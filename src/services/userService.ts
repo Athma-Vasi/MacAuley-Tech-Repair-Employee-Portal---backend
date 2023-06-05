@@ -3,6 +3,18 @@ import { FlattenMaps, Types } from 'mongoose';
 
 import { UserModel, UserSchema } from '../models';
 
+async function checkDuplicateUserService(username: string): Promise<boolean> {
+  try {
+    // lean is used to return a plain javascript object instead of a mongoose document
+    // exec is used when passing an argument and returning a promise and also provides better error handling
+    const duplicate = await UserModel.findOne({ username }).lean().exec();
+
+    return duplicate ? true : false;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'checkDuplicateUser' });
+  }
+}
+
 type CreateNewUserServiceInput = {
   username: string;
   password: string;
@@ -43,22 +55,10 @@ async function getAllUsersService(): Promise<
   }
 }
 
-async function checkDuplicateUserService(username: string): Promise<boolean> {
-  try {
-    // lean is used to return a plain javascript object instead of a mongoose document
-    // exec is used when passing an argument and returning a promise and also provides better error handling
-    const duplicate = await UserModel.findOne({ username }).lean().exec();
-
-    return duplicate ? true : false;
-  } catch (error: any) {
-    throw new Error(error, { cause: 'checkDuplicateUser' });
-  }
-}
-
 /**
  *
  *
  *
  */
 
-export { getAllUsersService, checkDuplicateUserService };
+export { createNewUserService, checkDuplicateUserService, getAllUsersService };

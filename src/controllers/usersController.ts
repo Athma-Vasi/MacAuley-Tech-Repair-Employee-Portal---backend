@@ -2,7 +2,7 @@ import expressAsyncHandler from 'express-async-handler';
 import bcrypt from 'bcryptjs';
 import { Request, Response } from 'express';
 
-import { checkDuplicateUserService, getAllUsersService } from '../services';
+import { checkDuplicateUserService, createNewUserService, getAllUsersService } from '../services';
 import { CreateNewUserRequest, GetAllUsersRequest } from '../types';
 
 // @desc Create new user
@@ -30,7 +30,13 @@ const createNewUserHandler = expressAsyncHandler(
       response.status(400).json({ message: 'Username already exists' });
     }
 
+    // create new user if all checks pass successfully
     const createdUser = await createNewUserService({ username, password, roles });
+    if (createdUser) {
+      response.status(201).json({ message: `User ${username} created successfully` });
+    } else {
+      response.status(400).json({ message: 'User creation failed' });
+    }
   }
 );
 
