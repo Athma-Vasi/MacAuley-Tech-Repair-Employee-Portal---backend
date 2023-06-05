@@ -1,6 +1,7 @@
 import {
   createNewUserService,
   checkUserExistsService,
+  deleteUserService,
   getAllUsersService,
   updateUserService,
 } from './userService';
@@ -11,4 +12,13 @@ import {
  *
  */
 
-export { createNewUserService, checkUserExistsService, getAllUsersService, updateUserService };
+export {
+  // user service
+  createNewUserService,
+  checkUserExistsService,
+  deleteUserService,
+  getAllUsersService,
+  updateUserService,
+
+  // note service
+};

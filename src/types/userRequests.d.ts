@@ -8,7 +8,11 @@ interface CreateNewUserRequest extends Request {
   };
 }
 
-interface DeleteUserRequest extends Request {}
+interface DeleteUserRequest extends Request {
+  body: {
+    id: string;
+  };
+}
 
 interface GetAllUsersRequest extends Request {}
 

@@ -40,6 +40,15 @@ async function createNewUserService({ username, password, roles }: CreateNewUser
   }
 }
 
+async function deleteUserService(id: string) {
+  try {
+    const deletedUser = await UserModel.findByIdAndDelete(id);
+    return deletedUser;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'deleteUserService' });
+  }
+}
+
 async function getAllUsersService(): Promise<
   (FlattenMaps<UserSchema> & {
     _id: Types.ObjectId;
@@ -69,7 +78,12 @@ async function updateUserService({
   password,
   roles,
   active,
-}: UpdateUserServiceInput) {
+}: UpdateUserServiceInput): Promise<
+  | (FlattenMaps<UserSchema> & {
+      _id: Types.ObjectId;
+    })
+  | null
+> {
   try {
     // if password is provided, hash it
     let newHashedPassword: string;
@@ -113,4 +127,10 @@ async function updateUserService({
  *
  */
 
-export { createNewUserService, checkUserExistsService, getAllUsersService, updateUserService };
+export {
+  createNewUserService,
+  checkUserExistsService,
+  deleteUserService,
+  getAllUsersService,
+  updateUserService,
+};

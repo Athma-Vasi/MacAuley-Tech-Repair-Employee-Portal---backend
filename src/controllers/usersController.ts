@@ -5,10 +5,16 @@ import { Request, Response } from 'express';
 import {
   checkUserExistsService,
   createNewUserService,
+  deleteUserService,
   getAllUsersService,
   updateUserService,
 } from '../services';
-import { CreateNewUserRequest, GetAllUsersRequest, UpdateUserRequest } from '../types';
+import {
+  CreateNewUserRequest,
+  DeleteUserRequest,
+  GetAllUsersRequest,
+  UpdateUserRequest,
+} from '../types';
 
 // @desc Create new user
 // @route POST /users
@@ -48,7 +54,31 @@ const createNewUserHandler = expressAsyncHandler(
 // @desc Delete a user
 // @route DELETE /users
 // @access Private
-const deleteUserHandler = expressAsyncHandler(async (request: Request, response: Response) => {});
+const deleteUserHandler = expressAsyncHandler(
+  async (request: DeleteUserRequest, response: Response) => {
+    const { id } = request.body;
+    if (!id) {
+      response.status(400).json({ message: 'User Id is required' });
+    }
+
+    // we do not want to delete the user if they have notes assigned to them
+    // so we check the notes model for any notes with the user id
+    // if there are notes with the user id, we do not delete the user
+    // TODO TODO TODO TODO :: implement this check
+
+    // check user exists
+    const userExists = await checkUserExistsService(id);
+    if (!userExists) {
+      response.status(400).json({ message: 'User does not exist' });
+    }
+
+    // delete user if all checks pass successfully
+    const deletedUser = await deleteUserService(id);
+    if (deletedUser) {
+      response.status(200).json({ message: 'User deleted successfully' });
+    }
+  }
+);
 
 // @desc Get all users
 // @route GET /users
@@ -97,7 +127,7 @@ const updateUserHandler = expressAsyncHandler(
     // update user if all checks pass successfully
     const updatedUser = await updateUserService({ id, username, password, roles, active });
     if (updatedUser) {
-      response.status(200).json({ message: `User ${username} updated successfully` });
+      response.status(200).json({ message: `User ${updatedUser.username} updated successfully` });
     } else {
       response.status(400).json({ message: 'User update failed' });
     }
