@@ -3,7 +3,7 @@ import { FlattenMaps, Types } from 'mongoose';
 
 import { UserModel, UserSchema } from '../models';
 
-async function checkDuplicateUserService(username: string): Promise<boolean> {
+async function checkUserExistsService(username: string): Promise<boolean> {
   try {
     // lean is used to return a plain javascript object instead of a mongoose document
     // exec is used when passing an argument and returning a promise and also provides better error handling
@@ -55,10 +55,62 @@ async function getAllUsersService(): Promise<
   }
 }
 
+type UpdateUserServiceInput = {
+  id: string;
+  username: string;
+  password?: string | undefined;
+  roles: ('Admin' | 'Employee' | 'Manager')[];
+  active: boolean;
+};
+
+async function updateUserService({
+  id,
+  username,
+  password,
+  roles,
+  active,
+}: UpdateUserServiceInput) {
+  try {
+    // if password is provided, hash it
+    let newHashedPassword: string;
+    if (password) {
+      const passwordSalt = await bcrypt.genSalt(10);
+      newHashedPassword = await bcrypt.hash(password, passwordSalt);
+    } else {
+      // find the user by id and select the password field
+      const user = await UserModel.findById(id).select('password').lean();
+      if (user) {
+        // if password is not provided, use the existing password
+        newHashedPassword = user.password;
+      } else {
+        throw new Error('User not found', {
+          cause: 'updateUserService in else block of user returned by findById',
+        });
+      }
+    }
+
+    const userFieldsToUpdateObj = {
+      username,
+      password: newHashedPassword,
+      roles,
+      active,
+    };
+
+    // find the user by id and update the user
+    const updatedUser = await UserModel.findByIdAndUpdate(id, userFieldsToUpdateObj, {
+      new: true,
+    }).lean();
+
+    return updatedUser;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'updateUserService' });
+  }
+}
+
 /**
  *
  *
  *
  */
 
-export { createNewUserService, checkDuplicateUserService, getAllUsersService };
+export { createNewUserService, checkUserExistsService, getAllUsersService, updateUserService };

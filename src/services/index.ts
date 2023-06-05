@@ -1,4 +1,9 @@
-import { createNewUserService, checkDuplicateUserService, getAllUsersService } from './userService';
+import {
+  createNewUserService,
+  checkUserExistsService,
+  getAllUsersService,
+  updateUserService,
+} from './userService';
 
 /**
  *
@@ -6,4 +11,4 @@ import { createNewUserService, checkDuplicateUserService, getAllUsersService } f
  *
  */
 
-export { createNewUserService, checkDuplicateUserService, getAllUsersService };
+export { createNewUserService, checkUserExistsService, getAllUsersService, updateUserService };
