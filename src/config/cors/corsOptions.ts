@@ -34,7 +34,7 @@ const corsOptions: CorsOptions = {
     requestOrigin: string | undefined,
     callback: (err: Error | null, origin?: StaticOrigin) => void
   ): void => {
-    // TODO: remove the undefined in production. it is only used for testing as localhost:3000 registers as undefined in the requestOrigin
+    // TODO: remove the undefined in production. it is only used for testing as request.headers.origin is undefined in development
     if (allowedOrigins.indexOf(requestOrigin ?? 'undefined') !== -1) {
       callback(null, true);
     } else {
