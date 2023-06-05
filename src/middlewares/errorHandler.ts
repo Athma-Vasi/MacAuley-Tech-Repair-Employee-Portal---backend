@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
+
 import { logEvents } from './logger';
 
 // this errorHandler will override default express error handling

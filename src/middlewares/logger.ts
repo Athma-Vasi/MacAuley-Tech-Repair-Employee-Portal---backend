@@ -1,16 +1,23 @@
 import { format } from 'date-fns';
-import { v4 as uuidV4 } from 'uuid';
 import fs from 'fs';
 import fsPromises from 'fs/promises';
 import path from 'path';
 import { NextFunction, Request, Response } from 'express';
+import { v4 as uuidV4 } from 'uuid';
 
 type LogEventsInput = {
   message: string;
   logFileName: string;
 };
 
-async function logEvents({ message, logFileName }: LogEventsInput) {
+/**
+ * Logs events to a file. The log file is stored in the logs directory.
+ * @param param0 LogEventsInput - { message: string, logFileName: string}
+ * @param param0.message string - the message to be logged
+ * @param param0.logFileName string - the name of the log file
+ * @returns Promise:void
+ */
+async function logEvents({ message, logFileName }: LogEventsInput): Promise<void> {
   const dateTime = `${format(new Date(), 'yyyy-MM-dd\tHH:mm:ss')}`;
   const logItem = `${dateTime}\t${uuidV4()}\t${message}\n`;
 
