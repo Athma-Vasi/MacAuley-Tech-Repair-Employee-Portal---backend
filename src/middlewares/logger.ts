@@ -12,10 +12,6 @@ type LogEventsInput = {
 
 /**
  * Logs events to a file. The log file is stored in the logs directory.
- * @param param0 LogEventsInput - { message: string, logFileName: string}
- * @param param0.message string - the message to be logged
- * @param param0.logFileName string - the name of the log file
- * @returns Promise:void
  */
 async function logEvents({ message, logFileName }: LogEventsInput): Promise<void> {
   const dateTime = `${format(new Date(), 'yyyy-MM-dd\tHH:mm:ss')}`;

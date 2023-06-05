@@ -5,7 +5,7 @@ import { logEvents } from './logger';
 // this errorHandler will override default express error handling
 function errorHandler(error: Error, request: Request, response: Response, next: NextFunction) {
   logEvents({
-    message: `${error.name}:${error.message}\t${request.method}\t${request.url}\t${request.headers.origin}\t`,
+    message: `${error.name}:${error.message}\t${error.cause}\t${request.method}\t${request.url}\t${request.headers.origin}\t`,
     logFileName: 'errorsLog.log',
   });
 
@@ -13,9 +13,10 @@ function errorHandler(error: Error, request: Request, response: Response, next: 
 
   const status = response.statusCode ? response.statusCode : 500;
   response.status(status);
+  response.statusMessage = error.message ?? 'Internal Server Error';
   response.json({
     status,
-    message: error.message,
+    message: error.message ?? 'Internal Server Error',
   });
 }
 

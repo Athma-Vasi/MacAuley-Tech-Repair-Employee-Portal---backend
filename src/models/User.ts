@@ -9,8 +9,9 @@ type UserSchema = {
 
 type UserDocument = UserSchema & {
   _id: Schema.Types.ObjectId;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: NativeDate;
+  updatedAt: NativeDate;
+  __v: number;
 };
 
 const userSchema = new Schema<UserSchema>(
@@ -42,4 +43,4 @@ const userSchema = new Schema<UserSchema>(
 
 const UserModel = model('User', userSchema);
 
-export { UserModel, UserDocument };
+export { UserModel, UserDocument, UserSchema };

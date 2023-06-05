@@ -11,8 +11,9 @@ type NoteSchema = {
 
 type NoteDocument = NoteSchema & {
   _id: Schema.Types.ObjectId;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: NativeDate;
+  updatedAt: NativeDate;
+  __v: number;
 };
 
 const noteSchema = new Schema<NoteSchema>(
@@ -50,4 +51,4 @@ noteSchema.plugin(AutoIncrement, {
 
 const NoteModel = model('Note', noteSchema);
 
-export { NoteModel, NoteDocument };
+export { NoteModel, NoteDocument, NoteSchema };

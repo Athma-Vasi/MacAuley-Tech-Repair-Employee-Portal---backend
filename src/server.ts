@@ -9,12 +9,8 @@ import path from 'path';
 import { config } from './config';
 import { connectDB } from './config/connectDB';
 import { corsOptions } from './config/cors';
-import { errorHandler } from './middlewares';
-import { logEvents, loggerMiddleware } from './middlewares';
-import { notFoundRouter } from './routes';
-import { rootRouter } from './routes';
-
-const { PORT } = config;
+import { errorHandler, logEvents, loggerMiddleware } from './middlewares';
+import { notFoundRouter, rootRouter, userRouter } from './routes';
 
 const app = express();
 
@@ -32,18 +28,22 @@ app.use(compression());
 app.use('/', express.static(path.join(__dirname, 'public')));
 
 app.use('/', rootRouter);
+app.use('/users', userRouter);
 
 app.all('*', notFoundRouter);
 
 // error handling
 app.use(errorHandler);
 
-//
-//
-//
+/**
+ *
+ *
+ *
+ */
 mongoose.connection.once('open', () => {
   console.log('Connected to MongoDB');
 
+  const { PORT } = config;
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });
