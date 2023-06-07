@@ -1,4 +1,10 @@
-import { createNewNoteService, checkNoteExistsService, getAllNotesService } from './noteService';
+import {
+  createNewNoteService,
+  checkNoteExistsService,
+  deleteNoteService,
+  getAllNotesService,
+  updateNoteService,
+} from './noteService';
 
 import {
   createNewUserService,
@@ -19,7 +25,9 @@ export {
   // note service
   createNewNoteService,
   checkNoteExistsService,
+  deleteNoteService,
   getAllNotesService,
+  updateNoteService,
 
   // user service
   createNewUserService,

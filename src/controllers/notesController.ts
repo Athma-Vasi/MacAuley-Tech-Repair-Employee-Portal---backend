@@ -58,7 +58,30 @@ const createNewNoteHandler = expressAsyncHandler(
 // @route DELETE /notes
 // @access Private
 const deleteNoteHandler = expressAsyncHandler(
-  async (request: DeleteNoteRequest, response: Response) => {}
+  async (request: DeleteNoteRequest, response: Response) => {
+    const { id } = request.body;
+
+    // confirm that id is not empty
+    if (!id) {
+      response.status(400).json({ message: 'Id field is required' });
+      return;
+    }
+
+    // confirm that note exists
+    const isNote = await checkNoteExistsService({ id });
+    if (!isNote) {
+      response.status(400).json({ message: 'Note does not exist' });
+      return;
+    }
+
+    // delete note if all checks pass successfully
+    const deletedNote = await deleteNoteService(id);
+    if (deletedNote) {
+      response.status(200).json({ message: `Note ${id} deleted successfully` });
+    } else {
+      response.status(400).json({ message: 'Note deletion failed' });
+    }
+  }
 );
 
 // @desc Get all notes
@@ -94,7 +117,52 @@ const getAllNotesHandler = expressAsyncHandler(
 // @route PATCH /notes
 // @access Private
 const updateNoteHandler = expressAsyncHandler(
-  async (request: UpdateNoteRequest, response: Response) => {}
+  async (request: UpdateNoteRequest, response: Response) => {
+    const { id, user, title, text, completed } = request.body;
+
+    // confirm that id, user, title, and text are not empty
+    if (!id || !user || !title || !text) {
+      response.status(400).json({ message: 'Id, User, Title, and Text fields are required' });
+      return;
+    }
+
+    // confirm that completed exists and is a boolean
+    if (completed === undefined || typeof completed !== 'boolean') {
+      response
+        .status(400)
+        .json({ message: 'Completed field is required and must be of type boolean' });
+      return;
+    }
+
+    // check if note exists
+    const isNote = await checkNoteExistsService({ id });
+    if (!isNote) {
+      response.status(400).json({ message: 'Note does not exist' });
+      return;
+    }
+
+    // check if note with same title already exists
+    const isDuplicateNote = await checkNoteExistsService({ title });
+    if (isDuplicateNote) {
+      response.status(400).json({ message: 'Note with same title already exists' });
+      return;
+    }
+
+    // check if user exists
+    const isUser = await getUserByIdService(user);
+    if (!isUser) {
+      response.status(400).json({ message: 'User does not exist' });
+      return;
+    }
+
+    // update note if all checks pass successfully
+    const updatedNote = await updateNoteService({ id, user, title, text, completed });
+    if (updatedNote) {
+      response.status(201).json({ message: `Note ${title} updated successfully` });
+    } else {
+      response.status(400).json({ message: 'Note update failed' });
+    }
+  }
 );
 
 export { createNewNoteHandler, deleteNoteHandler, getAllNotesHandler, updateNoteHandler };

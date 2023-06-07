@@ -1,6 +1,7 @@
 import { FlattenMaps, Schema, Types } from 'mongoose';
 
 import { NoteModel, NoteSchema, NoteDocument, UserModel, UserSchema } from '../models';
+import { th } from 'date-fns/locale';
 
 type Note = {
   user: Types.ObjectId;
@@ -59,6 +60,15 @@ async function createNewNoteService({ user, title, text }: CreateNewNoteServiceI
   }
 }
 
+async function deleteNoteService(id: Types.ObjectId) {
+  try {
+    const result = await NoteModel.deleteOne(id);
+    return result;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'deleteNoteService' });
+  }
+}
+
 async function getAllNotesService(): Promise<
   (FlattenMaps<NoteSchema> & {
     _id: Types.ObjectId;
@@ -72,4 +82,44 @@ async function getAllNotesService(): Promise<
   }
 }
 
-export { createNewNoteService, checkNoteExistsService, getAllNotesService };
+type UpdateNoteServiceInput = {
+  id: Types.ObjectId;
+  user: Types.ObjectId;
+  title: string;
+  text: string;
+  completed: boolean;
+};
+
+async function updateNoteService({
+  id,
+  user,
+  title,
+  text,
+  completed,
+}: UpdateNoteServiceInput): Promise<
+  | (FlattenMaps<NoteSchema> & {
+      _id: Types.ObjectId;
+    })
+  | null
+> {
+  try {
+    const updatedNote = await NoteModel.findOneAndUpdate(
+      { id },
+      { user, title, text, completed },
+      { new: true }
+    )
+      .lean()
+      .exec();
+    return updatedNote;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'updateNoteService' });
+  }
+}
+
+export {
+  createNewNoteService,
+  checkNoteExistsService,
+  deleteNoteService,
+  getAllNotesService,
+  updateNoteService,
+};
