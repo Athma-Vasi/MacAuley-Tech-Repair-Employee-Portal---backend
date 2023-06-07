@@ -3,6 +3,7 @@ import {
   checkNoteExistsService,
   deleteNoteService,
   getAllNotesService,
+  getNotesByUserService,
   updateNoteService,
 } from './noteService';
 
@@ -27,6 +28,7 @@ export {
   checkNoteExistsService,
   deleteNoteService,
   getAllNotesService,
+  getNotesByUserService,
   updateNoteService,
 
   // user service

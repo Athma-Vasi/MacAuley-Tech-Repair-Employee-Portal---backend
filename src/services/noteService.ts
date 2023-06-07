@@ -2,13 +2,6 @@ import { FlattenMaps, Types } from 'mongoose';
 
 import { NoteModel, NoteSchema } from '../models';
 
-type Note = {
-  user: Types.ObjectId;
-  title: string;
-  text: string;
-  completed: boolean;
-};
-
 type CheckNoteExistsServiceInput = {
   id?: Types.ObjectId;
   title?: string;
@@ -53,8 +46,6 @@ async function createNewNoteService({ user, title, text }: CreateNewNoteServiceI
       completed: false,
     };
 
-    console.log({ newNoteObject });
-
     const newNote = await NoteModel.create(newNoteObject);
 
     return newNote;
@@ -69,6 +60,19 @@ async function deleteNoteService(id: Types.ObjectId) {
     return result;
   } catch (error: any) {
     throw new Error(error, { cause: 'deleteNoteService' });
+  }
+}
+
+async function getNotesByUserService(user: Types.ObjectId): Promise<
+  (FlattenMaps<NoteSchema> & {
+    _id: Types.ObjectId;
+  })[]
+> {
+  try {
+    const notes = await NoteModel.find({ user }).lean().exec();
+    return notes;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getNotesByUserService' });
   }
 }
 
@@ -129,5 +133,6 @@ export {
   checkNoteExistsService,
   deleteNoteService,
   getAllNotesService,
+  getNotesByUserService,
   updateNoteService,
 };

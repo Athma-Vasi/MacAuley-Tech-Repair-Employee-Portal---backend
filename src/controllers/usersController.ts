@@ -2,10 +2,12 @@ import expressAsyncHandler from 'express-async-handler';
 import { Response } from 'express';
 
 import {
+  checkNoteExistsService,
   checkUserExistsService,
   createNewUserService,
   deleteUserService,
   getAllUsersService,
+  getNotesByUserService,
   updateUserService,
 } from '../services';
 import {
@@ -64,10 +66,14 @@ const deleteUserHandler = expressAsyncHandler(
       return;
     }
 
-    // we do not want to delete the user if they have notes assigned to them
-    // so we check the notes model for any notes with the user id
-    // if there are notes with the user id, we do not delete the user
-    // TODO TODO TODO TODO :: implement this check
+    // we do not want to delete the user if they have notes assigned to them that are not completed
+    const userHasNotes = await getNotesByUserService(id);
+    if (userHasNotes.filter((note) => note.completed).length > 0) {
+      response
+        .status(400)
+        .json({ message: 'User has notes assigned to them that are not completed' });
+      return;
+    }
 
     // check user exists
     const userExists = await checkUserExistsService({ id });
