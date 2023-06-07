@@ -1,7 +1,6 @@
-import { FlattenMaps, Schema, Types } from 'mongoose';
+import { FlattenMaps, Types } from 'mongoose';
 
-import { NoteModel, NoteSchema, NoteDocument, UserModel, UserSchema } from '../models';
-import { th } from 'date-fns/locale';
+import { NoteModel, NoteSchema } from '../models';
 
 type Note = {
   user: Types.ObjectId;
@@ -24,7 +23,7 @@ async function checkNoteExistsService({
     // exec is used when passing an argument and returning a promise and also provides better error handling
 
     if (id) {
-      const note = await NoteModel.findOne({ id }).lean().exec();
+      const note = await NoteModel.findById(id).lean().exec();
       return note ? true : false;
     }
 
@@ -51,9 +50,13 @@ async function createNewNoteService({ user, title, text }: CreateNewNoteServiceI
       user,
       title,
       text,
+      completed: false,
     };
 
+    console.log({ newNoteObject });
+
     const newNote = await NoteModel.create(newNoteObject);
+
     return newNote;
   } catch (error: any) {
     throw new Error(error, { cause: 'createNewNoteService' });
@@ -62,7 +65,7 @@ async function createNewNoteService({ user, title, text }: CreateNewNoteServiceI
 
 async function deleteNoteService(id: Types.ObjectId) {
   try {
-    const result = await NoteModel.deleteOne(id);
+    const result = await NoteModel.findByIdAndDelete(id);
     return result;
   } catch (error: any) {
     throw new Error(error, { cause: 'deleteNoteService' });
@@ -103,13 +106,18 @@ async function updateNoteService({
   | null
 > {
   try {
-    const updatedNote = await NoteModel.findOneAndUpdate(
-      { id },
-      { user, title, text, completed },
-      { new: true }
-    )
+    const noteFieldsToUpdateObj = {
+      id,
+      user,
+      title,
+      text,
+      completed,
+    };
+
+    const updatedNote = await NoteModel.findByIdAndUpdate(id, noteFieldsToUpdateObj, { new: true })
       .lean()
       .exec();
+
     return updatedNote;
   } catch (error: any) {
     throw new Error(error, { cause: 'updateNoteService' });

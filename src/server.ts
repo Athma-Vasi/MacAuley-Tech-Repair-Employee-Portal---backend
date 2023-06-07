@@ -10,7 +10,7 @@ import { config } from './config';
 import { connectDB } from './config/connectDB';
 import { corsOptions } from './config/cors';
 import { errorHandler, logEvents, loggerMiddleware } from './middlewares';
-import { notFoundRouter, rootRouter, userRouter } from './routes';
+import { notFoundRouter, noteRouter, rootRouter, userRouter } from './routes';
 
 const app = express();
 
@@ -29,6 +29,7 @@ app.use('/', express.static(path.join(__dirname, 'public')));
 
 app.use('/', rootRouter);
 app.use('/users', userRouter);
+app.use('/notes', noteRouter);
 
 app.all('*', notFoundRouter);
 

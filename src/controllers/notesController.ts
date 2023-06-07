@@ -46,6 +46,7 @@ const createNewNoteHandler = expressAsyncHandler(
 
     // create new note if all checks pass successfully
     const createdNote = await createNewNoteService({ user, title, text });
+
     if (createdNote) {
       response.status(201).json({ message: `Note ${title} created successfully` });
     } else {
