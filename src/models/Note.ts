@@ -1,16 +1,16 @@
-import mongoose, { Schema, model } from 'mongoose';
+import mongoose, { Schema, model, Types } from 'mongoose';
 
 const AutoIncrement = require('mongoose-sequence')(mongoose);
 
 type NoteSchema = {
-  user: Schema.Types.ObjectId;
+  user: Types.ObjectId;
   title: string;
   text: string;
   completed: boolean;
 };
 
 type NoteDocument = NoteSchema & {
-  _id: Schema.Types.ObjectId;
+  _id: Types.ObjectId;
   createdAt: NativeDate;
   updatedAt: NativeDate;
   __v: number;
@@ -42,7 +42,6 @@ const noteSchema = new Schema<NoteSchema>(
 );
 
 // this is for auto incrementing the ticket number for each note created by a user
-
 noteSchema.plugin(AutoIncrement, {
   inc_field: 'ticket',
   id: 'ticketNums',

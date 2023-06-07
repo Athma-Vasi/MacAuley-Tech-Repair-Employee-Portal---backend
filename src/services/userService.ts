@@ -1,17 +1,35 @@
 import bcrypt from 'bcryptjs';
-import { FlattenMaps, Types } from 'mongoose';
+import { FlattenMaps, Schema, Types } from 'mongoose';
 
 import { UserModel, UserSchema } from '../models';
+import { GetAllUsersReturn } from '../types';
 
-async function checkUserExistsService(username: string): Promise<boolean> {
+type CheckUserExistsServiceInput = {
+  username?: string;
+  id?: Types.ObjectId;
+};
+
+async function checkUserExistsService({
+  username,
+  id,
+}: CheckUserExistsServiceInput): Promise<boolean> {
   try {
     // lean is used to return a plain javascript object instead of a mongoose document
     // exec is used when passing an argument and returning a promise and also provides better error handling
-    const duplicate = await UserModel.findOne({ username }).lean().exec();
 
-    return duplicate ? true : false;
+    if (id) {
+      const user = await UserModel.findById(id).lean().exec();
+      return user ? true : false;
+    }
+
+    if (username) {
+      const duplicate = await UserModel.findOne({ username }).lean().exec();
+      return duplicate ? true : false;
+    }
+
+    return false;
   } catch (error: any) {
-    throw new Error(error, { cause: 'checkDuplicateUser' });
+    throw new Error(error, { cause: 'checkUserExistsService' });
   }
 }
 
@@ -40,7 +58,7 @@ async function createNewUserService({ username, password, roles }: CreateNewUser
   }
 }
 
-async function deleteUserService(id: string) {
+async function deleteUserService(id: Types.ObjectId) {
   try {
     const deletedUser = await UserModel.findByIdAndDelete(id);
     return deletedUser;
@@ -49,15 +67,25 @@ async function deleteUserService(id: string) {
   }
 }
 
-async function getAllUsersService(): Promise<
-  (FlattenMaps<UserSchema> & {
-    _id: Types.ObjectId;
-  })[]
+async function getUserByIdService(id: Types.ObjectId): Promise<
+  | (FlattenMaps<UserSchema> & {
+      _id: Types.ObjectId;
+    })
+  | null
 > {
+  try {
+    const user = await UserModel.findById(id).lean().exec();
+    return user;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getUserByIdService' });
+  }
+}
+
+async function getAllUsersService(): Promise<GetAllUsersReturn[]> {
   try {
     // select is used to exclude the password field from the returned document
     // lean is used to return a plain javascript object instead of a mongoose document
-    const users = await UserModel.find().select('-password').lean();
+    const users = (await UserModel.find().select('-password').lean()) as GetAllUsersReturn[];
     return users;
   } catch (error: any) {
     throw new Error(error, { cause: 'getAllUsersService' });
@@ -65,7 +93,7 @@ async function getAllUsersService(): Promise<
 }
 
 type UpdateUserServiceInput = {
-  id: string;
+  id: Types.ObjectId;
   username: string;
   password?: string | undefined;
   roles: ('Admin' | 'Employee' | 'Manager')[];
@@ -78,23 +106,18 @@ async function updateUserService({
   password,
   roles,
   active,
-}: UpdateUserServiceInput): Promise<
-  | (FlattenMaps<UserSchema> & {
-      _id: Types.ObjectId;
-    })
-  | null
-> {
+}: UpdateUserServiceInput) {
   try {
-    // if password is provided, hash it
     let newHashedPassword: string;
+    // if password is provided, hash it and assign it to newHashedPassword
     if (password) {
       const passwordSalt = await bcrypt.genSalt(10);
       newHashedPassword = await bcrypt.hash(password, passwordSalt);
     } else {
-      // find the user by id and select the password field
+      // if password is not provided, find the user by id and grab the existing hashed password
       const user = await UserModel.findById(id).select('password').lean();
       if (user) {
-        // if password is not provided, use the existing password
+        // if user is found, assign the existing hashed password to newHashedPassword
         newHashedPassword = user.password;
       } else {
         throw new Error('User not found', {
@@ -132,5 +155,6 @@ export {
   checkUserExistsService,
   deleteUserService,
   getAllUsersService,
+  getUserByIdService,
   updateUserService,
 };

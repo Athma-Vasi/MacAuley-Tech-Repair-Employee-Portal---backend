@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 
 type UserSchema = {
   username: string;
@@ -8,7 +8,7 @@ type UserSchema = {
 };
 
 type UserDocument = UserSchema & {
-  _id: Schema.Types.ObjectId;
+  _id: Types.ObjectId;
   createdAt: NativeDate;
   updatedAt: NativeDate;
   __v: number;
