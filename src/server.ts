@@ -28,6 +28,7 @@ app.use(compression());
 app.use('/', express.static(path.join(__dirname, 'public')));
 
 app.use('/', rootRouter);
+app.use('/auth', authRouter);
 app.use('/users', userRouter);
 app.use('/notes', noteRouter);
 

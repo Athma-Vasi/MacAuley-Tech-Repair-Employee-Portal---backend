@@ -10,8 +10,10 @@ import {
 import {
   createNewUserService,
   checkUserExistsService,
+  checkUserIsActiveService,
   deleteUserService,
   getAllUsersService,
+  getUserByUsernameService,
   getUserByIdService,
   updateUserService,
 } from './userService';
@@ -34,8 +36,10 @@ export {
   // user service
   createNewUserService,
   checkUserExistsService,
+  checkUserIsActiveService,
   deleteUserService,
   getAllUsersService,
   getUserByIdService,
+  getUserByUsernameService,
   updateUserService,
 };

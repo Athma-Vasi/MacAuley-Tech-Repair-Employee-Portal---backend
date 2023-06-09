@@ -4,7 +4,7 @@ import {
   deleteNoteHandler,
   getAllNotesHandler,
   updateNoteHandler,
-} from '../controllers/notesController';
+} from '../controllers';
 
 const noteRouter = Router();
 

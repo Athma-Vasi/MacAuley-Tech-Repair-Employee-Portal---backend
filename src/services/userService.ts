@@ -33,6 +33,29 @@ async function checkUserExistsService({
   }
 }
 
+type CheckUserIsActiveServiceInput = {
+  username?: string;
+  id?: Types.ObjectId;
+};
+
+async function checkUserIsActiveService({ username, id }: CheckUserIsActiveServiceInput) {
+  try {
+    if (id) {
+      const user = await UserModel.findById(id).lean().exec();
+      return user?.active ?? false;
+    }
+
+    if (username) {
+      const user = await UserModel.findOne({ username }).lean().exec();
+      return user?.active ?? false;
+    }
+
+    return false;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'checkUserExistsService' });
+  }
+}
+
 type CreateNewUserServiceInput = {
   username: string;
   password: string;
@@ -78,6 +101,15 @@ async function getUserByIdService(id: Types.ObjectId): Promise<
     return user;
   } catch (error: any) {
     throw new Error(error, { cause: 'getUserByIdService' });
+  }
+}
+
+async function getUserByUsernameService(username: string) {
+  try {
+    const user = await UserModel.findOne({ username }).lean().exec();
+    return user;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getUserByUsernameService' });
   }
 }
 
@@ -153,8 +185,10 @@ async function updateUserService({
 export {
   createNewUserService,
   checkUserExistsService,
+  checkUserIsActiveService,
   deleteUserService,
   getAllUsersService,
   getUserByIdService,
+  getUserByUsernameService,
   updateUserService,
 };

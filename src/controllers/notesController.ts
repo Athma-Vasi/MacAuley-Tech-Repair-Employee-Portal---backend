@@ -142,12 +142,12 @@ const updateNoteHandler = expressAsyncHandler(
       return;
     }
 
-    // check if note with same title already exists
-    const isDuplicateNote = await checkNoteExistsService({ title });
-    if (isDuplicateNote) {
-      response.status(400).json({ message: 'Note with same title already exists' });
-      return;
-    }
+    // // check if note with same title already exists
+    // const isDuplicateNote = await checkNoteExistsService({ title });
+    // if (isDuplicateNote) {
+    //   response.status(400).json({ message: 'Note with same title already exists' });
+    //   return;
+    // }
 
     // check if user exists
     const isUser = await getUserByIdService(user);

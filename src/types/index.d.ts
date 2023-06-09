@@ -1,3 +1,5 @@
+import { LoginUserRequest, LogoutUserRequest, RefreshTokenRequest } from './auth';
+
 import {
   // note request types from client
   CreateNewNoteRequest,
@@ -27,6 +29,11 @@ import {
  */
 
 export {
+  // auth requests from client
+  LoginUserRequest,
+  LogoutUserRequest,
+  RefreshTokenRequest,
+
   // user requests from client
   CreateNewUserRequest,
   DeleteUserRequest,

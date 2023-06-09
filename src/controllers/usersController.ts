@@ -135,12 +135,12 @@ const updateUserHandler = expressAsyncHandler(
       return;
     }
 
-    // check user exists and that the username being updated is not being used by another user
-    const userExists = await checkUserExistsService({ username });
-    if (userExists) {
-      response.status(400).json({ message: 'Username already exists' });
-      return;
-    }
+    // // check user exists and that the username being updated is not being used by another user
+    // const userExists = await checkUserExistsService({ username });
+    // if (userExists) {
+    //   response.status(400).json({ message: 'Username already exists' });
+    //   return;
+    // }
 
     // update user if all checks pass successfully
     const updatedUser = await updateUserService({ id, username, password, roles, active });

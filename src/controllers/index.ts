@@ -1,9 +1,18 @@
+import { loginUserHandler, logoutUserHandler, refreshTokenHandler } from './authController';
+
 import {
   createNewUserHandler,
   deleteUserHandler,
   getAllUsersHandler,
   updateUserHandler,
 } from './usersController';
+
+import {
+  createNewNoteHandler,
+  deleteNoteHandler,
+  getAllNotesHandler,
+  updateNoteHandler,
+} from './notesController';
 
 /**
  *
@@ -12,6 +21,11 @@ import {
  */
 
 export {
+  // auth
+  loginUserHandler,
+  logoutUserHandler,
+  refreshTokenHandler,
+
   // user
   createNewUserHandler,
   deleteUserHandler,
@@ -19,4 +33,8 @@ export {
   updateUserHandler,
 
   // note
+  createNewNoteHandler,
+  deleteNoteHandler,
+  getAllNotesHandler,
+  updateNoteHandler,
 };
