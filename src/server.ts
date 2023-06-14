@@ -11,6 +11,7 @@ import { connectDB } from './config/connectDB';
 import { corsOptions } from './config/cors';
 import { errorHandler, logEvents, loggerMiddleware } from './middlewares';
 import { notFoundRouter, noteRouter, rootRouter, userRouter } from './routes';
+import { authRouter } from './routes/authRoutes';
 
 const app = express();
 

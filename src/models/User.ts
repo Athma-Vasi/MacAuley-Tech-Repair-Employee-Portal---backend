@@ -1,6 +1,7 @@
 import { Schema, model, Types } from 'mongoose';
 
 type UserSchema = {
+  email: string;
   username: string;
   password: string;
   roles: ('Admin' | 'Employee' | 'Manager')[];
@@ -16,6 +17,11 @@ type UserDocument = UserSchema & {
 
 const userSchema = new Schema<UserSchema>(
   {
+    email: {
+      type: String,
+      required: [true, 'Email is required'],
+      unique: true,
+    },
     username: {
       type: String,
       required: [true, 'Username is required'],

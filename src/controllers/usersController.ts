@@ -22,11 +22,12 @@ import {
 // @access Private
 const createNewUserHandler = expressAsyncHandler(
   async (request: CreateNewUserRequest, response: Response) => {
-    const { username, password, roles } = request.body;
+    console.log('request.body', request.body);
+    const { email, username, password, roles = ['Employee'] } = request.body;
 
     // confirm that username and password are not empty
-    if (!username || !password) {
-      response.status(400).json({ message: 'Username and password are required' });
+    if (!email || !username || !password) {
+      response.status(400).json({ message: 'Email, username and password are required' });
       return;
     }
 
@@ -38,15 +39,22 @@ const createNewUserHandler = expressAsyncHandler(
       return;
     }
 
+    // check for duplicate email
+    const isDuplicateEmail = await checkUserExistsService({ email });
+    if (isDuplicateEmail) {
+      response.status(409).json({ message: 'Email already exists' });
+      return;
+    }
+
     // check for duplicate username
     const isDuplicateUser = await checkUserExistsService({ username });
     if (isDuplicateUser) {
-      response.status(400).json({ message: 'Username already exists' });
+      response.status(409).json({ message: 'Username already exists' });
       return;
     }
 
     // create new user if all checks pass successfully
-    const createdUser = await createNewUserService({ username, password, roles });
+    const createdUser = await createNewUserService({ email, username, password, roles });
     if (createdUser) {
       response.status(201).json({ message: `User ${username} created successfully` });
     } else {

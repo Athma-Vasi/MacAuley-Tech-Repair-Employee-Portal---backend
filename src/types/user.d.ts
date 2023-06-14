@@ -1,15 +1,18 @@
 import { Request } from 'express';
 import { Schema } from 'mongoose';
 
-interface CreateNewUserRequest extends Request {
+import { RequestAfterJWTVerification } from './auth';
+
+interface CreateNewUserRequest extends RequestAfterJWTVerification {
   body: {
+    email: string;
     username: string;
     password: string;
     roles: ('Admin' | 'Employee' | 'Manager')[];
   };
 }
 
-interface DeleteUserRequest extends Request {
+interface DeleteUserRequest extends RequestAfterJWTVerification {
   body: {
     id: Types.ObjectId;
   };
@@ -18,7 +21,7 @@ interface DeleteUserRequest extends Request {
 // converted to type alias instead of interface because an interface declaring no members is equivalent to its supertype and rome doesn't like that
 type GetAllUsersRequest = Request;
 
-interface UpdateUserRequest extends Request {
+interface UpdateUserRequest extends RequestAfterJWTVerification {
   body: {
     id: Types.ObjectId;
     username: string;

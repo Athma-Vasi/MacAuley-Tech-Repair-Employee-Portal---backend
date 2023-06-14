@@ -19,4 +19,13 @@ interface LogoutUserRequest extends Request {
   };
 }
 
-export { LoginUserRequest, RefreshTokenRequest, LogoutUserRequest };
+interface RequestAfterJWTVerification extends Request {
+  body: {
+    userInfo: {
+      username: string;
+      roles: string[];
+    };
+  };
+}
+
+export { LoginUserRequest, RefreshTokenRequest, LogoutUserRequest, RequestAfterJWTVerification };

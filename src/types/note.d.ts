@@ -1,7 +1,9 @@
 import { Request } from 'express';
 import { Types } from 'mongoose';
 
-interface CreateNewNoteRequest extends Request {
+import { RequestAfterJWTVerification } from './auth';
+
+interface CreateNewNoteRequest extends RequestAfterJWTVerification {
   body: {
     user: Types.ObjectId;
     title: string;
@@ -9,16 +11,16 @@ interface CreateNewNoteRequest extends Request {
   };
 }
 
-interface DeleteNoteRequest extends Request {
+interface DeleteNoteRequest extends RequestAfterJWTVerification {
   body: {
     id: Types.ObjectId;
   };
 }
 
 // converted to type alias instead of interface because an interface declaring no members is equivalent to its supertype and rome doesn't like that
-type GetAllNotesRequest = Request;
+type GetAllNotesRequest = RequestAfterJWTVerification;
 
-interface UpdateNoteRequest extends Request {
+interface UpdateNoteRequest extends RequestAfterJWTVerification {
   body: {
     id: Types.ObjectId;
     user: Types.ObjectId;

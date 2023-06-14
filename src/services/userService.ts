@@ -5,11 +5,13 @@ import { UserModel, UserSchema } from '../models';
 import { GetAllUsersReturn } from '../types';
 
 type CheckUserExistsServiceInput = {
+  email?: string;
   username?: string;
   id?: Types.ObjectId;
 };
 
 async function checkUserExistsService({
+  email,
   username,
   id,
 }: CheckUserExistsServiceInput): Promise<boolean> {
@@ -18,13 +20,18 @@ async function checkUserExistsService({
     // exec is used when passing an argument and returning a promise and also provides better error handling
 
     if (id) {
-      const user = await UserModel.findById(id).lean().exec();
-      return user ? true : false;
+      const duplicateId = await UserModel.findById(id).lean().exec();
+      return duplicateId ? true : false;
+    }
+
+    if (email) {
+      const duplicateEmail = await UserModel.findOne({ email }).lean().exec();
+      return duplicateEmail ? true : false;
     }
 
     if (username) {
-      const duplicate = await UserModel.findOne({ username }).lean().exec();
-      return duplicate ? true : false;
+      const duplicateUsername = await UserModel.findOne({ username }).lean().exec();
+      return duplicateUsername ? true : false;
     }
 
     return false;
@@ -57,18 +64,25 @@ async function checkUserIsActiveService({ username, id }: CheckUserIsActiveServi
 }
 
 type CreateNewUserServiceInput = {
+  email: string;
   username: string;
   password: string;
   roles: ('Admin' | 'Employee' | 'Manager')[];
 };
 
-async function createNewUserService({ username, password, roles }: CreateNewUserServiceInput) {
+async function createNewUserService({
+  email,
+  username,
+  password,
+  roles,
+}: CreateNewUserServiceInput) {
   // salt rounds of 10
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
 
   try {
     const newUserObject = {
+      email,
       username,
       password: hashedPassword,
       roles,

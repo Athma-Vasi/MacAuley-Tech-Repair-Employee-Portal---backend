@@ -1,4 +1,9 @@
-import { LoginUserRequest, LogoutUserRequest, RefreshTokenRequest } from './auth';
+import {
+  LoginUserRequest,
+  LogoutUserRequest,
+  RefreshTokenRequest,
+  RequestAfterJWTVerification,
+} from './auth';
 
 import {
   // note request types from client
@@ -33,6 +38,7 @@ export {
   LoginUserRequest,
   LogoutUserRequest,
   RefreshTokenRequest,
+  RequestAfterJWTVerification,
 
   // user requests from client
   CreateNewUserRequest,

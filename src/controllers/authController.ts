@@ -81,7 +81,7 @@ const loginUserHandler = expressAsyncHandler(
     });
 
     // send access token in response
-    response.status(200).json({ accessToken });
+    response.status(200).json({ message: 'Login successful', accessToken });
   }
 );
 
