@@ -103,13 +103,17 @@ const deleteUserHandler = expressAsyncHandler(
 // @desc Get all users
 // @route GET /users
 // @access Private
+// responseType: {message:string, users: User[]} | {message:string}
 const getAllUsersHandler = expressAsyncHandler(
   async (request: GetAllUsersRequest, response: Response) => {
     const users = await getAllUsersService();
     if (users.length === 0) {
       response.status(400).json({ message: 'No users found' });
     } else {
-      response.status(200).json(users);
+      response.status(200).json({
+        message: 'Users found successfully',
+        users,
+      });
     }
   }
 );
@@ -119,11 +123,11 @@ const getAllUsersHandler = expressAsyncHandler(
 // @access Private
 const updateUserHandler = expressAsyncHandler(
   async (request: UpdateUserRequest, response: Response) => {
-    const { id, username, password, roles, active } = request.body;
+    const { id, email, username, password, roles, active } = request.body;
 
     // confirm that id and username are not empty
-    if (!id || !username) {
-      response.status(400).json({ message: 'Id and Username fields are required' });
+    if (!id || !email || !username) {
+      response.status(400).json({ message: 'Id, email and username fields are required' });
       return;
     }
 
@@ -151,7 +155,7 @@ const updateUserHandler = expressAsyncHandler(
     // }
 
     // update user if all checks pass successfully
-    const updatedUser = await updateUserService({ id, username, password, roles, active });
+    const updatedUser = await updateUserService({ id, email, username, password, roles, active });
     if (updatedUser) {
       response.status(200).json({ message: `User ${updatedUser.username} updated successfully` });
     } else {

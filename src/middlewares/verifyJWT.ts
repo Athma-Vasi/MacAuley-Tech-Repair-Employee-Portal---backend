@@ -11,8 +11,11 @@ function verifyJWTMiddleware(
   next: NextFunction
 ) {
   const { ACCESS_TOKEN_SECRET } = config;
+
+  console.log('request.headers.authorization', request.headers.authorization);
+
   const token = request.headers.authorization?.split(' ')[1];
-  if (!token || !token.startsWith('Bearer ')) {
+  if (!token) {
     response.status(401).json({ message: 'No token provided' });
     return;
   }

@@ -19,11 +19,12 @@ interface DeleteUserRequest extends RequestAfterJWTVerification {
 }
 
 // converted to type alias instead of interface because an interface declaring no members is equivalent to its supertype and rome doesn't like that
-type GetAllUsersRequest = Request;
+type GetAllUsersRequest = RequestAfterJWTVerification;
 
 interface UpdateUserRequest extends RequestAfterJWTVerification {
   body: {
     id: Types.ObjectId;
+    email: string;
     username: string;
     password?: string | undefined;
     roles: ('Admin' | 'Employee' | 'Manager')[];
@@ -33,6 +34,7 @@ interface UpdateUserRequest extends RequestAfterJWTVerification {
 
 interface GetAllUsersReturn {
   _id: Types.ObjectId;
+  email: string;
   username: string;
   roles: ('Admin' | 'Employee' | 'Manager')[];
   active: boolean;

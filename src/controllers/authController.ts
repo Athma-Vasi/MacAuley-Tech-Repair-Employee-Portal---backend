@@ -64,12 +64,12 @@ const loginUserHandler = expressAsyncHandler(
         },
       },
       ACCESS_TOKEN_SECRET,
-      { expiresIn: '10s' }
+      { expiresIn: '1d' }
     );
 
     // create refresh token
     const refreshToken = jwt.sign({ username: foundUser.username }, REFRESH_TOKEN_SECRET, {
-      expiresIn: '1d',
+      expiresIn: '1y',
     });
 
     // create secure cookie with refresh token

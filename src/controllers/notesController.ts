@@ -94,7 +94,7 @@ const getAllNotesHandler = expressAsyncHandler(
 
     // if no notes are found, return type is an empty array
     if (allNotes.length === 0) {
-      response.status(404).json({ message: 'No notes found' });
+      response.status(404).json({ message: 'No notes found', notes: [] });
       return;
     }
 
@@ -110,7 +110,7 @@ const getAllNotesHandler = expressAsyncHandler(
       })
     );
 
-    response.status(200).json(allNotesWithUsername);
+    response.status(200).json({ message: 'Notes found successfully', notes: allNotesWithUsername });
   }
 );
 

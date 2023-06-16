@@ -141,6 +141,7 @@ async function getAllUsersService(): Promise<GetAllUsersReturn[]> {
 type UpdateUserServiceInput = {
   id: Types.ObjectId;
   username: string;
+  email: string;
   password?: string | undefined;
   roles: ('Admin' | 'Employee' | 'Manager')[];
   active: boolean;
@@ -148,6 +149,7 @@ type UpdateUserServiceInput = {
 
 async function updateUserService({
   id,
+  email,
   username,
   password,
   roles,
@@ -173,6 +175,7 @@ async function updateUserService({
     }
 
     const userFieldsToUpdateObj = {
+      email,
       username,
       password: newHashedPassword,
       roles,
