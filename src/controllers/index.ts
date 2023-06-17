@@ -12,6 +12,7 @@ import {
   deleteNoteHandler,
   getAllNotesHandler,
   updateNoteHandler,
+  getNotesFromUserIdHandler,
 } from './notesController';
 
 /**
@@ -37,4 +38,5 @@ export {
   deleteNoteHandler,
   getAllNotesHandler,
   updateNoteHandler,
+  getNotesFromUserIdHandler,
 };

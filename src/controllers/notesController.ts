@@ -171,6 +171,7 @@ const updateNoteHandler = expressAsyncHandler(
 const getNotesFromUserIdHandler = expressAsyncHandler(
   async (request: GetNotesFromUserIdRequest, response: Response) => {
     const { userId } = request.params;
+    console.log({ userId });
 
     // check if user exists
     const isUser = await getUserByIdService(userId);

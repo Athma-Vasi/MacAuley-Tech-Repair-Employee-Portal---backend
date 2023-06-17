@@ -59,6 +59,7 @@ const loginUserHandler = expressAsyncHandler(
     const accessToken = jwt.sign(
       {
         userInfo: {
+          userId: foundUser._id,
           username: foundUser.username,
           roles: foundUser.roles,
         },

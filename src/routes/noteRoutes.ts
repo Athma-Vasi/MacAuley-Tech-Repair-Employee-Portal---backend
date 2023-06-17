@@ -6,12 +6,15 @@ import {
   deleteNoteHandler,
   getAllNotesHandler,
   updateNoteHandler,
+  getNotesFromUserIdHandler,
 } from '../controllers';
 
 const noteRouter = Router();
 
 // verifyJWT middleware is applied to all routes in this router
 noteRouter.use(verifyJWTMiddleware);
+
+noteRouter.route('/:userId').get(getNotesFromUserIdHandler);
 
 noteRouter
   .route('/')
@@ -20,5 +23,4 @@ noteRouter
   .patch(updateNoteHandler)
   .delete(deleteNoteHandler);
 
-noteRouter.route('/:userId').get(getNotesFromUserIdHandler);
 export { noteRouter };
