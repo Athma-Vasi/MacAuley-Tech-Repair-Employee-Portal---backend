@@ -20,6 +20,11 @@ interface DeleteNoteRequest extends RequestAfterJWTVerification {
 // converted to type alias instead of interface because an interface declaring no members is equivalent to its supertype and rome doesn't like that
 type GetAllNotesRequest = RequestAfterJWTVerification;
 
+interface GetNotesFromUserIdRequest extends RequestAfterJWTVerification {
+  params: {
+    userId: Types.ObjectId;
+  };
+}
 interface UpdateNoteRequest extends RequestAfterJWTVerification {
   body: {
     id: Types.ObjectId;
@@ -44,6 +49,7 @@ export {
   DeleteNoteRequest,
   GetAllNotesRequest,
   UpdateNoteRequest,
+  GetNotesFromUserIdRequest,
 
   // note return types from service
   GetAllNotesReturn,

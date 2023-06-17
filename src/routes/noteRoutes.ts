@@ -20,4 +20,5 @@ noteRouter
   .patch(updateNoteHandler)
   .delete(deleteNoteHandler);
 
+noteRouter.route('/:userId').get(getNotesFromUserIdHandler);
 export { noteRouter };

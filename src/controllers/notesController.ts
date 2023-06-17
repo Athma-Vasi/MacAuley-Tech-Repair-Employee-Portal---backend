@@ -6,6 +6,7 @@ import {
   createNewNoteService,
   deleteNoteService,
   getAllNotesService,
+  getNotesByUserService,
   getUserByIdService,
   updateNoteService,
 } from '../services';
@@ -16,6 +17,7 @@ import {
   GetAllNotesRequest,
   UpdateNoteRequest,
 } from '../types';
+import { GetNotesFromUserIdRequest } from '../types/note';
 
 // @desc Create new note
 // @route POST /notes
@@ -166,4 +168,31 @@ const updateNoteHandler = expressAsyncHandler(
   }
 );
 
-export { createNewNoteHandler, deleteNoteHandler, getAllNotesHandler, updateNoteHandler };
+const getNotesFromUserIdHandler = expressAsyncHandler(
+  async (request: GetNotesFromUserIdRequest, response: Response) => {
+    const { userId } = request.params;
+
+    // check if user exists
+    const isUser = await getUserByIdService(userId);
+    if (!isUser) {
+      response.status(400).json({ message: 'User does not exist' });
+      return;
+    }
+
+    const notes = await getNotesByUserService(userId);
+    if (notes.length === 0) {
+      response.status(404).json({ message: 'No notes found', notes: [] });
+      return;
+    }
+
+    response.status(200).json({ message: 'Notes found successfully', notes });
+  }
+);
+
+export {
+  createNewNoteHandler,
+  deleteNoteHandler,
+  getAllNotesHandler,
+  updateNoteHandler,
+  getNotesFromUserIdHandler,
+};
