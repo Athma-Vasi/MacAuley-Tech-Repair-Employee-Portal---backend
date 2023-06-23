@@ -180,13 +180,14 @@ const getNotesFromUserIdHandler = expressAsyncHandler(
       return;
     }
 
-    const notes = await getNotesByUserService(userId);
-    if (notes.length === 0) {
+    const notesByUser = await getNotesByUserService(userId);
+    if (notesByUser.length === 0) {
       response.status(404).json({ message: 'No notes found', notes: [] });
       return;
     }
+    const notesWithUsername = notesByUser.map((note) => ({ ...note, username: isUser.username }));
 
-    response.status(200).json({ message: 'Notes found successfully', notes });
+    response.status(200).json({ message: 'Notes found successfully', notes: notesWithUsername });
   }
 );
 
