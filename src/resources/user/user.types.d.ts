@@ -49,7 +49,7 @@ interface GetAllUsersReturn {
  *
  */
 
-export {
+export type {
   // user requests
   CreateNewUserRequest,
   DeleteUserRequest,

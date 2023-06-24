@@ -41,4 +41,5 @@ const noteSchema = new Schema<NoteSchema>(
 
 const NoteModel = model('Note', noteSchema);
 
-export { NoteModel, NoteDocument, NoteSchema };
+export { NoteModel };
+export type { NoteSchema, NoteDocument };

@@ -43,7 +43,7 @@ interface GetAllNotesReturn {}
  *
  */
 
-export {
+export type {
   // note requests
   CreateNewNoteRequest,
   DeleteNoteRequest,
