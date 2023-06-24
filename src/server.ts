@@ -10,9 +10,14 @@ import { config } from './config';
 import { connectDB } from './config/connectDB';
 import { corsOptions } from './config/cors';
 import { errorHandler, logEvents, loggerMiddleware } from './middlewares';
-import { notFoundRouter, noteRouter, rootRouter, userRouter } from './routes';
-import { authRouter } from './routes/authRoutes';
+// import { notFoundRouter, noteRouter, rootRouter, userRouter } from './routes';
+// import { authRouter } from './routes/authRoutes';
 
+import { noteRouter } from './resources/note';
+import { userRouter } from './resources/user';
+import { rootRouter } from './resources/root';
+import { notFoundRouter } from './resources/notFound404';
+import { authRouter } from './resources/auth';
 const app = express();
 
 // connect to MongoDB

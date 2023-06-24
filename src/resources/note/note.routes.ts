@@ -7,7 +7,7 @@ import {
   getAllNotesHandler,
   updateNoteHandler,
   getNotesFromUserIdHandler,
-} from './index';
+} from './note.controller';
 
 const noteRouter = Router();
 

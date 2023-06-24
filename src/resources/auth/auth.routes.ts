@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 import { loginLimiter } from '../../middlewares';
-import { loginUserHandler, logoutUserHandler, refreshTokenHandler } from './index';
+import { loginUserHandler, logoutUserHandler, refreshTokenHandler } from '../auth/auth.controller';
 
 const authRouter = Router();
 
