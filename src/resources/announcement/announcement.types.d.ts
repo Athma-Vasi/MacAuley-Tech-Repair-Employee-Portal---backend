@@ -20,7 +20,7 @@ interface CreateNewAnnouncementRequest extends RequestAfterJWTVerification {
 }
 
 interface DeleteAnnouncementRequest extends RequestAfterJWTVerification {
-  body: {
+  params: {
     id: Types.ObjectId;
   };
 }
@@ -35,8 +35,11 @@ interface GetAnnouncementsFromUserIdRequest extends RequestAfterJWTVerification 
 }
 
 interface UpdateAnnouncementRequest extends RequestAfterJWTVerification {
-  body: {
+  params: {
     id: Types.ObjectId;
+  };
+  body: {
+    // id: Types.ObjectId;
     user: Types.ObjectId;
     title: string;
     username: string;

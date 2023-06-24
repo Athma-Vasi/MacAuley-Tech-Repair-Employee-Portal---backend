@@ -19,8 +19,8 @@ import {
 } from './index';
 import { getUserByIdService } from '../user';
 
-// @desc Create new note
-// @route POST /notes
+// @desc   Create new note
+// @route  POST /notes
 // @access Private
 const createNewNoteHandler = expressAsyncHandler(
   async (request: CreateNewNoteRequest, response: Response) => {
@@ -57,8 +57,8 @@ const createNewNoteHandler = expressAsyncHandler(
   }
 );
 
-// @desc Delete a note
-// @route DELETE /notes
+// @desc   Delete a note
+// @route  DELETE /notes
 // @access Private
 const deleteNoteHandler = expressAsyncHandler(
   async (request: DeleteNoteRequest, response: Response) => {
@@ -87,8 +87,8 @@ const deleteNoteHandler = expressAsyncHandler(
   }
 );
 
-// @desc Get all notes
-// @route GET /notes
+// @desc   Get all notes
+// @route  GET /notes
 // @access Private
 const getAllNotesHandler = expressAsyncHandler(
   async (request: GetAllNotesRequest, response: Response) => {
@@ -96,7 +96,7 @@ const getAllNotesHandler = expressAsyncHandler(
 
     // if no notes are found, return type is an empty array
     if (allNotes.length === 0) {
-      response.status(404).json({ message: 'No notes found', notes: [] });
+      response.status(200).json({ message: 'No notes found', notes: [] });
       return;
     }
 
@@ -116,8 +116,8 @@ const getAllNotesHandler = expressAsyncHandler(
   }
 );
 
-// @desc Update a note
-// @route PATCH /notes
+// @desc   Update a note
+// @route  PATCH /notes
 // @access Private
 const updateNoteHandler = expressAsyncHandler(
   async (request: UpdateNoteRequest, response: Response) => {
@@ -168,10 +168,12 @@ const updateNoteHandler = expressAsyncHandler(
   }
 );
 
+// @desc   Get all notes from a user
+// @route  GET /notes/:userId
+// @access Private
 const getNotesFromUserIdHandler = expressAsyncHandler(
   async (request: GetNotesFromUserIdRequest, response: Response) => {
     const { userId } = request.params;
-    console.log({ userId });
 
     // check if user exists
     const isUser = await getUserByIdService(userId);
@@ -182,7 +184,8 @@ const getNotesFromUserIdHandler = expressAsyncHandler(
 
     const notesByUser = await getNotesByUserService(userId);
     if (notesByUser.length === 0) {
-      response.status(404).json({ message: 'No notes found', notes: [] });
+      // 200 status is to prevent error from being thrown in frontend
+      response.status(200).json({ message: 'No notes found', notes: [] });
       return;
     }
     const notesWithUsername = notesByUser.map((note) => ({ ...note, username: isUser.username }));

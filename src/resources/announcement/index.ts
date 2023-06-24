@@ -14,7 +14,16 @@ import {
   getAnnouncementsFromUserIdHandler,
 } from './announcement.controller';
 
-import { AnnouncementDocument, AnnouncementSchema, RatingFeel } from './announcement.model';
+import {
+  checkAnnouncementExistsService,
+  createNewAnnouncementService,
+  deleteAnnouncementService,
+  getAllAnnouncementsService,
+  getAnnouncementsByUserService,
+  updateAnnouncementService,
+} from './announcement.service';
+
+import type { AnnouncementDocument, AnnouncementSchema, RatingFeel } from './announcement.model';
 import type {
   CreateNewAnnouncementRequest,
   DeleteAnnouncementRequest,
@@ -34,6 +43,12 @@ export {
   deleteAnnouncementHandler,
   updateAnnouncementHandler,
   getAnnouncementsFromUserIdHandler,
+  checkAnnouncementExistsService,
+  createNewAnnouncementService,
+  deleteAnnouncementService,
+  getAllAnnouncementsService,
+  getAnnouncementsByUserService,
+  updateAnnouncementService,
 };
 
 export type {

@@ -17,8 +17,8 @@ import {
   updateUserService,
 } from './index';
 
-// @desc Create new user
-// @route POST /users
+// @desc   Create new user
+// @route  POST /users
 // @access Private
 const createNewUserHandler = expressAsyncHandler(
   async (request: CreateNewUserRequest, response: Response) => {
@@ -63,8 +63,8 @@ const createNewUserHandler = expressAsyncHandler(
   }
 );
 
-// @desc Delete a user
-// @route DELETE /users
+// @desc   Delete a user
+// @route  DELETE /users
 // @access Private
 const deleteUserHandler = expressAsyncHandler(
   async (request: DeleteUserRequest, response: Response) => {
@@ -100,8 +100,8 @@ const deleteUserHandler = expressAsyncHandler(
   }
 );
 
-// @desc Get all users
-// @route GET /users
+// @desc   Get all users
+// @route  GET /users
 // @access Private
 // responseType: {message:string, users: User[]} | {message:string}
 const getAllUsersHandler = expressAsyncHandler(
@@ -118,8 +118,8 @@ const getAllUsersHandler = expressAsyncHandler(
   }
 );
 
-// @desc Update a user
-// @route PATCH /users
+// @desc   Update a user
+// @route  PATCH /users
 // @access Private
 const updateUserHandler = expressAsyncHandler(
   async (request: UpdateUserRequest, response: Response) => {
