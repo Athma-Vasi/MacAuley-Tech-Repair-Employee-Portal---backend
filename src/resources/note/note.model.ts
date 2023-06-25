@@ -20,10 +20,12 @@ const noteSchema = new Schema<NoteSchema>(
       type: Schema.Types.ObjectId,
       required: [true, 'User is required'],
       ref: 'User', // referring to the User model
+      // index: true,
     },
     title: {
       type: String,
       required: [true, 'Title is required'],
+      index: true,
     },
     text: {
       type: String,

@@ -21,10 +21,12 @@ const userSchema = new Schema<UserSchema>(
       type: String,
       required: [true, 'Email is required'],
       unique: true,
+      index: true,
     },
     username: {
       type: String,
       required: [true, 'Username is required'],
+      index: true,
     },
     password: {
       type: String,

@@ -22,6 +22,7 @@ interface LogoutUserRequest extends Request {
 interface RequestAfterJWTVerification extends Request {
   body: {
     userInfo: {
+      userId: string;
       username: string;
       roles: string[];
     };

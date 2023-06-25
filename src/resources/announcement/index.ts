@@ -1,11 +1,12 @@
 /**
- * this index file is used to import and export announcement resource
+ * this index file is used to import and export announcement resources
  */
 
 /**
- * import all announcement resource
+ * import all announcement resources
  */
 import { AnnouncementModel } from './announcement.model';
+import { announcementRouter } from './announcement.routes';
 import {
   getAllAnnouncementsHandler,
   createNewAnnouncementHandler,
@@ -13,7 +14,6 @@ import {
   updateAnnouncementHandler,
   getAnnouncementsFromUserIdHandler,
 } from './announcement.controller';
-
 import {
   checkAnnouncementExistsService,
   createNewAnnouncementService,
@@ -23,7 +23,12 @@ import {
   updateAnnouncementService,
 } from './announcement.service';
 
-import type { AnnouncementDocument, AnnouncementSchema, RatingFeel } from './announcement.model';
+import type {
+  AnnouncementDocument,
+  AnnouncementSchema,
+  RatingFeel,
+  ArticleSections,
+} from './announcement.model';
 import type {
   CreateNewAnnouncementRequest,
   DeleteAnnouncementRequest,
@@ -34,10 +39,11 @@ import type {
 } from './announcement.types';
 
 /**
- * export all announcement resource
+ * export all announcement resources
  */
 export {
   AnnouncementModel,
+  announcementRouter,
   getAllAnnouncementsHandler,
   createNewAnnouncementHandler,
   deleteAnnouncementHandler,
@@ -55,6 +61,7 @@ export type {
   AnnouncementDocument,
   AnnouncementSchema,
   RatingFeel,
+  ArticleSections,
   CreateNewAnnouncementRequest,
   DeleteAnnouncementRequest,
   GetAllAnnouncementsRequest,

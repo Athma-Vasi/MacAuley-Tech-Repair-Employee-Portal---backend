@@ -110,16 +110,7 @@ const createNewAnnouncementHandler = expressAsyncHandler(
     }
 
     // create new announcement if all checks pass successfully
-    const newAnnouncement = await createNewAnnouncementService({
-      user,
-      username,
-      title,
-      article,
-      imageAlt,
-      imageSrc,
-      rating,
-      timeToRead,
-    });
+    const newAnnouncement = await createNewAnnouncementService(request.body);
     if (newAnnouncement) {
       response.status(201).json({ message: 'Announcement created successfully', newAnnouncement });
     } else {
@@ -171,12 +162,12 @@ const deleteAnnouncementHandler = expressAsyncHandler(
   async (request: DeleteAnnouncementRequest, response: Response) => {
     const { id } = request.params;
 
-    // check if announcement exists
-    const isAnnouncement = await checkAnnouncementExistsService({ id });
-    if (!isAnnouncement) {
-      response.status(400).json({ message: 'Announcement does not exist' });
-      return;
-    }
+    // // check if announcement exists
+    // const isAnnouncement = await checkAnnouncementExistsService({ id });
+    // if (!isAnnouncement) {
+    //   response.status(400).json({ message: 'Announcement does not exist' });
+    //   return;
+    // }
     const updatedAnnouncement = await updateAnnouncementService;
     // delete announcement if all checks pass successfully
     const deletedAnnouncement = await deleteAnnouncementService(id);

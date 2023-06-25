@@ -69,9 +69,14 @@ async function createNewAnnouncementService({
   }
 }
 
-async function deleteAnnouncementService(id: Types.ObjectId) {
+async function deleteAnnouncementService(id: Types.ObjectId): Promise<
+  | (FlattenMaps<AnnouncementSchema> & {
+      _id: Types.ObjectId;
+    })
+  | null
+> {
   try {
-    const result = await AnnouncementModel.findByIdAndDelete(id);
+    const result = await AnnouncementModel.findByIdAndDelete(id).lean().exec();
     return result;
   } catch (error: any) {
     throw new Error(error, { cause: 'deleteAnnouncementService' });
@@ -146,7 +151,7 @@ async function getAllAnnouncementsService(): Promise<
   })[]
 > {
   try {
-    const announcements = await AnnouncementModel.find().lean().exec();
+    const announcements = await AnnouncementModel.find({}).lean().exec();
     return announcements;
   } catch (error: any) {
     throw new Error(error, { cause: 'getAllAnnouncementsService' });

@@ -2,13 +2,15 @@ import mongoose, { Schema, model, Types } from 'mongoose';
 
 type RatingFeel = 'estatic' | 'happy' | 'neutral' | 'sad' | 'devastated' | '';
 
+type ArticleSections = 'title' | 'body';
+
 type AnnouncementSchema = {
   user: Types.ObjectId;
   title: string;
   username: string;
   imageSrc: string;
   imageAlt: string;
-  article: Record<string, string[]>;
+  article: Record<ArticleSections, string[]>;
   timeToRead: number;
   rating: {
     feel: RatingFeel;
@@ -29,6 +31,7 @@ const announcementSchema = new Schema<AnnouncementSchema>(
       type: Schema.Types.ObjectId,
       required: [true, 'User is required'],
       ref: 'User', // referring to the User model
+      index: true,
     },
     title: {
       type: String,
@@ -67,4 +70,4 @@ const announcementSchema = new Schema<AnnouncementSchema>(
 const AnnouncementModel = model('Announcement', announcementSchema);
 
 export { AnnouncementModel };
-export type { AnnouncementSchema, AnnouncementDocument, RatingFeel };
+export type { AnnouncementSchema, AnnouncementDocument, RatingFeel, ArticleSections };

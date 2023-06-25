@@ -12,8 +12,6 @@ function verifyJWTMiddleware(
 ) {
   const { ACCESS_TOKEN_SECRET } = config;
 
-  console.log('request.headers.authorization', request.headers.authorization);
-
   const token = request.headers.authorization?.split(' ')[1];
   if (!token) {
     response.status(401).json({ message: 'No token provided' });
@@ -27,7 +25,7 @@ function verifyJWTMiddleware(
     }
 
     const { userInfo } = decoded as {
-      userInfo: { username: string; roles: ('Admin' | 'Employee' | 'Manager')[] };
+      userInfo: { username: string; userId: string; roles: ('Admin' | 'Employee' | 'Manager')[] };
     };
     request.body.userInfo = userInfo;
 

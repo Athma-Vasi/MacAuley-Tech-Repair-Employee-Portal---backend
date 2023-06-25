@@ -18,6 +18,8 @@ import { userRouter } from './resources/user';
 import { rootRouter } from './resources/root';
 import { notFoundRouter } from './resources/notFound404';
 import { authRouter } from './resources/auth';
+import { announcementRouter } from './resources/announcement';
+import { actionsRouter } from './resources/actions';
 const app = express();
 
 // connect to MongoDB
@@ -37,6 +39,8 @@ app.use('/', rootRouter);
 app.use('/auth', authRouter);
 app.use('/users', userRouter);
 app.use('/notes', noteRouter);
+app.use('/announcements', announcementRouter);
+app.use('/actions', actionsRouter);
 
 app.all('*', notFoundRouter);
 
@@ -56,6 +60,10 @@ mongoose.connection.once('open', () => {
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });
+
+  // mongoose.connection.db.stats().then((stats) => {
+  //   console.log(stats);
+  // });
 });
 
 mongoose.connection.on('error', (error) => {

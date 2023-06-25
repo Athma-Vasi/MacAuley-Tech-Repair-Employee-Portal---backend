@@ -1,4 +1,5 @@
 import { Request } from 'express';
+import { Types } from 'mongoose';
 
 interface LoginUserRequest extends Request {
   body: {
@@ -22,6 +23,7 @@ interface LogoutUserRequest extends Request {
 interface RequestAfterJWTVerification extends Request {
   body: {
     userInfo: {
+      userId: Types.ObjectId;
       username: string;
       roles: string[];
     };
