@@ -24,7 +24,7 @@ import {
   getUserByUsernameService,
 } from './user.service';
 
-import type { UserDocument, UserSchema } from './user.model';
+import type { UserDocument, UserSchema, UserRoles } from './user.model';
 import type {
   CreateNewUserRequest,
   DeleteUserRequest,
@@ -55,6 +55,7 @@ export {
 export type {
   UserDocument,
   UserSchema,
+  UserRoles,
   CreateNewUserRequest,
   DeleteUserRequest,
   GetAllUsersRequest,

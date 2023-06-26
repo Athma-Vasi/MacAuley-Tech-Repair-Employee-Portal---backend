@@ -29,7 +29,7 @@ const getAllAnnouncementsHandler = expressAsyncHandler(
     // add username to each announcement before sending response
     const announcementsWithUsername = await Promise.all(
       announcements.map(async (announcement) => {
-        const user = await getUserByIdService(announcement.user);
+        const user = await getUserByIdService(announcement.userId);
 
         if (!user) {
           return { ...announcement, username: 'unknown' };
@@ -69,7 +69,7 @@ const getAnnouncementsByUserHandler = expressAsyncHandler(
     // add username to each announcement before sending response
     const announcementsWithUsername = await Promise.all(
       announcements.map(async (announcement) => {
-        const user = await getUserByIdService(announcement.user);
+        const user = await getUserByIdService(announcement.userId);
 
         if (!user) {
           return { ...announcement, username: 'unknown' };
@@ -91,10 +91,18 @@ const getAnnouncementsByUserHandler = expressAsyncHandler(
 // @access Private
 const createNewAnnouncementHandler = expressAsyncHandler(
   async (request: CreateNewAnnouncementRequest, response: Response) => {
-    const { user, username, title, article, imageAlt, imageSrc, rating, timeToRead } = request.body;
+    const {
+      userInfo: { userId, username },
+      title,
+      article,
+      imageAlt,
+      imageSrc,
+      rating,
+      timeToRead,
+    } = request.body;
 
     // check if user exists
-    const isUser = await getUserByIdService(user);
+    const isUser = await getUserByIdService(userId);
     if (!isUser) {
       response.status(400).json({ message: 'User does not exist' });
       return;
@@ -108,7 +116,17 @@ const createNewAnnouncementHandler = expressAsyncHandler(
     }
 
     // create new announcement if all checks pass successfully
-    const newAnnouncement = await createNewAnnouncementService(request.body);
+    const newAnnouncementObject = {
+      userId,
+      username,
+      title,
+      article,
+      imageAlt,
+      imageSrc,
+      rating,
+      timeToRead,
+    };
+    const newAnnouncement = await createNewAnnouncementService(newAnnouncementObject);
     if (newAnnouncement) {
       response.status(201).json({ message: 'Announcement created successfully', newAnnouncement });
     } else {
@@ -122,19 +140,27 @@ const createNewAnnouncementHandler = expressAsyncHandler(
 // @access Private
 const updateAnnouncementHandler = expressAsyncHandler(
   async (request: UpdateAnnouncementRequest, response: Response) => {
-    const { id, title, article, imageAlt, imageSrc, rating, timeToRead, username } = request.body;
-
-    // update announcement if all checks pass successfully
-    const updatedAnnouncement = await updateAnnouncementService({
-      id,
+    const {
+      userInfo: { userId, username },
       title,
       article,
       imageAlt,
       imageSrc,
       rating,
       timeToRead,
+    } = request.body;
+
+    const updateAnnouncementObject = {
+      userId,
       username,
-    });
+      title,
+      article,
+      imageAlt,
+      imageSrc,
+      rating,
+      timeToRead,
+    };
+    const updatedAnnouncement = await updateAnnouncementService(updateAnnouncementObject);
     if (updatedAnnouncement) {
       response
         .status(201)

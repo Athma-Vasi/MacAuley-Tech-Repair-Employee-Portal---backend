@@ -1,10 +1,12 @@
 import { Schema, model, Types } from 'mongoose';
 
+type UserRoles = ('Admin' | 'Employee' | 'Manager')[];
+
 type UserSchema = {
   email: string;
   username: string;
   password: string;
-  roles: ('Admin' | 'Employee' | 'Manager')[];
+  roles: UserRoles;
   active: boolean;
 };
 
@@ -52,4 +54,4 @@ const userSchema = new Schema<UserSchema>(
 const UserModel = model('User', userSchema);
 
 export { UserModel };
-export type { UserSchema, UserDocument };
+export type { UserSchema, UserDocument, UserRoles };

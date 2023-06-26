@@ -8,7 +8,7 @@ import {
   getEndorsementsByUserService,
 } from './endorsement.service';
 
-import type { Request, Response } from 'express';
+import type { Response } from 'express';
 import type {
   CreateNewEndorsementRequest,
   DeleteEndorsementRequest,
@@ -17,9 +17,32 @@ import type {
   GetEndorsementsFromUserRequest,
 } from './endorsement.types';
 
+// @desc   Create new endorsement
+// @route  POST /endorsements
+// @access Private
 const createNewEndorsementHandler = expressAsyncHandler(
   async (request: CreateNewEndorsementRequest, response: Response) => {
-    const newEndorsement = await createNewEndorsementService(request.body);
+    const {
+      userInfo: { userId, username },
+      title,
+      section,
+      userToBeEndorsed,
+      attributeEndorsed,
+      summaryOfEndorsement,
+    } = request.body;
+
+    console.log('request.body', request.body);
+
+    const newEndorsementObject = {
+      userId,
+      section,
+      title,
+      username,
+      userToBeEndorsed,
+      summaryOfEndorsement,
+      attributeEndorsed,
+    };
+    const newEndorsement = await createNewEndorsementService(newEndorsementObject);
 
     if (newEndorsement) {
       response.status(201).json({
@@ -27,11 +50,14 @@ const createNewEndorsementHandler = expressAsyncHandler(
         endorsement: newEndorsement,
       });
     } else {
-      response.status(400).json({ message: 'Endorsement could not be created', endorsement: [] });
+      response.status(400).json({ message: 'Endorsement could not be created', endorsement: {} });
     }
   }
 );
 
+// @desc   Get all endorsements
+// @route  GET /endorsements
+// @access Private
 const getAllEndorsementsHandler = expressAsyncHandler(
   async (request: GetAllEndorsementsRequest, response: Response) => {
     const endorsements = await getAllEndorsementsService();
@@ -47,6 +73,9 @@ const getAllEndorsementsHandler = expressAsyncHandler(
   }
 );
 
+// @desc   Get an endorsement
+// @route  GET /endorsements/:id
+// @access Private
 const getAnEndorsementHandler = expressAsyncHandler(
   async (request: GetAnEndorsementRequest, response: Response) => {
     const { id: endorsementId } = request.params;
@@ -63,6 +92,9 @@ const getAnEndorsementHandler = expressAsyncHandler(
   }
 );
 
+// @desc   Get endorsements by user
+// @route  GET /endorsements/user
+// @access Private
 const getEndorsementsByUserHandler = expressAsyncHandler(
   async (request: GetEndorsementsFromUserRequest, response: Response) => {
     const {
@@ -81,6 +113,9 @@ const getEndorsementsByUserHandler = expressAsyncHandler(
   }
 );
 
+// @desc   Delete an endorsement
+// @route  DELETE /endorsements/:id
+// @access Private
 const deleteEndorsementHandler = expressAsyncHandler(
   async (request: DeleteEndorsementRequest, response: Response) => {
     const { id: endorsementId } = request.params;

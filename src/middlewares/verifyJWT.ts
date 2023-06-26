@@ -27,6 +27,7 @@ function verifyJWTMiddleware(
     const { userInfo } = decoded as {
       userInfo: { username: string; userId: string; roles: ('Admin' | 'Employee' | 'Manager')[] };
     };
+
     request.body.userInfo = userInfo;
 
     next();

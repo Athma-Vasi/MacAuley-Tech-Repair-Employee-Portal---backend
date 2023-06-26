@@ -1,7 +1,7 @@
 import type { FlattenMaps, Types } from 'mongoose';
-import type { NoteSchema } from './index';
+import type { NoteSchema } from './note.model';
 
-import { NoteModel } from './index';
+import { NoteModel } from './note.model';
 
 type CheckNoteExistsServiceInput = {
   id?: Types.ObjectId;

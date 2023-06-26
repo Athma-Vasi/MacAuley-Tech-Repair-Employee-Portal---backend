@@ -26,7 +26,7 @@ async function checkAnnouncementExistsService({
 }
 
 type CreateNewAnnouncementServiceInput = {
-  user: Types.ObjectId;
+  userId: Types.ObjectId;
   title: string;
   username: string;
   imageSrc: string;
@@ -40,7 +40,7 @@ type CreateNewAnnouncementServiceInput = {
 };
 
 async function createNewAnnouncementService({
-  user,
+  userId,
   title,
   username,
   imageSrc,
@@ -51,7 +51,7 @@ async function createNewAnnouncementService({
 }: CreateNewAnnouncementServiceInput) {
   try {
     const newAnnouncementObject = {
-      user,
+      userId,
       title,
       username,
       imageSrc,
@@ -97,7 +97,7 @@ async function getAnnouncementsByUserService(user: Types.ObjectId): Promise<
 }
 
 type UpdateAnnouncementServiceInput = {
-  id: Types.ObjectId;
+  userId: Types.ObjectId;
   title: string;
   username: string;
   imageSrc: string;
@@ -111,7 +111,7 @@ type UpdateAnnouncementServiceInput = {
 };
 
 async function updateAnnouncementService({
-  id,
+  userId,
   title,
   username,
   imageSrc,
@@ -132,7 +132,7 @@ async function updateAnnouncementService({
     };
 
     const announcement = await AnnouncementModel.findByIdAndUpdate(
-      id,
+      userId,
       announcementFieldsToUpdateObj,
       { new: true }
     )

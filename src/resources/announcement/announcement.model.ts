@@ -5,7 +5,7 @@ type RatingFeel = 'estatic' | 'happy' | 'neutral' | 'sad' | 'devastated' | '';
 type ArticleSections = 'title' | 'body';
 
 type AnnouncementSchema = {
-  user: Types.ObjectId;
+  userId: Types.ObjectId;
   title: string;
   username: string;
   imageSrc: string;
@@ -27,7 +27,7 @@ type AnnouncementDocument = AnnouncementSchema & {
 
 const announcementSchema = new Schema<AnnouncementSchema>(
   {
-    user: {
+    userId: {
       type: Schema.Types.ObjectId,
       required: [true, 'User is required'],
       ref: 'User', // referring to the User model

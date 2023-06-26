@@ -2,12 +2,18 @@ import type { Request } from 'express';
 import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from './auth';
 import type { RatingFeel } from './announcement.model';
+import type { UserRoles } from '../user';
 
 interface CreateNewAnnouncementRequest extends RequestAfterJWTVerification {
   body: {
-    user: Types.ObjectId;
+    // userInfo object is decoded from the JWT in the auth middleware: verifyJWT.ts
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    // below are the fields required to be sent with post request
     title: string;
-    username: string;
     imageSrc: string;
     imageAlt: string;
     article: Record<string, string[]>;
@@ -36,10 +42,13 @@ interface GetAnnouncementsFromUserIdRequest extends RequestAfterJWTVerification 
 
 interface UpdateAnnouncementRequest extends RequestAfterJWTVerification {
   body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
     id: Types.ObjectId; // id of announcement to update
-    user: Types.ObjectId;
     title: string;
-    username: string;
     imageSrc: string;
     imageAlt: string;
     article: Record<string, string[]>;

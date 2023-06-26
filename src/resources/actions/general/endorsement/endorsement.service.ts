@@ -4,7 +4,7 @@ import type { EmployeeAttributes, EndorsementDocument } from './endorsement.mode
 import { EndorsementModel } from './endorsement.model';
 
 type CreateNewEndorsementInput = {
-  user: Types.ObjectId;
+  userId: Types.ObjectId;
   section: 'company' | 'general';
   title: 'endorsement';
   username: string;
@@ -14,7 +14,7 @@ type CreateNewEndorsementInput = {
 };
 
 async function createNewEndorsementService({
-  user,
+  userId,
   section,
   title,
   username,
@@ -24,7 +24,7 @@ async function createNewEndorsementService({
 }: CreateNewEndorsementInput) {
   try {
     const newEndorsementObject = {
-      user,
+      userId,
       section,
       title,
       username,

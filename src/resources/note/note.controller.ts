@@ -7,7 +7,7 @@ import type {
   GetAllNotesRequest,
   UpdateNoteRequest,
   GetNotesFromUserIdRequest,
-} from './index';
+} from './note.types';
 
 import {
   checkNoteExistsService,
@@ -16,7 +16,7 @@ import {
   getAllNotesService,
   getNotesByUserService,
   updateNoteService,
-} from './index';
+} from './note.service';
 import { getUserByIdService } from '../user';
 
 // @desc   Create new note

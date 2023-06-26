@@ -1,5 +1,7 @@
 import mongoose, { Schema, model, Types } from 'mongoose';
 
+import type { ActionsGeneral } from '../actionsGeneral.types';
+
 type EmployeeAttributes =
   | 'teamwork and collaboration'
   | 'leadership and mentorship'
@@ -12,9 +14,9 @@ type EmployeeAttributes =
   | 'reliability and dependability';
 
 type EndorsementSchema = {
-  user: Types.ObjectId;
+  userId: Types.ObjectId;
   section: 'company' | 'general';
-  title: 'endorsement';
+  title: ActionsGeneral;
   username: string;
   userToBeEndorsed: string;
   summaryOfEndorsement: string;
@@ -28,9 +30,9 @@ type EndorsementDocument = EndorsementSchema & {
   __v: number;
 };
 
-const endorseSchema = new Schema<EndorsementSchema>(
+const endorsementSchema = new Schema<EndorsementSchema>(
   {
-    user: {
+    userId: {
       type: Schema.Types.ObjectId,
       required: [true, 'User is required'],
       ref: 'User', // referring to the User model
@@ -47,6 +49,7 @@ const endorseSchema = new Schema<EndorsementSchema>(
     username: {
       type: String,
       required: [true, 'Username is required'],
+      index: true,
     },
     userToBeEndorsed: {
       type: String,
@@ -66,7 +69,7 @@ const endorseSchema = new Schema<EndorsementSchema>(
   }
 );
 
-const EndorsementModel = model<EndorsementDocument>('Endorse', endorseSchema);
+const EndorsementModel = model<EndorsementDocument>('Endorsement', endorsementSchema);
 
 export { EndorsementModel };
 export type { EndorsementSchema, EndorsementDocument, EmployeeAttributes };

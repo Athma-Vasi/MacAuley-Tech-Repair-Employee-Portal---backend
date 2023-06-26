@@ -1,9 +1,9 @@
 import bcrypt from 'bcryptjs';
 
 import type { FlattenMaps, Types } from 'mongoose';
-import type { UserSchema, GetAllUsersReturn } from './index';
+import type { UserSchema } from './user.model';
 
-import { UserModel } from './index';
+import { UserModel } from './user.model';
 
 type CheckUserExistsServiceInput = {
   email?: string;

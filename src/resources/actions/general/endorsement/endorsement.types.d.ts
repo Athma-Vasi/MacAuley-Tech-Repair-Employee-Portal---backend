@@ -5,10 +5,15 @@ import type { EmployeeAttributes } from './index';
 
 interface CreateNewEndorsementRequest extends RequestAfterJWTVerification {
   body: {
-    user: Types.ObjectId;
+    // userInfo object is decoded from the JWT in the auth middleware: verifyJWT.ts
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: string[];
+    };
+    // below are the fields required to be sent with post request
     section: 'company' | 'general';
     title: 'endorsement';
-    username: string;
     userToBeEndorsed: string;
     summaryOfEndorsement: string;
     attributeEndorsed: EmployeeAttributes;

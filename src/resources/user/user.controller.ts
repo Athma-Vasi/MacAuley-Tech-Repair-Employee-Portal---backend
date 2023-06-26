@@ -6,7 +6,7 @@ import type {
   DeleteUserRequest,
   GetAllUsersRequest,
   UpdateUserRequest,
-} from './index';
+} from './user.types';
 
 import { getNotesByUserService } from '../note';
 import {
@@ -15,7 +15,7 @@ import {
   deleteUserService,
   getAllUsersService,
   updateUserService,
-} from './index';
+} from './user.service';
 
 // @desc   Create new user
 // @route  POST /users
