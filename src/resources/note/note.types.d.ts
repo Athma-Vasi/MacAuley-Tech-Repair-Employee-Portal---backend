@@ -20,7 +20,7 @@ interface CreateNewNoteRequest extends RequestAfterJWTVerification {
 
 interface DeleteNoteRequest extends RequestAfterJWTVerification {
   body: {
-    id: Types.ObjectId;
+    noteId: Types.ObjectId;
   };
 }
 
@@ -41,7 +41,7 @@ interface UpdateNoteRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     // below are the fields required to be sent with post request
-    postId: Types.ObjectId;
+    noteId: Types.ObjectId;
     // user: Types.ObjectId;
     title: string;
     text: string;

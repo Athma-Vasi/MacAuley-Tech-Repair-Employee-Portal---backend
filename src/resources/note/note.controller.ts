@@ -24,16 +24,20 @@ import { getUserByIdService } from '../user';
 // @access Private
 const createNewNoteHandler = expressAsyncHandler(
   async (request: CreateNewNoteRequest, response: Response) => {
-    const { user, title, text } = request.body;
+    const {
+      userInfo: { userId },
+      title,
+      text,
+    } = request.body;
 
     // confirm that user, title, and text are not empty
-    if (!user || !title || !text) {
+    if (!userId || !title || !text) {
       response.status(400).json({ message: 'User, Title, and Text fields are required' });
       return;
     }
 
     // check if user exists
-    const isUser = await getUserByIdService(user);
+    const isUser = await getUserByIdService(userId);
     if (!isUser) {
       response.status(400).json({ message: 'User does not exist' });
       return;
@@ -47,7 +51,7 @@ const createNewNoteHandler = expressAsyncHandler(
     }
 
     // create new note if all checks pass successfully
-    const createdNote = await createNewNoteService({ user, title, text });
+    const createdNote = await createNewNoteService({ userId, title, text });
 
     if (createdNote) {
       response.status(201).json({ message: `Note ${title} created successfully` });
@@ -62,25 +66,25 @@ const createNewNoteHandler = expressAsyncHandler(
 // @access Private
 const deleteNoteHandler = expressAsyncHandler(
   async (request: DeleteNoteRequest, response: Response) => {
-    const { id } = request.body;
+    const { noteId } = request.body;
 
     // confirm that id is not empty
-    if (!id) {
+    if (!noteId) {
       response.status(400).json({ message: 'Id field is required' });
       return;
     }
 
     // confirm that note exists
-    const isNote = await checkNoteExistsService({ id });
+    const isNote = await checkNoteExistsService({ noteId });
     if (!isNote) {
       response.status(400).json({ message: 'Note does not exist' });
       return;
     }
 
     // delete note if all checks pass successfully
-    const deletedNote = await deleteNoteService(id);
+    const deletedNote = await deleteNoteService(noteId);
     if (deletedNote) {
-      response.status(200).json({ message: `Note ${id} deleted successfully` });
+      response.status(200).json({ message: `Note ${noteId} deleted successfully` });
     } else {
       response.status(400).json({ message: 'Note deletion failed' });
     }
@@ -103,7 +107,7 @@ const getAllNotesHandler = expressAsyncHandler(
     // add username to each note before sending response
     const allNotesWithUsername = await Promise.all(
       allNotes.map(async (note) => {
-        const user = await getUserByIdService(note.user);
+        const user = await getUserByIdService(note.userId);
         if (!user) {
           return { ...note, username: 'unknown' };
         }
@@ -121,11 +125,17 @@ const getAllNotesHandler = expressAsyncHandler(
 // @access Private
 const updateNoteHandler = expressAsyncHandler(
   async (request: UpdateNoteRequest, response: Response) => {
-    const { id, user, title, text, completed } = request.body;
+    const {
+      userInfo: { userId, username },
+      noteId,
+      title,
+      text,
+      completed,
+    } = request.body;
 
     // confirm that id, user, title, and text are not empty
-    if (!id || !user || !title || !text) {
-      response.status(400).json({ message: 'Id, User, Title, and Text fields are required' });
+    if (!noteId || !userId || !title || !text) {
+      response.status(400).json({ message: 'noteId, userId, Title, and Text fields are required' });
       return;
     }
 
@@ -138,21 +148,21 @@ const updateNoteHandler = expressAsyncHandler(
     }
 
     // check if note exists
-    const isNote = await checkNoteExistsService({ id });
+    const isNote = await checkNoteExistsService({ noteId });
     if (!isNote) {
       response.status(400).json({ message: 'Note does not exist' });
       return;
     }
 
     // check if user exists
-    const isUser = await getUserByIdService(user);
+    const isUser = await getUserByIdService(userId);
     if (!isUser) {
       response.status(400).json({ message: 'User does not exist' });
       return;
     }
 
     // update note if all checks pass successfully
-    const updatedNote = await updateNoteService({ id, user, title, text, completed });
+    const updatedNote = await updateNoteService({ noteId, userId, title, text, completed });
     if (updatedNote) {
       response.status(201).json({ message: `Note ${title} updated successfully` });
     } else {

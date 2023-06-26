@@ -4,20 +4,20 @@ import type { NoteSchema } from './note.model';
 import { NoteModel } from './note.model';
 
 type CheckNoteExistsServiceInput = {
-  id?: Types.ObjectId;
+  noteId?: Types.ObjectId;
   title?: string;
 };
 
 async function checkNoteExistsService({
-  id,
+  noteId,
   title,
 }: CheckNoteExistsServiceInput): Promise<boolean> {
   try {
     // lean is used to return a plain javascript object instead of a mongoose document
     // exec is used when passing an argument and returning a promise and also provides better error handling
 
-    if (id) {
-      const note = await NoteModel.findById(id).lean().exec();
+    if (noteId) {
+      const note = await NoteModel.findById(noteId).lean().exec();
       return note ? true : false;
     }
 
@@ -33,15 +33,15 @@ async function checkNoteExistsService({
 }
 
 type CreateNewNoteServiceInput = {
-  user: Types.ObjectId;
+  userId: Types.ObjectId;
   title: string;
   text: string;
 };
 
-async function createNewNoteService({ user, title, text }: CreateNewNoteServiceInput) {
+async function createNewNoteService({ userId, title, text }: CreateNewNoteServiceInput) {
   try {
     const newNoteObject = {
-      user,
+      userId,
       title,
       text,
       completed: false,
@@ -96,16 +96,16 @@ async function getAllNotesService(): Promise<
 }
 
 type UpdateNoteServiceInput = {
-  id: Types.ObjectId;
-  user: Types.ObjectId;
+  noteId: Types.ObjectId;
+  userId: Types.ObjectId;
   title: string;
   text: string;
   completed: boolean;
 };
 
 async function updateNoteService({
-  id,
-  user,
+  noteId,
+  userId,
   title,
   text,
   completed,
@@ -117,14 +117,16 @@ async function updateNoteService({
 > {
   try {
     const noteFieldsToUpdateObj = {
-      id,
-      user,
+      noteId,
+      userId,
       title,
       text,
       completed,
     };
 
-    const updatedNote = await NoteModel.findByIdAndUpdate(id, noteFieldsToUpdateObj, { new: true })
+    const updatedNote = await NoteModel.findByIdAndUpdate(noteId, noteFieldsToUpdateObj, {
+      new: true,
+    })
       .lean()
       .exec();
 

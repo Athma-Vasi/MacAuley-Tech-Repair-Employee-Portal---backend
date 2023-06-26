@@ -1,7 +1,7 @@
 import mongoose, { Schema, model, Types } from 'mongoose';
 
 type NoteSchema = {
-  user: Types.ObjectId;
+  userId: Types.ObjectId;
   title: string;
   text: string;
   completed: boolean;
@@ -16,7 +16,7 @@ type NoteDocument = NoteSchema & {
 
 const noteSchema = new Schema<NoteSchema>(
   {
-    user: {
+    userId: {
       type: Schema.Types.ObjectId,
       required: [true, 'User is required'],
       ref: 'User', // referring to the User model
