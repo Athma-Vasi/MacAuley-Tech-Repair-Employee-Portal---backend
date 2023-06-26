@@ -20,6 +20,7 @@ import type {
   GetAllAnonymousRequestsRequest,
   GetAnAnonymousRequestRequest,
   DeleteAllAnonymousRequestsRequest,
+  AnonymousRequestsServerResponse,
 } from './anonymousRequest.types';
 
 /**
@@ -32,6 +33,7 @@ export type {
   DeleteAllAnonymousRequestsRequest,
   GetAnAnonymousRequestRequest,
   GetAllAnonymousRequestsRequest,
+  AnonymousRequestsServerResponse,
   AnonymousRequestDocument,
   AnonymousRequestSchema,
   AnonymousRequestKind,

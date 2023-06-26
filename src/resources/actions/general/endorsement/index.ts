@@ -19,6 +19,8 @@ import type {
   GetAllEndorsementsRequest,
   GetAnEndorsementRequest,
   GetEndorsementsFromUserRequest,
+  DeleteAllEndorsementsRequest,
+  EndorsementsServerResponse,
 } from './endorsement.types';
 
 /**
@@ -31,7 +33,9 @@ export type {
   EmployeeAttributes,
   CreateNewEndorsementRequest,
   DeleteEndorsementRequest,
+  DeleteAllEndorsementsRequest,
   GetAllEndorsementsRequest,
   GetAnEndorsementRequest,
   GetEndorsementsFromUserRequest,
+  EndorsementsServerResponse,
 };

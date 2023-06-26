@@ -1,7 +1,7 @@
 import type { Request } from 'express';
 import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from './auth';
-import type { RatingFeel } from './announcement.model';
+import type { RatingFeel, AnnouncementDocument } from './announcement.model';
 import type { UserRoles } from '../user';
 
 interface CreateNewAnnouncementRequest extends RequestAfterJWTVerification {
@@ -31,7 +31,8 @@ interface DeleteAnAnnouncementRequest extends RequestAfterJWTVerification {
   };
 }
 
-// converted to type alias instead of interface because an interface declaring no members is equivalent to its supertype and rome doesn't like that
+type DeleteAllAnnouncementsRequest = RequestAfterJWTVerification;
+
 type GetAllAnnouncementsRequest = RequestAfterJWTVerification;
 
 interface GetAnnouncementsFromUserIdRequest extends RequestAfterJWTVerification {
@@ -60,22 +61,16 @@ interface UpdateAnnouncementRequest extends RequestAfterJWTVerification {
   };
 }
 
-// rome-ignore lint/suspicious/noEmptyInterface: <temporary>
-interface GetAllAnnouncementsReturn {}
-
-/**
- *
- *
- */
+type AnnouncementsServerResponse = {
+  message: string;
+  announcementData: Array<AnnouncementDocument>;
+};
 
 export type {
-  // announcement requests
   CreateNewAnnouncementRequest,
   DeleteAnAnnouncementRequest,
   GetAllAnnouncementsRequest,
   UpdateAnnouncementRequest,
   GetAnnouncementsFromUserIdRequest,
-
-  // announcement return types from service
-  GetAllAnnouncementsReturn,
+  AnnouncementsServerResponse,
 };

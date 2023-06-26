@@ -31,11 +31,11 @@ import type {
 } from './announcement.model';
 import type {
   CreateNewAnnouncementRequest,
-  DeleteAnnouncementRequest,
+  DeleteAnAnnouncementRequest,
   GetAllAnnouncementsRequest,
   UpdateAnnouncementRequest,
   GetAnnouncementsFromUserIdRequest,
-  GetAllAnnouncementsReturn,
+  AnnouncementsServerResponse,
 } from './announcement.types';
 
 /**
@@ -63,9 +63,9 @@ export type {
   RatingFeel,
   ArticleSections,
   CreateNewAnnouncementRequest,
-  DeleteAnnouncementRequest,
+  DeleteAnAnnouncementRequest,
   GetAllAnnouncementsRequest,
   UpdateAnnouncementRequest,
   GetAnnouncementsFromUserIdRequest,
-  GetAllAnnouncementsReturn,
+  AnnouncementsServerResponse,
 };

@@ -1,7 +1,7 @@
 import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
 import type { ActionsGeneral } from '../actionsGeneral.types';
-import type { PrinterIssueUrgency } from './printerIssue.model';
+import type { PrinterIssueUrgency, PrinterIssueDocument } from './printerIssue.model';
 import { UserRoles } from '../../../user';
 
 interface CreateNewPrinterIssueRequest extends RequestAfterJWTVerification {
@@ -41,6 +41,11 @@ interface GetAPrinterIssueRequest extends RequestAfterJWTVerification {
 
 type GetPrinterIssuesFromUserRequest = RequestAfterJWTVerification;
 
+type PrinterIssuesServerResponse = {
+  message: string;
+  printerIssueData: Array<PrinterIssueDocument>;
+};
+
 export type {
   CreateNewPrinterIssueRequest,
   DeletePrinterIssueRequest,
@@ -48,4 +53,5 @@ export type {
   GetAllPrinterIssuesRequest,
   GetAPrinterIssueRequest,
   GetPrinterIssuesFromUserRequest,
+  PrinterIssuesServerResponse,
 };

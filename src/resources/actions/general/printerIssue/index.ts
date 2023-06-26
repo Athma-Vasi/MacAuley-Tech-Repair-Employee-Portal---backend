@@ -33,6 +33,8 @@ import type {
   GetAPrinterIssueRequest,
   GetAllPrinterIssuesRequest,
   GetPrinterIssuesFromUserRequest,
+  DeleteAllPrinterIssuesRequest,
+  PrinterIssuesServerResponse,
 } from './printerIssue.types';
 
 /**
@@ -56,10 +58,12 @@ export {
 export type {
   CreateNewPrinterIssueRequest,
   DeletePrinterIssueRequest,
+  DeleteAllPrinterIssuesRequest,
   GetAPrinterIssueRequest,
   GetAllPrinterIssuesRequest,
   GetPrinterIssuesFromUserRequest,
   PrinterIssueDocument,
   PrinterIssueSchema,
   PrinterIssueUrgency,
+  PrinterIssuesServerResponse,
 };

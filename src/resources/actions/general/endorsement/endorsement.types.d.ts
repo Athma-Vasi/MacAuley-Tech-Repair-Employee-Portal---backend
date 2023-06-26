@@ -1,7 +1,7 @@
 import type { Request } from 'express';
-import type { RequestAfterJWTVerification } from '../../../auth';
 import type { Types } from 'mongoose';
-import type { EmployeeAttributes } from './index';
+import type { RequestAfterJWTVerification } from '../../../auth';
+import type { EmployeeAttributes, EndorsementDocument } from './endorsement.model';
 
 interface CreateNewEndorsementRequest extends RequestAfterJWTVerification {
   body: {
@@ -38,6 +38,11 @@ interface GetAnEndorsementRequest extends RequestAfterJWTVerification {
 
 type GetEndorsementsFromUserRequest = RequestAfterJWTVerification;
 
+type EndorsementsServerResponse = {
+  message: string;
+  endorsementData: Array<EndorsementDocument>;
+};
+
 export type {
   CreateNewEndorsementRequest,
   DeleteEndorsementRequest,
@@ -45,4 +50,5 @@ export type {
   GetAllEndorsementsRequest,
   GetAnEndorsementRequest,
   GetEndorsementsFromUserRequest,
+  EndorsementsServerResponse,
 };

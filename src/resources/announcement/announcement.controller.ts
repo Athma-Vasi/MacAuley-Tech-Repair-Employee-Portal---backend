@@ -3,7 +3,7 @@ import expressAsyncHandler from 'express-async-handler';
 import type { Response } from 'express';
 import type {
   CreateNewAnnouncementRequest,
-  DeleteAnnouncementRequest,
+  DeleteAnAnnouncementRequest,
   GetAllAnnouncementsRequest,
   UpdateAnnouncementRequest,
   GetAnnouncementsFromUserIdRequest,
@@ -175,7 +175,7 @@ const updateAnnouncementHandler = expressAsyncHandler(
 // @route  DELETE /announcements/:id
 // @access Private
 const deleteAnnouncementHandler = expressAsyncHandler(
-  async (request: DeleteAnnouncementRequest, response: Response) => {
+  async (request: DeleteAnAnnouncementRequest, response: Response) => {
     const { id } = request.params;
 
     // check if announcement exists

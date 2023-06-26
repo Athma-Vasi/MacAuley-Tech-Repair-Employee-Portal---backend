@@ -1,7 +1,11 @@
 import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
 import type { ActionsGeneral } from '../actionsGeneral.types';
-import type { AnonymousRequestKind, AnonymousRequestUrgency } from './anonymousRequest.model';
+import type {
+  AnonymousRequestDocument,
+  AnonymousRequestKind,
+  AnonymousRequestUrgency,
+} from './anonymousRequest.model';
 
 import { UserRoles } from '../../../user';
 
@@ -51,10 +55,16 @@ interface GetAnAnonymousRequestRequest extends RequestAfterJWTVerification {
   };
 }
 
+type AnonymousRequestsServerResponse = {
+  message: string;
+  anonymousRequestData: Array<AnonymousRequestDocument>;
+};
+
 export type {
   CreateNewAnonymousRequestRequest,
   DeleteAnAnonymousRequestRequest,
   DeleteAllAnonymousRequestsRequest,
   GetAllAnonymousRequestsRequest,
   GetAnAnonymousRequestRequest,
+  AnonymousRequestsServerResponse,
 };
