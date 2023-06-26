@@ -96,9 +96,14 @@ async function createNewUserService({
   }
 }
 
-async function deleteUserService(id: Types.ObjectId) {
+async function deleteUserService(id: Types.ObjectId): Promise<
+  | (FlattenMaps<UserSchema> & {
+      _id: Types.ObjectId;
+    })
+  | null
+> {
   try {
-    const deletedUser = await UserModel.findByIdAndDelete(id);
+    const deletedUser = await UserModel.findByIdAndDelete(id).lean().exec();
     return deletedUser;
   } catch (error: any) {
     throw new Error(error, { cause: 'deleteUserService' });
@@ -128,11 +133,15 @@ async function getUserByUsernameService(username: string) {
   }
 }
 
-async function getAllUsersService(): Promise<GetAllUsersReturn[]> {
+async function getAllUsersService(): Promise<
+  (FlattenMaps<UserSchema> & {
+    _id: Types.ObjectId;
+  })[]
+> {
   try {
     // select is used to exclude the password field from the returned document
     // lean is used to return a plain javascript object instead of a mongoose document
-    const users = (await UserModel.find().select('-password').lean()) as GetAllUsersReturn[];
+    const users = await UserModel.find().select('-password').lean().exec();
     return users;
   } catch (error: any) {
     throw new Error(error, { cause: 'getAllUsersService' });
@@ -164,7 +173,7 @@ async function updateUserService({
       newHashedPassword = await bcrypt.hash(password, passwordSalt);
     } else {
       // if password is not provided, find the user by id and grab the existing hashed password
-      const user = await UserModel.findById(id).select('password').lean();
+      const user = await UserModel.findById(id).select('password').lean().exec();
       if (user) {
         // if user is found, assign the existing hashed password to newHashedPassword
         newHashedPassword = user.password;
@@ -186,7 +195,9 @@ async function updateUserService({
     // find the user by id and update the user
     const updatedUser = await UserModel.findByIdAndUpdate(id, userFieldsToUpdateObj, {
       new: true,
-    }).lean();
+    })
+      .lean()
+      .exec();
 
     return updatedUser;
   } catch (error: any) {

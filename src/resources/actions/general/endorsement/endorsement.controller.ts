@@ -15,7 +15,7 @@ import type {
   GetAllEndorsementsRequest,
   GetAnEndorsementRequest,
   GetEndorsementsFromUserRequest,
-} from './index';
+} from './endorsement.types';
 
 const createNewEndorsementHandler = expressAsyncHandler(
   async (request: CreateNewEndorsementRequest, response: Response) => {

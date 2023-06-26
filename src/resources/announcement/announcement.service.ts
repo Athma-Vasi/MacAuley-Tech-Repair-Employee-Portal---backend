@@ -1,7 +1,7 @@
 import type { FlattenMaps, Types } from 'mongoose';
-import type { AnnouncementSchema, RatingFeel } from './index';
+import type { AnnouncementSchema, RatingFeel } from './announcement.model';
 
-import { AnnouncementModel } from './index';
+import { AnnouncementModel } from './announcement.model';
 
 type CheckAnnouncementExistsServiceInput = {
   id?: Types.ObjectId;
@@ -131,15 +131,19 @@ async function updateAnnouncementService({
       rating,
     };
 
-    const announcements = await AnnouncementModel.findByIdAndUpdate(
+    const announcement = await AnnouncementModel.findByIdAndUpdate(
       id,
       announcementFieldsToUpdateObj,
       { new: true }
     )
       .lean()
       .exec();
-
-    return announcements;
+    if (announcement) {
+      return announcement;
+    } else {
+      const newAnnouncement = await AnnouncementModel.create(announcementFieldsToUpdateObj);
+      return newAnnouncement;
+    }
   } catch (error: any) {
     throw new Error(error, { cause: 'updateAnnouncementService' });
   }

@@ -7,7 +7,7 @@ import type {
   GetAllAnnouncementsRequest,
   UpdateAnnouncementRequest,
   GetAnnouncementsFromUserIdRequest,
-} from './index';
+} from './announcement.types';
 
 import {
   checkAnnouncementExistsService,
@@ -16,7 +16,7 @@ import {
   getAllAnnouncementsService,
   getAnnouncementsByUserService,
   updateAnnouncementService,
-} from './index';
+} from './announcement.service';
 import { getUserByIdService } from '../user';
 
 // @desc   create new announcement
@@ -49,8 +49,7 @@ const getAllAnnouncementsHandler = expressAsyncHandler(
 // @desc   get announcements from an user by their user id
 // @route  GET /announcement/:userId
 // @access Private
-
-const getAnnouncementsFromUserIdHandler = expressAsyncHandler(
+const getAnnouncementsByUserHandler = expressAsyncHandler(
   async (request: GetAnnouncementsFromUserIdRequest, response: Response) => {
     const { userId } = request.params;
 
@@ -63,8 +62,7 @@ const getAnnouncementsFromUserIdHandler = expressAsyncHandler(
 
     const announcements = await getAnnouncementsByUserService(userId);
     if (announcements.length === 0) {
-      // 200 status is to prevent error from being thrown in frontend
-      response.status(200).json({ message: 'No announcements found', announcements: [] });
+      response.status(400).json({ message: 'No announcements found', announcements: [] });
       return;
     }
 
@@ -120,19 +118,11 @@ const createNewAnnouncementHandler = expressAsyncHandler(
 );
 
 // @desc   update announcement
-// @route  PUT /announcement/:id
+// @route  PUT /announcements/:id
 // @access Private
 const updateAnnouncementHandler = expressAsyncHandler(
   async (request: UpdateAnnouncementRequest, response: Response) => {
-    const { id } = request.params;
-    const { title, article, imageAlt, imageSrc, rating, timeToRead, username } = request.body;
-
-    // check if announcement exists
-    const isAnnouncement = await checkAnnouncementExistsService({ id });
-    if (!isAnnouncement) {
-      response.status(400).json({ message: 'Announcement does not exist' });
-      return;
-    }
+    const { id, title, article, imageAlt, imageSrc, rating, timeToRead, username } = request.body;
 
     // update announcement if all checks pass successfully
     const updatedAnnouncement = await updateAnnouncementService({
@@ -156,19 +146,19 @@ const updateAnnouncementHandler = expressAsyncHandler(
 );
 
 // @desc   delete announcement
-// @route  DELETE /announcement/:id
+// @route  DELETE /announcements/:id
 // @access Private
 const deleteAnnouncementHandler = expressAsyncHandler(
   async (request: DeleteAnnouncementRequest, response: Response) => {
     const { id } = request.params;
 
-    // // check if announcement exists
-    // const isAnnouncement = await checkAnnouncementExistsService({ id });
-    // if (!isAnnouncement) {
-    //   response.status(400).json({ message: 'Announcement does not exist' });
-    //   return;
-    // }
-    const updatedAnnouncement = await updateAnnouncementService;
+    // check if announcement exists
+    const isAnnouncement = await checkAnnouncementExistsService({ id });
+    if (!isAnnouncement) {
+      response.status(400).json({ message: 'Announcement does not exist' });
+      return;
+    }
+
     // delete announcement if all checks pass successfully
     const deletedAnnouncement = await deleteAnnouncementService(id);
     if (deletedAnnouncement) {
@@ -184,7 +174,7 @@ const deleteAnnouncementHandler = expressAsyncHandler(
 export {
   deleteAnnouncementHandler,
   getAllAnnouncementsHandler,
-  getAnnouncementsFromUserIdHandler,
+  getAnnouncementsByUserHandler,
   createNewAnnouncementHandler,
   updateAnnouncementHandler,
 };

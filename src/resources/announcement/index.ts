@@ -12,7 +12,7 @@ import {
   createNewAnnouncementHandler,
   deleteAnnouncementHandler,
   updateAnnouncementHandler,
-  getAnnouncementsFromUserIdHandler,
+  getAnnouncementsByUserHandler,
 } from './announcement.controller';
 import {
   checkAnnouncementExistsService,
@@ -48,7 +48,7 @@ export {
   createNewAnnouncementHandler,
   deleteAnnouncementHandler,
   updateAnnouncementHandler,
-  getAnnouncementsFromUserIdHandler,
+  getAnnouncementsByUserHandler,
   checkAnnouncementExistsService,
   createNewAnnouncementService,
   deleteAnnouncementService,

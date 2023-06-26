@@ -20,7 +20,7 @@ noteRouter
   .route('/')
   .get(getAllNotesHandler)
   .post(createNewNoteHandler)
-  .patch(updateNoteHandler)
+  .put(updateNoteHandler)
   .delete(deleteNoteHandler);
 
 export { noteRouter };

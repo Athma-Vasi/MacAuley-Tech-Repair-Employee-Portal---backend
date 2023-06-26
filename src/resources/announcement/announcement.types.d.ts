@@ -35,11 +35,8 @@ interface GetAnnouncementsFromUserIdRequest extends RequestAfterJWTVerification 
 }
 
 interface UpdateAnnouncementRequest extends RequestAfterJWTVerification {
-  params: {
-    id: Types.ObjectId;
-  };
   body: {
-    // id: Types.ObjectId;
+    id: Types.ObjectId; // id of announcement to update
     user: Types.ObjectId;
     title: string;
     username: string;

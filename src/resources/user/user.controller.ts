@@ -119,7 +119,7 @@ const getAllUsersHandler = expressAsyncHandler(
 );
 
 // @desc   Update a user
-// @route  PATCH /users
+// @route  PUT /users
 // @access Private
 const updateUserHandler = expressAsyncHandler(
   async (request: UpdateUserRequest, response: Response) => {
@@ -146,13 +146,6 @@ const updateUserHandler = expressAsyncHandler(
         .json({ message: 'Active field is required and must be of type boolean' });
       return;
     }
-
-    // // check user exists and that the username being updated is not being used by another user
-    // const userExists = await checkUserExistsService({ username });
-    // if (userExists) {
-    //   response.status(400).json({ message: 'Username already exists' });
-    //   return;
-    // }
 
     // update user if all checks pass successfully
     const updatedUser = await updateUserService({ id, email, username, password, roles, active });

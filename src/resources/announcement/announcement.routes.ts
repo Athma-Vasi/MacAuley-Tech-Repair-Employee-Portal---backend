@@ -6,7 +6,7 @@ import {
   deleteAnnouncementHandler,
   getAllAnnouncementsHandler,
   updateAnnouncementHandler,
-  getAnnouncementsFromUserIdHandler,
+  getAnnouncementsByUserHandler,
 } from './announcement.controller';
 
 const announcementRouter = Router();
@@ -14,13 +14,12 @@ const announcementRouter = Router();
 // verifyJWT middleware is applied to all routes in this router
 announcementRouter.use(verifyJWTMiddleware);
 
-announcementRouter.route('/:userId').get(getAnnouncementsFromUserIdHandler);
-
 announcementRouter
   .route('/')
   .get(getAllAnnouncementsHandler)
   .post(createNewAnnouncementHandler)
-  .patch(updateAnnouncementHandler)
+  .put(updateAnnouncementHandler)
   .delete(deleteAnnouncementHandler);
 
+announcementRouter.route('/:userId').get(getAnnouncementsByUserHandler);
 export { announcementRouter };

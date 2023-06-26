@@ -1,7 +1,7 @@
 import type { FlattenMaps, Types } from 'mongoose';
-import type { EmployeeAttributes, EndorsementDocument } from './index';
+import type { EmployeeAttributes, EndorsementDocument } from './endorsement.model';
 
-import { EndorsementModel } from './index';
+import { EndorsementModel } from './endorsement.model';
 
 type CreateNewEndorsementInput = {
   user: Types.ObjectId;

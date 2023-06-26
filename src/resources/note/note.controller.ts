@@ -117,7 +117,7 @@ const getAllNotesHandler = expressAsyncHandler(
 );
 
 // @desc   Update a note
-// @route  PATCH /notes
+// @route  PUT /notes
 // @access Private
 const updateNoteHandler = expressAsyncHandler(
   async (request: UpdateNoteRequest, response: Response) => {
@@ -143,13 +143,6 @@ const updateNoteHandler = expressAsyncHandler(
       response.status(400).json({ message: 'Note does not exist' });
       return;
     }
-
-    // // check if note with same title already exists
-    // const isDuplicateNote = await checkNoteExistsService({ title });
-    // if (isDuplicateNote) {
-    //   response.status(400).json({ message: 'Note with same title already exists' });
-    //   return;
-    // }
 
     // check if user exists
     const isUser = await getUserByIdService(user);
@@ -184,8 +177,7 @@ const getNotesFromUserIdHandler = expressAsyncHandler(
 
     const notesByUser = await getNotesByUserService(userId);
     if (notesByUser.length === 0) {
-      // 200 status is to prevent error from being thrown in frontend
-      response.status(200).json({ message: 'No notes found', notes: [] });
+      response.status(400).json({ message: 'No notes found', notes: [] });
       return;
     }
     const notesWithUsername = notesByUser.map((note) => ({ ...note, username: isUser.username }));

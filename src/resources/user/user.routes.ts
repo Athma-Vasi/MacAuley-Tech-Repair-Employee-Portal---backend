@@ -16,7 +16,7 @@ userRouter
   .route('/')
   .get(verifyJWTMiddleware, getAllUsersHandler)
   .post(createNewUserHandler)
-  .patch(verifyJWTMiddleware, updateUserHandler)
+  .put(verifyJWTMiddleware, updateUserHandler)
   .delete(verifyJWTMiddleware, deleteUserHandler);
 
 export { userRouter };

@@ -55,9 +55,14 @@ async function createNewNoteService({ user, title, text }: CreateNewNoteServiceI
   }
 }
 
-async function deleteNoteService(id: Types.ObjectId) {
+async function deleteNoteService(id: Types.ObjectId): Promise<
+  | (FlattenMaps<NoteSchema> & {
+      _id: Types.ObjectId;
+    })
+  | null
+> {
   try {
-    const result = await NoteModel.findByIdAndDelete(id);
+    const result = await NoteModel.findByIdAndDelete(id).lean().exec();
     return result;
   } catch (error: any) {
     throw new Error(error, { cause: 'deleteNoteService' });
@@ -83,7 +88,7 @@ async function getAllNotesService(): Promise<
   })[]
 > {
   try {
-    const allNotes = await NoteModel.find({}).lean();
+    const allNotes = await NoteModel.find({}).lean().exec();
     return allNotes;
   } catch (error: any) {
     throw new Error(error, { cause: 'getAllNotesService' });
