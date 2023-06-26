@@ -1,10 +1,18 @@
 import type { Request } from 'express';
 import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from './auth';
+import { UserRoles } from '../user';
 
 interface CreateNewNoteRequest extends RequestAfterJWTVerification {
   body: {
-    user: Types.ObjectId;
+    // userInfo object is decoded from the JWT in the auth middleware: verifyJWT.ts
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    // below are the fields required to be sent with post request
+    // user: Types.ObjectId;
     title: string;
     text: string;
   };
@@ -26,8 +34,15 @@ interface GetNotesFromUserIdRequest extends RequestAfterJWTVerification {
 }
 interface UpdateNoteRequest extends RequestAfterJWTVerification {
   body: {
-    id: Types.ObjectId;
-    user: Types.ObjectId;
+    // userInfo object is decoded from the JWT in the auth middleware: verifyJWT.ts
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    // below are the fields required to be sent with post request
+    postId: Types.ObjectId;
+    // user: Types.ObjectId;
     title: string;
     text: string;
     completed: boolean;
