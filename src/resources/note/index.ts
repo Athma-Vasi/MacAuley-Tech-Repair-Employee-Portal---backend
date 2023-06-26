@@ -1,9 +1,9 @@
 /**
- * This index file is used to import and export note resources.
+ * This index file is used to import/export note model, router, types, handlers and services
  */
 
 /**
- * Import all the note resources.
+ * Imports
  */
 import { NoteModel } from './note.model';
 import { noteRouter } from './note.routes';
@@ -34,7 +34,7 @@ import type {
 } from './note.types';
 
 /**
- * Export all the note resources.
+ * Exports
  */
 export {
   NoteModel,

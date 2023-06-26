@@ -29,6 +29,8 @@ interface DeletePrinterIssueRequest extends RequestAfterJWTVerification {
   };
 }
 
+type DeleteAllPrinterIssuesRequest = RequestAfterJWTVerification;
+
 type GetAllPrinterIssuesRequest = RequestAfterJWTVerification;
 
 interface GetAPrinterIssueRequest extends RequestAfterJWTVerification {
@@ -42,6 +44,7 @@ type GetPrinterIssuesFromUserRequest = RequestAfterJWTVerification;
 export type {
   CreateNewPrinterIssueRequest,
   DeletePrinterIssueRequest,
+  DeleteAllPrinterIssuesRequest,
   GetAllPrinterIssuesRequest,
   GetAPrinterIssueRequest,
   GetPrinterIssuesFromUserRequest,

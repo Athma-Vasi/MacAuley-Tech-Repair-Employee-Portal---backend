@@ -2,7 +2,7 @@ import { Schema, model, Types } from 'mongoose';
 
 import type { ActionsGeneral } from '../actionsGeneral.types';
 
-type AnonymousRequestType =
+type AnonymousRequestKind =
   | 'workplace safety'
   | 'employee conflict'
   | 'workplace harassment'
@@ -18,7 +18,7 @@ type AnonymousRequestSchema = {
   title: ActionsGeneral;
   secureContactNumber: string;
   secureContactEmail: string;
-  requestType: AnonymousRequestType;
+  requestKind: AnonymousRequestKind;
   requestDescription: string;
   additionalInformation: string;
   urgency: AnonymousRequestUrgency;
@@ -56,9 +56,9 @@ const anonymousRequestSchema = new Schema<AnonymousRequestSchema>(
       type: String,
       required: [true, 'SecureContactEmail is required'],
     },
-    requestType: {
+    requestKind: {
       type: String,
-      required: [true, 'RequestType is required'],
+      required: [true, 'RequestKind is required'],
     },
     requestDescription: {
       type: String,
@@ -87,6 +87,6 @@ export { AnonymousRequestModel };
 export type {
   AnonymousRequestDocument,
   AnonymousRequestSchema,
-  AnonymousRequestType,
+  AnonymousRequestKind,
   AnonymousRequestUrgency,
 };

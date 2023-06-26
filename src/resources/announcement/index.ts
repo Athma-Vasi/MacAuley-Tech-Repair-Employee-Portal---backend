@@ -1,9 +1,9 @@
 /**
- * this index file is used to import and export announcement resources
+ * This index file is used to import/export announcement model, router, types, handlers and services
  */
 
 /**
- * import all announcement resources
+ * Imports
  */
 import { AnnouncementModel } from './announcement.model';
 import { announcementRouter } from './announcement.routes';
@@ -39,7 +39,7 @@ import type {
 } from './announcement.types';
 
 /**
- * export all announcement resources
+ * Exports
  */
 export {
   AnnouncementModel,

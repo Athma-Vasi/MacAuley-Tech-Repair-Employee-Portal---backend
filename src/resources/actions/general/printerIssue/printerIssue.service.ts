@@ -1,4 +1,5 @@
 import type { FlattenMaps, Types } from 'mongoose';
+import type { DeleteResult } from 'mongodb';
 import type { PrinterIssueDocument, PrinterIssueUrgency } from './printerIssue.model';
 import type { ActionsGeneral } from '../actionsGeneral.types';
 
@@ -85,10 +86,20 @@ async function getPrinterIssuesFromUserService(userId: Types.ObjectId): Promise<
   }
 }
 
+async function deleteAllPrinterIssuesService(): Promise<DeleteResult> {
+  try {
+    const deletedPrinterIssues = await PrinterIssueModel.deleteMany({}).lean().exec();
+    return deletedPrinterIssues;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'deleteAllPrinterIssuesService' });
+  }
+}
+
 export {
   createNewPrinterIssueService,
   getAllPrinterIssuesService,
   deletePrinterIssueService,
+  deleteAllPrinterIssuesService,
   getAPrinterIssueService,
   getPrinterIssuesFromUserService,
 };

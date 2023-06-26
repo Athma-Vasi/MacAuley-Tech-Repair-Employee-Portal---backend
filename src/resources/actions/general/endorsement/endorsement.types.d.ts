@@ -26,6 +26,8 @@ interface DeleteEndorsementRequest extends RequestAfterJWTVerification {
   };
 }
 
+type DeleteAllEndorsementsRequest = RequestAfterJWTVerification;
+
 type GetAllEndorsementsRequest = RequestAfterJWTVerification;
 
 interface GetAnEndorsementRequest extends RequestAfterJWTVerification {
@@ -39,6 +41,7 @@ type GetEndorsementsFromUserRequest = RequestAfterJWTVerification;
 export type {
   CreateNewEndorsementRequest,
   DeleteEndorsementRequest,
+  DeleteAllEndorsementsRequest,
   GetAllEndorsementsRequest,
   GetAnEndorsementRequest,
   GetEndorsementsFromUserRequest,

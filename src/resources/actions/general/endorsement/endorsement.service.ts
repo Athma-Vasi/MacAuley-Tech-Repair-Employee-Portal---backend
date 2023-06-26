@@ -1,8 +1,9 @@
 import type { FlattenMaps, Types } from 'mongoose';
+import type { DeleteResult } from 'mongodb';
 import type { EmployeeAttributes, EndorsementDocument } from './endorsement.model';
+import type { ActionsGeneral } from '../../general';
 
 import { EndorsementModel } from './endorsement.model';
-import { ActionsGeneral } from '../actionsGeneral.types';
 
 type CreateNewEndorsementInput = {
   userId: Types.ObjectId;
@@ -84,9 +85,19 @@ async function getEndorsementsByUserService(userId: Types.ObjectId): Promise<
   }
 }
 
+async function deleteAllEndorsementsService(): Promise<DeleteResult> {
+  try {
+    const deletedEndorsements = await EndorsementModel.deleteMany({}).lean().exec();
+    return deletedEndorsements;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'deleteAllEndorsementsService' });
+  }
+}
+
 export {
   createNewEndorsementService,
   deleteEndorsementService,
+  deleteAllEndorsementsService,
   getAllEndorsementsService,
   getEndorsementsByUserService,
   getAnEndorsementService,

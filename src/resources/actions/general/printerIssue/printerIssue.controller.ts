@@ -7,9 +7,12 @@ import type {
   DeletePrinterIssueRequest,
   GetAPrinterIssueRequest,
   GetPrinterIssuesFromUserRequest,
+  DeleteAllPrinterIssuesRequest,
 } from './printerIssue.types';
+
 import {
   createNewPrinterIssueService,
+  deleteAllPrinterIssuesService,
   deletePrinterIssueService,
   getAPrinterIssueService,
   getAllPrinterIssuesService,
@@ -52,12 +55,12 @@ const createNewPrinterIssueHandler = expressAsyncHandler(
     if (newPrinterIssue) {
       response.status(201).json({
         message: 'Printer issue created successfully',
-        printerIssue: newPrinterIssue,
+        printerIssueData: [newPrinterIssue],
       });
     } else {
       response
         .status(400)
-        .json({ message: 'Printer issue could not be created', printerIssue: {} });
+        .json({ message: 'Printer issue could not be created', printerIssueData: [] });
     }
   }
 );
@@ -67,11 +70,24 @@ const createNewPrinterIssueHandler = expressAsyncHandler(
 // @access Private
 const getAllPrinterIssuesHandler = expressAsyncHandler(
   async (request: GetAllPrinterIssuesRequest, response: Response) => {
+    // only managers/admins can view all printer issues
+    const {
+      userInfo: { roles },
+    } = request.body;
+    if (!roles.includes('Manager') && !roles.includes('Admin')) {
+      response.status(403).json({
+        message: 'Only managers and admins can get all printer issues',
+        printerIssueData: [],
+      });
+      return;
+    }
     const printerIssues = await getAllPrinterIssuesService();
     if (printerIssues.length === 0) {
       response.status(404).json({ message: 'No printer issues found', printerIssues: [] });
     } else {
-      response.status(200).json({ message: 'Printer issues found', printerIssues });
+      response
+        .status(200)
+        .json({ message: 'Printer issues found', printerIssueData: [printerIssues] });
     }
   }
 );
@@ -81,15 +97,29 @@ const getAllPrinterIssuesHandler = expressAsyncHandler(
 // @access Private
 const deletePrinterIssueHandler = expressAsyncHandler(
   async (request: DeletePrinterIssueRequest, response: Response) => {
+    // only managers/admins can delete a printer issue
+    const {
+      userInfo: { roles },
+    } = request.body;
+    if (!roles.includes('Manager') && !roles.includes('Admin')) {
+      response.status(403).json({
+        message: 'Only managers and admins can delete a printer issue',
+        printerIssueData: [],
+      });
+      return;
+    }
+
     const { printerIssueId } = request.params;
     const printerIssue = await deletePrinterIssueService(printerIssueId);
 
     if (printerIssue) {
-      response.status(200).json({ message: 'Printer issue deleted successfully', printerIssue });
+      response
+        .status(200)
+        .json({ message: 'Printer issue deleted successfully', printerIssueData: [printerIssue] });
     } else {
       response
         .status(400)
-        .json({ message: 'Printer issue could not be deleted', printerIssue: {} });
+        .json({ message: 'Printer issue could not be deleted', printerIssueData: [] });
     }
   }
 );
@@ -99,13 +129,27 @@ const deletePrinterIssueHandler = expressAsyncHandler(
 // @access Private
 const getAPrinterIssueHandler = expressAsyncHandler(
   async (request: GetAPrinterIssueRequest, response: Response) => {
+    // only managers/admins can view a printer issue not belonging to them
+    const {
+      userInfo: { roles },
+    } = request.body;
+    if (!roles.includes('Manager') && !roles.includes('Admin')) {
+      response.status(403).json({
+        message: 'Only managers and admins can view a printer issue not belonging to them',
+        printerIssueData: [],
+      });
+      return;
+    }
+
     const { printerIssueId } = request.params;
     const printerIssue = await getAPrinterIssueService(printerIssueId);
 
     if (printerIssue) {
-      response.status(200).json({ message: 'Printer issue found', printerIssue });
+      response
+        .status(200)
+        .json({ message: 'Printer issue found', printerIssueData: [printerIssue] });
     } else {
-      response.status(404).json({ message: 'Printer issue not found', printerIssue: {} });
+      response.status(404).json({ message: 'Printer issue not found', printerIssueData: [] });
     }
   }
 );
@@ -115,14 +159,50 @@ const getAPrinterIssueHandler = expressAsyncHandler(
 // @access Private
 const getPrinterIssuesByUserHandler = expressAsyncHandler(
   async (request: GetPrinterIssuesFromUserRequest, response: Response) => {
+    // anyone can view their own printer issues
     const {
       userInfo: { userId },
     } = request.body;
+
     const printerIssues = await getPrinterIssuesFromUserService(userId);
     if (printerIssues.length === 0) {
-      response.status(404).json({ message: 'No printer issues found', printerIssues: [] });
+      response.status(404).json({ message: 'No printer issues found', printerIssueData: [] });
     } else {
-      response.status(200).json({ message: 'Printer issues found', printerIssues });
+      response
+        .status(200)
+        .json({ message: 'Printer issues found', printerIssueData: [printerIssues] });
+    }
+  }
+);
+
+// @desc   Delete all printer issues
+// @route  DELETE /printerIssues
+// @access Private
+const deleteAllPrinterIssuesHandler = expressAsyncHandler(
+  async (request: DeleteAllPrinterIssuesRequest, response: Response) => {
+    // only managers/admin can delete all printer issues
+    const {
+      userInfo: { roles },
+    } = request.body;
+    if (!roles.includes('Manager') && !roles.includes('Admin')) {
+      response.status(403).json({
+        message: 'Only managers and admins can delete all printer issues',
+        printerIssueData: [],
+      });
+      return;
+    }
+
+    const printerIssues = await deleteAllPrinterIssuesService();
+
+    if (printerIssues.acknowledged) {
+      response.status(200).json({
+        message: 'All printer issues deleted successfully',
+        printerIssueData: [],
+      });
+    } else {
+      response
+        .status(400)
+        .json({ message: 'Printer issues could not be deleted', printerIssueData: [] });
     }
   }
 );
@@ -131,6 +211,7 @@ export {
   createNewPrinterIssueHandler,
   getAllPrinterIssuesHandler,
   deletePrinterIssueHandler,
+  deleteAllPrinterIssuesHandler,
   getAPrinterIssueHandler,
   getPrinterIssuesByUserHandler,
 };

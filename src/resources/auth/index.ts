@@ -1,9 +1,9 @@
 /**
- * This index file is used to import and export auth resources.
+ * This index file is used to import/export auth model, router, types, handlers and services
  */
 
 /**
- * Import all the auth resources.
+ * Imports
  */
 import { authRouter } from './auth.routes';
 import { loginUserHandler, logoutUserHandler, refreshTokenHandler } from './auth.controller';
@@ -16,7 +16,7 @@ import type {
 } from './auth.types';
 
 /**
- * Export all the auth resources.
+ * Exports
  */
 export { authRouter, loginUserHandler, logoutUserHandler, refreshTokenHandler };
 export type {

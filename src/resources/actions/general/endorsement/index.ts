@@ -1,9 +1,9 @@
 /**
- * this index file is used to import/export endorsement resources
+ * this index file is used to import/export endorsement model, router, types, handlers and services
  */
 
 /**
- * import endorsement resources
+ * imports
  */
 import { endorsementRouter } from './endorsement.routes';
 import { EndorsementModel } from './endorsement.model';
@@ -22,7 +22,7 @@ import type {
 } from './endorsement.types';
 
 /**
- * export endorsement resources
+ * exports
  */
 export { endorsementRouter, EndorsementModel };
 export type {

@@ -1,9 +1,9 @@
 /**
- * This index -file is used to import and export user resources.
+ * This index -file is used to import/export user model, router, types, handlers and services
  */
 
 /**
- * Import all the user resources.
+ * Imports
  */
 import { UserModel } from './user.model';
 import { userRouter } from './user.routes';
@@ -34,7 +34,7 @@ import type {
 } from './user.types';
 
 /**
- * Export all the user resources.
+ * Exports
  */
 export {
   UserModel,

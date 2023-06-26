@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   createNewPrinterIssueHandler,
+  deleteAllPrinterIssuesHandler,
   deletePrinterIssueHandler,
   getAPrinterIssueHandler,
   getAllPrinterIssuesHandler,
@@ -9,7 +10,11 @@ import {
 
 const printerIssueRouter = Router();
 
-printerIssueRouter.route('/').get(getAllPrinterIssuesHandler).post(createNewPrinterIssueHandler);
+printerIssueRouter
+  .route('/')
+  .get(getAllPrinterIssuesHandler)
+  .post(createNewPrinterIssueHandler)
+  .delete(deleteAllPrinterIssuesHandler);
 
 printerIssueRouter.route('/user').get(getPrinterIssuesByUserHandler);
 

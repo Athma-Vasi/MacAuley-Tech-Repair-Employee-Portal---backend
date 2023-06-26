@@ -25,7 +25,7 @@ interface CreateNewAnnouncementRequest extends RequestAfterJWTVerification {
   };
 }
 
-interface DeleteAnnouncementRequest extends RequestAfterJWTVerification {
+interface DeleteAnAnnouncementRequest extends RequestAfterJWTVerification {
   params: {
     id: Types.ObjectId;
   };
@@ -71,7 +71,7 @@ interface GetAllAnnouncementsReturn {}
 export type {
   // announcement requests
   CreateNewAnnouncementRequest,
-  DeleteAnnouncementRequest,
+  DeleteAnAnnouncementRequest,
   GetAllAnnouncementsRequest,
   UpdateAnnouncementRequest,
   GetAnnouncementsFromUserIdRequest,
