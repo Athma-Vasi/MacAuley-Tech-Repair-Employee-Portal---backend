@@ -1,25 +1,41 @@
 import type { FlattenMaps, Types } from 'mongoose';
+import type { DeleteResult } from 'mongodb';
 import type { AnnouncementSchema, RatingFeel } from './announcement.model';
 
 import { AnnouncementModel } from './announcement.model';
 
 type CheckAnnouncementExistsServiceInput = {
-  id?: Types.ObjectId;
+  announcementId?: Types.ObjectId;
   title?: string;
-  user?: Types.ObjectId;
+  userId?: Types.ObjectId;
 };
 
 async function checkAnnouncementExistsService({
-  id,
+  announcementId,
   title,
-  user,
+  userId,
 }: CheckAnnouncementExistsServiceInput): Promise<boolean> {
   try {
-    const announcement = await AnnouncementModel.findOne({
-      $or: [{ _id: id }, { title }, { user }],
-    }).lean();
+    // const announcement = await AnnouncementModel.findOne({
+    //   $or: [{ _id: id }, { title }, { user }],
+    // }).lean();
 
-    return announcement ? true : false;
+    if (announcementId) {
+      const announcement = await AnnouncementModel.findById(announcementId).lean().exec();
+      return announcement ? true : false;
+    }
+
+    if (title) {
+      const announcement = await AnnouncementModel.find({ title }).lean().exec();
+      return announcement.length > 0 ? true : false;
+    }
+
+    if (userId) {
+      const announcement = await AnnouncementModel.findById(userId).lean().exec();
+      return announcement ? true : false;
+    }
+
+    return false;
   } catch (error: any) {
     throw new Error(error, { cause: 'checkAnnouncementExistsService' });
   }
@@ -97,6 +113,7 @@ async function getAnnouncementsByUserService(user: Types.ObjectId): Promise<
 }
 
 type UpdateAnnouncementServiceInput = {
+  announcementId: Types.ObjectId;
   userId: Types.ObjectId;
   title: string;
   username: string;
@@ -111,6 +128,7 @@ type UpdateAnnouncementServiceInput = {
 };
 
 async function updateAnnouncementService({
+  announcementId,
   userId,
   title,
   username,
@@ -122,6 +140,7 @@ async function updateAnnouncementService({
 }: UpdateAnnouncementServiceInput) {
   try {
     const announcementFieldsToUpdateObj = {
+      userId,
       title,
       username,
       imageSrc,
@@ -132,7 +151,7 @@ async function updateAnnouncementService({
     };
 
     const announcement = await AnnouncementModel.findByIdAndUpdate(
-      userId,
+      announcementId,
       announcementFieldsToUpdateObj,
       { new: true }
     )
@@ -162,11 +181,31 @@ async function getAllAnnouncementsService(): Promise<
   }
 }
 
+async function deleteAllAnnouncementsService(): Promise<DeleteResult> {
+  try {
+    const deletedResult = await AnnouncementModel.deleteMany({}).lean().exec();
+    return deletedResult;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'deleteAllAnnouncementsService' });
+  }
+}
+
+async function getAnnouncementByIdService(announcementId: Types.ObjectId) {
+  try {
+    const announcement = await AnnouncementModel.findById(announcementId).lean().exec();
+    return announcement;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getAnnouncementByIdService' });
+  }
+}
+
 export {
   checkAnnouncementExistsService,
   createNewAnnouncementService,
   deleteAnnouncementService,
+  deleteAllAnnouncementsService,
   getAnnouncementsByUserService,
   updateAnnouncementService,
   getAllAnnouncementsService,
+  getAnnouncementByIdService,
 };

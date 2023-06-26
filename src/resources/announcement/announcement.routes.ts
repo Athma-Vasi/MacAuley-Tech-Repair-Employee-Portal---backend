@@ -7,6 +7,8 @@ import {
   getAllAnnouncementsHandler,
   updateAnnouncementHandler,
   getAnnouncementsByUserHandler,
+  deleteAllAnnouncementsHandler,
+  getAnnouncementByIdHandler,
 } from './announcement.controller';
 
 const announcementRouter = Router();
@@ -18,8 +20,13 @@ announcementRouter
   .route('/')
   .get(getAllAnnouncementsHandler)
   .post(createNewAnnouncementHandler)
-  .put(updateAnnouncementHandler)
-  .delete(deleteAnnouncementHandler);
+  .delete(deleteAllAnnouncementsHandler);
 
 announcementRouter.route('/user').get(getAnnouncementsByUserHandler);
+
+announcementRouter
+  .route('/:announcementId')
+  .get(getAnnouncementByIdHandler)
+  .delete(deleteAnnouncementHandler)
+  .put(updateAnnouncementHandler);
 export { announcementRouter };

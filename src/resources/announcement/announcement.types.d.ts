@@ -1,6 +1,6 @@
 import type { Request } from 'express';
 import type { Types } from 'mongoose';
-import type { RequestAfterJWTVerification } from './auth';
+import type { RequestAfterJWTVerification } from '../auth';
 import type { RatingFeel, AnnouncementDocument } from './announcement.model';
 import type { UserRoles } from '../user';
 
@@ -37,6 +37,17 @@ type GetAllAnnouncementsRequest = RequestAfterJWTVerification;
 
 type GetAnnouncementsByUserRequest = RequestAfterJWTVerification;
 
+interface GetAnAnnouncementRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    announcementId: Types.ObjectId;
+  };
+}
+
 interface UpdateAnnouncementRequest extends RequestAfterJWTVerification {
   // userInfo object is decoded from the JWT in the auth middleware: verifyJWT.ts
   body: {
@@ -45,7 +56,6 @@ interface UpdateAnnouncementRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    announcementId: Types.ObjectId;
     title: string;
     imageSrc: string;
     imageAlt: string;
@@ -55,6 +65,9 @@ interface UpdateAnnouncementRequest extends RequestAfterJWTVerification {
       feel: RatingFeel;
       count: number;
     };
+  };
+  params: {
+    announcementId: Types.ObjectId;
   };
 }
 
@@ -66,8 +79,10 @@ type AnnouncementsServerResponse = {
 export type {
   CreateNewAnnouncementRequest,
   DeleteAnAnnouncementRequest,
+  DeleteAllAnnouncementsRequest,
   GetAllAnnouncementsRequest,
   UpdateAnnouncementRequest,
   GetAnnouncementsByUserRequest,
+  GetAnAnnouncementRequest,
   AnnouncementsServerResponse,
 };
