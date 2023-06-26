@@ -2,12 +2,16 @@ import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
 import type { ActionsGeneral } from '../actionsGeneral.types';
 import type { PrinterIssueUrgency } from './printerIssue.model';
+import { UserRoles } from '../../../user';
 
 interface CreateNewPrinterIssueRequest extends RequestAfterJWTVerification {
   body: {
-    userId: Types.ObjectId;
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
     title: ActionsGeneral;
-    username: string;
     contactNumber: string;
     contactEmail: string;
     printerMake: string;
@@ -18,3 +22,27 @@ interface CreateNewPrinterIssueRequest extends RequestAfterJWTVerification {
     additionalInformation: string;
   };
 }
+
+interface DeletePrinterIssueRequest extends RequestAfterJWTVerification {
+  params: {
+    printerIssueId: Types.ObjectId;
+  };
+}
+
+type GetAllPrinterIssuesRequest = RequestAfterJWTVerification;
+
+interface GetAPrinterIssueRequest extends RequestAfterJWTVerification {
+  params: {
+    printerIssueId: Types.ObjectId;
+  };
+}
+
+type GetPrinterIssuesFromUserRequest = RequestAfterJWTVerification;
+
+export type {
+  CreateNewPrinterIssueRequest,
+  DeletePrinterIssueRequest,
+  GetAllPrinterIssuesRequest,
+  GetAPrinterIssueRequest,
+  GetPrinterIssuesFromUserRequest,
+};

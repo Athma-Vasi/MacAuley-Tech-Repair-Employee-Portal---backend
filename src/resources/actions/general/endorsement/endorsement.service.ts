@@ -2,38 +2,21 @@ import type { FlattenMaps, Types } from 'mongoose';
 import type { EmployeeAttributes, EndorsementDocument } from './endorsement.model';
 
 import { EndorsementModel } from './endorsement.model';
+import { ActionsGeneral } from '../actionsGeneral.types';
 
 type CreateNewEndorsementInput = {
   userId: Types.ObjectId;
   section: 'company' | 'general';
-  title: 'endorsement';
+  title: ActionsGeneral;
   username: string;
   userToBeEndorsed: string;
   summaryOfEndorsement: string;
   attributeEndorsed: EmployeeAttributes;
 };
 
-async function createNewEndorsementService({
-  userId,
-  section,
-  title,
-  username,
-  userToBeEndorsed,
-  summaryOfEndorsement,
-  attributeEndorsed,
-}: CreateNewEndorsementInput) {
+async function createNewEndorsementService(input: CreateNewEndorsementInput) {
   try {
-    const newEndorsementObject = {
-      userId,
-      section,
-      title,
-      username,
-      userToBeEndorsed,
-      summaryOfEndorsement,
-      attributeEndorsed,
-    };
-
-    const newEndorsement = await EndorsementModel.create(newEndorsementObject);
+    const newEndorsement = await EndorsementModel.create(input);
 
     return newEndorsement;
   } catch (error: any) {
@@ -87,14 +70,14 @@ async function getAnEndorsementService(id: Types.ObjectId): Promise<
   }
 }
 
-async function getEndorsementsByUserService(user: Types.ObjectId): Promise<
+async function getEndorsementsByUserService(userId: Types.ObjectId): Promise<
   (FlattenMaps<EndorsementDocument> &
     Required<{
       _id: Types.ObjectId;
     }>)[]
 > {
   try {
-    const endorsements = await EndorsementModel.find({ user }).lean().exec();
+    const endorsements = await EndorsementModel.find({ userId }).lean().exec();
     return endorsements;
   } catch (error: any) {
     throw new Error(error, { cause: 'getEndorsementsByUserService' });

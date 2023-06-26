@@ -22,21 +22,19 @@ interface CreateNewEndorsementRequest extends RequestAfterJWTVerification {
 
 interface DeleteEndorsementRequest extends RequestAfterJWTVerification {
   params: {
-    id: Types.ObjectId;
+    endorsementId: Types.ObjectId;
   };
 }
 
-// rome-ignore lint/suspicious/noEmptyInterface: <explanation>
-interface GetAllEndorsementsRequest extends RequestAfterJWTVerification {}
+type GetAllEndorsementsRequest = RequestAfterJWTVerification;
 
 interface GetAnEndorsementRequest extends RequestAfterJWTVerification {
   params: {
-    id: Types.ObjectId;
+    endorsementId: Types.ObjectId;
   };
 }
 
-// rome-ignore lint/suspicious/noEmptyInterface: <explanation>
-interface GetEndorsementsFromUserRequest extends RequestAfterJWTVerification {}
+type GetEndorsementsFromUserRequest = RequestAfterJWTVerification;
 
 export type {
   CreateNewEndorsementRequest,

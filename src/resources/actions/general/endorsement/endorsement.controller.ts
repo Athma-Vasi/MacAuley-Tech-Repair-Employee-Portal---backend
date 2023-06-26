@@ -1,5 +1,4 @@
 import expressAsyncHandler from 'express-async-handler';
-import { EndorsementModel } from './endorsement.model';
 import {
   createNewEndorsementService,
   deleteEndorsementService,
@@ -78,7 +77,7 @@ const getAllEndorsementsHandler = expressAsyncHandler(
 // @access Private
 const getAnEndorsementHandler = expressAsyncHandler(
   async (request: GetAnEndorsementRequest, response: Response) => {
-    const { id: endorsementId } = request.params;
+    const { endorsementId } = request.params;
 
     const endorsement = await getAnEndorsementService(endorsementId);
     if (endorsement) {
@@ -118,7 +117,7 @@ const getEndorsementsByUserHandler = expressAsyncHandler(
 // @access Private
 const deleteEndorsementHandler = expressAsyncHandler(
   async (request: DeleteEndorsementRequest, response: Response) => {
-    const { id: endorsementId } = request.params;
+    const { endorsementId } = request.params;
 
     const deletedEndorsement = await deleteEndorsementService(endorsementId);
     if (deletedEndorsement) {
