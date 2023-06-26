@@ -6,7 +6,7 @@ import type {
   DeleteAnAnnouncementRequest,
   GetAllAnnouncementsRequest,
   UpdateAnnouncementRequest,
-  GetAnnouncementsFromUserIdRequest,
+  GetAnnouncementsByUserRequest,
 } from './announcement.types';
 
 import {
@@ -50,8 +50,10 @@ const getAllAnnouncementsHandler = expressAsyncHandler(
 // @route  GET /announcement/:userId
 // @access Private
 const getAnnouncementsByUserHandler = expressAsyncHandler(
-  async (request: GetAnnouncementsFromUserIdRequest, response: Response) => {
-    const { userId } = request.params;
+  async (request: GetAnnouncementsByUserRequest, response: Response) => {
+    const {
+      userInfo: { userId },
+    } = request.body;
 
     // check if user exists
     const isUser = await getUserByIdService(userId);

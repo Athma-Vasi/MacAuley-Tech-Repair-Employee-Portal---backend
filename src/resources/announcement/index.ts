@@ -34,7 +34,7 @@ import type {
   DeleteAnAnnouncementRequest,
   GetAllAnnouncementsRequest,
   UpdateAnnouncementRequest,
-  GetAnnouncementsFromUserIdRequest,
+  GetAnnouncementsByUserRequest,
   AnnouncementsServerResponse,
 } from './announcement.types';
 
@@ -66,6 +66,6 @@ export type {
   DeleteAnAnnouncementRequest,
   GetAllAnnouncementsRequest,
   UpdateAnnouncementRequest,
-  GetAnnouncementsFromUserIdRequest,
+  GetAnnouncementsByUserRequest,
   AnnouncementsServerResponse,
 };

@@ -2,9 +2,10 @@ import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
 import type { ActionsGeneral } from '../actionsGeneral.types';
 import type { PrinterIssueUrgency, PrinterIssueDocument } from './printerIssue.model';
-import { UserRoles } from '../../../user';
+import type { UserRoles } from '../../../user';
 
 interface CreateNewPrinterIssueRequest extends RequestAfterJWTVerification {
+  // userInfo object is decoded from the JWT in the auth middleware: verifyJWT.ts
   body: {
     userInfo: {
       userId: Types.ObjectId;

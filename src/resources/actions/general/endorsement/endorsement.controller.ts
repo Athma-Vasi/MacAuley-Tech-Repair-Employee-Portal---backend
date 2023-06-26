@@ -17,6 +17,7 @@ import type {
   GetAnEndorsementRequest,
   GetEndorsementsFromUserRequest,
 } from './endorsement.types';
+import { getUserByIdService } from '../../../user';
 
 // @desc   Create new endorsement
 // @route  POST /endorsements
@@ -130,6 +131,13 @@ const getEndorsementsByUserHandler = expressAsyncHandler(
     const {
       userInfo: { userId },
     } = request.body;
+
+    // check if user exists
+    const isUser = await getUserByIdService(userId);
+    if (!isUser) {
+      response.status(400).json({ message: 'User does not exist' });
+      return;
+    }
 
     const endorsements = await getEndorsementsByUserService(userId);
     if (endorsements.length === 0) {

@@ -18,6 +18,7 @@ import {
   getAllPrinterIssuesService,
   getPrinterIssuesFromUserService,
 } from './printerIssue.service';
+import { getUserByIdService } from '../../../user';
 
 // @desc   Create new printer issue
 // @route  POST /printerIssues
@@ -163,6 +164,13 @@ const getPrinterIssuesByUserHandler = expressAsyncHandler(
     const {
       userInfo: { userId },
     } = request.body;
+
+    // check if user exists
+    const isUser = await getUserByIdService(userId);
+    if (!isUser) {
+      response.status(400).json({ message: 'User does not exist' });
+      return;
+    }
 
     const printerIssues = await getPrinterIssuesFromUserService(userId);
     if (printerIssues.length === 0) {

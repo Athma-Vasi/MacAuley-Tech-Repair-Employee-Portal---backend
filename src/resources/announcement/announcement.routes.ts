@@ -21,5 +21,5 @@ announcementRouter
   .put(updateAnnouncementHandler)
   .delete(deleteAnnouncementHandler);
 
-announcementRouter.route('/:userId').get(getAnnouncementsByUserHandler);
+announcementRouter.route('/user').get(getAnnouncementsByUserHandler);
 export { announcementRouter };

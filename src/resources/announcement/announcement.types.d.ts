@@ -27,7 +27,7 @@ interface CreateNewAnnouncementRequest extends RequestAfterJWTVerification {
 
 interface DeleteAnAnnouncementRequest extends RequestAfterJWTVerification {
   params: {
-    id: Types.ObjectId;
+    announcementId: Types.ObjectId;
   };
 }
 
@@ -35,20 +35,17 @@ type DeleteAllAnnouncementsRequest = RequestAfterJWTVerification;
 
 type GetAllAnnouncementsRequest = RequestAfterJWTVerification;
 
-interface GetAnnouncementsFromUserIdRequest extends RequestAfterJWTVerification {
-  params: {
-    userId: Types.ObjectId;
-  };
-}
+type GetAnnouncementsByUserRequest = RequestAfterJWTVerification;
 
 interface UpdateAnnouncementRequest extends RequestAfterJWTVerification {
+  // userInfo object is decoded from the JWT in the auth middleware: verifyJWT.ts
   body: {
     userInfo: {
       userId: Types.ObjectId;
       username: string;
       roles: UserRoles;
     };
-    id: Types.ObjectId; // id of announcement to update
+    announcementId: Types.ObjectId;
     title: string;
     imageSrc: string;
     imageAlt: string;
@@ -71,6 +68,6 @@ export type {
   DeleteAnAnnouncementRequest,
   GetAllAnnouncementsRequest,
   UpdateAnnouncementRequest,
-  GetAnnouncementsFromUserIdRequest,
+  GetAnnouncementsByUserRequest,
   AnnouncementsServerResponse,
 };
