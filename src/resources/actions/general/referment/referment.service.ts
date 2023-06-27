@@ -2,6 +2,7 @@ import type { FlattenMaps, Types } from 'mongoose';
 import type { DeleteResult } from 'mongodb';
 
 import { RefermentDocument, RefermentModel } from './referment.model';
+import { DatabaseResponse, DatabaseResponseNullable } from '../../../../types';
 
 type CheckRefermentExistsServiceInput = {
   refermentId?: Types.ObjectId;
@@ -62,13 +63,9 @@ async function createNewRefermentService(input: CreateNewRefermentServiceInput) 
   }
 }
 
-async function deleteARefermentService(refermentId: Types.ObjectId): Promise<
-  | (FlattenMaps<RefermentDocument> &
-      Required<{
-        _id: Types.ObjectId;
-      }>)
-  | null
-> {
+async function deleteARefermentService(
+  refermentId: Types.ObjectId
+): DatabaseResponseNullable<RefermentDocument> {
   try {
     const deleteResult = await RefermentModel.findByIdAndDelete(refermentId).lean().exec();
     return deleteResult;
@@ -86,12 +83,7 @@ async function deleteAllRefermentsService(): Promise<DeleteResult> {
   }
 }
 
-async function getAllRefermentsService(): Promise<
-  (FlattenMaps<RefermentDocument> &
-    Required<{
-      _id: Types.ObjectId;
-    }>)[]
-> {
+async function getAllRefermentsService(): DatabaseResponse<RefermentDocument> {
   try {
     const referments = await RefermentModel.find({}).lean().exec();
     return referments;
@@ -100,13 +92,9 @@ async function getAllRefermentsService(): Promise<
   }
 }
 
-async function getARefermentService(refermentId: Types.ObjectId): Promise<
-  | (FlattenMaps<RefermentDocument> &
-      Required<{
-        _id: Types.ObjectId;
-      }>)
-  | null
-> {
+async function getARefermentService(
+  refermentId: Types.ObjectId
+): DatabaseResponseNullable<RefermentDocument> {
   try {
     const referment = await RefermentModel.findById(refermentId).lean().exec();
     return referment;
@@ -115,12 +103,9 @@ async function getARefermentService(refermentId: Types.ObjectId): Promise<
   }
 }
 
-async function getRefermentsByUserService(userId: Types.ObjectId): Promise<
-  (FlattenMaps<RefermentDocument> &
-    Required<{
-      _id: Types.ObjectId;
-    }>)[]
-> {
+async function getRefermentsByUserService(
+  userId: Types.ObjectId
+): DatabaseResponse<RefermentDocument> {
   try {
     const referments = await RefermentModel.find({ referrerUserId: userId }).lean().exec();
     return referments;
@@ -148,13 +133,9 @@ type UpdateRefermentServiceInput = {
   privacyConsent: boolean;
 };
 
-async function updateARefermentService(input: UpdateRefermentServiceInput): Promise<
-  | (FlattenMaps<RefermentDocument> &
-      Required<{
-        _id: Types.ObjectId;
-      }>)
-  | null
-> {
+async function updateARefermentService(
+  input: UpdateRefermentServiceInput
+): DatabaseResponseNullable<RefermentDocument> {
   try {
     const updatedReferment = await RefermentModel.findByIdAndUpdate(input.refermentId, input, {
       new: true,

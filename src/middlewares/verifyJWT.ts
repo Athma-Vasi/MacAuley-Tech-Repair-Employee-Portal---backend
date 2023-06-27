@@ -1,8 +1,11 @@
 import { NextFunction, Response } from 'express';
 import jwt from 'jsonwebtoken';
 
+import type { RequestAfterJWTVerification } from '../resources/auth';
+import type { UserRoles } from '../resources/user';
+import type { Types } from 'mongoose';
+
 import { config } from '../config';
-import { RequestAfterJWTVerification } from '../types';
 
 function verifyJWTMiddleware(
   // technically this request is only modified after this middleware function runs
@@ -25,7 +28,7 @@ function verifyJWTMiddleware(
     }
 
     const { userInfo } = decoded as {
-      userInfo: { username: string; userId: string; roles: ('Admin' | 'Employee' | 'Manager')[] };
+      userInfo: { username: string; userId: Types.ObjectId; roles: UserRoles };
     };
 
     request.body.userInfo = userInfo;
