@@ -38,22 +38,27 @@ const getAllAnnouncementsHandler = expressAsyncHandler(
       return;
     }
 
-    // add username to each announcement before sending response
-    const announcementsWithUsername = await Promise.all(
-      announcements.map(async (announcement) => {
-        const user = await getUserByIdService(announcement.userId);
+    // // add username to each announcement before sending response
+    // const announcementsWithUsername = await Promise.all(
+    //   announcements.map(async (announcement) => {
+    //     const user = await getUserByIdService(announcement.userId);
 
-        if (!user) {
-          return { ...announcement, username: 'unknown' };
-        }
+    //     if (!user) {
+    //       return { ...announcement, username: 'unknown' };
+    //     }
 
-        return { ...announcement, username: user?.username };
-      })
-    );
+    //     return { ...announcement, username: user?.username };
+    //   })
+    // );
+
+    // response.status(200).json({
+    //   message: 'Announcements found successfully',
+    //   announcementData: announcementsWithUsername,
+    // });
 
     response.status(200).json({
       message: 'Announcements found successfully',
-      announcementData: announcementsWithUsername,
+      announcementData: announcements,
     });
   }
 );
@@ -80,22 +85,27 @@ const getAnnouncementsByUserHandler = expressAsyncHandler(
       return;
     }
 
-    // add username to each announcement before sending response
-    const announcementsWithUsername = await Promise.all(
-      announcements.map(async (announcement) => {
-        const user = await getUserByIdService(announcement.userId);
+    // // add username to each announcement before sending response
+    // const announcementsWithUsername = await Promise.all(
+    //   announcements.map(async (announcement) => {
+    //     const user = await getUserByIdService(announcement.userId);
 
-        if (!user) {
-          return { ...announcement, username: 'unknown' };
-        }
+    //     if (!user) {
+    //       return { ...announcement, username: 'unknown' };
+    //     }
 
-        return { ...announcement, username: user?.username };
-      })
-    );
+    //     return { ...announcement, username: user?.username };
+    //   })
+    // );
+
+    // response.status(200).json({
+    //   message: 'Announcements found successfully',
+    //   announcementData: announcementsWithUsername,
+    // });
 
     response.status(200).json({
       message: 'Announcements found successfully',
-      announcementData: announcementsWithUsername,
+      announcementData: announcements,
     });
   }
 );
