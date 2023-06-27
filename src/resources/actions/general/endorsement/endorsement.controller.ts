@@ -35,6 +35,13 @@ const createNewEndorsementHandler = expressAsyncHandler(
       summaryOfEndorsement,
     } = request.body;
 
+    // check if user exists
+    const isUser = await getUserByIdService(userId);
+    if (!isUser) {
+      response.status(400).json({ message: 'User does not exist', endorsementData: [] });
+      return;
+    }
+
     const newEndorsementObject = {
       userId,
       section,
@@ -64,10 +71,18 @@ const createNewEndorsementHandler = expressAsyncHandler(
 // @access Private
 const getAllEndorsementsHandler = expressAsyncHandler(
   async (request: GetAllEndorsementsRequest, response: Response) => {
-    // only managers/admins can view all endorsements
     const {
-      userInfo: { roles },
+      userInfo: { roles, userId },
     } = request.body;
+
+    // check if user exists
+    const isUser = await getUserByIdService(userId);
+    if (!isUser) {
+      response.status(400).json({ message: 'User does not exist', endorsementData: [] });
+      return;
+    }
+
+    // only managers/admins can view all endorsements
     if (roles.includes('Employee')) {
       response.status(403).json({
         message: 'Only managers and admins can view all endorsements',
@@ -96,10 +111,18 @@ const getAllEndorsementsHandler = expressAsyncHandler(
 // @access Private
 const getAnEndorsementHandler = expressAsyncHandler(
   async (request: GetAnEndorsementRequest, response: Response) => {
-    // only managers/admins can view an endorsement by its id
     const {
-      userInfo: { roles },
+      userInfo: { roles, userId },
     } = request.body;
+
+    // check if user exists
+    const isUser = await getUserByIdService(userId);
+    if (!isUser) {
+      response.status(400).json({ message: 'User does not exist', endorsementData: [] });
+      return;
+    }
+
+    // only managers/admins can view an endorsement by its id
     if (roles.includes('Employee')) {
       response.status(403).json({
         message: 'Only managers and admins can view an endorsement not belonging to them',
@@ -137,7 +160,7 @@ const getEndorsementsByUserHandler = expressAsyncHandler(
     // check if user exists
     const isUser = await getUserByIdService(userId);
     if (!isUser) {
-      response.status(400).json({ message: 'User does not exist' });
+      response.status(400).json({ message: 'User does not exist', endorsementData: [] });
       return;
     }
 
@@ -158,10 +181,18 @@ const getEndorsementsByUserHandler = expressAsyncHandler(
 // @access Private
 const deleteEndorsementHandler = expressAsyncHandler(
   async (request: DeleteEndorsementRequest, response: Response) => {
-    // only managers/admins can delete an endorsement by its id
     const {
-      userInfo: { roles },
+      userInfo: { roles, userId },
     } = request.body;
+
+    // check if user exists
+    const isUser = await getUserByIdService(userId);
+    if (!isUser) {
+      response.status(400).json({ message: 'User does not exist', endorsementData: [] });
+      return;
+    }
+
+    // only managers/admins can delete an endorsement by its id
     if (roles.includes('Employee')) {
       response.status(403).json({
         message: 'Only managers and admins can delete an endorsement',
@@ -191,10 +222,18 @@ const deleteEndorsementHandler = expressAsyncHandler(
 // @access Private
 const deleteAllEndorsementsHandler = expressAsyncHandler(
   async (request: DeleteAllEndorsementsRequest, response: Response) => {
-    // only managers/admins can delete all endorsements
     const {
-      userInfo: { roles },
+      userInfo: { userId, roles },
     } = request.body;
+
+    // check if user exists
+    const isUser = await getUserByIdService(userId);
+    if (!isUser) {
+      response.status(400).json({ message: 'User does not exist', endorsementData: [] });
+      return;
+    }
+
+    // only managers/admins can delete all endorsements
     if (roles.includes('Employee')) {
       response.status(403).json({
         message: 'Only managers and admins can delete all endorsements',
@@ -235,7 +274,7 @@ const updateAnEndorsementHandler = expressAsyncHandler(
     // check if user exists
     const isUser = await getUserByIdService(userId);
     if (!isUser) {
-      response.status(400).json({ message: 'User does not exist' });
+      response.status(400).json({ message: 'User does not exist', endorsementData: [] });
       return;
     }
 
