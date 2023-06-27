@@ -40,6 +40,13 @@ const createNewPrinterIssueHandler = expressAsyncHandler(
       additionalInformation,
     } = request.body;
 
+    // check if user exists
+    const isUser = await getUserByIdService(userId);
+    if (!isUser) {
+      response.status(400).json({ message: 'User does not exist', printerIssueData: [] });
+      return;
+    }
+
     const newPrinterIssueObject = {
       userId,
       title,
@@ -73,10 +80,18 @@ const createNewPrinterIssueHandler = expressAsyncHandler(
 // @access Private
 const getAllPrinterIssuesHandler = expressAsyncHandler(
   async (request: GetAllPrinterIssuesRequest, response: Response) => {
-    // only managers/admins can view all printer issues
     const {
-      userInfo: { roles },
+      userInfo: { roles, userId },
     } = request.body;
+
+    // check if user exists
+    const isUser = await getUserByIdService(userId);
+    if (!isUser) {
+      response.status(400).json({ message: 'User does not exist', printerIssueData: [] });
+      return;
+    }
+
+    // only managers/admins can view all printer issues
     if (roles.includes('Employee')) {
       response.status(403).json({
         message: 'Only managers and admins can get all printer issues',
@@ -100,10 +115,18 @@ const getAllPrinterIssuesHandler = expressAsyncHandler(
 // @access Private
 const deletePrinterIssueHandler = expressAsyncHandler(
   async (request: DeletePrinterIssueRequest, response: Response) => {
-    // only managers/admins can delete a printer issue
     const {
-      userInfo: { roles },
+      userInfo: { roles, userId },
     } = request.body;
+
+    // check if user exists
+    const isUser = await getUserByIdService(userId);
+    if (!isUser) {
+      response.status(400).json({ message: 'User does not exist', printerIssueData: [] });
+      return;
+    }
+
+    // only managers/admins can delete a printer issue
     if (roles.includes('Employee')) {
       response.status(403).json({
         message: 'Only managers and admins can delete a printer issue',
@@ -132,10 +155,18 @@ const deletePrinterIssueHandler = expressAsyncHandler(
 // @access Private
 const getAPrinterIssueHandler = expressAsyncHandler(
   async (request: GetAPrinterIssueRequest, response: Response) => {
-    // only managers/admins can view a printer issue not belonging to them
     const {
-      userInfo: { roles },
+      userInfo: { roles, userId },
     } = request.body;
+
+    // check if user exists
+    const isUser = await getUserByIdService(userId);
+    if (!isUser) {
+      response.status(400).json({ message: 'User does not exist', printerIssueData: [] });
+      return;
+    }
+
+    // only managers/admins can view a printer issue not belonging to them
     if (roles.includes('Employee')) {
       response.status(403).json({
         message: 'Only managers and admins can view a printer issue not belonging to them',
@@ -170,7 +201,7 @@ const getPrinterIssuesByUserHandler = expressAsyncHandler(
     // check if user exists
     const isUser = await getUserByIdService(userId);
     if (!isUser) {
-      response.status(400).json({ message: 'User does not exist' });
+      response.status(400).json({ message: 'User does not exist', printerIssueData: [] });
       return;
     }
 
@@ -190,10 +221,18 @@ const getPrinterIssuesByUserHandler = expressAsyncHandler(
 // @access Private
 const deleteAllPrinterIssuesHandler = expressAsyncHandler(
   async (request: DeleteAllPrinterIssuesRequest, response: Response) => {
-    // only managers/admin can delete all printer issues
     const {
-      userInfo: { roles },
+      userInfo: { roles, userId },
     } = request.body;
+
+    // check if user exists
+    const isUser = await getUserByIdService(userId);
+    if (!isUser) {
+      response.status(400).json({ message: 'User does not exist', printerIssueData: [] });
+      return;
+    }
+
+    // only managers/admin can delete all printer issues
     if (roles.includes('Employee')) {
       response.status(403).json({
         message: 'Only managers and admins can delete all printer issues',
@@ -239,7 +278,7 @@ const updatePrinterIssueHandler = expressAsyncHandler(
     // check if user exists
     const isUser = await getUserByIdService(userId);
     if (!isUser) {
-      response.status(400).json({ message: 'User does not exist' });
+      response.status(400).json({ message: 'User does not exist', printerIssueData: [] });
       return;
     }
 
