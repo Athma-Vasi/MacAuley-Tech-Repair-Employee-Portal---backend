@@ -222,6 +222,13 @@ const updateAnnouncementHandler = expressAsyncHandler(
       timeToRead,
     };
 
+    // check if announcement exists
+    const isAnnouncement = await getAnnouncementByIdService(announcementId);
+    if (!isAnnouncement) {
+      response.status(400).json({ message: 'Announcement does not exist', announcementData: [] });
+      return;
+    }
+
     // as it is a PUT request, announcement is created if it does not exist
     const updatedAnnouncement = await updateAnnouncementService(updateAnnouncementObject);
     if (updatedAnnouncement) {
