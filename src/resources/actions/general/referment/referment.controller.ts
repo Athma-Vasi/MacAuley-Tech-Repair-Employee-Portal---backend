@@ -20,6 +20,7 @@ import {
   deleteAllRefermentsService,
   getARefermentService,
   getAllRefermentsService,
+  getRefermentsByUserService,
 } from './referment.service';
 
 // @desc   create new referment
@@ -192,10 +193,32 @@ const getARefermentHandler = expressAsyncHandler(
   }
 );
 
+// @desc   get referments by user
+// @route  GET /referments/user/
+// @access Private
+const getRefermentsByUserHandler = expressAsyncHandler(
+  async (request: GetRefermentsByUserRequest, response: Response) => {
+    // anyone can view their own referments
+    const {
+      userInfo: { userId },
+    } = request.body;
+
+    const referments = await getRefermentsByUserService(userId);
+    if (referments) {
+      response
+        .status(200)
+        .json({ message: 'Referments fetched successfully', refermentData: referments });
+    } else {
+      response.status(400).json({ message: 'Referments could not be fetched', refermentData: [] });
+    }
+  }
+);
+
 export {
   createNewRefermentHandler,
   deleteARefermentHandler,
   deleteAllRefermentsHandler,
   getAllRefermentsHandler,
   getARefermentHandler,
+  getRefermentsByUserHandler,
 };
