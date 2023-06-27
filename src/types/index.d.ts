@@ -11,7 +11,7 @@ type DatabaseResponse<Document> = Promise<
     }>)[]
 >;
 /**
- * where generic type Document is the mongoose document type
+ * where generic type parameter Document is a mongoose document type
  */
 type DatabaseResponseNullable<Document> = Promise<
   | (FlattenMaps<Document> &

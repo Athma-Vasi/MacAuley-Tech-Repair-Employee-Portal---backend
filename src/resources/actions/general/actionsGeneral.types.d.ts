@@ -1,3 +1,3 @@
-type ActionsGeneral = 'endorsement' | 'printerIssue' | 'anonymousRequest';
+type ActionsGeneral = 'endorsement' | 'printerIssue' | 'anonymousRequest' | 'referment';
 
 export type { ActionsGeneral };
