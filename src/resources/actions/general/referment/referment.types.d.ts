@@ -55,7 +55,7 @@ interface GetARefermentRequest extends RequestAfterJWTVerification {
   };
 }
 
-interface UpdateRefermentRequest extends RequestAfterJWTVerification {
+interface UpdateARefermentRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {
       userId: Types.ObjectId;
@@ -75,6 +75,9 @@ interface UpdateRefermentRequest extends RequestAfterJWTVerification {
     additionalInformation: string;
     privacyConsent: boolean;
   };
+  params: {
+    refermentId: Types.ObjectId;
+  };
 }
 
 type RefermentsServerResponse = {
@@ -89,6 +92,6 @@ export type {
   GetAllRefermentsRequest,
   GetRefermentsByUserRequest,
   GetARefermentRequest,
-  UpdateRefermentRequest,
+  UpdateARefermentRequest,
   RefermentsServerResponse,
 };

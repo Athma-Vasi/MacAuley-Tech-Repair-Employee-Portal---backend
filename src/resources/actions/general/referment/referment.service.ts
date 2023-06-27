@@ -129,6 +129,44 @@ async function getRefermentsByUserService(userId: Types.ObjectId): Promise<
   }
 }
 
+type UpdateRefermentServiceInput = {
+  refermentId: Types.ObjectId;
+  referrerUserId: Types.ObjectId;
+  referrerUsername: string;
+
+  candidateFullName: string;
+  candidateEmail: string;
+  candidateContactNumber: string;
+  candidateCurrentJobTitle: string;
+  candidateCurrentCompany: string;
+  candidateLinkedinProfile: string;
+
+  positionReferredFor: string;
+  positionJobDescription: string;
+  referralReason: string;
+  additionalInformation: string;
+  privacyConsent: boolean;
+};
+
+async function updateARefermentService(input: UpdateRefermentServiceInput): Promise<
+  | (FlattenMaps<RefermentDocument> &
+      Required<{
+        _id: Types.ObjectId;
+      }>)
+  | null
+> {
+  try {
+    const updatedReferment = await RefermentModel.findByIdAndUpdate(input.refermentId, input, {
+      new: true,
+    })
+      .lean()
+      .exec();
+    return updatedReferment;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'updateRefermentService' });
+  }
+}
+
 export {
   checkRefermentExistsService,
   createNewRefermentService,
@@ -137,4 +175,5 @@ export {
   getAllRefermentsService,
   getARefermentService,
   getRefermentsByUserService,
+  updateARefermentService,
 };

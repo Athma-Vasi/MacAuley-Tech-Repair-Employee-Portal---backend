@@ -9,7 +9,7 @@ import type {
   GetAllRefermentsRequest,
   GetRefermentsByUserRequest,
   RefermentsServerResponse,
-  UpdateRefermentRequest,
+  UpdateARefermentRequest,
 } from './referment.types';
 
 import { getUserByIdService } from '../../../user';
@@ -21,6 +21,7 @@ import {
   getARefermentService,
   getAllRefermentsService,
   getRefermentsByUserService,
+  updateARefermentService,
 } from './referment.service';
 
 // @desc   create new referment
@@ -214,6 +215,74 @@ const getRefermentsByUserHandler = expressAsyncHandler(
   }
 );
 
+// @desc   update a referment
+// @route  PUT /referments/:refermentId
+// @access Private
+const updateARefermentHandler = expressAsyncHandler(
+  async (request: UpdateARefermentRequest, response: Response) => {
+    // anyone can update their own referments
+    const {
+      userInfo: { userId, username },
+      candidateFullName,
+      candidateEmail,
+      candidateContactNumber,
+      candidateCurrentJobTitle,
+      candidateCurrentCompany,
+      candidateLinkedinProfile,
+      positionReferredFor,
+      positionJobDescription,
+      referralReason,
+      additionalInformation,
+      privacyConsent,
+    } = request.body;
+
+    // check that referment to be updated exists
+    const { refermentId } = request.params;
+    const isRefermentExists = await checkRefermentExistsService({ refermentId });
+    if (!isRefermentExists) {
+      response.status(404).json({ message: 'Referment not found', refermentData: [] });
+      return;
+    }
+
+    // check that referment to be updated belongs to the user
+    const referment = await getARefermentService(refermentId);
+    if (referment && referment.referrerUserId !== userId) {
+      response.status(403).json({
+        message:
+          'You are not authorized to update this referment as you are not the originator of this referment',
+        refermentData: [],
+      });
+      return;
+    }
+
+    // update referment
+    const updatedReferment = await updateARefermentService({
+      refermentId,
+      referrerUserId: userId,
+      referrerUsername: username,
+      candidateFullName,
+      candidateEmail,
+      candidateContactNumber,
+      candidateCurrentJobTitle,
+      candidateCurrentCompany,
+      candidateLinkedinProfile,
+      positionReferredFor,
+      positionJobDescription,
+      referralReason,
+      additionalInformation,
+      privacyConsent,
+    });
+
+    if (updatedReferment) {
+      response
+        .status(200)
+        .json({ message: 'Referment updated successfully', refermentData: [updatedReferment] });
+    } else {
+      response.status(400).json({ message: 'Referment could not be updated', refermentData: [] });
+    }
+  }
+);
+
 export {
   createNewRefermentHandler,
   deleteARefermentHandler,
@@ -221,4 +290,5 @@ export {
   getAllRefermentsHandler,
   getARefermentHandler,
   getRefermentsByUserHandler,
+  updateARefermentHandler,
 };
