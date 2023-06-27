@@ -1,4 +1,4 @@
-function returnEmptyFieldsTuple(input: Record<string, string>) {
+function returnEmptyFieldsTuple(input: Record<string, string | NativeDate>) {
   const fieldValuesTuples: [string, boolean][] = Object.entries(input).map(([field, value]) => [
     field,
     value === '',

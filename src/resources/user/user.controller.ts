@@ -5,18 +5,22 @@ import type {
   CreateNewUserRequest,
   DeleteUserRequest,
   GetAllUsersRequest,
+  UpdateUserPasswordRequest,
   UpdateUserRequest,
 } from './user.types';
 
 import { getNotesByUserService } from '../note';
 import {
   checkUserExistsService,
+  checkUserPasswordService,
   createNewUserService,
   deleteUserService,
   getAllUsersService,
+  updateUserPasswordService,
   updateUserService,
 } from './user.service';
 import { returnEmptyFieldsTuple } from '../../utils';
+import { add } from 'date-fns';
 
 // @desc   Create new user
 // @route  POST /users
@@ -39,22 +43,33 @@ const createNewUserHandler = expressAsyncHandler(
       roles = ['Employee'],
       active = true,
     } = request.body;
+    const { addressLine1, city, province, state, postalCode, country } = address;
+    const { fullName, contactNumber: emergencyContactNumber } = emergencyContact;
 
-    // confirm that all required fields are present
-    let fieldValuesTuples: [string, boolean][] = Object.entries({
+    // both state and province cannot be empty (both are required)
+    if (state === '' && province === '') {
+      response.status(400).json({
+        message: 'State or province must be filled',
+      });
+      return;
+    }
+
+    const isFieldsEmpty: [string, boolean][] = returnEmptyFieldsTuple({
       email,
       username,
       password,
       firstName,
+      middleName,
       lastName,
       contactNumber,
-      jobPosition,
-      department,
+      addressLine1,
+      city,
       startDate,
-    }).map(([field, value]) => [field, value === '']);
-    let isFieldsEmpty: [string, boolean][] = fieldValuesTuples.filter(
-      ([_, value]) => value === true
-    );
+      postalCode,
+      fullName,
+      emergencyContactNumber,
+    });
+
     if (isFieldsEmpty.length > 0) {
       response.status(400).json({
         message: `${isFieldsEmpty.map(([field, _]) => field).join(', ')} are required`,
@@ -62,31 +77,12 @@ const createNewUserHandler = expressAsyncHandler(
       return;
     }
 
-    fieldValuesTuples = Object.entries(address).map(([field, value]) => [field, value === '']);
-    isFieldsEmpty = fieldValuesTuples.filter(([_, value]) => value === true);
-    if (isFieldsEmpty.length > 0) {
+    const isArraysEmpty = [department, jobPosition, country]
+      .map((field) => !Array.isArray(field) || field.length === 0)
+      .filter((value) => value === true);
+    if (isArraysEmpty.length > 0) {
       response.status(400).json({
-        message: `${isFieldsEmpty.map(([field, _]) => field).join(', ')} are required`,
-      });
-      return;
-    }
-
-    fieldValuesTuples = Object.entries(emergencyContact).map(([field, value]) => [
-      field,
-      value === '',
-    ]);
-    isFieldsEmpty = fieldValuesTuples.filter(([_, value]) => value === true);
-    if (isFieldsEmpty.length > 0) {
-      response.status(400).json({
-        message: `${isFieldsEmpty.map(([field, _]) => field).join(', ')} are required`,
-      });
-      return;
-    }
-
-    // confirm that roles is an array and is not empty
-    if (!Array.isArray(roles) || roles.length === 0) {
-      response.status(400).json({
-        message: "Roles is required and must be of type: ('Admin' | 'Employee' | 'Manager')[]",
+        message: 'department, country and jobPosition are required',
       });
       return;
     }
@@ -140,6 +136,7 @@ const deleteUserHandler = expressAsyncHandler(
     // only managers/admin are allowed to delete users
     const {
       userInfo: { roles },
+      userToBeDeletedId,
     } = request.body;
 
     if (roles.includes('Employee')) {
@@ -147,14 +144,13 @@ const deleteUserHandler = expressAsyncHandler(
       return;
     }
 
-    const { userId } = request.params;
-    if (!userId) {
-      response.status(400).json({ message: 'userId is required' });
+    if (!userToBeDeletedId) {
+      response.status(400).json({ message: 'userToBeDeletedId is required' });
       return;
     }
 
     // we do not want to delete the user if they have notes assigned to them that are not completed
-    const userHasNotes = await getNotesByUserService(userId);
+    const userHasNotes = await getNotesByUserService(userToBeDeletedId);
     if (userHasNotes.filter((note) => note.completed).length > 0) {
       response
         .status(400)
@@ -163,14 +159,14 @@ const deleteUserHandler = expressAsyncHandler(
     }
 
     // check user exists
-    const userExists = await checkUserExistsService({ userId });
+    const userExists = await checkUserExistsService({ userId: userToBeDeletedId });
     if (!userExists) {
       response.status(400).json({ message: 'User does not exist' });
       return;
     }
 
     // delete user if all checks pass successfully
-    const deletedUser = await deleteUserService(userId);
+    const deletedUser = await deleteUserService(userToBeDeletedId);
     if (deletedUser) {
       response.status(200).json({ message: 'User deleted successfully' });
     } else {
@@ -209,14 +205,13 @@ const getAllUsersHandler = expressAsyncHandler(
 );
 
 // @desc   Update a user
-// @route  PUT /users
+// @route  PATCH /users
 // @access Private
 const updateUserHandler = expressAsyncHandler(
   async (request: UpdateUserRequest, response: Response) => {
     const {
       userInfo: { roles, userId, username },
       email,
-      password,
       firstName,
       middleName,
       lastName,
@@ -228,11 +223,45 @@ const updateUserHandler = expressAsyncHandler(
       startDate,
       active,
     } = request.body;
+    const { addressLine1, city, country, postalCode, province, state } = address;
+    const { contactNumber: emergencyContactNumber, fullName } = emergencyContact;
 
-    // confirm that roles is an array and is not empty
-    if (!Array.isArray(roles) || roles.length === 0) {
+    // both state and provinces cannot be empty (one must be filled)
+    if (state === '' && province === '') {
       response.status(400).json({
-        message: "Roles is required and must be of type: ('Admin' | 'Employee' | 'Manager')[]",
+        message: 'state and province cannot both be empty',
+      });
+      return;
+    }
+
+    // check arrays exist
+    const isArraysEmpty = [roles, department, jobPosition, country]
+      .map((field) => !Array.isArray(field) || field.length === 0)
+      .filter((value) => value === true);
+    if (isArraysEmpty.length > 0) {
+      response.status(400).json({
+        message: 'roles, department, country and jobPosition are required',
+      });
+      return;
+    }
+
+    // all fields except password are required
+    const isFieldsEmpty: [string, boolean][] = returnEmptyFieldsTuple({
+      email,
+      firstName,
+      middleName,
+      lastName,
+      contactNumber,
+      startDate,
+      addressLine1,
+      city,
+      postalCode,
+      emergencyContactNumber,
+      fullName,
+    });
+    if (isFieldsEmpty.length > 0) {
+      response.status(400).json({
+        message: `${isFieldsEmpty.map(([field, _]) => field).join(', ')} are required`,
       });
       return;
     }
@@ -246,11 +275,70 @@ const updateUserHandler = expressAsyncHandler(
     }
 
     // update user if all checks pass successfully
-    const updatedUser = await updateUserService({ id, email, username, password, roles, active });
+    const updatedUser = await updateUserService({
+      userId,
+      email,
+      username,
+      roles,
+      active,
+      firstName,
+      middleName,
+      lastName,
+      contactNumber,
+      address,
+      jobPosition,
+      department,
+      emergencyContact,
+      startDate,
+    });
     if (updatedUser) {
       response.status(200).json({ message: `User ${updatedUser.username} updated successfully` });
     } else {
       response.status(400).json({ message: 'User update failed' });
+    }
+  }
+);
+
+// @desc   update user password
+// @route  PATCH /users/password
+// @access Private
+const updateUserPasswordHandler = expressAsyncHandler(
+  async (request: UpdateUserPasswordRequest, response: Response) => {
+    const {
+      userInfo: { userId },
+      currentPassword,
+      newPassword,
+    } = request.body;
+
+    // check if user exists
+    const userExists = await checkUserExistsService({ userId });
+    if (!userExists) {
+      response.status(400).json({ message: 'User does not exist' });
+      return;
+    }
+
+    // check if current password is correct
+    const isCurrentPasswordCorrect = await checkUserPasswordService({
+      userId,
+      password: currentPassword,
+    });
+    if (!isCurrentPasswordCorrect) {
+      response.status(400).json({ message: 'Current password is incorrect' });
+      return;
+    }
+
+    // check if new password is the same as current password
+    if (currentPassword === newPassword) {
+      response.status(400).json({ message: 'New password cannot be the same as current password' });
+      return;
+    }
+
+    // update user password if all checks pass successfully
+    const updatedUser = await updateUserPasswordService({ userId, newPassword });
+    if (updatedUser) {
+      response.status(200).json({ message: 'Password updated successfully' });
+    } else {
+      response.status(400).json({ message: 'Password update failed' });
     }
   }
 );

@@ -170,59 +170,93 @@ async function getAllUsersService(): Promise<
 }
 
 type UpdateUserServiceInput = {
-  id: Types.ObjectId;
-  username: string;
+  userId: Types.ObjectId;
   email: string;
-  password?: string | undefined;
-  roles: ('Admin' | 'Employee' | 'Manager')[];
+  username: string;
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  contactNumber: PhoneNumber;
+  address: {
+    addressLine1: string;
+    city: string;
+    province: string;
+    state: string;
+    postalCode: PostalCodes;
+    country: Countries;
+  };
+  jobPosition: JobPositions;
+  department: Departments;
+  emergencyContact: {
+    fullName: string;
+    contactNumber: PhoneNumber;
+  };
+  startDate: NativeDate;
+  roles: UserRoles;
   active: boolean;
 };
 
-async function updateUserService({
-  id,
-  email,
-  username,
-  password,
-  roles,
-  active,
-}: UpdateUserServiceInput) {
+async function updateUserService(input: UpdateUserServiceInput) {
   try {
-    let newHashedPassword: string;
-    // if password is provided, hash it and assign it to newHashedPassword
-    if (password) {
-      const passwordSalt = await bcrypt.genSalt(10);
-      newHashedPassword = await bcrypt.hash(password, passwordSalt);
-    } else {
-      // if password is not provided, find the user by id and grab the existing hashed password
-      const user = await UserModel.findById(id).select('password').lean().exec();
-      if (user) {
-        // if user is found, assign the existing hashed password to newHashedPassword
-        newHashedPassword = user.password;
-      } else {
-        throw new Error('User not found', {
-          cause: 'updateUserService in else block of user returned by findById',
-        });
-      }
-    }
-
-    const userFieldsToUpdateObj = {
-      email,
-      username,
-      password: newHashedPassword,
-      roles,
-      active,
-    };
-
-    // find the user by id and update the user
-    const updatedUser = await UserModel.findByIdAndUpdate(id, userFieldsToUpdateObj, {
-      new: true,
-    })
+    // get existing user
+    const existingUser = await UserModel.findById(input.userId).lean().exec();
+    // replace existing user with new user minus the password
+    const updatedUser = await UserModel.findByIdAndUpdate(
+      input.userId,
+      { ...input, password: existingUser?.password },
+      { new: true }
+    )
+      .select('-password')
       .lean()
       .exec();
 
     return updatedUser;
   } catch (error: any) {
     throw new Error(error, { cause: 'updateUserService' });
+  }
+}
+
+type CheckUserPasswordServiceInput = {
+  userId: Types.ObjectId;
+  password: string;
+};
+async function checkUserPasswordService({
+  userId,
+  password,
+}: CheckUserPasswordServiceInput): Promise<boolean> {
+  try {
+    const user = await UserModel.findById(userId).lean().exec();
+    if (!user) {
+      return false;
+    }
+
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
+    return isPasswordMatch;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'checkUserPasswordService' });
+  }
+}
+
+type UpdateUserPasswordServiceInput = {
+  userId: Types.ObjectId;
+  newPassword: string;
+};
+async function updateUserPasswordService({ userId, newPassword }: UpdateUserPasswordServiceInput) {
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+  try {
+    const updatedUser = await UserModel.findByIdAndUpdate(
+      userId,
+      { password: hashedPassword },
+      { new: true }
+    )
+      .select('-password')
+      .lean()
+      .exec();
+    return updatedUser;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'updateUserPasswordService' });
   }
 }
 
@@ -241,4 +275,6 @@ export {
   getUserByIdService,
   getUserByUsernameService,
   updateUserService,
+  checkUserPasswordService,
+  updateUserPasswordService,
 };

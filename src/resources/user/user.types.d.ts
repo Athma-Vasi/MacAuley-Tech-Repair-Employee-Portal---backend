@@ -40,8 +40,13 @@ interface CreateNewUserRequest extends RequestAfterJWTVerification {
 }
 
 interface DeleteUserRequest extends RequestAfterJWTVerification {
-  params: {
-    userId: Types.ObjectId;
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    userToBeDeletedId: Types.ObjectId;
   };
 }
 
@@ -56,7 +61,6 @@ interface UpdateUserRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     email: string;
-    password: string;
     firstName: string;
     middleName: string;
     lastName: string;
@@ -80,6 +84,18 @@ interface UpdateUserRequest extends RequestAfterJWTVerification {
   };
 }
 
+interface UpdateUserPasswordRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    currentPassword: string;
+    newPassword: string;
+  };
+}
+
 type UserServerResponse = {
   message: string;
 };
@@ -96,7 +112,8 @@ export type {
   DeleteUserRequest,
   GetAllUsersRequest,
   UpdateUserRequest,
+  UpdateUserPasswordRequest,
 
   // user return types from service
-  GetAllUsersReturn,
+  UserServerResponse,
 };

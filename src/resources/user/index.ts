@@ -14,14 +14,16 @@ import {
   updateUserHandler,
 } from './user.controller';
 import {
-  checkUserExistsService,
   createNewUserService,
+  checkUserExistsService,
+  checkUserIsActiveService,
   deleteUserService,
   getAllUsersService,
-  updateUserService,
-  checkUserIsActiveService,
   getUserByIdService,
   getUserByUsernameService,
+  updateUserService,
+  checkUserPasswordService,
+  updateUserPasswordService,
 } from './user.service';
 
 import type { UserDocument, UserSchema, UserRoles } from './user.model';
@@ -30,7 +32,8 @@ import type {
   DeleteUserRequest,
   GetAllUsersRequest,
   UpdateUserRequest,
-  GetAllUsersReturn,
+  UpdateUserPasswordRequest,
+  UserServerResponse,
 } from './user.types';
 
 /**
@@ -43,14 +46,16 @@ export {
   deleteUserHandler,
   getAllUsersHandler,
   updateUserHandler,
-  checkUserExistsService,
   createNewUserService,
+  checkUserExistsService,
+  checkUserIsActiveService,
   deleteUserService,
   getAllUsersService,
-  updateUserService,
-  checkUserIsActiveService,
   getUserByIdService,
   getUserByUsernameService,
+  updateUserService,
+  checkUserPasswordService,
+  updateUserPasswordService,
 };
 export type {
   UserDocument,
@@ -60,5 +65,6 @@ export type {
   DeleteUserRequest,
   GetAllUsersRequest,
   UpdateUserRequest,
-  GetAllUsersReturn,
+  UpdateUserPasswordRequest,
+  UserServerResponse,
 };
