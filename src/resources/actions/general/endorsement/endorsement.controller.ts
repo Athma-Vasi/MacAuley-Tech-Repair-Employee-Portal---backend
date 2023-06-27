@@ -6,6 +6,7 @@ import {
   getAllEndorsementsService,
   getAnEndorsementService,
   getEndorsementsByUserService,
+  updateAnEndorsementService,
 } from './endorsement.service';
 
 import type { Response } from 'express';
@@ -16,6 +17,7 @@ import type {
   GetAllEndorsementsRequest,
   GetAnEndorsementRequest,
   GetEndorsementsFromUserRequest,
+  UpdateAnEndorsementRequest,
 } from './endorsement.types';
 import { getUserByIdService } from '../../../user';
 
@@ -215,6 +217,70 @@ const deleteAllEndorsementsHandler = expressAsyncHandler(
   }
 );
 
+// @desc   Update an endorsement
+// @route  PUT /endorsements/:endorsementId
+// @access Private
+const updateAnEndorsementHandler = expressAsyncHandler(
+  async (request: UpdateAnEndorsementRequest, response: Response) => {
+    // anyone can update their own endorsements
+    const {
+      userInfo: { userId, username },
+      title,
+      section,
+      attributeEndorsed,
+      summaryOfEndorsement,
+      userToBeEndorsed,
+    } = request.body;
+
+    // check if user exists
+    const isUser = await getUserByIdService(userId);
+    if (!isUser) {
+      response.status(400).json({ message: 'User does not exist' });
+      return;
+    }
+
+    const { endorsementId } = request.params;
+    // check if endorsement exists
+    const endorsement = await getAnEndorsementService(endorsementId);
+    if (!endorsement) {
+      response.status(400).json({ message: 'Endorsement does not exist' });
+      return;
+    }
+
+    // check if user is the owner of the endorsement
+    if (endorsement.userId !== userId) {
+      response.status(403).json({
+        message:
+          'You are not authorized to update as you are not the originator of this endorsement',
+        endorsementData: [],
+      });
+      return;
+    }
+
+    const updatedEndorsement = await updateAnEndorsementService({
+      endorsementId,
+      title,
+      section,
+      attributeEndorsed,
+      summaryOfEndorsement,
+      userToBeEndorsed,
+      userId,
+      username,
+    });
+
+    if (updatedEndorsement) {
+      response.status(200).json({
+        message: 'Endorsement updated successfully',
+        endorsementData: [updatedEndorsement],
+      });
+    } else {
+      response
+        .status(400)
+        .json({ message: 'Endorsement could not be updated', endorsementData: [] });
+    }
+  }
+);
+
 export {
   createNewEndorsementHandler,
   getAnEndorsementHandler,
@@ -222,4 +288,5 @@ export {
   deleteAllEndorsementsHandler,
   getAllEndorsementsHandler,
   getEndorsementsByUserHandler,
+  updateAnEndorsementHandler,
 };

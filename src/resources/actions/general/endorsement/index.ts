@@ -7,6 +7,24 @@
  */
 import { endorsementRouter } from './endorsement.routes';
 import { EndorsementModel } from './endorsement.model';
+import {
+  createNewEndorsementHandler,
+  deleteEndorsementHandler,
+  deleteAllEndorsementsHandler,
+  getAllEndorsementsHandler,
+  getAnEndorsementHandler,
+  getEndorsementsByUserHandler,
+  updateAnEndorsementHandler,
+} from './endorsement.controller';
+import {
+  createNewEndorsementService,
+  deleteEndorsementService,
+  deleteAllEndorsementsService,
+  getAllEndorsementsService,
+  getAnEndorsementService,
+  getEndorsementsByUserService,
+  updateAnEndorsementService,
+} from './endorsement.service';
 
 import type {
   EndorsementDocument,
@@ -21,12 +39,30 @@ import type {
   GetEndorsementsFromUserRequest,
   DeleteAllEndorsementsRequest,
   EndorsementsServerResponse,
+  UpdateAnEndorsementRequest,
 } from './endorsement.types';
 
 /**
  * exports
  */
-export { endorsementRouter, EndorsementModel };
+export {
+  endorsementRouter,
+  EndorsementModel,
+  createNewEndorsementHandler,
+  deleteEndorsementHandler,
+  deleteAllEndorsementsHandler,
+  getAllEndorsementsHandler,
+  getAnEndorsementHandler,
+  getEndorsementsByUserHandler,
+  updateAnEndorsementHandler,
+  createNewEndorsementService,
+  deleteEndorsementService,
+  deleteAllEndorsementsService,
+  getAllEndorsementsService,
+  getAnEndorsementService,
+  getEndorsementsByUserService,
+  updateAnEndorsementService,
+};
 export type {
   EndorsementDocument,
   EndorsementSchema,
@@ -38,4 +74,5 @@ export type {
   GetAnEndorsementRequest,
   GetEndorsementsFromUserRequest,
   EndorsementsServerResponse,
+  UpdateAnEndorsementRequest,
 };

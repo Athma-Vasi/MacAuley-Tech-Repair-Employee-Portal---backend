@@ -20,6 +20,25 @@ interface CreateNewEndorsementRequest extends RequestAfterJWTVerification {
   };
 }
 
+interface UpdateAnEndorsementRequest extends RequestAfterJWTVerification {
+  // userInfo object is decoded from the JWT in the auth middleware: verifyJWT.ts
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: string[];
+    };
+    section: 'company' | 'general';
+    title: 'endorsement';
+    userToBeEndorsed: string;
+    summaryOfEndorsement: string;
+    attributeEndorsed: EmployeeAttributes;
+  };
+  params: {
+    endorsementId: Types.ObjectId;
+  };
+}
+
 interface DeleteEndorsementRequest extends RequestAfterJWTVerification {
   params: {
     endorsementId: Types.ObjectId;
@@ -51,4 +70,5 @@ export type {
   GetAnEndorsementRequest,
   GetEndorsementsFromUserRequest,
   EndorsementsServerResponse,
+  UpdateAnEndorsementRequest,
 };

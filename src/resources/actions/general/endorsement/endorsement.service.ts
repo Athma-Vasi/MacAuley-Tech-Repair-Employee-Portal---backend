@@ -94,6 +94,31 @@ async function deleteAllEndorsementsService(): Promise<DeleteResult> {
   }
 }
 
+type UpdateAnEndorsementInput = CreateNewEndorsementInput & {
+  endorsementId: Types.ObjectId;
+};
+
+async function updateAnEndorsementService(input: UpdateAnEndorsementInput): Promise<
+  | (FlattenMaps<EndorsementDocument> &
+      Required<{
+        _id: Types.ObjectId;
+      }>)
+  | null
+> {
+  try {
+    const updatedEndorsement = await EndorsementModel.findByIdAndUpdate(
+      input.endorsementId,
+      input,
+      { new: true }
+    )
+      .lean()
+      .exec();
+    return updatedEndorsement;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'updateAnEndorsementService' });
+  }
+}
+
 export {
   createNewEndorsementService,
   deleteEndorsementService,
@@ -101,4 +126,5 @@ export {
   getAllEndorsementsService,
   getEndorsementsByUserService,
   getAnEndorsementService,
+  updateAnEndorsementService,
 };

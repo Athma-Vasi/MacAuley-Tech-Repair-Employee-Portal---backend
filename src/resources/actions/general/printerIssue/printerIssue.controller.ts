@@ -236,6 +236,13 @@ const updatePrinterIssueHandler = expressAsyncHandler(
       additionalInformation,
     } = request.body;
 
+    // check if user exists
+    const isUser = await getUserByIdService(userId);
+    if (!isUser) {
+      response.status(400).json({ message: 'User does not exist' });
+      return;
+    }
+
     const { printerIssueId } = request.params;
     // check if printer issue exists
     const printerIssue = await getAPrinterIssueService(printerIssueId);

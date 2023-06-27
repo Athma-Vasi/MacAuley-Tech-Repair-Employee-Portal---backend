@@ -7,6 +7,7 @@ import {
   getAllEndorsementsHandler,
   getAnEndorsementHandler,
   getEndorsementsByUserHandler,
+  updateAnEndorsementHandler,
 } from './endorsement.controller';
 
 const endorsementRouter = Router();
@@ -22,6 +23,7 @@ endorsementRouter.route('/user').get(getEndorsementsByUserHandler);
 endorsementRouter
   .route('/:endorsementId')
   .get(getAnEndorsementHandler)
-  .delete(deleteEndorsementHandler);
+  .delete(deleteEndorsementHandler)
+  .put(updateAnEndorsementHandler);
 
 export { endorsementRouter };
