@@ -88,7 +88,7 @@ const getAllPrinterIssuesHandler = expressAsyncHandler(
     } else {
       response
         .status(200)
-        .json({ message: 'Printer issues found', printerIssueData: [printerIssues] });
+        .json({ message: 'Printer issues found', printerIssueData: printerIssues });
     }
   }
 );
@@ -178,7 +178,7 @@ const getPrinterIssuesByUserHandler = expressAsyncHandler(
     } else {
       response
         .status(200)
-        .json({ message: 'Printer issues found', printerIssueData: [printerIssues] });
+        .json({ message: 'Printer issues found', printerIssueData: printerIssues });
     }
   }
 );
@@ -200,9 +200,9 @@ const deleteAllPrinterIssuesHandler = expressAsyncHandler(
       return;
     }
 
-    const printerIssues = await deleteAllPrinterIssuesService();
+    const deletedResult = await deleteAllPrinterIssuesService();
 
-    if (printerIssues.acknowledged) {
+    if (deletedResult.acknowledged) {
       response.status(200).json({
         message: 'All printer issues deleted successfully',
         printerIssueData: [],

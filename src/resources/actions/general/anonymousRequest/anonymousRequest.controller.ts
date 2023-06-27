@@ -62,7 +62,7 @@ const getAllAnonymousRequestsHandler = expressAsyncHandler(
     } else {
       response.status(200).json({
         message: 'Anonymous requests found successfully',
-        anonymousRequestData: [allAnonymousRequests],
+        anonymousRequestData: allAnonymousRequests,
       });
     }
   }
@@ -130,7 +130,7 @@ const deleteAnAnonymousRequestHandler = expressAsyncHandler(
     } else {
       response
         .status(400)
-        .json({ message: 'Anonymous request could not be deleted', anonymousRequestData: {} });
+        .json({ message: 'Anonymous request could not be deleted', anonymousRequestData: [] });
     }
   }
 );
@@ -152,9 +152,9 @@ const deleteAllAnonymousRequestsHandler = expressAsyncHandler(
       return;
     }
 
-    const deletedAnonymousRequests = await deleteAllAnonymousRequestsService();
+    const deletedResult = await deleteAllAnonymousRequestsService();
 
-    if (deletedAnonymousRequests.acknowledged) {
+    if (deletedResult.acknowledged) {
       response.status(200).json({
         message: 'All anonymous requests deleted successfully',
         anonymousRequestData: [],

@@ -53,7 +53,7 @@ const getAllAnnouncementsHandler = expressAsyncHandler(
 
     response.status(200).json({
       message: 'Announcements found successfully',
-      announcementData: [announcementsWithUsername],
+      announcementData: announcementsWithUsername,
     });
   }
 );
@@ -95,7 +95,7 @@ const getAnnouncementsByUserHandler = expressAsyncHandler(
 
     response.status(200).json({
       message: 'Announcements found successfully',
-      announcementData: [announcementsWithUsername],
+      announcementData: announcementsWithUsername,
     });
   }
 );

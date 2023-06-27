@@ -83,7 +83,7 @@ const getAllEndorsementsHandler = expressAsyncHandler(
     } else {
       response.status(200).json({
         message: 'Endorsements fetched successfully',
-        endorsementData: [endorsements],
+        endorsementData: endorsements,
       });
     }
   }
@@ -145,7 +145,7 @@ const getEndorsementsByUserHandler = expressAsyncHandler(
     } else {
       response.status(200).json({
         message: 'Endorsements fetched successfully',
-        endorsementData: [endorsements],
+        endorsementData: endorsements,
       });
     }
   }
@@ -201,8 +201,8 @@ const deleteAllEndorsementsHandler = expressAsyncHandler(
       return;
     }
 
-    const deletedEndorsements = await deleteAllEndorsementsService();
-    if (deletedEndorsements.acknowledged) {
+    const deletedResult = await deleteAllEndorsementsService();
+    if (deletedResult.acknowledged) {
       response.status(200).json({
         message: 'Endorsements deleted successfully',
         endorsementData: [],
