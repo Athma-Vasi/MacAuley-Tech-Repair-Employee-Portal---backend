@@ -1,3 +1,5 @@
+import type { FlattenMaps } from 'mongoose';
+
 type DatabaseResponse<Document> = Promise<
   (FlattenMaps<Document> &
     Required<{

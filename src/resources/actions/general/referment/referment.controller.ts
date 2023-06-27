@@ -74,10 +74,18 @@ const createNewRefermentHandler = expressAsyncHandler(
 // @access Private
 const deleteARefermentHandler = expressAsyncHandler(
   async (request: DeleteARefermentRequest, response: Response) => {
-    // only managers/admin can delete referments
     const {
-      userInfo: { roles },
+      userInfo: { roles, userId },
     } = request.body;
+
+    // check if user exists
+    const isUser = await getUserByIdService(userId);
+    if (!isUser) {
+      response.status(400).json({ message: 'User does not exist', refermentData: [] });
+      return;
+    }
+
+    // only managers/admin can delete referments
     if (roles.includes('Employee')) {
       response
         .status(403)
@@ -108,10 +116,18 @@ const deleteARefermentHandler = expressAsyncHandler(
 // @access Private
 const deleteAllRefermentsHandler = expressAsyncHandler(
   async (request: DeleteAllRefermentsRequest, response: Response) => {
-    // only managers/admin can delete all referments
     const {
-      userInfo: { roles },
+      userInfo: { roles, userId },
     } = request.body;
+
+    // check if user exists
+    const isUser = await getUserByIdService(userId);
+    if (!isUser) {
+      response.status(400).json({ message: 'User does not exist', refermentData: [] });
+      return;
+    }
+
+    // only managers/admin can delete all referments
     if (roles.includes('Employee')) {
       response
         .status(403)
@@ -135,10 +151,18 @@ const deleteAllRefermentsHandler = expressAsyncHandler(
 // @access Private
 const getAllRefermentsHandler = expressAsyncHandler(
   async (request: GetAllRefermentsRequest, response: Response<RefermentsServerResponse>) => {
-    // only managers/admin can get all referments
     const {
-      userInfo: { roles },
+      userInfo: { roles, userId },
     } = request.body;
+
+    // check if user exists
+    const isUser = await getUserByIdService(userId);
+    if (!isUser) {
+      response.status(400).json({ message: 'User does not exist', refermentData: [] });
+      return;
+    }
+
+    // only managers/admin can get all referments
     if (roles.includes('Employee')) {
       response
         .status(403)
@@ -163,11 +187,19 @@ const getAllRefermentsHandler = expressAsyncHandler(
 // @access Private
 const getARefermentHandler = expressAsyncHandler(
   async (request: GetARefermentRequest, response: Response) => {
-    // only managers/admin can get a referment by its id
     const {
-      userInfo: { roles },
+      userInfo: { roles, userId },
       refermentId,
     } = request.body;
+
+    // check if user exists
+    const isUser = await getUserByIdService(userId);
+    if (!isUser) {
+      response.status(400).json({ message: 'User does not exist', refermentData: [] });
+      return;
+    }
+
+    // only managers/admin can get a referment by its id
     if (roles.includes('Employee')) {
       response.status(403).json({
         message: 'Only managers and admins can get a referment by its id',
@@ -199,11 +231,18 @@ const getARefermentHandler = expressAsyncHandler(
 // @access Private
 const getRefermentsByUserHandler = expressAsyncHandler(
   async (request: GetRefermentsByUserRequest, response: Response) => {
-    // anyone can view their own referments
     const {
       userInfo: { userId },
     } = request.body;
 
+    // check if user exists
+    const isUser = await getUserByIdService(userId);
+    if (!isUser) {
+      response.status(400).json({ message: 'User does not exist', refermentData: [] });
+      return;
+    }
+
+    // anyone can view their own referments
     const referments = await getRefermentsByUserService(userId);
     if (referments) {
       response
@@ -220,7 +259,6 @@ const getRefermentsByUserHandler = expressAsyncHandler(
 // @access Private
 const updateARefermentHandler = expressAsyncHandler(
   async (request: UpdateARefermentRequest, response: Response) => {
-    // anyone can update their own referments
     const {
       userInfo: { userId, username },
       candidateFullName,
@@ -236,6 +274,14 @@ const updateARefermentHandler = expressAsyncHandler(
       privacyConsent,
     } = request.body;
 
+    // check if user exists
+    const isUser = await getUserByIdService(userId);
+    if (!isUser) {
+      response.status(400).json({ message: 'User does not exist', refermentData: [] });
+      return;
+    }
+
+    // anyone can update their own referments
     const { refermentId } = request.params;
     // check that referment to be updated exists
     const referment = await getARefermentService(refermentId);
