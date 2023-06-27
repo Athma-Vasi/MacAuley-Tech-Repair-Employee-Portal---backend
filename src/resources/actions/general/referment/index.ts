@@ -7,6 +7,25 @@
  */
 import { RefermentModel } from './referment.model';
 import { refermentRouter } from './referment.routes';
+import {
+  createNewRefermentHandler,
+  deleteARefermentHandler,
+  deleteAllRefermentsHandler,
+  getARefermentHandler,
+  getAllRefermentsHandler,
+  getRefermentsByUserHandler,
+  updateARefermentHandler,
+} from './referment.controller';
+import {
+  checkRefermentExistsService,
+  createNewRefermentService,
+  deleteARefermentService,
+  deleteAllRefermentsService,
+  getARefermentService,
+  getAllRefermentsService,
+  getRefermentsByUserService,
+  updateARefermentService,
+} from './referment.service';
 
 import type { RefermentDocument, RefermentSchema } from './referment.model';
 import type {
@@ -17,13 +36,31 @@ import type {
   GetAllRefermentsRequest,
   GetRefermentsByUserRequest,
   RefermentsServerResponse,
-  UpdateRefermentRequest,
+  UpdateARefermentRequest,
 } from './referment.types';
 
 /**
  * Exports
  */
-export { RefermentModel, refermentRouter };
+export {
+  RefermentModel,
+  refermentRouter,
+  createNewRefermentHandler,
+  deleteARefermentHandler,
+  deleteAllRefermentsHandler,
+  getARefermentHandler,
+  getAllRefermentsHandler,
+  getRefermentsByUserHandler,
+  updateARefermentHandler,
+  checkRefermentExistsService,
+  createNewRefermentService,
+  deleteARefermentService,
+  deleteAllRefermentsService,
+  getARefermentService,
+  getAllRefermentsService,
+  getRefermentsByUserService,
+  updateARefermentService,
+};
 export type {
   RefermentDocument,
   RefermentSchema,
@@ -34,5 +71,5 @@ export type {
   GetAllRefermentsRequest,
   GetRefermentsByUserRequest,
   RefermentsServerResponse,
-  UpdateRefermentRequest,
+  UpdateARefermentRequest,
 };
