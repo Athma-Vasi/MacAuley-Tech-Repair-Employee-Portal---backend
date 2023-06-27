@@ -236,20 +236,18 @@ const updateARefermentHandler = expressAsyncHandler(
       privacyConsent,
     } = request.body;
 
-    // check that referment to be updated exists
     const { refermentId } = request.params;
-    const isRefermentExists = await checkRefermentExistsService({ refermentId });
-    if (!isRefermentExists) {
+    // check that referment to be updated exists
+    const referment = await getARefermentService(refermentId);
+    if (!referment) {
       response.status(404).json({ message: 'Referment not found', refermentData: [] });
       return;
     }
 
     // check that referment to be updated belongs to the user
-    const referment = await getARefermentService(refermentId);
-    if (referment && referment.referrerUserId !== userId) {
+    if (referment.referrerUserId !== userId) {
       response.status(403).json({
-        message:
-          'You are not authorized to update this referment as you are not the originator of this referment',
+        message: 'You are not authorized to update as you are not the originator of this referment',
         refermentData: [],
       });
       return;

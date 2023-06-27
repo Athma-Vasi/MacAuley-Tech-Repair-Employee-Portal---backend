@@ -13,6 +13,8 @@ import {
   getAPrinterIssueHandler,
   getAllPrinterIssuesHandler,
   getPrinterIssuesByUserHandler,
+  updatePrinterIssueHandler,
+  deleteAllPrinterIssuesHandler,
 } from './printerIssue.controller';
 import {
   createNewPrinterIssueService,
@@ -20,6 +22,8 @@ import {
   getAPrinterIssueService,
   getAllPrinterIssuesService,
   getPrinterIssuesFromUserService,
+  deleteAllPrinterIssuesService,
+  updatePrinterIssueService,
 } from './printerIssue.service';
 
 import type {
@@ -35,6 +39,7 @@ import type {
   GetPrinterIssuesFromUserRequest,
   DeleteAllPrinterIssuesRequest,
   PrinterIssuesServerResponse,
+  UpdatePrinterIssueRequest,
 } from './printerIssue.types';
 
 /**
@@ -53,6 +58,10 @@ export {
   getPrinterIssuesFromUserService,
   PrinterIssueModel,
   printerIssueRouter,
+  deleteAllPrinterIssuesHandler,
+  deleteAllPrinterIssuesService,
+  updatePrinterIssueHandler,
+  updatePrinterIssueService,
 };
 
 export type {
@@ -66,4 +75,5 @@ export type {
   PrinterIssueSchema,
   PrinterIssueUrgency,
   PrinterIssuesServerResponse,
+  UpdatePrinterIssueRequest,
 };

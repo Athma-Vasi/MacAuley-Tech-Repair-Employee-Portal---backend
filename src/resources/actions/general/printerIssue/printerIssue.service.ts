@@ -28,6 +28,31 @@ async function createNewPrinterIssueService(input: CreateNewPrinterIssueInput) {
   }
 }
 
+type UpdatePrinterIssueInput = CreateNewPrinterIssueInput & {
+  printerIssueId: Types.ObjectId;
+};
+
+async function updatePrinterIssueService(input: UpdatePrinterIssueInput): Promise<
+  | (FlattenMaps<PrinterIssueDocument> &
+      Required<{
+        _id: Types.ObjectId;
+      }>)
+  | null
+> {
+  try {
+    const updatedPrinterIssue = await PrinterIssueModel.findByIdAndUpdate(
+      input.printerIssueId,
+      input,
+      { new: true }
+    )
+      .lean()
+      .exec();
+    return updatedPrinterIssue;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'updatePrinterIssueService' });
+  }
+}
+
 async function getAllPrinterIssuesService(): Promise<
   (FlattenMaps<PrinterIssueDocument> &
     Required<{
@@ -102,4 +127,5 @@ export {
   deleteAllPrinterIssuesService,
   getAPrinterIssueService,
   getPrinterIssuesFromUserService,
+  updatePrinterIssueService,
 };

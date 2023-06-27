@@ -6,6 +6,7 @@ import {
   getAPrinterIssueHandler,
   getAllPrinterIssuesHandler,
   getPrinterIssuesByUserHandler,
+  updatePrinterIssueHandler,
 } from './printerIssue.controller';
 
 const printerIssueRouter = Router();
@@ -21,6 +22,7 @@ printerIssueRouter.route('/user').get(getPrinterIssuesByUserHandler);
 printerIssueRouter
   .route('/:printerIssueId')
   .get(getAPrinterIssueHandler)
-  .delete(deletePrinterIssueHandler);
+  .delete(deletePrinterIssueHandler)
+  .put(updatePrinterIssueHandler);
 
 export { printerIssueRouter };

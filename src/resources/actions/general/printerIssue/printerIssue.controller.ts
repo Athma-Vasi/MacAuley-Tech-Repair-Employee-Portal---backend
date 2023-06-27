@@ -8,6 +8,7 @@ import type {
   GetAPrinterIssueRequest,
   GetPrinterIssuesFromUserRequest,
   DeleteAllPrinterIssuesRequest,
+  UpdatePrinterIssueRequest,
 } from './printerIssue.types';
 
 import {
@@ -17,6 +18,7 @@ import {
   getAPrinterIssueService,
   getAllPrinterIssuesService,
   getPrinterIssuesFromUserService,
+  updatePrinterIssueService,
 } from './printerIssue.service';
 import { getUserByIdService } from '../../../user';
 
@@ -215,6 +217,71 @@ const deleteAllPrinterIssuesHandler = expressAsyncHandler(
   }
 );
 
+// @desc   Update a printer issue
+// @route  PUT /printerIssues/:printerIssueId
+// @access Private
+const updatePrinterIssueHandler = expressAsyncHandler(
+  async (request: UpdatePrinterIssueRequest, response: Response) => {
+    // anyone can update their own printer issue
+    const {
+      userInfo: { userId, username },
+      title,
+      contactEmail,
+      contactNumber,
+      printerIssueDescription,
+      printerMake,
+      printerModel,
+      printerSerialNumber,
+      urgency,
+      additionalInformation,
+    } = request.body;
+
+    const { printerIssueId } = request.params;
+    // check if printer issue exists
+    const printerIssue = await getAPrinterIssueService(printerIssueId);
+    if (!printerIssue) {
+      response.status(404).json({ message: 'Printer issue not found', printerIssueData: [] });
+      return;
+    }
+
+    // check if user is the owner of the printer issue
+    if (printerIssue.userId !== userId) {
+      response.status(403).json({
+        message:
+          'You are not authorized to update as you are not the originator of this printer issue',
+        printerIssueData: [],
+      });
+      return;
+    }
+
+    const updatedPrinterIssue = await updatePrinterIssueService({
+      printerIssueId,
+      userId,
+      username,
+      title,
+      contactEmail,
+      contactNumber,
+      printerIssueDescription,
+      printerMake,
+      printerModel,
+      printerSerialNumber,
+      urgency,
+      additionalInformation,
+    });
+
+    if (updatedPrinterIssue) {
+      response.status(200).json({
+        message: 'Printer issue updated successfully',
+        printerIssueData: [updatedPrinterIssue],
+      });
+    } else {
+      response
+        .status(400)
+        .json({ message: 'Printer issue could not be updated', printerIssueData: [] });
+    }
+  }
+);
+
 export {
   createNewPrinterIssueHandler,
   getAllPrinterIssuesHandler,
@@ -222,4 +289,5 @@ export {
   deleteAllPrinterIssuesHandler,
   getAPrinterIssueHandler,
   getPrinterIssuesByUserHandler,
+  updatePrinterIssueHandler,
 };
