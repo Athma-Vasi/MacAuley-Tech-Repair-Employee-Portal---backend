@@ -1,20 +1,47 @@
 import { Request } from 'express';
-import { Schema } from 'mongoose';
 
-import { RequestAfterJWTVerification } from './auth';
+import type { RequestAfterJWTVerification } from '../auth';
+import type {
+  UserRoles,
+  Countries,
+  Departments,
+  JobPositions,
+  PhoneNumber,
+  PostalCodes,
+} from './user.model';
 
 interface CreateNewUserRequest extends RequestAfterJWTVerification {
   body: {
     email: string;
     username: string;
     password: string;
-    roles: ('Admin' | 'Employee' | 'Manager')[];
+    firstName: string;
+    middleName: string;
+    lastName: string;
+    contactNumber: PhoneNumber;
+    address: {
+      addressLine1: string;
+      city: string;
+      province: string;
+      state: string;
+      postalCode: PostalCodes;
+      country: Countries;
+    };
+    jobPosition: JobPositions;
+    department: Departments;
+    emergencyContact: {
+      fullName: string;
+      contactNumber: PhoneNumber;
+    };
+    startDate: NativeDate;
+    roles: UserRoles;
+    active: boolean;
   };
 }
 
 interface DeleteUserRequest extends RequestAfterJWTVerification {
-  body: {
-    id: Types.ObjectId;
+  params: {
+    userId: Types.ObjectId;
   };
 }
 
@@ -23,25 +50,39 @@ type GetAllUsersRequest = RequestAfterJWTVerification;
 
 interface UpdateUserRequest extends RequestAfterJWTVerification {
   body: {
-    id: Types.ObjectId;
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
     email: string;
-    username: string;
-    password?: string | undefined;
-    roles: ('Admin' | 'Employee' | 'Manager')[];
+    password: string;
+    firstName: string;
+    middleName: string;
+    lastName: string;
+    contactNumber: PhoneNumber;
+    address: {
+      addressLine1: string;
+      city: string;
+      province: string;
+      state: string;
+      postalCode: PostalCodes;
+      country: Countries;
+    };
+    jobPosition: JobPositions;
+    department: Departments;
+    emergencyContact: {
+      fullName: string;
+      contactNumber: PhoneNumber;
+    };
+    startDate: NativeDate;
     active: boolean;
   };
 }
 
-interface GetAllUsersReturn {
-  _id: Types.ObjectId;
-  email: string;
-  username: string;
-  roles: ('Admin' | 'Employee' | 'Manager')[];
-  active: boolean;
-  createdAt: NativeDate;
-  updatedAt: NativeDate;
-  __v: number;
-}
+type UserServerResponse = {
+  message: string;
+};
 
 /**
  *

@@ -16,18 +16,70 @@ import {
   getAllUsersService,
   updateUserService,
 } from './user.service';
+import { returnEmptyFieldsTuple } from '../../utils';
 
 // @desc   Create new user
 // @route  POST /users
 // @access Private
 const createNewUserHandler = expressAsyncHandler(
   async (request: CreateNewUserRequest, response: Response) => {
-    console.log('request.body', request.body);
-    const { email, username, password, roles = ['Employee'] } = request.body;
+    const {
+      email,
+      username,
+      password,
+      firstName,
+      middleName,
+      lastName,
+      contactNumber,
+      address,
+      jobPosition,
+      department,
+      emergencyContact,
+      startDate,
+      roles = ['Employee'],
+      active = true,
+    } = request.body;
 
-    // confirm that username and password are not empty
-    if (!email || !username || !password) {
-      response.status(400).json({ message: 'Email, username and password are required' });
+    // confirm that all required fields are present
+    let fieldValuesTuples: [string, boolean][] = Object.entries({
+      email,
+      username,
+      password,
+      firstName,
+      lastName,
+      contactNumber,
+      jobPosition,
+      department,
+      startDate,
+    }).map(([field, value]) => [field, value === '']);
+    let isFieldsEmpty: [string, boolean][] = fieldValuesTuples.filter(
+      ([_, value]) => value === true
+    );
+    if (isFieldsEmpty.length > 0) {
+      response.status(400).json({
+        message: `${isFieldsEmpty.map(([field, _]) => field).join(', ')} are required`,
+      });
+      return;
+    }
+
+    fieldValuesTuples = Object.entries(address).map(([field, value]) => [field, value === '']);
+    isFieldsEmpty = fieldValuesTuples.filter(([_, value]) => value === true);
+    if (isFieldsEmpty.length > 0) {
+      response.status(400).json({
+        message: `${isFieldsEmpty.map(([field, _]) => field).join(', ')} are required`,
+      });
+      return;
+    }
+
+    fieldValuesTuples = Object.entries(emergencyContact).map(([field, value]) => [
+      field,
+      value === '',
+    ]);
+    isFieldsEmpty = fieldValuesTuples.filter(([_, value]) => value === true);
+    if (isFieldsEmpty.length > 0) {
+      response.status(400).json({
+        message: `${isFieldsEmpty.map(([field, _]) => field).join(', ')} are required`,
+      });
       return;
     }
 
@@ -53,8 +105,25 @@ const createNewUserHandler = expressAsyncHandler(
       return;
     }
 
+    const newUserData = {
+      email,
+      username,
+      password,
+      firstName,
+      middleName,
+      lastName,
+      contactNumber,
+      address,
+      jobPosition,
+      department,
+      emergencyContact,
+      startDate,
+      roles,
+      active,
+    };
+
     // create new user if all checks pass successfully
-    const createdUser = await createNewUserService({ email, username, password, roles });
+    const createdUser = await createNewUserService(newUserData);
     if (createdUser) {
       response.status(201).json({ message: `User ${username} created successfully` });
     } else {
@@ -68,14 +137,24 @@ const createNewUserHandler = expressAsyncHandler(
 // @access Private
 const deleteUserHandler = expressAsyncHandler(
   async (request: DeleteUserRequest, response: Response) => {
-    const { id } = request.body;
-    if (!id) {
-      response.status(400).json({ message: 'User Id is required' });
+    // only managers/admin are allowed to delete users
+    const {
+      userInfo: { roles },
+    } = request.body;
+
+    if (roles.includes('Employee')) {
+      response.status(403).json({ message: 'Unauthorized' });
+      return;
+    }
+
+    const { userId } = request.params;
+    if (!userId) {
+      response.status(400).json({ message: 'userId is required' });
       return;
     }
 
     // we do not want to delete the user if they have notes assigned to them that are not completed
-    const userHasNotes = await getNotesByUserService(id);
+    const userHasNotes = await getNotesByUserService(userId);
     if (userHasNotes.filter((note) => note.completed).length > 0) {
       response
         .status(400)
@@ -84,14 +163,14 @@ const deleteUserHandler = expressAsyncHandler(
     }
 
     // check user exists
-    const userExists = await checkUserExistsService({ id });
+    const userExists = await checkUserExistsService({ userId });
     if (!userExists) {
       response.status(400).json({ message: 'User does not exist' });
       return;
     }
 
     // delete user if all checks pass successfully
-    const deletedUser = await deleteUserService(id);
+    const deletedUser = await deleteUserService(userId);
     if (deletedUser) {
       response.status(200).json({ message: 'User deleted successfully' });
     } else {
@@ -103,12 +182,23 @@ const deleteUserHandler = expressAsyncHandler(
 // @desc   Get all users
 // @route  GET /users
 // @access Private
-// responseType: {message:string, users: User[]} | {message:string}
 const getAllUsersHandler = expressAsyncHandler(
   async (request: GetAllUsersRequest, response: Response) => {
+    // only managers/admin are allowed to get all users
+    const {
+      userInfo: { roles },
+    } = request.body;
+
+    if (roles.includes('Employee')) {
+      response
+        .status(403)
+        .json({ message: 'Only managers and admins are allowed to get all users' });
+      return;
+    }
+
     const users = await getAllUsersService();
     if (users.length === 0) {
-      response.status(400).json({ message: 'No users found' });
+      response.status(404).json({ message: 'No users found' });
     } else {
       response.status(200).json({
         message: 'Users found successfully',
@@ -123,13 +213,21 @@ const getAllUsersHandler = expressAsyncHandler(
 // @access Private
 const updateUserHandler = expressAsyncHandler(
   async (request: UpdateUserRequest, response: Response) => {
-    const { id, email, username, password, roles, active } = request.body;
-
-    // confirm that id and username are not empty
-    if (!id || !email || !username) {
-      response.status(400).json({ message: 'Id, email and username fields are required' });
-      return;
-    }
+    const {
+      userInfo: { roles, userId, username },
+      email,
+      password,
+      firstName,
+      middleName,
+      lastName,
+      contactNumber,
+      address,
+      jobPosition,
+      department,
+      emergencyContact,
+      startDate,
+      active,
+    } = request.body;
 
     // confirm that roles is an array and is not empty
     if (!Array.isArray(roles) || roles.length === 0) {

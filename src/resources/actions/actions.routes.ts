@@ -2,7 +2,7 @@ import { Router } from 'express';
 
 import { verifyJWTMiddleware } from '../../middlewares';
 import { actionsGeneralRouter } from './general';
-import { actionsCompanyRouter } from './company/actionsCompany.routes';
+import { actionsCompanyRouter } from './company';
 
 const actionsRouter = Router();
 

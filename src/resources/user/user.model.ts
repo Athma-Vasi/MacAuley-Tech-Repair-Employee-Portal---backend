@@ -2,10 +2,48 @@ import { Schema, model, Types } from 'mongoose';
 
 type UserRoles = ('Admin' | 'Employee' | 'Manager')[];
 
+type CanadianPostalCode = `${string}${string}${string} ${string}${string}${string}`;
+type USPostalCode = `${string}${string}${string}${string}${string}`;
+type PostalCodes = CanadianPostalCode | USPostalCode;
+type PhoneNumber =
+  `+(${string})(${string}${string}${string}) ${string}${string}${string}-${string}${string}${string}${string}`;
+type Countries = ('Canada' | 'United States')[];
+
+type JobPositions = ('employee' | 'supervisor' | 'manager')[];
+type Departments = (
+  | 'administration'
+  | 'customer service'
+  | 'human resources'
+  | 'repair'
+  | 'technical support'
+  | 'sales'
+  | 'logistics'
+  | 'inventory management'
+)[];
+
 type UserSchema = {
-  email: string;
   username: string;
   password: string;
+  email: string;
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  contactNumber: PhoneNumber;
+  address: {
+    addressLine1: string;
+    city: string;
+    province: string;
+    state: string;
+    postalCode: PostalCodes;
+    country: Countries;
+  };
+  jobPosition: JobPositions;
+  department: Departments;
+  emergencyContact: {
+    fullName: string;
+    contactNumber: PhoneNumber;
+  };
+  startDate: NativeDate;
   roles: UserRoles;
   active: boolean;
 };
@@ -19,30 +57,96 @@ type UserDocument = UserSchema & {
 
 const userSchema = new Schema<UserSchema>(
   {
-    email: {
-      type: String,
-      required: [true, 'Email is required'],
-      unique: true,
-      index: true,
-    },
     username: {
       type: String,
       required: [true, 'Username is required'],
+      unique: true,
       index: true,
     },
     password: {
       type: String,
       required: [true, 'Password is required'],
     },
-    roles: [
-      {
+    email: {
+      type: String,
+      required: [true, 'Email is required'],
+      unique: true,
+      index: true,
+    },
+    firstName: {
+      type: String,
+      required: [true, 'First name is required'],
+    },
+    middleName: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    lastName: {
+      type: String,
+      required: [true, 'Last name is required'],
+    },
+    contactNumber: {
+      type: String,
+      required: [true, 'Contact number is required'],
+    },
+    address: {
+      addressLine1: {
         type: String,
-        enum: ['Admin', 'Employee', 'Manager'],
-        default: 'Employee',
+        required: [true, 'Address line 1 is required'],
       },
-    ],
+      city: {
+        type: String,
+        required: [true, 'City is required'],
+      },
+      province: {
+        type: String,
+        required: false,
+        default: '',
+      },
+      state: {
+        type: String,
+        required: false,
+        default: '',
+      },
+      postalCode: {
+        type: String,
+        required: [true, 'Postal code is required'],
+      },
+      country: {
+        type: String,
+        required: [true, 'Country is required'],
+      },
+    },
+    jobPosition: {
+      type: [String],
+      required: [true, 'Job position is required'],
+    },
+    department: {
+      type: [String],
+      required: [true, 'Department is required'],
+    },
+    emergencyContact: {
+      fullName: {
+        type: String,
+        required: [true, 'Emergency contact full name is required'],
+      },
+      contactNumber: {
+        type: String,
+        required: [true, 'Emergency contact number is required'],
+      },
+    },
+    startDate: {
+      type: NativeDate,
+      required: [true, 'Start date is required'],
+    },
+    roles: {
+      type: [String],
+      required: [true, 'Roles are required'],
+    },
     active: {
       type: Boolean,
+      required: [true, 'Active status is required'],
       default: true,
     },
   },
@@ -54,4 +158,13 @@ const userSchema = new Schema<UserSchema>(
 const UserModel = model('User', userSchema);
 
 export { UserModel };
-export type { UserSchema, UserDocument, UserRoles };
+export type {
+  UserSchema,
+  UserDocument,
+  UserRoles,
+  PostalCodes,
+  PhoneNumber,
+  Countries,
+  JobPositions,
+  Departments,
+};

@@ -1,27 +1,35 @@
 import bcrypt from 'bcryptjs';
 
 import type { FlattenMaps, Types } from 'mongoose';
-import type { UserSchema } from './user.model';
+import type {
+  Countries,
+  Departments,
+  JobPositions,
+  PhoneNumber,
+  PostalCodes,
+  UserRoles,
+  UserSchema,
+} from './user.model';
 
 import { UserModel } from './user.model';
 
 type CheckUserExistsServiceInput = {
-  email?: string;
-  username?: string;
-  id?: Types.ObjectId;
+  email?: string | undefined;
+  username?: string | undefined;
+  userId?: Types.ObjectId | undefined;
 };
 
 async function checkUserExistsService({
   email,
   username,
-  id,
+  userId,
 }: CheckUserExistsServiceInput): Promise<boolean> {
   try {
     // lean is used to return a plain javascript object instead of a mongoose document
     // exec is used when passing an argument and returning a promise and also provides better error handling
 
-    if (id) {
-      const duplicateId = await UserModel.findById(id).lean().exec();
+    if (userId) {
+      const duplicateId = await UserModel.findById(userId).lean().exec();
       return duplicateId ? true : false;
     }
 
@@ -42,14 +50,14 @@ async function checkUserExistsService({
 }
 
 type CheckUserIsActiveServiceInput = {
-  username?: string;
-  id?: Types.ObjectId;
+  username?: string | undefined;
+  userId?: Types.ObjectId | undefined;
 };
 
-async function checkUserIsActiveService({ username, id }: CheckUserIsActiveServiceInput) {
+async function checkUserIsActiveService({ username, userId }: CheckUserIsActiveServiceInput) {
   try {
-    if (id) {
-      const user = await UserModel.findById(id).lean().exec();
+    if (userId) {
+      const user = await UserModel.findById(userId).lean().exec();
       return user?.active ?? false;
     }
 
@@ -68,28 +76,42 @@ type CreateNewUserServiceInput = {
   email: string;
   username: string;
   password: string;
-  roles: ('Admin' | 'Employee' | 'Manager')[];
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  contactNumber: PhoneNumber;
+  address: {
+    addressLine1: string;
+    city: string;
+    province: string;
+    state: string;
+    postalCode: PostalCodes;
+    country: Countries;
+  };
+  jobPosition: JobPositions;
+  department: Departments;
+  emergencyContact: {
+    fullName: string;
+    contactNumber: PhoneNumber;
+  };
+  startDate: NativeDate;
+  roles: UserRoles;
+  active: boolean;
 };
 
-async function createNewUserService({
-  email,
-  username,
-  password,
-  roles,
-}: CreateNewUserServiceInput) {
+async function createNewUserService(inputObj: CreateNewUserServiceInput) {
+  const { password } = inputObj;
   // salt rounds of 10
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
 
-  try {
-    const newUserObject = {
-      email,
-      username,
-      password: hashedPassword,
-      roles,
-    };
+  const newUserObj = {
+    ...inputObj,
+    password: hashedPassword,
+  };
 
-    const newUser = await UserModel.create(newUserObject);
+  try {
+    const newUser = await UserModel.create(newUserObj);
     return newUser;
   } catch (error: any) {
     throw new Error(error, { cause: 'createNewUserService' });
@@ -110,14 +132,14 @@ async function deleteUserService(id: Types.ObjectId): Promise<
   }
 }
 
-async function getUserByIdService(id: Types.ObjectId): Promise<
+async function getUserByIdService(userId: Types.ObjectId): Promise<
   | (FlattenMaps<UserSchema> & {
       _id: Types.ObjectId;
     })
   | null
 > {
   try {
-    const user = await UserModel.findById(id).lean().exec();
+    const user = await UserModel.findById(userId).lean().exec();
     return user;
   } catch (error: any) {
     throw new Error(error, { cause: 'getUserByIdService' });
@@ -139,9 +161,8 @@ async function getAllUsersService(): Promise<
   })[]
 > {
   try {
-    // select is used to exclude the password field from the returned document
-    // lean is used to return a plain javascript object instead of a mongoose document
-    const users = await UserModel.find().select('-password').lean().exec();
+    // do not return the password field
+    const users = await UserModel.find({}).select('-password').lean().exec();
     return users;
   } catch (error: any) {
     throw new Error(error, { cause: 'getAllUsersService' });
