@@ -4,6 +4,7 @@ import type { EmployeeAttributes, EndorsementDocument } from './endorsement.mode
 import type { ActionsGeneral } from '../../general';
 
 import { EndorsementModel } from './endorsement.model';
+import { DatabaseResponse, DatabaseResponseNullable } from '../../../../types';
 
 type CreateNewEndorsementInput = {
   userId: Types.ObjectId;
@@ -25,13 +26,9 @@ async function createNewEndorsementService(input: CreateNewEndorsementInput) {
   }
 }
 
-async function deleteEndorsementService(id: Types.ObjectId): Promise<
-  | (FlattenMaps<EndorsementDocument> &
-      Required<{
-        _id: Types.ObjectId;
-      }>)
-  | null
-> {
+async function deleteEndorsementService(
+  id: Types.ObjectId
+): DatabaseResponseNullable<EndorsementDocument> {
   try {
     const deletedEndorsement = await EndorsementModel.findByIdAndDelete(id).lean().exec();
 
@@ -41,12 +38,7 @@ async function deleteEndorsementService(id: Types.ObjectId): Promise<
   }
 }
 
-async function getAllEndorsementsService(): Promise<
-  (FlattenMaps<EndorsementDocument> &
-    Required<{
-      _id: Types.ObjectId;
-    }>)[]
-> {
+async function getAllEndorsementsService(): DatabaseResponse<EndorsementDocument> {
   try {
     const allEndorsements = await EndorsementModel.find({}).lean().exec();
 
@@ -56,13 +48,9 @@ async function getAllEndorsementsService(): Promise<
   }
 }
 
-async function getAnEndorsementService(id: Types.ObjectId): Promise<
-  | (FlattenMaps<EndorsementDocument> &
-      Required<{
-        _id: Types.ObjectId;
-      }>)
-  | null
-> {
+async function getAnEndorsementService(
+  id: Types.ObjectId
+): DatabaseResponseNullable<EndorsementDocument> {
   try {
     const endorsement = await EndorsementModel.findById({ _id: id }).lean().exec();
     return endorsement;
@@ -71,12 +59,9 @@ async function getAnEndorsementService(id: Types.ObjectId): Promise<
   }
 }
 
-async function getEndorsementsByUserService(userId: Types.ObjectId): Promise<
-  (FlattenMaps<EndorsementDocument> &
-    Required<{
-      _id: Types.ObjectId;
-    }>)[]
-> {
+async function getEndorsementsByUserService(
+  userId: Types.ObjectId
+): DatabaseResponse<EndorsementDocument> {
   try {
     const endorsements = await EndorsementModel.find({ userId }).lean().exec();
     return endorsements;
@@ -98,13 +83,9 @@ type UpdateAnEndorsementInput = CreateNewEndorsementInput & {
   endorsementId: Types.ObjectId;
 };
 
-async function updateAnEndorsementService(input: UpdateAnEndorsementInput): Promise<
-  | (FlattenMaps<EndorsementDocument> &
-      Required<{
-        _id: Types.ObjectId;
-      }>)
-  | null
-> {
+async function updateAnEndorsementService(
+  input: UpdateAnEndorsementInput
+): DatabaseResponseNullable<EndorsementDocument> {
   try {
     const updatedEndorsement = await EndorsementModel.findByIdAndUpdate(
       input.endorsementId,
