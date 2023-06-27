@@ -13,7 +13,11 @@ import type {
 } from './referment.types';
 
 import { getUserByIdService } from '../../../user';
-import { createNewRefermentService } from './referment.service';
+import {
+  checkRefermentExistsService,
+  createNewRefermentService,
+  deleteARefermentService,
+} from './referment.service';
 
 // @desc   create new referment
 // @route  POST /referments
@@ -60,4 +64,33 @@ const createNewRefermentHandler = expressAsyncHandler(
   }
 );
 
-export { createNewRefermentHandler };
+// @desc   delete a referment
+// @route  DELETE /referments/:refermentId
+// @access Private
+const deleteARefermentHandler = expressAsyncHandler(
+  async (request: DeleteARefermentRequest, response: Response) => {
+    // only managers/admin can delete referments
+    const {
+      userInfo: { roles },
+    } = request.body;
+    if (roles.includes('Employee')) {
+      response
+        .status(403)
+        .json({ message: 'Only managers and admins can delete referments', refermentData: [] });
+      return;
+    }
+
+    const { refermentId } = request.params;
+    // check if referment exists
+    const isRefermentExists = await checkRefermentExistsService({ refermentId });
+    if (!isRefermentExists) {
+      response.status(404).json({ message: 'Referment not found', refermentData: [] });
+      return;
+    }
+
+    // delete referment
+    const deletedResult = await deleteARefermentService(refermentId);
+  }
+);
+
+export { createNewRefermentHandler, deleteARefermentHandler };

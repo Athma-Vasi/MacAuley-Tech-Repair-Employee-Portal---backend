@@ -1,7 +1,7 @@
 import type { FlattenMaps, Types } from 'mongoose';
 import type { DeleteResult } from 'mongodb';
 
-import { RefermentModel } from './referment.model';
+import { RefermentDocument, RefermentModel } from './referment.model';
 
 type CheckRefermentExistsServiceInput = {
   refermentId?: Types.ObjectId;
@@ -62,4 +62,19 @@ async function createNewRefermentService(input: CreateNewRefermentServiceInput) 
   }
 }
 
-export { checkRefermentExistsService, createNewRefermentService };
+async function deleteARefermentService(refermentId: Types.ObjectId): Promise<
+  | (FlattenMaps<RefermentDocument> &
+      Required<{
+        _id: Types.ObjectId;
+      }>)
+  | null
+> {
+  try {
+    const deleteResult = await RefermentModel.findByIdAndDelete(refermentId).lean().exec();
+    return deleteResult;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'deleteARefermentService' });
+  }
+}
+
+export { checkRefermentExistsService, createNewRefermentService, deleteARefermentService };

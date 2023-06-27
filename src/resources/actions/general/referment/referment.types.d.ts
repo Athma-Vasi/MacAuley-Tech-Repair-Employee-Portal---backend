@@ -26,6 +26,13 @@ interface CreateNewRefermentRequest extends RequestAfterJWTVerification {
 }
 
 interface DeleteARefermentRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+  };
   params: {
     refermentId: Types.ObjectId;
   };

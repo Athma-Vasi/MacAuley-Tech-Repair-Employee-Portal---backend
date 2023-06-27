@@ -1,5 +1,5 @@
-import { Request } from 'express';
-import { Types } from 'mongoose';
+import type { Request } from 'express';
+import type { Types } from 'mongoose';
 
 interface LoginUserRequest extends Request {
   body: {
@@ -30,4 +30,9 @@ interface RequestAfterJWTVerification extends Request {
   };
 }
 
-export { LoginUserRequest, RefreshTokenRequest, LogoutUserRequest, RequestAfterJWTVerification };
+export type {
+  LoginUserRequest,
+  RefreshTokenRequest,
+  LogoutUserRequest,
+  RequestAfterJWTVerification,
+};
