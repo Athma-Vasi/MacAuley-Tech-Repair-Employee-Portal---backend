@@ -1,58 +1,8 @@
-import {
-  LoginUserRequest,
-  LogoutUserRequest,
-  RefreshTokenRequest,
-  RequestAfterJWTVerification,
-} from './auth';
+type DatabaseResponse<Document> = Promise<
+  (FlattenMaps<Document> &
+    Required<{
+      _id: Types.ObjectId;
+    }>)[]
+>;
 
-import {
-  // note request types from client
-  CreateNewNoteRequest,
-  DeleteNoteRequest,
-  GetAllNotesRequest,
-  UpdateNoteRequest,
-
-  // note return types from service
-  GetAllNotesReturn,
-} from './note';
-
-import {
-  // user request types from client
-  CreateNewUserRequest,
-  DeleteUserRequest,
-  GetAllUsersRequest,
-  UpdateUserRequest,
-
-  // user return types from service
-  GetAllUsersReturn,
-} from './user';
-
-/**
- *
- *
- *
- */
-
-export {
-  // auth requests from client
-  LoginUserRequest,
-  LogoutUserRequest,
-  RefreshTokenRequest,
-  RequestAfterJWTVerification,
-
-  // user requests from client
-  CreateNewUserRequest,
-  DeleteUserRequest,
-  GetAllUsersRequest,
-  UpdateUserRequest,
-  // user return types from service
-  GetAllUsersReturn,
-
-  // note requests from client
-  CreateNewNoteRequest,
-  DeleteNoteRequest,
-  GetAllNotesRequest,
-  UpdateNoteRequest,
-  // note return types from service
-  GetAllNotesReturn,
-};
+export type { DatabaseResponse };
