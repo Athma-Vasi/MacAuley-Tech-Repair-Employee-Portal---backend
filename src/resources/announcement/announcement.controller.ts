@@ -28,6 +28,17 @@ import { getUserByIdService } from '../user';
 // @access Public
 const getAllAnnouncementsHandler = expressAsyncHandler(
   async (request: GetAllAnnouncementsRequest, response: Response) => {
+    const {
+      userInfo: { userId },
+    } = request.body;
+
+    // check if user exists
+    const isUser = await getUserByIdService(userId);
+    if (!isUser) {
+      response.status(400).json({ message: 'User does not exist', announcementData: [] });
+      return;
+    }
+
     const announcements = await getAllAnnouncementsService();
 
     if (announcements.length === 0) {
@@ -181,6 +192,13 @@ const updateAnnouncementHandler = expressAsyncHandler(
       timeToRead,
     } = request.body;
 
+    // check if user exists
+    const isUser = await getUserByIdService(userId);
+    if (!isUser) {
+      response.status(400).json({ message: 'User does not exist', announcementData: [] });
+      return;
+    }
+
     const { announcementId } = request.params;
 
     // only managers/admin can update announcements
@@ -224,10 +242,18 @@ const updateAnnouncementHandler = expressAsyncHandler(
 // @access Private
 const deleteAnnouncementHandler = expressAsyncHandler(
   async (request: DeleteAnAnnouncementRequest, response: Response) => {
-    // only managers/admin can delete announcements
     const {
-      userInfo: { roles },
+      userInfo: { roles, userId },
     } = request.body;
+
+    // check if user exists
+    const isUser = await getUserByIdService(userId);
+    if (!isUser) {
+      response.status(400).json({ message: 'User does not exist', announcementData: [] });
+      return;
+    }
+
+    // only managers/admin can delete announcements
     if (roles.includes('Employee')) {
       response.status(403).json({
         message: 'Only managers and admins can delete announcements',
@@ -265,10 +291,18 @@ const deleteAnnouncementHandler = expressAsyncHandler(
 // @access  Private
 const deleteAllAnnouncementsHandler = expressAsyncHandler(
   async (request: DeleteAllAnnouncementsRequest, response: Response) => {
-    // only managers/admin can delete all announcements
     const {
-      userInfo: { roles },
+      userInfo: { roles, userId },
     } = request.body;
+
+    // check if user exists
+    const isUser = await getUserByIdService(userId);
+    if (!isUser) {
+      response.status(400).json({ message: 'User does not exist', announcementData: [] });
+      return;
+    }
+
+    // only managers/admin can delete all announcements
     if (roles.includes('Employee')) {
       response.status(403).json({
         message: 'Only managers and admins can delete all announcements',
@@ -298,11 +332,19 @@ const deleteAllAnnouncementsHandler = expressAsyncHandler(
 // @access Private
 const getAnnouncementByIdHandler = expressAsyncHandler(
   async (request: GetAnAnnouncementRequest, response: Response) => {
-    // only managers/admin can get an announcement by its id
     const {
-      userInfo: { roles },
+      userInfo: { roles, userId },
       announcementId,
     } = request.body;
+
+    // check if user exists
+    const isUser = await getUserByIdService(userId);
+    if (!isUser) {
+      response.status(400).json({ message: 'User does not exist', announcementData: [] });
+      return;
+    }
+
+    // only managers/admin can get an announcement by its id
     if (roles.includes('Employee')) {
       response.status(403).json({
         message: 'Only managers and admins can request an announcement by its id',
