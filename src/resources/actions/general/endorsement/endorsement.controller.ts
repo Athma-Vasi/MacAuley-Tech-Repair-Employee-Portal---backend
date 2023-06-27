@@ -66,7 +66,7 @@ const getAllEndorsementsHandler = expressAsyncHandler(
     const {
       userInfo: { roles },
     } = request.body;
-    if (!roles.includes('manager') && !roles.includes('admin')) {
+    if (roles.includes('Employee')) {
       response.status(403).json({
         message: 'Only managers and admins can view all endorsements',
         endorsementData: [],
@@ -98,7 +98,7 @@ const getAnEndorsementHandler = expressAsyncHandler(
     const {
       userInfo: { roles },
     } = request.body;
-    if (!roles.includes('manager') && !roles.includes('admin')) {
+    if (roles.includes('Employee')) {
       response.status(403).json({
         message: 'Only managers and admins can view an endorsement not belonging to them',
         endorsementData: [],
@@ -160,7 +160,7 @@ const deleteEndorsementHandler = expressAsyncHandler(
     const {
       userInfo: { roles },
     } = request.body;
-    if (!roles.includes('manager') && !roles.includes('admin')) {
+    if (roles.includes('Employee')) {
       response.status(403).json({
         message: 'Only managers and admins can delete an endorsement',
         endorsementData: [],
@@ -193,7 +193,7 @@ const deleteAllEndorsementsHandler = expressAsyncHandler(
     const {
       userInfo: { roles },
     } = request.body;
-    if (!roles.includes('manager') && !roles.includes('admin')) {
+    if (roles.includes('Employee')) {
       response.status(403).json({
         message: 'Only managers and admins can delete all endorsements',
         endorsementData: [],

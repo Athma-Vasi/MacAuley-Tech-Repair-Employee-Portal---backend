@@ -174,7 +174,7 @@ const updateAnnouncementHandler = expressAsyncHandler(
     const { announcementId } = request.params;
 
     // only managers/admin can update announcements
-    if (!roles.includes('Manager') && !roles.includes('Admin')) {
+    if (roles.includes('Employee')) {
       response.status(403).json({
         message: 'Only managers and admins can update announcements',
         announcementData: [],
@@ -218,7 +218,7 @@ const deleteAnnouncementHandler = expressAsyncHandler(
     const {
       userInfo: { roles },
     } = request.body;
-    if (!roles.includes('manager') && !roles.includes('admin')) {
+    if (roles.includes('Employee')) {
       response.status(403).json({
         message: 'Only managers and admins can delete announcements',
         announcementData: [],
@@ -259,7 +259,7 @@ const deleteAllAnnouncementsHandler = expressAsyncHandler(
     const {
       userInfo: { roles },
     } = request.body;
-    if (!roles.includes('manager') && !roles.includes('admin')) {
+    if (roles.includes('Employee')) {
       response.status(403).json({
         message: 'Only managers and admins can delete all announcements',
         announcementData: [],
@@ -293,7 +293,7 @@ const getAnnouncementByIdHandler = expressAsyncHandler(
       userInfo: { roles },
       announcementId,
     } = request.body;
-    if (!roles.includes('Manager') && !roles.includes('Admin')) {
+    if (roles.includes('Employee')) {
       response.status(403).json({
         message: 'Only managers and admins can request an announcement by its id',
         announcementData: [],

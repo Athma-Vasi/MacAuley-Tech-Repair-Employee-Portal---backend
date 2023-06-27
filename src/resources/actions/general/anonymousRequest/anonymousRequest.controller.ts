@@ -44,7 +44,7 @@ const getAllAnonymousRequestsHandler = expressAsyncHandler(
     const {
       userInfo: { roles },
     } = request.body;
-    if (!roles.includes('Manager') && !roles.includes('Admin')) {
+    if (roles.includes('Employee')) {
       response.status(403).json({
         message: 'Only managers and admins can get all anonymous requests',
         anonymousRequestData: [],
@@ -77,7 +77,7 @@ const getAnAnonymousRequestHandler = expressAsyncHandler(
     const {
       userInfo: { roles },
     } = request.body;
-    if (!roles.includes('Manager') && !roles.includes('Admin')) {
+    if (roles.includes('Employee')) {
       response.status(403).json({
         message: 'Only managers and admins can get view an anonymous request not belonging to them',
         anonymousRequestData: [],

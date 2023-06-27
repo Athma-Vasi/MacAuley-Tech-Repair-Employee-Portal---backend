@@ -75,7 +75,7 @@ const getAllPrinterIssuesHandler = expressAsyncHandler(
     const {
       userInfo: { roles },
     } = request.body;
-    if (!roles.includes('Manager') && !roles.includes('Admin')) {
+    if (roles.includes('Employee')) {
       response.status(403).json({
         message: 'Only managers and admins can get all printer issues',
         printerIssueData: [],
@@ -102,7 +102,7 @@ const deletePrinterIssueHandler = expressAsyncHandler(
     const {
       userInfo: { roles },
     } = request.body;
-    if (!roles.includes('Manager') && !roles.includes('Admin')) {
+    if (roles.includes('Employee')) {
       response.status(403).json({
         message: 'Only managers and admins can delete a printer issue',
         printerIssueData: [],
@@ -134,7 +134,7 @@ const getAPrinterIssueHandler = expressAsyncHandler(
     const {
       userInfo: { roles },
     } = request.body;
-    if (!roles.includes('Manager') && !roles.includes('Admin')) {
+    if (roles.includes('Employee')) {
       response.status(403).json({
         message: 'Only managers and admins can view a printer issue not belonging to them',
         printerIssueData: [],
@@ -192,7 +192,7 @@ const deleteAllPrinterIssuesHandler = expressAsyncHandler(
     const {
       userInfo: { roles },
     } = request.body;
-    if (!roles.includes('Manager') && !roles.includes('Admin')) {
+    if (roles.includes('Employee')) {
       response.status(403).json({
         message: 'Only managers and admins can delete all printer issues',
         printerIssueData: [],
