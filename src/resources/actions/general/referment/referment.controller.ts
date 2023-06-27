@@ -17,6 +17,7 @@ import {
   checkRefermentExistsService,
   createNewRefermentService,
   deleteARefermentService,
+  deleteAllRefermentsService,
 } from './referment.service';
 
 // @desc   create new referment
@@ -90,7 +91,39 @@ const deleteARefermentHandler = expressAsyncHandler(
 
     // delete referment
     const deletedResult = await deleteARefermentService(refermentId);
+    if (deletedResult) {
+      response.status(200).json({ message: 'Referment deleted successfully', refermentData: [] });
+    } else {
+      response.status(400).json({ message: 'Referment could not be deleted', refermentData: [] });
+    }
   }
 );
 
-export { createNewRefermentHandler, deleteARefermentHandler };
+// @desc   delete all referments
+// @route  DELETE /referments
+// @access Private
+const deleteAllRefermentsHandler = expressAsyncHandler(
+  async (request: DeleteAllRefermentsRequest, response: Response) => {
+    // only managers/admin can delete all referments
+    const {
+      userInfo: { roles },
+    } = request.body;
+    if (roles.includes('Employee')) {
+      response
+        .status(403)
+        .json({ message: 'Only managers and admins can delete all referments', refermentData: [] });
+      return;
+    }
+
+    const deletedResult = await deleteAllRefermentsService();
+    if (deletedResult.acknowledged) {
+      response
+        .status(200)
+        .json({ message: 'All referments deleted successfully', refermentData: [] });
+    } else {
+      response.status(400).json({ message: 'Referments could not be deleted', refermentData: [] });
+    }
+  }
+);
+
+export { createNewRefermentHandler, deleteARefermentHandler, deleteAllRefermentsHandler };

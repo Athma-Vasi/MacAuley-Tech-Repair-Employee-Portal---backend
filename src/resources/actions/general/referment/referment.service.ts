@@ -77,4 +77,18 @@ async function deleteARefermentService(refermentId: Types.ObjectId): Promise<
   }
 }
 
-export { checkRefermentExistsService, createNewRefermentService, deleteARefermentService };
+async function deleteAllRefermentsService(): Promise<DeleteResult> {
+  try {
+    const deleteResult = await RefermentModel.deleteMany({}).lean().exec();
+    return deleteResult;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'deleteAllRefermentsService' });
+  }
+}
+
+export {
+  checkRefermentExistsService,
+  createNewRefermentService,
+  deleteARefermentService,
+  deleteAllRefermentsService,
+};
