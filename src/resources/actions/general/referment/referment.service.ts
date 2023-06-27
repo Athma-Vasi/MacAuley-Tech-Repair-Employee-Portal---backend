@@ -100,10 +100,26 @@ async function getAllRefermentsService(): Promise<
   }
 }
 
+async function getARefermentService(refermentId: Types.ObjectId): Promise<
+  | (FlattenMaps<RefermentDocument> &
+      Required<{
+        _id: Types.ObjectId;
+      }>)
+  | null
+> {
+  try {
+    const referment = await RefermentModel.findById(refermentId).lean().exec();
+    return referment;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getARefermentService' });
+  }
+}
+
 export {
   checkRefermentExistsService,
   createNewRefermentService,
   deleteARefermentService,
   deleteAllRefermentsService,
   getAllRefermentsService,
+  getARefermentService,
 };

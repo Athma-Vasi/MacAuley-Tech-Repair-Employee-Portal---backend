@@ -18,6 +18,7 @@ import {
   createNewRefermentService,
   deleteARefermentService,
   deleteAllRefermentsService,
+  getARefermentService,
   getAllRefermentsService,
 } from './referment.service';
 
@@ -155,9 +156,46 @@ const getAllRefermentsHandler = expressAsyncHandler(
   }
 );
 
+// @desc   get a referment
+// @route  GET /referments/:refermentId
+// @access Private
+const getARefermentHandler = expressAsyncHandler(
+  async (request: GetARefermentRequest, response: Response) => {
+    // only managers/admin can get a referment by its id
+    const {
+      userInfo: { roles },
+      refermentId,
+    } = request.body;
+    if (roles.includes('Employee')) {
+      response.status(403).json({
+        message: 'Only managers and admins can get a referment by its id',
+        refermentData: [],
+      });
+      return;
+    }
+
+    // check if referment exists
+    const isRefermentExists = await checkRefermentExistsService({ refermentId });
+    if (!isRefermentExists) {
+      response.status(404).json({ message: 'Referment not found', refermentData: [] });
+      return;
+    }
+
+    const referment = await getARefermentService(refermentId);
+    if (referment) {
+      response
+        .status(200)
+        .json({ message: 'Referment fetched successfully', refermentData: [referment] });
+    } else {
+      response.status(400).json({ message: 'Referment could not be fetched', refermentData: [] });
+    }
+  }
+);
+
 export {
   createNewRefermentHandler,
   deleteARefermentHandler,
   deleteAllRefermentsHandler,
   getAllRefermentsHandler,
+  getARefermentHandler,
 };

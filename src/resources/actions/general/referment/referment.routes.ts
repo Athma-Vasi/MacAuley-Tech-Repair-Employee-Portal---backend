@@ -4,6 +4,7 @@ import {
   createNewRefermentHandler,
   deleteARefermentHandler,
   deleteAllRefermentsHandler,
+  getARefermentHandler,
   getAllRefermentsHandler,
 } from './referment.controller';
 
@@ -17,6 +18,10 @@ refermentRouter
 
 refermentRouter.route('/user').get();
 
-refermentRouter.route('/:refermentId').get().delete(deleteARefermentHandler).put();
+refermentRouter
+  .route('/:refermentId')
+  .get(getARefermentHandler)
+  .delete(deleteARefermentHandler)
+  .put();
 
 export { refermentRouter };
