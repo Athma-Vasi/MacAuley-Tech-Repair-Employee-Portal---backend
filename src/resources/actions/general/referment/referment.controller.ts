@@ -18,6 +18,7 @@ import {
   createNewRefermentService,
   deleteARefermentService,
   deleteAllRefermentsService,
+  getAllRefermentsService,
 } from './referment.service';
 
 // @desc   create new referment
@@ -126,4 +127,37 @@ const deleteAllRefermentsHandler = expressAsyncHandler(
   }
 );
 
-export { createNewRefermentHandler, deleteARefermentHandler, deleteAllRefermentsHandler };
+// @desc   get all referments
+// @route  GET /referments
+// @access Private
+const getAllRefermentsHandler = expressAsyncHandler(
+  async (request: GetAllRefermentsRequest, response: Response<RefermentsServerResponse>) => {
+    // only managers/admin can get all referments
+    const {
+      userInfo: { roles },
+    } = request.body;
+    if (roles.includes('Employee')) {
+      response
+        .status(403)
+        .json({ message: 'Only managers and admins can get all referments', refermentData: [] });
+      return;
+    }
+
+    const allReferments = await getAllRefermentsService();
+    if (allReferments.length === 0) {
+      response.status(404).json({ message: 'No referments found', refermentData: [] });
+      return;
+    } else {
+      response
+        .status(200)
+        .json({ message: 'All referments fetched successfully', refermentData: allReferments });
+    }
+  }
+);
+
+export {
+  createNewRefermentHandler,
+  deleteARefermentHandler,
+  deleteAllRefermentsHandler,
+  getAllRefermentsHandler,
+};

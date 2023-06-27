@@ -86,9 +86,24 @@ async function deleteAllRefermentsService(): Promise<DeleteResult> {
   }
 }
 
+async function getAllRefermentsService(): Promise<
+  (FlattenMaps<RefermentDocument> &
+    Required<{
+      _id: Types.ObjectId;
+    }>)[]
+> {
+  try {
+    const referments = await RefermentModel.find({}).lean().exec();
+    return referments;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getAllRefermentsService' });
+  }
+}
+
 export {
   checkRefermentExistsService,
   createNewRefermentService,
   deleteARefermentService,
   deleteAllRefermentsService,
+  getAllRefermentsService,
 };

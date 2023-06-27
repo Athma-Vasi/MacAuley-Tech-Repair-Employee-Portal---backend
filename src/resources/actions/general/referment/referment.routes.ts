@@ -4,11 +4,16 @@ import {
   createNewRefermentHandler,
   deleteARefermentHandler,
   deleteAllRefermentsHandler,
+  getAllRefermentsHandler,
 } from './referment.controller';
 
 const refermentRouter = Router();
 
-refermentRouter.route('/').get().post(createNewRefermentHandler).delete(deleteAllRefermentsHandler);
+refermentRouter
+  .route('/')
+  .get(getAllRefermentsHandler)
+  .post(createNewRefermentHandler)
+  .delete(deleteAllRefermentsHandler);
 
 refermentRouter.route('/user').get();
 
