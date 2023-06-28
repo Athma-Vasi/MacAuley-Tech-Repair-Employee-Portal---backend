@@ -7,6 +7,7 @@ import type {
 } from './leaveRequest.model';
 
 import { LeaveRequestModel } from './leaveRequest.model';
+import { DatabaseResponseNullable } from '../../../../types';
 
 type CreateNewLeaveRequestServiceInput = {
   userId: Types.ObjectId;
@@ -31,4 +32,24 @@ async function createNewLeaveRequestService(
   }
 }
 
-export { createNewLeaveRequestService };
+async function getLeaveRequestByIdService(
+  leaveRequestId: Types.ObjectId
+): DatabaseResponseNullable<LeaveRequestDocument> {
+  try {
+    const leaveRequest = await LeaveRequestModel.findById(leaveRequestId).lean().exec();
+    return leaveRequest;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getLeaveRequestByIdService' });
+  }
+}
+
+async function deleteALeaveRequestService(leaveRequestId: Types.ObjectId): Promise<DeleteResult> {
+  try {
+    const leaveRequest = await LeaveRequestModel.deleteOne({ _id: leaveRequestId }).lean().exec();
+    return leaveRequest;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'deleteALeaveRequestService' });
+  }
+}
+
+export { createNewLeaveRequestService, getLeaveRequestByIdService, deleteALeaveRequestService };
