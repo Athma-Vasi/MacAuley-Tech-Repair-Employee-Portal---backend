@@ -15,6 +15,7 @@ import { checkUserExistsService, getUserByIdService, updateUserService } from '.
 import { create } from 'domain';
 import {
   createNewAddressChangeService,
+  getAddressChangeByIdService,
   getAddressChangesByUserService,
   getAllAddressChangesService,
 } from './addressChange.service';
@@ -23,7 +24,7 @@ import { UserDatabaseResponse } from '../../../user/user.types';
 // @desc   Create a new address change request
 // @route  POST /address-change
 // @access Private
-const createNewAddressChange = expressAsyncHandler(
+const createNewAddressChangeHandler = expressAsyncHandler(
   async (request: CreateNewAddressChangeRequest, response: Response) => {
     const {
       userInfo: { roles, userId, username },
@@ -88,7 +89,7 @@ const createNewAddressChange = expressAsyncHandler(
 // @desc   Get all address change requests
 // @route  GET /address-change
 // @access Private
-const getAllAddressChanges = expressAsyncHandler(
+const getAllAddressChangesHandler = expressAsyncHandler(
   async (request: GetAllAddressChangesRequest, response: Response) => {
     const {
       userInfo: { roles, userId },
@@ -128,7 +129,7 @@ const getAllAddressChanges = expressAsyncHandler(
 // @desc   Get all address change requests by user
 // @route  GET /address-change/user
 // @access Private
-const getAddressChangesByUser = expressAsyncHandler(
+const getAddressChangesByUserHandler = expressAsyncHandler(
   async (request: GetAddressChangesByUserRequest, response: Response) => {
     const {
       userInfo: { roles, userId },
@@ -165,4 +166,51 @@ const getAddressChangesByUser = expressAsyncHandler(
   }
 );
 
-export { createNewAddressChange, getAllAddressChanges };
+// @desc   Get an address change request
+// @route  GET /address-change/:addressChangeId
+// @access Private
+const getAnAddressChangeHandler = expressAsyncHandler(
+  async (request: GetAnAddressChangeRequest, response: Response) => {
+    const {
+      userInfo: { roles, userId },
+      addressChangeId,
+    } = request.body;
+
+    // only managers/admin can access this route
+    if (roles.includes('Employee')) {
+      response.status(403).json({
+        message:
+          'Only managers or admins are allowed to view an addressChange request not belonging to them',
+        addressChangeData: [],
+      });
+      return;
+    }
+
+    // check user exists
+    const userExists = await checkUserExistsService({ userId });
+    if (!userExists) {
+      response.status(400).json({ message: 'User does not exist', addressChangeData: [] });
+      return;
+    }
+
+    // get addressChange request by id
+    const addressChange = await getAddressChangeByIdService(addressChangeId);
+    if (!addressChange) {
+      response
+        .status(404)
+        .json({ message: 'AddressChange request not found', addressChangeData: [] });
+    } else {
+      response.status(200).json({
+        message: 'AddressChange request found successfully',
+        addressChangeData: [addressChange],
+      });
+    }
+  }
+);
+
+export {
+  createNewAddressChangeHandler,
+  getAllAddressChangesHandler,
+  getAddressChangesByUserHandler,
+  getAnAddressChangeHandler,
+};
