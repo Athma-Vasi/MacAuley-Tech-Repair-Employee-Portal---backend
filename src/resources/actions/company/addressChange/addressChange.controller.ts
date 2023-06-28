@@ -11,9 +11,10 @@ import type {
   GetAnAddressChangeRequest,
   UpdateAddressChangeRequest,
 } from './addressChange.types';
-import { getUserByIdService } from '../../../user';
+import { getUserByIdService, updateUserService } from '../../../user';
 import { create } from 'domain';
 import { createNewAddressChangeService } from './addressChange.service';
+import { UserDatabaseResponse } from '../../../user/user.types';
 
 // @desc   Create a new address change request
 // @route  POST /address-change
@@ -44,11 +45,17 @@ const createNewAddressChange = expressAsyncHandler(
     }
 
     // create new user object with new address
-    const newUserObject: User = {
+    const newUserObject = {
       ...userExists,
+      userId,
       address: newAddress,
     };
     // update user's address
+    const updatedUser = await updateUserService(newUserObject);
+    if (!updatedUser) {
+      response.status(400).json({ message: 'User update failed', addressChangeData: [] });
+      return;
+    }
 
     // create new address change object
     const newAddressChange: AddressChangeSchema = {

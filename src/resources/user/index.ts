@@ -26,7 +26,16 @@ import {
   updateUserPasswordService,
 } from './user.service';
 
-import type { UserDocument, UserSchema, UserRoles } from './user.model';
+import type {
+  UserDocument,
+  UserSchema,
+  UserRoles,
+  Countries,
+  Departments,
+  JobPositions,
+  PhoneNumber,
+  PostalCodes,
+} from './user.model';
 import type {
   CreateNewUserRequest,
   DeleteUserRequest,
@@ -60,6 +69,11 @@ export {
 export type {
   UserDocument,
   UserSchema,
+  Countries,
+  Departments,
+  JobPositions,
+  PhoneNumber,
+  PostalCodes,
   UserRoles,
   CreateNewUserRequest,
   DeleteUserRequest,

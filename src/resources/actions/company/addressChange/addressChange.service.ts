@@ -2,6 +2,7 @@ import type { FlattenMaps, Types } from 'mongoose';
 import type { DeleteResult } from 'mongodb';
 import type { AddressChangeDocument, AddressChangeSchema } from './addressChange.model';
 import type { DatabaseResponse, DatabaseResponseNullable } from '../../../../types';
+import type { Countries, PhoneNumber, PostalCodes } from '../../../user';
 
 import { AddressChangeModel } from './addressChange.model';
 
@@ -18,14 +19,14 @@ type CreateNewAddressChangeServiceInput = {
   userId: Types.ObjectId;
   username: string;
   email: string;
-  contactNumber: string;
+  contactNumber: PhoneNumber;
   newAddress: {
     addressLine1: string;
     city: string;
     province: string;
     state: string;
-    postalCode: string;
-    country: string;
+    postalCode: PostalCodes;
+    country: Countries;
   };
 };
 
