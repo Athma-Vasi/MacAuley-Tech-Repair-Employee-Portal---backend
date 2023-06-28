@@ -9,16 +9,16 @@ type PhoneNumber =
   `+(${string})(${string}${string}${string}) ${string}${string}${string}-${string}${string}${string}${string}`;
 type Country = 'Canada' | 'United States';
 
-type JobPosition = 'employee' | 'supervisor' | 'manager';
+type JobPosition = 'Employee' | 'Supervisor' | 'Manager';
 type Department =
-  | 'administration'
-  | 'customer service'
-  | 'human resources'
-  | 'repair'
-  | 'technical support'
-  | 'sales'
-  | 'logistics'
-  | 'inventory management';
+  | 'Administration'
+  | 'Customer Service'
+  | 'Human Resources'
+  | 'Repair'
+  | 'Technical Support'
+  | 'Sales'
+  | 'Logistics'
+  | 'Inventory Management';
 
 type UserSchema = {
   username: string;
