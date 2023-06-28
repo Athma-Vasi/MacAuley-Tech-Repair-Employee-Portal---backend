@@ -18,6 +18,7 @@ import {
   deleteAllLeaveRequestsService,
   getAllLeaveRequestsService,
   getLeaveRequestByIdService,
+  getLeaveRequestsByUserService,
 } from './leaveRequest.service';
 import { Types } from 'mongoose';
 
@@ -244,9 +245,45 @@ const getAllLeaveRequestsHandler = expressAsyncHandler(
   }
 );
 
+// @desc   Get all leave requests for a user
+// @route  GET /leave-request/user
+// @access Private/Admin/Manager/Employee
+const getLeaveRequestsByUserHandler = expressAsyncHandler(
+  async (
+    request: GetLeaveRequestsByUserRequest,
+    response: Response<LeaveRequestServerResponse>
+  ) => {
+    const {
+      userInfo: { roles, userId, username },
+    } = request.body;
+
+    // check if user exists
+    const userExists = await getUserByIdService(userId);
+    if (!userExists) {
+      response.status(404).json({ message: 'User does not exist', leaveRequestData: [] });
+      return;
+    }
+
+    // anyone can get their own leave requests
+    const leaveRequests = await getLeaveRequestsByUserService(userId);
+    if (leaveRequests.length === 0) {
+      response.status(404).json({
+        message: 'No leave requests found',
+        leaveRequestData: [],
+      });
+    } else {
+      response.status(200).json({
+        message: 'Leave requests found successfully',
+        leaveRequestData: leaveRequests,
+      });
+    }
+  }
+);
 export {
   createNewLeaveRequestHandler,
   deleteALeaveRequestHandler,
   deleteAllLeaveRequestsHandler,
   getALeaveRequestHandler,
+  getAllLeaveRequestsHandler,
+  getLeaveRequestsByUserHandler,
 };

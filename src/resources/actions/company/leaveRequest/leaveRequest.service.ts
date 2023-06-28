@@ -7,7 +7,7 @@ import type {
 } from './leaveRequest.model';
 
 import { LeaveRequestModel } from './leaveRequest.model';
-import { DatabaseResponseNullable } from '../../../../types';
+import { DatabaseResponse, DatabaseResponseNullable } from '../../../../types';
 
 type CreateNewLeaveRequestServiceInput = {
   userId: Types.ObjectId;
@@ -75,10 +75,25 @@ async function getAllLeaveRequestsService(): Promise<
   }
 }
 
+async function getLeaveRequestsByUserService(userId: Types.ObjectId): Promise<
+  (FlattenMaps<LeaveRequestDocument> &
+    Required<{
+      _id: Types.ObjectId;
+    }>)[]
+> {
+  try {
+    const leaveRequests = await LeaveRequestModel.find({ userId }).lean().exec();
+    return leaveRequests;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getLeaveRequestsByUserService' });
+  }
+}
+
 export {
   createNewLeaveRequestService,
   getLeaveRequestByIdService,
   deleteALeaveRequestService,
   deleteAllLeaveRequestsService,
   getAllLeaveRequestsService,
+  getLeaveRequestsByUserService,
 };
