@@ -1,12 +1,10 @@
 import { Schema, Types, model } from 'mongoose';
 
-import type { Country, PhoneNumber, PostalCode } from '../../../user';
+import type { Country, PostalCode } from '../../../user';
 
 type AddressChangeSchema = {
   userId: Types.ObjectId;
   username: string;
-  email: string;
-  contactNumber: PhoneNumber;
   newAddress: {
     addressLine1: string;
     city: string;
@@ -36,15 +34,6 @@ const addressChangeSchema = new Schema<AddressChangeSchema>(
       type: String,
       required: [true, 'Username is required'],
       index: true,
-    },
-    email: {
-      type: String,
-      required: [true, 'Email is required'],
-      index: true,
-    },
-    contactNumber: {
-      type: String,
-      required: [true, 'Contact number is required'],
     },
     newAddress: {
       addressLine1: {

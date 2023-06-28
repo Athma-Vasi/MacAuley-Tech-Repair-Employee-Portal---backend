@@ -67,8 +67,6 @@ const createNewAddressChangeHandler = expressAsyncHandler(
     const newAddressChange: AddressChangeSchema = {
       userId,
       username,
-      email: userExists.email,
-      contactNumber: userExists.contactNumber,
       newAddress,
     };
 

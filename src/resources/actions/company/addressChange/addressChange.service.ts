@@ -1,8 +1,8 @@
 import type { FlattenMaps, Types } from 'mongoose';
 import type { DeleteResult } from 'mongodb';
 import type { AddressChangeDocument, AddressChangeSchema } from './addressChange.model';
-import type { DatabaseResponse, DatabaseResponseNullable } from '../../../../types';
-import type { Country, PhoneNumber, PostalCode } from '../../../user';
+
+import type { Country, PostalCode } from '../../../user';
 
 import { AddressChangeModel } from './addressChange.model';
 
@@ -18,8 +18,6 @@ async function getAddressChangeByIdService(addressChangeId: Types.ObjectId) {
 type CreateNewAddressChangeServiceInput = {
   userId: Types.ObjectId;
   username: string;
-  email: string;
-  contactNumber: PhoneNumber;
   newAddress: {
     addressLine1: string;
     city: string;
