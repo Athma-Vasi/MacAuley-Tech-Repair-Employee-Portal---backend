@@ -8,6 +8,7 @@ import type {
   JobPositions,
   PhoneNumber,
   PostalCodes,
+  UserDocument,
 } from './user.model';
 
 interface CreateNewUserRequest extends RequestAfterJWTVerification {
@@ -96,9 +97,11 @@ interface UpdateUserPasswordRequest extends RequestAfterJWTVerification {
   };
 }
 
-type UserServerResponse = {
+type UsersServerResponse = {
   message: string;
 };
+
+type UserDatabaseResponse = Omit<UserDocument, 'password'>;
 
 /**
  *
@@ -114,6 +117,7 @@ export type {
   UpdateUserRequest,
   UpdateUserPasswordRequest,
 
-  // user return types from service
+  // user return types
   UserServerResponse,
+  UserDatabaseResponse,
 };

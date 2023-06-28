@@ -169,7 +169,7 @@ const deleteUserHandler = expressAsyncHandler(
 
     // delete user if all checks pass successfully
     const deletedUser = await deleteUserService(userToBeDeletedId);
-    if (deletedUser) {
+    if (deletedUser.acknowledged) {
       response.status(200).json({ message: 'User deleted successfully' });
     } else {
       response.status(400).json({ message: 'User deletion failed' });

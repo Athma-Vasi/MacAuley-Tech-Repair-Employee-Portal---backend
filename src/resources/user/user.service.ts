@@ -1,17 +1,20 @@
 import bcrypt from 'bcryptjs';
 
 import type { FlattenMaps, Types } from 'mongoose';
+import type { DeleteResult } from 'mongodb';
 import type {
   Countries,
   Departments,
   JobPositions,
   PhoneNumber,
   PostalCodes,
+  UserDocument,
   UserRoles,
   UserSchema,
 } from './user.model';
 
 import { UserModel } from './user.model';
+import { UserDatabaseResponse } from './user.types';
 
 type CheckUserExistsServiceInput = {
   email?: string | undefined;
@@ -118,29 +121,19 @@ async function createNewUserService(inputObj: CreateNewUserServiceInput) {
   }
 }
 
-async function deleteUserService(id: Types.ObjectId): Promise<
-  | (FlattenMaps<UserSchema> & {
-      _id: Types.ObjectId;
-    })
-  | null
-> {
+async function deleteUserService(userId: Types.ObjectId): Promise<DeleteResult> {
   try {
-    const deletedUser = await UserModel.findByIdAndDelete(id).lean().exec();
+    const deletedUser = await UserModel.deleteOne({ _id: userId }).lean().exec();
     return deletedUser;
   } catch (error: any) {
     throw new Error(error, { cause: 'deleteUserService' });
   }
 }
 
-async function getUserByIdService(userId: Types.ObjectId): Promise<
-  | (FlattenMaps<UserSchema> & {
-      _id: Types.ObjectId;
-    })
-  | null
-> {
+async function getUserByIdService(userId: Types.ObjectId) {
   try {
-    const user = await UserModel.findById(userId).lean().exec();
-    return user;
+    const user = await UserModel.findById(userId).select('-password').lean().exec();
+    return user as unknown as Promise<UserDatabaseResponse> | null;
   } catch (error: any) {
     throw new Error(error, { cause: 'getUserByIdService' });
   }
@@ -148,22 +141,18 @@ async function getUserByIdService(userId: Types.ObjectId): Promise<
 
 async function getUserByUsernameService(username: string) {
   try {
-    const user = await UserModel.findOne({ username }).lean().exec();
-    return user;
+    const user = await UserModel.findOne({ username }).select('-password').lean().exec();
+    return user as unknown as Promise<UserDatabaseResponse> | null;
   } catch (error: any) {
     throw new Error(error, { cause: 'getUserByUsernameService' });
   }
 }
 
-async function getAllUsersService(): Promise<
-  (FlattenMaps<UserSchema> & {
-    _id: Types.ObjectId;
-  })[]
-> {
+async function getAllUsersService() {
   try {
     // do not return the password field
     const users = await UserModel.find({}).select('-password').lean().exec();
-    return users;
+    return users as unknown as Promise<UserDatabaseResponse[]>;
   } catch (error: any) {
     throw new Error(error, { cause: 'getAllUsersService' });
   }
@@ -210,7 +199,7 @@ async function updateUserService(input: UpdateUserServiceInput) {
       .lean()
       .exec();
 
-    return updatedUser;
+    return updatedUser as Promise<UserDatabaseResponse> | null;
   } catch (error: any) {
     throw new Error(error, { cause: 'updateUserService' });
   }

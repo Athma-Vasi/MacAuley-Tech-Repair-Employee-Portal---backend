@@ -1,9 +1,9 @@
 import type { FlattenMaps, Types } from 'mongoose';
 import type { DeleteResult } from 'mongodb';
 import type { AnnouncementDocument, AnnouncementSchema, RatingFeel } from './announcement.model';
+import type { DatabaseResponse, DatabaseResponseNullable } from '../../types';
 
 import { AnnouncementModel } from './announcement.model';
-import { DatabaseResponse, DatabaseResponseNullable } from '../../types';
 
 type CheckAnnouncementExistsServiceInput = {
   announcementId?: Types.ObjectId;
