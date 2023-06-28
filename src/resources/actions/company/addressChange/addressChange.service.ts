@@ -39,4 +39,18 @@ async function createNewAddressChangeService(input: CreateNewAddressChangeServic
   }
 }
 
-export { getAddressChangeByIdService, createNewAddressChangeService };
+async function getAllAddressChangesService(): Promise<
+  (FlattenMaps<AddressChangeDocument> &
+    Required<{
+      _id: Types.ObjectId;
+    }>)[]
+> {
+  try {
+    const addressChanges = await AddressChangeModel.find({}).lean().exec();
+    return addressChanges;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getAllAddressChangesService' });
+  }
+}
+
+export { getAddressChangeByIdService, createNewAddressChangeService, getAllAddressChangesService };

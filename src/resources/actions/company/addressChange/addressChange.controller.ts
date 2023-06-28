@@ -11,9 +11,12 @@ import type {
   GetAnAddressChangeRequest,
   UpdateAddressChangeRequest,
 } from './addressChange.types';
-import { getUserByIdService, updateUserService } from '../../../user';
+import { checkUserExistsService, getUserByIdService, updateUserService } from '../../../user';
 import { create } from 'domain';
-import { createNewAddressChangeService } from './addressChange.service';
+import {
+  createNewAddressChangeService,
+  getAllAddressChangesService,
+} from './addressChange.service';
 import { UserDatabaseResponse } from '../../../user/user.types';
 
 // @desc   Create a new address change request
@@ -81,4 +84,44 @@ const createNewAddressChange = expressAsyncHandler(
   }
 );
 
-export { createNewAddressChange };
+// @desc   Get all address change requests
+// @route  GET /address-change
+// @access Private
+const getAllAddressChanges = expressAsyncHandler(
+  async (request: GetAllAddressChangesRequest, response: Response) => {
+    const {
+      userInfo: { roles, userId },
+    } = request.body;
+
+    // only managers/admin can access this route
+    if (roles.includes('Employee')) {
+      response.status(403).json({
+        message: 'Only managers or admins are allowed to view all addressChange requests',
+        addressChangeData: [],
+      });
+      return;
+    }
+
+    // check user exists
+    const userExists = await checkUserExistsService({ userId });
+    if (!userExists) {
+      response.status(400).json({ message: 'User does not exist', addressChangeData: [] });
+      return;
+    }
+
+    // get all addressChange requests
+    const addressChanges = await getAllAddressChangesService();
+    if (addressChanges.length === 0) {
+      response
+        .status(404)
+        .json({ message: 'No addressChange requests found', addressChangeData: [] });
+    } else {
+      response.status(200).json({
+        message: 'AddressChange requests found successfully',
+        addressChangeData: addressChanges,
+      });
+    }
+  }
+);
+
+export { createNewAddressChange, getAllAddressChanges };
