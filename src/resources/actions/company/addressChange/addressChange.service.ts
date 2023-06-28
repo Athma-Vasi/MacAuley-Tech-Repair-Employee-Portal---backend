@@ -67,9 +67,23 @@ async function getAddressChangesByUserService(userId: Types.ObjectId): Promise<
   }
 }
 
+async function deleteAddressChangeByIdService(
+  addressChangeId: Types.ObjectId
+): Promise<DeleteResult> {
+  try {
+    const deletedResult = await AddressChangeModel.deleteOne({ _id: addressChangeId })
+      .lean()
+      .exec();
+    return deletedResult;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'deleteAddressChangeByIdService' });
+  }
+}
+
 export {
   getAddressChangeByIdService,
   createNewAddressChangeService,
   getAllAddressChangesService,
   getAddressChangesByUserService,
+  deleteAddressChangeByIdService,
 };

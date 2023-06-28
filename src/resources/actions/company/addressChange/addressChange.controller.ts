@@ -9,17 +9,19 @@ import type {
   GetAllAddressChangesRequest,
   GetAddressChangesByUserRequest,
   GetAnAddressChangeRequest,
-  UpdateAddressChangeRequest,
+  UpdateAnAddressChangeRequest,
 } from './addressChange.types';
 import { checkUserExistsService, getUserByIdService, updateUserService } from '../../../user';
 import { create } from 'domain';
 import {
   createNewAddressChangeService,
+  deleteAddressChangeByIdService,
   getAddressChangeByIdService,
   getAddressChangesByUserService,
   getAllAddressChangesService,
 } from './addressChange.service';
 import { UserDatabaseResponse } from '../../../user/user.types';
+import { Types } from 'mongoose';
 
 // @desc   Create a new address change request
 // @route  POST /address-change
@@ -208,9 +210,61 @@ const getAnAddressChangeHandler = expressAsyncHandler(
   }
 );
 
+// @desc   Delete an address change request by its id
+// @route  DELETE /address-change/:addressChangeId
+// @access Private
+const deleteAnAddressChangeHandler = expressAsyncHandler(
+  async (request: DeleteAnAddressChangeRequest, response: Response) => {
+    const {
+      userInfo: { roles, userId },
+    } = request.body;
+    const addressChangeId = request.params.addressChangeId as Types.ObjectId;
+
+    // only managers/admin can access this route
+    if (roles.includes('Employee')) {
+      response.status(403).json({
+        message: 'Only managers or admins are allowed to delete an addressChange request',
+        addressChangeData: [],
+      });
+      return;
+    }
+
+    // check user exists
+    const userExists = await checkUserExistsService({ userId });
+    if (!userExists) {
+      response.status(400).json({ message: 'User does not exist', addressChangeData: [] });
+      return;
+    }
+
+    // check addressChange request exists
+    const addressChangeExists = await getAddressChangeByIdService(addressChangeId);
+    if (!addressChangeExists) {
+      response
+        .status(404)
+        .json({ message: 'AddressChange request does not exist', addressChangeData: [] });
+      return;
+    }
+
+    // delete addressChange request by id
+    const deletedResult = await deleteAddressChangeByIdService(addressChangeId);
+    if (deletedResult.acknowledged) {
+      response.status(200).json({
+        message: 'AddressChange request deleted successfully',
+        addressChangeData: [],
+      });
+    } else {
+      response.status(400).json({
+        message: 'AddressChange request could not be deleted',
+        addressChangeData: [],
+      });
+    }
+  }
+);
+
 export {
   createNewAddressChangeHandler,
   getAllAddressChangesHandler,
   getAddressChangesByUserHandler,
   getAnAddressChangeHandler,
+  deleteAnAddressChangeHandler,
 };

@@ -45,12 +45,6 @@ interface GetAnAddressChangeRequest extends RequestAfterJWTVerification {
   };
 }
 
-type UpdateAddressChangeRequest = CreateNewAddressChangeRequest & {
-  params: {
-    addressChangeId: Types.ObjectId;
-  };
-};
-
 type AddressChangeServerResponse = {
   message: string;
   addressChangeData: Array<AddressChangeDocument>;
@@ -63,6 +57,6 @@ export type {
   GetAllAddressChangesRequest,
   GetAddressChangesByUserRequest,
   GetAnAddressChangeRequest,
-  UpdateAddressChangeRequest,
+  UpdateAnAddressChangeRequest,
   AddressChangeServerResponse,
 };
