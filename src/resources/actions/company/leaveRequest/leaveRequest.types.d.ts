@@ -40,8 +40,8 @@ interface GetALeaveRequestRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    leaveRequestId: Types.ObjectId;
   };
+  params: { leaveRequestId: Types.ObjectId };
 }
 
 type LeaveRequestServerResponse = {

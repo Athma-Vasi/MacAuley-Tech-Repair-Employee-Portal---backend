@@ -166,4 +166,48 @@ const deleteAllLeaveRequestsHandler = expressAsyncHandler(
   }
 );
 
-export { createNewLeaveRequestHandler, deleteALeaveRequestHandler };
+// @desc   Get a leave request by id
+// @route  GET /leave-request/:leaveRequestId
+// @access Private/Admin/Manager
+const getALeaveRequestHandler = expressAsyncHandler(
+  async (request: GetALeaveRequestRequest, response: Response<LeaveRequestServerResponse>) => {
+    const {
+      userInfo: { roles, userId, username },
+    } = request.body;
+    const leaveRequestId = request.params.leaveRequestId as Types.ObjectId;
+
+    // check if user exists
+    const userExists = await getUserByIdService(userId);
+    if (!userExists) {
+      response.status(404).json({ message: 'User does not exist', leaveRequestData: [] });
+      return;
+    }
+
+    // check if user has permission
+    if (roles.includes('Employee')) {
+      response.status(403).json({ message: 'User does not have permission', leaveRequestData: [] });
+      return;
+    }
+
+    // get leave request
+    const leaveRequest = await getLeaveRequestByIdService(leaveRequestId);
+    if (leaveRequest) {
+      response.status(200).json({
+        message: 'Leave request found successfully',
+        leaveRequestData: [leaveRequest],
+      });
+    } else {
+      response.status(404).json({
+        message: 'Leave request not found',
+        leaveRequestData: [],
+      });
+    }
+  }
+);
+
+export {
+  createNewLeaveRequestHandler,
+  deleteALeaveRequestHandler,
+  deleteAllLeaveRequestsHandler,
+  getALeaveRequestHandler,
+};
