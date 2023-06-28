@@ -1,7 +1,7 @@
 import type { Request } from 'express';
 import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
-import type { LeaveRequestDocument } from './leaveRequest.model';
+import type { LeaveRequestDocument, ReasonForLeave } from './leaveRequest.model';
 
 interface CreateNewLeaveRequestRequest extends RequestAfterJWTVerification {
   body: {
@@ -10,10 +10,9 @@ interface CreateNewLeaveRequestRequest extends RequestAfterJWTVerification {
       username: string;
     };
     leaveRequest: {
-      leaveType: string;
       startDate: Date;
       endDate: Date;
-      reasonForLeave: string;
+      reasonForLeave: ReasonForLeave;
       delegatedToEmployee: string;
       delegatedResponsibilities: string;
       additionalComments: string;
