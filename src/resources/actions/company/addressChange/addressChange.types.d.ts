@@ -1,7 +1,7 @@
 import type { Request } from 'express';
 import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
-import type { Countries, PostalCodes, UserRoles } from '../../../user';
+import type { Country, PostalCode, UserRoles } from '../../../user';
 import type { AddressChangeDocument, AddressChangeSchema } from './addressChange.model';
 
 interface CreateNewAddressChangeRequest extends RequestAfterJWTVerification {
@@ -16,8 +16,8 @@ interface CreateNewAddressChangeRequest extends RequestAfterJWTVerification {
       city: string;
       province: string;
       state: string;
-      postalCode: PostalCodes;
-      country: Countries;
+      postalCode: PostalCode;
+      country: Country;
     };
   };
 }

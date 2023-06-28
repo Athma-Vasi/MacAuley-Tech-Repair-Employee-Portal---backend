@@ -3,11 +3,11 @@ import bcrypt from 'bcryptjs';
 import type { FlattenMaps, Types } from 'mongoose';
 import type { DeleteResult } from 'mongodb';
 import type {
-  Countries,
-  Departments,
-  JobPositions,
+  Country,
+  Department,
+  JobPosition,
   PhoneNumber,
-  PostalCodes,
+  PostalCode,
   UserDocument,
   UserRoles,
   UserSchema,
@@ -88,11 +88,11 @@ type CreateNewUserServiceInput = {
     city: string;
     province: string;
     state: string;
-    postalCode: PostalCodes;
-    country: Countries;
+    postalCode: PostalCode;
+    country: Country;
   };
-  jobPosition: JobPositions;
-  department: Departments;
+  jobPosition: JobPosition;
+  department: Department;
   emergencyContact: {
     fullName: string;
     contactNumber: PhoneNumber;
@@ -171,11 +171,11 @@ type UpdateUserServiceInput = {
     city: string;
     province: string;
     state: string;
-    postalCode: PostalCodes;
-    country: Countries;
+    postalCode: PostalCode;
+    country: Country;
   };
-  jobPosition: JobPositions;
-  department: Departments;
+  jobPosition: JobPosition;
+  department: Department;
   emergencyContact: {
     fullName: string;
     contactNumber: PhoneNumber;

@@ -1,3 +1,3 @@
-type ActionsCompany = 'addressChange';
+type ActionsCompany = 'addressChange' | 'parentalLeave';
 
 export type { ActionsCompany };

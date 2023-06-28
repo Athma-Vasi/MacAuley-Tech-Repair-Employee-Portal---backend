@@ -4,13 +4,13 @@ type UserRoles = ('Admin' | 'Employee' | 'Manager')[];
 
 type CanadianPostalCode = `${string}${string}${string} ${string}${string}${string}`;
 type USPostalCode = `${string}${string}${string}${string}${string}`;
-type PostalCodes = CanadianPostalCode | USPostalCode;
+type PostalCode = CanadianPostalCode | USPostalCode;
 type PhoneNumber =
   `+(${string})(${string}${string}${string}) ${string}${string}${string}-${string}${string}${string}${string}`;
-type Countries = ('Canada' | 'United States')[];
+type Country = 'Canada' | 'United States';
 
-type JobPositions = ('employee' | 'supervisor' | 'manager')[];
-type Departments = (
+type JobPosition = 'employee' | 'supervisor' | 'manager';
+type Department =
   | 'administration'
   | 'customer service'
   | 'human resources'
@@ -18,8 +18,7 @@ type Departments = (
   | 'technical support'
   | 'sales'
   | 'logistics'
-  | 'inventory management'
-)[];
+  | 'inventory management';
 
 type UserSchema = {
   username: string;
@@ -34,11 +33,11 @@ type UserSchema = {
     city: string;
     province: string;
     state: string;
-    postalCode: PostalCodes;
-    country: Countries;
+    postalCode: PostalCode;
+    country: Country;
   };
-  jobPosition: JobPositions;
-  department: Departments;
+  jobPosition: JobPosition;
+  department: Department;
   emergencyContact: {
     fullName: string;
     contactNumber: PhoneNumber;
@@ -119,11 +118,11 @@ const userSchema = new Schema<UserSchema>(
       },
     },
     jobPosition: {
-      type: [String],
+      type: String,
       required: [true, 'Job position is required'],
     },
     department: {
-      type: [String],
+      type: String,
       required: [true, 'Department is required'],
     },
     emergencyContact: {
@@ -162,9 +161,9 @@ export type {
   UserSchema,
   UserDocument,
   UserRoles,
-  PostalCodes,
+  PostalCode,
   PhoneNumber,
-  Countries,
-  JobPositions,
-  Departments,
+  Country,
+  JobPosition,
+  Department,
 };

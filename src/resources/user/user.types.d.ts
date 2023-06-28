@@ -3,11 +3,11 @@ import { Request } from 'express';
 import type { RequestAfterJWTVerification } from '../auth';
 import type {
   UserRoles,
-  Countries,
-  Departments,
-  JobPositions,
+  Country,
+  Department,
+  JobPosition,
   PhoneNumber,
-  PostalCodes,
+  PostalCode,
   UserDocument,
 } from './user.model';
 
@@ -25,11 +25,11 @@ interface CreateNewUserRequest extends RequestAfterJWTVerification {
       city: string;
       province: string;
       state: string;
-      postalCode: PostalCodes;
-      country: Countries;
+      postalCode: PostalCode;
+      country: Country;
     };
-    jobPosition: JobPositions;
-    department: Departments;
+    jobPosition: JobPosition;
+    department: Department;
     emergencyContact: {
       fullName: string;
       contactNumber: PhoneNumber;
@@ -71,11 +71,11 @@ interface UpdateUserRequest extends RequestAfterJWTVerification {
       city: string;
       province: string;
       state: string;
-      postalCode: PostalCodes;
-      country: Countries;
+      postalCode: PostalCode;
+      country: Country;
     };
-    jobPosition: JobPositions;
-    department: Departments;
+    jobPosition: JobPosition;
+    department: Department;
     emergencyContact: {
       fullName: string;
       contactNumber: PhoneNumber;

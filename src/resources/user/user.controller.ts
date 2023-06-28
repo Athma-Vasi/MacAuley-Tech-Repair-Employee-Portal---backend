@@ -67,7 +67,10 @@ const createNewUserHandler = expressAsyncHandler(
       addressLine1,
       city,
       startDate,
+      country,
       postalCode,
+      jobPosition,
+      department,
       fullName,
       emergencyContactNumber,
     });
@@ -75,16 +78,6 @@ const createNewUserHandler = expressAsyncHandler(
     if (isFieldsEmpty.length > 0) {
       response.status(400).json({
         message: `${isFieldsEmpty.map(([field, _]) => field).join(', ')} are required`,
-      });
-      return;
-    }
-
-    const isArraysEmpty = [department, jobPosition, country]
-      .map((field) => !field || field.length === 0)
-      .filter((value) => value === true);
-    if (isArraysEmpty.length > 0) {
-      response.status(400).json({
-        message: 'department, country and jobPosition are required',
       });
       return;
     }
@@ -256,6 +249,9 @@ const updateUserHandler = expressAsyncHandler(
       contactNumber,
       startDate,
       addressLine1,
+      country,
+      jobPosition,
+      department,
       city,
       postalCode,
       emergencyContactNumber,

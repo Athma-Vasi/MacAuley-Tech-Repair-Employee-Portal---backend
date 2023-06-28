@@ -1,5 +1,6 @@
 import { Schema, Types, model } from 'mongoose';
-import type { Countries, PhoneNumber, PostalCodes } from '../../../user';
+
+import type { Country, PhoneNumber, PostalCode } from '../../../user';
 
 type AddressChangeSchema = {
   userId: Types.ObjectId;
@@ -11,8 +12,8 @@ type AddressChangeSchema = {
     city: string;
     province: string;
     state: string;
-    postalCode: PostalCodes;
-    country: Countries;
+    postalCode: PostalCode;
+    country: Country;
   };
 };
 
