@@ -15,6 +15,7 @@ import { checkUserExistsService, getUserByIdService, updateUserService } from '.
 import { create } from 'domain';
 import {
   createNewAddressChangeService,
+  getAddressChangesByUserService,
   getAllAddressChangesService,
 } from './addressChange.service';
 import { UserDatabaseResponse } from '../../../user/user.types';
@@ -111,6 +112,46 @@ const getAllAddressChanges = expressAsyncHandler(
 
     // get all addressChange requests
     const addressChanges = await getAllAddressChangesService();
+    if (addressChanges.length === 0) {
+      response
+        .status(404)
+        .json({ message: 'No addressChange requests found', addressChangeData: [] });
+    } else {
+      response.status(200).json({
+        message: 'AddressChange requests found successfully',
+        addressChangeData: addressChanges,
+      });
+    }
+  }
+);
+
+// @desc   Get all address change requests by user
+// @route  GET /address-change/user
+// @access Private
+const getAddressChangesByUser = expressAsyncHandler(
+  async (request: GetAddressChangesByUserRequest, response: Response) => {
+    const {
+      userInfo: { roles, userId },
+    } = request.body;
+
+    // only managers/admin can access this route
+    if (roles.includes('Employee')) {
+      response.status(403).json({
+        message: 'Only managers or admins are allowed to view  addressChange requests by user',
+        addressChangeData: [],
+      });
+      return;
+    }
+
+    // check user exists
+    const userExists = await checkUserExistsService({ userId });
+    if (!userExists) {
+      response.status(400).json({ message: 'User does not exist', addressChangeData: [] });
+      return;
+    }
+
+    // get all addressChange requests by user
+    const addressChanges = await getAddressChangesByUserService(userId);
     if (addressChanges.length === 0) {
       response
         .status(404)

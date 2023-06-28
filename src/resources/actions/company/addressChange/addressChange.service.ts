@@ -53,4 +53,23 @@ async function getAllAddressChangesService(): Promise<
   }
 }
 
-export { getAddressChangeByIdService, createNewAddressChangeService, getAllAddressChangesService };
+async function getAddressChangesByUserService(userId: Types.ObjectId): Promise<
+  (FlattenMaps<AddressChangeDocument> &
+    Required<{
+      _id: Types.ObjectId;
+    }>)[]
+> {
+  try {
+    const addressChanges = await AddressChangeModel.find({ userId }).lean().exec();
+    return addressChanges;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getAddressChangesByUserService' });
+  }
+}
+
+export {
+  getAddressChangeByIdService,
+  createNewAddressChangeService,
+  getAllAddressChangesService,
+  getAddressChangesByUserService,
+};
