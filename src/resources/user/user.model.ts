@@ -137,7 +137,7 @@ const userSchema = new Schema<UserSchema>(
       },
     },
     startDate: {
-      type: NativeDate,
+      type: Date,
       required: [true, 'Start date is required'],
     },
     roles: {

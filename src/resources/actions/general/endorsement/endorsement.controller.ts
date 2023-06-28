@@ -94,9 +94,7 @@ const getAllEndorsementsHandler = expressAsyncHandler(
     const endorsements = await getAllEndorsementsService();
 
     if (endorsements.length === 0) {
-      response
-        .status(400)
-        .json({ message: 'Endorsements could not be fetched', endorsementData: [] });
+      response.status(400).json({ message: 'No endorsements found', endorsementData: [] });
     } else {
       response.status(200).json({
         message: 'Endorsements fetched successfully',

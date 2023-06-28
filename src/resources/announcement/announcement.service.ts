@@ -88,7 +88,7 @@ async function createNewAnnouncementService({
 
 async function deleteAnnouncementService(
   id: Types.ObjectId
-): DatabaseResponseNullable<AnnouncementDocument> {
+): DatabaseResponseNullable<AnnouncementSchema> {
   try {
     const result = await AnnouncementModel.findByIdAndDelete(id).lean().exec();
     return result;
@@ -99,7 +99,7 @@ async function deleteAnnouncementService(
 
 async function getAnnouncementsByUserService(
   user: Types.ObjectId
-): DatabaseResponse<AnnouncementDocument> {
+): DatabaseResponse<AnnouncementSchema> {
   try {
     const announcements = await AnnouncementModel.find({ user }).lean().exec();
     return announcements;
@@ -133,7 +133,7 @@ async function updateAnnouncementService({
   article,
   timeToRead,
   rating,
-}: UpdateAnnouncementServiceInput): DatabaseResponseNullable<AnnouncementDocument> {
+}: UpdateAnnouncementServiceInput): DatabaseResponseNullable<AnnouncementSchema> {
   try {
     const announcementFieldsToUpdateObj = {
       userId,
@@ -159,7 +159,7 @@ async function updateAnnouncementService({
   }
 }
 
-async function getAllAnnouncementsService(): DatabaseResponse<AnnouncementDocument> {
+async function getAllAnnouncementsService(): DatabaseResponse<AnnouncementSchema> {
   try {
     const announcements = await AnnouncementModel.find({}).lean().exec();
     return announcements;
@@ -179,7 +179,7 @@ async function deleteAllAnnouncementsService(): Promise<DeleteResult> {
 
 async function getAnnouncementByIdService(
   announcementId: Types.ObjectId
-): DatabaseResponseNullable<AnnouncementDocument> {
+): DatabaseResponseNullable<AnnouncementSchema> {
   try {
     const announcement = await AnnouncementModel.findById(announcementId).lean().exec();
     return announcement;

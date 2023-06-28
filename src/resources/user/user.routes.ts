@@ -6,6 +6,7 @@ import {
   deleteUserHandler,
   getAllUsersHandler,
   updateUserHandler,
+  updateUserPasswordHandler,
 } from './user.controller';
 
 const userRouter = Router();
@@ -19,6 +20,6 @@ userRouter
   .patch(verifyJWTMiddleware, updateUserHandler)
   .delete(verifyJWTMiddleware, deleteUserHandler);
 
-userRouter.route('/password').put(verifyJWTMiddleware);
+userRouter.route('/update-password').put(verifyJWTMiddleware, updateUserPasswordHandler);
 
 export { userRouter };

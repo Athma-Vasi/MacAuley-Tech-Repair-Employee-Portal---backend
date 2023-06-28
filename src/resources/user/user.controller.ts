@@ -46,8 +46,10 @@ const createNewUserHandler = expressAsyncHandler(
     const { addressLine1, city, province, state, postalCode, country } = address;
     const { fullName, contactNumber: emergencyContactNumber } = emergencyContact;
 
+    console.log(JSON.stringify(request.body, null, 2));
+
     // both state and province cannot be empty (both are required)
-    if (state === '' && province === '') {
+    if (!state && !province) {
       response.status(400).json({
         message: 'State or province must be filled',
       });
@@ -78,7 +80,7 @@ const createNewUserHandler = expressAsyncHandler(
     }
 
     const isArraysEmpty = [department, jobPosition, country]
-      .map((field) => !Array.isArray(field) || field.length === 0)
+      .map((field) => !field || field.length === 0)
       .filter((value) => value === true);
     if (isArraysEmpty.length > 0) {
       response.status(400).json({
@@ -227,7 +229,7 @@ const updateUserHandler = expressAsyncHandler(
     const { contactNumber: emergencyContactNumber, fullName } = emergencyContact;
 
     // both state and provinces cannot be empty (one must be filled)
-    if (state === '' && province === '') {
+    if (!state && !province) {
       response.status(400).json({
         message: 'state and province cannot both be empty',
       });
@@ -236,7 +238,7 @@ const updateUserHandler = expressAsyncHandler(
 
     // check arrays exist
     const isArraysEmpty = [roles, department, jobPosition, country]
-      .map((field) => !Array.isArray(field) || field.length === 0)
+      .map((field) => !field || field.length === 0)
       .filter((value) => value === true);
     if (isArraysEmpty.length > 0) {
       response.status(400).json({
@@ -343,4 +345,10 @@ const updateUserPasswordHandler = expressAsyncHandler(
   }
 );
 
-export { createNewUserHandler, deleteUserHandler, getAllUsersHandler, updateUserHandler };
+export {
+  createNewUserHandler,
+  deleteUserHandler,
+  getAllUsersHandler,
+  updateUserHandler,
+  updateUserPasswordHandler,
+};
