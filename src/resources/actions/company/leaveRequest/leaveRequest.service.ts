@@ -52,4 +52,18 @@ async function deleteALeaveRequestService(leaveRequestId: Types.ObjectId): Promi
   }
 }
 
-export { createNewLeaveRequestService, getLeaveRequestByIdService, deleteALeaveRequestService };
+async function deleteAllLeaveRequestsService(): Promise<DeleteResult> {
+  try {
+    const leaveRequests = await LeaveRequestModel.deleteMany({}).lean().exec();
+    return leaveRequests;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'deleteAllLeaveRequestsService' });
+  }
+}
+
+export {
+  createNewLeaveRequestService,
+  getLeaveRequestByIdService,
+  deleteALeaveRequestService,
+  deleteAllLeaveRequestsService,
+};

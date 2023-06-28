@@ -15,6 +15,7 @@ import { getUserByIdService } from '../../../user';
 import {
   createNewLeaveRequestService,
   deleteALeaveRequestService,
+  deleteAllLeaveRequestsService,
   getLeaveRequestByIdService,
 } from './leaveRequest.service';
 import { Types } from 'mongoose';
@@ -44,7 +45,7 @@ const createNewLeaveRequestHandler = expressAsyncHandler(
       return;
     }
 
-    // check if acknowledgement is true
+    // user must acknowledge that leaveRequest info is correct
     if (!acknowledgement) {
       response.status(400).json({ message: 'Acknowledgement is required', leaveRequestData: [] });
       return;
@@ -121,6 +122,44 @@ const deleteALeaveRequestHandler = expressAsyncHandler(
     } else {
       response.status(400).json({
         message: 'Leave request could not be deleted',
+        leaveRequestData: [],
+      });
+    }
+  }
+);
+
+// @desc   Delete all leave requests
+// @route  DELETE /leave-request
+// @access Private/Admin/Manager
+const deleteAllLeaveRequestsHandler = expressAsyncHandler(
+  async (request: DeleteAllLeaveRequestsRequest, response: Response) => {
+    const {
+      userInfo: { roles, userId, username },
+    } = request.body;
+
+    // check if user exists
+    const userExists = await getUserByIdService(userId);
+    if (!userExists) {
+      response.status(404).json({ message: 'User does not exist', leaveRequestData: [] });
+      return;
+    }
+
+    // check if user has permission
+    if (roles.includes('Employee')) {
+      response.status(403).json({ message: 'User does not have permission', leaveRequestData: [] });
+      return;
+    }
+
+    // delete all leave requests
+    const deletedResult = await deleteAllLeaveRequestsService();
+    if (deletedResult.acknowledged) {
+      response.status(200).json({
+        message: 'All leave requests deleted successfully',
+        leaveRequestData: [],
+      });
+    } else {
+      response.status(400).json({
+        message: 'All leave requests could not be deleted',
         leaveRequestData: [],
       });
     }
