@@ -29,6 +29,7 @@ const createNewAddressChangeHandler = expressAsyncHandler(
   async (request: CreateNewAddressChangeRequest, response: Response) => {
     const {
       userInfo: { userId, username },
+      acknowledgement,
       newAddress,
     } = request.body;
 
@@ -36,6 +37,12 @@ const createNewAddressChangeHandler = expressAsyncHandler(
     const userExists = await getUserByIdService(userId);
     if (!userExists) {
       response.status(400).json({ message: 'User does not exist', addressChangeData: [] });
+      return;
+    }
+
+    // user must acknowledge that new address is correct
+    if (!acknowledgement) {
+      response.status(400).json({ message: 'Acknowledgement is required', addressChangeData: [] });
       return;
     }
 
@@ -68,6 +75,7 @@ const createNewAddressChangeHandler = expressAsyncHandler(
       userId,
       username,
       newAddress,
+      acknowledgement,
     };
 
     // save new address change object to database
@@ -132,7 +140,7 @@ const getAddressChangesByUserHandler = expressAsyncHandler(
   async (request: GetAddressChangesByUserRequest, response: Response) => {
     // anyone can view their own addressChange requests
     const {
-      userInfo: { roles, userId },
+      userInfo: { userId },
     } = request.body;
 
     // check user exists

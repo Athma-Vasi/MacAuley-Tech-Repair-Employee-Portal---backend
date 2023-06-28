@@ -13,6 +13,7 @@ type AddressChangeSchema = {
     postalCode: PostalCode;
     country: Country;
   };
+  acknowledgement: boolean;
 };
 
 type AddressChangeDocument = AddressChangeSchema & {
@@ -62,6 +63,11 @@ const addressChangeSchema = new Schema<AddressChangeSchema>(
         type: String,
         required: [true, 'Country is required'],
       },
+    },
+    acknowledgement: {
+      type: Boolean,
+      required: [true, 'Acknowledgement is required'],
+      default: false,
     },
   },
   { timestamps: true }

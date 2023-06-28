@@ -5,8 +5,10 @@ import type { Country, Department, JobPosition, PhoneNumber, PostalCode } from '
 type ParentalLeaveSchema = {
   userId: Types.ObjectId;
   username: string;
-  email: string;
-  contactNumber: PhoneNumber;
-  department: Department;
-  jobPosition: JobPosition;
+  startDate: NativeDate;
+  endDate: NativeDate;
+  reasonForLeave: string;
+  delegatedToEmployee: string;
+  responsibilitesHandedOver: string;
+  acknowledgement: boolean;
 };

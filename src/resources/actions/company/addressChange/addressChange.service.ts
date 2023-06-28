@@ -26,6 +26,7 @@ type CreateNewAddressChangeServiceInput = {
     postalCode: PostalCode;
     country: Country;
   };
+  acknowledgement: boolean;
 };
 
 async function createNewAddressChangeService(input: CreateNewAddressChangeServiceInput) {

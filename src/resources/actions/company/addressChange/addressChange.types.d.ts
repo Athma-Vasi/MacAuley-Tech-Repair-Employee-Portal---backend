@@ -19,6 +19,7 @@ interface CreateNewAddressChangeRequest extends RequestAfterJWTVerification {
       postalCode: PostalCode;
       country: Country;
     };
+    acknowledgement: boolean;
   };
 }
 
