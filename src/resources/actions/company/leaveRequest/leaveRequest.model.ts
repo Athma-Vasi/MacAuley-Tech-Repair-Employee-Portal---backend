@@ -40,7 +40,6 @@ const leaveRequestSchema = new Schema<LeaveRequestSchema>(
     },
     username: {
       type: String,
-
       required: [true, 'Username is required'],
       index: true,
     },
