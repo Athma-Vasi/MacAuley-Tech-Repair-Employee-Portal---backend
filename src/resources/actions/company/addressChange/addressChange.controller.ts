@@ -16,6 +16,7 @@ import { create } from 'domain';
 import {
   createNewAddressChangeService,
   deleteAddressChangeByIdService,
+  deleteAllAddressChangesService,
   getAddressChangeByIdService,
   getAddressChangesByUserService,
   getAllAddressChangesService,
@@ -255,6 +256,47 @@ const deleteAnAddressChangeHandler = expressAsyncHandler(
     } else {
       response.status(400).json({
         message: 'AddressChange request could not be deleted',
+        addressChangeData: [],
+      });
+    }
+  }
+);
+
+// @desc    Delete all address change requests
+// @route   DELETE /address-change
+// @access  Private
+const deleteAllAddressChangesHandler = expressAsyncHandler(
+  async (request: DeleteAllAddressChangesRequest, response: Response) => {
+    const {
+      userInfo: { roles, userId },
+    } = request.body;
+
+    // only managers/admin can access this route
+    if (roles.includes('Employee')) {
+      response.status(403).json({
+        message: 'Only managers or admins are allowed to delete all addressChange requests',
+        addressChangeData: [],
+      });
+      return;
+    }
+
+    // check user exists
+    const userExists = await checkUserExistsService({ userId });
+    if (!userExists) {
+      response.status(400).json({ message: 'User does not exist', addressChangeData: [] });
+      return;
+    }
+
+    // delete all addressChange requests
+    const deletedResult = await deleteAllAddressChangesService();
+    if (deletedResult.acknowledged) {
+      response.status(200).json({
+        message: 'All addressChange requests deleted successfully',
+        addressChangeData: [],
+      });
+    } else {
+      response.status(400).json({
+        message: 'All addressChange requests could not be deleted',
         addressChangeData: [],
       });
     }

@@ -80,10 +80,20 @@ async function deleteAddressChangeByIdService(
   }
 }
 
+async function deleteAllAddressChangesService(): Promise<DeleteResult> {
+  try {
+    const deletedResult = await AddressChangeModel.deleteMany({}).lean().exec();
+    return deletedResult;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'deleteAllAddressChangesService' });
+  }
+}
+
 export {
   getAddressChangeByIdService,
   createNewAddressChangeService,
   getAllAddressChangesService,
   getAddressChangesByUserService,
   deleteAddressChangeByIdService,
+  deleteAllAddressChangesService,
 };
