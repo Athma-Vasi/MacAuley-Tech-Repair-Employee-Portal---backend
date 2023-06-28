@@ -16,6 +16,7 @@ import {
   createNewLeaveRequestService,
   deleteALeaveRequestService,
   deleteAllLeaveRequestsService,
+  getAllLeaveRequestsService,
   getLeaveRequestByIdService,
 } from './leaveRequest.service';
 import { Types } from 'mongoose';
@@ -200,6 +201,44 @@ const getALeaveRequestHandler = expressAsyncHandler(
       response.status(404).json({
         message: 'Leave request not found',
         leaveRequestData: [],
+      });
+    }
+  }
+);
+
+// @desc   Get all leave requests
+// @route  GET /leave-request
+// @access Private/Admin/Manager
+const getAllLeaveRequestsHandler = expressAsyncHandler(
+  async (request: GetAllLeaveRequestsRequest, response: Response<LeaveRequestServerResponse>) => {
+    const {
+      userInfo: { roles, userId, username },
+    } = request.body;
+
+    // check if user exists
+    const userExists = await getUserByIdService(userId);
+    if (!userExists) {
+      response.status(404).json({ message: 'User does not exist', leaveRequestData: [] });
+      return;
+    }
+
+    // check if user has permission
+    if (roles.includes('Employee')) {
+      response.status(403).json({ message: 'User does not have permission', leaveRequestData: [] });
+      return;
+    }
+
+    // get all leave requests
+    const leaveRequests = await getAllLeaveRequestsService();
+    if (leaveRequests.length === 0) {
+      response.status(404).json({
+        message: 'No leave requests found',
+        leaveRequestData: [],
+      });
+    } else {
+      response.status(200).json({
+        message: 'Leave requests found successfully',
+        leaveRequestData: leaveRequests,
       });
     }
   }

@@ -61,9 +61,24 @@ async function deleteAllLeaveRequestsService(): Promise<DeleteResult> {
   }
 }
 
+async function getAllLeaveRequestsService(): Promise<
+  (FlattenMaps<LeaveRequestDocument> &
+    Required<{
+      _id: Types.ObjectId;
+    }>)[]
+> {
+  try {
+    const leaveRequests = await LeaveRequestModel.find({}).lean().exec();
+    return leaveRequests;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getAllLeaveRequestsService' });
+  }
+}
+
 export {
   createNewLeaveRequestService,
   getLeaveRequestByIdService,
   deleteALeaveRequestService,
   deleteAllLeaveRequestsService,
+  getAllLeaveRequestsService,
 };
