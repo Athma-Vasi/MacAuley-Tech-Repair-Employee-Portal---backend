@@ -25,7 +25,7 @@ type AddressChangeDocument = AddressChangeSchema & {
 const addressChangeSchema = new Schema<AddressChangeSchema>(
   {
     userId: {
-      type: Types.ObjectId,
+      type: Schema.Types.ObjectId,
       required: [true, 'User ID is required'],
       ref: 'User',
       index: true,
