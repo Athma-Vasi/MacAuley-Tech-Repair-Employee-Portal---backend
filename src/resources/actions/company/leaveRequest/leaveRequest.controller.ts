@@ -5,7 +5,7 @@ import type {
   CreateNewLeaveRequestRequest,
   DeleteALeaveRequestRequest,
   DeleteAllLeaveRequestsRequest,
-  GetALeaveRequestRequest,
+  GetLeaveRequestByIdRequest,
   GetAllLeaveRequestsRequest,
   GetLeaveRequestsByUserRequest,
   LeaveRequestServerResponse,
@@ -171,8 +171,8 @@ const deleteAllLeaveRequestsHandler = expressAsyncHandler(
 // @desc   Get a leave request by id
 // @route  GET /leave-request/:leaveRequestId
 // @access Private/Admin/Manager
-const getALeaveRequestHandler = expressAsyncHandler(
-  async (request: GetALeaveRequestRequest, response: Response<LeaveRequestServerResponse>) => {
+const getLeaveRequestByIdHandler = expressAsyncHandler(
+  async (request: GetLeaveRequestByIdRequest, response: Response<LeaveRequestServerResponse>) => {
     const {
       userInfo: { roles, userId, username },
     } = request.body;
@@ -283,7 +283,7 @@ export {
   createNewLeaveRequestHandler,
   deleteALeaveRequestHandler,
   deleteAllLeaveRequestsHandler,
-  getALeaveRequestHandler,
+  getLeaveRequestByIdHandler,
   getAllLeaveRequestsHandler,
   getLeaveRequestsByUserHandler,
 };

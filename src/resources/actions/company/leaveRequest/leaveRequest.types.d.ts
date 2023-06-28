@@ -33,7 +33,7 @@ type GetAllLeaveRequestsRequest = RequestAfterJWTVerification;
 
 type GetLeaveRequestsByUserRequest = RequestAfterJWTVerification;
 
-interface GetALeaveRequestRequest extends RequestAfterJWTVerification {
+interface GetLeaveRequestByIdRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {
       userId: Types.ObjectId;
@@ -55,6 +55,6 @@ export type {
   DeleteAllLeaveRequestsRequest,
   GetAllLeaveRequestsRequest,
   GetLeaveRequestsByUserRequest,
-  GetALeaveRequestRequest,
+  GetLeaveRequestByIdRequest,
   LeaveRequestServerResponse,
 };
