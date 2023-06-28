@@ -309,4 +309,5 @@ export {
   getAddressChangesByUserHandler,
   getAnAddressChangeHandler,
   deleteAnAddressChangeHandler,
+  deleteAllAddressChangesHandler,
 };
