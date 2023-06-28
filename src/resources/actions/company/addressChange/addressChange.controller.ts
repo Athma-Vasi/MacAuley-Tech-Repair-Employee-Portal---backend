@@ -9,7 +9,7 @@ import type {
   DeleteAllAddressChangesRequest,
   GetAllAddressChangesRequest,
   GetAddressChangesByUserRequest,
-  GetAnAddressChangeRequest,
+  GetAddressChangeByIdRequest,
 } from './addressChange.types';
 
 import { checkUserExistsService, getUserByIdService, updateUserService } from '../../../user';
@@ -168,8 +168,8 @@ const getAddressChangesByUserHandler = expressAsyncHandler(
 // @desc   Get an address change request
 // @route  GET /address-change/:addressChangeId
 // @access Private
-const getAnAddressChangeHandler = expressAsyncHandler(
-  async (request: GetAnAddressChangeRequest, response: Response) => {
+const getAddressChangeByIdHandler = expressAsyncHandler(
+  async (request: GetAddressChangeByIdRequest, response: Response) => {
     const {
       userInfo: { roles, userId },
       addressChangeId,
@@ -303,7 +303,7 @@ export {
   createNewAddressChangeHandler,
   getAllAddressChangesHandler,
   getAddressChangesByUserHandler,
-  getAnAddressChangeHandler,
+  getAddressChangeByIdHandler,
   deleteAnAddressChangeHandler,
   deleteAllAddressChangesHandler,
 };

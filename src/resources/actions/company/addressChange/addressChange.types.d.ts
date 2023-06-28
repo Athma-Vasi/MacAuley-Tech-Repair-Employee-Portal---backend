@@ -35,7 +35,7 @@ type GetAllAddressChangesRequest = RequestAfterJWTVerification;
 
 type GetAddressChangesByUserRequest = RequestAfterJWTVerification;
 
-interface GetAnAddressChangeRequest extends RequestAfterJWTVerification {
+interface GetAddressChangeByIdRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {
       userId: Types.ObjectId;
@@ -57,6 +57,6 @@ export type {
   DeleteAllAddressChangesRequest,
   GetAllAddressChangesRequest,
   GetAddressChangesByUserRequest,
-  GetAnAddressChangeRequest,
+  GetAddressChangeByIdRequest,
   AddressChangeServerResponse,
 };
