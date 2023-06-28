@@ -99,6 +99,7 @@ interface UpdateUserPasswordRequest extends RequestAfterJWTVerification {
 
 type UsersServerResponse = {
   message: string;
+  userData?: UserDatabaseResponse[] | undefined;
 };
 
 type UserDatabaseResponse = Omit<UserDocument, 'password'>;

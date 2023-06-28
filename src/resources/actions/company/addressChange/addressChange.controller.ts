@@ -1,6 +1,7 @@
 import expressAsyncHandler from 'express-async-handler';
-import { AddressChangeModel, AddressChangeSchema } from './addressChange.model';
+import { Types } from 'mongoose';
 
+import type { AddressChangeSchema } from './addressChange.model';
 import type { Response } from 'express';
 import type {
   CreateNewAddressChangeRequest,
@@ -9,10 +10,9 @@ import type {
   GetAllAddressChangesRequest,
   GetAddressChangesByUserRequest,
   GetAnAddressChangeRequest,
-  UpdateAnAddressChangeRequest,
 } from './addressChange.types';
+
 import { checkUserExistsService, getUserByIdService, updateUserService } from '../../../user';
-import { create } from 'domain';
 import {
   createNewAddressChangeService,
   deleteAddressChangeByIdService,
@@ -21,8 +21,6 @@ import {
   getAddressChangesByUserService,
   getAllAddressChangesService,
 } from './addressChange.service';
-import { UserDatabaseResponse } from '../../../user/user.types';
-import { Types } from 'mongoose';
 
 // @desc   Create a new address change request
 // @route  POST /address-change
@@ -30,7 +28,7 @@ import { Types } from 'mongoose';
 const createNewAddressChangeHandler = expressAsyncHandler(
   async (request: CreateNewAddressChangeRequest, response: Response) => {
     const {
-      userInfo: { roles, userId, username },
+      userInfo: { userId, username },
       newAddress,
     } = request.body;
 
@@ -78,7 +76,7 @@ const createNewAddressChangeHandler = expressAsyncHandler(
     const createdAddressChange = await createNewAddressChangeService(newAddressChange);
     if (createdAddressChange) {
       response.status(201).json({
-        message: 'New address change request created successfully',
+        message: `User ${username} address was changed successfully`,
         addressChangeData: [createdAddressChange],
       });
     } else {
@@ -134,18 +132,10 @@ const getAllAddressChangesHandler = expressAsyncHandler(
 // @access Private
 const getAddressChangesByUserHandler = expressAsyncHandler(
   async (request: GetAddressChangesByUserRequest, response: Response) => {
+    // anyone can view their own addressChange requests
     const {
       userInfo: { roles, userId },
     } = request.body;
-
-    // only managers/admin can access this route
-    if (roles.includes('Employee')) {
-      response.status(403).json({
-        message: 'Only managers or admins are allowed to view  addressChange requests by user',
-        addressChangeData: [],
-      });
-      return;
-    }
 
     // check user exists
     const userExists = await checkUserExistsService({ userId });
@@ -179,7 +169,7 @@ const getAnAddressChangeHandler = expressAsyncHandler(
       addressChangeId,
     } = request.body;
 
-    // only managers/admin can access this route
+    // only managers/admin can view addressChange requests not belonging to them
     if (roles.includes('Employee')) {
       response.status(403).json({
         message:

@@ -200,7 +200,7 @@ const getAllUsersHandler = expressAsyncHandler(
     } else {
       response.status(200).json({
         message: 'Users found successfully',
-        users,
+        userData: users,
       });
     }
   }

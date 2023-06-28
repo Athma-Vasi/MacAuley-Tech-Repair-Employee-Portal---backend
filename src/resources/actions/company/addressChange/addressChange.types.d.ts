@@ -57,6 +57,5 @@ export type {
   GetAllAddressChangesRequest,
   GetAddressChangesByUserRequest,
   GetAnAddressChangeRequest,
-  UpdateAnAddressChangeRequest,
   AddressChangeServerResponse,
 };
