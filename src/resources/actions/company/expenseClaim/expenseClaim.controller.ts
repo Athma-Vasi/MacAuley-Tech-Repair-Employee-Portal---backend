@@ -16,6 +16,7 @@ import { getUserByIdService } from '../../../user';
 import {
   createNewExpenseClaimService,
   getAllExpenseClaimsService,
+  getExpenseClaimByIdService,
   getExpenseClaimsByUserService,
 } from './expenseClaim.service';
 
@@ -145,6 +146,51 @@ const getExpenseClaimsByUserHandler = expressAsyncHandler(
       });
     } else {
       response.status(404).json({ message: 'No expense claims found', expenseClaimData: [] });
+    }
+  }
+);
+
+// @desc   Get expense claim by id
+// @route  GET /expense-claim/:expenseClaimId
+// @access Private/Admin/Manager
+const getExpenseClaimByIdHandler = expressAsyncHandler(
+  async (request: GetExpenseClaimByIdRequest, response: Response) => {
+    const {
+      userInfo: { roles, userId },
+    } = request.body;
+
+    // check if user exists
+    const userExists = await getUserByIdService(userId);
+    if (!userExists) {
+      response.status(404).json({ message: 'User does not exist', expenseClaimData: [] });
+      return;
+    }
+
+    const expenseClaimId = request.params.expenseClaimId as Types.ObjectId;
+
+    // check permissions: only admin and manager can view an expense claim that does not belong to them
+    if (roles.includes('Employee')) {
+      const expenseClaim = await getExpenseClaimsByUserService(userId);
+      if (!expenseClaim) {
+        response.status(404).json({ message: 'Expense claim not found', expenseClaimData: [] });
+        return;
+      }
+      response.status(200).json({
+        message: 'Successfully fetched expense claim',
+        expenseClaimData: expenseClaim,
+      });
+      return;
+    }
+
+    // get expense claim by id
+    const expenseClaim = await getExpenseClaimByIdService(expenseClaimId);
+    if (expenseClaim) {
+      response.status(200).json({
+        message: 'Successfully fetched expense claim',
+        expenseClaimData: expenseClaim,
+      });
+    } else {
+      response.status(404).json({ message: 'Expense claim not found', expenseClaimData: [] });
     }
   }
 );

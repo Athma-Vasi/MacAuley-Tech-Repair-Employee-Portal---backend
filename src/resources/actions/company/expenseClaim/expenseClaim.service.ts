@@ -53,4 +53,20 @@ async function getExpenseClaimsByUserService(
   }
 }
 
-export { createNewExpenseClaimService, getAllExpenseClaimsService, getExpenseClaimsByUserService };
+async function getExpenseClaimByIdService(
+  expenseClaimId: Types.ObjectId
+): Promise<ExpenseClaimDocument | null> {
+  try {
+    const expenseClaim = await ExpenseClaimModel.findById(expenseClaimId).lean().exec();
+    return expenseClaim;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getExpenseClaimByIdService' });
+  }
+}
+
+export {
+  createNewExpenseClaimService,
+  getAllExpenseClaimsService,
+  getExpenseClaimsByUserService,
+  getExpenseClaimByIdService,
+};
