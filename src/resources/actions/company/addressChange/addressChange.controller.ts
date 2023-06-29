@@ -10,6 +10,7 @@ import type {
   GetAllAddressChangesRequest,
   GetAddressChangesByUserRequest,
   GetAddressChangeByIdRequest,
+  AddressChangeServerResponse,
 } from './addressChange.types';
 
 import { checkUserExistsService, getUserByIdService, updateUserService } from '../../../user';
@@ -26,7 +27,10 @@ import {
 // @route  POST /address-change
 // @access Private
 const createNewAddressChangeHandler = expressAsyncHandler(
-  async (request: CreateNewAddressChangeRequest, response: Response) => {
+  async (
+    request: CreateNewAddressChangeRequest,
+    response: Response<AddressChangeServerResponse>
+  ) => {
     const {
       userInfo: { userId, username },
       acknowledgement,
@@ -97,7 +101,7 @@ const createNewAddressChangeHandler = expressAsyncHandler(
 // @route  GET /address-change
 // @access Private
 const getAllAddressChangesHandler = expressAsyncHandler(
-  async (request: GetAllAddressChangesRequest, response: Response) => {
+  async (request: GetAllAddressChangesRequest, response: Response<AddressChangeServerResponse>) => {
     const {
       userInfo: { roles, userId },
     } = request.body;
@@ -137,7 +141,10 @@ const getAllAddressChangesHandler = expressAsyncHandler(
 // @route  GET /address-change/user
 // @access Private
 const getAddressChangesByUserHandler = expressAsyncHandler(
-  async (request: GetAddressChangesByUserRequest, response: Response) => {
+  async (
+    request: GetAddressChangesByUserRequest,
+    response: Response<AddressChangeServerResponse>
+  ) => {
     // anyone can view their own addressChange requests
     const {
       userInfo: { userId },
@@ -169,7 +176,7 @@ const getAddressChangesByUserHandler = expressAsyncHandler(
 // @route  GET /address-change/:addressChangeId
 // @access Private
 const getAddressChangeByIdHandler = expressAsyncHandler(
-  async (request: GetAddressChangeByIdRequest, response: Response) => {
+  async (request: GetAddressChangeByIdRequest, response: Response<AddressChangeServerResponse>) => {
     const {
       userInfo: { roles, userId },
       addressChangeId,

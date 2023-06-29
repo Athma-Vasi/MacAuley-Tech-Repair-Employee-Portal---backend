@@ -9,6 +9,7 @@ import type {
   GetAnnouncementsByUserRequest,
   DeleteAllAnnouncementsRequest,
   GetAnAnnouncementRequest,
+  AnnouncementsServerResponse,
 } from './announcement.types';
 
 import {
@@ -46,7 +47,11 @@ const getAllAnnouncementsHandler = expressAsyncHandler(
         message: 'No announcements found',
         announcementData: [],
       });
-      return;
+    } else {
+      response.status(200).json({
+        message: 'Announcements found successfully',
+        announcementData: announcements,
+      });
     }
 
     // // add username to each announcement before sending response
@@ -66,11 +71,6 @@ const getAllAnnouncementsHandler = expressAsyncHandler(
     //   message: 'Announcements found successfully',
     //   announcementData: announcementsWithUsername,
     // });
-
-    response.status(200).json({
-      message: 'Announcements found successfully',
-      announcementData: announcements,
-    });
   }
 );
 

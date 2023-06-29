@@ -6,6 +6,7 @@ import type {
   CreateNewExpenseClaimRequest,
   DeleteAllExpenseClaimsRequest,
   DeleteAnExpenseClaimRequest,
+  ExpenseClaimServerResponse,
   GetAllExpenseClaimsRequest,
   GetExpenseClaimByIdRequest,
   GetExpenseClaimsByUserRequest,
@@ -25,7 +26,7 @@ import {
 // @route  POST /expense-claim
 // @access Private
 const createNewExpenseClaimHandler = expressAsyncHandler(
-  async (request: CreateNewExpenseClaimRequest, response: Response) => {
+  async (request: CreateNewExpenseClaimRequest, response: Response<ExpenseClaimServerResponse>) => {
     const {
       userInfo: { userId, username },
       expenseClaim: {
@@ -88,7 +89,7 @@ const createNewExpenseClaimHandler = expressAsyncHandler(
 // @route  GET /expense-claim
 // @access Private/Admin/Manager
 const getAllExpenseClaimsHandler = expressAsyncHandler(
-  async (request: GetAllExpenseClaimsRequest, response: Response) => {
+  async (request: GetAllExpenseClaimsRequest, response: Response<ExpenseClaimServerResponse>) => {
     const {
       userInfo: { roles, userId },
     } = request.body;
@@ -126,7 +127,10 @@ const getAllExpenseClaimsHandler = expressAsyncHandler(
 // @route  GET /expense-claim/user
 // @access Private
 const getExpenseClaimsByUserHandler = expressAsyncHandler(
-  async (request: GetExpenseClaimsByUserRequest, response: Response) => {
+  async (
+    request: GetExpenseClaimsByUserRequest,
+    response: Response<ExpenseClaimServerResponse>
+  ) => {
     const {
       userInfo: { userId },
     } = request.body;
@@ -155,7 +159,7 @@ const getExpenseClaimsByUserHandler = expressAsyncHandler(
 // @route  GET /expense-claim/:expenseClaimId
 // @access Private/Admin/Manager
 const getExpenseClaimByIdHandler = expressAsyncHandler(
-  async (request: GetExpenseClaimByIdRequest, response: Response) => {
+  async (request: GetExpenseClaimByIdRequest, response: Response<ExpenseClaimServerResponse>) => {
     const {
       userInfo: { roles, userId },
     } = request.body;
@@ -188,7 +192,7 @@ const getExpenseClaimByIdHandler = expressAsyncHandler(
     if (expenseClaim) {
       response.status(200).json({
         message: 'Successfully fetched expense claim',
-        expenseClaimData: expenseClaim,
+        expenseClaimData: [expenseClaim],
       });
     } else {
       response.status(404).json({ message: 'Expense claim not found', expenseClaimData: [] });
@@ -236,7 +240,7 @@ const deleteAllExpenseClaimsHandler = expressAsyncHandler(
 // @route  DELETE /expense-claim/:expenseClaimId
 // @access Private/Admin/Manager
 const deleteAnExpenseClaimHandler = expressAsyncHandler(
-  async (request: DeleteAnExpenseClaimRequest, response: Response) => {
+  async (request: DeleteAnExpenseClaimRequest, response: Response<ExpenseClaimServerResponse>) => {
     const {
       userInfo: { roles, userId },
     } = request.body;

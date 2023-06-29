@@ -26,7 +26,7 @@ import {
 // @route  POST /leave-request
 // @access Private
 const createNewLeaveRequestHandler = expressAsyncHandler(
-  async (request: CreateNewLeaveRequestRequest, response: Response) => {
+  async (request: CreateNewLeaveRequestRequest, response: Response<LeaveRequestServerResponse>) => {
     const {
       userInfo: { userId, username },
       leaveRequest: {
