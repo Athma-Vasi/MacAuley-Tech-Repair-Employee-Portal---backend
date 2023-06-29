@@ -18,6 +18,7 @@ import {
   deleteAllRequestResourcesService,
   getAllRequestResourcesService,
   getRequestResourceByIdService,
+  getRequestResourceByUserService,
 } from './requestResource.service';
 import { Types } from 'mongoose';
 
@@ -259,8 +260,46 @@ const getRequestResourceByIdHandler = expressAsyncHandler(
   }
 );
 
+// @desc   Get request resource by user
+// @route  GET /request-resource/user
+// @access Private
+const getRequestResourceByUserHandler = expressAsyncHandler(
+  async (
+    request: GetRequestResourcesByUserRequest,
+    response: Response<RequestResourcesServerResponse>
+  ) => {
+    const {
+      userInfo: { roles, userId, username },
+    } = request.body;
+
+    // check if user exists
+    const userExists = await getUserByIdService(userId);
+    if (!userExists) {
+      response.status(404).json({ message: 'User does not exist', requestResourceData: [] });
+      return;
+    }
+
+    // anyone can get their own request resources
+    const requestResources = await getRequestResourceByUserService(userId);
+    if (requestResources.length > 0) {
+      response.status(200).json({
+        message: 'Request resources retrieved successfully',
+        requestResourceData: requestResources,
+      });
+    } else {
+      response.status(400).json({
+        message: 'Request resources could not be retrieved',
+        requestResourceData: [],
+      });
+    }
+  }
+);
+
 export {
   createNewRequestResourceHandler,
   deleteARequestResourceHandler,
   deleteAllRequestResourcesHandler,
+  getAllRequestResourcesHandler,
+  getRequestResourceByIdHandler,
+  getRequestResourceByUserHandler,
 };

@@ -142,7 +142,7 @@ const getExpenseClaimsByUserHandler = expressAsyncHandler(
       return;
     }
 
-    // get expense claims by user
+    // anyone can view their own expense claims
     const expenseClaimsByUser = await getExpenseClaimsByUserService(userId);
     if (expenseClaimsByUser.length > 0) {
       response.status(200).json({

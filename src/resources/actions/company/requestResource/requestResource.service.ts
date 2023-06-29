@@ -77,10 +77,22 @@ async function getRequestResourceByIdService(
   }
 }
 
+async function getRequestResourceByUserService(
+  userId: Types.ObjectId
+): DatabaseResponse<RequestResourceSchema> {
+  try {
+    const requestResources = await RequestResourceModel.find({ userId }).lean().exec();
+    return requestResources;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getRequestResourceByUserService' });
+  }
+}
+
 export {
   createNewRequestResourceService,
   deleteARequestResourceService,
   deleteAllRequestResourcesService,
   getAllRequestResourcesService,
   getRequestResourceByIdService,
+  getRequestResourceByUserService,
 };
