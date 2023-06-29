@@ -42,4 +42,15 @@ async function getAllExpenseClaimsService(): Promise<Array<ExpenseClaimDocument>
   }
 }
 
-export { createNewExpenseClaimService, getAllExpenseClaimsService };
+async function getExpenseClaimsByUserService(
+  userId: Types.ObjectId
+): Promise<Array<ExpenseClaimDocument>> {
+  try {
+    const expenseClaims = await ExpenseClaimModel.find({ userId }).lean().exec();
+    return expenseClaims;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getExpenseClaimsByUserService' });
+  }
+}
+
+export { createNewExpenseClaimService, getAllExpenseClaimsService, getExpenseClaimsByUserService };

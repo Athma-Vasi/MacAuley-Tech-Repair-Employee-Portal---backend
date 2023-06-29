@@ -13,7 +13,11 @@ import type {
 } from './expenseClaim.types';
 
 import { getUserByIdService } from '../../../user';
-import { createNewExpenseClaimService, getAllExpenseClaimsService } from './expenseClaim.service';
+import {
+  createNewExpenseClaimService,
+  getAllExpenseClaimsService,
+  getExpenseClaimsByUserService,
+} from './expenseClaim.service';
 
 // @desc   Create a new expense claim
 // @route  POST /expense-claim
@@ -110,6 +114,35 @@ const getAllExpenseClaimsHandler = expressAsyncHandler(
       response
         .status(200)
         .json({ message: 'All expense claims', expenseClaimData: allExpenseClaims });
+    } else {
+      response.status(404).json({ message: 'No expense claims found', expenseClaimData: [] });
+    }
+  }
+);
+
+// @desc   Get expense claims by user
+// @route  GET /expense-claim/user
+// @access Private
+const getExpenseClaimsByUserHandler = expressAsyncHandler(
+  async (request: GetExpenseClaimsByUserRequest, response: Response) => {
+    const {
+      userInfo: { userId },
+    } = request.body;
+
+    // check if user exists
+    const userExists = await getUserByIdService(userId);
+    if (!userExists) {
+      response.status(404).json({ message: 'User does not exist', expenseClaimData: [] });
+      return;
+    }
+
+    // get expense claims by user
+    const expenseClaimsByUser = await getExpenseClaimsByUserService(userId);
+    if (expenseClaimsByUser.length > 0) {
+      response.status(200).json({
+        message: 'Successfully fetched expense claims',
+        expenseClaimData: expenseClaimsByUser,
+      });
     } else {
       response.status(404).json({ message: 'No expense claims found', expenseClaimData: [] });
     }
