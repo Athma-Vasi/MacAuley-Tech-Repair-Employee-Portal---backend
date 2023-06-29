@@ -1,6 +1,7 @@
 import expressAsyncHandler from 'express-async-handler';
 
 import type { Response } from 'express';
+import { Types } from 'mongoose';
 import type {
   CreateNewLeaveRequestRequest,
   DeleteALeaveRequestRequest,
@@ -20,7 +21,6 @@ import {
   getLeaveRequestByIdService,
   getLeaveRequestsByUserService,
 } from './leaveRequest.service';
-import { Types } from 'mongoose';
 
 // @desc   Create a new leave request
 // @route  POST /leave-request
