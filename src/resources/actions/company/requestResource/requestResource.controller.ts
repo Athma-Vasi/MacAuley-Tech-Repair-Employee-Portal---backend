@@ -12,7 +12,11 @@ import type {
 } from './requestResource.types';
 
 import { getUserByIdService } from '../../../user';
-import { createNewRequestResourceService } from './requestResource.service';
+import {
+  createNewRequestResourceService,
+  deleteARequestResourceService,
+} from './requestResource.service';
+import { Types } from 'mongoose';
 
 // @desc   Create a new request resource
 // @route  POST /request-resource
@@ -68,6 +72,52 @@ const createNewRequestResourceHandler = expressAsyncHandler(
       response
         .status(400)
         .json({ message: 'New request resource could not be created', requestResourceData: [] });
+    }
+  }
+);
+
+// @desc   Delete a request resource
+// @route  DELETE /request-resource/:requestResourceId
+// @access Private/Admin/Manager
+const deleteARequestResourceHandler = expressAsyncHandler(
+  async (
+    request: DeleteARequestResourceRequest,
+    response: Response<RequestResourcesServerResponse>
+  ) => {
+    const {
+      userInfo: { roles, userId, username },
+    } = request.body;
+
+    // check if user exists
+    const userExists = await getUserByIdService(userId);
+    if (!userExists) {
+      response.status(404).json({ message: 'User does not exist', requestResourceData: [] });
+      return;
+    }
+
+    // check if user is admin or manager
+    if (roles.includes('Employee')) {
+      response.status(403).json({
+        message: 'Only managers/admin can delete a requestResource',
+        requestResourceData: [],
+      });
+      return;
+    }
+
+    const requestResourceId = request.params.requestResourceId as Types.ObjectId;
+
+    // delete requestResource
+    const deletedResult = await deleteARequestResourceService(requestResourceId);
+    if (deletedResult.acknowledged) {
+      response.status(200).json({
+        message: 'Request resource deleted successfully',
+        requestResourceData: [],
+      });
+    } else {
+      response.status(400).json({
+        message: 'Request resource could not be deleted',
+        requestResourceData: [],
+      });
     }
   }
 );

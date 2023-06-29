@@ -35,4 +35,15 @@ async function createNewRequestResourceService(
   }
 }
 
-export { createNewRequestResourceService };
+async function deleteARequestResourceService(
+  requestResourceId: Types.ObjectId
+): Promise<DeleteResult> {
+  try {
+    const deleteResult = await RequestResourceModel.deleteOne({ _id: requestResourceId });
+    return deleteResult;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'deleteARequestResourceService' });
+  }
+}
+
+export { createNewRequestResourceService, deleteARequestResourceService };
