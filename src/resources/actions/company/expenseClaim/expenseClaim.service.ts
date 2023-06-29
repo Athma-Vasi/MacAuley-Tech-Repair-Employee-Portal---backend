@@ -64,9 +64,19 @@ async function getExpenseClaimByIdService(
   }
 }
 
+async function deleteAllExpenseClaimsService(): Promise<DeleteResult> {
+  try {
+    const deleteResult = await ExpenseClaimModel.deleteMany({}).lean().exec();
+    return deleteResult;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'deleteAllExpenseClaimsService' });
+  }
+}
+
 export {
   createNewExpenseClaimService,
   getAllExpenseClaimsService,
   getExpenseClaimsByUserService,
   getExpenseClaimByIdService,
+  deleteAllExpenseClaimsService,
 };

@@ -15,6 +15,7 @@ import type {
 import { getUserByIdService } from '../../../user';
 import {
   createNewExpenseClaimService,
+  deleteAllExpenseClaimsService,
   getAllExpenseClaimsService,
   getExpenseClaimByIdService,
   getExpenseClaimsByUserService,
@@ -195,4 +196,45 @@ const getExpenseClaimByIdHandler = expressAsyncHandler(
   }
 );
 
-export { createNewExpenseClaimHandler, getAllExpenseClaimsHandler };
+// @desc   Delete all expense claims
+// @route  DELETE /expense-claim
+// @access Private/Admin/Manager
+const deleteAllExpenseClaimsHandler = expressAsyncHandler(
+  async (request: DeleteAllExpenseClaimsRequest, response: Response) => {
+    const {
+      userInfo: { roles, userId },
+    } = request.body;
+
+    // check if user exists
+    const userExists = await getUserByIdService(userId);
+    if (!userExists) {
+      response.status(404).json({ message: 'User does not exist', expenseClaimData: [] });
+      return;
+    }
+
+    // check permissions: only admin and manager can delete all expense claims
+    if (roles.includes('Employee')) {
+      response.status(403).json({
+        message: 'Only managers/admins can delete all expense claims',
+        expenseClaimData: [],
+      });
+      return;
+    }
+
+    // delete all expense claims
+    const deletedResult = await deleteAllExpenseClaimsService();
+
+    if (deletedResult.acknowledged) {
+      response.status(200).json({ message: 'All expense claims deleted', expenseClaimData: [] });
+    } else {
+      response.status(404).json({ message: 'No expense claims found', expenseClaimData: [] });
+    }
+  }
+);
+
+export {
+  createNewExpenseClaimHandler,
+  getAllExpenseClaimsHandler,
+  getExpenseClaimsByUserHandler,
+  getExpenseClaimByIdHandler,
+};
