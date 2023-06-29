@@ -6,7 +6,6 @@ import type {
   CreateNewExpenseClaimRequest,
   DeleteAllExpenseClaimsRequest,
   DeleteAnExpenseClaimRequest,
-  ExpenseClaimServerResponse,
   GetAllExpenseClaimsRequest,
   GetExpenseClaimByIdRequest,
   GetExpenseClaimsByUserRequest,
@@ -16,7 +15,7 @@ import { getUserByIdService } from '../../../user';
 import {
   createNewExpenseClaimService,
   deleteAllExpenseClaimsService,
-  deleteExpenseClaimByIdService,
+  deleteAnExpenseClaimService,
   getAllExpenseClaimsService,
   getExpenseClaimByIdService,
   getExpenseClaimsByUserService,
@@ -236,8 +235,8 @@ const deleteAllExpenseClaimsHandler = expressAsyncHandler(
 // @desc   Delete expense claim by id
 // @route  DELETE /expense-claim/:expenseClaimId
 // @access Private/Admin/Manager
-const deleteExpenseClaimByIdHandler = expressAsyncHandler(
-  async (request: DeleteExpenseClaimByIdRequest, response: Response) => {
+const deleteAnExpenseClaimHandler = expressAsyncHandler(
+  async (request: DeleteAnExpenseClaimRequest, response: Response) => {
     const {
       userInfo: { roles, userId },
     } = request.body;
@@ -261,7 +260,7 @@ const deleteExpenseClaimByIdHandler = expressAsyncHandler(
     }
 
     // delete expense claim by id
-    const deletedResult = await deleteExpenseClaimByIdService(expenseClaimId);
+    const deletedResult = await deleteAnExpenseClaimService(expenseClaimId);
 
     if (deletedResult.acknowledged) {
       response.status(200).json({ message: 'Expense claim deleted', expenseClaimData: [] });
@@ -277,4 +276,5 @@ export {
   getExpenseClaimsByUserHandler,
   getExpenseClaimByIdHandler,
   deleteAllExpenseClaimsHandler,
+  deleteAnExpenseClaimHandler,
 };

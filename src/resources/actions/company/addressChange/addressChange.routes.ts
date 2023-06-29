@@ -3,7 +3,7 @@ import {
   createNewAddressChangeHandler,
   getAllAddressChangesHandler,
   getAddressChangesByUserHandler,
-  getAnAddressChangeHandler,
+  getAddressChangeByIdHandler,
   deleteAnAddressChangeHandler,
   deleteAllAddressChangesHandler,
 } from './addressChange.controller';
@@ -20,7 +20,7 @@ addressChangeRouter.route('/user').get(getAddressChangesByUserHandler);
 
 addressChangeRouter
   .route('/:addressChangeId')
-  .get(getAnAddressChangeHandler)
+  .get(getAddressChangeByIdHandler)
   .delete(deleteAnAddressChangeHandler);
 
 export { addressChangeRouter };

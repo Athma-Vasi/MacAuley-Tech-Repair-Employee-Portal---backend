@@ -73,9 +73,7 @@ async function deleteAllExpenseClaimsService(): Promise<DeleteResult> {
   }
 }
 
-async function deleteExpenseClaimByIdService(
-  expenseClaimId: Types.ObjectId
-): Promise<DeleteResult> {
+async function deleteAnExpenseClaimService(expenseClaimId: Types.ObjectId): Promise<DeleteResult> {
   try {
     const deleteResult = await ExpenseClaimModel.deleteOne({ _id: expenseClaimId }).lean().exec();
     return deleteResult;
@@ -90,5 +88,5 @@ export {
   getExpenseClaimsByUserService,
   getExpenseClaimByIdService,
   deleteAllExpenseClaimsService,
-  deleteExpenseClaimByIdService,
+  deleteAnExpenseClaimService,
 };
