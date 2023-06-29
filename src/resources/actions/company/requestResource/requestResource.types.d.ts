@@ -46,5 +46,5 @@ type GetRequestResourcesByUserRequest = RequestAfterJWTVerification;
 
 type RequestResourcesServerResponse = {
   message: string;
-  requestResourceData: Array<RequestResourceDocument>;
+  requestResourceData: Array<RequestResourceSchema>;
 };
