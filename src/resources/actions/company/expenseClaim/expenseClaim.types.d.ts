@@ -3,7 +3,7 @@ import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
 import type { ExpenseClaimType, Currency } from './expenseClaim.model';
 
-// RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) to the request body
+// RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 
 interface CreateNewExpenseClaimRequest extends RequestAfterJWTVerification {
   body: {

@@ -4,7 +4,7 @@ import type { RequestAfterJWTVerification } from '../../../auth';
 import type { LeaveRequestDocument, ReasonForLeave } from './leaveRequest.model';
 import { UserRoles } from '../../../user';
 
-// RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) to the request body
+// RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 interface CreateNewLeaveRequestRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {

@@ -3,7 +3,7 @@ import type { RequestAfterJWTVerification } from '../auth';
 import type { UserRoles } from '../../../user';
 import type { RefermentDocument } from './referment.model';
 
-// RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) to the request body
+// RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 
 interface CreateNewRefermentRequest extends RequestAfterJWTVerification {
   body: {

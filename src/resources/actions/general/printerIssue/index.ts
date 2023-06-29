@@ -26,11 +26,7 @@ import {
   updatePrinterIssueService,
 } from './printerIssue.service';
 
-import type {
-  PrinterIssueDocument,
-  PrinterIssueSchema,
-  PrinterIssueUrgency,
-} from './printerIssue.model';
+import type { PrinterIssueDocument, PrinterIssueSchema, Urgency } from './printerIssue.model';
 import type {
   CreateNewPrinterIssueRequest,
   DeletePrinterIssueRequest,
@@ -73,7 +69,7 @@ export type {
   GetPrinterIssuesFromUserRequest,
   PrinterIssueDocument,
   PrinterIssueSchema,
-  PrinterIssueUrgency,
+  Urgency,
   PrinterIssuesServerResponse,
   UpdatePrinterIssueRequest,
 };

@@ -1,7 +1,7 @@
 import mongoose, { Schema, model, Types } from 'mongoose';
 import { ActionsGeneral } from '../actionsGeneral.types';
 
-type PrinterIssueUrgency = 'low' | 'medium' | 'high';
+type Urgency = 'low' | 'medium' | 'high';
 
 type PrinterIssueSchema = {
   userId: Types.ObjectId;
@@ -13,7 +13,7 @@ type PrinterIssueSchema = {
   printerModel: string;
   printerSerialNumber: string;
   printerIssueDescription: string;
-  urgency: PrinterIssueUrgency;
+  urgency: Urgency;
   additionalInformation: string;
 };
 
@@ -82,4 +82,4 @@ const printerIssueSchema = new Schema<PrinterIssueSchema>(
 const PrinterIssueModel = model<PrinterIssueDocument>('PrinterIssue', printerIssueSchema);
 
 export { PrinterIssueModel };
-export type { PrinterIssueDocument, PrinterIssueSchema, PrinterIssueUrgency };
+export type { PrinterIssueDocument, PrinterIssueSchema, Urgency };

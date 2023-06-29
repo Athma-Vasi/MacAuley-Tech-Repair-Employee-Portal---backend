@@ -1,6 +1,6 @@
 import type { FlattenMaps, Types } from 'mongoose';
 import type { DeleteResult } from 'mongodb';
-import type { PrinterIssueDocument, PrinterIssueUrgency } from './printerIssue.model';
+import type { PrinterIssueDocument, Urgency } from './printerIssue.model';
 import type { ActionsGeneral } from '../actionsGeneral.types';
 
 import { PrinterIssueModel } from './printerIssue.model';
@@ -15,7 +15,7 @@ type CreateNewPrinterIssueInput = {
   printerModel: string;
   printerSerialNumber: string;
   printerIssueDescription: string;
-  urgency: PrinterIssueUrgency;
+  urgency: Urgency;
   additionalInformation: string;
 };
 
