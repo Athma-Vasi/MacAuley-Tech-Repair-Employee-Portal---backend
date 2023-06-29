@@ -15,6 +15,7 @@ import { getUserByIdService } from '../../../user';
 import {
   createNewRequestResourceService,
   deleteARequestResourceService,
+  deleteAllRequestResourcesService,
 } from './requestResource.service';
 import { Types } from 'mongoose';
 
@@ -116,6 +117,50 @@ const deleteARequestResourceHandler = expressAsyncHandler(
     } else {
       response.status(400).json({
         message: 'Request resource could not be deleted',
+        requestResourceData: [],
+      });
+    }
+  }
+);
+
+// @desc   Delete all request resources
+// @route  DELETE /request-resource
+// @access Private/Admin/Manager
+const deleteAllRequestResourcesHandler = expressAsyncHandler(
+  async (
+    request: DeleteAllRequestResourcesRequest,
+    response: Response<RequestResourcesServerResponse>
+  ) => {
+    const {
+      userInfo: { roles, userId, username },
+    } = request.body;
+
+    // check if user exists
+    const userExists = await getUserByIdService(userId);
+    if (!userExists) {
+      response.status(404).json({ message: 'User does not exist', requestResourceData: [] });
+      return;
+    }
+
+    // check if user is admin or manager
+    if (roles.includes('Employee')) {
+      response.status(403).json({
+        message: 'Only managers/admin can delete a requestResource',
+        requestResourceData: [],
+      });
+      return;
+    }
+
+    // delete all requestResources
+    const deletedResult = await deleteAllRequestResourcesService();
+    if (deletedResult.acknowledged) {
+      response.status(200).json({
+        message: 'Request resources deleted successfully',
+        requestResourceData: [],
+      });
+    } else {
+      response.status(400).json({
+        message: 'Request resources could not be deleted',
         requestResourceData: [],
       });
     }
