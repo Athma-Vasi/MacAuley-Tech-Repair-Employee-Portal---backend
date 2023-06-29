@@ -3,9 +3,9 @@ import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from './auth';
 import { UserRoles } from '../user';
 
+// RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) to the request body
 interface CreateNewNoteRequest extends RequestAfterJWTVerification {
   body: {
-    // userInfo object is decoded from the JWT in the auth middleware: verifyJWT.ts
     userInfo: {
       userId: Types.ObjectId;
       username: string;
@@ -24,7 +24,6 @@ interface DeleteNoteRequest extends RequestAfterJWTVerification {
   };
 }
 
-// converted to type alias instead of interface because an interface declaring no members is equivalent to its supertype and rome doesn't like that
 type GetAllNotesRequest = RequestAfterJWTVerification;
 
 interface GetNotesFromUserIdRequest extends RequestAfterJWTVerification {
@@ -34,7 +33,6 @@ interface GetNotesFromUserIdRequest extends RequestAfterJWTVerification {
 }
 interface UpdateNoteRequest extends RequestAfterJWTVerification {
   body: {
-    // userInfo object is decoded from the JWT in the auth middleware: verifyJWT.ts
     userInfo: {
       userId: Types.ObjectId;
       username: string;

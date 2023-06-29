@@ -3,9 +3,9 @@ import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
 import type { EmployeeAttributes, EndorsementDocument } from './endorsement.model';
 
+// RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) to the request body
 interface CreateNewEndorsementRequest extends RequestAfterJWTVerification {
   body: {
-    // userInfo object is decoded from the JWT in the auth middleware: verifyJWT.ts
     userInfo: {
       userId: Types.ObjectId;
       username: string;
@@ -21,7 +21,6 @@ interface CreateNewEndorsementRequest extends RequestAfterJWTVerification {
 }
 
 interface UpdateAnEndorsementRequest extends RequestAfterJWTVerification {
-  // userInfo object is decoded from the JWT in the auth middleware: verifyJWT.ts
   body: {
     userInfo: {
       userId: Types.ObjectId;

@@ -4,6 +4,7 @@ import type { RequestAfterJWTVerification } from '../../../auth';
 import type { Country, PostalCode, UserRoles } from '../../../user';
 import type { AddressChangeDocument, AddressChangeSchema } from './addressChange.model';
 
+// RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) to the request body
 interface CreateNewAddressChangeRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {

@@ -9,6 +9,8 @@ import type {
 
 import { UserRoles } from '../../../user';
 
+// RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) to the request body
+
 interface CreateNewAnonymousRequestRequest extends RequestAfterJWTVerification {
   body: {
     //  we are not decoding userInfo from JWT because we want to allow anonymous requests
@@ -24,7 +26,7 @@ interface CreateNewAnonymousRequestRequest extends RequestAfterJWTVerification {
 
 interface DeleteAnAnonymousRequestRequest extends RequestAfterJWTVerification {
   body: {
-    // only managers can delete anonymous requests and this userInfo object is decoded from JWT
+    // only managers can delete anonymous requests
     userInfo: {
       userId: Types.ObjectId;
       username: string;
@@ -38,7 +40,7 @@ interface DeleteAnAnonymousRequestRequest extends RequestAfterJWTVerification {
 
 interface DeleteAllAnonymousRequestsRequest extends RequestAfterJWTVerification {
   body: {
-    // only managers can delete an anonymous request and this userInfo object is decoded from JWT
+    // only managers can delete an anonymous request
     userInfo: {
       userId: Types.ObjectId;
       username: string;

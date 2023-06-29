@@ -2,12 +2,15 @@ import type { Request } from 'express';
 import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
 import type { LeaveRequestDocument, ReasonForLeave } from './leaveRequest.model';
+import { UserRoles } from '../../../user';
 
+// RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) to the request body
 interface CreateNewLeaveRequestRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {
       userId: Types.ObjectId;
       username: string;
+      roles: UserRoles;
     };
     leaveRequest: {
       startDate: Date;

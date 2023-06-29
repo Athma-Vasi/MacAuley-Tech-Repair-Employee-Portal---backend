@@ -4,9 +4,9 @@ import type { RequestAfterJWTVerification } from '../auth';
 import type { RatingFeel, AnnouncementDocument } from './announcement.model';
 import type { UserRoles } from '../user';
 
+// RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) to the request body
 interface CreateNewAnnouncementRequest extends RequestAfterJWTVerification {
   body: {
-    // userInfo object is decoded from the JWT in the auth middleware: verifyJWT.ts
     userInfo: {
       userId: Types.ObjectId;
       username: string;
@@ -49,7 +49,6 @@ interface GetAnAnnouncementRequest extends RequestAfterJWTVerification {
 }
 
 interface UpdateAnnouncementRequest extends RequestAfterJWTVerification {
-  // userInfo object is decoded from the JWT in the auth middleware: verifyJWT.ts
   body: {
     userInfo: {
       userId: Types.ObjectId;

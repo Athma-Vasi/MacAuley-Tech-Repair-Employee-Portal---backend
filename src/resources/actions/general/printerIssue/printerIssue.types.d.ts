@@ -4,8 +4,8 @@ import type { ActionsGeneral } from '../actionsGeneral.types';
 import type { PrinterIssueUrgency, PrinterIssueDocument } from './printerIssue.model';
 import type { UserRoles } from '../../../user';
 
+// RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) to the request body
 interface CreateNewPrinterIssueRequest extends RequestAfterJWTVerification {
-  // userInfo object is decoded from the JWT in the auth middleware: verifyJWT.ts
   body: {
     userInfo: {
       userId: Types.ObjectId;
@@ -25,7 +25,6 @@ interface CreateNewPrinterIssueRequest extends RequestAfterJWTVerification {
 }
 
 interface UpdatePrinterIssueRequest extends RequestAfterJWTVerification {
-  // userInfo object is decoded from the JWT in the auth middleware: verifyJWT.ts
   body: {
     userInfo: {
       userId: Types.ObjectId;
