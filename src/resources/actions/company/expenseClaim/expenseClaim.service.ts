@@ -73,10 +73,22 @@ async function deleteAllExpenseClaimsService(): Promise<DeleteResult> {
   }
 }
 
+async function deleteExpenseClaimByIdService(
+  expenseClaimId: Types.ObjectId
+): Promise<DeleteResult> {
+  try {
+    const deleteResult = await ExpenseClaimModel.deleteOne({ _id: expenseClaimId }).lean().exec();
+    return deleteResult;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'deleteExpenseClaimByIdService' });
+  }
+}
+
 export {
   createNewExpenseClaimService,
   getAllExpenseClaimsService,
   getExpenseClaimsByUserService,
   getExpenseClaimByIdService,
   deleteAllExpenseClaimsService,
+  deleteExpenseClaimByIdService,
 };
