@@ -57,8 +57,22 @@ async function deleteAllRequestResourcesService(): Promise<DeleteResult> {
   }
 }
 
+async function getAllRequestResourcesService(): Promise<
+  (FlattenMaps<RequestResourceSchema> & {
+    _id: Types.ObjectId;
+  })[]
+> {
+  try {
+    const requestResources = await RequestResourceModel.find({}).lean().exec();
+    return requestResources;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getAllRequestResourcesService' });
+  }
+}
+
 export {
   createNewRequestResourceService,
   deleteARequestResourceService,
   deleteAllRequestResourcesService,
+  getAllRequestResourcesService,
 };

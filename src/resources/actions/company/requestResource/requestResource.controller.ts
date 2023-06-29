@@ -16,6 +16,7 @@ import {
   createNewRequestResourceService,
   deleteARequestResourceService,
   deleteAllRequestResourcesService,
+  getAllRequestResourcesService,
 } from './requestResource.service';
 import { Types } from 'mongoose';
 
@@ -167,4 +168,52 @@ const deleteAllRequestResourcesHandler = expressAsyncHandler(
   }
 );
 
-export { createNewRequestResourceHandler };
+// @desc   Get all request resources
+// @route  GET /request-resource
+// @access Private/Admin/Manager
+const getAllRequestResourcesHandler = expressAsyncHandler(
+  async (
+    request: GetAllRequestResourcesRequest,
+    response: Response<RequestResourcesServerResponse>
+  ) => {
+    const {
+      userInfo: { roles, userId, username },
+    } = request.body;
+
+    // check if user exists
+    const userExists = await getUserByIdService(userId);
+    if (!userExists) {
+      response.status(404).json({ message: 'User does not exist', requestResourceData: [] });
+      return;
+    }
+
+    // check if user is admin or manager
+    if (roles.includes('Employee')) {
+      response.status(403).json({
+        message: 'Only managers/admin can delete a requestResource',
+        requestResourceData: [],
+      });
+      return;
+    }
+
+    // get all requestResources
+    const requestResources = await getAllRequestResourcesService();
+    if (requestResources.length > 0) {
+      response.status(200).json({
+        message: 'Request resources retrieved successfully',
+        requestResourceData: requestResources,
+      });
+    } else {
+      response.status(400).json({
+        message: 'Request resources could not be retrieved',
+        requestResourceData: [],
+      });
+    }
+  }
+);
+
+export {
+  createNewRequestResourceHandler,
+  deleteARequestResourceHandler,
+  deleteAllRequestResourcesHandler,
+};
