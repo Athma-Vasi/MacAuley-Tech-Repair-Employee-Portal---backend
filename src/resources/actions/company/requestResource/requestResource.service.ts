@@ -26,7 +26,7 @@ type CreateNewRequestResourceServiceInput = {
 
 async function createNewRequestResourceService(
   requestResourceData: CreateNewRequestResourceServiceInput
-) {
+): Promise<RequestResourceSchema> {
   try {
     const newRequestResource = await RequestResourceModel.create(requestResourceData);
     return newRequestResource;
@@ -57,11 +57,7 @@ async function deleteAllRequestResourcesService(): Promise<DeleteResult> {
   }
 }
 
-async function getAllRequestResourcesService(): Promise<
-  (FlattenMaps<RequestResourceSchema> & {
-    _id: Types.ObjectId;
-  })[]
-> {
+async function getAllRequestResourcesService(): DatabaseResponse<RequestResourceSchema> {
   try {
     const requestResources = await RequestResourceModel.find({}).lean().exec();
     return requestResources;
@@ -70,9 +66,21 @@ async function getAllRequestResourcesService(): Promise<
   }
 }
 
+async function getRequestResourceByIdService(
+  requestResourceId: Types.ObjectId
+): DatabaseResponseNullable<RequestResourceSchema> {
+  try {
+    const requestResource = await RequestResourceModel.findById(requestResourceId).lean().exec();
+    return requestResource;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getRequestResourceByIdService' });
+  }
+}
+
 export {
   createNewRequestResourceService,
   deleteARequestResourceService,
   deleteAllRequestResourcesService,
   getAllRequestResourcesService,
+  getRequestResourceByIdService,
 };

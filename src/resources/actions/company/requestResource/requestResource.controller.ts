@@ -17,6 +17,7 @@ import {
   deleteARequestResourceService,
   deleteAllRequestResourcesService,
   getAllRequestResourcesService,
+  getRequestResourceByIdService,
 } from './requestResource.service';
 import { Types } from 'mongoose';
 
@@ -206,6 +207,52 @@ const getAllRequestResourcesHandler = expressAsyncHandler(
     } else {
       response.status(400).json({
         message: 'Request resources could not be retrieved',
+        requestResourceData: [],
+      });
+    }
+  }
+);
+
+// @desc   Get request resource by id
+// @route  GET /request-resource/:requestResourceId
+// @access Private/Admin/Manager
+const getRequestResourceByIdHandler = expressAsyncHandler(
+  async (
+    request: GetRequestResourceByIdRequest,
+    response: Response<RequestResourcesServerResponse>
+  ) => {
+    const {
+      userInfo: { roles, userId, username },
+    } = request.body;
+
+    // check if user exists
+    const userExists = await getUserByIdService(userId);
+    if (!userExists) {
+      response.status(404).json({ message: 'User does not exist', requestResourceData: [] });
+      return;
+    }
+
+    // check if user is admin or manager
+    if (roles.includes('Employee')) {
+      response.status(403).json({
+        message: 'Only managers/admin can get a requestResource',
+        requestResourceData: [],
+      });
+      return;
+    }
+
+    const requestResourceId = request.params.requestResourceId as Types.ObjectId;
+
+    // get requestResource
+    const requestResource = await getRequestResourceByIdService(requestResourceId);
+    if (requestResource) {
+      response.status(200).json({
+        message: 'Request resource retrieved successfully',
+        requestResourceData: [requestResource],
+      });
+    } else {
+      response.status(400).json({
+        message: 'Request resource could not be retrieved',
         requestResourceData: [],
       });
     }
