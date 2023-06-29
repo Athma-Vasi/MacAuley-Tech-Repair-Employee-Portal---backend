@@ -86,4 +86,4 @@ const expenseClaimSchema = new Schema<ExpenseClaimSchema>(
 const ExpenseClaimModel = model<ExpenseClaimDocument>('ExpenseClaim', expenseClaimSchema);
 
 export { ExpenseClaimModel };
-export type { ExpenseClaimSchema, ExpenseClaimDocument, ExpenseClaimType };
+export type { ExpenseClaimSchema, ExpenseClaimDocument, ExpenseClaimType, Currency };
