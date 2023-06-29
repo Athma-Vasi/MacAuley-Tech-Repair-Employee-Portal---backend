@@ -13,7 +13,7 @@ import {
   deleteAllAddressChangesHandler,
   getAllAddressChangesHandler,
   getAddressChangesByUserHandler,
-  getAnAddressChangeHandler,
+  getAddressChangeByIdHandler,
 } from './addressChange.controller';
 import {
   createNewAddressChangeService,
@@ -30,7 +30,7 @@ import type {
   DeleteAnAddressChangeRequest,
   GetAllAddressChangesRequest,
   GetAddressChangesByUserRequest,
-  GetAnAddressChangeRequest,
+  GetAddressChangeByIdRequest,
   DeleteAllAddressChangesRequest,
   AddressChangeServerResponse,
 } from './addressChange.types';
@@ -46,7 +46,7 @@ export {
   deleteAllAddressChangesHandler,
   getAllAddressChangesHandler,
   getAddressChangesByUserHandler,
-  getAnAddressChangeHandler,
+  getAddressChangeByIdHandler,
   createNewAddressChangeService,
   deleteAddressChangeByIdService,
   deleteAllAddressChangesService,
@@ -62,7 +62,7 @@ export type {
   DeleteAnAddressChangeRequest,
   GetAllAddressChangesRequest,
   GetAddressChangesByUserRequest,
-  GetAnAddressChangeRequest,
+  GetAddressChangeByIdRequest,
   DeleteAllAddressChangesRequest,
   AddressChangeServerResponse,
 };
