@@ -28,7 +28,7 @@ import { getUserByIdService } from '../user';
 // @route  POST /announcements
 // @access Public
 const getAllAnnouncementsHandler = expressAsyncHandler(
-  async (request: GetAllAnnouncementsRequest, response: Response) => {
+  async (request: GetAllAnnouncementsRequest, response: Response<AnnouncementsServerResponse>) => {
     const {
       userInfo: { userId },
     } = request.body;
@@ -78,7 +78,10 @@ const getAllAnnouncementsHandler = expressAsyncHandler(
 // @route  GET /announcements/user
 // @access Private
 const getAnnouncementsByUserHandler = expressAsyncHandler(
-  async (request: GetAnnouncementsByUserRequest, response: Response) => {
+  async (
+    request: GetAnnouncementsByUserRequest,
+    response: Response<AnnouncementsServerResponse>
+  ) => {
     const {
       userInfo: { userId },
     } = request.body;
@@ -125,7 +128,10 @@ const getAnnouncementsByUserHandler = expressAsyncHandler(
 // @route  POST /announcements
 // @access Private
 const createNewAnnouncementHandler = expressAsyncHandler(
-  async (request: CreateNewAnnouncementRequest, response: Response) => {
+  async (
+    request: CreateNewAnnouncementRequest,
+    response: Response<AnnouncementsServerResponse>
+  ) => {
     const {
       userInfo: { userId, username },
       title,
@@ -181,7 +187,7 @@ const createNewAnnouncementHandler = expressAsyncHandler(
 // @route  PUT /announcements/:announcementId
 // @access Private
 const updateAnnouncementHandler = expressAsyncHandler(
-  async (request: UpdateAnnouncementRequest, response: Response) => {
+  async (request: UpdateAnnouncementRequest, response: Response<AnnouncementsServerResponse>) => {
     const {
       userInfo: { userId, username, roles },
       title,
@@ -338,7 +344,7 @@ const deleteAllAnnouncementsHandler = expressAsyncHandler(
 // @route  GET /announcements/:announcementId
 // @access Private
 const getAnnouncementByIdHandler = expressAsyncHandler(
-  async (request: GetAnAnnouncementRequest, response: Response) => {
+  async (request: GetAnAnnouncementRequest, response: Response<AnnouncementsServerResponse>) => {
     const {
       userInfo: { roles, userId },
       announcementId,

@@ -73,7 +73,7 @@ interface UpdateAnnouncementRequest extends RequestAfterJWTVerification {
 
 type AnnouncementsServerResponse = {
   message: string;
-  announcementData: Array<AnnouncementDocument>;
+  announcementData: Array<AnnouncementSchema>;
 };
 
 export type {
