@@ -5,23 +5,36 @@ import type { AssociatedResourceKind, FileExtension, FileUploadDocument } from '
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 
-interface CreateNewFileUploadRequest extends RequestAfterJWTVerification {
+interface RequestAfterFileInfoExtraction extends RequestAfterJWTVerification {
   body: {
     userInfo: {
       userId: Types.ObjectId;
       username: string;
       roles: UserRoles;
     };
-    fileUpload: {
-      associatedDocumentId: Types.ObjectId;
-      associatedResource: AssociatedResourceKind;
+    fileUploads: Array<{
       uploadedFile: Express.Multer.File;
-      fileExtension: FileExtension;
       fileName: string;
-      fileSize: number;
+      fileExtension: FileExtension;
+      fileSize: string;
       fileMimeType: string;
       fileEncoding: string;
+    }>;
+  };
+}
+
+type CreateNewFileUploadRequest = RequestAfterJWTVerification;
+
+interface InsertAssociatedDocumentIdRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
     };
+    fileUploadId: Types.ObjectId;
+    associatedDocumentId: Types.ObjectId;
+    associatedResource: AssociatedResourceKind;
   };
 }
 
@@ -43,11 +56,12 @@ interface GetFileUploadByIdRequest extends RequestAfterJWTVerification {
 
 type FileUploadServerResponse = {
   message: string;
-  fileUploadData: Array<FileUploadDocument>;
+  documentId?: Types.ObjectId | undefined;
 };
 
 export type {
   CreateNewFileUploadRequest,
+  InsertAssociatedDocumentIdRequest,
   DeleteAFileUploadRequest,
   DeleteAllFileUploadsRequest,
   GetAllFileUploadsRequest,

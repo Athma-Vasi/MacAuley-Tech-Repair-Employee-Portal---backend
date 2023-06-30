@@ -12,7 +12,6 @@ import type {
   GetExpenseClaimsByUserRequest,
 } from './expenseClaim.types';
 
-import { getUserByIdService } from '../../../user';
 import {
   createNewExpenseClaimService,
   deleteAllExpenseClaimsService,

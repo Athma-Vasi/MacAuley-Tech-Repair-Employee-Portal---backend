@@ -19,19 +19,21 @@ type AssociatedResourceKind = 'Expense Claim';
 
 type FileUploadSchema = {
   userId: Types.ObjectId;
-  associatedDocumentId: Types.ObjectId;
   uploadedFile: Express.Multer.File;
   username: string;
-  associatedResource: AssociatedResourceKind;
   fileExtension: FileExtension;
   fileName: string;
-  fileSize: number;
+  fileSize: string;
   fileMimeType: string;
   fileEncoding: string;
 };
 
 type FileUploadDocument = FileUploadSchema & {
   _id: Types.ObjectId;
+  // some fileUploads may not be associated with any resource
+  associatedResource?: AssociatedResourceKind | undefined;
+  // some fileUploads may not be associated with any document
+  associatedDocumentId?: Types.ObjectId | undefined;
   createdAt: Date;
   updatedAt: Date;
   __v: number;
@@ -45,12 +47,6 @@ const fileUploadSchema = new Schema<FileUploadSchema>(
       ref: 'User',
       index: true,
     },
-    associatedDocumentId: {
-      type: Schema.Types.ObjectId,
-      // in this API, no files are uploaded by themselves, all are associated with a document
-      required: [true, 'Associated document Id is required'],
-      index: true,
-    },
     uploadedFile: {
       type: Object, // Express.Multer.File
       required: [true, 'Uploaded file is required'],
@@ -60,11 +56,7 @@ const fileUploadSchema = new Schema<FileUploadSchema>(
       required: [true, 'Username is required'],
       index: true,
     },
-    associatedResource: {
-      type: String,
-      required: [true, 'Associated resource is required'],
-      index: true, // optimizes query for all files associated with a particular resource
-    },
+
     fileExtension: {
       type: String,
       required: [true, 'File extension is required'],
@@ -74,7 +66,7 @@ const fileUploadSchema = new Schema<FileUploadSchema>(
       required: [true, 'File name is required'],
     },
     fileSize: {
-      type: Number,
+      type: String,
       required: [true, 'File size is required'],
     },
     fileMimeType: {
