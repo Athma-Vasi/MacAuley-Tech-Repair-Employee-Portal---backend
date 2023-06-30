@@ -42,7 +42,7 @@ const fileExtensionLimiterMiddleware = (allowedExtensionsArray: string[]) => {
 
       const message = `Upload failed. The following file${progressiveApostrophe}${properVerb} not allowed: ${filesWithDisallowedExtensions
         .map((file) => file.name)
-        .join(', ')}`;
+        .join(', ')}. Allowed extensions are: ${allowedExtensionsArray.join(', ')}`;
 
       response.status(422).json({ message }); // 422: Unprocessable Entity
       return;

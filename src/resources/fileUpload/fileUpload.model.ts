@@ -20,13 +20,13 @@ type AssociatedResourceKind = 'Expense Claim';
 type FileUploadSchema = {
   userId: Types.ObjectId;
   associatedDocumentId: Types.ObjectId;
+  uploadedFile: Express.Multer.File;
   username: string;
   associatedResource: AssociatedResourceKind;
   fileExtension: FileExtension;
   fileName: string;
   fileSize: number;
   fileMimeType: string;
-  fileEncoding: string;
 };
 
 type FileUploadDocument = FileUploadSchema & {
@@ -40,13 +40,13 @@ const fileUploadSchema = new Schema<FileUploadSchema>(
   {
     userId: {
       type: Schema.Types.ObjectId,
-      required: [true, 'User ID is required'],
+      required: [true, 'User Id is required'],
       ref: 'User',
       index: true,
     },
     associatedDocumentId: {
       type: Schema.Types.ObjectId,
-      required: [true, 'Associated document ID is required'],
+      required: [true, 'Associated document Id is required'],
       index: true,
     },
     username: {
@@ -57,6 +57,7 @@ const fileUploadSchema = new Schema<FileUploadSchema>(
     associatedResource: {
       type: String,
       required: [true, 'Associated resource is required'],
+      index: true, // optimizes query for all files associated with a particular resource
     },
     fileExtension: {
       type: String,
@@ -73,10 +74,6 @@ const fileUploadSchema = new Schema<FileUploadSchema>(
     fileMimeType: {
       type: String,
       required: [true, 'File MIME type is required'],
-    },
-    fileEncoding: {
-      type: String,
-      required: [true, 'File encoding is required'],
     },
   },
   {
