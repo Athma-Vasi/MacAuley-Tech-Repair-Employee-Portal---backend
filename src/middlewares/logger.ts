@@ -2,8 +2,9 @@ import { format } from 'date-fns';
 import fs from 'fs';
 import fsPromises from 'fs/promises';
 import path from 'path';
-import { NextFunction, Request, Response } from 'express';
 import { v4 as uuidV4 } from 'uuid';
+
+import type { NextFunction, Request, Response } from 'express';
 
 type LogEventsInput = {
   message: string;
