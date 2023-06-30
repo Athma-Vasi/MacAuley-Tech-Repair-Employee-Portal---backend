@@ -12,7 +12,11 @@ import type {
   GetFileUploadByIdRequest,
   GetFileUploadsByUserRequest,
 } from './fileUpload.types';
-import { createNewFileUploadService } from './fileUpload.service';
+import {
+  createNewFileUploadService,
+  getFileUploadById,
+  insertAssociatedDocumentIdService,
+} from './fileUpload.service';
 
 // @desc   Create a new file upload
 // @route  POST /file-upload
@@ -60,7 +64,30 @@ const insertAssociatedDocumentIdHandler = expressAsyncHandler(
       associatedDocumentId,
       associatedResource,
     } = request.body;
+
+    const oldFileUpload = await getFileUploadById(fileUploadId);
+    if (!oldFileUpload) {
+      response.status(404).json({
+        message: 'File upload not found',
+      });
+      return;
+    }
+
+    // update fileUpload object
+    const updatedFileUploadObject = {
+      ...oldFileUpload,
+      associatedDocumentId,
+      associatedResource,
+    };
+
+    // update fileUpload
+    const updatedFileUpload = await insertAssociatedDocumentIdService(updatedFileUploadObject);
+    if (updatedFileUpload) {
+      response.status(200).json({ message: 'File upload updated successfully' });
+    } else {
+      response.status(400).json({ message: 'File upload could not be updated' });
+    }
   }
 );
 
-export { createNewFileUploadHandler };
+export { createNewFileUploadHandler, insertAssociatedDocumentIdHandler };

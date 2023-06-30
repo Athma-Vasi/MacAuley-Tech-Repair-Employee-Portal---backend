@@ -31,4 +31,35 @@ async function createNewFileUploadService(
   }
 }
 
-export { createNewFileUploadService };
+async function getFileUploadById(fileUploadId: Types.ObjectId) {
+  try {
+    const fileUpload = await FileUploadModel.findById(fileUploadId).lean().exec();
+    return fileUpload;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getFileUploadById' });
+  }
+}
+
+type InsertAssociatedDocumentIdServiceInput = CreateNewFileUploadServiceInput & {
+  _id: Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+  associatedDocumentId: Types.ObjectId;
+  associatedResource: AssociatedResourceKind;
+  __v: number;
+};
+
+async function insertAssociatedDocumentIdService(input: InsertAssociatedDocumentIdServiceInput) {
+  try {
+    const updatedFileUpload = await FileUploadModel.findOneAndReplace({ _id: input._id }, input, {
+      new: true,
+    })
+      .lean()
+      .exec();
+    return updatedFileUpload;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'insertAssociatedDocumentIdService' });
+  }
+}
+
+export { createNewFileUploadService, getFileUploadById, insertAssociatedDocumentIdService };
