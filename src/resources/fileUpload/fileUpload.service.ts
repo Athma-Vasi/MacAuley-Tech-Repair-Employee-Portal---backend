@@ -40,7 +40,7 @@ async function getFileUploadById(fileUploadId: Types.ObjectId) {
   }
 }
 
-type InsertAssociatedDocumentIdServiceInput = CreateNewFileUploadServiceInput & {
+type InsertAssociatedResourceDocumentIdServiceInput = CreateNewFileUploadServiceInput & {
   _id: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
@@ -49,7 +49,9 @@ type InsertAssociatedDocumentIdServiceInput = CreateNewFileUploadServiceInput & 
   __v: number;
 };
 
-async function insertAssociatedDocumentIdService(input: InsertAssociatedDocumentIdServiceInput) {
+async function insertAssociatedResourceDocumentIdService(
+  input: InsertAssociatedResourceDocumentIdServiceInput
+) {
   try {
     const updatedFileUpload = await FileUploadModel.findOneAndReplace({ _id: input._id }, input, {
       new: true,
@@ -58,8 +60,32 @@ async function insertAssociatedDocumentIdService(input: InsertAssociatedDocument
       .exec();
     return updatedFileUpload;
   } catch (error: any) {
-    throw new Error(error, { cause: 'insertAssociatedDocumentIdService' });
+    throw new Error(error, { cause: 'insertAssociatedResourceDocumentIdService' });
   }
 }
 
-export { createNewFileUploadService, getFileUploadById, insertAssociatedDocumentIdService };
+async function deleteFileUploadService(fileUploadId: Types.ObjectId): Promise<DeleteResult> {
+  try {
+    const deleteResult = await FileUploadModel.deleteOne({ _id: fileUploadId }).exec();
+    return deleteResult;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'deleteFileUploadService' });
+  }
+}
+
+async function deleteAllFileUploadsService(): Promise<DeleteResult> {
+  try {
+    const deleteResult = await FileUploadModel.deleteMany({}).lean().exec();
+    return deleteResult;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'deleteAllFileUploadsService' });
+  }
+}
+
+export {
+  createNewFileUploadService,
+  getFileUploadById,
+  insertAssociatedResourceDocumentIdService,
+  deleteFileUploadService,
+  deleteAllFileUploadsService,
+};
