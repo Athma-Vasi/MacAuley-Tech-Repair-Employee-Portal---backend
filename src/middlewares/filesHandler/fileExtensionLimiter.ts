@@ -1,4 +1,3 @@
-import expressFileUpload from 'express-fileupload';
 import path from 'path';
 
 import type { NextFunction, Request, Response } from 'express';
@@ -21,9 +20,14 @@ const ALLOWED_FILE_EXTENSIONS = [
 
 const fileExtensionLimiterMiddleware = (allowedExtensionsArray: string[]) => {
   return (request: Request, response: Response, next: NextFunction) => {
-    const { files } = request as unknown as expressFileUpload.FileArray;
+    // this middleware only runs if filesPayloadExistsMiddleware and fileSizeLimiterMiddleware has passed
+    const files = request.files as
+      | {
+          [fieldname: string]: Express.Multer.File[];
+        }
+      | Express.Multer.File[];
 
-    const filesWithDisallowedExtensions: expressFileUpload.FileArray[] = [];
+    const filesWithDisallowedExtensions: Express.Multer.File[] = [];
 
     Object.entries(files).forEach((file) => {
       const [fileName, fileObject] = file;
@@ -41,7 +45,7 @@ const fileExtensionLimiterMiddleware = (allowedExtensionsArray: string[]) => {
       const properVerb = filesWithDisallowedExtensions.length > 1 ? 'are' : 'is';
 
       const message = `Upload failed. The following file${progressiveApostrophe}${properVerb} not allowed: ${filesWithDisallowedExtensions
-        .map((file) => file.name)
+        .map((file) => file.filename)
         .join(', ')}. Allowed extensions are: ${allowedExtensionsArray.join(', ')}`;
 
       response.status(422).json({ message }); // 422: Unprocessable Entity

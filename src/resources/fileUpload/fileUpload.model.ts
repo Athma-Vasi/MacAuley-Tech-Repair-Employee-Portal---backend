@@ -47,6 +47,7 @@ const fileUploadSchema = new Schema<FileUploadSchema>(
     },
     associatedDocumentId: {
       type: Schema.Types.ObjectId,
+      // in this API, no files are uploaded by themselves, all are associated with a document
       required: [true, 'Associated document Id is required'],
       index: true,
     },

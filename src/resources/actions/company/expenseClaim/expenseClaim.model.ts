@@ -12,7 +12,7 @@ type Currency = 'CAD' | 'USD';
 type ExpenseClaimSchema = {
   userId: Types.ObjectId;
   username: string;
-  receiptPhotoId: Types.ObjectId;
+  uploadedFileId: Types.ObjectId;
   expenseClaimType: ExpenseClaimType;
   expenseClaimAmount: number;
   expenseClaimCurrency: Currency;
@@ -42,10 +42,10 @@ const expenseClaimSchema = new Schema<ExpenseClaimSchema>(
       required: [true, 'Username is required'],
       index: true,
     },
-    receiptPhotoId: {
+    uploadedFileId: {
       type: Schema.Types.ObjectId,
       required: [true, 'Receipt photo ID is required'],
-      ref: 'PhotoUpload',
+      ref: 'FileUpload',
       index: true,
     },
     expenseClaimType: {

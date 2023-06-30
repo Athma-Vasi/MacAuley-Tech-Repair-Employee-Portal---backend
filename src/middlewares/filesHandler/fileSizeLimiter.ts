@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from 'express';
-import expressFileUpload from 'express-fileupload';
 
 const MB = 5; // 5MB
 const FILE_SIZE_LIMIT = MB * 1024 * 1024;
@@ -7,8 +6,12 @@ const FILE_SIZE_LIMIT = MB * 1024 * 1024;
 function fileSizeLimiterMiddleware(request: Request, response: Response, next: NextFunction) {
   // this middleware only runs if filesPayloadExistsMiddleware has passed
 
-  const { files } = request as unknown as expressFileUpload.FileArray;
-  const filesOverLimit: expressFileUpload.FileArray[] = [];
+  const files = request.files as
+    | {
+        [fieldname: string]: Express.Multer.File[];
+      }
+    | Express.Multer.File[];
+  const filesOverLimit: Express.Multer.File[] = [];
 
   // determine files over limit
   Object.entries(files).forEach((file) => {
@@ -24,7 +27,7 @@ function fileSizeLimiterMiddleware(request: Request, response: Response, next: N
     const properVerb = filesOverLimit.length > 1 ? 'are' : 'is';
 
     const message = `Upload failed. The following file${progressiveApostrophe}${properVerb} over ${MB}MB: ${filesOverLimit
-      .map((file) => file.name)
+      .map((file) => file.filename)
       .join(', ')}`;
 
     response.status(413).json({ message }); // 413: Payload Too Large
