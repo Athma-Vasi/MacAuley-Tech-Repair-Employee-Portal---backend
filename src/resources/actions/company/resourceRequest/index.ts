@@ -1,13 +1,13 @@
 /**
- * This index file is used to import/export requestResource model, router, types, handlers and services
+ * This index file is used to import/export resourceRequest model, router, types, handlers and services
  */
 
 /**
  * Imports
  */
 
-import { RequestResourceModel } from './requestResource.model';
-import { requestResourceRouter } from './requestResource.routes';
+import { RequestResourceModel } from './resourceRequest.model';
+import { requestResourceRouter } from './resourceRequest.routes';
 import {
   createNewRequestResourceHandler,
   deleteARequestResourceHandler,
@@ -15,7 +15,7 @@ import {
   getAllRequestResourcesHandler,
   getRequestResourceByIdHandler,
   getRequestResourceByUserHandler,
-} from './requestResource.controller';
+} from './resourceRequest.controller';
 import {
   createNewRequestResourceService,
   deleteARequestResourceService,
@@ -23,13 +23,13 @@ import {
   getAllRequestResourcesService,
   getRequestResourceByIdService,
   getRequestResourceByUserService,
-} from './requestResource.service';
+} from './resourceRequest.service';
 
 import type {
   RequestResourceDocument,
   RequestResourceSchema,
   RequestResourceKind,
-} from './requestResource.model';
+} from './resourceRequest.model';
 import type {
   CreateNewRequestResourceRequest,
   DeleteARequestResourceRequest,
@@ -38,7 +38,7 @@ import type {
   GetRequestResourceByIdRequest,
   GetRequestResourcesByUserRequest,
   RequestResourcesServerResponse,
-} from './requestResource.types';
+} from './resourceRequest.types';
 
 /**
  * Exports

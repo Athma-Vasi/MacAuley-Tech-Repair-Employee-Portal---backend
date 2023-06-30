@@ -40,13 +40,6 @@ const createNewLeaveRequestHandler = expressAsyncHandler(
       },
     } = request.body;
 
-    // check if user exists
-    const userExists = await getUserByIdService(userId);
-    if (!userExists) {
-      response.status(404).json({ message: 'User does not exist', leaveRequestData: [] });
-      return;
-    }
-
     // user must acknowledge that leaveRequest info is correct
     if (!acknowledgement) {
       response.status(400).json({ message: 'Acknowledgement is required', leaveRequestData: [] });
@@ -94,13 +87,6 @@ const deleteALeaveRequestHandler = expressAsyncHandler(
     } = request.body;
     const leaveRequestId = request.params.leaveRequestId as Types.ObjectId;
 
-    // check if user exists
-    const userExists = await getUserByIdService(userId);
-    if (!userExists) {
-      response.status(404).json({ message: 'User does not exist', leaveRequestData: [] });
-      return;
-    }
-
     // check if user has permission
     if (roles.includes('Employee')) {
       response.status(403).json({ message: 'User does not have permission', leaveRequestData: [] });
@@ -139,13 +125,6 @@ const deleteAllLeaveRequestsHandler = expressAsyncHandler(
       userInfo: { roles, userId, username },
     } = request.body;
 
-    // check if user exists
-    const userExists = await getUserByIdService(userId);
-    if (!userExists) {
-      response.status(404).json({ message: 'User does not exist', leaveRequestData: [] });
-      return;
-    }
-
     // check if user has permission
     if (roles.includes('Employee')) {
       response.status(403).json({ message: 'User does not have permission', leaveRequestData: [] });
@@ -178,13 +157,6 @@ const getLeaveRequestByIdHandler = expressAsyncHandler(
     } = request.body;
     const leaveRequestId = request.params.leaveRequestId as Types.ObjectId;
 
-    // check if user exists
-    const userExists = await getUserByIdService(userId);
-    if (!userExists) {
-      response.status(404).json({ message: 'User does not exist', leaveRequestData: [] });
-      return;
-    }
-
     // check if user has permission
     if (roles.includes('Employee')) {
       response.status(403).json({ message: 'User does not have permission', leaveRequestData: [] });
@@ -215,13 +187,6 @@ const getAllLeaveRequestsHandler = expressAsyncHandler(
     const {
       userInfo: { roles, userId, username },
     } = request.body;
-
-    // check if user exists
-    const userExists = await getUserByIdService(userId);
-    if (!userExists) {
-      response.status(404).json({ message: 'User does not exist', leaveRequestData: [] });
-      return;
-    }
 
     // check if user has permission
     if (roles.includes('Employee')) {
@@ -256,13 +221,6 @@ const getLeaveRequestsByUserHandler = expressAsyncHandler(
     const {
       userInfo: { roles, userId, username },
     } = request.body;
-
-    // check if user exists
-    const userExists = await getUserByIdService(userId);
-    if (!userExists) {
-      response.status(404).json({ message: 'User does not exist', leaveRequestData: [] });
-      return;
-    }
 
     // anyone can get their own leave requests
     const leaveRequests = await getLeaveRequestsByUserService(userId);

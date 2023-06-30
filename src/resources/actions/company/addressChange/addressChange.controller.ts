@@ -40,7 +40,7 @@ const createNewAddressChangeHandler = expressAsyncHandler(
     // check if user exists
     const userExists = await getUserByIdService(userId);
     if (!userExists) {
-      response.status(400).json({ message: 'User does not exist', addressChangeData: [] });
+      response.status(404).json({ message: 'User does not exist', addressChangeData: [] });
       return;
     }
 
@@ -115,13 +115,6 @@ const getAllAddressChangesHandler = expressAsyncHandler(
       return;
     }
 
-    // check user exists
-    const userExists = await checkUserExistsService({ userId });
-    if (!userExists) {
-      response.status(400).json({ message: 'User does not exist', addressChangeData: [] });
-      return;
-    }
-
     // get all addressChange requests
     const addressChanges = await getAllAddressChangesService();
     if (addressChanges.length === 0) {
@@ -149,13 +142,6 @@ const getAddressChangesByUserHandler = expressAsyncHandler(
     const {
       userInfo: { userId },
     } = request.body;
-
-    // check user exists
-    const userExists = await checkUserExistsService({ userId });
-    if (!userExists) {
-      response.status(400).json({ message: 'User does not exist', addressChangeData: [] });
-      return;
-    }
 
     // get all addressChange requests by user
     const addressChanges = await getAddressChangesByUserService(userId);
@@ -192,13 +178,6 @@ const getAddressChangeByIdHandler = expressAsyncHandler(
       return;
     }
 
-    // check user exists
-    const userExists = await checkUserExistsService({ userId });
-    if (!userExists) {
-      response.status(400).json({ message: 'User does not exist', addressChangeData: [] });
-      return;
-    }
-
     // get addressChange request by id
     const addressChange = await getAddressChangeByIdService(addressChangeId);
     if (!addressChange) {
@@ -230,13 +209,6 @@ const deleteAnAddressChangeHandler = expressAsyncHandler(
         message: 'Only managers or admins are allowed to delete an addressChange request',
         addressChangeData: [],
       });
-      return;
-    }
-
-    // check user exists
-    const userExists = await checkUserExistsService({ userId });
-    if (!userExists) {
-      response.status(400).json({ message: 'User does not exist', addressChangeData: [] });
       return;
     }
 
@@ -280,13 +252,6 @@ const deleteAllAddressChangesHandler = expressAsyncHandler(
         message: 'Only managers or admins are allowed to delete all addressChange requests',
         addressChangeData: [],
       });
-      return;
-    }
-
-    // check user exists
-    const userExists = await checkUserExistsService({ userId });
-    if (!userExists) {
-      response.status(400).json({ message: 'User does not exist', addressChangeData: [] });
       return;
     }
 

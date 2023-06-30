@@ -4,10 +4,10 @@ import type {
   RequestResourceDocument,
   RequestResourceKind,
   RequestResourceSchema,
-} from './requestResource.model';
+} from './resourceRequest.model';
 import { DatabaseResponse, DatabaseResponseNullable } from '../../../../types';
 
-import { RequestResourceModel } from './requestResource.model';
+import { RequestResourceModel } from './resourceRequest.model';
 import { Department } from '../../../user';
 import { Urgency } from '../../general/printerIssue';
 
@@ -70,8 +70,8 @@ async function getRequestResourceByIdService(
   requestResourceId: Types.ObjectId
 ): DatabaseResponseNullable<RequestResourceSchema> {
   try {
-    const requestResource = await RequestResourceModel.findById(requestResourceId).lean().exec();
-    return requestResource;
+    const resourceRequest = await RequestResourceModel.findById(requestResourceId).lean().exec();
+    return resourceRequest;
   } catch (error: any) {
     throw new Error(error, { cause: 'getRequestResourceByIdService' });
   }

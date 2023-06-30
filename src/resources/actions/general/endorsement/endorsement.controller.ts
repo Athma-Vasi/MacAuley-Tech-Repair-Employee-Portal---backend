@@ -35,13 +35,6 @@ const createNewEndorsementHandler = expressAsyncHandler(
       summaryOfEndorsement,
     } = request.body;
 
-    // check if user exists
-    const isUser = await getUserByIdService(userId);
-    if (!isUser) {
-      response.status(400).json({ message: 'User does not exist', endorsementData: [] });
-      return;
-    }
-
     const newEndorsementObject = {
       userId,
       section,
@@ -75,13 +68,6 @@ const getAllEndorsementsHandler = expressAsyncHandler(
       userInfo: { roles, userId },
     } = request.body;
 
-    // check if user exists
-    const isUser = await getUserByIdService(userId);
-    if (!isUser) {
-      response.status(400).json({ message: 'User does not exist', endorsementData: [] });
-      return;
-    }
-
     // only managers/admins can view all endorsements
     if (roles.includes('Employee')) {
       response.status(403).json({
@@ -94,7 +80,7 @@ const getAllEndorsementsHandler = expressAsyncHandler(
     const endorsements = await getAllEndorsementsService();
 
     if (endorsements.length === 0) {
-      response.status(400).json({ message: 'No endorsements found', endorsementData: [] });
+      response.status(404).json({ message: 'No endorsements found', endorsementData: [] });
     } else {
       response.status(200).json({
         message: 'Endorsements fetched successfully',
@@ -105,20 +91,13 @@ const getAllEndorsementsHandler = expressAsyncHandler(
 );
 
 // @desc   Get an endorsement
-// @route  GET /endorsements/:id
+// @route  GET /endorsements/:endorsementId
 // @access Private
 const getAnEndorsementHandler = expressAsyncHandler(
   async (request: GetAnEndorsementRequest, response: Response) => {
     const {
       userInfo: { roles, userId },
     } = request.body;
-
-    // check if user exists
-    const isUser = await getUserByIdService(userId);
-    if (!isUser) {
-      response.status(400).json({ message: 'User does not exist', endorsementData: [] });
-      return;
-    }
 
     // only managers/admins can view an endorsement by its id
     if (roles.includes('Employee')) {
@@ -155,16 +134,9 @@ const getEndorsementsByUserHandler = expressAsyncHandler(
       userInfo: { userId },
     } = request.body;
 
-    // check if user exists
-    const isUser = await getUserByIdService(userId);
-    if (!isUser) {
-      response.status(400).json({ message: 'User does not exist', endorsementData: [] });
-      return;
-    }
-
     const endorsements = await getEndorsementsByUserService(userId);
     if (endorsements.length === 0) {
-      response.status(400).json({ message: 'No endorsements found', endorsementData: [] });
+      response.status(404).json({ message: 'No endorsements found', endorsementData: [] });
     } else {
       response.status(200).json({
         message: 'Endorsements fetched successfully',
@@ -182,13 +154,6 @@ const deleteEndorsementHandler = expressAsyncHandler(
     const {
       userInfo: { roles, userId },
     } = request.body;
-
-    // check if user exists
-    const isUser = await getUserByIdService(userId);
-    if (!isUser) {
-      response.status(400).json({ message: 'User does not exist', endorsementData: [] });
-      return;
-    }
 
     // only managers/admins can delete an endorsement by its id
     if (roles.includes('Employee')) {
@@ -223,13 +188,6 @@ const deleteAllEndorsementsHandler = expressAsyncHandler(
     const {
       userInfo: { userId, roles },
     } = request.body;
-
-    // check if user exists
-    const isUser = await getUserByIdService(userId);
-    if (!isUser) {
-      response.status(400).json({ message: 'User does not exist', endorsementData: [] });
-      return;
-    }
 
     // only managers/admins can delete all endorsements
     if (roles.includes('Employee')) {
@@ -269,18 +227,11 @@ const updateAnEndorsementHandler = expressAsyncHandler(
       userToBeEndorsed,
     } = request.body;
 
-    // check if user exists
-    const isUser = await getUserByIdService(userId);
-    if (!isUser) {
-      response.status(400).json({ message: 'User does not exist', endorsementData: [] });
-      return;
-    }
-
     const { endorsementId } = request.params;
     // check if endorsement exists
     const endorsement = await getAnEndorsementService(endorsementId);
     if (!endorsement) {
-      response.status(400).json({ message: 'Endorsement does not exist' });
+      response.status(404).json({ message: 'Endorsement does not exist' });
       return;
     }
 

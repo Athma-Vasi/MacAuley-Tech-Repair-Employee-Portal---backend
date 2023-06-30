@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import expressAsyncHandler from 'express-async-handler';
 
-import type { Request, Response } from 'express';
+import type { Response } from 'express';
 import type { LoginUserRequest, LogoutUserRequest, RefreshTokenRequest } from '../auth';
 
 import { config } from '../../config';
@@ -11,6 +11,7 @@ import {
   checkUserIsActiveService,
   getUserByUsernameService,
 } from '../user';
+import { getUserWithPasswordService } from '../user/user.service';
 
 // @desc Login user
 // @route POST /auth/login
@@ -28,7 +29,7 @@ const loginUserHandler = expressAsyncHandler(
     // check if user exists
     const userExists = await checkUserExistsService({ username });
     if (!userExists) {
-      response.status(400).json({ message: 'Username does not exist' });
+      response.status(404).json({ message: 'Username does not exist' });
       return;
     }
 
@@ -40,7 +41,7 @@ const loginUserHandler = expressAsyncHandler(
     }
 
     // find user
-    const foundUser = await getUserByUsernameService(username);
+    const foundUser = await getUserWithPasswordService(username);
     if (!foundUser) {
       response.status(400).json({ message: 'User not found' });
       return;
@@ -133,6 +134,7 @@ const refreshTokenHandler = expressAsyncHandler(
       const accessToken = jwt.sign(
         {
           userInfo: {
+            userId: foundUser._id,
             username: foundUser.username,
             roles: foundUser.roles,
           },

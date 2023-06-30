@@ -33,13 +33,6 @@ const getAllAnnouncementsHandler = expressAsyncHandler(
       userInfo: { userId },
     } = request.body;
 
-    // check if user exists
-    const isUser = await getUserByIdService(userId);
-    if (!isUser) {
-      response.status(400).json({ message: 'User does not exist', announcementData: [] });
-      return;
-    }
-
     const announcements = await getAllAnnouncementsService();
 
     if (announcements.length === 0) {
@@ -85,13 +78,6 @@ const getAnnouncementsByUserHandler = expressAsyncHandler(
     const {
       userInfo: { userId },
     } = request.body;
-
-    // check if user exists
-    const isUser = await getUserByIdService(userId);
-    if (!isUser) {
-      response.status(400).json({ message: 'User does not exist', announcementData: [] });
-      return;
-    }
 
     const announcements = await getAnnouncementsByUserService(userId);
     if (announcements.length === 0) {
@@ -142,13 +128,6 @@ const createNewAnnouncementHandler = expressAsyncHandler(
       timeToRead,
     } = request.body;
 
-    // check if user exists
-    const isUser = await getUserByIdService(userId);
-    if (!isUser) {
-      response.status(400).json({ message: 'User does not exist', announcementData: [] });
-      return;
-    }
-
     // check if announcement with same title already exists
     const isDuplicateAnnouncement = await checkAnnouncementExistsService({ title });
     if (isDuplicateAnnouncement) {
@@ -197,13 +176,6 @@ const updateAnnouncementHandler = expressAsyncHandler(
       rating,
       timeToRead,
     } = request.body;
-
-    // check if user exists
-    const isUser = await getUserByIdService(userId);
-    if (!isUser) {
-      response.status(400).json({ message: 'User does not exist', announcementData: [] });
-      return;
-    }
 
     const { announcementId } = request.params;
 
@@ -259,13 +231,6 @@ const deleteAnnouncementHandler = expressAsyncHandler(
       userInfo: { roles, userId },
     } = request.body;
 
-    // check if user exists
-    const isUser = await getUserByIdService(userId);
-    if (!isUser) {
-      response.status(400).json({ message: 'User does not exist', announcementData: [] });
-      return;
-    }
-
     // only managers/admin can delete announcements
     if (roles.includes('Employee')) {
       response.status(403).json({
@@ -308,13 +273,6 @@ const deleteAllAnnouncementsHandler = expressAsyncHandler(
       userInfo: { roles, userId },
     } = request.body;
 
-    // check if user exists
-    const isUser = await getUserByIdService(userId);
-    if (!isUser) {
-      response.status(400).json({ message: 'User does not exist', announcementData: [] });
-      return;
-    }
-
     // only managers/admin can delete all announcements
     if (roles.includes('Employee')) {
       response.status(403).json({
@@ -349,13 +307,6 @@ const getAnnouncementByIdHandler = expressAsyncHandler(
       userInfo: { roles, userId },
       announcementId,
     } = request.body;
-
-    // check if user exists
-    const isUser = await getUserByIdService(userId);
-    if (!isUser) {
-      response.status(400).json({ message: 'User does not exist', announcementData: [] });
-      return;
-    }
 
     // only managers/admin can get an announcement by its id
     if (roles.includes('Employee')) {

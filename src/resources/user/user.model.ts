@@ -141,7 +141,8 @@ const userSchema = new Schema<UserSchema>(
     },
     roles: {
       type: [String],
-      required: [true, 'Roles are required'],
+      required: false,
+      default: ['Employee'],
     },
     active: {
       type: Boolean,

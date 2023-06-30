@@ -9,7 +9,7 @@ import type {
   GetRequestResourceByIdRequest,
   GetRequestResourcesByUserRequest,
   RequestResourcesServerResponse,
-} from './requestResource.types';
+} from './resourceRequest.types';
 
 import { getUserByIdService } from '../../../user';
 import {
@@ -19,7 +19,7 @@ import {
   getAllRequestResourcesService,
   getRequestResourceByIdService,
   getRequestResourceByUserService,
-} from './requestResource.service';
+} from './resourceRequest.service';
 import { Types } from 'mongoose';
 
 // @desc   Create a new request resource
@@ -32,7 +32,7 @@ const createNewRequestResourceHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      requestResource: {
+      resourceRequest: {
         resourceType,
         department,
         reasonForRequest,
@@ -43,13 +43,6 @@ const createNewRequestResourceHandler = expressAsyncHandler(
         additionalInformation,
       },
     } = request.body;
-
-    // check if user exists
-    const userExists = await getUserByIdService(userId);
-    if (!userExists) {
-      response.status(404).json({ message: 'User does not exist', requestResourceData: [] });
-      return;
-    }
 
     // create new request resource object
     const newRequestResourceObject = {
@@ -92,17 +85,10 @@ const deleteARequestResourceHandler = expressAsyncHandler(
       userInfo: { roles, userId, username },
     } = request.body;
 
-    // check if user exists
-    const userExists = await getUserByIdService(userId);
-    if (!userExists) {
-      response.status(404).json({ message: 'User does not exist', requestResourceData: [] });
-      return;
-    }
-
     // check if user is admin or manager
     if (roles.includes('Employee')) {
       response.status(403).json({
-        message: 'Only managers/admin can delete a requestResource',
+        message: 'Only managers/admin can delete a resourceRequest',
         requestResourceData: [],
       });
       return;
@@ -110,7 +96,7 @@ const deleteARequestResourceHandler = expressAsyncHandler(
 
     const requestResourceId = request.params.requestResourceId as Types.ObjectId;
 
-    // delete requestResource
+    // delete resourceRequest
     const deletedResult = await deleteARequestResourceService(requestResourceId);
     if (deletedResult.acknowledged) {
       response.status(200).json({
@@ -138,17 +124,10 @@ const deleteAllRequestResourcesHandler = expressAsyncHandler(
       userInfo: { roles, userId, username },
     } = request.body;
 
-    // check if user exists
-    const userExists = await getUserByIdService(userId);
-    if (!userExists) {
-      response.status(404).json({ message: 'User does not exist', requestResourceData: [] });
-      return;
-    }
-
     // check if user is admin or manager
     if (roles.includes('Employee')) {
       response.status(403).json({
-        message: 'Only managers/admin can delete a requestResource',
+        message: 'Only managers/admin can delete a resourceRequest',
         requestResourceData: [],
       });
       return;
@@ -182,17 +161,10 @@ const getAllRequestResourcesHandler = expressAsyncHandler(
       userInfo: { roles, userId, username },
     } = request.body;
 
-    // check if user exists
-    const userExists = await getUserByIdService(userId);
-    if (!userExists) {
-      response.status(404).json({ message: 'User does not exist', requestResourceData: [] });
-      return;
-    }
-
     // check if user is admin or manager
     if (roles.includes('Employee')) {
       response.status(403).json({
-        message: 'Only managers/admin can delete a requestResource',
+        message: 'Only managers/admin can delete a resourceRequest',
         requestResourceData: [],
       });
       return;
@@ -226,17 +198,10 @@ const getRequestResourceByIdHandler = expressAsyncHandler(
       userInfo: { roles, userId, username },
     } = request.body;
 
-    // check if user exists
-    const userExists = await getUserByIdService(userId);
-    if (!userExists) {
-      response.status(404).json({ message: 'User does not exist', requestResourceData: [] });
-      return;
-    }
-
     // check if user is admin or manager
     if (roles.includes('Employee')) {
       response.status(403).json({
-        message: 'Only managers/admin can get a requestResource',
+        message: 'Only managers/admin can get a resourceRequest',
         requestResourceData: [],
       });
       return;
@@ -244,12 +209,12 @@ const getRequestResourceByIdHandler = expressAsyncHandler(
 
     const requestResourceId = request.params.requestResourceId as Types.ObjectId;
 
-    // get requestResource
-    const requestResource = await getRequestResourceByIdService(requestResourceId);
-    if (requestResource) {
+    // get resourceRequest
+    const resourceRequest = await getRequestResourceByIdService(requestResourceId);
+    if (resourceRequest) {
       response.status(200).json({
         message: 'Request resource retrieved successfully',
-        requestResourceData: [requestResource],
+        requestResourceData: [resourceRequest],
       });
     } else {
       response.status(400).json({
@@ -271,13 +236,6 @@ const getRequestResourceByUserHandler = expressAsyncHandler(
     const {
       userInfo: { roles, userId, username },
     } = request.body;
-
-    // check if user exists
-    const userExists = await getUserByIdService(userId);
-    if (!userExists) {
-      response.status(404).json({ message: 'User does not exist', requestResourceData: [] });
-      return;
-    }
 
     // anyone can get their own request resources
     const requestResources = await getRequestResourceByUserService(userId);

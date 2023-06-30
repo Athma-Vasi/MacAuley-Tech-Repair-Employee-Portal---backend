@@ -2,13 +2,13 @@ import { Router } from 'express';
 import { addressChangeRouter } from './addressChange';
 import { leaveRequestRouter } from './leaveRequest';
 import { expenseClaimRouter } from './expenseClaim';
-import { requestResourceRouter } from './requestResource';
+import { requestResourceRouter } from './resourceRequest';
 
 const actionsCompanyRouter = Router();
 
 actionsCompanyRouter.use('/address-change', addressChangeRouter);
 actionsCompanyRouter.use('/leave-request', leaveRequestRouter);
 actionsCompanyRouter.use('/expense-claim', expenseClaimRouter);
-actionsCompanyRouter.use('/request-resource', requestResourceRouter);
+actionsCompanyRouter.use('/resource-request', requestResourceRouter);
 
 export { actionsCompanyRouter };

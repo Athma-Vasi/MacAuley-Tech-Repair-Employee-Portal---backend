@@ -41,13 +41,6 @@ const createNewExpenseClaimHandler = expressAsyncHandler(
       },
     } = request.body;
 
-    // check if user exists
-    const userExists = await getUserByIdService(userId);
-    if (!userExists) {
-      response.status(404).json({ message: 'User does not exist', expenseClaimData: [] });
-      return;
-    }
-
     // user must acknowledge that expenseClaim info is correct
     if (!acknowledgement) {
       response.status(400).json({ message: 'Acknowledgement is required', expenseClaimData: [] });
@@ -94,13 +87,6 @@ const getAllExpenseClaimsHandler = expressAsyncHandler(
       userInfo: { roles, userId },
     } = request.body;
 
-    // check if user exists
-    const userExists = await getUserByIdService(userId);
-    if (!userExists) {
-      response.status(404).json({ message: 'User does not exist', expenseClaimData: [] });
-      return;
-    }
-
     // check permissions: only admin and manager can view all expense claims
     if (roles.includes('Employee')) {
       response.status(403).json({
@@ -135,13 +121,6 @@ const getExpenseClaimsByUserHandler = expressAsyncHandler(
       userInfo: { userId },
     } = request.body;
 
-    // check if user exists
-    const userExists = await getUserByIdService(userId);
-    if (!userExists) {
-      response.status(404).json({ message: 'User does not exist', expenseClaimData: [] });
-      return;
-    }
-
     // anyone can view their own expense claims
     const expenseClaimsByUser = await getExpenseClaimsByUserService(userId);
     if (expenseClaimsByUser.length > 0) {
@@ -163,13 +142,6 @@ const getExpenseClaimByIdHandler = expressAsyncHandler(
     const {
       userInfo: { roles, userId },
     } = request.body;
-
-    // check if user exists
-    const userExists = await getUserByIdService(userId);
-    if (!userExists) {
-      response.status(404).json({ message: 'User does not exist', expenseClaimData: [] });
-      return;
-    }
 
     const expenseClaimId = request.params.expenseClaimId as Types.ObjectId;
 
@@ -209,13 +181,6 @@ const deleteAllExpenseClaimsHandler = expressAsyncHandler(
       userInfo: { roles, userId },
     } = request.body;
 
-    // check if user exists
-    const userExists = await getUserByIdService(userId);
-    if (!userExists) {
-      response.status(404).json({ message: 'User does not exist', expenseClaimData: [] });
-      return;
-    }
-
     // check permissions: only admin and manager can delete all expense claims
     if (roles.includes('Employee')) {
       response.status(403).json({
@@ -244,13 +209,6 @@ const deleteAnExpenseClaimHandler = expressAsyncHandler(
     const {
       userInfo: { roles, userId },
     } = request.body;
-
-    // check if user exists
-    const userExists = await getUserByIdService(userId);
-    if (!userExists) {
-      response.status(404).json({ message: 'User does not exist', expenseClaimData: [] });
-      return;
-    }
 
     const expenseClaimId = request.params.expenseClaimId as Types.ObjectId;
 

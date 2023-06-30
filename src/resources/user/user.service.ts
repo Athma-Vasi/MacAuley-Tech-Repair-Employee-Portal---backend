@@ -148,6 +148,15 @@ async function getUserByUsernameService(username: string) {
   }
 }
 
+async function getUserWithPasswordService(username: string) {
+  try {
+    const userWithPassword = await UserModel.findOne({ username }).lean().exec();
+    return userWithPassword;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getUserWithPasswordService' });
+  }
+}
+
 async function getAllUsersService() {
   try {
     // do not return the password field
@@ -266,4 +275,5 @@ export {
   updateUserService,
   checkUserPasswordService,
   updateUserPasswordService,
+  getUserWithPasswordService,
 };

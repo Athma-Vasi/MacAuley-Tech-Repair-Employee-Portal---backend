@@ -46,8 +46,6 @@ const createNewUserHandler = expressAsyncHandler(
     const { addressLine1, city, province, state, postalCode, country } = address;
     const { fullName, contactNumber: emergencyContactNumber } = emergencyContact;
 
-    console.log(JSON.stringify(request.body, null, 2));
-
     // both state and province cannot be empty (both are required)
     if (!state && !province) {
       response.status(400).json({
@@ -150,13 +148,6 @@ const deleteUserHandler = expressAsyncHandler(
       response
         .status(400)
         .json({ message: 'User has notes assigned to them that are not completed' });
-      return;
-    }
-
-    // check user exists
-    const userExists = await checkUserExistsService({ userId: userToBeDeletedId });
-    if (!userExists) {
-      response.status(400).json({ message: 'User does not exist' });
       return;
     }
 
@@ -307,13 +298,6 @@ const updateUserPasswordHandler = expressAsyncHandler(
       currentPassword,
       newPassword,
     } = request.body;
-
-    // check if user exists
-    const userExists = await checkUserExistsService({ userId });
-    if (!userExists) {
-      response.status(400).json({ message: 'User does not exist' });
-      return;
-    }
 
     // check if current password is correct
     const isCurrentPasswordCorrect = await checkUserPasswordService({
