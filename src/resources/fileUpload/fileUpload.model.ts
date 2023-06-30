@@ -27,6 +27,7 @@ type FileUploadSchema = {
   fileName: string;
   fileSize: number;
   fileMimeType: string;
+  fileEncoding: string;
 };
 
 type FileUploadDocument = FileUploadSchema & {
@@ -48,6 +49,10 @@ const fileUploadSchema = new Schema<FileUploadSchema>(
       type: Schema.Types.ObjectId,
       required: [true, 'Associated document Id is required'],
       index: true,
+    },
+    uploadedFile: {
+      type: Object, // Express.Multer.File
+      required: [true, 'Uploaded file is required'],
     },
     username: {
       type: String,
@@ -74,6 +79,10 @@ const fileUploadSchema = new Schema<FileUploadSchema>(
     fileMimeType: {
       type: String,
       required: [true, 'File MIME type is required'],
+    },
+    fileEncoding: {
+      type: String,
+      required: [true, 'File encoding is required'],
     },
   },
   {
