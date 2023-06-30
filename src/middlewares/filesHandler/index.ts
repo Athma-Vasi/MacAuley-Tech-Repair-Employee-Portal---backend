@@ -5,11 +5,16 @@
 /**
  * Imports
  */
-import { fileExtensionLimiterMiddleware } from './fileExtensionLimiter';
+import { fileExtensionLimiterMiddleware, ALLOWED_FILE_EXTENSIONS } from './fileExtensionLimiter';
 import { fileSizeLimiterMiddleware } from './fileSizeLimiter';
 import { filesPayloadExistsMiddleware } from './filesPayloadExists';
 
 /**
  * Exports
  */
-export { fileExtensionLimiterMiddleware, fileSizeLimiterMiddleware, filesPayloadExistsMiddleware };
+export {
+  fileExtensionLimiterMiddleware,
+  ALLOWED_FILE_EXTENSIONS,
+  fileSizeLimiterMiddleware,
+  filesPayloadExistsMiddleware,
+};

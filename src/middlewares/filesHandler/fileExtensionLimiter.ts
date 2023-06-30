@@ -3,6 +3,22 @@ import path from 'path';
 
 import type { NextFunction, Request, Response } from 'express';
 
+const ALLOWED_FILE_EXTENSIONS = [
+  '.jpg',
+  '.jpeg',
+  '.png',
+  '.pdf',
+  '.docx',
+  '.doc',
+  '.xlsx',
+  '.xls',
+  '.ppt',
+  '.pptx',
+  '.csv',
+  '.txt',
+  '.log',
+];
+
 const fileExtensionLimiterMiddleware = (allowedExtensionsArray: string[]) => {
   return (request: Request, response: Response, next: NextFunction) => {
     const { files } = request as unknown as expressFileUpload.FileArray;
@@ -36,4 +52,4 @@ const fileExtensionLimiterMiddleware = (allowedExtensionsArray: string[]) => {
   };
 };
 
-export { fileExtensionLimiterMiddleware };
+export { fileExtensionLimiterMiddleware, ALLOWED_FILE_EXTENSIONS };
