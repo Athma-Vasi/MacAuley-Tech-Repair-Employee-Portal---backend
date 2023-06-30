@@ -66,6 +66,7 @@ interface GetFileUploadByIdRequest extends RequestAfterJWTVerification {
 type FileUploadServerResponse = {
   message: string;
   documentId?: Types.ObjectId | undefined;
+  fileUploads?: Array<FileUploadDocument> | undefined;
 };
 
 export type {

@@ -82,10 +82,20 @@ async function deleteAllFileUploadsService(): Promise<DeleteResult> {
   }
 }
 
+async function getAllFileUploadsService(): Promise<Array<FileUploadDocument>> {
+  try {
+    const fileUploads = await FileUploadModel.find({}).lean().exec();
+    return fileUploads;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getAllFileUploadsService' });
+  }
+}
+
 export {
   createNewFileUploadService,
   getFileUploadById,
   insertAssociatedResourceDocumentIdService,
   deleteFileUploadService,
   deleteAllFileUploadsService,
+  getAllFileUploadsService,
 };

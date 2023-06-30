@@ -16,6 +16,7 @@ import {
   createNewFileUploadService,
   deleteAllFileUploadsService,
   deleteFileUploadService,
+  getAllFileUploadsService,
   getFileUploadById,
   insertAssociatedResourceDocumentIdService,
 } from './fileUpload.service';
@@ -155,6 +156,36 @@ const deleteAllFileUploadsHandler = expressAsyncHandler(
       response.status(200).json({ message: 'All file uploads deleted successfully' });
     } else {
       response.status(400).json({ message: 'All file uploads could not be deleted' });
+    }
+  }
+);
+
+// @desc   Get all file uploads
+// @route  GET /file-upload
+// @access Private/Admin/Manager
+const getAllFileUploadsHandler = expressAsyncHandler(
+  async (request: GetAllFileUploadsRequest, response: Response<FileUploadServerResponse>) => {
+    const {
+      userInfo: { userId, username, roles },
+    } = request.body;
+
+    // check if user is admin or manager
+    if (roles.includes('Employee')) {
+      response.status(403).json({
+        message: 'Not authorized as user is not an admin or manager',
+      });
+      return;
+    }
+
+    // get all file uploads
+    const allFileUploads = await getAllFileUploadsService();
+    if (allFileUploads) {
+      response.status(200).json({
+        message: 'All file uploads retrieved successfully',
+        fileUploads: allFileUploads,
+      });
+    } else {
+      response.status(404).json({ message: 'No file uploads found' });
     }
   }
 );
