@@ -31,12 +31,12 @@ async function createNewFileUploadService(
   }
 }
 
-async function getFileUploadById(fileUploadId: Types.ObjectId) {
+async function getFileUploadByIdService(fileUploadId: Types.ObjectId) {
   try {
     const fileUpload = await FileUploadModel.findById(fileUploadId).lean().exec();
     return fileUpload;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getFileUploadById' });
+    throw new Error(error, { cause: 'getFileUploadByIdService' });
   }
 }
 
@@ -104,7 +104,7 @@ async function getFileUploadsByUserService(
 
 export {
   createNewFileUploadService,
-  getFileUploadById,
+  getFileUploadByIdService,
   insertAssociatedResourceDocumentIdService,
   deleteFileUploadService,
   deleteAllFileUploadsService,

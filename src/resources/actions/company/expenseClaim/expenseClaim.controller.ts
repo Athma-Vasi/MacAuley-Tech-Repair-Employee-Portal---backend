@@ -146,14 +146,9 @@ const getExpenseClaimByIdHandler = expressAsyncHandler(
 
     // check permissions: only admin and manager can view an expense claim that does not belong to them
     if (roles.includes('Employee')) {
-      const expenseClaim = await getExpenseClaimsByUserService(userId);
-      if (!expenseClaim) {
-        response.status(404).json({ message: 'Expense claim not found', expenseClaimData: [] });
-        return;
-      }
-      response.status(200).json({
-        message: 'Successfully fetched expense claim',
-        expenseClaimData: expenseClaim,
+      response.status(403).json({
+        message: 'Only managers/admins can view expense claims that do not belong to them',
+        expenseClaimData: [],
       });
       return;
     }

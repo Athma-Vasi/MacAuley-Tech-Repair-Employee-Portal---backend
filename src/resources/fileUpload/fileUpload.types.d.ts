@@ -68,6 +68,13 @@ interface GetFileUploadsByUserRequest extends RequestAfterJWTVerification {
 }
 
 interface GetFileUploadByIdRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+  };
   params: { fileUploadId: Types.ObjectId };
 }
 

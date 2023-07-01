@@ -17,7 +17,7 @@ import {
   deleteAllFileUploadsService,
   deleteFileUploadService,
   getAllFileUploadsService,
-  getFileUploadById,
+  getFileUploadByIdService,
   getFileUploadsByUserService,
   insertAssociatedResourceDocumentIdService,
 } from './fileUpload.service';
@@ -69,7 +69,7 @@ const insertAssociatedResourceDocumentIdHandler = expressAsyncHandler(
       associatedResource,
     } = request.body;
 
-    const oldFileUpload = await getFileUploadById(fileUploadId);
+    const oldFileUpload = await getFileUploadByIdService(fileUploadId);
     if (!oldFileUpload) {
       response.status(404).json({
         message: 'File upload not found',
@@ -107,7 +107,7 @@ const deleteAFileUploadHandler = expressAsyncHandler(
     // if it does, do not allow unless the associated document is deleted first (only managers/admin can delete associated documents)
     // users can delete their own file uploads which are not associated with any document
 
-    const existingFileUpload = await getFileUploadById(fileUploadId);
+    const existingFileUpload = await getFileUploadByIdService(fileUploadId);
     if (!existingFileUpload) {
       response.status(404).json({
         message: 'File upload not found',
@@ -214,10 +214,45 @@ const getFileUploadsByUserHandler = expressAsyncHandler(
   }
 );
 
+// @desc   Get file uploads by its id
+// @route  GET /file-upload/:fileUploadId
+// @access Private
+const getFileUploadByIdHandler = expressAsyncHandler(
+  async (request: GetFileUploadByIdRequest, response: Response<FileUploadServerResponse>) => {
+    const { fileUploadId } = request.params;
+
+    // only admin or manager can get file uploads by its id that does not belong to them
+    const {
+      userInfo: { roles, userId, username },
+    } = request.body;
+
+    // check if user is admin or manager
+    if (roles.includes('Employee')) {
+      response.status(403).json({
+        message: 'Not authorized as user is not an admin or manager',
+      });
+      return;
+    }
+
+    // get file upload by its id
+    const fileUpload = await getFileUploadByIdService(fileUploadId);
+    if (fileUpload) {
+      response.status(200).json({
+        message: 'File upload retrieved successfully',
+        fileUploads: [fileUpload],
+      });
+    } else {
+      response.status(404).json({ message: 'No file upload found', fileUploads: [] });
+    }
+  }
+);
+
 export {
   createNewFileUploadHandler,
   deleteAFileUploadHandler,
   insertAssociatedResourceDocumentIdHandler,
   deleteAllFileUploadsHandler,
   getAllFileUploadsHandler,
+  getFileUploadsByUserHandler,
+  getFileUploadByIdHandler,
 };
