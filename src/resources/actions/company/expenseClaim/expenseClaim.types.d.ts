@@ -29,6 +29,14 @@ interface DeleteAnExpenseClaimRequest extends RequestAfterJWTVerification {
   params: {
     expenseClaimId: Types.ObjectId;
   };
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    uploadedFileId: Types.ObjectId;
+  };
 }
 
 type DeleteAllExpenseClaimsRequest = RequestAfterJWTVerification;

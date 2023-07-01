@@ -20,11 +20,12 @@ import {
 import {
   createNewFileUploadService,
   deleteAllFileUploadsService,
-  deleteFileUploadService,
+  deleteFileUploadByIdService,
   getAllFileUploadsService,
   getFileUploadByIdService,
   getFileUploadsByUserService,
   insertAssociatedResourceDocumentIdService,
+  deleteAllFileUploadsByAssociatedResourceService,
 } from './fileUpload.service';
 
 import type {
@@ -60,11 +61,12 @@ export {
   insertAssociatedResourceDocumentIdHandler,
   createNewFileUploadService,
   deleteAllFileUploadsService,
-  deleteFileUploadService,
+  deleteFileUploadByIdService,
   getAllFileUploadsService,
   getFileUploadByIdService,
   getFileUploadsByUserService,
   insertAssociatedResourceDocumentIdService,
+  deleteAllFileUploadsByAssociatedResourceService,
 };
 
 export type {

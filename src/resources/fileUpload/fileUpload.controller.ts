@@ -14,7 +14,7 @@ import type {
 import {
   createNewFileUploadService,
   deleteAllFileUploadsService,
-  deleteFileUploadService,
+  deleteFileUploadByIdService,
   getAllFileUploadsService,
   getFileUploadByIdService,
   getFileUploadsByUserService,
@@ -126,7 +126,7 @@ const deleteAFileUploadHandler = expressAsyncHandler(
     }
 
     // delete file upload
-    const deletedResult = await deleteFileUploadService(fileUploadId);
+    const deletedResult = await deleteFileUploadByIdService(fileUploadId);
     if (deletedResult.acknowledged) {
       response.status(200).json({ message: 'File upload deleted successfully' });
     } else {

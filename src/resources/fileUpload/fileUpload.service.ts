@@ -64,7 +64,7 @@ async function insertAssociatedResourceDocumentIdService(
   }
 }
 
-async function deleteFileUploadService(fileUploadId: Types.ObjectId): Promise<DeleteResult> {
+async function deleteFileUploadByIdService(fileUploadId: Types.ObjectId): Promise<DeleteResult> {
   try {
     const deleteResult = await FileUploadModel.deleteOne({ _id: fileUploadId }).exec();
     return deleteResult;
@@ -79,6 +79,17 @@ async function deleteAllFileUploadsService(): Promise<DeleteResult> {
     return deleteResult;
   } catch (error: any) {
     throw new Error(error, { cause: 'deleteAllFileUploadsService' });
+  }
+}
+
+async function deleteAllFileUploadsByAssociatedResourceService(
+  associatedResource: AssociatedResourceKind
+): Promise<DeleteResult> {
+  try {
+    const deleteResult = await FileUploadModel.deleteMany({ associatedResource }).lean().exec();
+    return deleteResult;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'deleteAllFileUploadsByAssociatedResourceService' });
   }
 }
 
@@ -106,8 +117,9 @@ export {
   createNewFileUploadService,
   getFileUploadByIdService,
   insertAssociatedResourceDocumentIdService,
-  deleteFileUploadService,
+  deleteFileUploadByIdService,
   deleteAllFileUploadsService,
   getAllFileUploadsService,
   getFileUploadsByUserService,
+  deleteAllFileUploadsByAssociatedResourceService,
 };

@@ -73,6 +73,18 @@ async function deleteAllExpenseClaimsService(): Promise<DeleteResult> {
   }
 }
 
+async function returnAllUploadedFileIdsService(): Promise<Types.ObjectId[]> {
+  try {
+    const allUploadedFileIds = await ExpenseClaimModel.find({})
+      .distinct('uploadedFileId')
+      .lean()
+      .exec();
+    return allUploadedFileIds as Array<Types.ObjectId>;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'returnAllUploadedFileIdsService' });
+  }
+}
+
 async function deleteAnExpenseClaimService(expenseClaimId: Types.ObjectId): Promise<DeleteResult> {
   try {
     const deleteResult = await ExpenseClaimModel.deleteOne({ _id: expenseClaimId }).lean().exec();
@@ -89,4 +101,5 @@ export {
   getExpenseClaimByIdService,
   deleteAllExpenseClaimsService,
   deleteAnExpenseClaimService,
+  returnAllUploadedFileIdsService,
 };

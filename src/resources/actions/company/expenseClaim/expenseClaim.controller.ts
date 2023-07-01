@@ -22,7 +22,8 @@ import {
 } from './expenseClaim.service';
 import {
   AssociatedResourceKind,
-  FileUploadDocument,
+  deleteAllFileUploadsByAssociatedResourceService,
+  deleteFileUploadByIdService,
   getFileUploadByIdService,
   insertAssociatedResourceDocumentIdService,
 } from '../../../fileUpload';
@@ -220,13 +221,28 @@ const deleteAllExpenseClaimsHandler = expressAsyncHandler(
       return;
     }
 
-    // delete all expense claims
-    const deletedResult = await deleteAllExpenseClaimsService();
+    // delete all file uploads with associated resource 'Expense Claim'
+    const deleteFileUploadsResult = await deleteAllFileUploadsByAssociatedResourceService(
+      'Expense Claim'
+    );
+    if (!deleteFileUploadsResult.acknowledged) {
+      response.status(400).json({
+        message:
+          'All file uploads associated with all expense claims could not be deleted. Expense Claims not deleted. Please try again.',
+        expenseClaimData: [],
+      });
+      return;
+    }
 
-    if (deletedResult.acknowledged) {
+    // delete all expense claims
+    const deleteExpenseClaimsResult = await deleteAllExpenseClaimsService();
+
+    if (deleteExpenseClaimsResult.acknowledged) {
       response.status(200).json({ message: 'All expense claims deleted', expenseClaimData: [] });
     } else {
-      response.status(404).json({ message: 'No expense claims found', expenseClaimData: [] });
+      response
+        .status(400)
+        .json({ message: 'All expense claims could not be deleted', expenseClaimData: [] });
     }
   }
 );
@@ -238,6 +254,7 @@ const deleteAnExpenseClaimHandler = expressAsyncHandler(
   async (request: DeleteAnExpenseClaimRequest, response: Response<ExpenseClaimServerResponse>) => {
     const {
       userInfo: { roles, userId },
+      uploadedFileId,
     } = request.body;
 
     const expenseClaimId = request.params.expenseClaimId as Types.ObjectId;
@@ -251,13 +268,27 @@ const deleteAnExpenseClaimHandler = expressAsyncHandler(
       return;
     }
 
-    // delete expense claim by id
-    const deletedResult = await deleteAnExpenseClaimService(expenseClaimId);
+    // delete associated file upload with this expense claim
+    const deleteFileUploadResult = await deleteFileUploadByIdService(uploadedFileId);
+    if (!deleteFileUploadResult.acknowledged) {
+      response.status(400).json({
+        message:
+          'File upload associated with this expense claim could not be deleted. Expense Claim not deleted. Please try again.',
+        expenseClaimData: [],
+      });
+      return;
+    }
 
-    if (deletedResult.acknowledged) {
+    // delete expense claim by id
+    const deleteExpenseClaimResult = await deleteAnExpenseClaimService(expenseClaimId);
+
+    if (deleteExpenseClaimResult.acknowledged) {
       response.status(200).json({ message: 'Expense claim deleted', expenseClaimData: [] });
     } else {
-      response.status(404).json({ message: 'Expense claim not found', expenseClaimData: [] });
+      response.status(400).json({
+        message: 'Expense claim could not be deleted. Please try again.',
+        expenseClaimData: [],
+      });
     }
   }
 );
