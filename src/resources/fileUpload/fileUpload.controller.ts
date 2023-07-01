@@ -18,6 +18,7 @@ import {
   deleteFileUploadService,
   getAllFileUploadsService,
   getFileUploadById,
+  getFileUploadsByUserService,
   insertAssociatedResourceDocumentIdService,
 } from './fileUpload.service';
 
@@ -185,13 +186,38 @@ const getAllFileUploadsHandler = expressAsyncHandler(
         fileUploads: allFileUploads,
       });
     } else {
-      response.status(404).json({ message: 'No file uploads found' });
+      response.status(404).json({ message: 'No file uploads found', fileUploads: [] });
+    }
+  }
+);
+
+// @desc   Get file uploads by user
+// @route  GET /file-upload/user
+// @access Private
+const getFileUploadsByUserHandler = expressAsyncHandler(
+  async (request: GetFileUploadsByUserRequest, response: Response<FileUploadServerResponse>) => {
+    // anyone can get their own file uploads
+    const {
+      userInfo: { userId, username, roles },
+    } = request.body;
+
+    // get all file uploads by user
+    const fileUploads = await getFileUploadsByUserService(userId);
+    if (fileUploads) {
+      response.status(200).json({
+        message: 'File uploads retrieved successfully',
+        fileUploads,
+      });
+    } else {
+      response.status(404).json({ message: 'No file uploads found', fileUploads: [] });
     }
   }
 );
 
 export {
   createNewFileUploadHandler,
-  insertAssociatedResourceDocumentIdHandler,
   deleteAFileUploadHandler,
+  insertAssociatedResourceDocumentIdHandler,
+  deleteAllFileUploadsHandler,
+  getAllFileUploadsHandler,
 };

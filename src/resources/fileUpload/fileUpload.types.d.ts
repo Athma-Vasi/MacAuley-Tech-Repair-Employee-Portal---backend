@@ -57,7 +57,15 @@ interface DeleteAllFileUploadsRequest extends RequestAfterJWTVerification {
 
 type GetAllFileUploadsRequest = RequestAfterJWTVerification;
 
-type GetFileUploadsByUserRequest = RequestAfterJWTVerification;
+interface GetFileUploadsByUserRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+  };
+}
 
 interface GetFileUploadByIdRequest extends RequestAfterJWTVerification {
   params: { fileUploadId: Types.ObjectId };

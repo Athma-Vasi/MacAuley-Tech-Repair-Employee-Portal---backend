@@ -91,6 +91,17 @@ async function getAllFileUploadsService(): Promise<Array<FileUploadDocument>> {
   }
 }
 
+async function getFileUploadsByUserService(
+  userId: Types.ObjectId
+): Promise<Array<FileUploadDocument>> {
+  try {
+    const fileUploads = await FileUploadModel.find({ userId }).lean().exec();
+    return fileUploads;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getFileUploadsByUserService' });
+  }
+}
+
 export {
   createNewFileUploadService,
   getFileUploadById,
@@ -98,4 +109,5 @@ export {
   deleteFileUploadService,
   deleteAllFileUploadsService,
   getAllFileUploadsService,
+  getFileUploadsByUserService,
 };
