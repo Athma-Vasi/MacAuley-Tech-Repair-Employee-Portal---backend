@@ -8,14 +8,15 @@ import type {
 } from './fileUpload.model';
 
 import { FileUploadModel } from './fileUpload.model';
+import { FileUploadObject } from '../../types';
 
 type CreateNewFileUploadServiceInput = {
   userId: Types.ObjectId;
   username: string;
-  uploadedFile: Express.Multer.File;
+  uploadedFile: Buffer;
   fileName: string;
   fileExtension: FileExtension;
-  fileSize: string;
+  fileSize: number;
   fileMimeType: string;
   fileEncoding: string;
 };

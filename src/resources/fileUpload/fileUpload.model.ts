@@ -1,4 +1,5 @@
 import { Schema, Types, model } from 'mongoose';
+import { FileUploadObject } from '../../types';
 
 type FileExtension =
   | 'jpg'
@@ -19,11 +20,11 @@ type AssociatedResourceKind = 'Expense Claim';
 
 type FileUploadSchema = {
   userId: Types.ObjectId;
-  uploadedFile: Express.Multer.File;
+  uploadedFile: Buffer;
   username: string;
   fileExtension: FileExtension;
   fileName: string;
-  fileSize: string;
+  fileSize: number;
   fileMimeType: string;
   fileEncoding: string;
 };
@@ -48,7 +49,7 @@ const fileUploadSchema = new Schema<FileUploadSchema>(
       index: true,
     },
     uploadedFile: {
-      type: Object, // Express.Multer.File
+      type: Buffer,
       required: [true, 'Uploaded file is required'],
     },
     username: {
@@ -66,7 +67,7 @@ const fileUploadSchema = new Schema<FileUploadSchema>(
       required: [true, 'File name is required'],
     },
     fileSize: {
-      type: String,
+      type: Number,
       required: [true, 'File size is required'],
     },
     fileMimeType: {

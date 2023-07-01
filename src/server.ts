@@ -17,6 +17,7 @@ import {
   filesPayloadExistsMiddleware,
   logEvents,
   loggerMiddleware,
+  verifyJWTMiddleware,
 } from './middlewares';
 
 import { noteRouter } from './resources/note';
@@ -49,14 +50,8 @@ app.use('/users', userRouter);
 app.use('/notes', noteRouter);
 app.use('/announcements', announcementRouter);
 app.use('/actions', actionsRouter);
-app.use(
-  '/file-uploads',
-  filesPayloadExistsMiddleware,
-  fileSizeLimiterMiddleware,
-  fileExtensionLimiterMiddleware,
-  fileInfoExtracterMiddleware,
-  fileUploadRouter
-);
+
+app.use('/file-uploads', fileUploadRouter);
 
 app.all('*', notFoundRouter);
 

@@ -1,6 +1,7 @@
 import path from 'path';
 
 import type { NextFunction, Request, Response } from 'express';
+import { FileUploadObject } from '../../types';
 
 const ALLOWED_FILE_EXTENSIONS = [
   '.jpg',
@@ -20,24 +21,27 @@ const ALLOWED_FILE_EXTENSIONS = [
 
 const fileExtensionLimiterMiddleware = (allowedExtensionsArray: string[]) => {
   return (request: Request, response: Response, next: NextFunction) => {
-    // this middleware only runs if filesPayloadExistsMiddleware and fileSizeLimiterMiddleware has passed
-    const files = request.files as
-      | {
-          [fieldname: string]: Express.Multer.File[];
-        }
-      | Express.Multer.File[];
+    // this middleware only runs if filesPayloadExistsMiddleware and fileSizeLimiterMiddleware has passed - files cannot be undefined
+    const files = request.files as unknown as FileUploadObject | FileUploadObject[];
 
-    const filesWithDisallowedExtensions: Express.Multer.File[] = [];
+    const filesWithDisallowedExtensions: FileUploadObject[] = [];
 
-    Object.entries(files).forEach((file) => {
-      const [fileName, fileObject] = file;
+    console.log('fileExtensionLimiter-files: ', files);
+
+    Object.entries(files).forEach((file: [string, FileUploadObject]) => {
+      const [fileObjKey, fileObj] = file;
       // grab the file extension from the file name
-      const fileExtension = path.extname(fileName);
+      const fileExtension = path.extname(fileObj.name);
       // if the file extension is not in the allowedExtensionArray, add it to the filesWithDisallowedExtensions array
       if (!allowedExtensionsArray.includes(fileExtension)) {
-        filesWithDisallowedExtensions.push(fileObject);
+        filesWithDisallowedExtensions.push(fileObj);
       }
     });
+
+    console.log(
+      'fileExtensionLimiter-filesWithDisallowedExtensions: ',
+      filesWithDisallowedExtensions
+    );
 
     // if there are files with disallowed extensions, return error
     if (filesWithDisallowedExtensions.length > 0) {
@@ -45,7 +49,7 @@ const fileExtensionLimiterMiddleware = (allowedExtensionsArray: string[]) => {
       const properVerb = filesWithDisallowedExtensions.length > 1 ? 'are' : 'is';
 
       const message = `Upload failed. The following file${progressiveApostrophe}${properVerb} not allowed: ${filesWithDisallowedExtensions
-        .map((file) => file.filename)
+        .map((file) => file.name)
         .join(', ')}. Allowed extensions are: ${allowedExtensionsArray.join(', ')}`;
 
       response.status(422).json({ message }); // 422: Unprocessable Entity

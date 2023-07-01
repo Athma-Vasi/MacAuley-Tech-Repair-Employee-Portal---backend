@@ -26,10 +26,15 @@ import {
 // @access Private
 const createNewFileUploadHandler = expressAsyncHandler(
   async (request: CreateNewFileUploadRequest, response: Response<FileUploadServerResponse>) => {
+    console.log('createNewFileUploadHandler-request.body', request.body);
+
     const {
       userInfo: { userId, username },
-      fileUpload: { uploadedFile, fileExtension, fileName, fileSize, fileMimeType, fileEncoding },
+      fileUploads,
     } = request.body;
+
+    const { uploadedFile, fileEncoding, fileExtension, fileMimeType, fileName, fileSize } =
+      fileUploads[0];
 
     // create new fileUpload object
     const newFileUploadObject = {

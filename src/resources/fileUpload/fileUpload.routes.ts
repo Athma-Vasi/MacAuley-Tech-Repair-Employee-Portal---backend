@@ -1,4 +1,14 @@
 import { Router } from 'express';
+import expressFileUpload from 'express-fileupload';
+
+import {
+  verifyJWTMiddleware,
+  filesPayloadExistsMiddleware,
+  fileSizeLimiterMiddleware,
+  fileExtensionLimiterMiddleware,
+  fileInfoExtracterMiddleware,
+  ALLOWED_FILE_EXTENSIONS,
+} from '../../middlewares';
 import {
   createNewFileUploadHandler,
   deleteAFileUploadHandler,
@@ -11,10 +21,19 @@ import {
 
 const fileUploadRouter = Router();
 
+fileUploadRouter.use(verifyJWTMiddleware);
+
 fileUploadRouter
   .route('/')
   .get(getAllFileUploadsHandler)
-  .post(createNewFileUploadHandler)
+  .post(
+    expressFileUpload({ createParentPath: true }),
+    filesPayloadExistsMiddleware,
+    fileSizeLimiterMiddleware,
+    fileExtensionLimiterMiddleware(ALLOWED_FILE_EXTENSIONS),
+    fileInfoExtracterMiddleware,
+    createNewFileUploadHandler
+  )
   .delete(deleteAllFileUploadsHandler);
 
 fileUploadRouter.route('/user').get(getFileUploadsByUserHandler);

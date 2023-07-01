@@ -2,6 +2,7 @@ import expressAsyncHandler from 'express-async-handler';
 
 import { Types } from 'mongoose';
 import type { Response } from 'express';
+import type { AssociatedResourceKind } from '../../../fileUpload';
 import type {
   CreateNewExpenseClaimRequest,
   DeleteAllExpenseClaimsRequest,
@@ -21,7 +22,6 @@ import {
   getExpenseClaimsByUserService,
 } from './expenseClaim.service';
 import {
-  AssociatedResourceKind,
   deleteAllFileUploadsByAssociatedResourceService,
   deleteFileUploadByIdService,
   getFileUploadByIdService,
@@ -253,7 +253,7 @@ const deleteAllExpenseClaimsHandler = expressAsyncHandler(
 const deleteAnExpenseClaimHandler = expressAsyncHandler(
   async (request: DeleteAnExpenseClaimRequest, response: Response<ExpenseClaimServerResponse>) => {
     const {
-      userInfo: { roles, userId },
+      userInfo: { roles },
       uploadedFileId,
     } = request.body;
 

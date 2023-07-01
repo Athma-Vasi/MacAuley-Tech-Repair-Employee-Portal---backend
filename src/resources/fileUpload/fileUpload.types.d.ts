@@ -3,6 +3,7 @@ import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
 import type { AssociatedResourceKind, FileExtension, FileUploadDocument } from './fileUpload.model';
 import type { UserRoles } from '../user';
+import { FileInfoObject, FileUploadObject } from '../../types';
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 
@@ -13,18 +14,11 @@ interface RequestAfterFileInfoExtraction extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    fileUploads: Array<{
-      uploadedFile: Express.Multer.File;
-      fileName: string;
-      fileExtension: FileExtension;
-      fileSize: string;
-      fileMimeType: string;
-      fileEncoding: string;
-    }>;
+    fileUploads: Array<FileInfoObject>;
   };
 }
 
-type CreateNewFileUploadRequest = RequestAfterJWTVerification;
+type CreateNewFileUploadRequest = RequestAfterFileInfoExtraction;
 
 interface InsertAssociatedDocumentIdRequest extends RequestAfterJWTVerification {
   body: {
