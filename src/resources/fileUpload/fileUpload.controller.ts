@@ -1,6 +1,5 @@
 import expressAsyncHandler from 'express-async-handler';
 
-import { Types } from 'mongoose';
 import type { Response } from 'express';
 import type {
   CreateNewFileUploadRequest,
@@ -23,7 +22,7 @@ import {
 } from './fileUpload.service';
 
 // @desc   Create a new file upload
-// @route  POST /file-upload
+// @route  POST /file-uploads
 // @access Private
 const createNewFileUploadHandler = expressAsyncHandler(
   async (request: CreateNewFileUploadRequest, response: Response<FileUploadServerResponse>) => {
@@ -55,7 +54,7 @@ const createNewFileUploadHandler = expressAsyncHandler(
 );
 
 // @desc   Insert associated document id into file upload
-// @route  PUT /file-upload/:fileUploadId
+// @route  PUT /file-uploads/:fileUploadId
 // @access Private
 const insertAssociatedResourceDocumentIdHandler = expressAsyncHandler(
   async (
@@ -97,7 +96,7 @@ const insertAssociatedResourceDocumentIdHandler = expressAsyncHandler(
 );
 
 // @desc   Delete a file upload
-// @route  DELETE /file-upload/:fileUploadId
+// @route  DELETE /file-uploads/:fileUploadId
 // @access Private
 const deleteAFileUploadHandler = expressAsyncHandler(
   async (request: DeleteAFileUploadRequest, response: Response<FileUploadServerResponse>) => {
@@ -135,7 +134,7 @@ const deleteAFileUploadHandler = expressAsyncHandler(
 );
 
 // @desc   Delete all file uploads
-// @route  DELETE /file-upload
+// @route  DELETE /file-uploads
 // @access Private/Admin/Manager
 const deleteAllFileUploadsHandler = expressAsyncHandler(
   async (request: DeleteAllFileUploadsRequest, response: Response<FileUploadServerResponse>) => {
@@ -162,7 +161,7 @@ const deleteAllFileUploadsHandler = expressAsyncHandler(
 );
 
 // @desc   Get all file uploads
-// @route  GET /file-upload
+// @route  GET /file-uploads
 // @access Private/Admin/Manager
 const getAllFileUploadsHandler = expressAsyncHandler(
   async (request: GetAllFileUploadsRequest, response: Response<FileUploadServerResponse>) => {
@@ -192,7 +191,7 @@ const getAllFileUploadsHandler = expressAsyncHandler(
 );
 
 // @desc   Get file uploads by user
-// @route  GET /file-upload/user
+// @route  GET /file-uploads/user
 // @access Private
 const getFileUploadsByUserHandler = expressAsyncHandler(
   async (request: GetFileUploadsByUserRequest, response: Response<FileUploadServerResponse>) => {
@@ -215,7 +214,7 @@ const getFileUploadsByUserHandler = expressAsyncHandler(
 );
 
 // @desc   Get file uploads by its id
-// @route  GET /file-upload/:fileUploadId
+// @route  GET /file-uploads/:fileUploadId
 // @access Private
 const getFileUploadByIdHandler = expressAsyncHandler(
   async (request: GetFileUploadByIdRequest, response: Response<FileUploadServerResponse>) => {

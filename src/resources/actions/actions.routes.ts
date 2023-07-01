@@ -1,8 +1,15 @@
 import { Router } from 'express';
 
-import { verifyJWTMiddleware } from '../../middlewares';
+import {
+  fileExtensionLimiterMiddleware,
+  fileSizeLimiterMiddleware,
+  filesPayloadExistsMiddleware,
+  fileInfoExtracterMiddleware,
+  verifyJWTMiddleware,
+} from '../../middlewares';
 import { actionsGeneralRouter } from './general';
 import { actionsCompanyRouter } from './company';
+import { fileUploadRouter } from '../fileUpload';
 
 const actionsRouter = Router();
 
@@ -11,5 +18,13 @@ actionsRouter.use(verifyJWTMiddleware);
 
 actionsRouter.use('/company', actionsCompanyRouter);
 actionsRouter.use('/general', actionsGeneralRouter);
+actionsRouter.use(
+  '/file-uploads',
+  filesPayloadExistsMiddleware,
+  fileSizeLimiterMiddleware,
+  fileExtensionLimiterMiddleware,
+  fileInfoExtracterMiddleware,
+  fileUploadRouter
+);
 
 export { actionsRouter };

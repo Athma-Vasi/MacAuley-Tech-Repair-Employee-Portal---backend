@@ -8,6 +8,7 @@
 import { fileExtensionLimiterMiddleware, ALLOWED_FILE_EXTENSIONS } from './fileExtensionLimiter';
 import { fileSizeLimiterMiddleware } from './fileSizeLimiter';
 import { filesPayloadExistsMiddleware } from './filesPayloadExists';
+import { fileInfoExtracterMiddleware } from './fileInfoExtracter';
 
 /**
  * Exports
@@ -17,4 +18,5 @@ export {
   ALLOWED_FILE_EXTENSIONS,
   fileSizeLimiterMiddleware,
   filesPayloadExistsMiddleware,
+  fileInfoExtracterMiddleware,
 };

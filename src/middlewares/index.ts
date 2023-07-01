@@ -7,6 +7,7 @@ import {
   fileExtensionLimiterMiddleware,
   fileSizeLimiterMiddleware,
   filesPayloadExistsMiddleware,
+  fileInfoExtracterMiddleware,
 } from './filesHandler';
 
 export {
@@ -19,4 +20,5 @@ export {
   fileSizeLimiterMiddleware,
   filesPayloadExistsMiddleware,
   ALLOWED_FILE_EXTENSIONS,
+  fileInfoExtracterMiddleware,
 };
