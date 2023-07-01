@@ -12,7 +12,7 @@ import { ExpenseClaimModel } from './expenseClaim.model';
 type CreateNewExpenseClaimServiceInput = {
   userId: Types.ObjectId;
   username: string;
-  receiptPhotoId: Types.ObjectId;
+  uploadedFileId: Types.ObjectId;
   expenseClaimType: ExpenseClaimType;
   expenseClaimAmount: number;
   expenseClaimCurrency: Currency;

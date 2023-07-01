@@ -13,7 +13,7 @@ interface CreateNewExpenseClaimRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     expenseClaim: {
-      receiptPhotoId: Types.ObjectId;
+      uploadedFileId: Types.ObjectId;
       expenseClaimType: ExpenseClaimType;
       expenseClaimAmount: number;
       expenseClaimCurrency: Currency;

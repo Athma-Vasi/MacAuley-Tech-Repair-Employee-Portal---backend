@@ -46,7 +46,9 @@ const createNewFileUploadHandler = expressAsyncHandler(
     // create new fileUpload
     const newFileUpload = await createNewFileUploadService(newFileUploadObject);
     if (newFileUpload) {
-      response.status(201).json({ message: 'File uploaded successfully' });
+      response
+        .status(201)
+        .json({ message: 'File uploaded successfully', documentId: newFileUpload._id });
     } else {
       response.status(400).json({ message: 'File could not be uploaded' });
     }

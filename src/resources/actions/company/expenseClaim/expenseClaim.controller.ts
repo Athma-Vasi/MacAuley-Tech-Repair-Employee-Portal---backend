@@ -20,6 +20,12 @@ import {
   getExpenseClaimByIdService,
   getExpenseClaimsByUserService,
 } from './expenseClaim.service';
+import {
+  AssociatedResourceKind,
+  FileUploadDocument,
+  getFileUploadByIdService,
+  insertAssociatedResourceDocumentIdService,
+} from '../../../fileUpload';
 
 // @desc   Create a new expense claim
 // @route  POST /expense-claim
@@ -29,7 +35,7 @@ const createNewExpenseClaimHandler = expressAsyncHandler(
     const {
       userInfo: { userId, username },
       expenseClaim: {
-        receiptPhotoId,
+        uploadedFileId,
         expenseClaimType,
         expenseClaimAmount,
         expenseClaimCurrency,
@@ -46,13 +52,11 @@ const createNewExpenseClaimHandler = expressAsyncHandler(
       return;
     }
 
-    // TODO: check if receiptPhotoId exists
-
     // create new expenseClaim object
     const newExpenseClaimObject = {
       userId,
       username,
-      receiptPhotoId,
+      uploadedFileId,
       expenseClaimType,
       expenseClaimAmount,
       expenseClaimCurrency,
@@ -66,6 +70,33 @@ const createNewExpenseClaimHandler = expressAsyncHandler(
     const newExpenseClaim = await createNewExpenseClaimService(newExpenseClaimObject);
 
     if (newExpenseClaim) {
+      const expenseClaimDocumentId = newExpenseClaim._id;
+      // grab the corresponding fileUpload document
+      const fileUpload = await getFileUploadByIdService(uploadedFileId);
+      if (!fileUpload) {
+        response.status(404).json({ message: 'File upload not found', expenseClaimData: [] });
+        return;
+      }
+
+      // insert expenseClaim document id into fileUpload document
+      // so that we can query for all fileUploads associated with an expenseClaim
+      const fileUploadToUpdateObject = {
+        ...fileUpload,
+        associatedDocumentId: expenseClaimDocumentId,
+        associatedResource: 'Expense Claim' as AssociatedResourceKind,
+      };
+
+      // put the updated fileUpload document into the database
+      const updatedFileUpload = await insertAssociatedResourceDocumentIdService(
+        fileUploadToUpdateObject
+      );
+      if (!updatedFileUpload) {
+        response
+          .status(400)
+          .json({ message: 'File upload could not be updated', expenseClaimData: [] });
+        return;
+      }
+
       response
         .status(201)
         .json({ message: 'New expense claim created', expenseClaimData: [newExpenseClaim] });
@@ -146,9 +177,14 @@ const getExpenseClaimByIdHandler = expressAsyncHandler(
 
     // check permissions: only admin and manager can view an expense claim that does not belong to them
     if (roles.includes('Employee')) {
-      response.status(403).json({
-        message: 'Only managers/admins can view expense claims that do not belong to them',
-        expenseClaimData: [],
+      const expenseClaim = await getExpenseClaimsByUserService(userId);
+      if (!expenseClaim) {
+        response.status(404).json({ message: 'Expense claim not found', expenseClaimData: [] });
+        return;
+      }
+      response.status(200).json({
+        message: 'Successfully fetched expense claim',
+        expenseClaimData: expenseClaim,
       });
       return;
     }
