@@ -11,6 +11,7 @@ import type {
 import type { UserRoles } from '../../../user';
 
 import { SurveyBuilderModel } from './surveyBuilder.model';
+import { DatabaseResponseNullable } from '../../../../types';
 
 type CreateNewSurveyServiceInput = {
   creatorId: Types.ObjectId;
@@ -34,4 +35,24 @@ async function createNewSurveyService(
   }
 }
 
-export { createNewSurveyService };
+async function getSurveyByIdService(
+  surveyId: Types.ObjectId
+): DatabaseResponseNullable<SurveyBuilderDocument> {
+  try {
+    const survey = await SurveyBuilderModel.findById(surveyId).lean().exec();
+    return survey;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getSurveyByIdService' });
+  }
+}
+
+async function deleteASurveyService(surveyId: Types.ObjectId) {
+  try {
+    const deleteResult = await SurveyBuilderModel.deleteOne({ _id: surveyId }).lean().exec();
+    return deleteResult;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'deleteASurveyService' });
+  }
+}
+
+export { createNewSurveyService, getSurveyByIdService, deleteASurveyService };

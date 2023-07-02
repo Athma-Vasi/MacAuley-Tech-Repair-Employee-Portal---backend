@@ -27,13 +27,6 @@ interface DeleteASurveyRequest extends RequestAfterJWTVerification {
   params: {
     surveyId: Types.ObjectId;
   };
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-  };
 }
 
 type DeleteAllSurveysRequest = RequestAfterJWTVerification;
