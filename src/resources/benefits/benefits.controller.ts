@@ -16,6 +16,7 @@ import {
   deleteABenefitService,
   deleteAllBenefitsByUserService,
   getAllBenefitsService,
+  getBenefitsByUserService,
 } from './benefits.service';
 
 // @desc   Create a new benefits plan
@@ -121,9 +122,30 @@ const getAllBenefitsHandler = expressAsyncHandler(
   }
 );
 
+// @desc   Get all benefits plans for a user
+// @route  GET /benefits/user
+// @access Private/Admin/Manager
+const getBenefitsByUserHandler = expressAsyncHandler(
+  async (request: GetBenefitsByUserRequest, response: Response<BenefitsServerResponse>) => {
+    const userId = request.body.userInfo.userId as Types.ObjectId;
+
+    // get all benefits plans for a user
+    const allBenefitsPlans = await getBenefitsByUserService(userId);
+    if (allBenefitsPlans.length > 0) {
+      response.status(200).json({
+        message: 'All benefits plans fetched successfully',
+        benefitsData: allBenefitsPlans,
+      });
+    } else {
+      response.status(400).json({ message: 'Unable to get all benefits plans', benefitsData: [] });
+    }
+  }
+);
+
 export {
   createNewBenefitsHandler,
   deleteABenefitHandler,
   deleteAllBenefitsByUserHandler,
   getAllBenefitsHandler,
+  getBenefitsByUserHandler,
 };

@@ -57,9 +57,21 @@ async function getAllBenefitsService(): DatabaseResponse<BenefitsDocument> {
   }
 }
 
+async function getBenefitsByUserService(
+  userId: Types.ObjectId
+): DatabaseResponse<BenefitsDocument> {
+  try {
+    const allBenefits = await BenefitsModel.find({ userId }).lean().exec();
+    return allBenefits;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getBenefitsByUserService' });
+  }
+}
+
 export {
   createNewBenefitService,
   deleteABenefitService,
   deleteAllBenefitsByUserService,
   getAllBenefitsService,
+  getBenefitsByUserService,
 };
