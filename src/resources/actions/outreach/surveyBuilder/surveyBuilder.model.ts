@@ -4,15 +4,22 @@ import { UserRoles } from '../../../user';
 type SurveyRecipient = 'all' | 'active' | 'inactive' | 'employees' | 'admins' | 'managers';
 
 type SurveyResponseKind = {
-  chooseOne: 'trueFalse' | 'yesNo';
+  chooseOne: 'trueFalse' | 'yesNo' | 'radio';
   chooseAny: 'checkbox' | 'dropdown';
   shortAnswer: 'shortAnswer';
   rating: 'scale' | 'emotion';
 };
 
+// The mapped type loops over each key in SurveyResponseKind and returns an object, ensuring that the `inputHtml` property is constrained to the value of the `kind` property.
 type SurveyQuestion = {
   question: string;
-  responseKind: SurveyResponseKind;
+  responseKind: {
+    [Key in keyof SurveyResponseKind]: {
+      kind: Key;
+      inputHtml: SurveyResponseKind[Key];
+      dataOptions: Array<string>;
+    };
+  }[keyof SurveyResponseKind];
   required: boolean;
 };
 
@@ -34,7 +41,7 @@ type SurveyBuilderDocument = SurveyBuilderSchema & {
   __v: number;
 };
 
-const surveyBuilderSchema = new Schema<SurveyBuilderDocument>(
+const surveyBuilderSchema = new Schema<SurveyBuilderSchema>(
   {
     creatorId: {
       type: Schema.Types.ObjectId,

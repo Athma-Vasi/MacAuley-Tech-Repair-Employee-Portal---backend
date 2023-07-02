@@ -1,17 +1,11 @@
 import { Types } from 'mongoose';
 
 import type { DeleteResult } from 'mongodb';
-import type {
-  SurveyBuilderDocument,
-  SurveyBuilderSchema,
-  SurveyQuestion,
-  SurveyRecipient,
-  SurveyResponseKind,
-} from './surveyBuilder.model';
+import type { SurveyBuilderDocument, SurveyQuestion, SurveyRecipient } from './surveyBuilder.model';
 import type { UserRoles } from '../../../user';
 
 import { SurveyBuilderModel } from './surveyBuilder.model';
-import { DatabaseResponseNullable } from '../../../../types';
+import { DatabaseResponse, DatabaseResponseNullable } from '../../../../types';
 
 type CreateNewSurveyServiceInput = {
   creatorId: Types.ObjectId;
@@ -46,7 +40,7 @@ async function getSurveyByIdService(
   }
 }
 
-async function deleteASurveyService(surveyId: Types.ObjectId) {
+async function deleteASurveyService(surveyId: Types.ObjectId): Promise<DeleteResult> {
   try {
     const deleteResult = await SurveyBuilderModel.deleteOne({ _id: surveyId }).lean().exec();
     return deleteResult;
@@ -55,7 +49,7 @@ async function deleteASurveyService(surveyId: Types.ObjectId) {
   }
 }
 
-async function deleteAllSurveysService() {
+async function deleteAllSurveysService(): Promise<DeleteResult> {
   try {
     const deleteResult = await SurveyBuilderModel.deleteMany({}).lean().exec();
     return deleteResult;
@@ -64,7 +58,7 @@ async function deleteAllSurveysService() {
   }
 }
 
-async function getAllSurveysService() {
+async function getAllSurveysService(): DatabaseResponse<SurveyBuilderDocument> {
   try {
     const surveys = await SurveyBuilderModel.find({}).lean().exec();
     return surveys;
@@ -73,7 +67,9 @@ async function getAllSurveysService() {
   }
 }
 
-async function getSurveysByUserService(userId: Types.ObjectId) {
+async function getSurveysByUserService(
+  userId: Types.ObjectId
+): DatabaseResponse<SurveyBuilderDocument> {
   try {
     const surveys = await SurveyBuilderModel.find({ creatorId: userId }).lean().exec();
     return surveys;
