@@ -10,7 +10,7 @@ type SurveyResponseKind = {
   rating: 'scale' | 'emotion';
 };
 
-// The mapped type loops over each key in SurveyResponseKind and returns an object, ensuring that the `inputHtml` property is constrained to the value of the `kind` property.
+// The mapped type loops over each key in SurveyResponseKind and returns an object, ensuring that the value of `inputHtml` is constrained to the value of `kind` which is a key in the looped object.
 type SurveyQuestion = {
   question: string;
   responseKind: {
