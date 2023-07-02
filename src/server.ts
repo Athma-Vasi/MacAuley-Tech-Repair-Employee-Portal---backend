@@ -9,16 +9,7 @@ import path from 'path';
 import { config } from './config';
 import { connectDB } from './config/connectDB';
 import { corsOptions } from './config/cors';
-import {
-  errorHandler,
-  fileExtensionLimiterMiddleware,
-  fileInfoExtracterMiddleware,
-  fileSizeLimiterMiddleware,
-  filesPayloadExistsMiddleware,
-  logEvents,
-  loggerMiddleware,
-  verifyJWTMiddleware,
-} from './middlewares';
+import { errorHandler, logEvents, loggerMiddleware } from './middlewares';
 
 import { noteRouter } from './resources/note';
 import { userRouter } from './resources/user';
@@ -28,6 +19,7 @@ import { authRouter } from './resources/auth';
 import { announcementRouter } from './resources/announcement';
 import { actionsRouter } from './resources/actions';
 import { fileUploadRouter } from './resources/fileUpload';
+import { benefitsRouter } from './resources/benefits';
 
 const app = express();
 
@@ -50,7 +42,7 @@ app.use('/users', userRouter);
 app.use('/notes', noteRouter);
 app.use('/announcements', announcementRouter);
 app.use('/actions', actionsRouter);
-
+app.use('/benefits', benefitsRouter);
 app.use('/file-uploads', fileUploadRouter);
 
 app.all('*', notFoundRouter);
@@ -71,10 +63,6 @@ mongoose.connection.once('open', () => {
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });
-
-  // mongoose.connection.db.stats().then((stats) => {
-  //   console.log(stats);
-  // });
 });
 
 mongoose.connection.on('error', (error) => {

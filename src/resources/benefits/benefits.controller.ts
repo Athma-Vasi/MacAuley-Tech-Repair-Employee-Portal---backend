@@ -85,7 +85,7 @@ const deleteABenefitHandler = expressAsyncHandler(
 );
 
 // @desc   Delete all benefits plans for a user
-// @route  DELETE /benefits
+// @route  DELETE /benefits/user
 // @access Private/Admin/Manager
 const deleteAllBenefitsByUserHandler = expressAsyncHandler(
   async (request: DeleteAllBenefitsByUserRequest, response: Response<BenefitsServerResponse>) => {
@@ -131,11 +131,11 @@ const getBenefitsByUserHandler = expressAsyncHandler(
     const userId = request.body.userInfo.userId as Types.ObjectId;
 
     // get all benefits plans for a user
-    const allBenefitsPlans = await getBenefitsByUserService(userId);
-    if (allBenefitsPlans.length > 0) {
+    const allBenefitPlans = await getBenefitsByUserService(userId);
+    if (allBenefitPlans.length > 0) {
       response.status(200).json({
         message: 'All benefits plans fetched successfully',
-        benefitsData: allBenefitsPlans,
+        benefitsData: allBenefitPlans,
       });
     } else {
       response.status(400).json({ message: 'Unable to get all benefits plans', benefitsData: [] });
