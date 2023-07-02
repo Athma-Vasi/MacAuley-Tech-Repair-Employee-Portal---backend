@@ -26,7 +26,7 @@ interface CreateNewBenefitsRequest extends RequestAfterJWTVerification {
   };
 }
 
-interface DeleteABenefitsRequest extends RequestAfterJWTVerification {
+interface DeleteABenefitRequest extends RequestAfterJWTVerification {
   params: {
     benefitsId: Types.ObjectId;
   };
@@ -56,7 +56,7 @@ type BenefitsServerResponse = {
 
 export type {
   CreateNewBenefitsRequest,
-  DeleteABenefitsRequest,
+  DeleteABenefitRequest,
   DeleteAllBenefitsRequest,
   GetAllBenefitsRequest,
   GetBenefitsByUserRequest,

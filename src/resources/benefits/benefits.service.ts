@@ -29,4 +29,13 @@ async function createNewBenefitsService(
   }
 }
 
-export { createNewBenefitsService };
+async function deleteABenefitService(benefitId: Types.ObjectId): Promise<DeleteResult> {
+  try {
+    const deleteResult = await BenefitsModel.deleteOne({ _id: benefitId }).lean().exec();
+    return deleteResult;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'deleteABenefitService' });
+  }
+}
+
+export { createNewBenefitsService, deleteABenefitService };

@@ -5,13 +5,13 @@ import type { Response } from 'express';
 import type {
   BenefitsServerResponse,
   CreateNewBenefitsRequest,
-  DeleteABenefitsRequest,
+  DeleteABenefitRequest,
   DeleteAllBenefitsRequest,
   GetAllBenefitsRequest,
   GetBenefitsByIdRequest,
   GetBenefitsByUserRequest,
 } from './benefits.types';
-import { createNewBenefitsService } from './benefits.service';
+import { createNewBenefitsService, deleteABenefitService } from './benefits.service';
 
 // @desc   Create a new benefits plan
 // @route  POST /benefits
@@ -60,4 +60,21 @@ const createNewBenefitsHandler = expressAsyncHandler(
   }
 );
 
-export { createNewBenefitsHandler };
+// @desc   Delete a benefits plan by id
+// @route  DELETE /benefits/:benefitsId
+// @access Private/Admin/Manager
+const deleteABenefitHandler = expressAsyncHandler(
+  async (request: DeleteABenefitRequest, response: Response<BenefitsServerResponse>) => {
+    const { benefitsId } = request.params;
+
+    // delete a benefits plan
+    const deleteBenefitResult = await deleteABenefitService(benefitsId);
+    if (deleteBenefitResult.deletedCount === 1) {
+      response.status(200).json({ message: 'Benefits plan deleted', benefitsData: [] });
+    } else {
+      response.status(400).json({ message: 'Unable to delete benefits plan', benefitsData: [] });
+    }
+  }
+);
+
+export { createNewBenefitsHandler, deleteABenefitHandler };
