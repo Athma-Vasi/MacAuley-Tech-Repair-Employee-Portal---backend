@@ -55,4 +55,18 @@ async function deleteASurveyService(surveyId: Types.ObjectId) {
   }
 }
 
-export { createNewSurveyService, getSurveyByIdService, deleteASurveyService };
+async function deleteAllSurveysService() {
+  try {
+    const deleteResult = await SurveyBuilderModel.deleteMany({}).lean().exec();
+    return deleteResult;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'deleteAllSurveysService' });
+  }
+}
+
+export {
+  createNewSurveyService,
+  getSurveyByIdService,
+  deleteASurveyService,
+  deleteAllSurveysService,
+};

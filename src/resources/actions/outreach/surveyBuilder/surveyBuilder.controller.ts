@@ -15,6 +15,7 @@ import type {
 import {
   createNewSurveyService,
   deleteASurveyService,
+  deleteAllSurveysService,
   getSurveyByIdService,
 } from './surveyBuilder.service';
 
@@ -80,4 +81,19 @@ const deleteASurveyHandler = expressAsyncHandler(
   }
 );
 
-export { createNewSurveyHandler, deleteASurveyHandler };
+// @desc   Delete all surveys
+// @route  DELETE /survey-builder
+// @access Private/Admin/Manager
+const deleteAllSurveysHandler = expressAsyncHandler(
+  async (request: DeleteAllSurveysRequest, response: Response<SurveyServerResponse>) => {
+    // delete all surveys
+    const deleteResult = await deleteAllSurveysService();
+    if (deleteResult.deletedCount > 0) {
+      response.status(200).json({ message: 'All surveys deleted', surveyData: [] });
+    } else {
+      response.status(400).json({ message: 'Unable to delete surveys', surveyData: [] });
+    }
+  }
+);
+
+export { createNewSurveyHandler, deleteASurveyHandler, deleteAllSurveysHandler };
