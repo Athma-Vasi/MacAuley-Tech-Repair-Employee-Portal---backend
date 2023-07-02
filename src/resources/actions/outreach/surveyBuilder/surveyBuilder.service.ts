@@ -64,9 +64,19 @@ async function deleteAllSurveysService() {
   }
 }
 
+async function getAllSurveysService() {
+  try {
+    const surveys = await SurveyBuilderModel.find({}).lean().exec();
+    return surveys;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getAllSurveysService' });
+  }
+}
+
 export {
   createNewSurveyService,
   getSurveyByIdService,
   deleteASurveyService,
   deleteAllSurveysService,
+  getAllSurveysService,
 };

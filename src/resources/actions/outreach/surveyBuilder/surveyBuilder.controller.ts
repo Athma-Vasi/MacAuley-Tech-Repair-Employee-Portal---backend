@@ -16,6 +16,7 @@ import {
   createNewSurveyService,
   deleteASurveyService,
   deleteAllSurveysService,
+  getAllSurveysService,
   getSurveyByIdService,
 } from './surveyBuilder.service';
 
@@ -96,4 +97,42 @@ const deleteAllSurveysHandler = expressAsyncHandler(
   }
 );
 
-export { createNewSurveyHandler, deleteASurveyHandler, deleteAllSurveysHandler };
+// @desc   Get all surveys
+// @route  GET /survey-builder
+// @access Private/Admin/Manager
+const getAllSurveysHandler = expressAsyncHandler(
+  async (request: GetAllSurveysRequest, response: Response<SurveyServerResponse>) => {
+    // get all surveys
+    const allSurveys = await getAllSurveysService();
+    if (allSurveys) {
+      response.status(200).json({ message: 'All surveys retrieved', surveyData: allSurveys });
+    } else {
+      response.status(400).json({ message: 'Unable to retrieve surveys', surveyData: [] });
+    }
+  }
+);
+
+// @desc   Get a survey by id
+// @route  GET /survey-builder/:surveyId
+// @access Private/Admin/Manager
+const getSurveyByIdHandler = expressAsyncHandler(
+  async (request: GetSurveyByIdRequest, response: Response<SurveyServerResponse>) => {
+    const surveyId = request.params.surveyId as Types.ObjectId;
+
+    // get survey by id
+    const survey = await getSurveyByIdService(surveyId);
+    if (survey) {
+      response.status(200).json({ message: 'Survey retrieved', surveyData: [survey] });
+    } else {
+      response.status(400).json({ message: 'Unable to retrieve survey', surveyData: [] });
+    }
+  }
+);
+
+export {
+  createNewSurveyHandler,
+  deleteASurveyHandler,
+  deleteAllSurveysHandler,
+  getAllSurveysHandler,
+  getSurveyByIdHandler,
+};
