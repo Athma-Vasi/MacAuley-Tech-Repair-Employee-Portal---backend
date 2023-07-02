@@ -73,10 +73,20 @@ async function getAllSurveysService() {
   }
 }
 
+async function getSurveysByUserService(userId: Types.ObjectId) {
+  try {
+    const surveys = await SurveyBuilderModel.find({ creatorId: userId }).lean().exec();
+    return surveys;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getSurveysByUserService' });
+  }
+}
+
 export {
   createNewSurveyService,
   getSurveyByIdService,
   deleteASurveyService,
   deleteAllSurveysService,
   getAllSurveysService,
+  getSurveysByUserService,
 };

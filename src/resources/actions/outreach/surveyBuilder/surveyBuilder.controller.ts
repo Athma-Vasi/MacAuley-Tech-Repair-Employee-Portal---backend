@@ -18,6 +18,7 @@ import {
   deleteAllSurveysService,
   getAllSurveysService,
   getSurveyByIdService,
+  getSurveysByUserService,
 } from './surveyBuilder.service';
 
 // @desc   Create a new survey
@@ -129,10 +130,30 @@ const getSurveyByIdHandler = expressAsyncHandler(
   }
 );
 
+// @desc   Get surveys by user
+// @route  GET /survey-builder/user
+// @access Private/Admin/Manager
+const getSurveysByUserHandler = expressAsyncHandler(
+  async (request: GetSurveysByUserRequest, response: Response<SurveyServerResponse>) => {
+    const {
+      userInfo: { userId },
+    } = request.body;
+
+    // get surveys by user
+    const surveys = await getSurveysByUserService(userId);
+    if (surveys) {
+      response.status(200).json({ message: 'Surveys retrieved', surveyData: surveys });
+    } else {
+      response.status(400).json({ message: 'Unable to retrieve surveys', surveyData: [] });
+    }
+  }
+);
+
 export {
   createNewSurveyHandler,
   deleteASurveyHandler,
   deleteAllSurveysHandler,
   getAllSurveysHandler,
   getSurveyByIdHandler,
+  getSurveysByUserHandler,
 };
