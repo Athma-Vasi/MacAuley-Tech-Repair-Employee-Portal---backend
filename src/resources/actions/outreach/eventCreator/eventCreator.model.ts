@@ -6,6 +6,8 @@ type EventKind =
   | 'Workshop'
   | 'Seminar'
   | 'Conference'
+  | 'Networking'
+  | 'Tech Talk'
   | 'Charity'
   | 'Team Building'
   | 'Awards'
