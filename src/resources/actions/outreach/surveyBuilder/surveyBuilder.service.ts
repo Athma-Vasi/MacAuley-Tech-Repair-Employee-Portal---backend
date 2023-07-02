@@ -3,9 +3,9 @@ import { Types } from 'mongoose';
 import type { DeleteResult } from 'mongodb';
 import type { SurveyBuilderDocument, SurveyQuestion, SurveyRecipient } from './surveyBuilder.model';
 import type { UserRoles } from '../../../user';
+import type { DatabaseResponse, DatabaseResponseNullable } from '../../../../types';
 
 import { SurveyBuilderModel } from './surveyBuilder.model';
-import { DatabaseResponse, DatabaseResponseNullable } from '../../../../types';
 
 type CreateNewSurveyServiceInput = {
   creatorId: Types.ObjectId;
