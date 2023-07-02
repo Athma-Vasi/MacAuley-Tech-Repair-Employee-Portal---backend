@@ -1,5 +1,5 @@
 /**
- * This index file is used to import/export user model, router, types, handlers and services
+ * This barrel file is used to import/export user model, router, types, handlers and services
  */
 
 /**

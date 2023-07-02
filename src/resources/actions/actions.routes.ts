@@ -7,7 +7,7 @@ import { actionsOutreachRouter } from './outreach';
 
 const actionsRouter = Router();
 
-// verifyJWT middleware is applied to all routes in this router
+// verify JWT middleware that returns (upon success) the decoded JWT, which is the userInfo object that is added to the request body
 actionsRouter.use(verifyJWTMiddleware);
 
 actionsRouter.use('/company', actionsCompanyRouter);
