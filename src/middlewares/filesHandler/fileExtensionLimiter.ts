@@ -3,22 +3,9 @@ import path from 'path';
 import type { NextFunction, Request, Response } from 'express';
 import { FileUploadObject } from '../../types';
 
-const ALLOWED_FILE_EXTENSIONS = [
-  '.jpg',
-  '.jpeg',
-  '.png',
-  '.pdf',
-  '.docx',
-  '.doc',
-  '.xlsx',
-  '.xls',
-  '.ppt',
-  '.pptx',
-  '.csv',
-  '.txt',
-  '.log',
-];
+const ALLOWED_FILE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg', '.pdf'];
 
+// creates a closure that takes in an array of allowed file extensions and returns a middleware function
 const fileExtensionLimiterMiddleware = (allowedExtensionsArray: string[]) => {
   return (request: Request, response: Response, next: NextFunction) => {
     // this middleware only runs if filesPayloadExistsMiddleware and fileSizeLimiterMiddleware has passed - files cannot be undefined
@@ -29,7 +16,7 @@ const fileExtensionLimiterMiddleware = (allowedExtensionsArray: string[]) => {
     console.log('fileExtensionLimiter-files: ', files);
 
     Object.entries(files).forEach((file: [string, FileUploadObject]) => {
-      const [fileObjKey, fileObj] = file;
+      const [_, fileObj] = file;
       // grab the file extension from the file name
       const fileExtension = path.extname(fileObj.name);
       // if the file extension is not in the allowedExtensionArray, add it to the filesWithDisallowedExtensions array
@@ -45,10 +32,10 @@ const fileExtensionLimiterMiddleware = (allowedExtensionsArray: string[]) => {
 
     // if there are files with disallowed extensions, return error
     if (filesWithDisallowedExtensions.length > 0) {
-      const progressiveApostrophe = filesWithDisallowedExtensions.length > 1 ? "'s" : '';
-      const properVerb = filesWithDisallowedExtensions.length > 1 ? 'are' : 'is';
+      const progressiveApostrophe = filesWithDisallowedExtensions.length > 1 ? "'s" : ' ';
+      const properVerb = filesWithDisallowedExtensions.length > 1 ? ' are' : 'is';
 
-      const message = `Upload failed. The following file${progressiveApostrophe}${properVerb} not allowed: ${filesWithDisallowedExtensions
+      const message = `Upload failed. The following file ${progressiveApostrophe}${properVerb} not allowed: ${filesWithDisallowedExtensions
         .map((file) => file.name)
         .join(', ')}. Allowed extensions are: ${allowedExtensionsArray.join(', ')}`;
 

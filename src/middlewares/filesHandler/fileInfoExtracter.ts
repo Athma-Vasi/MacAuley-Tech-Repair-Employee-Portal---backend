@@ -21,27 +21,28 @@ function fileInfoExtracterMiddleware(request: Request, response: Response, next:
 
   // for each file, extract the file information and push it to the fileUploads array
   Object.entries(files).forEach((file: [string, FileUploadObject]) => {
-    const [FileObjKey, fileObject] = file;
+    const [_, { data, name, mimetype, size, encoding }] = file;
     const fileInfoObject = {
-      uploadedFile: fileObject.data,
-      fileName: fileObject.name,
-      fileExtension: fileObject.mimetype.split('/')[1],
-      fileSize: fileObject.size,
-      fileMimeType: fileObject.mimetype,
-      fileEncoding: fileObject.encoding,
+      uploadedFile: data,
+      fileName: name,
+      fileExtension: mimetype.split('/')[1],
+      fileSize: size,
+      fileMimeType: mimetype,
+      fileEncoding: encoding,
     };
 
     request.body.fileUploads.push(fileInfoObject);
-    console.log('fileInfoExtracter-fileObject', fileObject);
   });
 
-  // // delete the files property from the request object
-  // Object.defineProperty(request, 'files', {
-  //   value: undefined,
-  //   writable: true,
-  //   enumerable: true,
-  //   configurable: true,
-  // });
+  // delete the files property from the request object as it is no longer needed
+  Object.defineProperty(request, 'files', {
+    value: undefined,
+    writable: true,
+    enumerable: true,
+    configurable: true,
+  });
+
+  console.log('fileInfoExtracter-request.files after deletion: ', request.files);
 
   next();
 }
