@@ -105,7 +105,7 @@ const getAllSurveysHandler = expressAsyncHandler(
   async (request: GetAllSurveysRequest, response: Response<SurveyServerResponse>) => {
     // get all surveys
     const allSurveys = await getAllSurveysService();
-    if (allSurveys) {
+    if (allSurveys.length > 0) {
       response.status(200).json({ message: 'All surveys retrieved', surveyData: allSurveys });
     } else {
       response.status(400).json({ message: 'Unable to retrieve surveys', surveyData: [] });

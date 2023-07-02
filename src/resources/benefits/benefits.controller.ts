@@ -12,9 +12,10 @@ import type {
   GetBenefitsByUserRequest,
 } from './benefits.types';
 import {
-  createNewBenefitsService,
+  createNewBenefitService,
   deleteABenefitService,
   deleteAllBenefitsByUserService,
+  getAllBenefitsService,
 } from './benefits.service';
 
 // @desc   Create a new benefits plan
@@ -51,7 +52,7 @@ const createNewBenefitsHandler = expressAsyncHandler(
     };
 
     // create new benefits plan
-    const newBenefitsPlan = await createNewBenefitsService(newBenefitsObject);
+    const newBenefitsPlan = await createNewBenefitService(newBenefitsObject);
     if (newBenefitsPlan) {
       response
         .status(201)
@@ -84,9 +85,9 @@ const deleteABenefitHandler = expressAsyncHandler(
 // @desc   Delete all benefits plans for a user
 // @route  DELETE /benefits
 // @access Private/Admin/Manager
-const DeleteAllBenefitsByUserRequest = expressAsyncHandler(
+const deleteAllBenefitsByUserHandler = expressAsyncHandler(
   async (request: DeleteAllBenefitsByUserRequest, response: Response<BenefitsServerResponse>) => {
-    const { userId } = request.params;
+    const userId = request.body.userInfo.userId as Types.ObjectId;
 
     // delete all benefits plans for a user
     const deleteAllBenefitsResult = await deleteAllBenefitsByUserService(userId);
@@ -102,4 +103,27 @@ const DeleteAllBenefitsByUserRequest = expressAsyncHandler(
   }
 );
 
-export { createNewBenefitsHandler, deleteABenefitHandler, DeleteAllBenefitsByUserRequest };
+// @desc   Get all benefits plans
+// @route  GET /benefits
+// @access Private/Admin/Manager
+const getAllBenefitsHandler = expressAsyncHandler(
+  async (request: GetAllBenefitsRequest, response: Response<BenefitsServerResponse>) => {
+    // get all benefits plans
+    const allBenefitsPlans = await getAllBenefitsService();
+    if (allBenefitsPlans.length > 0) {
+      response.status(200).json({
+        message: 'All benefits plans fetched successfully',
+        benefitsData: allBenefitsPlans,
+      });
+    } else {
+      response.status(400).json({ message: 'Unable to get all benefits plans', benefitsData: [] });
+    }
+  }
+);
+
+export {
+  createNewBenefitsHandler,
+  deleteABenefitHandler,
+  deleteAllBenefitsByUserHandler,
+  getAllBenefitsHandler,
+};

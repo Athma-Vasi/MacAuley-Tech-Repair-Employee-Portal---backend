@@ -4,8 +4,9 @@ import type { DeleteResult } from 'mongodb';
 import type { BenefitsDocument, BenefitsPlanKind, BenefitsSchema } from './benefits.model';
 
 import { BenefitsModel } from './benefits.model';
+import { DatabaseResponse } from '../../types';
 
-type CreateNewBenefitsServiceInput = {
+type CreateNewBenefitServiceInput = {
   userId: Types.ObjectId;
   username: string;
   planName: string;
@@ -18,11 +19,11 @@ type CreateNewBenefitsServiceInput = {
   employeeContribution: number;
 };
 
-async function createNewBenefitsService(
-  input: CreateNewBenefitsServiceInput
+async function createNewBenefitService(
+  newBenefitObj: CreateNewBenefitServiceInput
 ): Promise<BenefitsDocument> {
   try {
-    const newBenefits = await BenefitsModel.create(input);
+    const newBenefits = await BenefitsModel.create(newBenefitObj);
     return newBenefits;
   } catch (error: any) {
     throw new Error(error, { cause: 'createNewBenefitsService' });
@@ -47,4 +48,18 @@ async function deleteAllBenefitsByUserService(userId: Types.ObjectId): Promise<D
   }
 }
 
-export { createNewBenefitsService, deleteABenefitService, deleteAllBenefitsByUserService };
+async function getAllBenefitsService(): DatabaseResponse<BenefitsDocument> {
+  try {
+    const allBenefits = await BenefitsModel.find({}).lean().exec();
+    return allBenefits;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getAllBenefitsService' });
+  }
+}
+
+export {
+  createNewBenefitService,
+  deleteABenefitService,
+  deleteAllBenefitsByUserService,
+  getAllBenefitsService,
+};
