@@ -4,7 +4,7 @@ import type { DeleteResult } from 'mongodb';
 import type { BenefitsDocument, BenefitsPlanKind, BenefitsSchema } from './benefits.model';
 
 import { BenefitsModel } from './benefits.model';
-import { DatabaseResponse } from '../../types';
+import { DatabaseResponse, DatabaseResponseNullable } from '../../types';
 
 type CreateNewBenefitServiceInput = {
   userId: Types.ObjectId;
@@ -68,10 +68,22 @@ async function getBenefitsByUserService(
   }
 }
 
+async function getBenefitByIdService(
+  benefitId: Types.ObjectId
+): DatabaseResponseNullable<BenefitsDocument> {
+  try {
+    const benefit = await BenefitsModel.findById(benefitId).lean().exec();
+    return benefit;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getBenefitByIdService' });
+  }
+}
+
 export {
   createNewBenefitService,
   deleteABenefitService,
   deleteAllBenefitsByUserService,
   getAllBenefitsService,
   getBenefitsByUserService,
+  getBenefitByIdService,
 };

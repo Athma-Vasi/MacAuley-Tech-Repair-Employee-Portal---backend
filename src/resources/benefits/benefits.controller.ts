@@ -16,6 +16,7 @@ import {
   deleteABenefitService,
   deleteAllBenefitsByUserService,
   getAllBenefitsService,
+  getBenefitByIdService,
   getBenefitsByUserService,
 } from './benefits.service';
 
@@ -142,10 +143,31 @@ const getBenefitsByUserHandler = expressAsyncHandler(
   }
 );
 
+// @desc   Get a benefits plan by id
+// @route  GET /benefits/:benefitsId
+// @access Private/Admin/Manager
+const getBenefitByIdHandler = expressAsyncHandler(
+  async (request: GetBenefitsByIdRequest, response: Response<BenefitsServerResponse>) => {
+    const { benefitsId } = request.params;
+
+    // get a benefits plan by id
+    const benefitsPlan = await getBenefitByIdService(benefitsId);
+    if (benefitsPlan) {
+      response.status(200).json({
+        message: 'Benefits plan fetched successfully',
+        benefitsData: [benefitsPlan],
+      });
+    } else {
+      response.status(400).json({ message: 'Unable to get benefits plan', benefitsData: [] });
+    }
+  }
+);
+
 export {
   createNewBenefitsHandler,
   deleteABenefitHandler,
   deleteAllBenefitsByUserHandler,
   getAllBenefitsHandler,
   getBenefitsByUserHandler,
+  getBenefitByIdHandler,
 };
