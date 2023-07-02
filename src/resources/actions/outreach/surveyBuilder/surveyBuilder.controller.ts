@@ -45,11 +45,12 @@ const createNewSurveyHandler = expressAsyncHandler(
 
     // create new survey
     const newSurvey = await createNewSurveyService(newSurveyObject);
-    if (newSurvey) {
-      response.status(201).json({ message: 'New survey created', surveyData: [newSurvey] });
-    } else {
+    if (!newSurvey) {
       response.status(400).json({ message: 'Unable to create new survey', surveyData: [] });
+      return;
     }
+
+    response.status(201).json({ message: 'New survey created', surveyData: [newSurvey] });
   }
 );
 
@@ -68,9 +69,11 @@ const deleteASurveyHandler = expressAsyncHandler(
     }
 
     // check that now is after the expiry date
-    const now = new Date();
-    if (now < surveyToDelete.expiryDate) {
+    const now = new Date().getTime();
+    const expiryDate = new Date(surveyToDelete.expiryDate).getTime();
+    if (now < expiryDate) {
       response.status(400).json({ message: 'Survey is not expired yet', surveyData: [] });
+      return;
     }
 
     // delete survey
