@@ -38,4 +38,13 @@ async function deleteABenefitService(benefitId: Types.ObjectId): Promise<DeleteR
   }
 }
 
-export { createNewBenefitsService, deleteABenefitService };
+async function deleteAllBenefitsByUserService(userId: Types.ObjectId): Promise<DeleteResult> {
+  try {
+    const deleteResult = await BenefitsModel.deleteMany({ userId }).lean().exec();
+    return deleteResult;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'deleteAllBenefitsByUserService' });
+  }
+}
+
+export { createNewBenefitsService, deleteABenefitService, deleteAllBenefitsByUserService };

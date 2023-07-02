@@ -32,7 +32,7 @@ interface DeleteABenefitRequest extends RequestAfterJWTVerification {
   };
 }
 
-type DeleteAllBenefitsRequest = RequestAfterJWTVerification;
+type DeleteAllBenefitsByUserRequest = RequestAfterJWTVerification;
 
 type GetAllBenefitsRequest = RequestAfterJWTVerification;
 
@@ -57,7 +57,7 @@ type BenefitsServerResponse = {
 export type {
   CreateNewBenefitsRequest,
   DeleteABenefitRequest,
-  DeleteAllBenefitsRequest,
+  DeleteAllBenefitsByUserRequest,
   GetAllBenefitsRequest,
   GetBenefitsByUserRequest,
   GetBenefitsByIdRequest,
