@@ -1,11 +1,7 @@
-import type { FlattenMaps, Types } from 'mongoose';
+import { Types } from 'mongoose';
+
 import type { DeleteResult } from 'mongodb';
-import type {
-  Currency,
-  ExpenseClaimDocument,
-  ExpenseClaimSchema,
-  ExpenseClaimType,
-} from './expenseClaim.model';
+import type { Currency, ExpenseClaimDocument, ExpenseClaimType } from './expenseClaim.model';
 
 import { ExpenseClaimModel } from './expenseClaim.model';
 
