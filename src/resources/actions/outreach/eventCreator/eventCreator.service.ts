@@ -30,3 +30,14 @@ async function createNewEventService(newEventObj: CreateNewEventCreatorServiceIn
     throw new Error(error, { cause: 'createNewEventService' });
   }
 }
+
+async function deleteAnEventService(eventId: Types.ObjectId): Promise<DeleteResult> {
+  try {
+    const deleteResult = await EventCreatorModel.deleteOne({ _id: eventId }).lean().exec();
+    return deleteResult;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'deleteAnEventService' });
+  }
+}
+
+export { createNewEventService, deleteAnEventService };
