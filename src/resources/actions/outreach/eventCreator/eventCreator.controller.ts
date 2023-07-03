@@ -221,4 +221,13 @@ const updateAnEventHandler = expressAsyncHandler(
     }
   }
 );
-export { createNewEventHandler };
+
+export {
+  createNewEventHandler,
+  deleteAnEventHandler,
+  getAllEventsHandler,
+  getEventByIdHandler,
+  getEventsByUserHandler,
+  deleteAllEventsByUserHandler,
+  updateAnEventHandler,
+};
