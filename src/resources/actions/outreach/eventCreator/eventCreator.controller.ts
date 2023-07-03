@@ -16,6 +16,7 @@ import {
   deleteAnEventService,
   getAllEventsService,
   getEventByIdService,
+  getEventsByUserService,
 } from './eventCreator.service';
 
 // @desc   Create a new event
@@ -111,6 +112,25 @@ const getEventByIdHandler = expressAsyncHandler(
       response.status(200).json({ message: 'Event', eventData: [event] });
     } else {
       response.status(400).json({ message: 'Unable to get event', eventData: [] });
+    }
+  }
+);
+
+// @desc   Get all events by user
+// @route  GET /events/user
+// @access Private/Admin/Manager
+const getEventsByUserHandler = expressAsyncHandler(
+  async (request: GetEventsByUserRequest, response: Response<EventServerResponse>) => {
+    const {
+      userInfo: { userId },
+    } = request.body;
+
+    // get all events by user
+    const eventsByUser = await getEventsByUserService(userId);
+    if (eventsByUser.length > 0) {
+      response.status(200).json({ message: 'Events by user', eventData: eventsByUser });
+    } else {
+      response.status(400).json({ message: 'Unable to get events by user', eventData: [] });
     }
   }
 );

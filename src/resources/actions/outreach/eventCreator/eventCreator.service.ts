@@ -60,4 +60,21 @@ async function getEventByIdService(
   }
 }
 
-export { createNewEventService, deleteAnEventService, getAllEventsService, getEventByIdService };
+async function getEventsByUserService(
+  userId: Types.ObjectId
+): DatabaseResponse<EventCreatorDocument> {
+  try {
+    const events = await EventCreatorModel.find({ creatorId: userId }).lean().exec();
+    return events;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getEventsByUserService' });
+  }
+}
+
+export {
+  createNewEventService,
+  deleteAnEventService,
+  getAllEventsService,
+  getEventByIdService,
+  getEventsByUserService,
+};
