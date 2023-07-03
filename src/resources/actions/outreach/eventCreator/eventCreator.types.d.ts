@@ -51,6 +51,29 @@ interface GetEventByIdRequest extends RequestAfterJWTVerification {
   params: { eventId: Types.ObjectId };
 }
 
+interface UpdateAnEventByIdRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    event: {
+      eventName: string;
+      eventDescription: string;
+      eventKind: EventKind;
+      eventDate: NativeDate;
+      eventStartTime: string;
+      eventEndTime: string;
+      eventLocation: string;
+      eventAttendees: string;
+      requiredItems: string;
+      rsvpDeadline: NativeDate;
+    };
+  };
+  params: { eventId: Types.ObjectId };
+}
+
 type EventServerResponse = {
   message: string;
   eventData: Array<EventDocument>;
@@ -63,5 +86,6 @@ export type {
   GetAllEventsRequest,
   GetEventsByUserRequest,
   GetEventByIdRequest,
+  UpdateAnEventByIdRequest,
   EventServerResponse,
 };

@@ -10,6 +10,7 @@ import type {
   GetAllEventsRequest,
   GetEventByIdRequest,
   GetEventsByUserRequest,
+  UpdateAnEventByIdRequest,
 } from './eventCreator.types';
 import {
   createNewEventService,
@@ -18,11 +19,12 @@ import {
   getAllEventsService,
   getEventByIdService,
   getEventsByUserService,
+  updateAnEventByIdService,
 } from './eventCreator.service';
 
 // @desc   Create a new event
 // @route  POST /events
-// @access Private/Admin/Manager
+// @access Private
 const createNewEventHandler = expressAsyncHandler(
   async (request: CreateNewEventRequest, response: Response<EventServerResponse>) => {
     const {
@@ -70,7 +72,7 @@ const createNewEventHandler = expressAsyncHandler(
 
 // @desc   Delete an event by id
 // @route  DELETE /events/:eventId
-// @access Private/Admin/Manager
+// @access Private
 const deleteAnEventHandler = expressAsyncHandler(
   async (request: DeleteAnEventRequest, response: Response<EventServerResponse>) => {
     const { eventId } = request.params;
@@ -87,7 +89,7 @@ const deleteAnEventHandler = expressAsyncHandler(
 
 // @desc   Get all events
 // @route  GET /events
-// @access Private/Admin/Manager
+// @access Private
 const getAllEventsHandler = expressAsyncHandler(
   async (request: GetAllEventsRequest, response: Response<EventServerResponse>) => {
     // get all events
@@ -102,7 +104,7 @@ const getAllEventsHandler = expressAsyncHandler(
 
 // @desc   Get an event by id
 // @route  GET /events/:eventId
-// @access Private/Admin/Manager
+// @access Private
 const getEventByIdHandler = expressAsyncHandler(
   async (request: GetEventByIdRequest, response: Response<EventServerResponse>) => {
     const { eventId } = request.params;
@@ -119,9 +121,10 @@ const getEventByIdHandler = expressAsyncHandler(
 
 // @desc   Get all events by user
 // @route  GET /events/user
-// @access Private/Admin/Manager
+// @access Private
 const getEventsByUserHandler = expressAsyncHandler(
   async (request: GetEventsByUserRequest, response: Response<EventServerResponse>) => {
+    // anyone can view their own events
     const {
       userInfo: { userId },
     } = request.body;
@@ -155,4 +158,67 @@ const deleteAllEventsByUserHandler = expressAsyncHandler(
   }
 );
 
+// @desc   Update an event by id
+// @route  PUT /events/:eventId
+// @access Private
+const updateAnEventHandler = expressAsyncHandler(
+  async (request: UpdateAnEventByIdRequest, response: Response<EventServerResponse>) => {
+    const { eventId } = request.params;
+    const {
+      userInfo: { userId, username, roles },
+      event: {
+        eventName,
+        eventAttendees,
+        eventDate,
+        eventDescription,
+        eventEndTime,
+        eventKind,
+        eventLocation,
+        eventStartTime,
+        rsvpDeadline,
+        requiredItems,
+      },
+    } = request.body;
+
+    const existingEvent = await getEventByIdService(eventId);
+    if (!existingEvent) {
+      response.status(404).json({ message: 'Event not found', eventData: [] });
+      return;
+    }
+
+    // only the creator can update the event
+    if (existingEvent.creatorId !== userId) {
+      response.status(401).json({
+        message: 'Only the originators of an event are allowed to modify the event',
+        eventData: [],
+      });
+      return;
+    }
+
+    const eventToBeUpdated = {
+      ...existingEvent,
+      creatorId: userId,
+      creatorUsername: username,
+      creatorRole: roles,
+      eventName,
+      eventDescription,
+      eventKind,
+      eventStartTime,
+      eventEndTime,
+      eventLocation,
+      eventDate,
+      rsvpDeadline,
+      eventAttendees,
+      requiredItems,
+    };
+
+    // update an event by id
+    const updatedEvent = await updateAnEventByIdService({ eventId, eventToBeUpdated });
+    if (updatedEvent) {
+      response.status(200).json({ message: 'Event updated', eventData: [updatedEvent] });
+    } else {
+      response.status(400).json({ message: 'Unable to update event', eventData: [] });
+    }
+  }
+);
 export { createNewEventHandler };

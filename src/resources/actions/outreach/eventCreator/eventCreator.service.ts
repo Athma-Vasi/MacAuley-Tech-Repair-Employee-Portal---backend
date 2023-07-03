@@ -80,6 +80,27 @@ async function deleteAllEventsByUserService(userId: Types.ObjectId): Promise<Del
   }
 }
 
+type UpdateAnEventByIdServiceInput = {
+  eventId: Types.ObjectId;
+  eventToBeUpdated: EventCreatorDocument;
+};
+
+async function updateAnEventByIdService({
+  eventId,
+  eventToBeUpdated,
+}: UpdateAnEventByIdServiceInput): DatabaseResponseNullable<EventCreatorDocument> {
+  try {
+    const event = await EventCreatorModel.findByIdAndUpdate(eventId, eventToBeUpdated, {
+      new: true,
+    })
+      .lean()
+      .exec();
+    return event;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'updateAnEventByIdService' });
+  }
+}
+
 export {
   createNewEventService,
   deleteAnEventService,
@@ -87,4 +108,5 @@ export {
   getEventByIdService,
   getEventsByUserService,
   deleteAllEventsByUserService,
+  updateAnEventByIdService,
 };
