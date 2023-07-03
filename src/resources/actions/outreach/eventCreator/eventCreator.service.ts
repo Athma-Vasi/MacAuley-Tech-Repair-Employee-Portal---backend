@@ -40,4 +40,13 @@ async function deleteAnEventService(eventId: Types.ObjectId): Promise<DeleteResu
   }
 }
 
-export { createNewEventService, deleteAnEventService };
+async function getAllEventsService(): DatabaseResponse<EventCreatorDocument> {
+  try {
+    const allEvents = await EventCreatorModel.find({}).lean().exec();
+    return allEvents;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getAllEventsService' });
+  }
+}
+
+export { createNewEventService, deleteAnEventService, getAllEventsService };

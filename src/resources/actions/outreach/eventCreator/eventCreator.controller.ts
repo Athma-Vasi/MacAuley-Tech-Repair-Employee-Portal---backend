@@ -11,7 +11,11 @@ import type {
   GetEventsByIdRequest,
   GetEventsByUserRequest,
 } from './eventCreator.types';
-import { createNewEventService, deleteAnEventService } from './eventCreator.service';
+import {
+  createNewEventService,
+  deleteAnEventService,
+  getAllEventsService,
+} from './eventCreator.service';
 
 // @desc   Create a new event
 // @route  POST /events
@@ -67,6 +71,21 @@ const deleteAnEventHandler = expressAsyncHandler(
       response.status(200).json({ message: 'Event deleted', eventData: [deletedEvent] });
     } else {
       response.status(400).json({ message: 'Unable to delete event', eventData: [] });
+    }
+  }
+);
+
+// @desc   Get all events
+// @route  GET /events
+// @access Private/Admin/Manager
+const getAllEventsHandler = expressAsyncHandler(
+  async (request: GetAllEventsRequest, response: Response<EventServerResponse>) => {
+    // get all events
+    const allEvents = await getAllEventsService();
+    if (allEvents.length > 0) {
+      response.status(200).json({ message: 'All events', eventData: allEvents });
+    } else {
+      response.status(400).json({ message: 'Unable to get all events', eventData: [] });
     }
   }
 );
