@@ -40,7 +40,7 @@ type GetAllEventsRequest = RequestAfterJWTVerification;
 
 type GetEventsByUserRequest = RequestAfterJWTVerification;
 
-interface GetEventsByIdRequest extends RequestAfterJWTVerification {
+interface GetEventByIdRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {
       userId: Types.ObjectId;
@@ -62,6 +62,6 @@ export type {
   DeleteAllEventsByUserRequest,
   GetAllEventsRequest,
   GetEventsByUserRequest,
-  GetEventsByIdRequest,
+  GetEventByIdRequest,
   EventServerResponse,
 };

@@ -10,16 +10,16 @@ type CreateNewEventCreatorServiceInput = {
   creatorId: Types.ObjectId;
   creatorUsername: string;
   creatorRole: string;
-  eventTitle: string;
+  eventName: string;
   eventDescription: string;
   eventKind: EventKind;
-  eventDate: Date;
+  eventDate: NativeDate;
   eventStartTime: string;
   eventEndTime: string;
   eventLocation: string;
   eventAttendees: string;
   requiredItems: string;
-  rsvpDeadline: Date;
+  rsvpDeadline: NativeDate;
 };
 
 async function createNewEventService(newEventObj: CreateNewEventCreatorServiceInput) {
@@ -49,4 +49,15 @@ async function getAllEventsService(): DatabaseResponse<EventCreatorDocument> {
   }
 }
 
-export { createNewEventService, deleteAnEventService, getAllEventsService };
+async function getEventByIdService(
+  eventId: Types.ObjectId
+): DatabaseResponseNullable<EventCreatorDocument> {
+  try {
+    const event = await EventCreatorModel.findById(eventId).lean().exec();
+    return event;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getEventByIdService' });
+  }
+}
+
+export { createNewEventService, deleteAnEventService, getAllEventsService, getEventByIdService };

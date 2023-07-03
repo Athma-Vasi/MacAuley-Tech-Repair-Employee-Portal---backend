@@ -8,13 +8,14 @@ import type {
   DeleteAnEventRequest,
   EventServerResponse,
   GetAllEventsRequest,
-  GetEventsByIdRequest,
+  GetEventByIdRequest,
   GetEventsByUserRequest,
 } from './eventCreator.types';
 import {
   createNewEventService,
   deleteAnEventService,
   getAllEventsService,
+  getEventByIdService,
 } from './eventCreator.service';
 
 // @desc   Create a new event
@@ -28,24 +29,31 @@ const createNewEventHandler = expressAsyncHandler(
         eventName,
         eventDescription,
         eventKind,
-        eventStartDate,
-        eventEndDate,
+        eventStartTime,
+        eventEndTime,
         eventLocation,
-        isEventActive,
+        eventDate,
+        rsvpDeadline,
+        eventAttendees,
+        requiredItems,
       },
     } = request.body;
 
     // create new event object
     const newEventObject = {
-      userId,
-      username,
-      eventKind,
+      creatorId: userId,
+      creatorUsername: username,
+      creatorRole: roles,
       eventName,
       eventDescription,
-      eventStartDate,
-      eventEndDate,
+      eventKind,
+      eventStartTime,
+      eventEndTime,
       eventLocation,
-      isEventActive,
+      eventDate,
+      rsvpDeadline,
+      eventAttendees,
+      requiredItems,
     };
 
     // create new event
@@ -86,6 +94,23 @@ const getAllEventsHandler = expressAsyncHandler(
       response.status(200).json({ message: 'All events', eventData: allEvents });
     } else {
       response.status(400).json({ message: 'Unable to get all events', eventData: [] });
+    }
+  }
+);
+
+// @desc   Get an event by id
+// @route  GET /events/:eventId
+// @access Private/Admin/Manager
+const getEventByIdHandler = expressAsyncHandler(
+  async (request: GetEventByIdRequest, response: Response<EventServerResponse>) => {
+    const { eventId } = request.params;
+
+    // get an event by id
+    const event = await getEventByIdService(eventId);
+    if (event) {
+      response.status(200).json({ message: 'Event', eventData: [event] });
+    } else {
+      response.status(400).json({ message: 'Unable to get event', eventData: [] });
     }
   }
 );
