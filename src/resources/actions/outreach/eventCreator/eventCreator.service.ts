@@ -71,10 +71,20 @@ async function getEventsByUserService(
   }
 }
 
+async function deleteAllEventsByUserService(userId: Types.ObjectId): Promise<DeleteResult> {
+  try {
+    const events = await EventCreatorModel.deleteMany({ creatorId: userId }).lean().exec();
+    return events;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'deleteAllEventsByUserService' });
+  }
+}
+
 export {
   createNewEventService,
   deleteAnEventService,
   getAllEventsService,
   getEventByIdService,
   getEventsByUserService,
+  deleteAllEventsByUserService,
 };

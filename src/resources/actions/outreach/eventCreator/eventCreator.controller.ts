@@ -13,6 +13,7 @@ import type {
 } from './eventCreator.types';
 import {
   createNewEventService,
+  deleteAllEventsByUserService,
   deleteAnEventService,
   getAllEventsService,
   getEventByIdService,
@@ -131,6 +132,25 @@ const getEventsByUserHandler = expressAsyncHandler(
       response.status(200).json({ message: 'Events by user', eventData: eventsByUser });
     } else {
       response.status(400).json({ message: 'Unable to get events by user', eventData: [] });
+    }
+  }
+);
+
+// @desc   Delete all events by user
+// @route  DELETE /events/user
+// @access Private/Admin/Manager
+const deleteAllEventsByUserHandler = expressAsyncHandler(
+  async (request: DeleteAllEventsByUserRequest, response: Response<EventServerResponse>) => {
+    const {
+      userInfo: { userId },
+    } = request.body;
+
+    // delete all events by user
+    const deleteResult = await deleteAllEventsByUserService(userId);
+    if (deleteResult.deletedCount > 0) {
+      response.status(200).json({ message: 'Events by user deleted', eventData: [] });
+    } else {
+      response.status(400).json({ message: 'Unable to delete events by user', eventData: [] });
     }
   }
 );
