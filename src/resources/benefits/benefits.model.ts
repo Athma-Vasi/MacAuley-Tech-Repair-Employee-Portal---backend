@@ -10,6 +10,8 @@ type BenefitsPlanKind =
   | 'Education'
   | 'Other';
 
+type Currency = 'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD' | 'JPY' | 'CNY';
+
 type BenefitsSchema = {
   userId: Types.ObjectId;
   username: string;
@@ -18,6 +20,7 @@ type BenefitsSchema = {
   planKind: BenefitsPlanKind;
   planStartDate: string;
   isPlanActive: boolean;
+  currency: Currency;
   monthlyPremium: number;
   employerContribution: number;
   employeeContribution: number;
@@ -46,6 +49,7 @@ const benefitsSchema = new Schema<BenefitsSchema>(
     planName: {
       type: String,
       required: [true, 'Plan name is required'],
+      index: true,
     },
     planDescription: {
       type: String,
@@ -62,6 +66,10 @@ const benefitsSchema = new Schema<BenefitsSchema>(
     isPlanActive: {
       type: Boolean,
       required: [true, 'Plan active status is required'],
+    },
+    currency: {
+      type: String,
+      required: [true, 'Currency is required'],
     },
     monthlyPremium: {
       type: Number,
@@ -84,4 +92,4 @@ const benefitsSchema = new Schema<BenefitsSchema>(
 const BenefitsModel = model<BenefitsDocument>('Benefits', benefitsSchema);
 
 export { BenefitsModel };
-export type { BenefitsSchema, BenefitsDocument, BenefitsPlanKind };
+export type { BenefitsSchema, BenefitsDocument, BenefitsPlanKind, Currency };

@@ -2,7 +2,7 @@ import type { Request } from 'express';
 import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../auth';
 import type { UserRoles } from '../user';
-import type { BenefitsDocument, BenefitsPlanKind } from './benefits.model';
+import type { BenefitsDocument, BenefitsPlanKind, Currency } from './benefits.model';
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 
@@ -19,6 +19,7 @@ interface CreateNewBenefitsRequest extends RequestAfterJWTVerification {
       planKind: BenefitsPlanKind;
       planStartDate: string;
       isPlanActive: boolean;
+      currency: Currency;
       monthlyPremium: number;
       employerContribution: number;
       employeeContribution: number;

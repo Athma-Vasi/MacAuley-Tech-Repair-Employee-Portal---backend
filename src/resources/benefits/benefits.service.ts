@@ -1,7 +1,12 @@
 import { Types } from 'mongoose';
 
 import type { DeleteResult } from 'mongodb';
-import type { BenefitsDocument, BenefitsPlanKind, BenefitsSchema } from './benefits.model';
+import type {
+  BenefitsDocument,
+  BenefitsPlanKind,
+  BenefitsSchema,
+  Currency,
+} from './benefits.model';
 
 import { BenefitsModel } from './benefits.model';
 import { DatabaseResponse, DatabaseResponseNullable } from '../../types';
@@ -14,6 +19,7 @@ type CreateNewBenefitServiceInput = {
   planKind: BenefitsPlanKind;
   planStartDate: string;
   isPlanActive: boolean;
+  currency: Currency;
   monthlyPremium: number;
   employerContribution: number;
   employeeContribution: number;

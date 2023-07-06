@@ -25,7 +25,12 @@ import {
   getBenefitsByUserService,
 } from './benefits.service';
 
-import type { BenefitsDocument, BenefitsSchema, BenefitsPlanKind } from './benefits.model';
+import type {
+  BenefitsDocument,
+  BenefitsSchema,
+  BenefitsPlanKind,
+  Currency,
+} from './benefits.model';
 import type {
   BenefitsServerResponse,
   CreateNewBenefitsRequest,
@@ -62,6 +67,7 @@ export type {
   BenefitsSchema,
   BenefitsPlanKind,
   BenefitsServerResponse,
+  Currency,
   CreateNewBenefitsRequest,
   DeleteABenefitRequest,
   DeleteAllBenefitsByUserRequest,
