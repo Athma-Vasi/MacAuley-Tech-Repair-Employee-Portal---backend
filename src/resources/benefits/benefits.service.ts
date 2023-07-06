@@ -12,7 +12,7 @@ type CreateNewBenefitServiceInput = {
   planName: string;
   planDescription: string;
   planKind: BenefitsPlanKind;
-  planStartDate: Date;
+  planStartDate: string;
   isPlanActive: boolean;
   monthlyPremium: number;
   employerContribution: number;

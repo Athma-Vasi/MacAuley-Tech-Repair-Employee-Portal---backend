@@ -9,6 +9,8 @@ import type {
   PhoneNumber,
   PostalCode,
   UserDocument,
+  Province,
+  StatesUS,
 } from './user.model';
 
 interface CreateNewUserRequest extends RequestAfterJWTVerification {
@@ -23,8 +25,8 @@ interface CreateNewUserRequest extends RequestAfterJWTVerification {
     address: {
       addressLine1: string;
       city: string;
-      province: string;
-      state: string;
+      province: Province;
+      state: StatesUS;
       postalCode: PostalCode;
       country: Country;
     };
@@ -69,8 +71,8 @@ interface UpdateUserRequest extends RequestAfterJWTVerification {
     address: {
       addressLine1: string;
       city: string;
-      province: string;
-      state: string;
+      province: Province;
+      state: StatesUS;
       postalCode: PostalCode;
       country: Country;
     };

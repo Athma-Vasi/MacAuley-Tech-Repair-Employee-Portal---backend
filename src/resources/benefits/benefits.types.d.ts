@@ -17,7 +17,7 @@ interface CreateNewBenefitsRequest extends RequestAfterJWTVerification {
       planName: string;
       planDescription: string;
       planKind: BenefitsPlanKind;
-      planStartDate: NativeDate;
+      planStartDate: string;
       isPlanActive: boolean;
       monthlyPremium: number;
       employerContribution: number;

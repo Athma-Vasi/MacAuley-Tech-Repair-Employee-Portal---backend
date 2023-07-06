@@ -16,7 +16,7 @@ type BenefitsSchema = {
   planName: string;
   planDescription: string;
   planKind: BenefitsPlanKind;
-  planStartDate: NativeDate;
+  planStartDate: string;
   isPlanActive: boolean;
   monthlyPremium: number;
   employerContribution: number;
@@ -56,7 +56,7 @@ const benefitsSchema = new Schema<BenefitsSchema>(
       required: [true, 'Plan kind is required'],
     },
     planStartDate: {
-      type: Date,
+      type: String,
       required: [true, 'Plan start date is required'],
     },
     isPlanActive: {
