@@ -9,7 +9,7 @@ import type {
   GetRequestResourceByIdRequest,
   GetRequestResourcesByUserRequest,
   RequestResourcesServerResponse,
-} from './resourceRequest.types';
+} from './requestResource.types';
 
 import { getUserByIdService } from '../../../user';
 import {
@@ -19,7 +19,7 @@ import {
   getAllRequestResourcesService,
   getRequestResourceByIdService,
   getRequestResourceByUserService,
-} from './resourceRequest.service';
+} from './requestResource.service';
 import { Types } from 'mongoose';
 
 // @desc   Create a new request resource

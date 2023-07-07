@@ -6,7 +6,7 @@ import {
   getAllRequestResourcesHandler,
   getRequestResourceByIdHandler,
   getRequestResourceByUserHandler,
-} from './resourceRequest.controller';
+} from './requestResource.controller';
 
 const requestResourceRouter = Router();
 

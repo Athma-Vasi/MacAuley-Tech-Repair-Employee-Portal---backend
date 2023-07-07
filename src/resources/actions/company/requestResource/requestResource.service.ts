@@ -4,10 +4,10 @@ import type {
   RequestResourceDocument,
   RequestResourceKind,
   RequestResourceSchema,
-} from './resourceRequest.model';
+} from './requestResource.model';
 import { DatabaseResponse, DatabaseResponseNullable } from '../../../../types';
 
-import { RequestResourceModel } from './resourceRequest.model';
+import { RequestResourceModel } from './requestResource.model';
 import { Department } from '../../../user';
 import { Urgency } from '../../general/printerIssue';
 

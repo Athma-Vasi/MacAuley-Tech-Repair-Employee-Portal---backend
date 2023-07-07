@@ -6,8 +6,8 @@
  * Imports
  */
 
-import { RequestResourceModel } from './resourceRequest.model';
-import { requestResourceRouter } from './resourceRequest.routes';
+import { RequestResourceModel } from './requestResource.model';
+import { requestResourceRouter } from './requestResource.routes';
 import {
   createNewRequestResourceHandler,
   deleteARequestResourceHandler,
@@ -15,7 +15,7 @@ import {
   getAllRequestResourcesHandler,
   getRequestResourceByIdHandler,
   getRequestResourceByUserHandler,
-} from './resourceRequest.controller';
+} from './requestResource.controller';
 import {
   createNewRequestResourceService,
   deleteARequestResourceService,
@@ -23,13 +23,13 @@ import {
   getAllRequestResourcesService,
   getRequestResourceByIdService,
   getRequestResourceByUserService,
-} from './resourceRequest.service';
+} from './requestResource.service';
 
 import type {
   RequestResourceDocument,
   RequestResourceSchema,
   RequestResourceKind,
-} from './resourceRequest.model';
+} from './requestResource.model';
 import type {
   CreateNewRequestResourceRequest,
   DeleteARequestResourceRequest,
@@ -38,7 +38,7 @@ import type {
   GetRequestResourceByIdRequest,
   GetRequestResourcesByUserRequest,
   RequestResourcesServerResponse,
-} from './resourceRequest.types';
+} from './requestResource.types';
 
 /**
  * Exports

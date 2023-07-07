@@ -1,7 +1,7 @@
 import type { Request } from 'express';
 import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
-import type { RequestResourceKind, RequestResourceDocument } from './resourceRequest.model';
+import type { RequestResourceKind, RequestResourceDocument } from './requestResource.model';
 import type { Urgency } from '../../general/printerIssue';
 import type { Department, UserRoles } from '../../../user';
 

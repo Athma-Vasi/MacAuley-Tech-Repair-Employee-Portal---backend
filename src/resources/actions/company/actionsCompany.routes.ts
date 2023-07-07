@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { addressChangeRouter } from './addressChange';
 import { leaveRequestRouter } from './leaveRequest';
 import { expenseClaimRouter } from './expenseClaim';
-import { requestResourceRouter } from './resourceRequest';
+import { requestResourceRouter } from './requestResource';
 
 const actionsCompanyRouter = Router();
 
