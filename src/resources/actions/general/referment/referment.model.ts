@@ -1,4 +1,5 @@
 import { Schema, model, Types } from 'mongoose';
+import { JobPosition, PhoneNumber } from '../../../user';
 
 type RefermentSchema = {
   referrerUserId: Types.ObjectId;
@@ -6,12 +7,12 @@ type RefermentSchema = {
 
   candidateFullName: string;
   candidateEmail: string;
-  candidateContactNumber: string;
+  candidateContactNumber: PhoneNumber;
   candidateCurrentJobTitle: string;
   candidateCurrentCompany: string;
   candidateProfileUrl: string;
 
-  positionReferredFor: string;
+  positionReferredFor: JobPosition;
   positionJobDescription: string;
   referralReason: string;
   additionalInformation: string;

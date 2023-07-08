@@ -1,6 +1,6 @@
 import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../auth';
-import type { UserRoles } from '../../../user';
+import type { UserRoles, JobPosition, PhoneNumber } from '../../../user';
 import type { RefermentDocument } from './referment.model';
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
@@ -14,12 +14,12 @@ interface CreateNewRefermentRequest extends RequestAfterJWTVerification {
     };
     candidateFullName: string;
     candidateEmail: string;
-    candidateContactNumber: string;
+    candidateContactNumber: PhoneNumber;
     candidateCurrentJobTitle: string;
     candidateCurrentCompany: string;
     candidateProfileUrl: string;
 
-    positionReferredFor: string;
+    positionReferredFor: JobPosition;
     positionJobDescription: string;
     referralReason: string;
     additionalInformation: string;
@@ -66,12 +66,12 @@ interface UpdateARefermentRequest extends RequestAfterJWTVerification {
     };
     candidateFullName: string;
     candidateEmail: string;
-    candidateContactNumber: string;
+    candidateContactNumber: PhoneNumber;
     candidateCurrentJobTitle: string;
     candidateCurrentCompany: string;
     candidateProfileUrl: string;
 
-    positionReferredFor: string;
+    positionReferredFor: JobPosition;
     positionJobDescription: string;
     referralReason: string;
     additionalInformation: string;

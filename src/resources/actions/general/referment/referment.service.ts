@@ -3,6 +3,7 @@ import type { DeleteResult } from 'mongodb';
 
 import { RefermentDocument, RefermentModel } from './referment.model';
 import { DatabaseResponse, DatabaseResponseNullable } from '../../../../types';
+import { JobPosition, PhoneNumber } from '../../../user';
 
 type CheckRefermentExistsServiceInput = {
   refermentId?: Types.ObjectId;
@@ -42,12 +43,12 @@ type CreateNewRefermentServiceInput = {
 
   candidateFullName: string;
   candidateEmail: string;
-  candidateContactNumber: string;
+  candidateContactNumber: PhoneNumber;
   candidateCurrentJobTitle: string;
   candidateCurrentCompany: string;
   candidateProfileUrl: string;
 
-  positionReferredFor: string;
+  positionReferredFor: JobPosition;
   positionJobDescription: string;
   referralReason: string;
   additionalInformation: string;
@@ -121,12 +122,12 @@ type UpdateRefermentServiceInput = {
 
   candidateFullName: string;
   candidateEmail: string;
-  candidateContactNumber: string;
+  candidateContactNumber: PhoneNumber;
   candidateCurrentJobTitle: string;
   candidateCurrentCompany: string;
   candidateProfileUrl: string;
 
-  positionReferredFor: string;
+  positionReferredFor: JobPosition;
   positionJobDescription: string;
   referralReason: string;
   additionalInformation: string;
