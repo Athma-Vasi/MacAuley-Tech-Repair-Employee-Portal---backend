@@ -5,12 +5,14 @@ import type { ActionsGeneral } from '../../general';
 
 import { EndorsementModel } from './endorsement.model';
 import { DatabaseResponse, DatabaseResponseNullable } from '../../../../types';
+import { Action } from '../..';
 
 type CreateNewEndorsementInput = {
   userId: Types.ObjectId;
-  section: 'company' | 'general';
-  title: ActionsGeneral;
   username: string;
+  action: Action;
+  category: ActionsGeneral;
+  title: string;
   userToBeEndorsed: string;
   summaryOfEndorsement: string;
   attributeEndorsed: EmployeeAttributes;

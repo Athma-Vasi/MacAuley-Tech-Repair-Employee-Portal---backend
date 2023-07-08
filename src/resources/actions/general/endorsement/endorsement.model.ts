@@ -1,6 +1,7 @@
 import mongoose, { Schema, model, Types } from 'mongoose';
 
-import type { ActionsGeneral } from '../actionsGeneral.types';
+import type { ActionsGeneral } from '../../general';
+import type { Action } from '../../../actions';
 
 type EmployeeAttributes =
   | 'teamwork and collaboration'
@@ -15,8 +16,9 @@ type EmployeeAttributes =
 
 type EndorsementSchema = {
   userId: Types.ObjectId;
-  section: 'company' | 'general';
-  title: ActionsGeneral;
+  action: Action;
+  category: ActionsGeneral;
+  title: string;
   username: string;
   userToBeEndorsed: string;
   summaryOfEndorsement: string;
@@ -38,9 +40,17 @@ const endorsementSchema = new Schema<EndorsementSchema>(
       ref: 'User', // referring to the User model
       index: true,
     },
-    section: {
+    action: {
       type: String,
-      required: [true, 'Section is required'],
+      required: [true, 'Action is required'],
+      enum: ['endorsement'],
+      index: true,
+    },
+    category: {
+      type: String,
+      required: [true, 'Category is required'],
+      enum: ['general'],
+      index: true,
     },
     title: {
       type: String,

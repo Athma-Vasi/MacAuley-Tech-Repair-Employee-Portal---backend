@@ -12,8 +12,7 @@ interface CreateNewEndorsementRequest extends RequestAfterJWTVerification {
       roles: string[];
     };
     // below are the fields required to be sent with post request
-    section: 'company' | 'general';
-    title: 'endorsement';
+    title: string;
     userToBeEndorsed: string;
     summaryOfEndorsement: string;
     attributeEndorsed: EmployeeAttributes;
@@ -27,8 +26,7 @@ interface UpdateAnEndorsementRequest extends RequestAfterJWTVerification {
       username: string;
       roles: string[];
     };
-    section: 'company' | 'general';
-    title: 'endorsement';
+    title: string;
     userToBeEndorsed: string;
     summaryOfEndorsement: string;
     attributeEndorsed: EmployeeAttributes;

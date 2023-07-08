@@ -20,6 +20,7 @@ import type {
   UpdateAnEndorsementRequest,
 } from './endorsement.types';
 import { getUserByIdService } from '../../../user';
+import { EndorsementSchema } from './endorsement.model';
 
 // @desc   Create new endorsement
 // @route  POST /endorsements
@@ -28,18 +29,19 @@ const createNewEndorsementHandler = expressAsyncHandler(
   async (request: CreateNewEndorsementRequest, response: Response) => {
     const {
       userInfo: { userId, username },
+
       title,
-      section,
       userToBeEndorsed,
       attributeEndorsed,
       summaryOfEndorsement,
     } = request.body;
 
-    const newEndorsementObject = {
+    const newEndorsementObject: EndorsementSchema = {
       userId,
-      section,
-      title,
       username,
+      action: 'general',
+      category: 'endorsement',
+      title,
       userToBeEndorsed,
       summaryOfEndorsement,
       attributeEndorsed,
@@ -220,8 +222,8 @@ const updateAnEndorsementHandler = expressAsyncHandler(
     // anyone can update their own endorsements
     const {
       userInfo: { userId, username },
+
       title,
-      section,
       attributeEndorsed,
       summaryOfEndorsement,
       userToBeEndorsed,
@@ -247,13 +249,14 @@ const updateAnEndorsementHandler = expressAsyncHandler(
 
     const updatedEndorsement = await updateAnEndorsementService({
       endorsementId,
+      userId,
+      username,
+      action: 'general',
+      category: 'endorsement',
       title,
-      section,
       attributeEndorsed,
       summaryOfEndorsement,
       userToBeEndorsed,
-      userId,
-      username,
     });
 
     if (updatedEndorsement) {
