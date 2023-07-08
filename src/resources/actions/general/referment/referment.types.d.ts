@@ -17,7 +17,7 @@ interface CreateNewRefermentRequest extends RequestAfterJWTVerification {
     candidateContactNumber: string;
     candidateCurrentJobTitle: string;
     candidateCurrentCompany: string;
-    candidateLinkedinProfile: string;
+    candidateProfileUrl: string;
 
     positionReferredFor: string;
     positionJobDescription: string;
@@ -69,7 +69,7 @@ interface UpdateARefermentRequest extends RequestAfterJWTVerification {
     candidateContactNumber: string;
     candidateCurrentJobTitle: string;
     candidateCurrentCompany: string;
-    candidateLinkedinProfile: string;
+    candidateProfileUrl: string;
 
     positionReferredFor: string;
     positionJobDescription: string;

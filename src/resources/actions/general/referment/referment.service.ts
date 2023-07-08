@@ -45,7 +45,7 @@ type CreateNewRefermentServiceInput = {
   candidateContactNumber: string;
   candidateCurrentJobTitle: string;
   candidateCurrentCompany: string;
-  candidateLinkedinProfile: string;
+  candidateProfileUrl: string;
 
   positionReferredFor: string;
   positionJobDescription: string;
@@ -124,7 +124,7 @@ type UpdateRefermentServiceInput = {
   candidateContactNumber: string;
   candidateCurrentJobTitle: string;
   candidateCurrentCompany: string;
-  candidateLinkedinProfile: string;
+  candidateProfileUrl: string;
 
   positionReferredFor: string;
   positionJobDescription: string;

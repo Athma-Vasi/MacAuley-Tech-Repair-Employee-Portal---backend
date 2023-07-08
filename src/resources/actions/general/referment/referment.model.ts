@@ -9,7 +9,7 @@ type RefermentSchema = {
   candidateContactNumber: string;
   candidateCurrentJobTitle: string;
   candidateCurrentCompany: string;
-  candidateLinkedinProfile: string;
+  candidateProfileUrl: string;
 
   positionReferredFor: string;
   positionJobDescription: string;
@@ -57,7 +57,7 @@ const refermentSchema = new Schema<RefermentSchema>({
     type: String,
     required: [true, 'CandidateCurrentCompany is required'],
   },
-  candidateLinkedinProfile: {
+  candidateProfileUrl: {
     type: String,
     required: false,
     default: '',
