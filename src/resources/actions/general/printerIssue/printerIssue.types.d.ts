@@ -15,8 +15,8 @@ interface CreateNewPrinterIssueRequest extends RequestAfterJWTVerification {
     title: string;
     contactNumber: string;
     contactEmail: string;
-    dateOfOccurence: string;
-    timeOfOccurence: string;
+    dateOfOccurrence: string;
+    timeOfOccurrence: string;
     printerMake: string;
     printerModel: string;
     printerSerialNumber: string;
@@ -36,8 +36,8 @@ interface UpdatePrinterIssueRequest extends RequestAfterJWTVerification {
     title: string;
     contactNumber: string;
     contactEmail: string;
-    dateOfOccurence: string;
-    timeOfOccurence: string;
+    dateOfOccurrence: string;
+    timeOfOccurrence: string;
     printerMake: string;
     printerModel: string;
     printerSerialNumber: string;

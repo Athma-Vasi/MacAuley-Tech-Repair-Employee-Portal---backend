@@ -12,8 +12,8 @@ type PrinterIssueSchema = {
   title: string;
   contactNumber: string;
   contactEmail: string;
-  dateOfOccurence: string;
-  timeOfOccurence: string;
+  dateOfOccurrence: string;
+  timeOfOccurrence: string;
   printerMake: string;
   printerModel: string;
   printerSerialNumber: string;
