@@ -2,7 +2,7 @@ import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
 import type { ActionsGeneral } from '../actionsGeneral.types';
 import type { Urgency, PrinterIssueDocument } from './printerIssue.model';
-import type { UserRoles } from '../../../user';
+import type { PhoneNumber, UserRoles } from '../../../user';
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 interface CreateNewPrinterIssueRequest extends RequestAfterJWTVerification {
@@ -13,7 +13,7 @@ interface CreateNewPrinterIssueRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     title: string;
-    contactNumber: string;
+    contactNumber: PhoneNumber;
     contactEmail: string;
     dateOfOccurrence: string;
     timeOfOccurrence: string;
@@ -34,7 +34,7 @@ interface UpdatePrinterIssueRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     title: string;
-    contactNumber: string;
+    contactNumber: PhoneNumber;
     contactEmail: string;
     dateOfOccurrence: string;
     timeOfOccurrence: string;

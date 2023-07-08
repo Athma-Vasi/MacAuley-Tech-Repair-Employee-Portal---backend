@@ -5,6 +5,7 @@ import type { ActionsGeneral } from '../actionsGeneral.types';
 import type { Action } from '../..';
 
 import { PrinterIssueModel } from './printerIssue.model';
+import { PhoneNumber } from '../../../user';
 
 type CreateNewPrinterIssueInput = {
   userId: Types.ObjectId;
@@ -12,7 +13,7 @@ type CreateNewPrinterIssueInput = {
   action: Action;
   category: ActionsGeneral;
   title: string;
-  contactNumber: string;
+  contactNumber: PhoneNumber;
   contactEmail: string;
   dateOfOccurrence: string;
   timeOfOccurrence: string;

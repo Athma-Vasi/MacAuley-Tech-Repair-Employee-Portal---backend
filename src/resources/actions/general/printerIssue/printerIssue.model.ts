@@ -1,6 +1,7 @@
 import mongoose, { Schema, model, Types } from 'mongoose';
 import { ActionsGeneral } from '../actionsGeneral.types';
 import { Action } from '../..';
+import { PhoneNumber } from '../../../user';
 
 type Urgency = 'low' | 'medium' | 'high';
 
@@ -10,7 +11,7 @@ type PrinterIssueSchema = {
   action: Action;
   category: ActionsGeneral;
   title: string;
-  contactNumber: string;
+  contactNumber: PhoneNumber;
   contactEmail: string;
   dateOfOccurrence: string;
   timeOfOccurrence: string;
