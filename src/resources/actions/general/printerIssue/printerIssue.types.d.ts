@@ -12,7 +12,7 @@ interface CreateNewPrinterIssueRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    title: ActionsGeneral;
+    title: string;
     contactNumber: string;
     contactEmail: string;
     printerMake: string;
@@ -31,7 +31,7 @@ interface UpdatePrinterIssueRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    title: ActionsGeneral;
+    title: string;
     contactNumber: string;
     contactEmail: string;
     printerMake: string;

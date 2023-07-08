@@ -3,7 +3,7 @@ import mongoose, { Schema, model, Types } from 'mongoose';
 import type { ActionsGeneral } from '../../general';
 import type { Action } from '../../../actions';
 
-type EmployeeAttributes =
+type EmployeeAttributes = (
   | 'teamwork and collaboration'
   | 'leadership and mentorship'
   | 'technical expertise'
@@ -12,7 +12,8 @@ type EmployeeAttributes =
   | 'customer service'
   | 'initiative and proactivity'
   | 'communication'
-  | 'reliability and dependability';
+  | 'reliability and dependability'
+)[];
 
 type EndorsementSchema = {
   userId: Types.ObjectId;
@@ -70,7 +71,7 @@ const endorsementSchema = new Schema<EndorsementSchema>(
       required: [true, 'SummaryOfEndorsement is required'],
     },
     attributeEndorsed: {
-      type: String,
+      type: [String],
       required: [true, 'AttributeEndorsed is required'],
     },
   },

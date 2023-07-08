@@ -21,6 +21,7 @@ import {
   updatePrinterIssueService,
 } from './printerIssue.service';
 import { getUserByIdService } from '../../../user';
+import { PrinterIssueSchema } from './printerIssue.model';
 
 // @desc   Create new printer issue
 // @route  POST /printerIssues
@@ -40,10 +41,12 @@ const createNewPrinterIssueHandler = expressAsyncHandler(
       additionalInformation,
     } = request.body;
 
-    const newPrinterIssueObject = {
+    const newPrinterIssueObject: PrinterIssueSchema = {
       userId,
-      title,
       username,
+      action: 'general',
+      category: 'printer issue',
+      title,
       contactNumber,
       contactEmail,
       printerMake,
@@ -255,6 +258,8 @@ const updatePrinterIssueHandler = expressAsyncHandler(
       printerIssueId,
       userId,
       username,
+      action: 'general',
+      category: 'printer issue',
       title,
       contactEmail,
       contactNumber,

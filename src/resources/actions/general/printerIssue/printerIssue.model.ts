@@ -1,12 +1,15 @@
 import mongoose, { Schema, model, Types } from 'mongoose';
 import { ActionsGeneral } from '../actionsGeneral.types';
+import { Action } from '../..';
 
 type Urgency = 'low' | 'medium' | 'high';
 
 type PrinterIssueSchema = {
   userId: Types.ObjectId;
   username: string;
-  title: ActionsGeneral;
+  action: Action;
+  category: ActionsGeneral;
+  title: string;
   contactNumber: string;
   contactEmail: string;
   printerMake: string;
