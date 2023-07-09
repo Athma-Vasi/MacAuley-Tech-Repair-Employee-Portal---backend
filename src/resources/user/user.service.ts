@@ -121,7 +121,7 @@ async function createNewUserService(inputObj: CreateNewUserServiceInput) {
   }
 }
 
-async function deleteUserService(userId: Types.ObjectId): Promise<DeleteResult> {
+async function deleteUserService(userId: Types.ObjectId | string): Promise<DeleteResult> {
   try {
     const deletedUser = await UserModel.deleteOne({ _id: userId }).lean().exec();
     return deletedUser;

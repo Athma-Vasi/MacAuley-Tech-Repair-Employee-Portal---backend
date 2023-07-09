@@ -1,4 +1,5 @@
 import { Request } from 'express';
+import { Types } from 'mongoose';
 
 import type { RequestAfterJWTVerification } from '../auth';
 import type {
@@ -13,7 +14,7 @@ import type {
   StatesUS,
 } from './user.model';
 
-interface CreateNewUserRequest extends RequestAfterJWTVerification {
+interface CreateNewUserRequest {
   body: {
     email: string;
     username: string;
@@ -49,7 +50,7 @@ interface DeleteUserRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    userToBeDeletedId: Types.ObjectId;
+    userToBeDeletedId: string;
   };
 }
 
@@ -121,6 +122,6 @@ export type {
   UpdateUserPasswordRequest,
 
   // user return types
-  UserServerResponse,
+  UsersServerResponse,
   UserDatabaseResponse,
 };

@@ -42,7 +42,7 @@ import type {
   GetAllUsersRequest,
   UpdateUserRequest,
   UpdateUserPasswordRequest,
-  UserServerResponse,
+  UsersServerResponse,
 } from './user.types';
 
 /**
@@ -80,5 +80,5 @@ export type {
   GetAllUsersRequest,
   UpdateUserRequest,
   UpdateUserPasswordRequest,
-  UserServerResponse,
+  UsersServerResponse,
 };
