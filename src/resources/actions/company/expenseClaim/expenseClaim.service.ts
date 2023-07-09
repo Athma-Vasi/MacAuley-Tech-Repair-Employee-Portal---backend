@@ -50,7 +50,7 @@ async function getExpenseClaimsByUserService(
 }
 
 async function getExpenseClaimByIdService(
-  expenseClaimId: Types.ObjectId
+  expenseClaimId: string
 ): Promise<ExpenseClaimDocument | null> {
   try {
     const expenseClaim = await ExpenseClaimModel.findById(expenseClaimId).lean().exec();
@@ -81,7 +81,7 @@ async function returnAllUploadedFileIdsService(): Promise<Types.ObjectId[]> {
   }
 }
 
-async function deleteAnExpenseClaimService(expenseClaimId: Types.ObjectId): Promise<DeleteResult> {
+async function deleteAnExpenseClaimService(expenseClaimId: string): Promise<DeleteResult> {
   try {
     const deleteResult = await ExpenseClaimModel.deleteOne({ _id: expenseClaimId }).lean().exec();
     return deleteResult;

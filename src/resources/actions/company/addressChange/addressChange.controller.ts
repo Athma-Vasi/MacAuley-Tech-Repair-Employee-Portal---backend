@@ -201,7 +201,7 @@ const deleteAnAddressChangeHandler = expressAsyncHandler(
     const {
       userInfo: { roles, userId },
     } = request.body;
-    const addressChangeId = request.params.addressChangeId as Types.ObjectId;
+    const addressChangeId = request.params.addressChangeId;
 
     // only managers/admin can access this route
     if (roles.includes('Employee')) {

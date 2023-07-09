@@ -174,7 +174,7 @@ const getExpenseClaimByIdHandler = expressAsyncHandler(
       userInfo: { roles, userId },
     } = request.body;
 
-    const expenseClaimId = request.params.expenseClaimId as Types.ObjectId;
+    const expenseClaimId = request.params.expenseClaimId;
 
     // check permissions: only admin and manager can view an expense claim that does not belong to them
     if (roles.includes('Employee')) {
@@ -257,7 +257,7 @@ const deleteAnExpenseClaimHandler = expressAsyncHandler(
       uploadedFileId,
     } = request.body;
 
-    const expenseClaimId = request.params.expenseClaimId as Types.ObjectId;
+    const expenseClaimId = request.params.expenseClaimId;
 
     // check permissions: only admin and manager can delete an expense claim
     if (roles.includes('Employee')) {

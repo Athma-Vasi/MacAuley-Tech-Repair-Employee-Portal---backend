@@ -6,7 +6,7 @@ import type { Country, PostalCode } from '../../../user';
 
 import { AddressChangeModel } from './addressChange.model';
 
-async function getAddressChangeByIdService(addressChangeId: Types.ObjectId) {
+async function getAddressChangeByIdService(addressChangeId: string) {
   try {
     const addressChange = await AddressChangeModel.findById(addressChangeId).lean().exec();
     return addressChange;
@@ -66,9 +66,7 @@ async function getAddressChangesByUserService(userId: Types.ObjectId): Promise<
   }
 }
 
-async function deleteAddressChangeByIdService(
-  addressChangeId: Types.ObjectId
-): Promise<DeleteResult> {
+async function deleteAddressChangeByIdService(addressChangeId: string): Promise<DeleteResult> {
   try {
     const deletedResult = await AddressChangeModel.deleteOne({ _id: addressChangeId })
       .lean()

@@ -26,7 +26,7 @@ interface CreateNewAddressChangeRequest extends RequestAfterJWTVerification {
 
 interface DeleteAnAddressChangeRequest extends RequestAfterJWTVerification {
   params: {
-    addressChangeId: Types.ObjectId;
+    addressChangeId: string;
   };
 }
 
@@ -43,7 +43,7 @@ interface GetAddressChangeByIdRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    addressChangeId: Types.ObjectId;
+    addressChangeId: string;
   };
 }
 
