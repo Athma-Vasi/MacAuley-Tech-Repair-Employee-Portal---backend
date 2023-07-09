@@ -80,7 +80,7 @@ const deleteAnEventHandler = expressAsyncHandler(
     // delete an event
     const deletedEvent = await deleteAnEventService(eventId);
     if (deletedEvent.deletedCount === 1) {
-      response.status(200).json({ message: 'Event deleted', eventData: [deletedEvent] });
+      response.status(200).json({ message: 'Event deleted', eventData: [] });
     } else {
       response.status(400).json({ message: 'Unable to delete event', eventData: [] });
     }

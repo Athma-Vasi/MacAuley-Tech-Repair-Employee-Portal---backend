@@ -5,11 +5,12 @@ import type { EventCreatorDocument, EventCreatorSchema, EventKind } from './even
 import type { DatabaseResponse, DatabaseResponseNullable } from '../../../../types';
 
 import { EventCreatorModel } from './eventCreator.model';
+import { UserRoles } from '../../../user';
 
 type CreateNewEventCreatorServiceInput = {
   creatorId: Types.ObjectId;
   creatorUsername: string;
-  creatorRole: string;
+  creatorRole: UserRoles;
   eventName: string;
   eventDescription: string;
   eventKind: EventKind;
@@ -31,7 +32,7 @@ async function createNewEventService(newEventObj: CreateNewEventCreatorServiceIn
   }
 }
 
-async function deleteAnEventService(eventId: Types.ObjectId): Promise<DeleteResult> {
+async function deleteAnEventService(eventId: string): Promise<DeleteResult> {
   try {
     const deleteResult = await EventCreatorModel.deleteOne({ _id: eventId }).lean().exec();
     return deleteResult;
@@ -50,7 +51,7 @@ async function getAllEventsService(): DatabaseResponse<EventCreatorDocument> {
 }
 
 async function getEventByIdService(
-  eventId: Types.ObjectId
+  eventId: string
 ): DatabaseResponseNullable<EventCreatorDocument> {
   try {
     const event = await EventCreatorModel.findById(eventId).lean().exec();
@@ -81,7 +82,7 @@ async function deleteAllEventsByUserService(userId: Types.ObjectId): Promise<Del
 }
 
 type UpdateAnEventByIdServiceInput = {
-  eventId: Types.ObjectId;
+  eventId: string;
   eventToBeUpdated: EventCreatorDocument;
 };
 

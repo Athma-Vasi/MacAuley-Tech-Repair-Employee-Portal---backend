@@ -1,8 +1,8 @@
 import type { Request } from 'express';
 import type { Types } from 'mongoose';
-import type { RequestAfterJWTVerification } from '../auth';
-import type { UserRoles } from '../user';
-import type { EventKind } from './eventCreator.model';
+import type { RequestAfterJWTVerification } from '../../../auth';
+import type { UserRoles } from '../../../user';
+import type { EventCreatorDocument, EventKind } from './eventCreator.model';
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 
@@ -30,7 +30,7 @@ interface CreateNewEventRequest extends RequestAfterJWTVerification {
 
 interface DeleteAnEventRequest extends RequestAfterJWTVerification {
   params: {
-    eventId: Types.ObjectId;
+    eventId: string;
   };
 }
 
@@ -48,7 +48,7 @@ interface GetEventByIdRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
   };
-  params: { eventId: Types.ObjectId };
+  params: { eventId: string };
 }
 
 interface UpdateAnEventByIdRequest extends RequestAfterJWTVerification {
@@ -71,12 +71,12 @@ interface UpdateAnEventByIdRequest extends RequestAfterJWTVerification {
       rsvpDeadline: NativeDate;
     };
   };
-  params: { eventId: Types.ObjectId };
+  params: { eventId: string };
 }
 
 type EventServerResponse = {
   message: string;
-  eventData: Array<EventDocument>;
+  eventData: Array<EventCreatorDocument>;
 };
 
 export type {
