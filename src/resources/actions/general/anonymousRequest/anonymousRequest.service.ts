@@ -1,25 +1,12 @@
-import type { FlattenMaps, Types } from 'mongoose';
 import type { DeleteResult } from 'mongodb';
-import type {
-  AnonymousRequestKind,
-  AnonymousRequestUrgency,
-  AnonymousRequestDocument,
-} from './anonymousRequest.model';
-import type { ActionsGeneral } from '../../general';
+import type { AnonymousRequestDocument, AnonymousRequestSchema } from './anonymousRequest.model';
 
 import { AnonymousRequestModel } from './anonymousRequest.model';
+import { DatabaseResponse, DatabaseResponseNullable } from '../../../../types';
 
-type CreateNewAnonymousRequestServiceInput = {
-  title: ActionsGeneral;
-  secureContactNumber: string;
-  secureContactEmail: string;
-  requestKind: AnonymousRequestKind;
-  requestDescription: string;
-  additionalInformation: string;
-  urgency: AnonymousRequestUrgency;
-};
-
-async function createNewAnonymousRequestService(input: CreateNewAnonymousRequestServiceInput) {
+async function createNewAnonymousRequestService(
+  input: AnonymousRequestSchema
+): Promise<AnonymousRequestDocument> {
   try {
     const newAnonymousRequest = await AnonymousRequestModel.create(input);
     return newAnonymousRequest;
@@ -28,12 +15,7 @@ async function createNewAnonymousRequestService(input: CreateNewAnonymousRequest
   }
 }
 
-async function getAllAnonymousRequestsService(): Promise<
-  (FlattenMaps<AnonymousRequestDocument> &
-    Required<{
-      _id: Types.ObjectId;
-    }>)[]
-> {
+async function getAllAnonymousRequestsService(): DatabaseResponse<AnonymousRequestDocument> {
   try {
     const allAnonymousRequests = await AnonymousRequestModel.find({}).lean().exec();
     return allAnonymousRequests;
@@ -42,13 +24,9 @@ async function getAllAnonymousRequestsService(): Promise<
   }
 }
 
-async function getAnAnonymousRequestService(anonymousRequestId: Types.ObjectId): Promise<
-  | (FlattenMaps<AnonymousRequestDocument> &
-      Required<{
-        _id: Types.ObjectId;
-      }>)
-  | null
-> {
+async function getAnAnonymousRequestService(
+  anonymousRequestId: string
+): DatabaseResponseNullable<AnonymousRequestDocument> {
   try {
     const anonymousRequest = await AnonymousRequestModel.findById(anonymousRequestId).lean().exec();
     return anonymousRequest;
@@ -57,11 +35,9 @@ async function getAnAnonymousRequestService(anonymousRequestId: Types.ObjectId):
   }
 }
 
-async function deleteAnAnonymousRequestService(anonymousRequestId: Types.ObjectId) {
+async function deleteAnAnonymousRequestService(anonymousRequestId: string): Promise<DeleteResult> {
   try {
-    const deletedAnonymousRequest = await AnonymousRequestModel.findByIdAndDelete(
-      anonymousRequestId
-    )
+    const deletedAnonymousRequest = await AnonymousRequestModel.deleteOne({ anonymousRequestId })
       .lean()
       .exec();
     return deletedAnonymousRequest;

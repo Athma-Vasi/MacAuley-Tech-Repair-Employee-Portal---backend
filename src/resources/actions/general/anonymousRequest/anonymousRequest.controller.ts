@@ -14,13 +14,37 @@ import {
   getAllAnonymousRequestsService,
   getAnAnonymousRequestService,
 } from './anonymousRequest.service';
+import { AnonymousRequestSchema } from './anonymousRequest.model';
 
 // @desc   Create new anonymous request
 // @route  POST /anonymousRequests
 // @access Private
 const createNewAnonymousRequestHandler = expressAsyncHandler(
   async (request: CreateNewAnonymousRequestRequest, response: Response) => {
-    const newAnonymousRequest = await createNewAnonymousRequestService(request.body);
+    // userInfo is not stored in server for anonymous requests
+    const {
+      additionalInformation,
+      requestDescription,
+      requestKind,
+      secureContactEmail,
+      secureContactNumber,
+      title,
+      urgency,
+    } = request.body;
+
+    const input: AnonymousRequestSchema = {
+      action: 'general',
+      category: 'anonymous request',
+      additionalInformation,
+      requestDescription,
+      requestKind,
+      secureContactEmail,
+      secureContactNumber,
+      title,
+      urgency,
+    };
+
+    const newAnonymousRequest = await createNewAnonymousRequestService(input);
 
     if (newAnonymousRequest) {
       response.status(201).json({

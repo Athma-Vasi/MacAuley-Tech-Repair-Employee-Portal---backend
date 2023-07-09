@@ -1,6 +1,6 @@
 import { Schema, model, Types } from 'mongoose';
-
-import type { ActionsGeneral } from '../actionsGeneral.types';
+import type { Action } from '../../../actions';
+import type { ActionsGeneral } from '../../general';
 
 type AnonymousRequestKind =
   | 'workplace safety'
@@ -13,8 +13,9 @@ type AnonymousRequestKind =
 type AnonymousRequestUrgency = 'low' | 'medium' | 'high';
 
 type AnonymousRequestSchema = {
-  userId: Types.ObjectId;
-  username: string;
+  action: Action;
+  category: ActionsGeneral;
+
   title: ActionsGeneral;
   secureContactNumber: string;
   secureContactEmail: string;
@@ -33,15 +34,14 @@ type AnonymousRequestDocument = AnonymousRequestSchema & {
 
 const anonymousRequestSchema = new Schema<AnonymousRequestSchema>(
   {
-    userId: {
-      type: Schema.Types.ObjectId,
-      required: [true, 'User is required'],
-      ref: 'User', // referring to the User model
+    action: {
+      type: String,
+      required: [true, 'Action is required'],
       index: true,
     },
-    username: {
+    category: {
       type: String,
-      required: [true, 'Username is required'],
+      required: [true, 'Category is required'],
       index: true,
     },
     title: {
