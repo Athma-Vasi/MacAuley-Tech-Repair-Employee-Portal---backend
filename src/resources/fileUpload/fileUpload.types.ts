@@ -1,6 +1,6 @@
 import type { Request } from 'express';
 import type { Types } from 'mongoose';
-import type { RequestAfterJWTVerification } from '../../../auth';
+import type { RequestAfterJWTVerification } from '../auth';
 import type { AssociatedResourceKind, FileExtension, FileUploadDocument } from './fileUpload.model';
 import type { UserRoles } from '../user';
 import { FileInfoObject, FileUploadObject } from '../../types';
@@ -27,7 +27,7 @@ interface InsertAssociatedDocumentIdRequest extends RequestAfterJWTVerification 
       username: string;
       roles: UserRoles;
     };
-    fileUploadId: Types.ObjectId;
+    fileUploadId: string;
     associatedDocumentId: Types.ObjectId;
     associatedResource: AssociatedResourceKind;
   };
@@ -35,7 +35,7 @@ interface InsertAssociatedDocumentIdRequest extends RequestAfterJWTVerification 
 
 interface DeleteAFileUploadRequest extends RequestAfterJWTVerification {
   params: {
-    fileUploadId: Types.ObjectId;
+    fileUploadId: string;
   };
 }
 
@@ -69,7 +69,7 @@ interface GetFileUploadByIdRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
   };
-  params: { fileUploadId: Types.ObjectId };
+  params: { fileUploadId: string };
 }
 
 type FileUploadServerResponse = {
