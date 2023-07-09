@@ -14,11 +14,13 @@ async function createNewEndorsementService(input: EndorsementSchema): Promise<En
   }
 }
 
-async function deleteEndorsementService(
-  id: Types.ObjectId | string
-): DatabaseResponseNullable<EndorsementDocument> {
+async function deleteEndorsementService(id: Types.ObjectId | string): Promise<DeleteResult> {
   try {
-    const deletedEndorsement = await EndorsementModel.findByIdAndDelete(id).lean().exec();
+    const deletedEndorsement = await EndorsementModel.deleteOne({
+      _id: id,
+    })
+      .lean()
+      .exec();
     return deletedEndorsement;
   } catch (error: any) {
     throw new Error(error, { cause: 'deleteEndorsementService' });

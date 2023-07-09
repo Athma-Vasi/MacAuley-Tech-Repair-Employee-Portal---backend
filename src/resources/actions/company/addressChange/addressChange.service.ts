@@ -1,12 +1,11 @@
-import type { FlattenMaps, Types } from 'mongoose';
+import type { Types } from 'mongoose';
 import type { DeleteResult } from 'mongodb';
 import type { AddressChangeDocument, AddressChangeSchema } from './addressChange.model';
 
-import type { Country, PostalCode } from '../../../user';
-
 import { AddressChangeModel } from './addressChange.model';
+import { DatabaseResponse } from '../../../../types';
 
-async function getAddressChangeByIdService(addressChangeId: string) {
+async function getAddressChangeByIdService(addressChangeId: Types.ObjectId | string) {
   try {
     const addressChange = await AddressChangeModel.findById(addressChangeId).lean().exec();
     return addressChange;
@@ -15,21 +14,9 @@ async function getAddressChangeByIdService(addressChangeId: string) {
   }
 }
 
-type CreateNewAddressChangeServiceInput = {
-  userId: Types.ObjectId;
-  username: string;
-  newAddress: {
-    addressLine1: string;
-    city: string;
-    province: string;
-    state: string;
-    postalCode: PostalCode;
-    country: Country;
-  };
-  acknowledgement: boolean;
-};
-
-async function createNewAddressChangeService(input: CreateNewAddressChangeServiceInput) {
+async function createNewAddressChangeService(
+  input: AddressChangeSchema
+): Promise<AddressChangeDocument> {
   try {
     const addressChange = await AddressChangeModel.create(input);
     return addressChange;
@@ -38,12 +25,7 @@ async function createNewAddressChangeService(input: CreateNewAddressChangeServic
   }
 }
 
-async function getAllAddressChangesService(): Promise<
-  (FlattenMaps<AddressChangeDocument> &
-    Required<{
-      _id: Types.ObjectId;
-    }>)[]
-> {
+async function getAllAddressChangesService(): DatabaseResponse<AddressChangeDocument> {
   try {
     const addressChanges = await AddressChangeModel.find({}).lean().exec();
     return addressChanges;
@@ -52,12 +34,9 @@ async function getAllAddressChangesService(): Promise<
   }
 }
 
-async function getAddressChangesByUserService(userId: Types.ObjectId): Promise<
-  (FlattenMaps<AddressChangeDocument> &
-    Required<{
-      _id: Types.ObjectId;
-    }>)[]
-> {
+async function getAddressChangesByUserService(
+  userId: Types.ObjectId | string
+): DatabaseResponse<AddressChangeDocument> {
   try {
     const addressChanges = await AddressChangeModel.find({ userId }).lean().exec();
     return addressChanges;
@@ -66,7 +45,9 @@ async function getAddressChangesByUserService(userId: Types.ObjectId): Promise<
   }
 }
 
-async function deleteAddressChangeByIdService(addressChangeId: string): Promise<DeleteResult> {
+async function deleteAddressChangeByIdService(
+  addressChangeId: Types.ObjectId | string
+): Promise<DeleteResult> {
   try {
     const deletedResult = await AddressChangeModel.deleteOne({ _id: addressChangeId })
       .lean()

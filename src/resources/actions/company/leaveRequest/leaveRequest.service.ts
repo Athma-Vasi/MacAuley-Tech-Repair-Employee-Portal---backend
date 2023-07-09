@@ -1,28 +1,12 @@
-import type { FlattenMaps, Types } from 'mongoose';
+import type { Types } from 'mongoose';
 import type { DeleteResult } from 'mongodb';
-import type {
-  LeaveRequestDocument,
-  ReasonForLeave,
-  LeaveRequestSchema,
-} from './leaveRequest.model';
+import type { LeaveRequestDocument, LeaveRequestSchema } from './leaveRequest.model';
 
 import { LeaveRequestModel } from './leaveRequest.model';
 import { DatabaseResponse, DatabaseResponseNullable } from '../../../../types';
 
-type CreateNewLeaveRequestServiceInput = {
-  userId: Types.ObjectId;
-  username: string;
-  startDate: Date;
-  endDate: Date;
-  reasonForLeave: ReasonForLeave;
-  delegatedToEmployee: string;
-  delegatedResponsibilities: string;
-  additionalComments: string;
-  acknowledgement: boolean;
-};
-
 async function createNewLeaveRequestService(
-  input: CreateNewLeaveRequestServiceInput
+  input: LeaveRequestSchema
 ): Promise<LeaveRequestDocument> {
   try {
     const leaveRequest = await LeaveRequestModel.create(input);
@@ -33,7 +17,7 @@ async function createNewLeaveRequestService(
 }
 
 async function getLeaveRequestByIdService(
-  leaveRequestId: string
+  leaveRequestId: Types.ObjectId | string
 ): DatabaseResponseNullable<LeaveRequestDocument> {
   try {
     const leaveRequest = await LeaveRequestModel.findById(leaveRequestId).lean().exec();
@@ -61,12 +45,7 @@ async function deleteAllLeaveRequestsService(): Promise<DeleteResult> {
   }
 }
 
-async function getAllLeaveRequestsService(): Promise<
-  (FlattenMaps<LeaveRequestDocument> &
-    Required<{
-      _id: Types.ObjectId;
-    }>)[]
-> {
+async function getAllLeaveRequestsService(): DatabaseResponse<LeaveRequestDocument> {
   try {
     const leaveRequests = await LeaveRequestModel.find({}).lean().exec();
     return leaveRequests;
@@ -75,12 +54,9 @@ async function getAllLeaveRequestsService(): Promise<
   }
 }
 
-async function getLeaveRequestsByUserService(userId: Types.ObjectId): Promise<
-  (FlattenMaps<LeaveRequestDocument> &
-    Required<{
-      _id: Types.ObjectId;
-    }>)[]
-> {
+async function getLeaveRequestsByUserService(
+  userId: Types.ObjectId | string
+): DatabaseResponse<LeaveRequestDocument> {
   try {
     const leaveRequests = await LeaveRequestModel.find({ userId }).lean().exec();
     return leaveRequests;

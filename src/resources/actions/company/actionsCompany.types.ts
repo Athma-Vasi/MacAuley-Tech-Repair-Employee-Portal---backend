@@ -1,3 +1,3 @@
-type ActionsCompany = 'address change' | 'expense claim' | 'request resource' | 'parental leave';
+type ActionsCompany = 'address change' | 'expense claim' | 'request resource' | 'leave request';
 
 export type { ActionsCompany };

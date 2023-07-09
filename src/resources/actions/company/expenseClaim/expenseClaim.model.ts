@@ -1,4 +1,6 @@
 import { Schema, Types, model } from 'mongoose';
+import type { Action } from '../../../actions';
+import type { ActionsCompany } from '../../company';
 
 type ExpenseClaimType =
   | 'Travel and Accomodation'
@@ -12,6 +14,9 @@ type Currency = 'CAD' | 'USD';
 type ExpenseClaimSchema = {
   userId: Types.ObjectId;
   username: string;
+  action: Action;
+  category: ActionsCompany;
+
   uploadedFileId: Types.ObjectId;
   expenseClaimType: ExpenseClaimType;
   expenseClaimAmount: number;
@@ -42,6 +47,17 @@ const expenseClaimSchema = new Schema<ExpenseClaimSchema>(
       required: [true, 'Username is required'],
       index: true,
     },
+    action: {
+      type: String,
+      required: [true, 'Action is required'],
+      index: true,
+    },
+    category: {
+      type: String,
+      required: [true, 'Category is required'],
+      index: true,
+    },
+
     uploadedFileId: {
       type: Schema.Types.ObjectId,
       required: [true, 'Receipt photo ID is required'],

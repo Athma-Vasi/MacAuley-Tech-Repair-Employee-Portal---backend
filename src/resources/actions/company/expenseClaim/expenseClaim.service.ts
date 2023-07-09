@@ -1,25 +1,17 @@
 import { Types } from 'mongoose';
 
 import type { DeleteResult } from 'mongodb';
-import type { Currency, ExpenseClaimDocument, ExpenseClaimType } from './expenseClaim.model';
+import type {
+  Currency,
+  ExpenseClaimDocument,
+  ExpenseClaimSchema,
+  ExpenseClaimType,
+} from './expenseClaim.model';
 
 import { ExpenseClaimModel } from './expenseClaim.model';
 
-type CreateNewExpenseClaimServiceInput = {
-  userId: Types.ObjectId;
-  username: string;
-  uploadedFileId: Types.ObjectId;
-  expenseClaimType: ExpenseClaimType;
-  expenseClaimAmount: number;
-  expenseClaimCurrency: Currency;
-  expenseClaimDate: Date;
-  expenseClaimDescription: string;
-  additionalComments: string;
-  acknowledgement: boolean;
-};
-
 async function createNewExpenseClaimService(
-  expenseClaimData: CreateNewExpenseClaimServiceInput
+  expenseClaimData: ExpenseClaimSchema
 ): Promise<ExpenseClaimDocument> {
   try {
     const newExpenseClaim = await ExpenseClaimModel.create(expenseClaimData);

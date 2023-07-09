@@ -11,7 +11,6 @@ import type {
   RequestResourcesServerResponse,
 } from './requestResource.types';
 
-import { getUserByIdService } from '../../../user';
 import {
   createNewRequestResourceService,
   deleteARequestResourceService,
@@ -20,7 +19,7 @@ import {
   getRequestResourceByIdService,
   getRequestResourceByUserService,
 } from './requestResource.service';
-import { Types } from 'mongoose';
+import { RequestResourceSchema } from './requestResource.model';
 
 // @desc   Create a new request resource
 // @route  POST /request-resource
@@ -45,9 +44,11 @@ const createNewRequestResourceHandler = expressAsyncHandler(
     } = request.body;
 
     // create new request resource object
-    const newRequestResourceObject = {
+    const newRequestResourceObject: RequestResourceSchema = {
       userId,
       username,
+      action: 'company',
+      category: 'request resource',
       resourceType,
       department,
       reasonForRequest,
@@ -82,7 +83,7 @@ const deleteARequestResourceHandler = expressAsyncHandler(
     response: Response<RequestResourcesServerResponse>
   ) => {
     const {
-      userInfo: { roles, userId, username },
+      userInfo: { roles },
     } = request.body;
 
     // check if user is admin or manager

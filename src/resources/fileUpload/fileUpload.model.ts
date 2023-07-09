@@ -1,5 +1,7 @@
 import { Schema, Types, model } from 'mongoose';
-import { FileUploadObject } from '../../types';
+import type { ActionsCompany } from '../actions/company';
+import type { ActionsGeneral } from '../actions/general';
+import type { ActionsOutreach } from '../actions/outreach';
 
 type FileExtension =
   | 'jpg'
@@ -16,7 +18,7 @@ type FileExtension =
   | 'txt'
   | 'log';
 
-type AssociatedResourceKind = 'Expense Claim';
+type AssociatedResourceKind = ActionsCompany | ActionsGeneral | ActionsOutreach | 'user' | 'note';
 
 type FileUploadSchema = {
   userId: Types.ObjectId;

@@ -9,6 +9,7 @@ import {
   updateAnEndorsementService,
 } from './endorsement.service';
 
+import type { DeleteResult } from 'mongodb';
 import type { Response } from 'express';
 import type {
   CreateNewEndorsementRequest,
@@ -168,8 +169,8 @@ const deleteEndorsementHandler = expressAsyncHandler(
 
     const { endorsementId } = request.params;
 
-    const deletedEndorsement = await deleteEndorsementService(endorsementId);
-    if (deletedEndorsement) {
+    const deletedEndorsement: DeleteResult = await deleteEndorsementService(endorsementId);
+    if (deletedEndorsement.deletedCount === 1) {
       response.status(200).json({
         message: 'Endorsement deleted successfully',
         endorsementData: [deletedEndorsement],
@@ -188,7 +189,7 @@ const deleteEndorsementHandler = expressAsyncHandler(
 const deleteAllEndorsementsHandler = expressAsyncHandler(
   async (request: DeleteAllEndorsementsRequest, response: Response) => {
     const {
-      userInfo: { userId, roles },
+      userInfo: { roles },
     } = request.body;
 
     // only managers/admins can delete all endorsements
@@ -200,8 +201,8 @@ const deleteAllEndorsementsHandler = expressAsyncHandler(
       return;
     }
 
-    const deletedResult = await deleteAllEndorsementsService();
-    if (deletedResult.acknowledged) {
+    const deletedResult: DeleteResult = await deleteAllEndorsementsService();
+    if (deletedResult.deletedCount > 0) {
       response.status(200).json({
         message: 'Endorsements deleted successfully',
         endorsementData: [],

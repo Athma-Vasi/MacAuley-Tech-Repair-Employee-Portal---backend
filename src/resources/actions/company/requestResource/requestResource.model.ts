@@ -1,12 +1,17 @@
 import { Schema, Types, model } from 'mongoose';
-import { Department } from '../../../user';
-import { Urgency } from '../../general/printerIssue';
+import type { Department } from '../../../user';
+import type { Urgency } from '../../general/printerIssue';
+import type { Action } from '../../../actions';
+import type { ActionsCompany } from '../../company';
 
 type RequestResourceKind = 'Hardware' | 'Software' | 'Access' | 'Other';
 
 type RequestResourceSchema = {
   userId: Types.ObjectId;
   username: string;
+  action: Action;
+  category: ActionsCompany;
+
   department: Department;
   resourceType: RequestResourceKind;
   resourceQuantity: number;
@@ -37,6 +42,17 @@ const requestResourceSchema = new Schema<RequestResourceSchema>(
       required: [true, 'Username is required'],
       index: true,
     },
+    action: {
+      type: String,
+      required: [true, 'Action is required'],
+      index: true,
+    },
+    category: {
+      type: String,
+      required: [true, 'Category is required'],
+      index: true,
+    },
+
     department: {
       type: String,
       required: [true, 'Department is required'],

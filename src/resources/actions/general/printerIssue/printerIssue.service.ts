@@ -48,7 +48,7 @@ async function getAllPrinterIssuesService(): DatabaseResponse<PrinterIssueDocume
 
 async function deletePrinterIssueService(id: Types.ObjectId | string): Promise<DeleteResult> {
   try {
-    const deletedPrinterIssue = await PrinterIssueModel.deleteOne({ id }).lean().exec();
+    const deletedPrinterIssue = await PrinterIssueModel.deleteOne({ _id: id }).lean().exec();
     return deletedPrinterIssue;
   } catch (error: any) {
     throw new Error(error, { cause: 'deletePrinterIssueService' });

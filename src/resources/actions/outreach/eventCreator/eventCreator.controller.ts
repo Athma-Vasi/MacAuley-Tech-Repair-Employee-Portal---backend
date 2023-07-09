@@ -1,5 +1,5 @@
 import expressAsyncHandler from 'express-async-handler';
-import { Types } from 'mongoose';
+import type { DeleteResult } from 'mongodb';
 
 import type { Response } from 'express';
 import type {
@@ -21,6 +21,7 @@ import {
   getEventsByUserService,
   updateAnEventByIdService,
 } from './eventCreator.service';
+import { EventCreatorSchema } from './eventCreator.model';
 
 // @desc   Create a new event
 // @route  POST /events
@@ -30,7 +31,7 @@ const createNewEventHandler = expressAsyncHandler(
     const {
       userInfo: { userId, username, roles },
       event: {
-        eventName,
+        eventTitle,
         eventDescription,
         eventKind,
         eventStartTime,
@@ -44,11 +45,14 @@ const createNewEventHandler = expressAsyncHandler(
     } = request.body;
 
     // create new event object
-    const newEventObject = {
+    const newEventObject: EventCreatorSchema = {
       creatorId: userId,
       creatorUsername: username,
       creatorRole: roles,
-      eventName,
+      action: 'outreach',
+      category: 'event creator',
+
+      eventTitle,
       eventDescription,
       eventKind,
       eventStartTime,
@@ -78,7 +82,7 @@ const deleteAnEventHandler = expressAsyncHandler(
     const { eventId } = request.params;
 
     // delete an event
-    const deletedEvent = await deleteAnEventService(eventId);
+    const deletedEvent: DeleteResult = await deleteAnEventService(eventId);
     if (deletedEvent.deletedCount === 1) {
       response.status(200).json({ message: 'Event deleted', eventData: [] });
     } else {
@@ -149,7 +153,7 @@ const deleteAllEventsByUserHandler = expressAsyncHandler(
     } = request.body;
 
     // delete all events by user
-    const deleteResult = await deleteAllEventsByUserService(userId);
+    const deleteResult: DeleteResult = await deleteAllEventsByUserService(userId);
     if (deleteResult.deletedCount > 0) {
       response.status(200).json({ message: 'Events by user deleted', eventData: [] });
     } else {

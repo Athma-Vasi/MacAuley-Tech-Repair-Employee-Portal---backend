@@ -1,8 +1,8 @@
 import expressAsyncHandler from 'express-async-handler';
-import { Types } from 'mongoose';
 
+import type { DeleteResult } from 'mongodb';
 import type { Response } from 'express';
-import type { SurveyQuestion, SurveyRecipient, SurveyResponseKind } from './surveyBuilder.model';
+import type { SurveyBuilderSchema } from './surveyBuilder.model';
 import type {
   CreateNewSurveyRequest,
   DeleteASurveyRequest,
@@ -32,10 +32,13 @@ const createNewSurveyHandler = expressAsyncHandler(
     } = request.body;
 
     // create new survey object
-    const newSurveyObject = {
+    const newSurveyObject: SurveyBuilderSchema = {
       creatorId: userId,
       creatorUsername: username,
       creatorRole: roles,
+      action: 'outreach',
+      category: 'survey builder',
+
       surveyTitle,
       sendTo,
       expiryDate,
@@ -77,7 +80,7 @@ const deleteASurveyHandler = expressAsyncHandler(
     }
 
     // delete survey
-    const deleteResult = await deleteASurveyService(surveyId);
+    const deleteResult: DeleteResult = await deleteASurveyService(surveyId);
     if (deleteResult.deletedCount === 1) {
       response.status(200).json({ message: 'Survey deleted', surveyData: [] });
     } else {
@@ -92,7 +95,7 @@ const deleteASurveyHandler = expressAsyncHandler(
 const deleteAllSurveysHandler = expressAsyncHandler(
   async (request: DeleteAllSurveysRequest, response: Response<SurveyServerResponse>) => {
     // delete all surveys
-    const deleteResult = await deleteAllSurveysService();
+    const deleteResult: DeleteResult = await deleteAllSurveysService();
     if (deleteResult.deletedCount > 0) {
       response.status(200).json({ message: 'All surveys deleted', surveyData: [] });
     } else {

@@ -1,10 +1,15 @@
 import { Schema, Types, model } from 'mongoose';
 
+import type { Action } from '../../../actions';
+import type { ActionsCompany } from '../../../actions/company';
 import type { Country, PostalCode } from '../../../user';
 
 type AddressChangeSchema = {
   userId: Types.ObjectId;
   username: string;
+  action: Action;
+  category: ActionsCompany;
+
   newAddress: {
     addressLine1: string;
     city: string;
@@ -34,6 +39,16 @@ const addressChangeSchema = new Schema<AddressChangeSchema>(
     username: {
       type: String,
       required: [true, 'Username is required'],
+      index: true,
+    },
+    action: {
+      type: String,
+      required: [true, 'Action is required'],
+      index: true,
+    },
+    category: {
+      type: String,
+      required: [true, 'Category is required'],
       index: true,
     },
     newAddress: {

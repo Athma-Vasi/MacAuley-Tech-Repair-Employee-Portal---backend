@@ -37,7 +37,9 @@ async function getAnAnonymousRequestService(
 
 async function deleteAnAnonymousRequestService(anonymousRequestId: string): Promise<DeleteResult> {
   try {
-    const deletedAnonymousRequest = await AnonymousRequestModel.deleteOne({ anonymousRequestId })
+    const deletedAnonymousRequest = await AnonymousRequestModel.deleteOne({
+      _id: anonymousRequestId,
+    })
       .lean()
       .exec();
     return deletedAnonymousRequest;

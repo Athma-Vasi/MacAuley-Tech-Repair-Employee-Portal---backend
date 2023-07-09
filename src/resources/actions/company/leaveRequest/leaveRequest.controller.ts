@@ -1,7 +1,7 @@
 import expressAsyncHandler from 'express-async-handler';
 
 import type { Response } from 'express';
-import { Types } from 'mongoose';
+import type { DeleteResult } from 'mongodb';
 import type {
   CreateNewLeaveRequestRequest,
   DeleteALeaveRequestRequest,
@@ -12,7 +12,6 @@ import type {
   LeaveRequestServerResponse,
 } from './leaveRequest.types';
 
-import { getUserByIdService } from '../../../user';
 import {
   createNewLeaveRequestService,
   deleteALeaveRequestService,
@@ -21,6 +20,7 @@ import {
   getLeaveRequestByIdService,
   getLeaveRequestsByUserService,
 } from './leaveRequest.service';
+import { LeaveRequestSchema } from './leaveRequest.model';
 
 // @desc   Create a new leave request
 // @route  POST /leave-request
@@ -47,9 +47,11 @@ const createNewLeaveRequestHandler = expressAsyncHandler(
     }
 
     // create new leave request object
-    const newLeaveRequestObject = {
+    const newLeaveRequestObject: LeaveRequestSchema = {
       userId,
       username,
+      action: 'company',
+      category: 'leave request',
       startDate,
       endDate,
       reasonForLeave,
@@ -83,7 +85,7 @@ const createNewLeaveRequestHandler = expressAsyncHandler(
 const deleteALeaveRequestHandler = expressAsyncHandler(
   async (request: DeleteALeaveRequestRequest, response: Response) => {
     const {
-      userInfo: { roles, userId, username },
+      userInfo: { roles },
     } = request.body;
     const leaveRequestId = request.params.leaveRequestId;
 
@@ -101,8 +103,8 @@ const deleteALeaveRequestHandler = expressAsyncHandler(
     }
 
     // delete leave request
-    const deletedResult = await deleteALeaveRequestService(leaveRequestId);
-    if (deletedResult.acknowledged) {
+    const deletedResult: DeleteResult = await deleteALeaveRequestService(leaveRequestId);
+    if (deletedResult.deletedCount === 1) {
       response.status(200).json({
         message: 'Leave request deleted successfully',
         leaveRequestData: [],
@@ -122,7 +124,7 @@ const deleteALeaveRequestHandler = expressAsyncHandler(
 const deleteAllLeaveRequestsHandler = expressAsyncHandler(
   async (request: DeleteAllLeaveRequestsRequest, response: Response) => {
     const {
-      userInfo: { roles, userId, username },
+      userInfo: { roles },
     } = request.body;
 
     // check if user has permission
@@ -132,8 +134,8 @@ const deleteAllLeaveRequestsHandler = expressAsyncHandler(
     }
 
     // delete all leave requests
-    const deletedResult = await deleteAllLeaveRequestsService();
-    if (deletedResult.acknowledged) {
+    const deletedResult: DeleteResult = await deleteAllLeaveRequestsService();
+    if (deletedResult.deletedCount > 0) {
       response.status(200).json({
         message: 'All leave requests deleted successfully',
         leaveRequestData: [],

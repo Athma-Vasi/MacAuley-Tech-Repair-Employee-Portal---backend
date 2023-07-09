@@ -1,29 +1,14 @@
 import { Types } from 'mongoose';
 
 import type { DeleteResult } from 'mongodb';
-import type { EventCreatorDocument, EventCreatorSchema, EventKind } from './eventCreator.model';
+import type { EventCreatorDocument, EventCreatorSchema } from './eventCreator.model';
 import type { DatabaseResponse, DatabaseResponseNullable } from '../../../../types';
 
 import { EventCreatorModel } from './eventCreator.model';
-import { UserRoles } from '../../../user';
 
-type CreateNewEventCreatorServiceInput = {
-  creatorId: Types.ObjectId;
-  creatorUsername: string;
-  creatorRole: UserRoles;
-  eventName: string;
-  eventDescription: string;
-  eventKind: EventKind;
-  eventDate: NativeDate;
-  eventStartTime: string;
-  eventEndTime: string;
-  eventLocation: string;
-  eventAttendees: string;
-  requiredItems: string;
-  rsvpDeadline: NativeDate;
-};
-
-async function createNewEventService(newEventObj: CreateNewEventCreatorServiceInput) {
+async function createNewEventService(
+  newEventObj: EventCreatorSchema
+): Promise<EventCreatorDocument> {
   try {
     const newEvent = await EventCreatorModel.create(newEventObj);
     return newEvent;
@@ -32,7 +17,7 @@ async function createNewEventService(newEventObj: CreateNewEventCreatorServiceIn
   }
 }
 
-async function deleteAnEventService(eventId: string): Promise<DeleteResult> {
+async function deleteAnEventService(eventId: Types.ObjectId | string): Promise<DeleteResult> {
   try {
     const deleteResult = await EventCreatorModel.deleteOne({ _id: eventId }).lean().exec();
     return deleteResult;
@@ -51,7 +36,7 @@ async function getAllEventsService(): DatabaseResponse<EventCreatorDocument> {
 }
 
 async function getEventByIdService(
-  eventId: string
+  eventId: string | Types.ObjectId
 ): DatabaseResponseNullable<EventCreatorDocument> {
   try {
     const event = await EventCreatorModel.findById(eventId).lean().exec();
@@ -62,7 +47,7 @@ async function getEventByIdService(
 }
 
 async function getEventsByUserService(
-  userId: Types.ObjectId
+  userId: Types.ObjectId | string
 ): DatabaseResponse<EventCreatorDocument> {
   try {
     const events = await EventCreatorModel.find({ creatorId: userId }).lean().exec();
@@ -72,7 +57,9 @@ async function getEventsByUserService(
   }
 }
 
-async function deleteAllEventsByUserService(userId: Types.ObjectId): Promise<DeleteResult> {
+async function deleteAllEventsByUserService(
+  userId: Types.ObjectId | string
+): Promise<DeleteResult> {
   try {
     const events = await EventCreatorModel.deleteMany({ creatorId: userId }).lean().exec();
     return events;
@@ -82,7 +69,7 @@ async function deleteAllEventsByUserService(userId: Types.ObjectId): Promise<Del
 }
 
 type UpdateAnEventByIdServiceInput = {
-  eventId: string;
+  eventId: string | Types.ObjectId;
   eventToBeUpdated: EventCreatorDocument;
 };
 

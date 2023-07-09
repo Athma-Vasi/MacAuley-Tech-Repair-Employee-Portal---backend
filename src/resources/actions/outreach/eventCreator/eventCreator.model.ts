@@ -1,5 +1,7 @@
 import { Schema, Types, model } from 'mongoose';
 import type { UserRoles } from '../../../user';
+import type { Action } from '../../../actions';
+import type { ActionsOutreach } from '../../../actions/outreach';
 
 type EventKind =
   | 'Webinar'
@@ -17,6 +19,9 @@ type EventCreatorSchema = {
   creatorId: Types.ObjectId;
   creatorUsername: string;
   creatorRole: UserRoles;
+  action: Action;
+  category: ActionsOutreach;
+
   eventTitle: string;
   eventDescription: string;
   eventKind: EventKind;
@@ -52,6 +57,16 @@ const eventCreatorSchema = new Schema<EventCreatorSchema>(
     creatorRole: {
       type: [String],
       required: [true, 'User role is required'],
+    },
+    action: {
+      type: String,
+      required: [true, 'Action is required'],
+      index: true,
+    },
+    category: {
+      type: String,
+      required: [true, 'Category is required'],
+      index: true,
     },
     eventTitle: {
       type: String,

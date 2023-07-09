@@ -1,5 +1,7 @@
 import { Schema, Types, model } from 'mongoose';
-import { UserRoles } from '../../../user';
+import type { UserRoles } from '../../../user';
+import type { Action } from '../../../actions';
+import type { ActionsOutreach } from '../../../actions/outreach';
 
 type SurveyRecipient = 'all' | 'active' | 'inactive' | 'employees' | 'admins' | 'managers';
 
@@ -27,6 +29,9 @@ type SurveyBuilderSchema = {
   creatorId: Types.ObjectId;
   creatorUsername: string;
   creatorRole: UserRoles;
+  action: Action;
+  category: ActionsOutreach;
+
   surveyTitle: string;
   sendTo: SurveyRecipient;
   expiryDate: NativeDate;
@@ -57,6 +62,17 @@ const surveyBuilderSchema = new Schema<SurveyBuilderSchema>(
       type: [String],
       required: [true, 'creatorRole is required'],
     },
+    action: {
+      type: String,
+      required: [true, 'action is required'],
+      index: true,
+    },
+    category: {
+      type: String,
+      required: [true, 'category is required'],
+      index: true,
+    },
+
     surveyTitle: {
       type: String,
       required: [true, 'surveyTitle is required'],

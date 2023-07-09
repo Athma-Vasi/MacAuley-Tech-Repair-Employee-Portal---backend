@@ -14,7 +14,7 @@ interface CreateNewEventRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     event: {
-      eventName: string;
+      eventTitle: string;
       eventDescription: string;
       eventKind: EventKind;
       eventDate: NativeDate;

@@ -1,5 +1,5 @@
 import expressAsyncHandler from 'express-async-handler';
-import { Types } from 'mongoose';
+import type { DeleteResult } from 'mongodb';
 
 import type { AddressChangeSchema } from './addressChange.model';
 import type { Response } from 'express';
@@ -78,6 +78,8 @@ const createNewAddressChangeHandler = expressAsyncHandler(
     const newAddressChange: AddressChangeSchema = {
       userId,
       username,
+      action: 'company',
+      category: 'address change',
       newAddress,
       acknowledgement,
     };
@@ -222,8 +224,8 @@ const deleteAnAddressChangeHandler = expressAsyncHandler(
     }
 
     // delete addressChange request by id
-    const deletedResult = await deleteAddressChangeByIdService(addressChangeId);
-    if (deletedResult.acknowledged) {
+    const deletedResult: DeleteResult = await deleteAddressChangeByIdService(addressChangeId);
+    if (deletedResult.deletedCount === 1) {
       response.status(200).json({
         message: 'AddressChange request deleted successfully',
         addressChangeData: [],
@@ -256,8 +258,8 @@ const deleteAllAddressChangesHandler = expressAsyncHandler(
     }
 
     // delete all addressChange requests
-    const deletedResult = await deleteAllAddressChangesService();
-    if (deletedResult.acknowledged) {
+    const deletedResult: DeleteResult = await deleteAllAddressChangesService();
+    if (deletedResult.deletedCount > 0) {
       response.status(200).json({
         message: 'All addressChange requests deleted successfully',
         addressChangeData: [],

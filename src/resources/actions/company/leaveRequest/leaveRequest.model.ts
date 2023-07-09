@@ -1,4 +1,6 @@
 import { Schema, Types, model } from 'mongoose';
+import type { Action } from '../../../actions';
+import type { ActionsCompany } from '../../company';
 
 type ReasonForLeave =
   | 'Vacation'
@@ -14,6 +16,9 @@ type ReasonForLeave =
 type LeaveRequestSchema = {
   userId: Types.ObjectId;
   username: string;
+  action: Action;
+  category: ActionsCompany;
+
   startDate: NativeDate;
   endDate: NativeDate;
   reasonForLeave: ReasonForLeave;
@@ -41,6 +46,16 @@ const leaveRequestSchema = new Schema<LeaveRequestSchema>(
     username: {
       type: String,
       required: [true, 'Username is required'],
+      index: true,
+    },
+    action: {
+      type: String,
+      required: [true, 'Action is required'],
+      index: true,
+    },
+    category: {
+      type: String,
+      required: [true, 'Category is required'],
       index: true,
     },
     startDate: {
