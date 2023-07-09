@@ -30,7 +30,7 @@ async function createNewSurveyService(
 }
 
 async function getSurveyByIdService(
-  surveyId: Types.ObjectId
+  surveyId: string
 ): DatabaseResponseNullable<SurveyBuilderDocument> {
   try {
     const survey = await SurveyBuilderModel.findById(surveyId).lean().exec();
@@ -40,7 +40,7 @@ async function getSurveyByIdService(
   }
 }
 
-async function deleteASurveyService(surveyId: Types.ObjectId): Promise<DeleteResult> {
+async function deleteASurveyService(surveyId: string): Promise<DeleteResult> {
   try {
     const deleteResult = await SurveyBuilderModel.deleteOne({ _id: surveyId }).lean().exec();
     return deleteResult;

@@ -59,7 +59,7 @@ const createNewSurveyHandler = expressAsyncHandler(
 // @access Private/Admin/Manager
 const deleteASurveyHandler = expressAsyncHandler(
   async (request: DeleteASurveyRequest, response: Response<SurveyServerResponse>) => {
-    const surveyId = request.params.surveyId as Types.ObjectId;
+    const surveyId = request.params.surveyId;
 
     // check that survey exists
     const surveyToDelete = await getSurveyByIdService(surveyId);
@@ -121,7 +121,7 @@ const getAllSurveysHandler = expressAsyncHandler(
 // @access Private/Admin/Manager
 const getSurveyByIdHandler = expressAsyncHandler(
   async (request: GetSurveyByIdRequest, response: Response<SurveyServerResponse>) => {
-    const surveyId = request.params.surveyId as Types.ObjectId;
+    const surveyId = request.params.surveyId;
 
     // get survey by id
     const survey = await getSurveyByIdService(surveyId);

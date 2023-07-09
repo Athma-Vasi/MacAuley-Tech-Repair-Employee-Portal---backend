@@ -1,7 +1,12 @@
 import type { Request } from 'express';
 import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
-import type { SurveyQuestion, SurveyRecipient, SurveyResponseKind } from './surveyBuilder.model';
+import type {
+  SurveyBuilderDocument,
+  SurveyQuestion,
+  SurveyRecipient,
+  SurveyResponseKind,
+} from './surveyBuilder.model';
 import type { UserRoles } from '../../../user';
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
@@ -25,7 +30,7 @@ interface CreateNewSurveyRequest extends RequestAfterJWTVerification {
 
 interface DeleteASurveyRequest extends RequestAfterJWTVerification {
   params: {
-    surveyId: Types.ObjectId;
+    surveyId: string;
   };
 }
 
@@ -43,7 +48,7 @@ interface GetSurveyByIdRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
   };
-  params: { surveyId: Types.ObjectId };
+  params: { surveyId: string };
 }
 
 type SurveyServerResponse = {
