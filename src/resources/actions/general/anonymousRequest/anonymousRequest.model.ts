@@ -1,28 +1,29 @@
 import { Schema, model, Types } from 'mongoose';
 import type { Action } from '../../../actions';
 import type { ActionsGeneral } from '../../general';
+import { Urgency } from '../printerIssue';
+import { PhoneNumber } from '../../../user';
 
 type AnonymousRequestKind =
-  | 'workplace safety'
-  | 'employee conflict'
-  | 'workplace harassment'
-  | 'company security'
-  | 'diversity and inclusion'
-  | 'lgbtqia+';
-
-type AnonymousRequestUrgency = 'low' | 'medium' | 'high';
+  | 'Workplace safety'
+  | 'Employee conflict'
+  | 'Workplace harassment'
+  | 'Company security'
+  | 'Diversity and inclusion'
+  | 'LGBTQIA+';
 
 type AnonymousRequestSchema = {
+  // action and category are added in the create handler
   action: Action;
   category: ActionsGeneral;
 
-  title: ActionsGeneral;
-  secureContactNumber: string;
+  title: string;
+  secureContactNumber: PhoneNumber;
   secureContactEmail: string;
   requestKind: AnonymousRequestKind;
   requestDescription: string;
   additionalInformation: string;
-  urgency: AnonymousRequestUrgency;
+  urgency: Urgency;
 };
 
 type AnonymousRequestDocument = AnonymousRequestSchema & {
@@ -84,9 +85,4 @@ const AnonymousRequestModel = model<AnonymousRequestDocument>(
 );
 
 export { AnonymousRequestModel };
-export type {
-  AnonymousRequestDocument,
-  AnonymousRequestSchema,
-  AnonymousRequestKind,
-  AnonymousRequestUrgency,
-};
+export type { AnonymousRequestDocument, AnonymousRequestSchema, AnonymousRequestKind, Urgency };

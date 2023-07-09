@@ -4,10 +4,10 @@ import type { ActionsGeneral } from '../actionsGeneral.types';
 import type {
   AnonymousRequestDocument,
   AnonymousRequestKind,
-  AnonymousRequestUrgency,
+  Urgency,
 } from './anonymousRequest.model';
 
-import { UserRoles } from '../../../user';
+import { PhoneNumber, UserRoles } from '../../../user';
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 
@@ -20,13 +20,13 @@ interface CreateNewAnonymousRequestRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    title: ActionsGeneral;
-    secureContactNumber: string;
+    title: string;
+    secureContactNumber: PhoneNumber;
     secureContactEmail: string;
     requestKind: AnonymousRequestKind;
     requestDescription: string;
     additionalInformation: string;
-    urgency: AnonymousRequestUrgency;
+    urgency: Urgency;
   };
 }
 

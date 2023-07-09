@@ -146,7 +146,7 @@ const deleteAnAnonymousRequestHandler = expressAsyncHandler(
 
     const { anonymousRequestId } = request.params;
     const anonymousRequest = await deleteAnAnonymousRequestService(anonymousRequestId);
-    if (anonymousRequest) {
+    if (anonymousRequest.deletedCount === 1) {
       response.status(200).json({
         message: 'Anonymous request deleted successfully',
         anonymousRequestData: anonymousRequest,
@@ -178,7 +178,7 @@ const deleteAllAnonymousRequestsHandler = expressAsyncHandler(
 
     const deletedResult = await deleteAllAnonymousRequestsService();
 
-    if (deletedResult.acknowledged) {
+    if (deletedResult.deletedCount > 0) {
       response.status(200).json({
         message: 'All anonymous requests deleted successfully',
         anonymousRequestData: [],

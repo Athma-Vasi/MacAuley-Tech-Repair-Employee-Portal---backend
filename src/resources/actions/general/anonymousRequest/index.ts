@@ -12,7 +12,7 @@ import type {
   AnonymousRequestDocument,
   AnonymousRequestSchema,
   AnonymousRequestKind,
-  AnonymousRequestUrgency,
+  Urgency,
 } from './anonymousRequest.model';
 import type {
   CreateNewAnonymousRequestRequest,
@@ -37,5 +37,5 @@ export type {
   AnonymousRequestDocument,
   AnonymousRequestSchema,
   AnonymousRequestKind,
-  AnonymousRequestUrgency,
+  Urgency,
 };
