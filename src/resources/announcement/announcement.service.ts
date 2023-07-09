@@ -6,7 +6,7 @@ import type { DatabaseResponse, DatabaseResponseNullable } from '../../types';
 import { AnnouncementModel } from './announcement.model';
 
 type CheckAnnouncementExistsServiceInput = {
-  announcementId?: Types.ObjectId;
+  announcementId?: string;
   title?: string;
   userId?: Types.ObjectId;
 };
@@ -86,9 +86,7 @@ async function createNewAnnouncementService({
   }
 }
 
-async function deleteAnnouncementService(
-  id: Types.ObjectId
-): DatabaseResponseNullable<AnnouncementSchema> {
+async function deleteAnnouncementService(id: string): DatabaseResponseNullable<AnnouncementSchema> {
   try {
     const result = await AnnouncementModel.findByIdAndDelete(id).lean().exec();
     return result;
@@ -109,7 +107,7 @@ async function getAnnouncementsByUserService(
 }
 
 type UpdateAnnouncementServiceInput = {
-  announcementId: Types.ObjectId;
+  announcementId: string;
   userId: Types.ObjectId;
   title: string;
   username: string;
@@ -178,7 +176,7 @@ async function deleteAllAnnouncementsService(): Promise<DeleteResult> {
 }
 
 async function getAnnouncementByIdService(
-  announcementId: Types.ObjectId
+  announcementId: string
 ): DatabaseResponseNullable<AnnouncementSchema> {
   try {
     const announcement = await AnnouncementModel.findById(announcementId).lean().exec();

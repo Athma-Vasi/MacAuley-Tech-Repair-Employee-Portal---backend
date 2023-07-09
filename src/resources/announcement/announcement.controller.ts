@@ -23,6 +23,7 @@ import {
   updateAnnouncementService,
 } from './announcement.service';
 import { getUserByIdService } from '../user';
+import { AnnouncementSchema } from './announcement.model';
 
 // @desc   create new announcement
 // @route  POST /announcements
@@ -114,10 +115,7 @@ const getAnnouncementsByUserHandler = expressAsyncHandler(
 // @route  POST /announcements
 // @access Private
 const createNewAnnouncementHandler = expressAsyncHandler(
-  async (
-    request: CreateNewAnnouncementRequest,
-    response: Response<AnnouncementsServerResponse>
-  ) => {
+  async (request: CreateNewAnnouncementRequest, response) => {
     const {
       userInfo: { userId, username },
       title,
@@ -138,7 +136,7 @@ const createNewAnnouncementHandler = expressAsyncHandler(
     }
 
     // create new announcement if all checks pass successfully
-    const newAnnouncementObject = {
+    const newAnnouncementObject: AnnouncementSchema = {
       userId,
       username,
       title,
