@@ -33,7 +33,7 @@ async function createNewLeaveRequestService(
 }
 
 async function getLeaveRequestByIdService(
-  leaveRequestId: Types.ObjectId
+  leaveRequestId: string
 ): DatabaseResponseNullable<LeaveRequestDocument> {
   try {
     const leaveRequest = await LeaveRequestModel.findById(leaveRequestId).lean().exec();
@@ -43,7 +43,7 @@ async function getLeaveRequestByIdService(
   }
 }
 
-async function deleteALeaveRequestService(leaveRequestId: Types.ObjectId): Promise<DeleteResult> {
+async function deleteALeaveRequestService(leaveRequestId: string): Promise<DeleteResult> {
   try {
     const leaveRequest = await LeaveRequestModel.deleteOne({ _id: leaveRequestId }).lean().exec();
     return leaveRequest;

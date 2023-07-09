@@ -85,7 +85,7 @@ const deleteALeaveRequestHandler = expressAsyncHandler(
     const {
       userInfo: { roles, userId, username },
     } = request.body;
-    const leaveRequestId = request.params.leaveRequestId as Types.ObjectId;
+    const leaveRequestId = request.params.leaveRequestId;
 
     // check if user has permission
     if (roles.includes('Employee')) {
@@ -155,7 +155,7 @@ const getLeaveRequestByIdHandler = expressAsyncHandler(
     const {
       userInfo: { roles, userId, username },
     } = request.body;
-    const leaveRequestId = request.params.leaveRequestId as Types.ObjectId;
+    const leaveRequestId = request.params.leaveRequestId;
 
     // check if user has permission
     if (roles.includes('Employee')) {

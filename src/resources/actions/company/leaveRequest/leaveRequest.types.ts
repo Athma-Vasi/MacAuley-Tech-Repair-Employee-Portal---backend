@@ -26,7 +26,7 @@ interface CreateNewLeaveRequestRequest extends RequestAfterJWTVerification {
 
 interface DeleteALeaveRequestRequest extends RequestAfterJWTVerification {
   params: {
-    leaveRequestId: Types.ObjectId;
+    leaveRequestId: string;
   };
 }
 
@@ -44,7 +44,7 @@ interface GetLeaveRequestByIdRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
   };
-  params: { leaveRequestId: Types.ObjectId };
+  params: { leaveRequestId: string };
 }
 
 type LeaveRequestServerResponse = {
