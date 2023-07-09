@@ -35,9 +35,7 @@ async function createNewRequestResourceService(
   }
 }
 
-async function deleteARequestResourceService(
-  requestResourceId: Types.ObjectId
-): Promise<DeleteResult> {
+async function deleteARequestResourceService(requestResourceId: string): Promise<DeleteResult> {
   try {
     const deleteResult = await RequestResourceModel.deleteOne({ _id: requestResourceId })
       .lean()
@@ -67,7 +65,7 @@ async function getAllRequestResourcesService(): DatabaseResponse<RequestResource
 }
 
 async function getRequestResourceByIdService(
-  requestResourceId: Types.ObjectId
+  requestResourceId: string
 ): DatabaseResponseNullable<RequestResourceSchema> {
   try {
     const resourceRequest = await RequestResourceModel.findById(requestResourceId).lean().exec();

@@ -94,7 +94,7 @@ const deleteARequestResourceHandler = expressAsyncHandler(
       return;
     }
 
-    const requestResourceId = request.params.requestResourceId as Types.ObjectId;
+    const requestResourceId = request.params.requestResourceId;
 
     // delete resourceRequest
     const deletedResult = await deleteARequestResourceService(requestResourceId);
@@ -207,7 +207,7 @@ const getRequestResourceByIdHandler = expressAsyncHandler(
       return;
     }
 
-    const requestResourceId = request.params.requestResourceId as Types.ObjectId;
+    const requestResourceId = request.params.requestResourceId;
 
     // get resourceRequest
     const resourceRequest = await getRequestResourceByIdService(requestResourceId);

@@ -1,7 +1,11 @@
 import type { Request } from 'express';
 import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
-import type { RequestResourceKind, RequestResourceDocument } from './requestResource.model';
+import type {
+  RequestResourceKind,
+  RequestResourceDocument,
+  RequestResourceSchema,
+} from './requestResource.model';
 import type { Urgency } from '../../general/printerIssue';
 import type { Department, UserRoles } from '../../../user';
 
@@ -28,7 +32,7 @@ interface CreateNewRequestResourceRequest extends RequestAfterJWTVerification {
 
 interface DeleteARequestResourceRequest extends RequestAfterJWTVerification {
   params: {
-    requestResourceId: Types.ObjectId;
+    requestResourceId: string;
   };
 }
 
@@ -38,7 +42,7 @@ type GetAllRequestResourcesRequest = RequestAfterJWTVerification;
 
 interface GetRequestResourceByIdRequest extends RequestAfterJWTVerification {
   params: {
-    requestResourceId: Types.ObjectId;
+    requestResourceId: string;
   };
 }
 
@@ -47,4 +51,14 @@ type GetRequestResourcesByUserRequest = RequestAfterJWTVerification;
 type RequestResourcesServerResponse = {
   message: string;
   requestResourceData: Array<RequestResourceSchema>;
+};
+
+export type {
+  CreateNewRequestResourceRequest,
+  DeleteARequestResourceRequest,
+  DeleteAllRequestResourcesRequest,
+  GetAllRequestResourcesRequest,
+  GetRequestResourceByIdRequest,
+  GetRequestResourcesByUserRequest,
+  RequestResourcesServerResponse,
 };
