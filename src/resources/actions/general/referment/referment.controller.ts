@@ -46,6 +46,8 @@ const createNewRefermentHandler = expressAsyncHandler(
     const newReferment = await createNewRefermentService({
       referrerUserId: userId,
       referrerUsername: username,
+      action: 'general',
+      category: 'referment',
 
       candidateFullName,
       candidateEmail,

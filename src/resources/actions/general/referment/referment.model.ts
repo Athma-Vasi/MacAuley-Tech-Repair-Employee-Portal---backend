@@ -1,9 +1,13 @@
 import { Schema, model, Types } from 'mongoose';
 import { JobPosition, PhoneNumber } from '../../../user';
+import { Action } from '../../../actions';
+import { ActionsGeneral } from '../../general';
 
 type RefermentSchema = {
   referrerUserId: Types.ObjectId;
   referrerUsername: string;
+  action: Action;
+  category: ActionsGeneral;
 
   candidateFullName: string;
   candidateEmail: string;
@@ -36,6 +40,18 @@ const refermentSchema = new Schema<RefermentSchema>({
   referrerUsername: {
     type: String,
     required: [true, 'ReferrerUsername is required'],
+    index: true,
+  },
+  action: {
+    type: String,
+    required: [true, 'Action is required'],
+    enum: ['company', 'general', 'outreach'],
+    index: true,
+  },
+  category: {
+    type: String,
+    required: [true, 'Category is required'],
+    enum: ['endorsement', 'printer issue', 'anonymous request', 'referment'],
     index: true,
   },
   candidateFullName: {

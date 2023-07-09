@@ -32,7 +32,7 @@ async function createNewFileUploadService(
   }
 }
 
-async function getFileUploadByIdService(fileUploadId: string) {
+async function getFileUploadByIdService(fileUploadId: Types.ObjectId | string) {
   try {
     const fileUpload = await FileUploadModel.findById(fileUploadId).lean().exec();
     return fileUpload;
@@ -65,7 +65,9 @@ async function insertAssociatedResourceDocumentIdService(
   }
 }
 
-async function deleteFileUploadByIdService(fileUploadId: string): Promise<DeleteResult> {
+async function deleteFileUploadByIdService(
+  fileUploadId: string | Types.ObjectId
+): Promise<DeleteResult> {
   try {
     const deleteResult = await FileUploadModel.deleteOne({ _id: fileUploadId }).exec();
     return deleteResult;

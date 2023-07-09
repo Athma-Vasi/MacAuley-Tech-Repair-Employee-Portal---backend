@@ -1,7 +1,7 @@
 import type { FlattenMaps, Types } from 'mongoose';
 import type { DeleteResult } from 'mongodb';
 
-import { RefermentDocument, RefermentModel } from './referment.model';
+import { RefermentDocument, RefermentModel, RefermentSchema } from './referment.model';
 import { DatabaseResponse, DatabaseResponseNullable } from '../../../../types';
 import { JobPosition, PhoneNumber } from '../../../user';
 
@@ -37,23 +37,7 @@ async function checkRefermentExistsService({
   }
 }
 
-type CreateNewRefermentServiceInput = {
-  referrerUserId: Types.ObjectId;
-  referrerUsername: string;
-
-  candidateFullName: string;
-  candidateEmail: string;
-  candidateContactNumber: PhoneNumber;
-  candidateCurrentJobTitle: string;
-  candidateCurrentCompany: string;
-  candidateProfileUrl: string;
-
-  positionReferredFor: JobPosition;
-  positionJobDescription: string;
-  referralReason: string;
-  additionalInformation: string;
-  privacyConsent: boolean;
-};
+type CreateNewRefermentServiceInput = RefermentSchema;
 
 async function createNewRefermentService(input: CreateNewRefermentServiceInput) {
   try {
