@@ -66,7 +66,7 @@ const createNewNoteHandler = expressAsyncHandler(
 // @access Private
 const deleteNoteHandler = expressAsyncHandler(
   async (request: DeleteNoteRequest, response: Response) => {
-    const { noteId } = request.body;
+    const { noteId } = request.params;
 
     // confirm that id is not empty
     if (!noteId) {

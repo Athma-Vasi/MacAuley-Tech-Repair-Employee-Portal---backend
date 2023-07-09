@@ -130,7 +130,7 @@ async function deleteUserService(userId: Types.ObjectId): Promise<DeleteResult> 
   }
 }
 
-async function getUserByIdService(userId: Types.ObjectId) {
+async function getUserByIdService(userId: string | Types.ObjectId) {
   try {
     const user = await UserModel.findById(userId).select('-password').lean().exec();
     return user as unknown as Promise<UserDatabaseResponse> | null;

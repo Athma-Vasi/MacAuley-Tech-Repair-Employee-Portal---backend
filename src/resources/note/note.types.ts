@@ -1,6 +1,6 @@
 import type { Request } from 'express';
 import type { Types } from 'mongoose';
-import type { RequestAfterJWTVerification } from './auth';
+import type { RequestAfterJWTVerification } from '../auth';
 import { UserRoles } from '../user';
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
@@ -19,8 +19,8 @@ interface CreateNewNoteRequest extends RequestAfterJWTVerification {
 }
 
 interface DeleteNoteRequest extends RequestAfterJWTVerification {
-  body: {
-    noteId: Types.ObjectId;
+  params: {
+    noteId: string;
   };
 }
 
@@ -28,7 +28,7 @@ type GetAllNotesRequest = RequestAfterJWTVerification;
 
 interface GetNotesFromUserIdRequest extends RequestAfterJWTVerification {
   params: {
-    userId: Types.ObjectId;
+    userId: string;
   };
 }
 interface UpdateNoteRequest extends RequestAfterJWTVerification {
@@ -39,7 +39,7 @@ interface UpdateNoteRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     // below are the fields required to be sent with post request
-    noteId: Types.ObjectId;
+    noteId: string;
     // user: Types.ObjectId;
     title: string;
     text: string;

@@ -4,7 +4,7 @@ import type { NoteSchema } from './note.model';
 import { NoteModel } from './note.model';
 
 type CheckNoteExistsServiceInput = {
-  noteId?: Types.ObjectId;
+  noteId?: string;
   title?: string;
 };
 
@@ -55,7 +55,7 @@ async function createNewNoteService({ userId, title, text }: CreateNewNoteServic
   }
 }
 
-async function deleteNoteService(id: Types.ObjectId): Promise<
+async function deleteNoteService(id: string): Promise<
   | (FlattenMaps<NoteSchema> & {
       _id: Types.ObjectId;
     })
@@ -69,7 +69,7 @@ async function deleteNoteService(id: Types.ObjectId): Promise<
   }
 }
 
-async function getNotesByUserService(user: Types.ObjectId): Promise<
+async function getNotesByUserService(user: string): Promise<
   (FlattenMaps<NoteSchema> & {
     _id: Types.ObjectId;
   })[]
@@ -96,7 +96,7 @@ async function getAllNotesService(): Promise<
 }
 
 type UpdateNoteServiceInput = {
-  noteId: Types.ObjectId;
+  noteId: string;
   userId: Types.ObjectId;
   title: string;
   text: string;
