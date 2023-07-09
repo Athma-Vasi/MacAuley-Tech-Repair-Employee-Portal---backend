@@ -1,4 +1,6 @@
 import type { FlattenMaps } from 'mongoose';
+import { Types } from 'mongoose';
+import { FileExtension } from '../resources/fileUpload';
 
 /**
  * these types are used in the database service functions for all resources
