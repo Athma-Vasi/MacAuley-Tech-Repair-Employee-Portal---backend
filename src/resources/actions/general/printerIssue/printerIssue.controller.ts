@@ -1,5 +1,6 @@
 import expressAsyncHandler from 'express-async-handler';
 
+import type { DeleteResult } from 'mongodb';
 import type { Response } from 'express';
 import type {
   GetAllPrinterIssuesRequest,
@@ -20,7 +21,6 @@ import {
   getPrinterIssuesFromUserService,
   updatePrinterIssueService,
 } from './printerIssue.service';
-import { getUserByIdService } from '../../../user';
 import { PrinterIssueSchema } from './printerIssue.model';
 
 // @desc   Create new printer issue
@@ -122,9 +122,9 @@ const deletePrinterIssueHandler = expressAsyncHandler(
     }
 
     const { printerIssueId } = request.params;
-    const printerIssue = await deletePrinterIssueService(printerIssueId);
+    const printerIssue: DeleteResult = await deletePrinterIssueService(printerIssueId);
 
-    if (printerIssue) {
+    if (printerIssue.deletedCount === 1) {
       response
         .status(200)
         .json({ message: 'Printer issue deleted successfully', printerIssueData: [printerIssue] });
@@ -142,7 +142,7 @@ const deletePrinterIssueHandler = expressAsyncHandler(
 const getAPrinterIssueHandler = expressAsyncHandler(
   async (request: GetAPrinterIssueRequest, response: Response) => {
     const {
-      userInfo: { roles, userId },
+      userInfo: { roles },
     } = request.body;
 
     // only managers/admins can view a printer issue not belonging to them
@@ -194,7 +194,7 @@ const getPrinterIssuesByUserHandler = expressAsyncHandler(
 const deleteAllPrinterIssuesHandler = expressAsyncHandler(
   async (request: DeleteAllPrinterIssuesRequest, response: Response) => {
     const {
-      userInfo: { roles, userId },
+      userInfo: { roles },
     } = request.body;
 
     // only managers/admin can delete all printer issues
@@ -206,9 +206,9 @@ const deleteAllPrinterIssuesHandler = expressAsyncHandler(
       return;
     }
 
-    const deletedResult = await deleteAllPrinterIssuesService();
+    const deletedResult: DeleteResult = await deleteAllPrinterIssuesService();
 
-    if (deletedResult.acknowledged) {
+    if (deletedResult.deletedCount > 0) {
       response.status(200).json({
         message: 'All printer issues deleted successfully',
         printerIssueData: [],

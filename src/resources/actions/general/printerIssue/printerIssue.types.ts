@@ -46,13 +46,13 @@ interface UpdatePrinterIssueRequest extends RequestAfterJWTVerification {
     additionalInformation: string;
   };
   params: {
-    printerIssueId: Types.ObjectId;
+    printerIssueId: string;
   };
 }
 
 interface DeletePrinterIssueRequest extends RequestAfterJWTVerification {
   params: {
-    printerIssueId: Types.ObjectId;
+    printerIssueId: string;
   };
 }
 
@@ -62,7 +62,7 @@ type GetAllPrinterIssuesRequest = RequestAfterJWTVerification;
 
 interface GetAPrinterIssueRequest extends RequestAfterJWTVerification {
   params: {
-    printerIssueId: Types.ObjectId;
+    printerIssueId: string;
   };
 }
 

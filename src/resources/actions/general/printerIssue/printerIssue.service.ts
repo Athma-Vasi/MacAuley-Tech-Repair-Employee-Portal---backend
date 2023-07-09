@@ -1,31 +1,13 @@
 import type { FlattenMaps, Types } from 'mongoose';
 import type { DeleteResult } from 'mongodb';
-import type { PrinterIssueDocument, Urgency } from './printerIssue.model';
-import type { ActionsGeneral } from '../actionsGeneral.types';
-import type { Action } from '../..';
+import type { PrinterIssueDocument, PrinterIssueSchema } from './printerIssue.model';
 
 import { PrinterIssueModel } from './printerIssue.model';
-import { PhoneNumber } from '../../../user';
+import { DatabaseResponse, DatabaseResponseNullable } from '../../../../types';
 
-type CreateNewPrinterIssueInput = {
-  userId: Types.ObjectId;
-  username: string;
-  action: Action;
-  category: ActionsGeneral;
-  title: string;
-  contactNumber: PhoneNumber;
-  contactEmail: string;
-  dateOfOccurrence: string;
-  timeOfOccurrence: string;
-  printerMake: string;
-  printerModel: string;
-  printerSerialNumber: string;
-  printerIssueDescription: string;
-  urgency: Urgency;
-  additionalInformation: string;
-};
-
-async function createNewPrinterIssueService(input: CreateNewPrinterIssueInput) {
+async function createNewPrinterIssueService(
+  input: PrinterIssueSchema
+): Promise<PrinterIssueDocument> {
   try {
     const newPrinterIssue = await PrinterIssueModel.create(input);
     return newPrinterIssue;
@@ -34,17 +16,13 @@ async function createNewPrinterIssueService(input: CreateNewPrinterIssueInput) {
   }
 }
 
-type UpdatePrinterIssueInput = CreateNewPrinterIssueInput & {
-  printerIssueId: Types.ObjectId;
+type UpdatePrinterIssueInput = PrinterIssueSchema & {
+  printerIssueId: string;
 };
 
-async function updatePrinterIssueService(input: UpdatePrinterIssueInput): Promise<
-  | (FlattenMaps<PrinterIssueDocument> &
-      Required<{
-        _id: Types.ObjectId;
-      }>)
-  | null
-> {
+async function updatePrinterIssueService(
+  input: UpdatePrinterIssueInput
+): DatabaseResponseNullable<PrinterIssueDocument> {
   try {
     const updatedPrinterIssue = await PrinterIssueModel.findByIdAndUpdate(
       input.printerIssueId,
@@ -59,12 +37,7 @@ async function updatePrinterIssueService(input: UpdatePrinterIssueInput): Promis
   }
 }
 
-async function getAllPrinterIssuesService(): Promise<
-  (FlattenMaps<PrinterIssueDocument> &
-    Required<{
-      _id: Types.ObjectId;
-    }>)[]
-> {
+async function getAllPrinterIssuesService(): DatabaseResponse<PrinterIssueDocument> {
   try {
     const allPrinterIssues = await PrinterIssueModel.find({}).lean().exec();
     return allPrinterIssues;
@@ -73,28 +46,18 @@ async function getAllPrinterIssuesService(): Promise<
   }
 }
 
-async function deletePrinterIssueService(id: Types.ObjectId): Promise<
-  | (FlattenMaps<PrinterIssueDocument> &
-      Required<{
-        _id: Types.ObjectId;
-      }>)
-  | null
-> {
+async function deletePrinterIssueService(id: Types.ObjectId | string): Promise<DeleteResult> {
   try {
-    const deletedPrinterIssue = await PrinterIssueModel.findByIdAndDelete(id).lean().exec();
+    const deletedPrinterIssue = await PrinterIssueModel.deleteOne({ id }).lean().exec();
     return deletedPrinterIssue;
   } catch (error: any) {
     throw new Error(error, { cause: 'deletePrinterIssueService' });
   }
 }
 
-async function getAPrinterIssueService(id: Types.ObjectId): Promise<
-  | (FlattenMaps<PrinterIssueDocument> &
-      Required<{
-        _id: Types.ObjectId;
-      }>)
-  | null
-> {
+async function getAPrinterIssueService(
+  id: Types.ObjectId | string
+): DatabaseResponseNullable<PrinterIssueDocument> {
   try {
     const printerIssue = await PrinterIssueModel.findById(id).lean().exec();
     return printerIssue;
@@ -103,12 +66,9 @@ async function getAPrinterIssueService(id: Types.ObjectId): Promise<
   }
 }
 
-async function getPrinterIssuesFromUserService(userId: Types.ObjectId): Promise<
-  (FlattenMaps<PrinterIssueDocument> &
-    Required<{
-      _id: Types.ObjectId;
-    }>)[]
-> {
+async function getPrinterIssuesFromUserService(
+  userId: Types.ObjectId
+): DatabaseResponse<PrinterIssueDocument> {
   try {
     const printerIssues = await PrinterIssueModel.find({ userId }).lean().exec();
     return printerIssues;
