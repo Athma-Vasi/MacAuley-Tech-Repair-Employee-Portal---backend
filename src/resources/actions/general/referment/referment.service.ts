@@ -6,9 +6,9 @@ import { DatabaseResponse, DatabaseResponseNullable } from '../../../../types';
 import { JobPosition, PhoneNumber } from '../../../user';
 
 type CheckRefermentExistsServiceInput = {
-  refermentId?: Types.ObjectId;
+  refermentId?: Types.ObjectId | string;
   title?: string;
-  userId?: Types.ObjectId;
+  userId?: Types.ObjectId | string;
 };
 
 async function checkRefermentExistsService({
@@ -37,9 +37,7 @@ async function checkRefermentExistsService({
   }
 }
 
-type CreateNewRefermentServiceInput = RefermentSchema;
-
-async function createNewRefermentService(input: CreateNewRefermentServiceInput) {
+async function createNewRefermentService(input: RefermentSchema) {
   try {
     const newReferment = await RefermentModel.create(input);
     return newReferment;
@@ -48,11 +46,13 @@ async function createNewRefermentService(input: CreateNewRefermentServiceInput) 
   }
 }
 
-async function deleteARefermentService(
-  refermentId: Types.ObjectId
-): DatabaseResponseNullable<RefermentDocument> {
+async function deleteARefermentService(refermentId: string): Promise<DeleteResult> {
   try {
-    const deleteResult = await RefermentModel.findByIdAndDelete(refermentId).lean().exec();
+    const deleteResult = await RefermentModel.deleteOne({
+      _id: refermentId,
+    })
+      .lean()
+      .exec();
     return deleteResult;
   } catch (error: any) {
     throw new Error(error, { cause: 'deleteARefermentService' });
@@ -78,7 +78,7 @@ async function getAllRefermentsService(): DatabaseResponse<RefermentDocument> {
 }
 
 async function getARefermentService(
-  refermentId: Types.ObjectId
+  refermentId: string
 ): DatabaseResponseNullable<RefermentDocument> {
   try {
     const referment = await RefermentModel.findById(refermentId).lean().exec();
@@ -100,7 +100,7 @@ async function getRefermentsByUserService(
 }
 
 type UpdateRefermentServiceInput = {
-  refermentId: Types.ObjectId;
+  refermentId: string;
   referrerUserId: Types.ObjectId;
   referrerUsername: string;
 

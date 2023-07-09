@@ -1,5 +1,5 @@
 import type { Types } from 'mongoose';
-import type { RequestAfterJWTVerification } from '../auth';
+import type { RequestAfterJWTVerification } from '../../../auth';
 import type { UserRoles, JobPosition, PhoneNumber } from '../../../user';
 import type { RefermentDocument } from './referment.model';
 
@@ -36,7 +36,7 @@ interface DeleteARefermentRequest extends RequestAfterJWTVerification {
     };
   };
   params: {
-    refermentId: Types.ObjectId;
+    refermentId: string;
   };
 }
 
@@ -53,7 +53,7 @@ interface GetARefermentRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    refermentId: Types.ObjectId;
+    refermentId: string;
   };
 }
 
@@ -78,7 +78,7 @@ interface UpdateARefermentRequest extends RequestAfterJWTVerification {
     privacyConsent: boolean;
   };
   params: {
-    refermentId: Types.ObjectId;
+    refermentId: string;
   };
 }
 
