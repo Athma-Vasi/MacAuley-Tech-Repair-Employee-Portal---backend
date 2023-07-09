@@ -1,27 +1,13 @@
-import type { FlattenMaps, Types } from 'mongoose';
+import type { Types } from 'mongoose';
 import type { DeleteResult } from 'mongodb';
-import type { EmployeeAttributes, EndorsementDocument } from './endorsement.model';
-import type { ActionsGeneral } from '../../general';
+import type { EndorsementDocument, EndorsementSchema } from './endorsement.model';
 
 import { EndorsementModel } from './endorsement.model';
 import { DatabaseResponse, DatabaseResponseNullable } from '../../../../types';
-import { Action } from '../..';
 
-type CreateNewEndorsementInput = {
-  userId: Types.ObjectId;
-  username: string;
-  action: Action;
-  category: ActionsGeneral;
-  title: string;
-  userToBeEndorsed: string;
-  summaryOfEndorsement: string;
-  attributeEndorsed: EmployeeAttributes;
-};
-
-async function createNewEndorsementService(input: CreateNewEndorsementInput) {
+async function createNewEndorsementService(input: EndorsementSchema): Promise<EndorsementDocument> {
   try {
     const newEndorsement = await EndorsementModel.create(input);
-
     return newEndorsement;
   } catch (error: any) {
     throw new Error(error, { cause: 'createNewEndorsementService' });
@@ -29,11 +15,10 @@ async function createNewEndorsementService(input: CreateNewEndorsementInput) {
 }
 
 async function deleteEndorsementService(
-  id: Types.ObjectId
+  id: Types.ObjectId | string
 ): DatabaseResponseNullable<EndorsementDocument> {
   try {
     const deletedEndorsement = await EndorsementModel.findByIdAndDelete(id).lean().exec();
-
     return deletedEndorsement;
   } catch (error: any) {
     throw new Error(error, { cause: 'deleteEndorsementService' });
@@ -43,7 +28,6 @@ async function deleteEndorsementService(
 async function getAllEndorsementsService(): DatabaseResponse<EndorsementDocument> {
   try {
     const allEndorsements = await EndorsementModel.find({}).lean().exec();
-
     return allEndorsements;
   } catch (error: any) {
     throw new Error(error, { cause: 'getAllEndorsementsService' });
@@ -51,7 +35,7 @@ async function getAllEndorsementsService(): DatabaseResponse<EndorsementDocument
 }
 
 async function getAnEndorsementService(
-  id: Types.ObjectId
+  id: Types.ObjectId | string
 ): DatabaseResponseNullable<EndorsementDocument> {
   try {
     const endorsement = await EndorsementModel.findById({ _id: id }).lean().exec();
@@ -62,7 +46,7 @@ async function getAnEndorsementService(
 }
 
 async function getEndorsementsByUserService(
-  userId: Types.ObjectId
+  userId: Types.ObjectId | string
 ): DatabaseResponse<EndorsementDocument> {
   try {
     const endorsements = await EndorsementModel.find({ userId }).lean().exec();
@@ -81,10 +65,9 @@ async function deleteAllEndorsementsService(): Promise<DeleteResult> {
   }
 }
 
-type UpdateAnEndorsementInput = CreateNewEndorsementInput & {
-  endorsementId: Types.ObjectId;
+type UpdateAnEndorsementInput = EndorsementSchema & {
+  endorsementId: string;
 };
-
 async function updateAnEndorsementService(
   input: UpdateAnEndorsementInput
 ): DatabaseResponseNullable<EndorsementDocument> {

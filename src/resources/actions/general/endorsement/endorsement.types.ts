@@ -1,7 +1,7 @@
-import type { Request } from 'express';
 import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
 import type { EmployeeAttributes, EndorsementDocument } from './endorsement.model';
+import type { UserRoles } from '../../../user';
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 interface CreateNewEndorsementRequest extends RequestAfterJWTVerification {
@@ -9,7 +9,7 @@ interface CreateNewEndorsementRequest extends RequestAfterJWTVerification {
     userInfo: {
       userId: Types.ObjectId;
       username: string;
-      roles: string[];
+      roles: UserRoles;
     };
     // below are the fields required to be sent with post request
     title: string;
@@ -24,7 +24,7 @@ interface UpdateAnEndorsementRequest extends RequestAfterJWTVerification {
     userInfo: {
       userId: Types.ObjectId;
       username: string;
-      roles: string[];
+      roles: UserRoles;
     };
     title: string;
     userToBeEndorsed: string;
@@ -32,13 +32,13 @@ interface UpdateAnEndorsementRequest extends RequestAfterJWTVerification {
     attributeEndorsed: EmployeeAttributes;
   };
   params: {
-    endorsementId: Types.ObjectId;
+    endorsementId: string;
   };
 }
 
 interface DeleteEndorsementRequest extends RequestAfterJWTVerification {
   params: {
-    endorsementId: Types.ObjectId;
+    endorsementId: string;
   };
 }
 
@@ -48,7 +48,7 @@ type GetAllEndorsementsRequest = RequestAfterJWTVerification;
 
 interface GetAnEndorsementRequest extends RequestAfterJWTVerification {
   params: {
-    endorsementId: Types.ObjectId;
+    endorsementId: string;
   };
 }
 
