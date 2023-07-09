@@ -1,4 +1,6 @@
 import { Schema, model, Types } from 'mongoose';
+import type { Action } from '../../../actions';
+import type { ActionsOutreach } from '../../outreach';
 
 type RatingFeel = 'estatic' | 'happy' | 'neutral' | 'sad' | 'devastated' | '';
 
@@ -6,8 +8,11 @@ type ArticleSections = 'title' | 'body';
 
 type AnnouncementSchema = {
   userId: Types.ObjectId;
-  title: string;
   username: string;
+  action: Action;
+  category: ActionsOutreach;
+
+  title: string;
   imageSrc: string;
   imageAlt: string;
   article: Record<ArticleSections, string[]>;
@@ -33,13 +38,24 @@ const announcementSchema = new Schema<AnnouncementSchema>(
       ref: 'User', // referring to the User model
       index: true,
     },
-    title: {
-      type: String,
-      required: [true, 'Title is required'],
-    },
     username: {
       type: String,
       required: [true, 'Username is required'],
+    },
+    action: {
+      type: String,
+      required: [true, 'Action is required'],
+      index: true,
+    },
+    category: {
+      type: String,
+      required: [true, 'Category is required'],
+      index: true,
+    },
+
+    title: {
+      type: String,
+      required: [true, 'Title is required'],
     },
     imageSrc: {
       type: String,

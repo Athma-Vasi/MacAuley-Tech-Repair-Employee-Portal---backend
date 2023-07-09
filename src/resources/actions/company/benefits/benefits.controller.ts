@@ -1,5 +1,5 @@
 import expressAsyncHandler from 'express-async-handler';
-import { Types } from 'mongoose';
+import type { DeleteResult } from 'mongodb';
 
 import type { Response } from 'express';
 import type {
@@ -19,6 +19,7 @@ import {
   getBenefitByIdService,
   getBenefitsByUserService,
 } from './benefits.service';
+import { BenefitsSchema } from './benefits.model';
 
 // @desc   Create a new benefits plan
 // @route  POST /benefits
@@ -41,9 +42,12 @@ const createNewBenefitsHandler = expressAsyncHandler(
     } = request.body;
 
     // create new benefits plan object
-    const newBenefitsObject = {
+    const newBenefitsObject: BenefitsSchema = {
       userId,
       username,
+      action: 'company',
+      category: 'benefits',
+
       planName,
       planDescription,
       planKind,
@@ -77,7 +81,7 @@ const deleteABenefitHandler = expressAsyncHandler(
     const { benefitsId } = request.params;
 
     // delete a benefits plan
-    const deleteBenefitResult = await deleteABenefitService(benefitsId);
+    const deleteBenefitResult: DeleteResult = await deleteABenefitService(benefitsId);
     if (deleteBenefitResult.deletedCount === 1) {
       response.status(200).json({ message: 'Benefits plan deleted', benefitsData: [] });
     } else {
@@ -94,8 +98,8 @@ const deleteAllBenefitsByUserHandler = expressAsyncHandler(
     const userId = request.body.userInfo.userId;
 
     // delete all benefits plans for a user
-    const deleteAllBenefitsResult = await deleteAllBenefitsByUserService(userId);
-    if (deleteAllBenefitsResult.deletedCount >= 1) {
+    const deleteAllBenefitsResult: DeleteResult = await deleteAllBenefitsByUserService(userId);
+    if (deleteAllBenefitsResult.deletedCount > 0) {
       response
         .status(200)
         .json({ message: 'All benefits plans for this user deleted', benefitsData: [] });

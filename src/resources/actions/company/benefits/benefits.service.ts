@@ -1,33 +1,12 @@
 import { Types } from 'mongoose';
 
 import type { DeleteResult } from 'mongodb';
-import type {
-  BenefitsDocument,
-  BenefitsPlanKind,
-  BenefitsSchema,
-  Currency,
-} from './benefits.model';
+import type { BenefitsDocument, BenefitsSchema } from './benefits.model';
 
 import { BenefitsModel } from './benefits.model';
-import { DatabaseResponse, DatabaseResponseNullable } from '../../types';
+import { DatabaseResponse, DatabaseResponseNullable } from '../../../../types';
 
-type CreateNewBenefitServiceInput = {
-  userId: Types.ObjectId;
-  username: string;
-  planName: string;
-  planDescription: string;
-  planKind: BenefitsPlanKind;
-  planStartDate: string;
-  isPlanActive: boolean;
-  currency: Currency;
-  monthlyPremium: number;
-  employerContribution: number;
-  employeeContribution: number;
-};
-
-async function createNewBenefitService(
-  newBenefitObj: CreateNewBenefitServiceInput
-): Promise<BenefitsDocument> {
+async function createNewBenefitService(newBenefitObj: BenefitsSchema): Promise<BenefitsDocument> {
   try {
     const newBenefits = await BenefitsModel.create(newBenefitObj);
     return newBenefits;

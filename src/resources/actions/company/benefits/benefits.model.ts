@@ -1,4 +1,6 @@
 import { Schema, Types, model } from 'mongoose';
+import type { Action } from '../../../actions';
+import type { ActionsCompany } from '../../company';
 
 type BenefitsPlanKind =
   | 'Health'
@@ -15,6 +17,9 @@ type Currency = 'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD' | 'JPY' | 'CNY';
 type BenefitsSchema = {
   userId: Types.ObjectId;
   username: string;
+  action: Action;
+  category: ActionsCompany;
+
   planName: string;
   planDescription: string;
   planKind: BenefitsPlanKind;
@@ -46,6 +51,17 @@ const benefitsSchema = new Schema<BenefitsSchema>(
       required: [true, 'Username is required'],
       index: true,
     },
+    action: {
+      type: String,
+      required: [true, 'Action is required'],
+      index: true,
+    },
+    category: {
+      type: String,
+      required: [true, 'Category is required'],
+      index: true,
+    },
+
     planName: {
       type: String,
       required: [true, 'Plan name is required'],

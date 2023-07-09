@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { verifyJWTMiddleware } from '../../middlewares';
+import { verifyJWTMiddleware } from '../../../../middlewares';
 import {
   createNewAnnouncementHandler,
   deleteAnnouncementHandler,

@@ -1,5 +1,6 @@
 import expressAsyncHandler from 'express-async-handler';
 
+import type { DeleteResult } from 'mongodb';
 import type { Response } from 'express';
 import type {
   CreateNewAnnouncementRequest,
@@ -22,7 +23,6 @@ import {
   getAnnouncementsByUserService,
   updateAnnouncementService,
 } from './announcement.service';
-import { getUserByIdService } from '../user';
 import { AnnouncementSchema } from './announcement.model';
 
 // @desc   create new announcement
@@ -139,6 +139,8 @@ const createNewAnnouncementHandler = expressAsyncHandler(
     const newAnnouncementObject: AnnouncementSchema = {
       userId,
       username,
+      action: 'outreach',
+      category: 'announcement',
       title,
       article,
       imageAlt,
@@ -248,8 +250,8 @@ const deleteAnnouncementHandler = expressAsyncHandler(
     }
 
     // delete announcement if all checks pass successfully
-    const deletedAnnouncement = await deleteAnnouncementService(announcementId);
-    if (deletedAnnouncement) {
+    const deletedAnnouncement: DeleteResult = await deleteAnnouncementService(announcementId);
+    if (deletedAnnouncement.deletedCount === 1) {
       response.status(201).json({
         message: 'Announcement deleted successfully',
         announcementData: [deletedAnnouncement],
@@ -281,8 +283,8 @@ const deleteAllAnnouncementsHandler = expressAsyncHandler(
     }
 
     // delete all announcements if all checks pass successfully
-    const deletedResult = await deleteAllAnnouncementsService();
-    if (deletedResult.acknowledged) {
+    const deletedResult: DeleteResult = await deleteAllAnnouncementsService();
+    if (deletedResult.deletedCount > 0) {
       response.status(200).json({
         message: 'All announcements deleted successfully',
         announcementData: [],

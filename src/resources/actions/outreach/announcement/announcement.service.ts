@@ -1,14 +1,14 @@
 import type { FlattenMaps, Types } from 'mongoose';
 import type { DeleteResult } from 'mongodb';
 import type { AnnouncementDocument, AnnouncementSchema, RatingFeel } from './announcement.model';
-import type { DatabaseResponse, DatabaseResponseNullable } from '../../types';
+import type { DatabaseResponse, DatabaseResponseNullable } from '../../../../types';
 
 import { AnnouncementModel } from './announcement.model';
 
 type CheckAnnouncementExistsServiceInput = {
-  announcementId?: string;
+  announcementId?: Types.ObjectId | string;
   title?: string;
-  userId?: Types.ObjectId;
+  userId?: Types.ObjectId | string;
 };
 
 async function checkAnnouncementExistsService({
@@ -42,53 +42,22 @@ async function checkAnnouncementExistsService({
   }
 }
 
-type CreateNewAnnouncementServiceInput = {
-  userId: Types.ObjectId;
-  title: string;
-  username: string;
-  imageSrc: string;
-  imageAlt: string;
-  article: Record<string, string[]>;
-  timeToRead: number;
-  rating: {
-    feel: RatingFeel;
-    count: number;
-  };
-};
-
-async function createNewAnnouncementService({
-  userId,
-  title,
-  username,
-  imageSrc,
-  imageAlt,
-  article,
-  timeToRead,
-  rating,
-}: CreateNewAnnouncementServiceInput) {
+async function createNewAnnouncementService(input: AnnouncementSchema) {
   try {
-    const newAnnouncementObject = {
-      userId,
-      title,
-      username,
-      imageSrc,
-      imageAlt,
-      article,
-      timeToRead,
-      rating,
-    };
-
-    const newAnnouncement = await AnnouncementModel.create(newAnnouncementObject);
-
+    const newAnnouncement = await AnnouncementModel.create(input);
     return newAnnouncement;
   } catch (error: any) {
     throw new Error(error, { cause: 'createNewAnnouncementService' });
   }
 }
 
-async function deleteAnnouncementService(id: string): DatabaseResponseNullable<AnnouncementSchema> {
+async function deleteAnnouncementService(id: Types.ObjectId | string): Promise<DeleteResult> {
   try {
-    const result = await AnnouncementModel.findByIdAndDelete(id).lean().exec();
+    const result = await AnnouncementModel.deleteOne({
+      _id: id,
+    })
+      .lean()
+      .exec();
     return result;
   } catch (error: any) {
     throw new Error(error, { cause: 'deleteAnnouncementService' });
@@ -96,7 +65,7 @@ async function deleteAnnouncementService(id: string): DatabaseResponseNullable<A
 }
 
 async function getAnnouncementsByUserService(
-  user: Types.ObjectId
+  user: Types.ObjectId | string
 ): DatabaseResponse<AnnouncementSchema> {
   try {
     const announcements = await AnnouncementModel.find({ user }).lean().exec();

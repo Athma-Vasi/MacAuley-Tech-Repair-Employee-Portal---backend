@@ -16,10 +16,8 @@ import { userRouter } from './resources/user';
 import { rootRouter } from './resources/root';
 import { notFoundRouter } from './resources/notFound404';
 import { authRouter } from './resources/auth';
-import { announcementRouter } from './resources/announcement';
 import { actionsRouter } from './resources/actions';
 import { fileUploadRouter } from './resources/fileUpload';
-import { benefitsRouter } from './resources/benefits';
 
 const app = express();
 
@@ -40,9 +38,7 @@ app.use('/', rootRouter);
 app.use('/auth', authRouter);
 app.use('/users', userRouter);
 app.use('/notes', noteRouter);
-app.use('/announcements', announcementRouter);
 app.use('/actions', actionsRouter);
-app.use('/benefits', benefitsRouter);
 app.use('/file-uploads', fileUploadRouter);
 
 app.all('*', notFoundRouter);
