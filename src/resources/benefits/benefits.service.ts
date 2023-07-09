@@ -36,7 +36,7 @@ async function createNewBenefitService(
   }
 }
 
-async function deleteABenefitService(benefitId: Types.ObjectId): Promise<DeleteResult> {
+async function deleteABenefitService(benefitId: string): Promise<DeleteResult> {
   try {
     const deleteResult = await BenefitsModel.deleteOne({ _id: benefitId }).lean().exec();
     return deleteResult;
@@ -75,7 +75,7 @@ async function getBenefitsByUserService(
 }
 
 async function getBenefitByIdService(
-  benefitId: Types.ObjectId
+  benefitId: string
 ): DatabaseResponseNullable<BenefitsDocument> {
   try {
     const benefit = await BenefitsModel.findById(benefitId).lean().exec();

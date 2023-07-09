@@ -91,7 +91,7 @@ const deleteABenefitHandler = expressAsyncHandler(
 // @access Private/Admin/Manager
 const deleteAllBenefitsByUserHandler = expressAsyncHandler(
   async (request: DeleteAllBenefitsByUserRequest, response: Response<BenefitsServerResponse>) => {
-    const userId = request.body.userInfo.userId as Types.ObjectId;
+    const userId = request.body.userInfo.userId;
 
     // delete all benefits plans for a user
     const deleteAllBenefitsResult = await deleteAllBenefitsByUserService(userId);
@@ -130,7 +130,7 @@ const getAllBenefitsHandler = expressAsyncHandler(
 // @access Private/Admin/Manager
 const getBenefitsByUserHandler = expressAsyncHandler(
   async (request: GetBenefitsByUserRequest, response: Response<BenefitsServerResponse>) => {
-    const userId = request.body.userInfo.userId as Types.ObjectId;
+    const userId = request.body.userInfo.userId;
 
     // get all benefits plans for a user
     const allBenefitPlans = await getBenefitsByUserService(userId);

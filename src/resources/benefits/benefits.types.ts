@@ -29,7 +29,7 @@ interface CreateNewBenefitsRequest extends RequestAfterJWTVerification {
 
 interface DeleteABenefitRequest extends RequestAfterJWTVerification {
   params: {
-    benefitsId: Types.ObjectId;
+    benefitsId: string;
   };
 }
 
@@ -47,7 +47,7 @@ interface GetBenefitsByIdRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
   };
-  params: { benefitsId: Types.ObjectId };
+  params: { benefitsId: string };
 }
 
 type BenefitsServerResponse = {
