@@ -23,11 +23,12 @@ type EventCreatorSchema = {
   category: ActionsOutreach;
 
   eventTitle: string;
-  eventDescription: string;
   eventKind: EventKind;
-  eventDate: NativeDate;
+  eventStartDate: NativeDate;
+  eventEndDate: NativeDate;
   eventStartTime: string;
   eventEndTime: string;
+  eventDescription: string;
   eventLocation: string;
   eventAttendees: string;
   requiredItems: string;
@@ -80,7 +81,7 @@ const eventCreatorSchema = new Schema<EventCreatorSchema>(
       type: String,
       required: [true, 'Event kind is required'],
     },
-    eventDate: {
+    eventStartDate: {
       type: Date,
       required: [true, 'Event date is required'],
     },

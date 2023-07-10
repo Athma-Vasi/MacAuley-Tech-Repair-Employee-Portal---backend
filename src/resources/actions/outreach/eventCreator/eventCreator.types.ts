@@ -17,7 +17,8 @@ interface CreateNewEventRequest extends RequestAfterJWTVerification {
       eventTitle: string;
       eventDescription: string;
       eventKind: EventKind;
-      eventDate: NativeDate;
+      eventStartDate: NativeDate;
+      eventEndDate: NativeDate;
       eventStartTime: string;
       eventEndTime: string;
       eventLocation: string;
@@ -62,8 +63,9 @@ interface UpdateAnEventByIdRequest extends RequestAfterJWTVerification {
       eventName: string;
       eventDescription: string;
       eventKind: EventKind;
-      eventDate: NativeDate;
+      eventStartDate: NativeDate;
       eventStartTime: string;
+      eventEndDate: NativeDate;
       eventEndTime: string;
       eventLocation: string;
       eventAttendees: string;
