@@ -99,11 +99,13 @@ const eventCreatorSchema = new Schema<EventCreatorSchema>(
     },
     eventAttendees: {
       type: String,
-      required: [true, 'Event attendees is required'],
+      required: false,
+      default: '',
     },
     requiredItems: {
       type: String,
-      required: [true, 'Required items is required'],
+      required: false,
+      default: '',
     },
     rsvpDeadline: {
       type: Date,

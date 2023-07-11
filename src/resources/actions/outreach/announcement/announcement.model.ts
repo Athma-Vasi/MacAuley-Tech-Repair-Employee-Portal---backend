@@ -11,7 +11,6 @@ type AnnouncementSchema = {
   username: string;
   action: Action;
   category: ActionsOutreach;
-
   title: string;
   imageSrc: string;
   imageAlt: string;
@@ -59,11 +58,13 @@ const announcementSchema = new Schema<AnnouncementSchema>(
     },
     imageSrc: {
       type: String,
-      required: [true, 'ImageSrc is required'],
+      required: false,
+      default: '',
     },
     imageAlt: {
       type: String,
-      required: [true, 'ImageAlt is required'],
+      required: false,
+      default: '',
     },
     article: {
       type: Object,

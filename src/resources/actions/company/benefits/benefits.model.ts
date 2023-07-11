@@ -69,7 +69,8 @@ const benefitsSchema = new Schema<BenefitsSchema>(
     },
     planDescription: {
       type: String,
-      required: [true, 'Plan description is required'],
+      required: false,
+      default: '',
     },
     planKind: {
       type: String,
