@@ -10,8 +10,9 @@ type PrinterIssueSchema = {
   username: string;
   action: Action;
   category: ActionsGeneral;
+
   title: string;
-  contactNumber: PhoneNumber;
+  contactNumber: PhoneNumber | string;
   contactEmail: string;
   dateOfOccurrence: string;
   timeOfOccurrence: string;
@@ -49,7 +50,8 @@ const printerIssueSchema = new Schema<PrinterIssueSchema>(
     },
     contactNumber: {
       type: String,
-      required: [true, 'ContactNumber is required'],
+      required: false,
+      default: '',
     },
     contactEmail: {
       type: String,
@@ -77,7 +79,8 @@ const printerIssueSchema = new Schema<PrinterIssueSchema>(
     },
     additionalInformation: {
       type: String,
-      required: [true, 'AdditionalInformation is required'],
+      required: false,
+      default: '',
     },
   },
   {

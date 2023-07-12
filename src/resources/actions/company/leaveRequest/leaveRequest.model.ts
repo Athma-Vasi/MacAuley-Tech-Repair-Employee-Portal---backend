@@ -72,11 +72,13 @@ const leaveRequestSchema = new Schema<LeaveRequestSchema>(
     },
     delegatedToEmployee: {
       type: String,
-      required: [true, 'Delegated to employee is required'],
+      required: false,
+      default: '',
     },
     delegatedResponsibilities: {
       type: String,
-      required: [true, 'Delegated responsibilities is required'],
+      required: false,
+      default: '',
     },
     additionalComments: {
       type: String,

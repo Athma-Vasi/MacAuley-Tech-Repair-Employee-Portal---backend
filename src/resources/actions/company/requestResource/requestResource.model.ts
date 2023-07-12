@@ -71,7 +71,8 @@ const requestResourceSchema = new Schema<RequestResourceSchema>(
     },
     reasonForRequest: {
       type: String,
-      required: [true, 'Reason for request is required'],
+      required: false,
+      default: '',
     },
     urgency: {
       type: String,

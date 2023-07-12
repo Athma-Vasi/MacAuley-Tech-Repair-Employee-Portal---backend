@@ -18,7 +18,7 @@ type AnonymousRequestSchema = {
   category: ActionsGeneral;
 
   title: string;
-  secureContactNumber: PhoneNumber;
+  secureContactNumber: PhoneNumber | string;
   secureContactEmail: string;
   requestKind: AnonymousRequestKind;
   requestDescription: string;
@@ -51,7 +51,8 @@ const anonymousRequestSchema = new Schema<AnonymousRequestSchema>(
     },
     secureContactNumber: {
       type: String,
-      required: [true, 'SecureContactNumber is required'],
+      required: false,
+      default: '',
     },
     secureContactEmail: {
       type: String,
@@ -67,7 +68,8 @@ const anonymousRequestSchema = new Schema<AnonymousRequestSchema>(
     },
     additionalInformation: {
       type: String,
-      required: [true, 'AdditionalInformation is required'],
+      required: false,
+      default: '',
     },
     urgency: {
       type: String,

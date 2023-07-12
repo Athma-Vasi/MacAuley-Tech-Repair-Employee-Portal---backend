@@ -51,6 +51,7 @@ const addressChangeSchema = new Schema<AddressChangeSchema>(
       required: [true, 'Category is required'],
       index: true,
     },
+
     newAddress: {
       addressLine1: {
         type: String,
