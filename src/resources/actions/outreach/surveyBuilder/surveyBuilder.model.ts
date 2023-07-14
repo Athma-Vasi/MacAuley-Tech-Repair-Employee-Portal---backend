@@ -3,13 +3,13 @@ import type { UserRoles } from '../../../user';
 import type { Action } from '../../../actions';
 import type { ActionsOutreach } from '../../../actions/outreach';
 
-type SurveyRecipient = 'all' | 'active' | 'inactive' | 'employees' | 'admins' | 'managers';
+type SurveyRecipient = 'All' | 'Active' | 'Inactive' | 'Employees' | 'Admins' | 'Managers';
 
 type SurveyResponseKind = {
   chooseOne: 'trueFalse' | 'yesNo' | 'radio';
   chooseAny: 'checkbox' | 'dropdown';
   shortAnswer: 'shortAnswer';
-  rating: 'scale' | 'emotion';
+  rating: 'scale' | 'emotion' | 'stars';
 };
 
 // The mapped type loops over each key in SurveyResponseKind and returns an object, ensuring that the value of `inputHtml` is constrained to the value of `kind` which is a key in the looped object.
@@ -33,6 +33,7 @@ type SurveyBuilderSchema = {
   category: ActionsOutreach;
 
   surveyTitle: string;
+  surveyDescription: string;
   sendTo: SurveyRecipient;
   expiryDate: NativeDate;
   isAnonymous: boolean;

@@ -2,14 +2,19 @@ import { Schema, Types, model } from 'mongoose';
 import type { Action } from '../../../actions';
 import type { ActionsCompany } from '../../company';
 
-type ExpenseClaimType =
+type ExpenseClaimKind =
   | 'Travel and Accomodation'
   | 'Equipment and Supplies'
   | 'Communication and Utilities'
   | 'Training and Certifications'
+  | 'Software and Licenses'
+  | 'Marketing and Advertising'
+  | 'Insurance'
+  | 'Rent and Leasing'
+  | 'Legal and Professional Fees'
   | 'Miscellaneous';
 
-type Currency = 'CAD' | 'USD';
+type Currency = 'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD' | 'JPY' | 'CNY';
 
 type ExpenseClaimSchema = {
   userId: Types.ObjectId;
@@ -18,7 +23,7 @@ type ExpenseClaimSchema = {
   category: ActionsCompany;
 
   uploadedFileId: Types.ObjectId;
-  expenseClaimType: ExpenseClaimType;
+  expenseClaimKind: ExpenseClaimKind;
   expenseClaimAmount: number;
   expenseClaimCurrency: Currency;
   expenseClaimDate: NativeDate;
@@ -64,7 +69,7 @@ const expenseClaimSchema = new Schema<ExpenseClaimSchema>(
       ref: 'FileUpload',
       index: true,
     },
-    expenseClaimType: {
+    expenseClaimKind: {
       type: String,
       required: [true, 'Expense claim type is required'],
     },
@@ -102,4 +107,4 @@ const expenseClaimSchema = new Schema<ExpenseClaimSchema>(
 const ExpenseClaimModel = model<ExpenseClaimDocument>('ExpenseClaim', expenseClaimSchema);
 
 export { ExpenseClaimModel };
-export type { ExpenseClaimSchema, ExpenseClaimDocument, ExpenseClaimType, Currency };
+export type { ExpenseClaimSchema, ExpenseClaimDocument, ExpenseClaimKind, Currency };

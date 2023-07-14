@@ -29,7 +29,7 @@ import type {
   ExpenseClaimDocument,
   ExpenseClaimSchema,
   Currency,
-  ExpenseClaimType,
+  ExpenseClaimKind,
 } from './expenseClaim.model';
 import type {
   CreateNewExpenseClaimRequest,
@@ -66,7 +66,7 @@ export type {
   ExpenseClaimDocument,
   ExpenseClaimSchema,
   Currency,
-  ExpenseClaimType,
+  ExpenseClaimKind,
   CreateNewExpenseClaimRequest,
   DeleteAllExpenseClaimsRequest,
   DeleteAnExpenseClaimRequest,

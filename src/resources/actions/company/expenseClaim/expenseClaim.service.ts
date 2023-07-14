@@ -5,7 +5,7 @@ import type {
   Currency,
   ExpenseClaimDocument,
   ExpenseClaimSchema,
-  ExpenseClaimType,
+  ExpenseClaimKind,
 } from './expenseClaim.model';
 
 import { ExpenseClaimModel } from './expenseClaim.model';

@@ -20,6 +20,7 @@ interface CreateNewSurveyRequest extends RequestAfterJWTVerification {
     };
     survey: {
       surveyTitle: string;
+      surveyDescription: string;
       sendTo: SurveyRecipient;
       expiryDate: NativeDate;
       isAnonymous: boolean;

@@ -38,7 +38,7 @@ const createNewExpenseClaimHandler = expressAsyncHandler(
       userInfo: { userId, username },
       expenseClaim: {
         uploadedFileId,
-        expenseClaimType,
+        expenseClaimKind,
         expenseClaimAmount,
         expenseClaimCurrency,
         expenseClaimDate,
@@ -61,7 +61,7 @@ const createNewExpenseClaimHandler = expressAsyncHandler(
       action: 'company',
       category: 'expense claim',
       uploadedFileId,
-      expenseClaimType,
+      expenseClaimKind,
       expenseClaimAmount,
       expenseClaimCurrency,
       expenseClaimDate,

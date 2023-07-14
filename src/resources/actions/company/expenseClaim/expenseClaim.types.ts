@@ -1,7 +1,7 @@
 import type { Request } from 'express';
 import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
-import type { ExpenseClaimType, Currency, ExpenseClaimDocument } from './expenseClaim.model';
+import type { ExpenseClaimKind, Currency, ExpenseClaimDocument } from './expenseClaim.model';
 import { UserRoles } from '../../../user';
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
@@ -15,7 +15,7 @@ interface CreateNewExpenseClaimRequest extends RequestAfterJWTVerification {
     };
     expenseClaim: {
       uploadedFileId: Types.ObjectId;
-      expenseClaimType: ExpenseClaimType;
+      expenseClaimKind: ExpenseClaimKind;
       expenseClaimAmount: number;
       expenseClaimCurrency: Currency;
       expenseClaimDate: NativeDate;
