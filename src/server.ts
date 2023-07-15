@@ -18,6 +18,7 @@ import { notFoundRouter } from './resources/notFound404';
 import { authRouter } from './resources/auth';
 import { actionsRouter } from './resources/actions';
 import { fileUploadRouter } from './resources/fileUpload';
+import { commentRouter } from './resources/comment';
 
 const app = express();
 
@@ -40,6 +41,7 @@ app.use('/users', userRouter);
 app.use('/notes', noteRouter);
 app.use('/actions', actionsRouter);
 app.use('/file-uploads', fileUploadRouter);
+app.use('/comments', commentRouter);
 
 app.all('*', notFoundRouter);
 

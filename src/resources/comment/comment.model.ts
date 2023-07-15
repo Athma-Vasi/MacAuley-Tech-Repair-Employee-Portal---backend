@@ -1,12 +1,14 @@
 import { Schema, Types, model } from 'mongoose';
 import type { UserRoles } from '../user';
+import { SurveyBuilderDocument } from '../actions/outreach/surveyBuilder';
 
 type CommentSchema = {
   creatorId: Types.ObjectId;
   creatorUsername: string;
-  creatorRole: UserRoles[];
-  parentCommentId: Types.ObjectId;
+  creatorRole: UserRoles;
 
+  announcementId: Types.ObjectId;
+  parentCommentId: Types.ObjectId;
   comment: string;
   isAnonymous: boolean;
   isDeleted: boolean;
@@ -35,9 +37,17 @@ const commentSchema = new Schema<CommentSchema>(
       type: [String],
       required: [true, 'creatorRole is required'],
     },
+
+    announcementId: {
+      type: Schema.Types.ObjectId,
+      required: [true, 'announcementId is required'],
+      ref: 'Announcement',
+      index: true,
+    },
     parentCommentId: {
       type: Schema.Types.ObjectId,
-      required: [true, 'parentCommentId is required'],
+      required: false,
+      ref: 'Comment',
       index: true,
     },
 
@@ -57,7 +67,7 @@ const commentSchema = new Schema<CommentSchema>(
   { timestamps: true }
 );
 
-const CommentModel = model<CommentSchema>('Comment', commentSchema);
+const CommentModel = model<CommentDocument>('Comment', commentSchema);
 
 export { CommentModel };
 export type { CommentDocument, CommentSchema };
