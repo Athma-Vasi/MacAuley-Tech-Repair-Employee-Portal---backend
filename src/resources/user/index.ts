@@ -35,6 +35,9 @@ import type {
   JobPosition,
   PhoneNumber,
   PostalCode,
+  PreferredPronouns,
+  Province,
+  StatesUS,
 } from './user.model';
 import type {
   CreateNewUserRequest,
@@ -74,6 +77,9 @@ export type {
   JobPosition,
   PhoneNumber,
   PostalCode,
+  PreferredPronouns,
+  Province,
+  StatesUS,
   UserRoles,
   CreateNewUserRequest,
   DeleteUserRequest,

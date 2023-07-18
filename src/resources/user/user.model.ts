@@ -87,16 +87,24 @@ type Department =
   | 'Logistics'
   | 'Inventory Management';
 
+type PreferredPronouns = 'He/Him' | 'She/Her' | 'They/Them' | 'Other' | 'Prefer not to say';
+
 type UserSchema = {
   username: string;
   password: string;
   email: string;
+
   firstName: string;
   middleName: string;
   lastName: string;
+  preferredName: string;
+  preferredPronouns: PreferredPronouns;
+  profilePictureUrl: string;
+  dateOfBirth: NativeDate;
+
   contactNumber: PhoneNumber;
   address: {
-    addressLine1: string;
+    addressLine: string;
     city: string;
     province: Province;
     state: StatesUS;
@@ -235,5 +243,6 @@ export type {
   JobPosition,
   Department,
   Province,
+  PreferredPronouns,
   StatesUS,
 };

@@ -8,6 +8,9 @@ import type {
   JobPosition,
   PhoneNumber,
   PostalCode,
+  PreferredPronouns,
+  Province,
+  StatesUS,
   UserDocument,
   UserRoles,
   UserSchema,
@@ -75,34 +78,7 @@ async function checkUserIsActiveService({ username, userId }: CheckUserIsActiveS
   }
 }
 
-type CreateNewUserServiceInput = {
-  email: string;
-  username: string;
-  password: string;
-  firstName: string;
-  middleName: string;
-  lastName: string;
-  contactNumber: PhoneNumber;
-  address: {
-    addressLine1: string;
-    city: string;
-    province: string;
-    state: string;
-    postalCode: PostalCode;
-    country: Country;
-  };
-  jobPosition: JobPosition;
-  department: Department;
-  emergencyContact: {
-    fullName: string;
-    contactNumber: PhoneNumber;
-  };
-  startDate: NativeDate;
-  roles: UserRoles;
-  active: boolean;
-};
-
-async function createNewUserService(inputObj: CreateNewUserServiceInput) {
+async function createNewUserService(inputObj: UserSchema) {
   const { password } = inputObj;
   // salt rounds of 10
   const salt = await bcrypt.genSalt(10);
@@ -168,18 +144,24 @@ async function getAllUsersService() {
 }
 
 type UpdateUserServiceInput = {
-  userId: Types.ObjectId;
-  email: string;
   username: string;
+  userId: Types.ObjectId;
+  roles: UserRoles;
+  email: string;
   firstName: string;
   middleName: string;
   lastName: string;
+  preferredName: string;
+  preferredPronouns: PreferredPronouns;
+  profilePictureUrl: string;
+  dateOfBirth: NativeDate;
+
   contactNumber: PhoneNumber;
   address: {
-    addressLine1: string;
+    addressLine: string;
     city: string;
-    province: string;
-    state: string;
+    province: Province;
+    state: StatesUS;
     postalCode: PostalCode;
     country: Country;
   };
@@ -190,18 +172,17 @@ type UpdateUserServiceInput = {
     contactNumber: PhoneNumber;
   };
   startDate: NativeDate;
-  roles: UserRoles;
   active: boolean;
 };
 
-async function updateUserService(input: UpdateUserServiceInput) {
+async function updateUserService(inputObj: UpdateUserServiceInput) {
   try {
     // get existing user
-    const existingUser = await UserModel.findById(input.userId).lean().exec();
+    const existingUser = await UserModel.findById(inputObj.userId).lean().exec();
     // replace existing user with new user minus the password
     const updatedUser = await UserModel.findByIdAndUpdate(
-      input.userId,
-      { ...input, password: existingUser?.password },
+      inputObj.userId,
+      { ...inputObj, password: existingUser?.password },
       { new: true }
     )
       .select('-password')

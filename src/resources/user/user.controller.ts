@@ -21,6 +21,7 @@ import {
 } from './user.service';
 import { returnEmptyFieldsTuple } from '../../utils';
 import { add } from 'date-fns';
+import { UserSchema } from './user.model';
 
 // @desc   Create new user
 // @route  POST /users
@@ -35,6 +36,10 @@ const createNewUserHandler = expressAsyncHandler(
       middleName,
       lastName,
       contactNumber,
+      dateOfBirth,
+      preferredName,
+      preferredPronouns,
+      profilePictureUrl,
       address,
       jobPosition,
       department,
@@ -43,7 +48,7 @@ const createNewUserHandler = expressAsyncHandler(
       roles = ['Employee'],
       active = true,
     } = request.body;
-    const { addressLine1, city, province, state, postalCode, country } = address;
+    const { addressLine, city, province, state, postalCode, country } = address;
     const { fullName, contactNumber: emergencyContactNumber } = emergencyContact;
 
     // both state and province cannot be empty (both are required)
@@ -62,7 +67,7 @@ const createNewUserHandler = expressAsyncHandler(
       middleName,
       lastName,
       contactNumber,
-      addressLine1,
+      addressLine,
       city,
       startDate,
       country,
@@ -94,7 +99,7 @@ const createNewUserHandler = expressAsyncHandler(
       return;
     }
 
-    const newUserData = {
+    const newUserData: UserSchema = {
       email,
       username,
       password,
@@ -102,13 +107,17 @@ const createNewUserHandler = expressAsyncHandler(
       middleName,
       lastName,
       contactNumber,
-      address,
+      dateOfBirth,
+      preferredName,
+      preferredPronouns,
+      profilePictureUrl,
       jobPosition,
       department,
-      emergencyContact,
       startDate,
       roles,
       active,
+      address,
+      emergencyContact,
     };
 
     // create new user if all checks pass successfully
@@ -201,6 +210,11 @@ const updateUserHandler = expressAsyncHandler(
       firstName,
       middleName,
       lastName,
+      preferredName,
+      preferredPronouns,
+      profilePictureUrl,
+      dateOfBirth,
+
       contactNumber,
       address,
       jobPosition,
@@ -209,7 +223,7 @@ const updateUserHandler = expressAsyncHandler(
       startDate,
       active,
     } = request.body;
-    const { addressLine1, city, country, postalCode, province, state } = address;
+    const { addressLine, city, country, postalCode, province, state } = address;
     const { contactNumber: emergencyContactNumber, fullName } = emergencyContact;
 
     // both state and provinces cannot be empty (one must be filled)
@@ -239,7 +253,7 @@ const updateUserHandler = expressAsyncHandler(
       lastName,
       contactNumber,
       startDate,
-      addressLine1,
+      addressLine,
       country,
       jobPosition,
       department,
@@ -263,8 +277,7 @@ const updateUserHandler = expressAsyncHandler(
       return;
     }
 
-    // update user if all checks pass successfully
-    const updatedUser = await updateUserService({
+    const objToUpdate = {
       userId,
       email,
       username,
@@ -274,12 +287,19 @@ const updateUserHandler = expressAsyncHandler(
       middleName,
       lastName,
       contactNumber,
+      preferredName,
+      preferredPronouns,
+      profilePictureUrl,
+      dateOfBirth,
       address,
       jobPosition,
       department,
       emergencyContact,
       startDate,
-    });
+    };
+
+    // update user if all checks pass successfully
+    const updatedUser = await updateUserService(objToUpdate);
     if (updatedUser) {
       response.status(200).json({ message: `User ${updatedUser.username} updated successfully` });
     } else {

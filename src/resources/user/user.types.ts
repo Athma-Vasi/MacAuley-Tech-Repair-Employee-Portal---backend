@@ -12,19 +12,26 @@ import type {
   UserDocument,
   Province,
   StatesUS,
+  PreferredPronouns,
 } from './user.model';
 
 interface CreateNewUserRequest {
   body: {
-    email: string;
     username: string;
     password: string;
+    email: string;
+
     firstName: string;
     middleName: string;
     lastName: string;
+    preferredName: string;
+    preferredPronouns: PreferredPronouns;
+    profilePictureUrl: string;
+    dateOfBirth: NativeDate;
+
     contactNumber: PhoneNumber;
     address: {
-      addressLine1: string;
+      addressLine: string;
       city: string;
       province: Province;
       state: StatesUS;
@@ -68,9 +75,14 @@ interface UpdateUserRequest extends RequestAfterJWTVerification {
     firstName: string;
     middleName: string;
     lastName: string;
+    preferredName: string;
+    preferredPronouns: PreferredPronouns;
+    profilePictureUrl: string;
+    dateOfBirth: NativeDate;
+
     contactNumber: PhoneNumber;
     address: {
-      addressLine1: string;
+      addressLine: string;
       city: string;
       province: Province;
       state: StatesUS;
