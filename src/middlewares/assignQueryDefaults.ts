@@ -11,6 +11,9 @@ const assignQueryDefaults =
     const { query } = request;
 
     const queryObject = { ...query };
+    const excludedFields = ['page', 'fields'];
+    excludedFields.forEach((field) => delete queryObject[field]);
+
     // convert query object to string
     let queryString = JSON.stringify(queryObject);
     // replace gte, gt, lte, lt, eq, in, ne, nin with $gte, $gt, $lte, $lt, $eq, $in, $ne, $nin
@@ -19,7 +22,6 @@ const assignQueryDefaults =
     const mongoDbQueryObject = JSON.parse(queryString);
 
     let { projection, ...rest } = mongoDbQueryObject;
-
     const options = {};
     const filter = {};
     // if keys are in the keywords array, then they are part of the options object passed in the mongoose find method else they are part of the filter object passed in the mongoose find method
@@ -76,7 +78,6 @@ const assignQueryDefaults =
           // rome-ignore lint: <basic reduce 【・_・?】>
           return Object.values(projection).reduce((acc, curr) => (acc += curr), 0);
         };
-
         // projection score of 0 means it is exclusive
         if (calculateProjectionScore(projection) === 0) {
           // only add -__v if it does not exist
@@ -91,6 +92,25 @@ const assignQueryDefaults =
         }
       }
     }
+
+    // pagination
+    const page = Number(query.page) || 1;
+    let limit = Number(query.limit) || 10;
+    limit = limit < 1 ? 10 : limit > 20 ? 20 : limit;
+    let skip = query.skip ? Number(query.skip) : (page - 1) * limit; // offset
+    skip = skip < 1 ? 0 : skip;
+    Object.defineProperty(options, 'limit', {
+      value: limit,
+      writable: true,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(options, 'skip', {
+      value: skip,
+      writable: true,
+      enumerable: true,
+      configurable: true,
+    });
 
     // overwrite query object with new values
     Object.defineProperty(request, 'query', {
