@@ -8,8 +8,11 @@ import { NextFunction, Request, Response } from 'express';
 const assignQueryDefaults =
   (findQueryOptionsKeywords: Set<string>) =>
   (request: Request, response: Response, next: NextFunction) => {
-    const { query } = request;
+    /**
+     * Object.defineProperty is used to satisfy the typescript compiler
+     */
 
+    const { query } = request;
     const queryObject = { ...query };
     const excludedFields = ['page', 'fields'];
     excludedFields.forEach((field) => delete queryObject[field]);
@@ -22,9 +25,10 @@ const assignQueryDefaults =
     const mongoDbQueryObject = JSON.parse(queryString);
 
     let { projection, ...rest } = mongoDbQueryObject;
-    const options = {};
-    const filter = {};
-    // if keys are in the keywords array, then they are part of the options object passed in the mongoose find method else they are part of the filter object passed in the mongoose find method
+    const options: Record<string, string | number | boolean> = {};
+    const filter: Record<string, string | number | boolean> = {};
+    // if keys are in the findQueryOptionsKeywords set, then they are part of the options object passed in the mongoose find method
+    // else they are part of the filter object passed in same method
     for (const key in rest) {
       findQueryOptionsKeywords.has(key)
         ? Object.defineProperty(options, key, {
@@ -50,37 +54,43 @@ const assignQueryDefaults =
         configurable: true,
       });
     }
+    // if there is only one sort field, _id field with corresponding sort direction is added for consistent results
+    // as _id is unique, orderable and immutable
+    const { sort } = options;
+    if (Object.keys(sort).length === 1) {
+      const sortDirection = Number(Object.values(sort)[0]) < 0 ? -1 : 1;
+      Object.defineProperty(sort, '_id', {
+        value: sortDirection,
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      });
+    }
 
     // set default projection exclusion if it does not exist
     if (!Object.hasOwn(mongoDbQueryObject, 'projection')) {
       projection = '-__v';
     } else {
-      // add -__v to projection exclusion if it does not exist
+      // check if projection is exclusive or inclusive and add -__v to projection exclusion if it does not exist
       if (typeof projection === 'string') {
-        // check if projection is exclusive or inclusive
         if (projection.startsWith('-')) {
-          // only add -__v if it does not exist
           if (!projection.includes('-__v')) {
             projection = projection.concat(' -__v');
           }
         }
       } else if (Array.isArray(projection)) {
-        // check if projection is exclusive or inclusive
         if (projection[0].startsWith('-')) {
-          // only add -__v if it does not exist
           if (!projection[0].includes('-__v')) {
             projection.push('-__v');
           }
         }
       } else if (typeof projection === 'object') {
-        // check if projection is exclusive or inclusive
         const calculateProjectionScore = (projection: Record<string, number>): number => {
           // rome-ignore lint: <basic reduce 【・_・?】>
           return Object.values(projection).reduce((acc, curr) => (acc += curr), 0);
         };
         // projection score of 0 means it is exclusive
         if (calculateProjectionScore(projection) === 0) {
-          // only add -__v if it does not exist
           if (!Object.hasOwn(projection, '__v')) {
             Object.defineProperty(projection, '__v', {
               value: 0,
@@ -93,7 +103,7 @@ const assignQueryDefaults =
       }
     }
 
-    // pagination
+    // set pagination default values for limit and skip
     const page = Number(query.page) || 1;
     let limit = Number(query.limit) || 10;
     limit = limit < 1 ? 10 : limit > 20 ? 20 : limit;

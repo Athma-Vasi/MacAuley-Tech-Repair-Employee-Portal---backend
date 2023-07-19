@@ -8,21 +8,23 @@ import type {
   DeleteALeaveRequestRequest,
   DeleteAllLeaveRequestsRequest,
   GetLeaveRequestByIdRequest,
-  GetAllLeaveRequestsRequest,
+  GetQueriedLeaveRequestsRequest,
   GetLeaveRequestsByUserRequest,
   LeaveRequestServerResponse,
+  LeaveRequestsQueryServerResponse,
 } from './leaveRequest.types';
 
 import {
   createNewLeaveRequestService,
   deleteALeaveRequestService,
   deleteAllLeaveRequestsService,
-  getAllLeaveRequestsService,
+  getQueriedLeaveRequestsService,
   getLeaveRequestByIdService,
   getLeaveRequestsByUserService,
+  getQueriedTotalLeaveRequestsService,
 } from './leaveRequest.service';
 import { LeaveRequestDocument, LeaveRequestSchema } from './leaveRequest.model';
-import { QueryObjectParsed } from '../../../../types';
+import { QueryObjectParsed, QueryObjectParsedWithDefaults } from '../../../../types';
 
 // @desc   Create a new leave request
 // @route  POST /leave-request
@@ -186,35 +188,58 @@ const getLeaveRequestByIdHandler = expressAsyncHandler(
 // @desc   Get all leave requests
 // @route  GET /leave-request
 // @access Private/Admin/Manager
-const getAllLeaveRequestsHandler = expressAsyncHandler(
-  async (request: GetAllLeaveRequestsRequest, response: Response<LeaveRequestServerResponse>) => {
-    const {
+const getQueriedLeaveRequestsHandler = expressAsyncHandler(
+  async (
+    request: GetQueriedLeaveRequestsRequest,
+    response: Response<LeaveRequestsQueryServerResponse>
+  ) => {
+    let {
       userInfo: { roles, userId, username },
+      newQueryFlag,
+      totalDocuments,
     } = request.body;
 
-    const { filter, projection, options } = request.query;
+    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
 
     // check if user has permission
     if (roles.includes('Employee')) {
-      response.status(403).json({ message: 'User does not have permission', leaveRequestData: [] });
+      response.status(403).json({
+        message: 'User does not have permission',
+        pages: 0,
+        totalDocuments: 0,
+        leaveRequestsData: [],
+      });
       return;
     }
 
+    // if its a brand new query, get total number of documents that match the query options and filter
+    // a performance optimization at an acceptable cost in accuracy as the actual number of documents may change between new queries
+    if (newQueryFlag) {
+      totalDocuments = await getQueriedTotalLeaveRequestsService({
+        filter: filter as FilterQuery<LeaveRequestDocument> | undefined,
+        options: options as QueryOptions<LeaveRequestDocument> | undefined,
+      });
+    }
+
     // get all leave requests
-    const leaveRequests = await getAllLeaveRequestsService({
+    const leaveRequests = await getQueriedLeaveRequestsService({
       filter: filter as FilterQuery<LeaveRequestDocument> | undefined,
       projection: projection as QueryOptions<LeaveRequestDocument>,
       options: options as QueryOptions<LeaveRequestDocument>,
     });
     if (leaveRequests.length === 0) {
       response.status(404).json({
-        message: 'No leave requests found',
-        leaveRequestData: [],
+        message: 'No leave requests that match query parameters were found',
+        pages: 0,
+        totalDocuments: 0,
+        leaveRequestsData: [],
       });
     } else {
       response.status(200).json({
         message: 'Leave requests found successfully',
-        leaveRequestData: leaveRequests,
+        pages: Math.ceil(totalDocuments / Number(options?.limit)),
+        totalDocuments: leaveRequests.length,
+        leaveRequestsData: leaveRequests,
       });
     }
   }
@@ -252,6 +277,6 @@ export {
   deleteALeaveRequestHandler,
   deleteAllLeaveRequestsHandler,
   getLeaveRequestByIdHandler,
-  getAllLeaveRequestsHandler,
+  getQueriedLeaveRequestsHandler,
   getLeaveRequestsByUserHandler,
 };

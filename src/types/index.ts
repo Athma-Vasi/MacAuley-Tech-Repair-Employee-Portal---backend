@@ -50,8 +50,20 @@ type FileInfoObject = {
   fileEncoding: string;
 };
 
+/**
+ * type signature of query object created by express
+ */
 type QueryObjectParsed = {
   [x: string]: string | ParsedQs | string[] | ParsedQs[] | undefined;
+};
+
+/**
+ * type signature of query object created after assignQueryDefaults middleware runs
+ */
+type QueryObjectParsedWithDefaults = {
+  filter: Record<string, string | number | boolean | Object>;
+  projection: string | string[] | Object;
+  options: Record<string, string | number | boolean | Object>;
 };
 
 export type {
@@ -60,4 +72,5 @@ export type {
   FileUploadObject,
   FileInfoObject,
   QueryObjectParsed,
+  QueryObjectParsedWithDefaults,
 };

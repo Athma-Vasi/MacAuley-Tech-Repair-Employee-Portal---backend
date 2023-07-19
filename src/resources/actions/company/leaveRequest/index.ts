@@ -11,7 +11,7 @@ import {
   createNewLeaveRequestHandler,
   deleteALeaveRequestHandler,
   deleteAllLeaveRequestsHandler,
-  getAllLeaveRequestsHandler,
+  getQueriedLeaveRequestsHandler,
   getLeaveRequestByIdHandler,
   getLeaveRequestsByUserHandler,
 } from './leaveRequest.controller';
@@ -20,7 +20,7 @@ import {
   getLeaveRequestByIdService,
   deleteALeaveRequestService,
   deleteAllLeaveRequestsService,
-  getAllLeaveRequestsService,
+  getQueriedLeaveRequestsService,
   getLeaveRequestsByUserService,
 } from './leaveRequest.service';
 
@@ -33,7 +33,7 @@ import type {
   CreateNewLeaveRequestRequest,
   DeleteALeaveRequestRequest,
   DeleteAllLeaveRequestsRequest,
-  GetAllLeaveRequestsRequest,
+  GetQueriedLeaveRequestsRequest,
   GetLeaveRequestByIdRequest,
   GetLeaveRequestsByUserRequest,
   LeaveRequestServerResponse,
@@ -49,14 +49,14 @@ export {
   createNewLeaveRequestHandler,
   deleteALeaveRequestHandler,
   deleteAllLeaveRequestsHandler,
-  getAllLeaveRequestsHandler,
+  getQueriedLeaveRequestsHandler,
   getLeaveRequestByIdHandler,
   getLeaveRequestsByUserHandler,
   createNewLeaveRequestService,
   getLeaveRequestByIdService,
   deleteALeaveRequestService,
   deleteAllLeaveRequestsService,
-  getAllLeaveRequestsService,
+  getQueriedLeaveRequestsService,
   getLeaveRequestsByUserService,
 };
 
@@ -67,7 +67,7 @@ export type {
   CreateNewLeaveRequestRequest,
   DeleteALeaveRequestRequest,
   DeleteAllLeaveRequestsRequest,
-  GetAllLeaveRequestsRequest,
+  GetQueriedLeaveRequestsRequest,
   GetLeaveRequestByIdRequest,
   GetLeaveRequestsByUserRequest,
   LeaveRequestServerResponse,

@@ -46,19 +46,19 @@ async function deleteAllLeaveRequestsService(): Promise<DeleteResult> {
   }
 }
 
-type GetAllLeaveRequestsServiceInput = {
+type GetQueriedLeaveRequestsServiceInput = {
   filter?: FilterQuery<LeaveRequestDocument> | undefined;
   projection?: QueryOptions<LeaveRequestDocument> | null | undefined;
-  options?: QueryOptions<LeaveRequestDocument> | null | undefined;
+  options?: QueryOptions<LeaveRequestDocument> | undefined;
 };
 
-async function getAllLeaveRequestsService({
+async function getQueriedLeaveRequestsService({
   filter = {},
   projection = null,
   options = {},
-}: GetAllLeaveRequestsServiceInput): DatabaseResponse<LeaveRequestDocument> {
+}: GetQueriedLeaveRequestsServiceInput): DatabaseResponse<LeaveRequestDocument> {
   try {
-    console.group('getAllLeaveRequestsService');
+    console.group('getQueriedLeaveRequestsService');
     console.log('filter', filter);
     console.log('projection', projection);
     console.log('options', options);
@@ -67,7 +67,21 @@ async function getAllLeaveRequestsService({
     const leaveRequests = await LeaveRequestModel.find(filter, projection, options).lean().exec();
     return leaveRequests;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getAllLeaveRequestsService' });
+    throw new Error(error, { cause: 'getQueriedLeaveRequestsService' });
+  }
+}
+
+async function getQueriedTotalLeaveRequestsService({
+  filter = {},
+  options = {},
+}: Omit<GetQueriedLeaveRequestsServiceInput, 'projection'>): Promise<number> {
+  try {
+    const totalLeaveRequests = await LeaveRequestModel.countDocuments(filter, options)
+      .lean()
+      .exec();
+    return totalLeaveRequests;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getQueriedTotalLeaveRequestsService' });
   }
 }
 
@@ -87,6 +101,7 @@ export {
   getLeaveRequestByIdService,
   deleteALeaveRequestService,
   deleteAllLeaveRequestsService,
-  getAllLeaveRequestsService,
+  getQueriedLeaveRequestsService,
   getLeaveRequestsByUserService,
+  getQueriedTotalLeaveRequestsService,
 };
