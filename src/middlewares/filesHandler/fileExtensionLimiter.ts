@@ -3,8 +3,6 @@ import path from 'path';
 import type { NextFunction, Request, Response } from 'express';
 import { FileUploadObject } from '../../types';
 
-const ALLOWED_FILE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg', '.pdf'];
-
 // creates a closure that takes in an array of allowed file extensions and returns a middleware function
 const fileExtensionLimiterMiddleware = (allowedExtensionsArray: string[]) => {
   return (request: Request, response: Response, next: NextFunction) => {
@@ -47,4 +45,4 @@ const fileExtensionLimiterMiddleware = (allowedExtensionsArray: string[]) => {
   };
 };
 
-export { fileExtensionLimiterMiddleware, ALLOWED_FILE_EXTENSIONS };
+export { fileExtensionLimiterMiddleware };

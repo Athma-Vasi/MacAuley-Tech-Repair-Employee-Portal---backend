@@ -1,5 +1,6 @@
 import expressAsyncHandler from 'express-async-handler';
 
+import type { FilterQuery, QueryOptions } from 'mongoose';
 import type { Response } from 'express';
 import type { DeleteResult } from 'mongodb';
 import type {
@@ -20,7 +21,8 @@ import {
   getLeaveRequestByIdService,
   getLeaveRequestsByUserService,
 } from './leaveRequest.service';
-import { LeaveRequestSchema } from './leaveRequest.model';
+import { LeaveRequestDocument, LeaveRequestSchema } from './leaveRequest.model';
+import { QueryObjectParsed } from '../../../../types';
 
 // @desc   Create a new leave request
 // @route  POST /leave-request
@@ -190,6 +192,8 @@ const getAllLeaveRequestsHandler = expressAsyncHandler(
       userInfo: { roles, userId, username },
     } = request.body;
 
+    const { filter, projection, options } = request.query;
+
     // check if user has permission
     if (roles.includes('Employee')) {
       response.status(403).json({ message: 'User does not have permission', leaveRequestData: [] });
@@ -197,7 +201,11 @@ const getAllLeaveRequestsHandler = expressAsyncHandler(
     }
 
     // get all leave requests
-    const leaveRequests = await getAllLeaveRequestsService();
+    const leaveRequests = await getAllLeaveRequestsService({
+      filter: filter as FilterQuery<LeaveRequestDocument> | undefined,
+      projection: projection as QueryOptions<LeaveRequestDocument>,
+      options: options as QueryOptions<LeaveRequestDocument>,
+    });
     if (leaveRequests.length === 0) {
       response.status(404).json({
         message: 'No leave requests found',

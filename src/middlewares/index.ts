@@ -3,14 +3,15 @@ import { logEvents, loggerMiddleware } from './logger';
 import { loginLimiter } from './loginLimiter';
 import { verifyJWTMiddleware } from './verifyJWT';
 import {
-  ALLOWED_FILE_EXTENSIONS,
   fileExtensionLimiterMiddleware,
   fileSizeLimiterMiddleware,
   filesPayloadExistsMiddleware,
   fileInfoExtracterMiddleware,
 } from './filesHandler';
+import { assignQueryDefaults } from './assignQueryDefaults';
 
 export {
+  assignQueryDefaults,
   errorHandler,
   logEvents,
   loggerMiddleware,
@@ -19,6 +20,5 @@ export {
   fileExtensionLimiterMiddleware,
   fileSizeLimiterMiddleware,
   filesPayloadExistsMiddleware,
-  ALLOWED_FILE_EXTENSIONS,
   fileInfoExtracterMiddleware,
 };

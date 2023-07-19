@@ -7,8 +7,8 @@ import {
   fileSizeLimiterMiddleware,
   fileExtensionLimiterMiddleware,
   fileInfoExtracterMiddleware,
-  ALLOWED_FILE_EXTENSIONS,
 } from '../../middlewares';
+import { ALLOWED_FILE_EXTENSIONS } from '../../constants';
 import {
   createNewFileUploadHandler,
   deleteAFileUploadHandler,

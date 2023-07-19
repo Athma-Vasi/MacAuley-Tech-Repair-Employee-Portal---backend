@@ -1,7 +1,7 @@
 import type { FlattenMaps } from 'mongoose';
 import { Types } from 'mongoose';
 import { FileExtension } from '../resources/fileUpload';
-
+import type { ParsedQs } from 'qs';
 /**
  * these types are used in the database service functions for all resources
  */
@@ -50,4 +50,14 @@ type FileInfoObject = {
   fileEncoding: string;
 };
 
-export type { DatabaseResponse, DatabaseResponseNullable, FileUploadObject, FileInfoObject };
+type QueryObjectParsed = {
+  [x: string]: string | ParsedQs | string[] | ParsedQs[] | undefined;
+};
+
+export type {
+  DatabaseResponse,
+  DatabaseResponseNullable,
+  FileUploadObject,
+  FileInfoObject,
+  QueryObjectParsed,
+};

@@ -2,7 +2,7 @@ import { Schema, Types, model } from 'mongoose';
 
 import type { Action } from '../../../actions';
 import type { ActionsCompany } from '../../../actions/company';
-import type { Country, PostalCode } from '../../../user';
+import type { Country, PostalCode, Province, StatesUS } from '../../../user';
 
 type AddressChangeSchema = {
   userId: Types.ObjectId;
@@ -11,10 +11,10 @@ type AddressChangeSchema = {
   category: ActionsCompany;
 
   newAddress: {
-    addressLine1: string;
+    addressLine: string;
     city: string;
-    province: string;
-    state: string;
+    province: Province;
+    state: StatesUS;
     postalCode: PostalCode;
     country: Country;
   };
