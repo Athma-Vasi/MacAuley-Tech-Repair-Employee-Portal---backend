@@ -4,7 +4,13 @@ import type { LeaveRequestDocument, LeaveRequestSchema } from './leaveRequest.mo
 import type { ParsedQs } from 'qs';
 
 import { LeaveRequestModel } from './leaveRequest.model';
-import { DatabaseResponse, DatabaseResponseNullable, QueryObjectParsed } from '../../../../types';
+import {
+  DatabaseResponse,
+  DatabaseResponseNullable,
+  GetQueriedResourceRequestsServiceInput,
+  GetQueriedTotalResourceRequestsServiceInput,
+  QueryObjectParsed,
+} from '../../../../types';
 
 async function createNewLeaveRequestService(
   input: LeaveRequestSchema
@@ -21,7 +27,10 @@ async function getLeaveRequestByIdService(
   leaveRequestId: Types.ObjectId | string
 ): DatabaseResponseNullable<LeaveRequestDocument> {
   try {
-    const leaveRequest = await LeaveRequestModel.findById(leaveRequestId).lean().exec();
+    const leaveRequest = await LeaveRequestModel.findById(leaveRequestId)
+      .select('-__v')
+      .lean()
+      .exec();
     return leaveRequest;
   } catch (error: any) {
     throw new Error(error, { cause: 'getLeaveRequestByIdService' });
@@ -46,24 +55,12 @@ async function deleteAllLeaveRequestsService(): Promise<DeleteResult> {
   }
 }
 
-type GetQueriedLeaveRequestsServiceInput = {
-  filter?: FilterQuery<LeaveRequestDocument> | undefined;
-  projection?: QueryOptions<LeaveRequestDocument> | null | undefined;
-  options?: QueryOptions<LeaveRequestDocument> | undefined;
-};
-
 async function getQueriedLeaveRequestsService({
   filter = {},
   projection = null,
   options = {},
-}: GetQueriedLeaveRequestsServiceInput): DatabaseResponse<LeaveRequestDocument> {
+}: GetQueriedResourceRequestsServiceInput<LeaveRequestDocument>): DatabaseResponse<LeaveRequestDocument> {
   try {
-    console.group('getQueriedLeaveRequestsService');
-    console.log('filter', filter);
-    console.log('projection', projection);
-    console.log('options', options);
-    console.groupEnd();
-
     const leaveRequests = await LeaveRequestModel.find(filter, projection, options).lean().exec();
     return leaveRequests;
   } catch (error: any) {
@@ -73,12 +70,9 @@ async function getQueriedLeaveRequestsService({
 
 async function getQueriedTotalLeaveRequestsService({
   filter = {},
-  options = {},
-}: Omit<GetQueriedLeaveRequestsServiceInput, 'projection'>): Promise<number> {
+}: GetQueriedTotalResourceRequestsServiceInput<LeaveRequestDocument>): Promise<number> {
   try {
-    const totalLeaveRequests = await LeaveRequestModel.countDocuments(filter, options)
-      .lean()
-      .exec();
+    const totalLeaveRequests = await LeaveRequestModel.countDocuments(filter).lean().exec();
     return totalLeaveRequests;
   } catch (error: any) {
     throw new Error(error, { cause: 'getQueriedTotalLeaveRequestsService' });
@@ -89,7 +83,7 @@ async function getLeaveRequestsByUserService(
   userId: Types.ObjectId | string
 ): DatabaseResponse<LeaveRequestDocument> {
   try {
-    const leaveRequests = await LeaveRequestModel.find({ userId }).lean().exec();
+    const leaveRequests = await LeaveRequestModel.find({ userId }).select('-__v').lean().exec();
     return leaveRequests;
   } catch (error: any) {
     throw new Error(error, { cause: 'getLeaveRequestsByUserService' });

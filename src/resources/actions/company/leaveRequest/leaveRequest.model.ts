@@ -1,6 +1,7 @@
 import { Schema, Types, model } from 'mongoose';
 import type { Action } from '../../../actions';
 import type { ActionsCompany } from '../../company';
+import { RequestStatus } from '../../../../types';
 
 type ReasonForLeave =
   | 'Vacation'
@@ -25,6 +26,7 @@ type LeaveRequestSchema = {
   delegatedToEmployee: string;
   delegatedResponsibilities: string;
   additionalComments: string;
+  requestStatus: RequestStatus;
   acknowledgement: boolean;
 };
 
@@ -61,14 +63,17 @@ const leaveRequestSchema = new Schema<LeaveRequestSchema>(
     startDate: {
       type: Date,
       required: [true, 'Start date is required'],
+      index: true,
     },
     endDate: {
       type: Date,
       required: [true, 'End date is required'],
+      index: true,
     },
     reasonForLeave: {
       type: String,
       required: [true, 'Reason for leave is required'],
+      index: true,
     },
     delegatedToEmployee: {
       type: String,
@@ -89,6 +94,12 @@ const leaveRequestSchema = new Schema<LeaveRequestSchema>(
       type: Boolean,
       required: [true, 'Acknowledgement is required'],
       default: false,
+    },
+    requestStatus: {
+      type: String,
+      required: false,
+      default: 'pending',
+      index: true,
     },
   },
   { timestamps: true }

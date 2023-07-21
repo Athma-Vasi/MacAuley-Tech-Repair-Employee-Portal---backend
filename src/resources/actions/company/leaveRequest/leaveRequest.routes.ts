@@ -3,7 +3,7 @@ import {
   createNewLeaveRequestHandler,
   deleteALeaveRequestHandler,
   deleteAllLeaveRequestsHandler,
-  getAllLeaveRequestsHandler,
+  getQueriedLeaveRequestsHandler,
   getLeaveRequestByIdHandler,
   getLeaveRequestsByUserHandler,
 } from './leaveRequest.controller';
@@ -13,7 +13,7 @@ const leaveRequestRouter = Router();
 leaveRequestRouter
   .route('/')
   .post(createNewLeaveRequestHandler)
-  .get(getAllLeaveRequestsHandler)
+  .get(getQueriedLeaveRequestsHandler)
   .delete(deleteAllLeaveRequestsHandler);
 
 leaveRequestRouter

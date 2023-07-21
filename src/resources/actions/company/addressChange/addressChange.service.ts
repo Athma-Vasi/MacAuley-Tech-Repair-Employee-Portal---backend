@@ -3,7 +3,11 @@ import type { DeleteResult } from 'mongodb';
 import type { AddressChangeDocument, AddressChangeSchema } from './addressChange.model';
 
 import { AddressChangeModel } from './addressChange.model';
-import { DatabaseResponse } from '../../../../types';
+import {
+  DatabaseResponse,
+  GetQueriedResourceRequestsServiceInput,
+  GetQueriedTotalResourceRequestsServiceInput,
+} from '../../../../types';
 
 async function getAddressChangeByIdService(addressChangeId: Types.ObjectId | string) {
   try {
@@ -25,12 +29,27 @@ async function createNewAddressChangeService(
   }
 }
 
-async function getAllAddressChangesService(): DatabaseResponse<AddressChangeDocument> {
+async function getQueriedAddressChangesService({
+  filter = {},
+  projection = null,
+  options = {},
+}: GetQueriedResourceRequestsServiceInput<AddressChangeDocument>): DatabaseResponse<AddressChangeDocument> {
   try {
-    const addressChanges = await AddressChangeModel.find({}).lean().exec();
-    return addressChanges;
+    const addressChange = await AddressChangeModel.find(filter, projection, options).lean().exec();
+    return addressChange;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getAllAddressChangesService' });
+    throw new Error(error, { cause: 'getQueriedAddressChangesService' });
+  }
+}
+
+async function getQueriedTotalAddressChangesService({
+  filter = {},
+}: GetQueriedTotalResourceRequestsServiceInput<AddressChangeDocument>): Promise<number> {
+  try {
+    const totalAddressChanges = await AddressChangeModel.countDocuments(filter).lean().exec();
+    return totalAddressChanges;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getQueriedTotalAddressChangesService' });
   }
 }
 
@@ -70,7 +89,8 @@ async function deleteAllAddressChangesService(): Promise<DeleteResult> {
 export {
   getAddressChangeByIdService,
   createNewAddressChangeService,
-  getAllAddressChangesService,
+  getQueriedAddressChangesService,
+  getQueriedTotalAddressChangesService,
   getAddressChangesByUserService,
   deleteAddressChangeByIdService,
   deleteAllAddressChangesService,

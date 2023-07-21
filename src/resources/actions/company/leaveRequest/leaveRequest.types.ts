@@ -3,6 +3,7 @@ import type { RequestAfterJWTVerification } from '../../../auth';
 import type { LeaveRequestDocument, ReasonForLeave } from './leaveRequest.model';
 import { UserRoles } from '../../../user';
 import { off } from 'process';
+import { RequestStatus } from '../../../../types';
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 interface CreateNewLeaveRequestRequest extends RequestAfterJWTVerification {
@@ -20,6 +21,7 @@ interface CreateNewLeaveRequestRequest extends RequestAfterJWTVerification {
       delegatedResponsibilities: string;
       additionalComments: string;
       acknowledgement: boolean;
+      requestStatus: RequestStatus;
     };
   };
 }
@@ -31,18 +33,6 @@ interface DeleteALeaveRequestRequest extends RequestAfterJWTVerification {
 }
 
 type DeleteAllLeaveRequestsRequest = RequestAfterJWTVerification;
-
-interface GetQueriedLeaveRequestsRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-    newQueryFlag: boolean;
-    totalDocuments: number;
-  };
-}
 
 type GetLeaveRequestsByUserRequest = RequestAfterJWTVerification;
 
@@ -59,23 +49,22 @@ interface GetLeaveRequestByIdRequest extends RequestAfterJWTVerification {
 
 type LeaveRequestServerResponse = {
   message: string;
-  leaveRequestData: Array<LeaveRequestDocument>;
+  leaveRequestData: Array<Omit<LeaveRequestDocument, '__v'>>;
 };
 
-type LeaveRequestsQueryServerResponse = {
+type QueriedLeaveRequestsServerResponse = {
   message: string;
   pages: number;
   totalDocuments: number;
-  leaveRequestsData: Array<LeaveRequestDocument>;
+  leaveRequestsData: Array<Partial<LeaveRequestDocument>>;
 };
 
 export type {
   CreateNewLeaveRequestRequest,
   DeleteALeaveRequestRequest,
   DeleteAllLeaveRequestsRequest,
-  GetQueriedLeaveRequestsRequest,
   GetLeaveRequestsByUserRequest,
   GetLeaveRequestByIdRequest,
   LeaveRequestServerResponse,
-  LeaveRequestsQueryServerResponse,
+  QueriedLeaveRequestsServerResponse,
 };

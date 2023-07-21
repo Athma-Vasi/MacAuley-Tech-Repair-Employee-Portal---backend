@@ -3,6 +3,7 @@ import { Schema, Types, model } from 'mongoose';
 import type { Action } from '../../../actions';
 import type { ActionsCompany } from '../../../actions/company';
 import type { Country, PostalCode, Province, StatesUS } from '../../../user';
+import { RequestStatus } from '../../../../types';
 
 type AddressChangeSchema = {
   userId: Types.ObjectId;
@@ -19,6 +20,7 @@ type AddressChangeSchema = {
     country: Country;
   };
   acknowledgement: boolean;
+  requestStatus: RequestStatus;
 };
 
 type AddressChangeDocument = AddressChangeSchema & {

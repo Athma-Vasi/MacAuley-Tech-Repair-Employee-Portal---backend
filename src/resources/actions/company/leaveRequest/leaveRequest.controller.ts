@@ -8,10 +8,9 @@ import type {
   DeleteALeaveRequestRequest,
   DeleteAllLeaveRequestsRequest,
   GetLeaveRequestByIdRequest,
-  GetQueriedLeaveRequestsRequest,
   GetLeaveRequestsByUserRequest,
   LeaveRequestServerResponse,
-  LeaveRequestsQueryServerResponse,
+  QueriedLeaveRequestsServerResponse,
 } from './leaveRequest.types';
 
 import {
@@ -24,7 +23,11 @@ import {
   getQueriedTotalLeaveRequestsService,
 } from './leaveRequest.service';
 import { LeaveRequestDocument, LeaveRequestSchema } from './leaveRequest.model';
-import { QueryObjectParsed, QueryObjectParsedWithDefaults } from '../../../../types';
+import {
+  GetQueriedResourceRequest,
+  QueryObjectParsed,
+  QueryObjectParsedWithDefaults,
+} from '../../../../types';
 
 // @desc   Create a new leave request
 // @route  POST /leave-request
@@ -41,6 +44,7 @@ const createNewLeaveRequestHandler = expressAsyncHandler(
         delegatedResponsibilities,
         additionalComments,
         acknowledgement,
+        requestStatus,
       },
     } = request.body;
 
@@ -63,6 +67,7 @@ const createNewLeaveRequestHandler = expressAsyncHandler(
       delegatedResponsibilities,
       additionalComments,
       acknowledgement,
+      requestStatus,
     };
 
     // create new leave request
@@ -190,8 +195,8 @@ const getLeaveRequestByIdHandler = expressAsyncHandler(
 // @access Private/Admin/Manager
 const getQueriedLeaveRequestsHandler = expressAsyncHandler(
   async (
-    request: GetQueriedLeaveRequestsRequest,
-    response: Response<LeaveRequestsQueryServerResponse>
+    request: GetQueriedResourceRequest,
+    response: Response<QueriedLeaveRequestsServerResponse>
   ) => {
     let {
       userInfo: { roles, userId, username },
@@ -217,7 +222,6 @@ const getQueriedLeaveRequestsHandler = expressAsyncHandler(
     if (newQueryFlag) {
       totalDocuments = await getQueriedTotalLeaveRequestsService({
         filter: filter as FilterQuery<LeaveRequestDocument> | undefined,
-        options: options as QueryOptions<LeaveRequestDocument> | undefined,
       });
     }
 

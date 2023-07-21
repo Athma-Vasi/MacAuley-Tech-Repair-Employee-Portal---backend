@@ -11,15 +11,15 @@ import {
   createNewAddressChangeHandler,
   deleteAnAddressChangeHandler,
   deleteAllAddressChangesHandler,
-  getAllAddressChangesHandler,
   getAddressChangesByUserHandler,
   getAddressChangeByIdHandler,
+  getQueriedAddressChangeHandler,
 } from './addressChange.controller';
 import {
   createNewAddressChangeService,
   deleteAddressChangeByIdService,
   deleteAllAddressChangesService,
-  getAllAddressChangesService,
+  getQueriedAddressChangesService,
   getAddressChangeByIdService,
   getAddressChangesByUserService,
 } from './addressChange.service';
@@ -28,7 +28,7 @@ import type { AddressChangeDocument, AddressChangeSchema } from './addressChange
 import type {
   CreateNewAddressChangeRequest,
   DeleteAnAddressChangeRequest,
-  GetAllAddressChangesRequest,
+  QueriedAddressChangesServerResponse,
   GetAddressChangesByUserRequest,
   GetAddressChangeByIdRequest,
   DeleteAllAddressChangesRequest,
@@ -44,15 +44,15 @@ export {
   createNewAddressChangeHandler,
   deleteAnAddressChangeHandler,
   deleteAllAddressChangesHandler,
-  getAllAddressChangesHandler,
   getAddressChangesByUserHandler,
+  getQueriedAddressChangeHandler,
   getAddressChangeByIdHandler,
   createNewAddressChangeService,
   deleteAddressChangeByIdService,
   deleteAllAddressChangesService,
-  getAllAddressChangesService,
   getAddressChangeByIdService,
   getAddressChangesByUserService,
+  getQueriedAddressChangesService,
 };
 
 export type {
@@ -60,7 +60,7 @@ export type {
   AddressChangeSchema,
   CreateNewAddressChangeRequest,
   DeleteAnAddressChangeRequest,
-  GetAllAddressChangesRequest,
+  QueriedAddressChangesServerResponse,
   GetAddressChangesByUserRequest,
   GetAddressChangeByIdRequest,
   DeleteAllAddressChangesRequest,

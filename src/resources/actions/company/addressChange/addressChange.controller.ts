@@ -1,16 +1,16 @@
 import expressAsyncHandler from 'express-async-handler';
 import type { DeleteResult } from 'mongodb';
 
-import type { AddressChangeSchema } from './addressChange.model';
+import type { AddressChangeDocument, AddressChangeSchema } from './addressChange.model';
 import type { Response } from 'express';
 import type {
   CreateNewAddressChangeRequest,
   DeleteAnAddressChangeRequest,
   DeleteAllAddressChangesRequest,
-  GetAllAddressChangesRequest,
   GetAddressChangesByUserRequest,
   GetAddressChangeByIdRequest,
   AddressChangeServerResponse,
+  QueriedAddressChangesServerResponse,
 } from './addressChange.types';
 
 import { checkUserExistsService, getUserByIdService, updateUserService } from '../../../user';
@@ -20,8 +20,12 @@ import {
   deleteAllAddressChangesService,
   getAddressChangeByIdService,
   getAddressChangesByUserService,
-  getAllAddressChangesService,
+  getQueriedTotalAddressChangesService,
+  getQueriedAddressChangesService,
 } from './addressChange.service';
+import { FilterQuery, QueryOptions } from 'mongoose';
+
+import { GetQueriedResourceRequest, QueryObjectParsedWithDefaults } from '../../../../types';
 
 // @desc   Create a new address change request
 // @route  POST /address-change
@@ -35,6 +39,7 @@ const createNewAddressChangeHandler = expressAsyncHandler(
       userInfo: { userId, username },
       acknowledgement,
       newAddress,
+      requestStatus,
     } = request.body;
 
     // check if user exists
@@ -82,6 +87,7 @@ const createNewAddressChangeHandler = expressAsyncHandler(
       category: 'address change',
       newAddress,
       acknowledgement,
+      requestStatus,
     };
 
     // save new address change object to database
@@ -99,34 +105,60 @@ const createNewAddressChangeHandler = expressAsyncHandler(
   }
 );
 
-// @desc   Get all address change requests
+// @desc   Get all address changes
 // @route  GET /address-change
-// @access Private
-const getAllAddressChangesHandler = expressAsyncHandler(
-  async (request: GetAllAddressChangesRequest, response: Response<AddressChangeServerResponse>) => {
-    const {
-      userInfo: { roles, userId },
+// @access Private/Admin/Manager
+const getQueriedAddressChangeHandler = expressAsyncHandler(
+  async (
+    request: GetQueriedResourceRequest,
+    response: Response<QueriedAddressChangesServerResponse>
+  ) => {
+    let {
+      userInfo: { roles, userId, username },
+      newQueryFlag,
+      totalDocuments,
     } = request.body;
 
-    // only managers/admin can access this route
+    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+
+    // check if user has permission
     if (roles.includes('Employee')) {
       response.status(403).json({
-        message: 'Only managers or admins are allowed to view all addressChange requests',
-        addressChangeData: [],
+        message: 'User does not have permission',
+        pages: 0,
+        totalDocuments: 0,
+        addressChangesData: [],
       });
       return;
     }
 
-    // get all addressChange requests
-    const addressChanges = await getAllAddressChangesService();
-    if (addressChanges.length === 0) {
-      response
-        .status(404)
-        .json({ message: 'No addressChange requests found', addressChangeData: [] });
+    // if its a brand new query, get total number of documents that match the query options and filter
+    // a performance optimization at an acceptable cost in accuracy as the actual number of documents may change between new queries
+    if (newQueryFlag) {
+      totalDocuments = await getQueriedTotalAddressChangesService({
+        filter: filter as FilterQuery<AddressChangeDocument> | undefined,
+      });
+    }
+
+    // get all address changes
+    const addressChange = await getQueriedAddressChangesService({
+      filter: filter as FilterQuery<AddressChangeDocument> | undefined,
+      projection: projection as QueryOptions<AddressChangeDocument>,
+      options: options as QueryOptions<AddressChangeDocument>,
+    });
+    if (addressChange.length === 0) {
+      response.status(404).json({
+        message: 'No address changes that match query parameters were found',
+        pages: 0,
+        totalDocuments: 0,
+        addressChangesData: [],
+      });
     } else {
       response.status(200).json({
-        message: 'AddressChange requests found successfully',
-        addressChangeData: addressChanges,
+        message: 'address changes found successfully',
+        pages: Math.ceil(totalDocuments / Number(options?.limit)),
+        totalDocuments: addressChange.length,
+        addressChangesData: addressChange,
       });
     }
   }
@@ -275,7 +307,7 @@ const deleteAllAddressChangesHandler = expressAsyncHandler(
 
 export {
   createNewAddressChangeHandler,
-  getAllAddressChangesHandler,
+  getQueriedAddressChangeHandler,
   getAddressChangesByUserHandler,
   getAddressChangeByIdHandler,
   deleteAnAddressChangeHandler,

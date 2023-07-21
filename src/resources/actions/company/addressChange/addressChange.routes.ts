@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import {
   createNewAddressChangeHandler,
-  getAllAddressChangesHandler,
+  getQueriedAddressChangeHandler,
   getAddressChangesByUserHandler,
   getAddressChangeByIdHandler,
   deleteAnAddressChangeHandler,
@@ -12,7 +12,7 @@ const addressChangeRouter = Router();
 
 addressChangeRouter
   .route('/')
-  .get(getAllAddressChangesHandler)
+  .get(getQueriedAddressChangeHandler)
   .post(createNewAddressChangeHandler)
   .delete(deleteAllAddressChangesHandler);
 

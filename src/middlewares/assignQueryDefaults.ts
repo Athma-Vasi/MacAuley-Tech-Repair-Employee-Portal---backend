@@ -131,7 +131,7 @@ const assignQueryDefaults =
     });
 
     console.group('assignQueryDefaults');
-    console.log({ options, filter });
+    console.log({ options, projection, filter });
     console.groupEnd();
 
     next();

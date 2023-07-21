@@ -1,7 +1,9 @@
-import type { FlattenMaps } from 'mongoose';
+import type { FilterQuery, FlattenMaps, QueryOptions } from 'mongoose';
 import { Types } from 'mongoose';
 import { FileExtension } from '../resources/fileUpload';
 import type { ParsedQs } from 'qs';
+import { RequestAfterJWTVerification } from '../resources/auth';
+import { UserRoles } from '../resources/user';
 /**
  * these types are used in the database service functions for all resources
  */
@@ -66,6 +68,32 @@ type QueryObjectParsedWithDefaults = {
   options: Record<string, string | number | boolean | Object>;
 };
 
+interface GetQueriedResourceRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    newQueryFlag: boolean;
+    totalDocuments: number;
+  };
+  query: QueryObjectParsed;
+}
+
+type GetQueriedResourceRequestsServiceInput<Document> = {
+  filter?: FilterQuery<Document> | undefined;
+  projection?: QueryOptions<Document> | null | undefined;
+  options?: QueryOptions<Document> | undefined;
+};
+
+type GetQueriedTotalResourceRequestsServiceInput<Document> = Omit<
+  GetQueriedResourceRequestsServiceInput<Document>,
+  'projection' & 'options'
+>;
+
+type RequestStatus = 'pending' | 'approved' | 'rejected';
+
 export type {
   DatabaseResponse,
   DatabaseResponseNullable,
@@ -73,4 +101,8 @@ export type {
   FileInfoObject,
   QueryObjectParsed,
   QueryObjectParsedWithDefaults,
+  RequestStatus,
+  GetQueriedResourceRequest,
+  GetQueriedResourceRequestsServiceInput,
+  GetQueriedTotalResourceRequestsServiceInput,
 };
