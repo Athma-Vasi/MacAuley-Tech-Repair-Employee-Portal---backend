@@ -19,6 +19,7 @@ import { authRouter } from './resources/auth';
 import { actionsRouter } from './resources/actions';
 import { fileUploadRouter } from './resources/fileUpload';
 import { commentRouter } from './resources/comment';
+import { apiRouter } from './resources/api';
 
 const app = express();
 
@@ -37,11 +38,13 @@ app.use('/', express.static(path.join(__dirname, 'public')));
 
 app.use('/', rootRouter);
 app.use('/auth', authRouter);
-app.use('/users', userRouter);
-app.use('/notes', noteRouter);
-app.use('/actions', actionsRouter);
-app.use('/file-uploads', fileUploadRouter);
-app.use('/comments', commentRouter);
+app.use('/api', apiRouter);
+
+// app.use('/users', userRouter);
+// app.use('/notes', noteRouter);
+// app.use('/actions', actionsRouter);
+// app.use('/file-uploads', fileUploadRouter);
+// app.use('/comments', commentRouter);
 
 app.all('*', notFoundRouter);
 
