@@ -1,7 +1,7 @@
 {
-  "name": "notes-app-fullstack",
+  "name": "macauley-tech-repair-employee-portal-backend",
   "version": "1.0.0",
-  "description": "notes app using mern stack with authorization and authentication",
+  "description": "Backend for Macauley Tech Repair Employee Portal",
   "main": "server.js",
   "scripts": {
     "dev": "nodemon --exec ts-node-dev src/server.ts",
@@ -9,10 +9,22 @@
     "build": "tsc -p ."
   },
   "keywords": [
-    "notes",
-    "notes-app",
-    "fullstack",
-    "mern"
+    "typescript",
+    "node",
+    "express",
+    "mongodb",
+    "mongoose",
+    "jwt",
+    "bcrypt",
+    "compression",
+    "helmet",
+    "cors",
+    "morgan",
+    "cookie-parser",
+    "express-fileupload",
+    "express-rate-limit",
+    "date-fns",
+    "uuid"
   ],
   "author": "Athma Vasi",
   "license": "MIT",

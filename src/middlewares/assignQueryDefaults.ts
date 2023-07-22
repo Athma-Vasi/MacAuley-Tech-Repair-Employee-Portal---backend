@@ -14,7 +14,7 @@ const assignQueryDefaults =
 
     const { query } = request;
     const queryObject = { ...query };
-    const excludedFields = ['page', 'fields'];
+    const excludedFields = ['page', 'fields', 'newQueryFlag', 'totalDocuments'];
     excludedFields.forEach((field) => delete queryObject[field]);
 
     // convert query object to string
@@ -27,8 +27,8 @@ const assignQueryDefaults =
     let { projection, ...rest } = mongoDbQueryObject;
     const options: Record<string, string | number | boolean> = {};
     const filter: Record<string, string | number | boolean> = {};
-    // if keys are in the findQueryOptionsKeywords set, then they are part of the options object passed in the mongoose find method
-    // else they are part of the filter object passed in same method
+    // if keys are in the findQueryOptionsKeywords set, then they will be part of the options object passed in the mongoose find method
+    // else they will be part of the filter object passed in same method
     for (const key in rest) {
       findQueryOptionsKeywords.has(key)
         ? Object.defineProperty(options, key, {
@@ -45,7 +45,10 @@ const assignQueryDefaults =
           });
     }
 
-    // set default sort field if it does not exist
+    /**
+     * if no sort is specified by client, default: { createdAt: -1, _id: -1 }  */
+    // set default createdAt sort field if it does not exist
+    // as all schemas have timestamps enabled, createdAt field is guaranteed to exist
     if (!Object.hasOwn(options, 'sort')) {
       Object.defineProperty(options, 'sort', {
         value: { createdAt: -1 },
@@ -130,7 +133,21 @@ const assignQueryDefaults =
       configurable: true,
     });
 
+    // add newQueryFlag and totalDocuments to request body
+    Object.defineProperty(request, 'body', {
+      value: {
+        ...request.body,
+        newQueryFlag: query.newQueryFlag,
+        totalDocuments: query.totalDocuments,
+      },
+      writable: true,
+      enumerable: true,
+      configurable: true,
+    });
+
     console.group('assignQueryDefaults');
+    console.log('query.newQueryFlag: ', query.newQueryFlag);
+    console.log('query.totalDocuments: ', query.totalDocuments);
     console.log({ options, projection, filter });
     console.groupEnd();
 

@@ -5,8 +5,8 @@ import type { AddressChangeDocument, AddressChangeSchema } from './addressChange
 import { AddressChangeModel } from './addressChange.model';
 import {
   DatabaseResponse,
-  GetQueriedResourceRequestsServiceInput,
-  GetQueriedTotalResourceRequestsServiceInput,
+  QueriedResourceGetRequestServiceInput,
+  QueriedTotalResourceGetRequestServiceInput,
 } from '../../../../types';
 
 async function getAddressChangeByIdService(addressChangeId: Types.ObjectId | string) {
@@ -33,7 +33,7 @@ async function getQueriedAddressChangesService({
   filter = {},
   projection = null,
   options = {},
-}: GetQueriedResourceRequestsServiceInput<AddressChangeDocument>): DatabaseResponse<AddressChangeDocument> {
+}: QueriedResourceGetRequestServiceInput<AddressChangeDocument>): DatabaseResponse<AddressChangeDocument> {
   try {
     const addressChange = await AddressChangeModel.find(filter, projection, options).lean().exec();
     return addressChange;
@@ -44,7 +44,7 @@ async function getQueriedAddressChangesService({
 
 async function getQueriedTotalAddressChangesService({
   filter = {},
-}: GetQueriedTotalResourceRequestsServiceInput<AddressChangeDocument>): Promise<number> {
+}: QueriedTotalResourceGetRequestServiceInput<AddressChangeDocument>): Promise<number> {
   try {
     const totalAddressChanges = await AddressChangeModel.countDocuments(filter).lean().exec();
     return totalAddressChanges;

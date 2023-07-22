@@ -75,22 +75,48 @@ interface GetQueriedResourceRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
+
+    // these are added by the assignQueryDefaults middleware
     newQueryFlag: boolean;
     totalDocuments: number;
   };
   query: QueryObjectParsed;
 }
 
-type GetQueriedResourceRequestsServiceInput<Document> = {
+/**
+ * Used in the getQueried${resource}Service default GET request service functions for all resources.
+ */
+type QueriedResourceGetRequestServiceInput<Document> = {
   filter?: FilterQuery<Document> | undefined;
   projection?: QueryOptions<Document> | null | undefined;
   options?: QueryOptions<Document> | undefined;
 };
 
-type GetQueriedTotalResourceRequestsServiceInput<Document> = Omit<
-  GetQueriedResourceRequestsServiceInput<Document>,
-  'projection' & 'options'
+/**
+ * Used in the getQueriedTotal${resource}Service functions for all resources.
+ */
+type QueriedTotalResourceGetRequestServiceInput<Document> = Omit<
+  QueriedResourceGetRequestServiceInput<Document>,
+  'projection' | 'options'
 >;
+
+/**
+ * Default server response type for all (except GET) REST API requests
+ */
+type ResourceRequestServerResponse<Document> = {
+  message: string;
+  resourceData: Array<Omit<Document, '__v'>>;
+};
+
+/**
+ * Default server response type for GET REST API requests, with query parameters
+ */
+type QueriedResourceGetRequestServerResponse<Document> = {
+  message: string;
+  pages: number;
+  totalDocuments: number;
+  resourceData: Array<Partial<Document>>;
+};
 
 type RequestStatus = 'pending' | 'approved' | 'rejected';
 
@@ -103,6 +129,6 @@ export type {
   QueryObjectParsedWithDefaults,
   RequestStatus,
   GetQueriedResourceRequest,
-  GetQueriedResourceRequestsServiceInput,
-  GetQueriedTotalResourceRequestsServiceInput,
+  QueriedResourceGetRequestServiceInput,
+  QueriedTotalResourceGetRequestServiceInput,
 };

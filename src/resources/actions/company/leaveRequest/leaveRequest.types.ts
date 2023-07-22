@@ -2,8 +2,7 @@ import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
 import type { LeaveRequestDocument, ReasonForLeave } from './leaveRequest.model';
 import { UserRoles } from '../../../user';
-import { off } from 'process';
-import { RequestStatus } from '../../../../types';
+import { GetQueriedResourceRequest, RequestStatus } from '../../../../types';
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 interface CreateNewLeaveRequestRequest extends RequestAfterJWTVerification {
@@ -36,6 +35,8 @@ type DeleteAllLeaveRequestsRequest = RequestAfterJWTVerification;
 
 type GetLeaveRequestsByUserRequest = RequestAfterJWTVerification;
 
+type GetQueriedLeaveRequestsRequest = GetQueriedResourceRequest;
+
 interface GetLeaveRequestByIdRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {
@@ -65,6 +66,7 @@ export type {
   DeleteAllLeaveRequestsRequest,
   GetLeaveRequestsByUserRequest,
   GetLeaveRequestByIdRequest,
+  GetQueriedLeaveRequestsRequest,
   LeaveRequestServerResponse,
   QueriedLeaveRequestsServerResponse,
 };

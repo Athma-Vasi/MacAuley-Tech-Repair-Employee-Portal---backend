@@ -1,15 +1,13 @@
-import type { FilterQuery, QueryOptions, Types } from 'mongoose';
+import type { Types } from 'mongoose';
 import type { DeleteResult } from 'mongodb';
 import type { LeaveRequestDocument, LeaveRequestSchema } from './leaveRequest.model';
-import type { ParsedQs } from 'qs';
 
 import { LeaveRequestModel } from './leaveRequest.model';
 import {
   DatabaseResponse,
   DatabaseResponseNullable,
-  GetQueriedResourceRequestsServiceInput,
-  GetQueriedTotalResourceRequestsServiceInput,
-  QueryObjectParsed,
+  QueriedResourceGetRequestServiceInput,
+  QueriedTotalResourceGetRequestServiceInput,
 } from '../../../../types';
 
 async function createNewLeaveRequestService(
@@ -59,7 +57,7 @@ async function getQueriedLeaveRequestsService({
   filter = {},
   projection = null,
   options = {},
-}: GetQueriedResourceRequestsServiceInput<LeaveRequestDocument>): DatabaseResponse<LeaveRequestDocument> {
+}: QueriedResourceGetRequestServiceInput<LeaveRequestDocument>): DatabaseResponse<LeaveRequestDocument> {
   try {
     const leaveRequests = await LeaveRequestModel.find(filter, projection, options).lean().exec();
     return leaveRequests;
@@ -70,8 +68,10 @@ async function getQueriedLeaveRequestsService({
 
 async function getQueriedTotalLeaveRequestsService({
   filter = {},
-}: GetQueriedTotalResourceRequestsServiceInput<LeaveRequestDocument>): Promise<number> {
+}: QueriedTotalResourceGetRequestServiceInput<LeaveRequestDocument>): Promise<number> {
   try {
+    console.log('getQueriedTotalLeaveRequestsService filter: ', filter);
+
     const totalLeaveRequests = await LeaveRequestModel.countDocuments(filter).lean().exec();
     return totalLeaveRequests;
   } catch (error: any) {

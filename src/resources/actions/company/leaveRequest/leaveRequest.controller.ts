@@ -9,6 +9,7 @@ import type {
   DeleteAllLeaveRequestsRequest,
   GetLeaveRequestByIdRequest,
   GetLeaveRequestsByUserRequest,
+  GetQueriedLeaveRequestsRequest,
   LeaveRequestServerResponse,
   QueriedLeaveRequestsServerResponse,
 } from './leaveRequest.types';
@@ -23,11 +24,7 @@ import {
   getQueriedTotalLeaveRequestsService,
 } from './leaveRequest.service';
 import { LeaveRequestDocument, LeaveRequestSchema } from './leaveRequest.model';
-import {
-  GetQueriedResourceRequest,
-  QueryObjectParsed,
-  QueryObjectParsedWithDefaults,
-} from '../../../../types';
+import { QueryObjectParsedWithDefaults } from '../../../../types';
 
 // @desc   Create a new leave request
 // @route  POST /leave-request
@@ -195,7 +192,7 @@ const getLeaveRequestByIdHandler = expressAsyncHandler(
 // @access Private/Admin/Manager
 const getQueriedLeaveRequestsHandler = expressAsyncHandler(
   async (
-    request: GetQueriedResourceRequest,
+    request: GetQueriedLeaveRequestsRequest,
     response: Response<QueriedLeaveRequestsServerResponse>
   ) => {
     let {
