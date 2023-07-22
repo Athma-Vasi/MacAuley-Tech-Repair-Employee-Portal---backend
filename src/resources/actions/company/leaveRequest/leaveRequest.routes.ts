@@ -5,22 +5,28 @@ import {
   deleteAllLeaveRequestsHandler,
   getQueriedLeaveRequestsHandler,
   getLeaveRequestByIdHandler,
-  getLeaveRequestsByUserHandler,
+  getQueriedLeaveRequestsByUserHandler,
 } from './leaveRequest.controller';
+import { assignQueryDefaults, verifyRoles } from '../../../../middlewares';
+import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
 
 const leaveRequestRouter = Router();
+
+leaveRequestRouter.use(verifyRoles());
 
 leaveRequestRouter
   .route('/')
   .post(createNewLeaveRequestHandler)
-  .get(getQueriedLeaveRequestsHandler)
+  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedLeaveRequestsHandler)
   .delete(deleteAllLeaveRequestsHandler);
+
+leaveRequestRouter
+  .route('/user')
+  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedLeaveRequestsByUserHandler);
 
 leaveRequestRouter
   .route('/:leaveRequestId')
   .get(getLeaveRequestByIdHandler)
   .delete(deleteALeaveRequestHandler);
-
-leaveRequestRouter.route('/user').get(getLeaveRequestsByUserHandler);
 
 export { leaveRequestRouter };

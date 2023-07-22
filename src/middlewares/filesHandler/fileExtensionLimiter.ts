@@ -42,6 +42,7 @@ const fileExtensionLimiterMiddleware = (allowedExtensionsArray: string[]) => {
     }
 
     next();
+    return;
   };
 };
 

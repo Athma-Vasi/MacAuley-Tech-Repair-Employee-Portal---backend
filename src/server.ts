@@ -11,14 +11,9 @@ import { connectDB } from './config/connectDB';
 import { corsOptions } from './config/cors';
 import { errorHandler, logEvents, loggerMiddleware } from './middlewares';
 
-import { noteRouter } from './resources/note';
-import { userRouter } from './resources/user';
 import { rootRouter } from './resources/root';
 import { notFoundRouter } from './resources/notFound404';
 import { authRouter } from './resources/auth';
-import { actionsRouter } from './resources/actions';
-import { fileUploadRouter } from './resources/fileUpload';
-import { commentRouter } from './resources/comment';
 import { apiRouter } from './resources/api';
 
 const app = express();
@@ -39,12 +34,6 @@ app.use('/', express.static(path.join(__dirname, 'public')));
 app.use('/', rootRouter);
 app.use('/auth', authRouter);
 app.use('/api', apiRouter);
-
-// app.use('/users', userRouter);
-// app.use('/notes', noteRouter);
-// app.use('/actions', actionsRouter);
-// app.use('/file-uploads', fileUploadRouter);
-// app.use('/comments', commentRouter);
 
 app.all('*', notFoundRouter);
 

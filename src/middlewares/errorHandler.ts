@@ -18,6 +18,7 @@ function errorHandler(error: Error, request: Request, response: Response, next: 
     status,
     message: error.message ?? 'Internal Server Error',
   });
+  return;
 }
 
 export { errorHandler };

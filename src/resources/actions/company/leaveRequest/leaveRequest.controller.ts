@@ -10,8 +10,6 @@ import type {
   GetLeaveRequestByIdRequest,
   GetLeaveRequestsByUserRequest,
   GetQueriedLeaveRequestsRequest,
-  LeaveRequestServerResponse,
-  QueriedLeaveRequestsServerResponse,
 } from './leaveRequest.types';
 
 import {
@@ -20,17 +18,24 @@ import {
   deleteAllLeaveRequestsService,
   getQueriedLeaveRequestsService,
   getLeaveRequestByIdService,
-  getLeaveRequestsByUserService,
+  getQueriedLeaveRequestsByUserService,
   getQueriedTotalLeaveRequestsService,
 } from './leaveRequest.service';
 import { LeaveRequestDocument, LeaveRequestSchema } from './leaveRequest.model';
-import { QueryObjectParsedWithDefaults } from '../../../../types';
+import {
+  GetQueriedResourceRequestServerResponse,
+  QueryObjectParsedWithDefaults,
+  ResourceRequestServerResponse,
+} from '../../../../types';
 
 // @desc   Create a new leave request
 // @route  POST /leave-request
 // @access Private
 const createNewLeaveRequestHandler = expressAsyncHandler(
-  async (request: CreateNewLeaveRequestRequest, response: Response<LeaveRequestServerResponse>) => {
+  async (
+    request: CreateNewLeaveRequestRequest,
+    response: Response<ResourceRequestServerResponse<LeaveRequestDocument>>
+  ) => {
     const {
       userInfo: { userId, username },
       leaveRequest: {
@@ -47,7 +52,7 @@ const createNewLeaveRequestHandler = expressAsyncHandler(
 
     // user must acknowledge that leaveRequest info is correct
     if (!acknowledgement) {
-      response.status(400).json({ message: 'Acknowledgement is required', leaveRequestData: [] });
+      response.status(400).json({ message: 'Acknowledgement is required', resourceData: [] });
       return;
     }
 
@@ -74,12 +79,12 @@ const createNewLeaveRequestHandler = expressAsyncHandler(
     if (newLeaveRequest) {
       response.status(201).json({
         message: 'New leave request created successfully',
-        leaveRequestData: [newLeaveRequest],
+        resourceData: [newLeaveRequest],
       });
     } else {
       response.status(400).json({
         message: 'New leave request could not be created',
-        leaveRequestData: [],
+        resourceData: [],
       });
     }
   }
@@ -89,22 +94,16 @@ const createNewLeaveRequestHandler = expressAsyncHandler(
 // @route  DELETE /leave-request/:leaveRequestId
 // @access Private/Admin/Manager
 const deleteALeaveRequestHandler = expressAsyncHandler(
-  async (request: DeleteALeaveRequestRequest, response: Response) => {
-    const {
-      userInfo: { roles },
-    } = request.body;
+  async (
+    request: DeleteALeaveRequestRequest,
+    response: Response<ResourceRequestServerResponse<LeaveRequestDocument>>
+  ) => {
     const leaveRequestId = request.params.leaveRequestId;
-
-    // check if user has permission
-    if (roles.includes('Employee')) {
-      response.status(403).json({ message: 'User does not have permission', leaveRequestData: [] });
-      return;
-    }
 
     // check if leave request exists
     const leaveRequestExists = await getLeaveRequestByIdService(leaveRequestId);
     if (!leaveRequestExists) {
-      response.status(404).json({ message: 'Leave request does not exist', leaveRequestData: [] });
+      response.status(404).json({ message: 'Leave request does not exist', resourceData: [] });
       return;
     }
 
@@ -113,12 +112,12 @@ const deleteALeaveRequestHandler = expressAsyncHandler(
     if (deletedResult.deletedCount === 1) {
       response.status(200).json({
         message: 'Leave request deleted successfully',
-        leaveRequestData: [],
+        resourceData: [],
       });
     } else {
       response.status(400).json({
         message: 'Leave request could not be deleted',
-        leaveRequestData: [],
+        resourceData: [],
       });
     }
   }
@@ -128,28 +127,21 @@ const deleteALeaveRequestHandler = expressAsyncHandler(
 // @route  DELETE /leave-request
 // @access Private/Admin/Manager
 const deleteAllLeaveRequestsHandler = expressAsyncHandler(
-  async (request: DeleteAllLeaveRequestsRequest, response: Response) => {
-    const {
-      userInfo: { roles },
-    } = request.body;
-
-    // check if user has permission
-    if (roles.includes('Employee')) {
-      response.status(403).json({ message: 'User does not have permission', leaveRequestData: [] });
-      return;
-    }
-
+  async (
+    request: DeleteAllLeaveRequestsRequest,
+    response: Response<ResourceRequestServerResponse<LeaveRequestDocument>>
+  ) => {
     // delete all leave requests
     const deletedResult: DeleteResult = await deleteAllLeaveRequestsService();
     if (deletedResult.deletedCount > 0) {
       response.status(200).json({
         message: 'All leave requests deleted successfully',
-        leaveRequestData: [],
+        resourceData: [],
       });
     } else {
       response.status(400).json({
         message: 'All leave requests could not be deleted',
-        leaveRequestData: [],
+        resourceData: [],
       });
     }
   }
@@ -159,29 +151,23 @@ const deleteAllLeaveRequestsHandler = expressAsyncHandler(
 // @route  GET /leave-request/:leaveRequestId
 // @access Private/Admin/Manager
 const getLeaveRequestByIdHandler = expressAsyncHandler(
-  async (request: GetLeaveRequestByIdRequest, response: Response<LeaveRequestServerResponse>) => {
-    const {
-      userInfo: { roles, userId, username },
-    } = request.body;
+  async (
+    request: GetLeaveRequestByIdRequest,
+    response: Response<ResourceRequestServerResponse<LeaveRequestDocument>>
+  ) => {
     const leaveRequestId = request.params.leaveRequestId;
-
-    // check if user has permission
-    if (roles.includes('Employee')) {
-      response.status(403).json({ message: 'User does not have permission', leaveRequestData: [] });
-      return;
-    }
 
     // get leave request
     const leaveRequest = await getLeaveRequestByIdService(leaveRequestId);
     if (leaveRequest) {
       response.status(200).json({
         message: 'Leave request found successfully',
-        leaveRequestData: [leaveRequest],
+        resourceData: [leaveRequest],
       });
     } else {
       response.status(404).json({
         message: 'Leave request not found',
-        leaveRequestData: [],
+        resourceData: [],
       });
     }
   }
@@ -193,29 +179,12 @@ const getLeaveRequestByIdHandler = expressAsyncHandler(
 const getQueriedLeaveRequestsHandler = expressAsyncHandler(
   async (
     request: GetQueriedLeaveRequestsRequest,
-    response: Response<QueriedLeaveRequestsServerResponse>
+    response: Response<GetQueriedResourceRequestServerResponse<LeaveRequestDocument>>
   ) => {
-    let {
-      userInfo: { roles, userId, username },
-      newQueryFlag,
-      totalDocuments,
-    } = request.body;
+    let { newQueryFlag, totalDocuments } = request.body;
 
     const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
 
-    // check if user has permission
-    if (roles.includes('Employee')) {
-      response.status(403).json({
-        message: 'User does not have permission',
-        pages: 0,
-        totalDocuments: 0,
-        leaveRequestsData: [],
-      });
-      return;
-    }
-
-    // if its a brand new query, get total number of documents that match the query options and filter
-    // a performance optimization at an acceptable cost in accuracy as the actual number of documents may change between new queries
     if (newQueryFlag) {
       totalDocuments = await getQueriedTotalLeaveRequestsService({
         filter: filter as FilterQuery<LeaveRequestDocument> | undefined,
@@ -233,14 +202,14 @@ const getQueriedLeaveRequestsHandler = expressAsyncHandler(
         message: 'No leave requests that match query parameters were found',
         pages: 0,
         totalDocuments: 0,
-        leaveRequestsData: [],
+        resourceData: [],
       });
     } else {
       response.status(200).json({
         message: 'Leave requests found successfully',
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
         totalDocuments: leaveRequests.length,
-        leaveRequestsData: leaveRequests,
+        resourceData: leaveRequests,
       });
     }
   }
@@ -249,26 +218,50 @@ const getQueriedLeaveRequestsHandler = expressAsyncHandler(
 // @desc   Get all leave requests for a user
 // @route  GET /leave-request/user
 // @access Private/Admin/Manager/Employee
-const getLeaveRequestsByUserHandler = expressAsyncHandler(
+const getQueriedLeaveRequestsByUserHandler = expressAsyncHandler(
   async (
     request: GetLeaveRequestsByUserRequest,
-    response: Response<LeaveRequestServerResponse>
+    response: Response<GetQueriedResourceRequestServerResponse<LeaveRequestDocument>>
   ) => {
     const {
-      userInfo: { roles, userId, username },
+      userInfo: { userId },
     } = request.body;
+    let { newQueryFlag, totalDocuments } = request.body;
 
-    // anyone can get their own leave requests
-    const leaveRequests = await getLeaveRequestsByUserService(userId);
+    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+
+    if (newQueryFlag) {
+      totalDocuments = await getQueriedTotalLeaveRequestsService({
+        filter: filter as FilterQuery<LeaveRequestDocument> | undefined,
+      });
+    }
+
+    // assign userId to filter
+    Object.defineProperty(filter, 'userId', {
+      value: userId,
+      writable: true,
+      enumerable: true,
+      configurable: true,
+    });
+
+    const leaveRequests = await getQueriedLeaveRequestsByUserService({
+      filter: filter as FilterQuery<LeaveRequestDocument> | undefined,
+      projection: projection as QueryOptions<LeaveRequestDocument>,
+      options: options as QueryOptions<LeaveRequestDocument>,
+    });
     if (leaveRequests.length === 0) {
       response.status(404).json({
         message: 'No leave requests found',
-        leaveRequestData: [],
+        pages: 0,
+        totalDocuments: 0,
+        resourceData: [],
       });
     } else {
       response.status(200).json({
         message: 'Leave requests found successfully',
-        leaveRequestData: leaveRequests,
+        pages: Math.ceil(totalDocuments / Number(options?.limit)),
+        totalDocuments: leaveRequests.length,
+        resourceData: leaveRequests,
       });
     }
   }
@@ -279,5 +272,5 @@ export {
   deleteAllLeaveRequestsHandler,
   getLeaveRequestByIdHandler,
   getQueriedLeaveRequestsHandler,
-  getLeaveRequestsByUserHandler,
+  getQueriedLeaveRequestsByUserHandler,
 };

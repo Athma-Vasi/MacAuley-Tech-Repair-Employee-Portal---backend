@@ -1,6 +1,6 @@
 import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
-import type { LeaveRequestDocument, ReasonForLeave } from './leaveRequest.model';
+import type { ReasonForLeave } from './leaveRequest.model';
 import { UserRoles } from '../../../user';
 import { GetQueriedResourceRequest, RequestStatus } from '../../../../types';
 
@@ -33,7 +33,7 @@ interface DeleteALeaveRequestRequest extends RequestAfterJWTVerification {
 
 type DeleteAllLeaveRequestsRequest = RequestAfterJWTVerification;
 
-type GetLeaveRequestsByUserRequest = RequestAfterJWTVerification;
+type GetLeaveRequestsByUserRequest = GetQueriedResourceRequest;
 
 type GetQueriedLeaveRequestsRequest = GetQueriedResourceRequest;
 
@@ -48,18 +48,6 @@ interface GetLeaveRequestByIdRequest extends RequestAfterJWTVerification {
   params: { leaveRequestId: string };
 }
 
-type LeaveRequestServerResponse = {
-  message: string;
-  leaveRequestData: Array<Omit<LeaveRequestDocument, '__v'>>;
-};
-
-type QueriedLeaveRequestsServerResponse = {
-  message: string;
-  pages: number;
-  totalDocuments: number;
-  leaveRequestsData: Array<Partial<LeaveRequestDocument>>;
-};
-
 export type {
   CreateNewLeaveRequestRequest,
   DeleteALeaveRequestRequest,
@@ -67,6 +55,4 @@ export type {
   GetLeaveRequestsByUserRequest,
   GetLeaveRequestByIdRequest,
   GetQueriedLeaveRequestsRequest,
-  LeaveRequestServerResponse,
-  QueriedLeaveRequestsServerResponse,
 };

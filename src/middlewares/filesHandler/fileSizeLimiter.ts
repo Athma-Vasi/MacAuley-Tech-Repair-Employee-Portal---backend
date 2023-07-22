@@ -36,6 +36,7 @@ function fileSizeLimiterMiddleware(request: Request, response: Response, next: N
   }
 
   next();
+  return;
 }
 
 export { fileSizeLimiterMiddleware };

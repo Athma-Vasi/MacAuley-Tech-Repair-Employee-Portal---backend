@@ -32,4 +32,5 @@ const config: Config = {
   REFRESH_TOKEN_SECRET,
 };
 
-export { config, type Config };
+export { config };
+export type { Config };

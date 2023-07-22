@@ -15,6 +15,7 @@ const loginLimiter = rateLimit({
     response.status(options.statusCode).json(options.message);
 
     next();
+    return;
   },
   standardHeaders: true, // return rate limit info in headers
   legacyHeaders: false, // disable X-RateLimit headers

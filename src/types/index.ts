@@ -75,8 +75,9 @@ interface GetQueriedResourceRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-
     // these are added by the assignQueryDefaults middleware
+    // if its a brand new query, get total number of documents that match the query options and filter
+    // a performance optimization at an acceptable cost in accuracy as the actual number of documents may change between new queries
     newQueryFlag: boolean;
     totalDocuments: number;
   };
@@ -109,9 +110,9 @@ type ResourceRequestServerResponse<Document> = {
 };
 
 /**
- * Default server response type for GET REST API requests, with query parameters
+ * Default server response type for GET REST API requests with query parameters
  */
-type QueriedResourceGetRequestServerResponse<Document> = {
+type GetQueriedResourceRequestServerResponse<Document> = {
   message: string;
   pages: number;
   totalDocuments: number;
@@ -131,4 +132,6 @@ export type {
   GetQueriedResourceRequest,
   QueriedResourceGetRequestServiceInput,
   QueriedTotalResourceGetRequestServiceInput,
+  ResourceRequestServerResponse,
+  GetQueriedResourceRequestServerResponse,
 };

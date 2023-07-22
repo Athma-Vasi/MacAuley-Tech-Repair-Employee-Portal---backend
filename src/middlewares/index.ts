@@ -9,6 +9,7 @@ import {
   fileInfoExtracterMiddleware,
 } from './filesHandler';
 import { assignQueryDefaults } from './assignQueryDefaults';
+import { verifyRoles } from './verifyRoles';
 
 export {
   assignQueryDefaults,
@@ -21,4 +22,5 @@ export {
   fileSizeLimiterMiddleware,
   filesPayloadExistsMiddleware,
   fileInfoExtracterMiddleware,
+  verifyRoles,
 };

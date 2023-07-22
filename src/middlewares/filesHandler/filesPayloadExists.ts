@@ -13,6 +13,7 @@ function filesPayloadExistsMiddleware(request: Request, response: Response, next
   }
 
   next();
+  return;
 }
 
 export { filesPayloadExistsMiddleware };

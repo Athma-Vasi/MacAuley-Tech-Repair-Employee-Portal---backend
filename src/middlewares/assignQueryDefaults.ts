@@ -152,6 +152,7 @@ const assignQueryDefaults =
     console.groupEnd();
 
     next();
+    return;
   };
 
 export { assignQueryDefaults };

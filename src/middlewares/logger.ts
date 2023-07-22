@@ -48,6 +48,7 @@ function loggerMiddleware(request: Request, response: Response, next: NextFuncti
   console.log(`${request.method} \t ${request.path}`);
 
   next();
+  return;
 }
 
 export { logEvents, loggerMiddleware };

@@ -45,6 +45,7 @@ function fileInfoExtracterMiddleware(request: Request, response: Response, next:
   console.log('fileInfoExtracter-request.files after deletion: ', request.files);
 
   next();
+  return;
 }
 
 export { fileInfoExtracterMiddleware };

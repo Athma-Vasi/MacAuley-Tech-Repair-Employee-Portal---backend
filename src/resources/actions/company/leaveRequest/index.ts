@@ -13,7 +13,7 @@ import {
   deleteAllLeaveRequestsHandler,
   getQueriedLeaveRequestsHandler,
   getLeaveRequestByIdHandler,
-  getLeaveRequestsByUserHandler,
+  getQueriedLeaveRequestsByUserHandler,
 } from './leaveRequest.controller';
 import {
   createNewLeaveRequestService,
@@ -21,7 +21,7 @@ import {
   deleteALeaveRequestService,
   deleteAllLeaveRequestsService,
   getQueriedLeaveRequestsService,
-  getLeaveRequestsByUserService,
+  getQueriedLeaveRequestsByUserService,
 } from './leaveRequest.service';
 
 import type {
@@ -35,7 +35,6 @@ import type {
   DeleteAllLeaveRequestsRequest,
   GetLeaveRequestByIdRequest,
   GetLeaveRequestsByUserRequest,
-  LeaveRequestServerResponse,
 } from './leaveRequest.types';
 
 /**
@@ -50,13 +49,13 @@ export {
   deleteAllLeaveRequestsHandler,
   getQueriedLeaveRequestsHandler,
   getLeaveRequestByIdHandler,
-  getLeaveRequestsByUserHandler,
+  getQueriedLeaveRequestsByUserHandler,
   createNewLeaveRequestService,
   getLeaveRequestByIdService,
   deleteALeaveRequestService,
   deleteAllLeaveRequestsService,
   getQueriedLeaveRequestsService,
-  getLeaveRequestsByUserService,
+  getQueriedLeaveRequestsByUserService,
 };
 
 export type {
@@ -68,5 +67,4 @@ export type {
   DeleteAllLeaveRequestsRequest,
   GetLeaveRequestByIdRequest,
   GetLeaveRequestsByUserRequest,
-  LeaveRequestServerResponse,
 };
