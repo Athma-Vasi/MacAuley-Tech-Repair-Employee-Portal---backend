@@ -47,7 +47,7 @@ async function getQueriedTotalAnonymousRequestsService({
 }
 
 async function getAnAnonymousRequestService(
-  anonymousRequestId: string
+  anonymousRequestId: Types.ObjectId | string
 ): DatabaseResponseNullable<AnonymousRequestDocument> {
   try {
     const anonymousRequest = await AnonymousRequestModel.findById(anonymousRequestId).lean().exec();
@@ -57,7 +57,9 @@ async function getAnAnonymousRequestService(
   }
 }
 
-async function deleteAnAnonymousRequestService(anonymousRequestId: string): Promise<DeleteResult> {
+async function deleteAnAnonymousRequestService(
+  anonymousRequestId: Types.ObjectId | string
+): Promise<DeleteResult> {
   try {
     const deletedAnonymousRequest = await AnonymousRequestModel.deleteOne({
       _id: anonymousRequestId,
