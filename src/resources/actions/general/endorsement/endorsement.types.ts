@@ -2,6 +2,7 @@ import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
 import type { EmployeeAttributes, EndorsementDocument } from './endorsement.model';
 import type { UserRoles } from '../../../user';
+import { GetQueriedResourceRequest, RequestStatus } from '../../../../types';
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 interface CreateNewEndorsementRequest extends RequestAfterJWTVerification {
@@ -16,6 +17,7 @@ interface CreateNewEndorsementRequest extends RequestAfterJWTVerification {
     userToBeEndorsed: string;
     summaryOfEndorsement: string;
     attributeEndorsed: EmployeeAttributes;
+    requestStatus: RequestStatus;
   };
 }
 
@@ -30,6 +32,7 @@ interface UpdateAnEndorsementRequest extends RequestAfterJWTVerification {
     userToBeEndorsed: string;
     summaryOfEndorsement: string;
     attributeEndorsed: EmployeeAttributes;
+    requestStatus: RequestStatus;
   };
   params: {
     endorsementId: string;
@@ -44,7 +47,7 @@ interface DeleteEndorsementRequest extends RequestAfterJWTVerification {
 
 type DeleteAllEndorsementsRequest = RequestAfterJWTVerification;
 
-type GetAllEndorsementsRequest = RequestAfterJWTVerification;
+type GetQueriedEndorsementsRequest = GetQueriedResourceRequest;
 
 interface GetAnEndorsementRequest extends RequestAfterJWTVerification {
   params: {
@@ -52,20 +55,14 @@ interface GetAnEndorsementRequest extends RequestAfterJWTVerification {
   };
 }
 
-type GetEndorsementsFromUserRequest = RequestAfterJWTVerification;
-
-type EndorsementsServerResponse = {
-  message: string;
-  endorsementData: Array<EndorsementDocument>;
-};
+type GetQueriedEndorsementsByUserRequest = GetQueriedResourceRequest;
 
 export type {
   CreateNewEndorsementRequest,
   DeleteEndorsementRequest,
   DeleteAllEndorsementsRequest,
-  GetAllEndorsementsRequest,
+  GetQueriedEndorsementsRequest,
   GetAnEndorsementRequest,
-  GetEndorsementsFromUserRequest,
-  EndorsementsServerResponse,
+  GetQueriedEndorsementsByUserRequest,
   UpdateAnEndorsementRequest,
 };

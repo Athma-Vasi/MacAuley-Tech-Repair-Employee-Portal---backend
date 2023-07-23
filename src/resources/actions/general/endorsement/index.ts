@@ -11,18 +11,18 @@ import {
   createNewEndorsementHandler,
   deleteEndorsementHandler,
   deleteAllEndorsementsHandler,
-  getAllEndorsementsHandler,
+  getQueriedEndorsementsHandler,
   getAnEndorsementHandler,
-  getEndorsementsByUserHandler,
+  getQueriedEndorsementsByUserHandler,
   updateAnEndorsementHandler,
 } from './endorsement.controller';
 import {
   createNewEndorsementService,
   deleteEndorsementService,
   deleteAllEndorsementsService,
-  getAllEndorsementsService,
+  getQueriedEndorsementsService,
   getAnEndorsementService,
-  getEndorsementsByUserService,
+  getQueriedEndorsementsByUserService,
   updateAnEndorsementService,
 } from './endorsement.service';
 
@@ -34,11 +34,10 @@ import type {
 import type {
   CreateNewEndorsementRequest,
   DeleteEndorsementRequest,
-  GetAllEndorsementsRequest,
+  GetQueriedEndorsementsRequest,
   GetAnEndorsementRequest,
-  GetEndorsementsFromUserRequest,
+  GetQueriedEndorsementsByUserRequest,
   DeleteAllEndorsementsRequest,
-  EndorsementsServerResponse,
   UpdateAnEndorsementRequest,
 } from './endorsement.types';
 
@@ -51,16 +50,16 @@ export {
   createNewEndorsementHandler,
   deleteEndorsementHandler,
   deleteAllEndorsementsHandler,
-  getAllEndorsementsHandler,
+  getQueriedEndorsementsHandler,
   getAnEndorsementHandler,
-  getEndorsementsByUserHandler,
+  getQueriedEndorsementsByUserHandler,
   updateAnEndorsementHandler,
   createNewEndorsementService,
   deleteEndorsementService,
   deleteAllEndorsementsService,
-  getAllEndorsementsService,
+  getQueriedEndorsementsService,
   getAnEndorsementService,
-  getEndorsementsByUserService,
+  getQueriedEndorsementsByUserService,
   updateAnEndorsementService,
 };
 export type {
@@ -70,9 +69,8 @@ export type {
   CreateNewEndorsementRequest,
   DeleteEndorsementRequest,
   DeleteAllEndorsementsRequest,
-  GetAllEndorsementsRequest,
+  GetQueriedEndorsementsRequest,
   GetAnEndorsementRequest,
-  GetEndorsementsFromUserRequest,
-  EndorsementsServerResponse,
+  GetQueriedEndorsementsByUserRequest,
   UpdateAnEndorsementRequest,
 };

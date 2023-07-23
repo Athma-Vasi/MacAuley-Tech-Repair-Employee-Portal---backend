@@ -3,7 +3,12 @@ import type { DeleteResult } from 'mongodb';
 import type { EndorsementDocument, EndorsementSchema } from './endorsement.model';
 
 import { EndorsementModel } from './endorsement.model';
-import { DatabaseResponse, DatabaseResponseNullable } from '../../../../types';
+import {
+  DatabaseResponse,
+  DatabaseResponseNullable,
+  QueriedResourceGetRequestServiceInput,
+  QueriedTotalResourceGetRequestServiceInput,
+} from '../../../../types';
 
 async function createNewEndorsementService(input: EndorsementSchema): Promise<EndorsementDocument> {
   try {
@@ -11,6 +16,54 @@ async function createNewEndorsementService(input: EndorsementSchema): Promise<En
     return newEndorsement;
   } catch (error: any) {
     throw new Error(error, { cause: 'createNewEndorsementService' });
+  }
+}
+
+async function getQueriedEndorsementsService({
+  filter = {},
+  projection = null,
+  options = {},
+}: QueriedResourceGetRequestServiceInput<EndorsementDocument>): DatabaseResponse<EndorsementDocument> {
+  try {
+    const allEndorsements = await EndorsementModel.find(filter, projection, options).lean().exec();
+    return allEndorsements;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getQueriedEndorsementsService' });
+  }
+}
+
+async function getQueriedTotalEndorsementsService({
+  filter = {},
+}: QueriedTotalResourceGetRequestServiceInput<EndorsementDocument>): Promise<number> {
+  try {
+    const totalEndorsements = await EndorsementModel.countDocuments(filter).lean().exec();
+    return totalEndorsements;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getQueriedTotalEndorsementsService' });
+  }
+}
+
+async function getQueriedEndorsementsByUserService({
+  filter = {},
+  projection = null,
+  options = {},
+}: QueriedResourceGetRequestServiceInput<EndorsementDocument>): DatabaseResponse<EndorsementDocument> {
+  try {
+    const endorsements = await EndorsementModel.find(filter, projection, options).lean().exec();
+    return endorsements;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getQueriedEndorsementsByUserService' });
+  }
+}
+
+async function getAnEndorsementService(
+  id: Types.ObjectId | string
+): DatabaseResponseNullable<EndorsementDocument> {
+  try {
+    const endorsement = await EndorsementModel.findById({ _id: id }).select('-__v').lean().exec();
+    return endorsement;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getAnEndorsementService' });
   }
 }
 
@@ -24,37 +77,6 @@ async function deleteEndorsementService(id: Types.ObjectId | string): Promise<De
     return deletedEndorsement;
   } catch (error: any) {
     throw new Error(error, { cause: 'deleteEndorsementService' });
-  }
-}
-
-async function getAllEndorsementsService(): DatabaseResponse<EndorsementDocument> {
-  try {
-    const allEndorsements = await EndorsementModel.find({}).lean().exec();
-    return allEndorsements;
-  } catch (error: any) {
-    throw new Error(error, { cause: 'getAllEndorsementsService' });
-  }
-}
-
-async function getAnEndorsementService(
-  id: Types.ObjectId | string
-): DatabaseResponseNullable<EndorsementDocument> {
-  try {
-    const endorsement = await EndorsementModel.findById({ _id: id }).lean().exec();
-    return endorsement;
-  } catch (error: any) {
-    throw new Error(error, { cause: 'getAnEndorsementService' });
-  }
-}
-
-async function getEndorsementsByUserService(
-  userId: Types.ObjectId | string
-): DatabaseResponse<EndorsementDocument> {
-  try {
-    const endorsements = await EndorsementModel.find({ userId }).lean().exec();
-    return endorsements;
-  } catch (error: any) {
-    throw new Error(error, { cause: 'getEndorsementsByUserService' });
   }
 }
 
@@ -79,6 +101,7 @@ async function updateAnEndorsementService(
       input,
       { new: true }
     )
+      .select('-__v')
       .lean()
       .exec();
     return updatedEndorsement;
@@ -91,8 +114,9 @@ export {
   createNewEndorsementService,
   deleteEndorsementService,
   deleteAllEndorsementsService,
-  getAllEndorsementsService,
-  getEndorsementsByUserService,
+  getQueriedEndorsementsService,
+  getQueriedEndorsementsByUserService,
   getAnEndorsementService,
+  getQueriedTotalEndorsementsService,
   updateAnEndorsementService,
 };

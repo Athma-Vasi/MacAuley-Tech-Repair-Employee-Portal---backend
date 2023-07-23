@@ -2,6 +2,7 @@ import mongoose, { Schema, model, Types } from 'mongoose';
 
 import type { ActionsGeneral } from '../../general';
 import type { Action } from '../../../actions';
+import { RequestStatus } from '../../../../types';
 
 type EmployeeAttributes = (
   | 'teamwork and collaboration'
@@ -24,6 +25,7 @@ type EndorsementSchema = {
   userToBeEndorsed: string;
   summaryOfEndorsement: string;
   attributeEndorsed: EmployeeAttributes;
+  requestStatus: RequestStatus;
 };
 
 type EndorsementDocument = EndorsementSchema & {
@@ -73,6 +75,12 @@ const endorsementSchema = new Schema<EndorsementSchema>(
     attributeEndorsed: {
       type: [String],
       required: [true, 'AttributeEndorsed is required'],
+    },
+    requestStatus: {
+      type: String,
+      required: false,
+      default: 'pending',
+      index: true,
     },
   },
   {
