@@ -4,20 +4,26 @@ import {
   deleteAllPrinterIssuesHandler,
   deletePrinterIssueHandler,
   getAPrinterIssueHandler,
-  getAllPrinterIssuesHandler,
-  getPrinterIssuesByUserHandler,
+  getQueriedPrinterIssuesHandler,
+  getQueriedPrinterIssuesByUserHandler,
   updatePrinterIssueHandler,
 } from './printerIssue.controller';
+import { assignQueryDefaults, verifyRoles } from '../../../../middlewares';
+import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
 
 const printerIssueRouter = Router();
 
+printerIssueRouter.use(verifyRoles());
+
 printerIssueRouter
   .route('/')
-  .get(getAllPrinterIssuesHandler)
+  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedPrinterIssuesHandler)
   .post(createNewPrinterIssueHandler)
   .delete(deleteAllPrinterIssuesHandler);
 
-printerIssueRouter.route('/user').get(getPrinterIssuesByUserHandler);
+printerIssueRouter
+  .route('/user')
+  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedPrinterIssuesByUserHandler);
 
 printerIssueRouter
   .route('/:printerIssueId')

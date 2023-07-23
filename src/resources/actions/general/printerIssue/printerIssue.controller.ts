@@ -3,11 +3,11 @@ import expressAsyncHandler from 'express-async-handler';
 import type { DeleteResult } from 'mongodb';
 import type { Response } from 'express';
 import type {
-  GetAllPrinterIssuesRequest,
+  GetQueriedPrinterIssuesRequest,
   CreateNewPrinterIssueRequest,
   DeletePrinterIssueRequest,
   GetAPrinterIssueRequest,
-  GetPrinterIssuesFromUserRequest,
+  GetQueriedPrinterIssuesByUserRequest,
   DeleteAllPrinterIssuesRequest,
   UpdatePrinterIssueRequest,
 } from './printerIssue.types';
@@ -17,17 +17,27 @@ import {
   deleteAllPrinterIssuesService,
   deletePrinterIssueService,
   getAPrinterIssueService,
-  getAllPrinterIssuesService,
-  getPrinterIssuesFromUserService,
+  getQueriedPrinterIssuesService,
+  getQueriedPrinterIssuesByUserService,
   updatePrinterIssueService,
+  getQueriedTotalPrinterIssuesService,
 } from './printerIssue.service';
-import { PrinterIssueSchema } from './printerIssue.model';
+import { PrinterIssueDocument, PrinterIssueSchema } from './printerIssue.model';
+import {
+  GetQueriedResourceRequestServerResponse,
+  QueryObjectParsedWithDefaults,
+  ResourceRequestServerResponse,
+} from '../../../../types';
+import { FilterQuery, QueryOptions } from 'mongoose';
 
 // @desc   Create new printer issue
 // @route  POST /printerIssues
 // @access Private
 const createNewPrinterIssueHandler = expressAsyncHandler(
-  async (request: CreateNewPrinterIssueRequest, response: Response) => {
+  async (
+    request: CreateNewPrinterIssueRequest,
+    response: Response<ResourceRequestServerResponse<PrinterIssueDocument>>
+  ) => {
     const {
       userInfo: { userId, username },
       title,
@@ -41,6 +51,7 @@ const createNewPrinterIssueHandler = expressAsyncHandler(
       printerIssueDescription,
       urgency,
       additionalInformation,
+      requestStatus,
     } = request.body;
 
     const newPrinterIssueObject: PrinterIssueSchema = {
@@ -59,18 +70,19 @@ const createNewPrinterIssueHandler = expressAsyncHandler(
       printerIssueDescription,
       urgency,
       additionalInformation,
+      requestStatus,
     };
     const newPrinterIssue = await createNewPrinterIssueService(newPrinterIssueObject);
 
     if (newPrinterIssue) {
       response.status(201).json({
         message: 'Printer issue created successfully',
-        printerIssueData: [newPrinterIssue],
+        resourceData: [newPrinterIssue],
       });
     } else {
       response
         .status(400)
-        .json({ message: 'Printer issue could not be created', printerIssueData: [] });
+        .json({ message: 'Printer issue could not be created', resourceData: [] });
     }
   }
 );
@@ -78,60 +90,92 @@ const createNewPrinterIssueHandler = expressAsyncHandler(
 // @desc   Get all printer issues
 // @route  GET /printerIssues
 // @access Private
-const getAllPrinterIssuesHandler = expressAsyncHandler(
-  async (request: GetAllPrinterIssuesRequest, response: Response) => {
-    const {
-      userInfo: { roles, userId },
-    } = request.body;
+const getQueriedPrinterIssuesHandler = expressAsyncHandler(
+  async (
+    request: GetQueriedPrinterIssuesRequest,
+    response: Response<GetQueriedResourceRequestServerResponse<PrinterIssueDocument>>
+  ) => {
+    let { newQueryFlag, totalDocuments } = request.body;
 
-    // only managers/admins can view all printer issues
-    if (roles.includes('Employee')) {
-      response.status(403).json({
-        message: 'Only managers and admins can get all printer issues',
-        printerIssueData: [],
+    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+
+    // only perform a countDocuments scan if a new query is being made
+    if (newQueryFlag) {
+      totalDocuments = await getQueriedTotalPrinterIssuesService({
+        filter: filter as FilterQuery<PrinterIssueDocument> | undefined,
       });
-      return;
     }
-    const printerIssues = await getAllPrinterIssuesService();
+
+    // get all printer issues
+    const printerIssues = await getQueriedPrinterIssuesService({
+      filter: filter as FilterQuery<PrinterIssueDocument> | undefined,
+      projection: projection as QueryOptions<PrinterIssueDocument>,
+      options: options as QueryOptions<PrinterIssueDocument>,
+    });
     if (printerIssues.length === 0) {
-      response.status(404).json({ message: 'No printer issues found', printerIssues: [] });
+      response.status(404).json({
+        message: 'No printer issues that match query parameters were found',
+        pages: 0,
+        totalDocuments: 0,
+        resourceData: [],
+      });
     } else {
-      response
-        .status(200)
-        .json({ message: 'Printer issues found', printerIssueData: printerIssues });
+      response.status(200).json({
+        message: 'Successfully found printer issues',
+        pages: Math.ceil(totalDocuments / Number(options?.limit)),
+        totalDocuments: printerIssues.length,
+        resourceData: printerIssues,
+      });
     }
   }
 );
 
-// @desc   Delete a printer issue
-// @route  DELETE /printerIssues/:printerIssueId
+// @desc   Get all printer issues from a user
+// @route  GET /printerIssues/user
 // @access Private
-const deletePrinterIssueHandler = expressAsyncHandler(
-  async (request: DeletePrinterIssueRequest, response: Response) => {
+const getQueriedPrinterIssuesByUserHandler = expressAsyncHandler(
+  async (
+    request: GetQueriedPrinterIssuesByUserRequest,
+    response: Response<GetQueriedResourceRequestServerResponse<PrinterIssueDocument>>
+  ) => {
     const {
-      userInfo: { roles, userId },
+      userInfo: { userId },
     } = request.body;
+    let { newQueryFlag, totalDocuments } = request.body;
 
-    // only managers/admins can delete a printer issue
-    if (roles.includes('Employee')) {
-      response.status(403).json({
-        message: 'Only managers and admins can delete a printer issue',
-        printerIssueData: [],
+    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+
+    // assign userId to filter
+    const filterWithUserId = { ...filter, userId };
+
+    // only perform a countDocuments scan if a new query is being made
+    if (newQueryFlag) {
+      totalDocuments = await getQueriedTotalPrinterIssuesService({
+        filter: filterWithUserId,
       });
-      return;
     }
 
-    const { printerIssueId } = request.params;
-    const printerIssue: DeleteResult = await deletePrinterIssueService(printerIssueId);
+    // get all printer issues
+    const printerIssues = await getQueriedPrinterIssuesByUserService({
+      filter: filterWithUserId,
+      projection: projection as QueryOptions<PrinterIssueDocument>,
+      options: options as QueryOptions<PrinterIssueDocument>,
+    });
 
-    if (printerIssue.deletedCount === 1) {
-      response
-        .status(200)
-        .json({ message: 'Printer issue deleted successfully', printerIssueData: [printerIssue] });
+    if (printerIssues.length === 0) {
+      response.status(404).json({
+        message: 'No printer issues that match query parameters were found',
+        pages: 0,
+        totalDocuments: 0,
+        resourceData: [],
+      });
     } else {
-      response
-        .status(400)
-        .json({ message: 'Printer issue could not be deleted', printerIssueData: [] });
+      response.status(200).json({
+        message: 'Successfully found printer issues',
+        pages: Math.ceil(totalDocuments / Number(options?.limit)),
+        totalDocuments: printerIssues.length,
+        resourceData: printerIssues,
+      });
     }
   }
 );
@@ -140,50 +184,40 @@ const deletePrinterIssueHandler = expressAsyncHandler(
 // @route  GET /printerIssues/:printerIssueId
 // @access Private
 const getAPrinterIssueHandler = expressAsyncHandler(
-  async (request: GetAPrinterIssueRequest, response: Response) => {
-    const {
-      userInfo: { roles },
-    } = request.body;
-
-    // only managers/admins can view a printer issue not belonging to them
-    if (roles.includes('Employee')) {
-      response.status(403).json({
-        message: 'Only managers and admins can view a printer issue not belonging to them',
-        printerIssueData: [],
-      });
-      return;
-    }
-
+  async (
+    request: GetAPrinterIssueRequest,
+    response: Response<ResourceRequestServerResponse<PrinterIssueDocument>>
+  ) => {
     const { printerIssueId } = request.params;
     const printerIssue = await getAPrinterIssueService(printerIssueId);
 
     if (printerIssue) {
-      response
-        .status(200)
-        .json({ message: 'Printer issue found', printerIssueData: [printerIssue] });
+      response.status(200).json({ message: 'Printer issue found', resourceData: [printerIssue] });
     } else {
-      response.status(404).json({ message: 'Printer issue not found', printerIssueData: [] });
+      response.status(404).json({ message: 'Printer issue not found', resourceData: [] });
     }
   }
 );
 
-// @desc   Get all printer issues from a user
-// @route  GET /printerIssues/user
+// @desc   Delete a printer issue
+// @route  DELETE /printerIssues/:printerIssueId
 // @access Private
-const getPrinterIssuesByUserHandler = expressAsyncHandler(
-  async (request: GetPrinterIssuesFromUserRequest, response: Response) => {
-    // anyone can view their own printer issues
-    const {
-      userInfo: { userId },
-    } = request.body;
+const deletePrinterIssueHandler = expressAsyncHandler(
+  async (
+    request: DeletePrinterIssueRequest,
+    response: Response<ResourceRequestServerResponse<PrinterIssueDocument>>
+  ) => {
+    const { printerIssueId } = request.params;
+    const printerIssue: DeleteResult = await deletePrinterIssueService(printerIssueId);
 
-    const printerIssues = await getPrinterIssuesFromUserService(userId);
-    if (printerIssues.length === 0) {
-      response.status(404).json({ message: 'No printer issues found', printerIssueData: [] });
-    } else {
+    if (printerIssue.deletedCount === 1) {
       response
         .status(200)
-        .json({ message: 'Printer issues found', printerIssueData: printerIssues });
+        .json({ message: 'Printer issue deleted successfully', resourceData: [] });
+    } else {
+      response
+        .status(400)
+        .json({ message: 'Printer issue could not be deleted', resourceData: [] });
     }
   }
 );
@@ -192,31 +226,21 @@ const getPrinterIssuesByUserHandler = expressAsyncHandler(
 // @route  DELETE /printerIssues
 // @access Private
 const deleteAllPrinterIssuesHandler = expressAsyncHandler(
-  async (request: DeleteAllPrinterIssuesRequest, response: Response) => {
-    const {
-      userInfo: { roles },
-    } = request.body;
-
-    // only managers/admin can delete all printer issues
-    if (roles.includes('Employee')) {
-      response.status(403).json({
-        message: 'Only managers and admins can delete all printer issues',
-        printerIssueData: [],
-      });
-      return;
-    }
-
+  async (
+    request: DeleteAllPrinterIssuesRequest,
+    response: Response<ResourceRequestServerResponse<PrinterIssueDocument>>
+  ) => {
     const deletedResult: DeleteResult = await deleteAllPrinterIssuesService();
 
     if (deletedResult.deletedCount > 0) {
       response.status(200).json({
         message: 'All printer issues deleted successfully',
-        printerIssueData: [],
+        resourceData: [],
       });
     } else {
       response
         .status(400)
-        .json({ message: 'Printer issues could not be deleted', printerIssueData: [] });
+        .json({ message: 'Printer issues could not be deleted', resourceData: [] });
     }
   }
 );
@@ -225,7 +249,10 @@ const deleteAllPrinterIssuesHandler = expressAsyncHandler(
 // @route  PUT /printerIssues/:printerIssueId
 // @access Private
 const updatePrinterIssueHandler = expressAsyncHandler(
-  async (request: UpdatePrinterIssueRequest, response: Response) => {
+  async (
+    request: UpdatePrinterIssueRequest,
+    response: Response<ResourceRequestServerResponse<PrinterIssueDocument>>
+  ) => {
     // anyone can update their own printer issue
     const {
       userInfo: { userId, username },
@@ -240,13 +267,14 @@ const updatePrinterIssueHandler = expressAsyncHandler(
       printerSerialNumber,
       urgency,
       additionalInformation,
+      requestStatus,
     } = request.body;
 
     const { printerIssueId } = request.params;
     // check if printer issue exists
     const printerIssue = await getAPrinterIssueService(printerIssueId);
     if (!printerIssue) {
-      response.status(404).json({ message: 'Printer issue not found', printerIssueData: [] });
+      response.status(404).json({ message: 'Printer issue not found', resourceData: [] });
       return;
     }
 
@@ -255,7 +283,7 @@ const updatePrinterIssueHandler = expressAsyncHandler(
       response.status(403).json({
         message:
           'You are not authorized to update as you are not the originator of this printer issue',
-        printerIssueData: [],
+        resourceData: [],
       });
       return;
     }
@@ -277,27 +305,28 @@ const updatePrinterIssueHandler = expressAsyncHandler(
       printerSerialNumber,
       urgency,
       additionalInformation,
+      requestStatus,
     });
 
     if (updatedPrinterIssue) {
       response.status(200).json({
         message: 'Printer issue updated successfully',
-        printerIssueData: [updatedPrinterIssue],
+        resourceData: [updatedPrinterIssue],
       });
     } else {
       response
         .status(400)
-        .json({ message: 'Printer issue could not be updated', printerIssueData: [] });
+        .json({ message: 'Printer issue could not be updated', resourceData: [] });
     }
   }
 );
 
 export {
   createNewPrinterIssueHandler,
-  getAllPrinterIssuesHandler,
+  getQueriedPrinterIssuesHandler,
   deletePrinterIssueHandler,
   deleteAllPrinterIssuesHandler,
   getAPrinterIssueHandler,
-  getPrinterIssuesByUserHandler,
+  getQueriedPrinterIssuesByUserHandler,
   updatePrinterIssueHandler,
 };

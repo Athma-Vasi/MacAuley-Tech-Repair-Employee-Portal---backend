@@ -1,9 +1,14 @@
-import type { FlattenMaps, Types } from 'mongoose';
+import type { Types } from 'mongoose';
 import type { DeleteResult } from 'mongodb';
 import type { PrinterIssueDocument, PrinterIssueSchema } from './printerIssue.model';
 
 import { PrinterIssueModel } from './printerIssue.model';
-import { DatabaseResponse, DatabaseResponseNullable } from '../../../../types';
+import {
+  DatabaseResponse,
+  DatabaseResponseNullable,
+  QueriedResourceGetRequestServiceInput,
+  QueriedTotalResourceGetRequestServiceInput,
+} from '../../../../types';
 
 async function createNewPrinterIssueService(
   input: PrinterIssueSchema
@@ -29,6 +34,7 @@ async function updatePrinterIssueService(
       input,
       { new: true }
     )
+      .select('-__v')
       .lean()
       .exec();
     return updatedPrinterIssue;
@@ -37,21 +43,42 @@ async function updatePrinterIssueService(
   }
 }
 
-async function getAllPrinterIssuesService(): DatabaseResponse<PrinterIssueDocument> {
+async function getQueriedPrinterIssuesService({
+  filter = {},
+  projection = null,
+  options = {},
+}: QueriedResourceGetRequestServiceInput<PrinterIssueDocument>): DatabaseResponse<PrinterIssueDocument> {
   try {
-    const allPrinterIssues = await PrinterIssueModel.find({}).lean().exec();
+    const allPrinterIssues = await PrinterIssueModel.find(filter, projection, options)
+      .lean()
+      .exec();
     return allPrinterIssues;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getAllPrinterIssuesService' });
+    throw new Error(error, { cause: 'getQueriedPrinterIssuesService' });
   }
 }
 
-async function deletePrinterIssueService(id: Types.ObjectId | string): Promise<DeleteResult> {
+async function getQueriedTotalPrinterIssuesService({
+  filter = {},
+}: QueriedTotalResourceGetRequestServiceInput<PrinterIssueDocument>): Promise<number> {
   try {
-    const deletedPrinterIssue = await PrinterIssueModel.deleteOne({ _id: id }).lean().exec();
-    return deletedPrinterIssue;
+    const totalPrinterIssues = await PrinterIssueModel.countDocuments(filter).lean().exec();
+    return totalPrinterIssues;
   } catch (error: any) {
-    throw new Error(error, { cause: 'deletePrinterIssueService' });
+    throw new Error(error, { cause: 'getQueriedTotalPrinterIssuesService' });
+  }
+}
+
+async function getQueriedPrinterIssuesByUserService({
+  filter = {},
+  projection = null,
+  options = {},
+}: QueriedResourceGetRequestServiceInput<PrinterIssueDocument>): DatabaseResponse<PrinterIssueDocument> {
+  try {
+    const printerIssues = await PrinterIssueModel.find(filter, projection, options).lean().exec();
+    return printerIssues;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getQueriedPrinterIssuesByUserService' });
   }
 }
 
@@ -66,14 +93,12 @@ async function getAPrinterIssueService(
   }
 }
 
-async function getPrinterIssuesFromUserService(
-  userId: Types.ObjectId
-): DatabaseResponse<PrinterIssueDocument> {
+async function deletePrinterIssueService(id: Types.ObjectId | string): Promise<DeleteResult> {
   try {
-    const printerIssues = await PrinterIssueModel.find({ userId }).lean().exec();
-    return printerIssues;
+    const deletedPrinterIssue = await PrinterIssueModel.deleteOne({ _id: id }).lean().exec();
+    return deletedPrinterIssue;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getPrinterIssuesFromUserService' });
+    throw new Error(error, { cause: 'deletePrinterIssueService' });
   }
 }
 
@@ -88,10 +113,11 @@ async function deleteAllPrinterIssuesService(): Promise<DeleteResult> {
 
 export {
   createNewPrinterIssueService,
-  getAllPrinterIssuesService,
+  getQueriedPrinterIssuesService,
   deletePrinterIssueService,
   deleteAllPrinterIssuesService,
   getAPrinterIssueService,
-  getPrinterIssuesFromUserService,
+  getQueriedTotalPrinterIssuesService,
+  getQueriedPrinterIssuesByUserService,
   updatePrinterIssueService,
 };

@@ -2,6 +2,7 @@ import mongoose, { Schema, model, Types } from 'mongoose';
 import { ActionsGeneral } from '../actionsGeneral.types';
 import { Action } from '../..';
 import { PhoneNumber } from '../../../user';
+import { RequestStatus } from '../../../../types';
 
 type Urgency = 'low' | 'medium' | 'high';
 
@@ -22,6 +23,7 @@ type PrinterIssueSchema = {
   printerIssueDescription: string;
   urgency: Urgency;
   additionalInformation: string;
+  requestStatus: RequestStatus;
 };
 
 type PrinterIssueDocument = PrinterIssueSchema & {
@@ -81,6 +83,12 @@ const printerIssueSchema = new Schema<PrinterIssueSchema>(
       type: String,
       required: false,
       default: '',
+    },
+    requestStatus: {
+      type: String,
+      required: false,
+      default: 'pending',
+      index: true,
     },
   },
   {

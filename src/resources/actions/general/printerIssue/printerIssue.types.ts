@@ -1,8 +1,9 @@
 import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
-import type { ActionsGeneral } from '../actionsGeneral.types';
+
 import type { Urgency, PrinterIssueDocument } from './printerIssue.model';
 import type { PhoneNumber, UserRoles } from '../../../user';
+import { GetQueriedResourceRequest, RequestStatus } from '../../../../types';
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 interface CreateNewPrinterIssueRequest extends RequestAfterJWTVerification {
@@ -23,6 +24,7 @@ interface CreateNewPrinterIssueRequest extends RequestAfterJWTVerification {
     printerIssueDescription: string;
     urgency: Urgency;
     additionalInformation: string;
+    requestStatus: RequestStatus;
   };
 }
 
@@ -44,6 +46,7 @@ interface UpdatePrinterIssueRequest extends RequestAfterJWTVerification {
     printerIssueDescription: string;
     urgency: Urgency;
     additionalInformation: string;
+    requestStatus: RequestStatus;
   };
   params: {
     printerIssueId: string;
@@ -58,7 +61,7 @@ interface DeletePrinterIssueRequest extends RequestAfterJWTVerification {
 
 type DeleteAllPrinterIssuesRequest = RequestAfterJWTVerification;
 
-type GetAllPrinterIssuesRequest = RequestAfterJWTVerification;
+type GetQueriedPrinterIssuesRequest = GetQueriedResourceRequest;
 
 interface GetAPrinterIssueRequest extends RequestAfterJWTVerification {
   params: {
@@ -66,20 +69,14 @@ interface GetAPrinterIssueRequest extends RequestAfterJWTVerification {
   };
 }
 
-type GetPrinterIssuesFromUserRequest = RequestAfterJWTVerification;
-
-type PrinterIssuesServerResponse = {
-  message: string;
-  printerIssueData: Array<PrinterIssueDocument>;
-};
+type GetQueriedPrinterIssuesByUserRequest = GetQueriedResourceRequest;
 
 export type {
   CreateNewPrinterIssueRequest,
   DeletePrinterIssueRequest,
   DeleteAllPrinterIssuesRequest,
-  GetAllPrinterIssuesRequest,
+  GetQueriedPrinterIssuesRequest,
   GetAPrinterIssueRequest,
-  GetPrinterIssuesFromUserRequest,
-  PrinterIssuesServerResponse,
+  GetQueriedPrinterIssuesByUserRequest,
   UpdatePrinterIssueRequest,
 };
