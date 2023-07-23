@@ -33,7 +33,7 @@ interface DeleteALeaveRequestRequest extends RequestAfterJWTVerification {
 
 type DeleteAllLeaveRequestsRequest = RequestAfterJWTVerification;
 
-type GetLeaveRequestsByUserRequest = GetQueriedResourceRequest;
+type GetQueriedLeaveRequestsByUserRequest = GetQueriedResourceRequest;
 
 type GetQueriedLeaveRequestsRequest = GetQueriedResourceRequest;
 
@@ -52,7 +52,7 @@ export type {
   CreateNewLeaveRequestRequest,
   DeleteALeaveRequestRequest,
   DeleteAllLeaveRequestsRequest,
-  GetLeaveRequestsByUserRequest,
+  GetQueriedLeaveRequestsByUserRequest,
   GetLeaveRequestByIdRequest,
   GetQueriedLeaveRequestsRequest,
 };

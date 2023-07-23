@@ -1,8 +1,7 @@
 import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
 import type { Country, PostalCode, Province, StatesUS, UserRoles } from '../../../user';
-import type { AddressChangeDocument, AddressChangeSchema } from './addressChange.model';
-import { RequestStatus } from '../../../../types';
+import { GetQueriedResourceRequest, RequestStatus } from '../../../../types';
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 interface CreateNewAddressChangeRequest extends RequestAfterJWTVerification {
@@ -33,7 +32,7 @@ interface DeleteAnAddressChangeRequest extends RequestAfterJWTVerification {
 
 type DeleteAllAddressChangesRequest = RequestAfterJWTVerification;
 
-type GetAddressChangesByUserRequest = RequestAfterJWTVerification;
+type GetQueriedAddressChangesByUserRequest = GetQueriedResourceRequest;
 
 interface GetAddressChangeByIdRequest extends RequestAfterJWTVerification {
   body: {
@@ -46,24 +45,13 @@ interface GetAddressChangeByIdRequest extends RequestAfterJWTVerification {
   };
 }
 
-type AddressChangeServerResponse = {
-  message: string;
-  addressChangeData: Array<Omit<AddressChangeDocument, '__v'>>;
-};
-
-type QueriedAddressChangesServerResponse = {
-  message: string;
-  pages: number;
-  totalDocuments: number;
-  addressChangesData: Array<Partial<AddressChangeDocument>>;
-};
+type GetQueriedAddressChangesRequest = GetQueriedResourceRequest;
 
 export type {
   CreateNewAddressChangeRequest,
   DeleteAnAddressChangeRequest,
   DeleteAllAddressChangesRequest,
-  GetAddressChangesByUserRequest,
+  GetQueriedAddressChangesByUserRequest,
   GetAddressChangeByIdRequest,
-  QueriedAddressChangesServerResponse,
-  AddressChangeServerResponse,
+  GetQueriedAddressChangesRequest,
 };

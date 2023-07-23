@@ -34,7 +34,7 @@ import type {
   DeleteALeaveRequestRequest,
   DeleteAllLeaveRequestsRequest,
   GetLeaveRequestByIdRequest,
-  GetLeaveRequestsByUserRequest,
+  GetQueriedLeaveRequestsByUserRequest,
 } from './leaveRequest.types';
 
 /**
@@ -66,5 +66,5 @@ export type {
   DeleteALeaveRequestRequest,
   DeleteAllLeaveRequestsRequest,
   GetLeaveRequestByIdRequest,
-  GetLeaveRequestsByUserRequest,
+  GetQueriedLeaveRequestsByUserRequest,
 };

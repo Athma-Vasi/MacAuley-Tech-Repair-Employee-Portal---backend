@@ -8,7 +8,7 @@ import type {
   DeleteALeaveRequestRequest,
   DeleteAllLeaveRequestsRequest,
   GetLeaveRequestByIdRequest,
-  GetLeaveRequestsByUserRequest,
+  GetQueriedLeaveRequestsByUserRequest,
   GetQueriedLeaveRequestsRequest,
 } from './leaveRequest.types';
 
@@ -220,7 +220,7 @@ const getQueriedLeaveRequestsHandler = expressAsyncHandler(
 // @access Private/Admin/Manager/Employee
 const getQueriedLeaveRequestsByUserHandler = expressAsyncHandler(
   async (
-    request: GetLeaveRequestsByUserRequest,
+    request: GetQueriedLeaveRequestsByUserRequest,
     response: Response<GetQueriedResourceRequestServerResponse<LeaveRequestDocument>>
   ) => {
     const {

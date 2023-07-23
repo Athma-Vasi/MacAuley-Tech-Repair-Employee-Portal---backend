@@ -7,7 +7,7 @@ import type {
   CreateNewAddressChangeRequest,
   DeleteAnAddressChangeRequest,
   DeleteAllAddressChangesRequest,
-  GetAddressChangesByUserRequest,
+  GetQueriedAddressChangesByUserRequest,
   GetAddressChangeByIdRequest,
   AddressChangeServerResponse,
   QueriedAddressChangesServerResponse,
@@ -169,7 +169,7 @@ const getQueriedAddressChangeHandler = expressAsyncHandler(
 // @access Private
 const getAddressChangesByUserHandler = expressAsyncHandler(
   async (
-    request: GetAddressChangesByUserRequest,
+    request: GetQueriedAddressChangesByUserRequest,
     response: Response<AddressChangeServerResponse>
   ) => {
     // anyone can view their own addressChange requests
