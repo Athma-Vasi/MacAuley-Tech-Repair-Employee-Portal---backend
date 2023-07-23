@@ -1,14 +1,14 @@
 import type { Types } from 'mongoose';
 import type { DeleteResult } from 'mongodb';
 import type { LeaveRequestDocument, LeaveRequestSchema } from './leaveRequest.model';
-
-import { LeaveRequestModel } from './leaveRequest.model';
-import {
+import type {
   DatabaseResponse,
   DatabaseResponseNullable,
   QueriedResourceGetRequestServiceInput,
   QueriedTotalResourceGetRequestServiceInput,
 } from '../../../../types';
+
+import { LeaveRequestModel } from './leaveRequest.model';
 
 async function createNewLeaveRequestService(
   input: LeaveRequestSchema

@@ -214,7 +214,7 @@ const repairNoteSchema = new Schema<RepairNoteSchema>(
   }
 );
 
-const RepairNote = model<RepairNoteDocument>('RepairNote', repairNoteSchema);
+const RepairNoteModel = model<RepairNoteDocument>('RepairNote', repairNoteSchema);
 
-export { RepairNote };
+export { RepairNoteModel };
 export type { RepairNoteSchema, RepairNoteDocument, RequiredRepairs, PartsNeeded, RepairStatus };
