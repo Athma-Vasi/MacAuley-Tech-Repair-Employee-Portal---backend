@@ -150,15 +150,15 @@ const getQueriedBenefitsByUserHandler = expressAsyncHandler(
 
     const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
 
+    // assign userId to filter
+    const filterWithUserId = { ...filter, userId };
+
     // only perform a countDocuments scan if a new query is being made
     if (newQueryFlag) {
       totalDocuments = await getQueriedTotalLeaveRequestsService({
-        filter: filter as FilterQuery<BenefitsDocument> | undefined,
+        filter: filterWithUserId,
       });
     }
-
-    // assign userId to filter
-    const filterWithUserId = { ...filter, userId };
 
     const benefits = await getQueriedBenefitsByUserService({
       filter: filterWithUserId as FilterQuery<BenefitsDocument> | undefined,

@@ -168,15 +168,15 @@ const getAddressChangesByUserHandler = expressAsyncHandler(
 
     const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
 
+    // assign userId to filter
+    const filterWithUserId = { ...filter, userId };
+
     // only perform a countDocuments scan if a new query is being made
     if (newQueryFlag) {
       totalDocuments = await getQueriedTotalAddressChangesService({
-        filter: filter as FilterQuery<AddressChangeDocument> | undefined,
+        filter: filterWithUserId,
       });
     }
-
-    // assign userId to filter
-    const filterWithUserId = { ...filter, userId };
 
     // get all addressChange requests by user
     const addressChanges = await getQueriedAddressChangesByUserService({

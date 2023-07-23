@@ -187,15 +187,15 @@ const getQueriedExpenseClaimsByUserHandler = expressAsyncHandler(
 
     const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
 
+    // assign userId to filter
+    const filterWithUserId = { ...filter, userId };
+
     // only perform a countDocuments scan if a new query is being made
     if (newQueryFlag) {
       totalDocuments = await getQueriedTotalExpenseClaimsService({
-        filter: filter as FilterQuery<ExpenseClaimDocument> | undefined,
+        filter: filterWithUserId,
       });
     }
-
-    // assign userId to filter
-    const filterWithUserId = { ...filter, userId };
 
     // get all expense claims for a user
     const expenseClaims = await getQueriedExpenseClaimsByUserService({

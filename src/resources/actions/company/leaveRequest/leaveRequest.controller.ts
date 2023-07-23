@@ -148,15 +148,15 @@ const getQueriedLeaveRequestsByUserHandler = expressAsyncHandler(
 
     const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
 
+    // assign userId to filter
+    const filterWithUserId = { ...filter, userId };
+
     // only perform a countDocuments scan if a new query is being made
     if (newQueryFlag) {
       totalDocuments = await getQueriedTotalLeaveRequestsService({
-        filter: filter as FilterQuery<LeaveRequestDocument> | undefined,
+        filter: filterWithUserId,
       });
     }
-
-    // assign userId to filter
-    const filterWithUserId = { ...filter, userId };
 
     const leaveRequests = await getQueriedLeaveRequestsByUserService({
       filter: filterWithUserId as FilterQuery<LeaveRequestDocument> | undefined,
