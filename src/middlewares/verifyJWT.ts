@@ -34,6 +34,7 @@ function verifyJWTMiddleware(
     request.body.userInfo = userInfo;
 
     next();
+    return;
   });
 }
 

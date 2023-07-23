@@ -10,11 +10,12 @@ import {
   updateRepairNoteByIdHandler,
 } from './repairNote.controller';
 
-import { assignQueryDefaults, verifyRoles } from '../../middlewares';
+import { assignQueryDefaults, verifyJWTMiddleware, verifyRoles } from '../../middlewares';
 import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../constants';
 
 const repairNoteRouter = Router();
 
+repairNoteRouter.use(verifyJWTMiddleware);
 repairNoteRouter.use(verifyRoles());
 
 repairNoteRouter
