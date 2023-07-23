@@ -305,6 +305,7 @@ const updateRepairNoteByIdHandler = expressAsyncHandler(
   ) => {
     const { repairNoteId } = request.params;
     const {
+      userInfo: { userId, username },
       repairNote: {
         // part information
         partName,
@@ -344,6 +345,8 @@ const updateRepairNoteByIdHandler = expressAsyncHandler(
 
     // create new repair note object
     const updatedRepairNoteObject: RepairNoteSchema = {
+      userId,
+      username,
       // part information
       partName,
       partSerialId,
