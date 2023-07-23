@@ -12,17 +12,17 @@ import {
   createNewExpenseClaimHandler,
   deleteAllExpenseClaimsHandler,
   deleteAnExpenseClaimHandler,
-  getAllExpenseClaimsHandler,
+  getQueriedExpenseClaimsHandler,
   getExpenseClaimByIdHandler,
-  getExpenseClaimsByUserHandler,
+  getQueriedExpenseClaimsByUserHandler,
 } from './expenseClaim.controller';
 import {
   createNewExpenseClaimService,
   deleteAllExpenseClaimsService,
   deleteAnExpenseClaimService,
-  getAllExpenseClaimsService,
+  getQueriedExpenseClaimsService,
   getExpenseClaimByIdService,
-  getExpenseClaimsByUserService,
+  getQueriedExpenseClaimsByUserService,
 } from './expenseClaim.service';
 
 import type {
@@ -35,10 +35,9 @@ import type {
   CreateNewExpenseClaimRequest,
   DeleteAllExpenseClaimsRequest,
   DeleteAnExpenseClaimRequest,
-  ExpenseClaimServerResponse,
-  GetAllExpenseClaimsRequest,
+  GetQueriedExpenseClaimsRequest,
   GetExpenseClaimByIdRequest,
-  GetExpenseClaimsByUserRequest,
+  GetQueriedExpenseClaimsByUserRequest,
 } from './expenseClaim.types';
 
 /**
@@ -51,15 +50,15 @@ export {
   createNewExpenseClaimHandler,
   deleteAllExpenseClaimsHandler,
   deleteAnExpenseClaimHandler,
-  getAllExpenseClaimsHandler,
+  getQueriedExpenseClaimsHandler,
   getExpenseClaimByIdHandler,
-  getExpenseClaimsByUserHandler,
+  getQueriedExpenseClaimsByUserHandler,
   createNewExpenseClaimService,
   deleteAllExpenseClaimsService,
   deleteAnExpenseClaimService,
-  getAllExpenseClaimsService,
+  getQueriedExpenseClaimsService,
   getExpenseClaimByIdService,
-  getExpenseClaimsByUserService,
+  getQueriedExpenseClaimsByUserService,
 };
 
 export type {
@@ -70,8 +69,7 @@ export type {
   CreateNewExpenseClaimRequest,
   DeleteAllExpenseClaimsRequest,
   DeleteAnExpenseClaimRequest,
-  ExpenseClaimServerResponse,
-  GetAllExpenseClaimsRequest,
+  GetQueriedExpenseClaimsRequest,
   GetExpenseClaimByIdRequest,
-  GetExpenseClaimsByUserRequest,
+  GetQueriedExpenseClaimsByUserRequest,
 };

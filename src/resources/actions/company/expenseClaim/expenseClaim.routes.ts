@@ -3,20 +3,26 @@ import {
   createNewExpenseClaimHandler,
   deleteAllExpenseClaimsHandler,
   deleteAnExpenseClaimHandler,
-  getAllExpenseClaimsHandler,
+  getQueriedExpenseClaimsHandler,
   getExpenseClaimByIdHandler,
-  getExpenseClaimsByUserHandler,
+  getQueriedExpenseClaimsByUserHandler,
 } from './expenseClaim.controller';
+import { assignQueryDefaults, verifyRoles } from '../../../../middlewares';
+import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
 
 const expenseClaimRouter = Router();
 
+expenseClaimRouter.use(verifyRoles());
+
 expenseClaimRouter
   .route('/')
-  .get(getAllExpenseClaimsHandler)
+  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedExpenseClaimsHandler)
   .post(createNewExpenseClaimHandler)
   .delete(deleteAllExpenseClaimsHandler);
 
-expenseClaimRouter.route('/user').get(getExpenseClaimsByUserHandler);
+expenseClaimRouter
+  .route('/user')
+  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedExpenseClaimsByUserHandler);
 
 expenseClaimRouter
   .route('/:expenseClaimId')

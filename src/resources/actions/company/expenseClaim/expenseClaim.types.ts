@@ -3,6 +3,7 @@ import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
 import type { ExpenseClaimKind, Currency, ExpenseClaimDocument } from './expenseClaim.model';
 import { UserRoles } from '../../../user';
+import { GetQueriedResourceRequest, RequestStatus } from '../../../../types';
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 
@@ -22,6 +23,7 @@ interface CreateNewExpenseClaimRequest extends RequestAfterJWTVerification {
       expenseClaimDescription: string;
       additionalComments: string;
       acknowledgement: boolean;
+      requestStatus: RequestStatus;
     };
   };
 }
@@ -42,9 +44,9 @@ interface DeleteAnExpenseClaimRequest extends RequestAfterJWTVerification {
 
 type DeleteAllExpenseClaimsRequest = RequestAfterJWTVerification;
 
-type GetAllExpenseClaimsRequest = RequestAfterJWTVerification;
+type GetQueriedExpenseClaimsRequest = GetQueriedResourceRequest;
 
-type GetExpenseClaimsByUserRequest = RequestAfterJWTVerification;
+type GetQueriedExpenseClaimsByUserRequest = GetQueriedResourceRequest;
 
 interface GetExpenseClaimByIdRequest extends RequestAfterJWTVerification {
   body: {
@@ -57,17 +59,11 @@ interface GetExpenseClaimByIdRequest extends RequestAfterJWTVerification {
   params: { expenseClaimId: string };
 }
 
-type ExpenseClaimServerResponse = {
-  message: string;
-  expenseClaimData: Array<ExpenseClaimDocument>;
-};
-
 export type {
   CreateNewExpenseClaimRequest,
   DeleteAnExpenseClaimRequest,
   DeleteAllExpenseClaimsRequest,
-  GetAllExpenseClaimsRequest,
-  GetExpenseClaimsByUserRequest,
+  GetQueriedExpenseClaimsRequest,
+  GetQueriedExpenseClaimsByUserRequest,
   GetExpenseClaimByIdRequest,
-  ExpenseClaimServerResponse,
 };

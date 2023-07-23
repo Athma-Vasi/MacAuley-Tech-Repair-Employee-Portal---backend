@@ -9,6 +9,10 @@ import type {
 } from './expenseClaim.model';
 
 import { ExpenseClaimModel } from './expenseClaim.model';
+import {
+  QueriedResourceGetRequestServiceInput,
+  QueriedTotalResourceGetRequestServiceInput,
+} from '../../../../types';
 
 async function createNewExpenseClaimService(
   expenseClaimData: ExpenseClaimSchema
@@ -21,31 +25,55 @@ async function createNewExpenseClaimService(
   }
 }
 
-async function getAllExpenseClaimsService(): Promise<Array<ExpenseClaimDocument>> {
+async function getQueriedExpenseClaimsService({
+  filter = {},
+  projection = null,
+  options = {},
+}: QueriedResourceGetRequestServiceInput<ExpenseClaimDocument>): Promise<
+  Array<ExpenseClaimDocument>
+> {
   try {
-    const expenseClaims = await ExpenseClaimModel.find({}).lean().exec();
+    const expenseClaims = await ExpenseClaimModel.find(filter, projection, options).lean().exec();
     return expenseClaims;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getAllExpenseClaimsService' });
+    throw new Error(error, { cause: 'getQueriedExpenseClaimsService' });
   }
 }
 
-async function getExpenseClaimsByUserService(
-  userId: Types.ObjectId
-): Promise<Array<ExpenseClaimDocument>> {
+async function getQueriedTotalExpenseClaimsService({
+  filter = {},
+}: QueriedTotalResourceGetRequestServiceInput<ExpenseClaimDocument>): Promise<number> {
   try {
-    const expenseClaims = await ExpenseClaimModel.find({ userId }).lean().exec();
+    const totalExpenseClaims = await ExpenseClaimModel.countDocuments(filter).lean().exec();
+    return totalExpenseClaims;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getQueriedTotalExpenseClaimsService' });
+  }
+}
+
+async function getQueriedExpenseClaimsByUserService({
+  filter = {},
+  projection = null,
+  options = {},
+}: QueriedResourceGetRequestServiceInput<ExpenseClaimDocument>): Promise<
+  Array<ExpenseClaimDocument>
+> {
+  try {
+    const expenseClaims = await ExpenseClaimModel.find(filter, projection, options).lean().exec();
     return expenseClaims;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getExpenseClaimsByUserService' });
+    throw new Error(error, { cause: 'getQueriedExpenseClaimsByUserService' });
   }
 }
 
 async function getExpenseClaimByIdService(
-  expenseClaimId: string
+  expenseClaimId: Types.ObjectId | string
 ): Promise<ExpenseClaimDocument | null> {
   try {
-    const expenseClaim = await ExpenseClaimModel.findById(expenseClaimId).lean().exec();
+    const expenseClaim = await ExpenseClaimModel.findById(expenseClaimId)
+      .select('-__v')
+      .lean()
+      .exec();
     return expenseClaim;
   } catch (error: any) {
     throw new Error(error, { cause: 'getExpenseClaimByIdService' });
@@ -73,7 +101,9 @@ async function returnAllUploadedFileIdsService(): Promise<Types.ObjectId[]> {
   }
 }
 
-async function deleteAnExpenseClaimService(expenseClaimId: string): Promise<DeleteResult> {
+async function deleteAnExpenseClaimService(
+  expenseClaimId: Types.ObjectId | string
+): Promise<DeleteResult> {
   try {
     const deleteResult = await ExpenseClaimModel.deleteOne({ _id: expenseClaimId }).lean().exec();
     return deleteResult;
@@ -84,9 +114,10 @@ async function deleteAnExpenseClaimService(expenseClaimId: string): Promise<Dele
 
 export {
   createNewExpenseClaimService,
-  getAllExpenseClaimsService,
-  getExpenseClaimsByUserService,
+  getQueriedExpenseClaimsService,
+  getQueriedExpenseClaimsByUserService,
   getExpenseClaimByIdService,
+  getQueriedTotalExpenseClaimsService,
   deleteAllExpenseClaimsService,
   deleteAnExpenseClaimService,
   returnAllUploadedFileIdsService,

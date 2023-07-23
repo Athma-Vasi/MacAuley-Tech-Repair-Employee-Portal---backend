@@ -124,7 +124,7 @@ const getQueriedLeaveRequestsHandler = expressAsyncHandler(
       });
     } else {
       response.status(200).json({
-        message: 'Leave requests found successfully',
+        message: 'Successfully found leave requests',
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
         totalDocuments: leaveRequests.length,
         resourceData: leaveRequests,

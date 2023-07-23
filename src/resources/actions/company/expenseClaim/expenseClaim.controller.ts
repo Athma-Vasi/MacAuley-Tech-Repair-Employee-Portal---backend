@@ -7,19 +7,19 @@ import type {
   CreateNewExpenseClaimRequest,
   DeleteAllExpenseClaimsRequest,
   DeleteAnExpenseClaimRequest,
-  ExpenseClaimServerResponse,
-  GetAllExpenseClaimsRequest,
+  GetQueriedExpenseClaimsRequest,
   GetExpenseClaimByIdRequest,
-  GetExpenseClaimsByUserRequest,
+  GetQueriedExpenseClaimsByUserRequest,
 } from './expenseClaim.types';
 
 import {
   createNewExpenseClaimService,
   deleteAllExpenseClaimsService,
   deleteAnExpenseClaimService,
-  getAllExpenseClaimsService,
+  getQueriedExpenseClaimsService,
   getExpenseClaimByIdService,
-  getExpenseClaimsByUserService,
+  getQueriedExpenseClaimsByUserService,
+  getQueriedTotalExpenseClaimsService,
 } from './expenseClaim.service';
 import {
   deleteAllFileUploadsByAssociatedResourceService,
@@ -27,13 +27,22 @@ import {
   getFileUploadByIdService,
   insertAssociatedResourceDocumentIdService,
 } from '../../../fileUpload';
-import { ExpenseClaimSchema } from './expenseClaim.model';
+import { ExpenseClaimDocument, ExpenseClaimSchema } from './expenseClaim.model';
+import {
+  GetQueriedResourceRequestServerResponse,
+  QueryObjectParsedWithDefaults,
+  ResourceRequestServerResponse,
+} from '../../../../types';
+import { FilterQuery, QueryOptions } from 'mongoose';
 
 // @desc   Create a new expense claim
 // @route  POST /expense-claim
 // @access Private
 const createNewExpenseClaimHandler = expressAsyncHandler(
-  async (request: CreateNewExpenseClaimRequest, response: Response<ExpenseClaimServerResponse>) => {
+  async (
+    request: CreateNewExpenseClaimRequest,
+    response: Response<ResourceRequestServerResponse<ExpenseClaimDocument>>
+  ) => {
     const {
       userInfo: { userId, username },
       expenseClaim: {
@@ -45,12 +54,13 @@ const createNewExpenseClaimHandler = expressAsyncHandler(
         expenseClaimDescription,
         additionalComments,
         acknowledgement,
+        requestStatus,
       },
     } = request.body;
 
     // user must acknowledge that expenseClaim info is correct
     if (!acknowledgement) {
-      response.status(400).json({ message: 'Acknowledgement is required', expenseClaimData: [] });
+      response.status(400).json({ message: 'Acknowledgement is required', resourceData: [] });
       return;
     }
 
@@ -68,7 +78,14 @@ const createNewExpenseClaimHandler = expressAsyncHandler(
       expenseClaimDescription,
       additionalComments,
       acknowledgement,
+      requestStatus,
     };
+
+    // user must acknowledge that expenseClaim info is correct
+    if (!acknowledgement) {
+      response.status(400).json({ message: 'Acknowledgement is required', resourceData: [] });
+      return;
+    }
 
     // create new expenseClaim
     const newExpenseClaim = await createNewExpenseClaimService(newExpenseClaimObject);
@@ -78,7 +95,7 @@ const createNewExpenseClaimHandler = expressAsyncHandler(
       // grab the corresponding fileUpload document
       const fileUpload = await getFileUploadByIdService(uploadedFileId);
       if (!fileUpload) {
-        response.status(404).json({ message: 'File upload not found', expenseClaimData: [] });
+        response.status(404).json({ message: 'File upload not found', resourceData: [] });
         return;
       }
 
@@ -97,17 +114,17 @@ const createNewExpenseClaimHandler = expressAsyncHandler(
       if (!updatedFileUpload) {
         response
           .status(400)
-          .json({ message: 'File upload could not be updated', expenseClaimData: [] });
+          .json({ message: 'File upload could not be updated', resourceData: [] });
         return;
       }
 
       response
         .status(201)
-        .json({ message: 'New expense claim created', expenseClaimData: [newExpenseClaim] });
+        .json({ message: 'New expense claim created', resourceData: [newExpenseClaim] });
     } else {
       response
         .status(400)
-        .json({ message: 'New expense claim could not be created', expenseClaimData: [] });
+        .json({ message: 'New expense claim could not be created', resourceData: [] });
     }
   }
 );
@@ -115,30 +132,42 @@ const createNewExpenseClaimHandler = expressAsyncHandler(
 // @desc   Get all expense claims
 // @route  GET /expense-claim
 // @access Private/Admin/Manager
-const getAllExpenseClaimsHandler = expressAsyncHandler(
-  async (request: GetAllExpenseClaimsRequest, response: Response<ExpenseClaimServerResponse>) => {
-    const {
-      userInfo: { roles, userId },
-    } = request.body;
+const getQueriedExpenseClaimsHandler = expressAsyncHandler(
+  async (
+    request: GetQueriedExpenseClaimsRequest,
+    response: Response<GetQueriedResourceRequestServerResponse<ExpenseClaimDocument>>
+  ) => {
+    let { newQueryFlag, totalDocuments } = request.body;
 
-    // check permissions: only admin and manager can view all expense claims
-    if (roles.includes('Employee')) {
-      response.status(403).json({
-        message: 'Only managers/admins can view all expense claims',
-        expenseClaimData: [],
+    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+
+    // only perform a countDocuments scan if a new query is being made
+    if (newQueryFlag) {
+      totalDocuments = await getQueriedTotalExpenseClaimsService({
+        filter: filter as FilterQuery<ExpenseClaimDocument> | undefined,
       });
-      return;
     }
 
     // get all expense claims
-    const allExpenseClaims = await getAllExpenseClaimsService();
-
-    if (allExpenseClaims) {
-      response
-        .status(200)
-        .json({ message: 'All expense claims', expenseClaimData: allExpenseClaims });
+    const expenseClaims = await getQueriedExpenseClaimsService({
+      filter: filter as FilterQuery<ExpenseClaimDocument> | undefined,
+      projection: projection as QueryOptions<ExpenseClaimDocument>,
+      options: options as QueryOptions<ExpenseClaimDocument>,
+    });
+    if (expenseClaims.length === 0) {
+      response.status(404).json({
+        message: 'No expense claims that match query parameters were found',
+        pages: 0,
+        totalDocuments: 0,
+        resourceData: [],
+      });
     } else {
-      response.status(404).json({ message: 'No expense claims found', expenseClaimData: [] });
+      response.status(200).json({
+        message: 'Successfully fetched expense claims',
+        pages: Math.ceil(totalDocuments / Number(options?.limit)),
+        totalDocuments,
+        resourceData: expenseClaims,
+      });
     }
   }
 );
@@ -146,24 +175,48 @@ const getAllExpenseClaimsHandler = expressAsyncHandler(
 // @desc   Get expense claims by user
 // @route  GET /expense-claim/user
 // @access Private
-const getExpenseClaimsByUserHandler = expressAsyncHandler(
+const getQueriedExpenseClaimsByUserHandler = expressAsyncHandler(
   async (
-    request: GetExpenseClaimsByUserRequest,
-    response: Response<ExpenseClaimServerResponse>
+    request: GetQueriedExpenseClaimsByUserRequest,
+    response: Response<GetQueriedResourceRequestServerResponse<ExpenseClaimDocument>>
   ) => {
     const {
       userInfo: { userId },
     } = request.body;
+    let { newQueryFlag, totalDocuments } = request.body;
 
-    // anyone can view their own expense claims
-    const expenseClaimsByUser = await getExpenseClaimsByUserService(userId);
-    if (expenseClaimsByUser.length > 0) {
-      response.status(200).json({
-        message: 'Successfully fetched expense claims',
-        expenseClaimData: expenseClaimsByUser,
+    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+
+    // only perform a countDocuments scan if a new query is being made
+    if (newQueryFlag) {
+      totalDocuments = await getQueriedTotalExpenseClaimsService({
+        filter: filter as FilterQuery<ExpenseClaimDocument> | undefined,
+      });
+    }
+
+    // assign userId to filter
+    const filterWithUserId = { ...filter, userId };
+
+    // get all expense claims for a user
+    const expenseClaims = await getQueriedExpenseClaimsByUserService({
+      filter: filterWithUserId as FilterQuery<ExpenseClaimDocument> | undefined,
+      projection: projection as QueryOptions<ExpenseClaimDocument>,
+      options: options as QueryOptions<ExpenseClaimDocument>,
+    });
+    if (expenseClaims.length === 0) {
+      response.status(404).json({
+        message: 'No expense claims that match query parameters were found',
+        pages: 0,
+        totalDocuments: 0,
+        resourceData: [],
       });
     } else {
-      response.status(404).json({ message: 'No expense claims found', expenseClaimData: [] });
+      response.status(200).json({
+        message: 'Successfully fetched expense claims',
+        pages: Math.ceil(totalDocuments / Number(options?.limit)),
+        totalDocuments,
+        resourceData: expenseClaims,
+      });
     }
   }
 );
@@ -172,36 +225,21 @@ const getExpenseClaimsByUserHandler = expressAsyncHandler(
 // @route  GET /expense-claim/:expenseClaimId
 // @access Private/Admin/Manager
 const getExpenseClaimByIdHandler = expressAsyncHandler(
-  async (request: GetExpenseClaimByIdRequest, response: Response<ExpenseClaimServerResponse>) => {
-    const {
-      userInfo: { roles, userId },
-    } = request.body;
-
+  async (
+    request: GetExpenseClaimByIdRequest,
+    response: Response<ResourceRequestServerResponse<ExpenseClaimDocument>>
+  ) => {
     const expenseClaimId = request.params.expenseClaimId;
-
-    // check permissions: only admin and manager can view an expense claim that does not belong to them
-    if (roles.includes('Employee')) {
-      const expenseClaim = await getExpenseClaimsByUserService(userId);
-      if (!expenseClaim) {
-        response.status(404).json({ message: 'Expense claim not found', expenseClaimData: [] });
-        return;
-      }
-      response.status(200).json({
-        message: 'Successfully fetched expense claim',
-        expenseClaimData: expenseClaim,
-      });
-      return;
-    }
 
     // get expense claim by id
     const expenseClaim = await getExpenseClaimByIdService(expenseClaimId);
     if (expenseClaim) {
       response.status(200).json({
         message: 'Successfully fetched expense claim',
-        expenseClaimData: [expenseClaim],
+        resourceData: [expenseClaim],
       });
     } else {
-      response.status(404).json({ message: 'Expense claim not found', expenseClaimData: [] });
+      response.status(404).json({ message: 'Expense claim not found', resourceData: [] });
     }
   }
 );
@@ -210,20 +248,10 @@ const getExpenseClaimByIdHandler = expressAsyncHandler(
 // @route  DELETE /expense-claim
 // @access Private/Admin/Manager
 const deleteAllExpenseClaimsHandler = expressAsyncHandler(
-  async (request: DeleteAllExpenseClaimsRequest, response: Response) => {
-    const {
-      userInfo: { roles, userId },
-    } = request.body;
-
-    // check permissions: only admin and manager can delete all expense claims
-    if (roles.includes('Employee')) {
-      response.status(403).json({
-        message: 'Only managers/admins can delete all expense claims',
-        expenseClaimData: [],
-      });
-      return;
-    }
-
+  async (
+    _request: DeleteAllExpenseClaimsRequest,
+    response: Response<ResourceRequestServerResponse<ExpenseClaimDocument>>
+  ) => {
     // delete all file uploads with associated resource 'Expense Claim'
     const deleteFileUploadsResult: DeleteResult =
       await deleteAllFileUploadsByAssociatedResourceService('expense claim');
@@ -231,7 +259,7 @@ const deleteAllExpenseClaimsHandler = expressAsyncHandler(
       response.status(400).json({
         message:
           'All file uploads associated with all expense claims could not be deleted. Expense Claims not deleted. Please try again.',
-        expenseClaimData: [],
+        resourceData: [],
       });
       return;
     }
@@ -240,11 +268,11 @@ const deleteAllExpenseClaimsHandler = expressAsyncHandler(
     const deleteExpenseClaimsResult: DeleteResult = await deleteAllExpenseClaimsService();
 
     if (deleteExpenseClaimsResult.deletedCount > 0) {
-      response.status(200).json({ message: 'All expense claims deleted', expenseClaimData: [] });
+      response.status(200).json({ message: 'All expense claims deleted', resourceData: [] });
     } else {
       response
         .status(400)
-        .json({ message: 'All expense claims could not be deleted', expenseClaimData: [] });
+        .json({ message: 'All expense claims could not be deleted', resourceData: [] });
     }
   }
 );
@@ -253,22 +281,12 @@ const deleteAllExpenseClaimsHandler = expressAsyncHandler(
 // @route  DELETE /expense-claim/:expenseClaimId
 // @access Private/Admin/Manager
 const deleteAnExpenseClaimHandler = expressAsyncHandler(
-  async (request: DeleteAnExpenseClaimRequest, response: Response<ExpenseClaimServerResponse>) => {
-    const {
-      userInfo: { roles },
-      uploadedFileId,
-    } = request.body;
-
+  async (
+    request: DeleteAnExpenseClaimRequest,
+    response: Response<ResourceRequestServerResponse<ExpenseClaimDocument>>
+  ) => {
+    const { uploadedFileId } = request.body;
     const expenseClaimId = request.params.expenseClaimId;
-
-    // check permissions: only admin and manager can delete an expense claim
-    if (roles.includes('Employee')) {
-      response.status(403).json({
-        message: 'Only managers/admins can delete an expense claim',
-        expenseClaimData: [],
-      });
-      return;
-    }
 
     // delete associated file upload with this expense claim
     const deleteFileUploadResult: DeleteResult = await deleteFileUploadByIdService(uploadedFileId);
@@ -276,7 +294,7 @@ const deleteAnExpenseClaimHandler = expressAsyncHandler(
       response.status(400).json({
         message:
           'File upload associated with this expense claim could not be deleted. Expense Claim not deleted. Please try again.',
-        expenseClaimData: [],
+        resourceData: [],
       });
       return;
     }
@@ -287,11 +305,11 @@ const deleteAnExpenseClaimHandler = expressAsyncHandler(
     );
 
     if (deleteExpenseClaimResult.deletedCount > 0) {
-      response.status(200).json({ message: 'Expense claim deleted', expenseClaimData: [] });
+      response.status(200).json({ message: 'Expense claim deleted', resourceData: [] });
     } else {
       response.status(400).json({
         message: 'Expense claim could not be deleted. Please try again.',
-        expenseClaimData: [],
+        resourceData: [],
       });
     }
   }
@@ -299,8 +317,8 @@ const deleteAnExpenseClaimHandler = expressAsyncHandler(
 
 export {
   createNewExpenseClaimHandler,
-  getAllExpenseClaimsHandler,
-  getExpenseClaimsByUserHandler,
+  getQueriedExpenseClaimsHandler,
+  getQueriedExpenseClaimsByUserHandler,
   getExpenseClaimByIdHandler,
   deleteAllExpenseClaimsHandler,
   deleteAnExpenseClaimHandler,

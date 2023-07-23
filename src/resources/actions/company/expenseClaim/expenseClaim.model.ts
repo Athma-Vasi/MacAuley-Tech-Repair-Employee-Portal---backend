@@ -1,6 +1,7 @@
 import { Schema, Types, model } from 'mongoose';
 import type { Action } from '../../../actions';
 import type { ActionsCompany } from '../../company';
+import { RequestStatus } from '../../../../types';
 
 type ExpenseClaimKind =
   | 'Travel and Accomodation'
@@ -30,6 +31,7 @@ type ExpenseClaimSchema = {
   expenseClaimDescription: string;
   additionalComments: string;
   acknowledgement: boolean;
+  requestStatus: RequestStatus;
 };
 
 type ExpenseClaimDocument = ExpenseClaimSchema & {
@@ -97,6 +99,12 @@ const expenseClaimSchema = new Schema<ExpenseClaimSchema>(
     acknowledgement: {
       type: Boolean,
       required: [true, 'Acknowledgement is required'],
+    },
+    requestStatus: {
+      type: String,
+      required: false,
+      default: 'pending',
+      index: true,
     },
   },
   {
