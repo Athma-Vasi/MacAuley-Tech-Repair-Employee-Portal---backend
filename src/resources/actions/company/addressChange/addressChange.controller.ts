@@ -9,23 +9,26 @@ import type {
   DeleteAllAddressChangesRequest,
   GetQueriedAddressChangesByUserRequest,
   GetAddressChangeByIdRequest,
-  AddressChangeServerResponse,
-  QueriedAddressChangesServerResponse,
 } from './addressChange.types';
 
-import { checkUserExistsService, getUserByIdService, updateUserService } from '../../../user';
+import { getUserByIdService, updateUserService } from '../../../user';
 import {
   createNewAddressChangeService,
   deleteAddressChangeByIdService,
   deleteAllAddressChangesService,
   getAddressChangeByIdService,
-  getAddressChangesByUserService,
+  getQueriedAddressChangesByUserService,
   getQueriedTotalAddressChangesService,
   getQueriedAddressChangesService,
 } from './addressChange.service';
 import { FilterQuery, QueryOptions } from 'mongoose';
 
-import { GetQueriedResourceRequest, QueryObjectParsedWithDefaults } from '../../../../types';
+import {
+  GetQueriedResourceRequest,
+  GetQueriedResourceRequestServerResponse,
+  QueryObjectParsedWithDefaults,
+  ResourceRequestServerResponse,
+} from '../../../../types';
 
 // @desc   Create a new address change request
 // @route  POST /address-change
@@ -33,7 +36,7 @@ import { GetQueriedResourceRequest, QueryObjectParsedWithDefaults } from '../../
 const createNewAddressChangeHandler = expressAsyncHandler(
   async (
     request: CreateNewAddressChangeRequest,
-    response: Response<AddressChangeServerResponse>
+    response: Response<ResourceRequestServerResponse<AddressChangeDocument>>
   ) => {
     const {
       userInfo: { userId, username },
@@ -45,13 +48,13 @@ const createNewAddressChangeHandler = expressAsyncHandler(
     // check if user exists
     const userExists = await getUserByIdService(userId);
     if (!userExists) {
-      response.status(404).json({ message: 'User does not exist', addressChangeData: [] });
+      response.status(404).json({ message: 'User does not exist', resourceData: [] });
       return;
     }
 
     // user must acknowledge that new address is correct
     if (!acknowledgement) {
-      response.status(400).json({ message: 'Acknowledgement is required', addressChangeData: [] });
+      response.status(400).json({ message: 'Acknowledgement is required', resourceData: [] });
       return;
     }
 
@@ -62,7 +65,7 @@ const createNewAddressChangeHandler = expressAsyncHandler(
     if (JSON.stringify(newAddress) === JSON.stringify(address)) {
       response
         .status(400)
-        .json({ message: 'New address is the same as current address', addressChangeData: [] });
+        .json({ message: 'New address is the same as current address', resourceData: [] });
       return;
     }
 
@@ -75,7 +78,7 @@ const createNewAddressChangeHandler = expressAsyncHandler(
     // update user's address
     const updatedUser = await updateUserService(newUserObject);
     if (!updatedUser) {
-      response.status(400).json({ message: 'User update failed', addressChangeData: [] });
+      response.status(400).json({ message: 'User update failed', resourceData: [] });
       return;
     }
 
@@ -95,12 +98,12 @@ const createNewAddressChangeHandler = expressAsyncHandler(
     if (createdAddressChange) {
       response.status(201).json({
         message: `User ${username} address was changed successfully`,
-        addressChangeData: [createdAddressChange],
+        resourceData: [createdAddressChange],
       });
     } else {
       response
         .status(400)
-        .json({ message: 'New address change request creation failed', addressChangeData: [] });
+        .json({ message: 'New address change request creation failed', resourceData: [] });
     }
   }
 );
@@ -108,32 +111,16 @@ const createNewAddressChangeHandler = expressAsyncHandler(
 // @desc   Get all address changes
 // @route  GET /address-change
 // @access Private/Admin/Manager
-const getQueriedAddressChangeHandler = expressAsyncHandler(
+const getQueriedAddressChangesHandler = expressAsyncHandler(
   async (
     request: GetQueriedResourceRequest,
-    response: Response<QueriedAddressChangesServerResponse>
+    response: Response<GetQueriedResourceRequestServerResponse<AddressChangeDocument>>
   ) => {
-    let {
-      userInfo: { roles, userId, username },
-      newQueryFlag,
-      totalDocuments,
-    } = request.body;
+    let { newQueryFlag, totalDocuments } = request.body;
 
     const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
 
-    // check if user has permission
-    if (roles.includes('Employee')) {
-      response.status(403).json({
-        message: 'User does not have permission',
-        pages: 0,
-        totalDocuments: 0,
-        addressChangesData: [],
-      });
-      return;
-    }
-
-    // if its a brand new query, get total number of documents that match the query options and filter
-    // a performance optimization at an acceptable cost in accuracy as the actual number of documents may change between new queries
+    // only perform a countDocuments scan if a new query is being made
     if (newQueryFlag) {
       totalDocuments = await getQueriedTotalAddressChangesService({
         filter: filter as FilterQuery<AddressChangeDocument> | undefined,
@@ -151,14 +138,14 @@ const getQueriedAddressChangeHandler = expressAsyncHandler(
         message: 'No address changes that match query parameters were found',
         pages: 0,
         totalDocuments: 0,
-        addressChangesData: [],
+        resourceData: [],
       });
     } else {
       response.status(200).json({
         message: 'address changes found successfully',
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
         totalDocuments: addressChange.length,
-        addressChangesData: addressChange,
+        resourceData: addressChange,
       });
     }
   }
@@ -170,23 +157,46 @@ const getQueriedAddressChangeHandler = expressAsyncHandler(
 const getAddressChangesByUserHandler = expressAsyncHandler(
   async (
     request: GetQueriedAddressChangesByUserRequest,
-    response: Response<AddressChangeServerResponse>
+    response: Response<GetQueriedResourceRequestServerResponse<AddressChangeDocument>>
   ) => {
     // anyone can view their own addressChange requests
     const {
       userInfo: { userId },
     } = request.body;
 
+    let { newQueryFlag, totalDocuments } = request.body;
+
+    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+
+    // only perform a countDocuments scan if a new query is being made
+    if (newQueryFlag) {
+      totalDocuments = await getQueriedTotalAddressChangesService({
+        filter: filter as FilterQuery<AddressChangeDocument> | undefined,
+      });
+    }
+
+    // assign userId to filter
+    const filterWithUserId = { ...filter, userId };
+
     // get all addressChange requests by user
-    const addressChanges = await getAddressChangesByUserService(userId);
+    const addressChanges = await getQueriedAddressChangesByUserService({
+      filter: filterWithUserId as FilterQuery<AddressChangeDocument> | undefined,
+      projection: projection as QueryOptions<AddressChangeDocument>,
+      options: options as QueryOptions<AddressChangeDocument>,
+    });
     if (addressChanges.length === 0) {
-      response
-        .status(404)
-        .json({ message: 'No addressChange requests found', addressChangeData: [] });
+      response.status(404).json({
+        message: 'No addressChange requests found',
+        pages: 0,
+        totalDocuments: 0,
+        resourceData: [],
+      });
     } else {
       response.status(200).json({
         message: 'AddressChange requests found successfully',
-        addressChangeData: addressChanges,
+        pages: Math.ceil(totalDocuments / Number(options?.limit)),
+        totalDocuments: addressChanges.length,
+        resourceData: addressChanges,
       });
     }
   }
@@ -196,32 +206,19 @@ const getAddressChangesByUserHandler = expressAsyncHandler(
 // @route  GET /address-change/:addressChangeId
 // @access Private
 const getAddressChangeByIdHandler = expressAsyncHandler(
-  async (request: GetAddressChangeByIdRequest, response: Response<AddressChangeServerResponse>) => {
-    const {
-      userInfo: { roles, userId },
-      addressChangeId,
-    } = request.body;
-
-    // only managers/admin can view addressChange requests not belonging to them
-    if (roles.includes('Employee')) {
-      response.status(403).json({
-        message:
-          'Only managers or admins are allowed to view an addressChange request not belonging to them',
-        addressChangeData: [],
-      });
-      return;
-    }
-
+  async (
+    request: GetAddressChangeByIdRequest,
+    response: Response<ResourceRequestServerResponse<AddressChangeDocument>>
+  ) => {
+    const { addressChangeId } = request.params;
     // get addressChange request by id
     const addressChange = await getAddressChangeByIdService(addressChangeId);
     if (!addressChange) {
-      response
-        .status(404)
-        .json({ message: 'AddressChange request not found', addressChangeData: [] });
+      response.status(404).json({ message: 'AddressChange request not found', resourceData: [] });
     } else {
       response.status(200).json({
         message: 'AddressChange request found successfully',
-        addressChangeData: [addressChange],
+        resourceData: [addressChange],
       });
     }
   }
@@ -232,26 +229,14 @@ const getAddressChangeByIdHandler = expressAsyncHandler(
 // @access Private
 const deleteAnAddressChangeHandler = expressAsyncHandler(
   async (request: DeleteAnAddressChangeRequest, response: Response) => {
-    const {
-      userInfo: { roles, userId },
-    } = request.body;
     const addressChangeId = request.params.addressChangeId;
-
-    // only managers/admin can access this route
-    if (roles.includes('Employee')) {
-      response.status(403).json({
-        message: 'Only managers or admins are allowed to delete an addressChange request',
-        addressChangeData: [],
-      });
-      return;
-    }
 
     // check addressChange request exists
     const addressChangeExists = await getAddressChangeByIdService(addressChangeId);
     if (!addressChangeExists) {
       response
         .status(404)
-        .json({ message: 'AddressChange request does not exist', addressChangeData: [] });
+        .json({ message: 'AddressChange request does not exist', resourceData: [] });
       return;
     }
 
@@ -260,12 +245,12 @@ const deleteAnAddressChangeHandler = expressAsyncHandler(
     if (deletedResult.deletedCount === 1) {
       response.status(200).json({
         message: 'AddressChange request deleted successfully',
-        addressChangeData: [],
+        resourceData: [],
       });
     } else {
       response.status(400).json({
         message: 'AddressChange request could not be deleted',
-        addressChangeData: [],
+        resourceData: [],
       });
     }
   }
@@ -275,31 +260,18 @@ const deleteAnAddressChangeHandler = expressAsyncHandler(
 // @route   DELETE /address-change
 // @access  Private
 const deleteAllAddressChangesHandler = expressAsyncHandler(
-  async (request: DeleteAllAddressChangesRequest, response: Response) => {
-    const {
-      userInfo: { roles, userId },
-    } = request.body;
-
-    // only managers/admin can access this route
-    if (roles.includes('Employee')) {
-      response.status(403).json({
-        message: 'Only managers or admins are allowed to delete all addressChange requests',
-        addressChangeData: [],
-      });
-      return;
-    }
-
+  async (_request: DeleteAllAddressChangesRequest, response: Response) => {
     // delete all addressChange requests
     const deletedResult: DeleteResult = await deleteAllAddressChangesService();
     if (deletedResult.deletedCount > 0) {
       response.status(200).json({
         message: 'All addressChange requests deleted successfully',
-        addressChangeData: [],
+        resourceData: [],
       });
     } else {
       response.status(400).json({
         message: 'All addressChange requests could not be deleted',
-        addressChangeData: [],
+        resourceData: [],
       });
     }
   }
@@ -307,7 +279,7 @@ const deleteAllAddressChangesHandler = expressAsyncHandler(
 
 export {
   createNewAddressChangeHandler,
-  getQueriedAddressChangeHandler,
+  getQueriedAddressChangesHandler,
   getAddressChangesByUserHandler,
   getAddressChangeByIdHandler,
   deleteAnAddressChangeHandler,

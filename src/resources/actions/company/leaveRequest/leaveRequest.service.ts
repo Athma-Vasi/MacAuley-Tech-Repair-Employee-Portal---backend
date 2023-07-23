@@ -86,7 +86,7 @@ async function getQueriedLeaveRequestsByUserService({
     const leaveRequests = await LeaveRequestModel.find(filter, projection, options).lean().exec();
     return leaveRequests;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getLeaveRequestsByUserService' });
+    throw new Error(error, { cause: 'getQueriedLeaveRequestsByUserService' });
   }
 }
 

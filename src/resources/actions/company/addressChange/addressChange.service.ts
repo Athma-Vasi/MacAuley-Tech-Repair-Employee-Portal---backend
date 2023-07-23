@@ -53,14 +53,16 @@ async function getQueriedTotalAddressChangesService({
   }
 }
 
-async function getAddressChangesByUserService(
-  userId: Types.ObjectId | string
-): DatabaseResponse<AddressChangeDocument> {
+async function getQueriedAddressChangesByUserService({
+  filter = {},
+  projection = null,
+  options = {},
+}: QueriedResourceGetRequestServiceInput<AddressChangeDocument>): DatabaseResponse<AddressChangeDocument> {
   try {
-    const addressChanges = await AddressChangeModel.find({ userId }).lean().exec();
+    const addressChanges = await AddressChangeModel.find(filter, projection, options).lean().exec();
     return addressChanges;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getAddressChangesByUserService' });
+    throw new Error(error, { cause: 'getQueriedAddressChangesByUserService' });
   }
 }
 
@@ -91,7 +93,7 @@ export {
   createNewAddressChangeService,
   getQueriedAddressChangesService,
   getQueriedTotalAddressChangesService,
-  getAddressChangesByUserService,
+  getQueriedAddressChangesByUserService,
   deleteAddressChangeByIdService,
   deleteAllAddressChangesService,
 };

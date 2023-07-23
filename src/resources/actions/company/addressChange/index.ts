@@ -13,26 +13,26 @@ import {
   deleteAllAddressChangesHandler,
   getAddressChangesByUserHandler,
   getAddressChangeByIdHandler,
-  getQueriedAddressChangeHandler,
+  getQueriedAddressChangesHandler,
 } from './addressChange.controller';
 import {
   createNewAddressChangeService,
   deleteAddressChangeByIdService,
   deleteAllAddressChangesService,
   getQueriedAddressChangesService,
+  getQueriedTotalAddressChangesService,
   getAddressChangeByIdService,
-  getAddressChangesByUserService,
+  getQueriedAddressChangesByUserService,
 } from './addressChange.service';
 
 import type { AddressChangeDocument, AddressChangeSchema } from './addressChange.model';
 import type {
   CreateNewAddressChangeRequest,
   DeleteAnAddressChangeRequest,
-  QueriedAddressChangesServerResponse,
   GetQueriedAddressChangesByUserRequest,
   GetAddressChangeByIdRequest,
   DeleteAllAddressChangesRequest,
-  AddressChangeServerResponse,
+  GetQueriedAddressChangesRequest,
 } from './addressChange.types';
 
 /**
@@ -45,14 +45,15 @@ export {
   deleteAnAddressChangeHandler,
   deleteAllAddressChangesHandler,
   getAddressChangesByUserHandler,
-  getQueriedAddressChangeHandler,
+  getQueriedAddressChangesHandler,
   getAddressChangeByIdHandler,
   createNewAddressChangeService,
   deleteAddressChangeByIdService,
   deleteAllAddressChangesService,
   getAddressChangeByIdService,
-  getAddressChangesByUserService,
+  getQueriedAddressChangesByUserService,
   getQueriedAddressChangesService,
+  getQueriedTotalAddressChangesService,
 };
 
 export type {
@@ -60,9 +61,8 @@ export type {
   AddressChangeSchema,
   CreateNewAddressChangeRequest,
   DeleteAnAddressChangeRequest,
-  QueriedAddressChangesServerResponse,
   GetQueriedAddressChangesByUserRequest,
   GetAddressChangeByIdRequest,
   DeleteAllAddressChangesRequest,
-  AddressChangeServerResponse,
+  GetQueriedAddressChangesRequest,
 };

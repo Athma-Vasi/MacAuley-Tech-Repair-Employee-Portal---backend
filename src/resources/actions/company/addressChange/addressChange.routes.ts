@@ -1,18 +1,22 @@
 import { Router } from 'express';
 import {
   createNewAddressChangeHandler,
-  getQueriedAddressChangeHandler,
+  getQueriedAddressChangesHandler,
   getAddressChangesByUserHandler,
   getAddressChangeByIdHandler,
   deleteAnAddressChangeHandler,
   deleteAllAddressChangesHandler,
 } from './addressChange.controller';
+import { assignQueryDefaults, verifyRoles } from '../../../../middlewares';
+import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
 
 const addressChangeRouter = Router();
 
+addressChangeRouter.use(verifyRoles());
+
 addressChangeRouter
   .route('/')
-  .get(getQueriedAddressChangeHandler)
+  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedAddressChangesHandler)
   .post(createNewAddressChangeHandler)
   .delete(deleteAllAddressChangesHandler);
 
@@ -20,7 +24,7 @@ addressChangeRouter.route('/user').get(getAddressChangesByUserHandler);
 
 addressChangeRouter
   .route('/:addressChangeId')
-  .get(getAddressChangeByIdHandler)
+  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getAddressChangeByIdHandler)
   .delete(deleteAnAddressChangeHandler);
 
 export { addressChangeRouter };
