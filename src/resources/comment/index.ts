@@ -12,17 +12,17 @@ import {
   createNewCommentHandler,
   deleteACommentHandler,
   deleteAllCommentsHandler,
-  getAllCommentsHandler,
+  getQueriedCommentsHandler,
   getCommentByIdHandler,
-  getCommentsByUserHandler,
+  getQueriedCommentsByUserHandler,
 } from './comment.controller';
 import {
   createNewCommentService,
   deleteACommentService,
   deleteAllCommentsService,
-  getAllCommentsService,
+  getQueriedCommentsService,
   getCommentByIdService,
-  getCommentsByUserService,
+  getQueriedCommentsByUserService,
 } from './comment.service';
 
 import type { CommentDocument, CommentSchema } from './comment.model';
@@ -30,11 +30,10 @@ import type {
   CreateNewCommentRequest,
   DeleteACommentRequest,
   DeleteAllCommentsRequest,
-  GetAllCommentsRequest,
+  GetQueriedCommentsRequest,
   GetCommentByIdRequest,
   GetCommentsByAnnouncementIdRequest,
-  GetCommentsByUserRequest,
-  CommentServerResponse,
+  GetQueriedCommentsByUserRequest,
 } from './comment.types';
 
 /**
@@ -47,15 +46,15 @@ export {
   createNewCommentHandler,
   deleteACommentHandler,
   deleteAllCommentsHandler,
-  getAllCommentsHandler,
+  getQueriedCommentsHandler,
   getCommentByIdHandler,
-  getCommentsByUserHandler,
+  getQueriedCommentsByUserHandler,
   createNewCommentService,
   deleteACommentService,
   deleteAllCommentsService,
-  getAllCommentsService,
+  getQueriedCommentsService,
   getCommentByIdService,
-  getCommentsByUserService,
+  getQueriedCommentsByUserService,
 };
 
 export type {
@@ -64,9 +63,8 @@ export type {
   CreateNewCommentRequest,
   DeleteACommentRequest,
   DeleteAllCommentsRequest,
-  GetAllCommentsRequest,
+  GetQueriedCommentsRequest,
   GetCommentByIdRequest,
   GetCommentsByAnnouncementIdRequest,
-  GetCommentsByUserRequest,
-  CommentServerResponse,
+  GetQueriedCommentsByUserRequest,
 };

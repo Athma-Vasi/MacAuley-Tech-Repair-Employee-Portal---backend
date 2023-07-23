@@ -1,6 +1,5 @@
 import { Schema, Types, model } from 'mongoose';
 import type { UserRoles } from '../user';
-import { SurveyBuilderDocument } from '../actions/outreach/surveyBuilder';
 
 type CommentSchema = {
   creatorId: Types.ObjectId;

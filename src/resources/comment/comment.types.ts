@@ -2,8 +2,7 @@ import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../auth';
 import type { CommentDocument, CommentSchema } from './comment.model';
 import type { UserRoles } from '../user';
-
-import { CommentModel } from './comment.model';
+import { GetQueriedResourceRequest, QueryObjectParsed } from '../../types';
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 
@@ -36,9 +35,9 @@ interface DeleteACommentRequest extends RequestAfterJWTVerification {
 
 type DeleteAllCommentsRequest = RequestAfterJWTVerification;
 
-type GetAllCommentsRequest = RequestAfterJWTVerification;
+type GetQueriedCommentsRequest = GetQueriedResourceRequest;
 
-type GetCommentsByUserRequest = RequestAfterJWTVerification;
+type GetQueriedCommentsByUserRequest = GetQueriedResourceRequest;
 
 interface GetCommentByIdRequest extends RequestAfterJWTVerification {
   body: {
@@ -51,29 +50,26 @@ interface GetCommentByIdRequest extends RequestAfterJWTVerification {
   params: { commentId: string };
 }
 
-interface GetCommentsByAnnouncementIdRequest extends RequestAfterJWTVerification {
+interface GetCommentsByAnnouncementIdRequest extends GetQueriedResourceRequest {
   body: {
     userInfo: {
       userId: Types.ObjectId;
       username: string;
       roles: UserRoles;
     };
+    newQueryFlag: boolean;
+    totalDocuments: number;
   };
+  query: QueryObjectParsed;
   params: { announcementId: string };
 }
-
-type CommentServerResponse = {
-  message: string;
-  commentData: Array<CommentDocument>;
-};
 
 export type {
   CreateNewCommentRequest,
   DeleteACommentRequest,
   DeleteAllCommentsRequest,
-  GetAllCommentsRequest,
-  GetCommentsByUserRequest,
+  GetQueriedCommentsRequest,
+  GetQueriedCommentsByUserRequest,
   GetCommentByIdRequest,
   GetCommentsByAnnouncementIdRequest,
-  CommentServerResponse,
 };

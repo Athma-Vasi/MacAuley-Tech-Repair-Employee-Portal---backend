@@ -2,7 +2,12 @@ import { Types } from 'mongoose';
 
 import type { DeleteResult } from 'mongodb';
 import type { CommentDocument, CommentSchema } from './comment.model';
-import type { DatabaseResponse, DatabaseResponseNullable } from '../../types';
+import type {
+  DatabaseResponse,
+  DatabaseResponseNullable,
+  QueriedResourceGetRequestServiceInput,
+  QueriedTotalResourceGetRequestServiceInput,
+} from '../../types';
 
 import { CommentModel } from './comment.model';
 
@@ -12,6 +17,43 @@ async function createNewCommentService(commentObj: CommentSchema): Promise<Comme
     return newComment;
   } catch (error: any) {
     throw new Error(error, { cause: 'createNewCommentService' });
+  }
+}
+
+async function getQueriedCommentsService({
+  filter = {},
+  projection = null,
+  options = {},
+}: QueriedResourceGetRequestServiceInput<CommentDocument>): DatabaseResponse<CommentDocument> {
+  try {
+    const comments = await CommentModel.find(filter, projection, options).lean().exec();
+    return comments;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getQueriedCommentsService' });
+  }
+}
+
+async function getQueriedTotalCommentsService({
+  filter = {},
+}: QueriedTotalResourceGetRequestServiceInput<CommentDocument>): Promise<number> {
+  try {
+    const totalComments = await CommentModel.countDocuments(filter).lean().exec();
+    return totalComments;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getQueriedTotalCommentsService' });
+  }
+}
+
+async function getQueriedCommentsByUserService({
+  filter = {},
+  projection = null,
+  options = {},
+}: QueriedResourceGetRequestServiceInput<CommentDocument>): DatabaseResponse<CommentDocument> {
+  try {
+    const comments = await CommentModel.find(filter, projection, options).lean().exec();
+    return comments;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getQueriedCommentsByUserService' });
   }
 }
 
@@ -44,34 +86,16 @@ async function deleteAllCommentsService(): Promise<DeleteResult> {
   }
 }
 
-async function getAllCommentsService(): DatabaseResponse<CommentDocument> {
+async function getQueriedCommentsByAnnouncementIdService({
+  filter = {},
+  projection = null,
+  options = {},
+}: QueriedResourceGetRequestServiceInput<CommentDocument>): DatabaseResponse<CommentDocument> {
   try {
-    const comments = await CommentModel.find({}).lean().exec();
+    const comments = await CommentModel.find(filter, projection, options).lean().exec();
     return comments;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getAllCommentsService' });
-  }
-}
-
-async function getCommentsByUserService(
-  userId: Types.ObjectId | string
-): DatabaseResponse<CommentDocument> {
-  try {
-    const comments = await CommentModel.find({ _id: userId }).lean().exec();
-    return comments;
-  } catch (error: any) {
-    throw new Error(error, { cause: 'getCommentsByUserService' });
-  }
-}
-
-async function getCommentsByAnnouncementIdService(
-  announcementId: Types.ObjectId | string
-): DatabaseResponse<CommentDocument> {
-  try {
-    const comments = await CommentModel.find({ _id: announcementId }).lean().exec();
-    return comments;
-  } catch (error: any) {
-    throw new Error(error, { cause: 'getCommentsByAnnouncementIdService' });
+    throw new Error(error, { cause: 'getQueriedCommentsByAnnouncementIdService' });
   }
 }
 
@@ -80,7 +104,8 @@ export {
   getCommentByIdService,
   deleteACommentService,
   deleteAllCommentsService,
-  getAllCommentsService,
-  getCommentsByUserService,
-  getCommentsByAnnouncementIdService,
+  getQueriedCommentsService,
+  getQueriedCommentsByUserService,
+  getQueriedCommentsByAnnouncementIdService,
+  getQueriedTotalCommentsService,
 };
