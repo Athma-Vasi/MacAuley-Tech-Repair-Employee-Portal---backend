@@ -62,12 +62,11 @@ async function getQueriedRepairNotesByUserService({
   }
 }
 
-async function getRepairNoteByIdService(repairNoteId: Types.ObjectId | string) {
+async function getRepairNoteByIdService(
+  repairNoteId: Types.ObjectId | string
+): DatabaseResponseNullable<RepairNoteDocument> {
   try {
-    const repairNote = await RepairNoteModel.find({ _id: repairNoteId })
-      .select('-__v')
-      .lean()
-      .exec();
+    const repairNote = await RepairNoteModel.findById(repairNoteId).select('-__v').lean().exec();
     return repairNote;
   } catch (error: any) {
     throw new Error(error, { cause: 'getRepairNoteByIdService' });

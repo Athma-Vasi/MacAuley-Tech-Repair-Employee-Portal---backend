@@ -257,7 +257,7 @@ const deleteAllLeaveRequestsHandler = expressAsyncHandler(
       });
     } else {
       response.status(400).json({
-        message: 'All leave requests could not be deleted',
+        message: 'All leave requests could not be deleted. Please try again!',
         resourceData: [],
       });
     }
