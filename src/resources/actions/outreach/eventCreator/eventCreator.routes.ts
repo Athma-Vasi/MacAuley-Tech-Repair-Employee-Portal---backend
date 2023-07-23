@@ -4,22 +4,32 @@ import {
   createNewEventHandler,
   deleteAllEventsByUserHandler,
   deleteAnEventHandler,
-  getAllEventsHandler,
+  getQueriedEventsHandler,
   getEventByIdHandler,
-  getEventsByUserHandler,
+  getQueriedEventsByUserHandler,
   updateAnEventHandler,
 } from './eventCreator.controller';
+import { assignQueryDefaults, verifyRoles } from '../../../../middlewares';
+import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
 
 const eventCreatorRouter = Router();
 
-eventCreatorRouter.route('/').post(createNewEventHandler).get(getAllEventsHandler);
+eventCreatorRouter.use(verifyRoles());
+
+eventCreatorRouter
+  .route('/')
+  .post(createNewEventHandler)
+  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedEventsHandler);
+
+eventCreatorRouter
+  .route('/user')
+  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedEventsByUserHandler)
+  .delete(deleteAllEventsByUserHandler);
 
 eventCreatorRouter
   .route('/:eventId')
   .get(getEventByIdHandler)
   .delete(deleteAnEventHandler)
   .put(updateAnEventHandler);
-
-eventCreatorRouter.route('/user').get(getEventsByUserHandler).delete(deleteAllEventsByUserHandler);
 
 export { eventCreatorRouter };

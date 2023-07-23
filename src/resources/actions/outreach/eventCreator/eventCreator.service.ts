@@ -2,7 +2,12 @@ import { Types } from 'mongoose';
 
 import type { DeleteResult } from 'mongodb';
 import type { EventCreatorDocument, EventCreatorSchema } from './eventCreator.model';
-import type { DatabaseResponse, DatabaseResponseNullable } from '../../../../types';
+import type {
+  DatabaseResponse,
+  DatabaseResponseNullable,
+  QueriedResourceGetRequestServiceInput,
+  QueriedTotalResourceGetRequestServiceInput,
+} from '../../../../types';
 
 import { EventCreatorModel } from './eventCreator.model';
 
@@ -17,21 +22,40 @@ async function createNewEventService(
   }
 }
 
-async function deleteAnEventService(eventId: Types.ObjectId | string): Promise<DeleteResult> {
+async function getQueriedEventsService({
+  filter = {},
+  projection = null,
+  options = {},
+}: QueriedResourceGetRequestServiceInput<EventCreatorDocument>): DatabaseResponse<EventCreatorDocument> {
   try {
-    const deleteResult = await EventCreatorModel.deleteOne({ _id: eventId }).lean().exec();
-    return deleteResult;
+    const allEvents = await EventCreatorModel.find(filter, projection, options).lean().exec();
+    return allEvents;
   } catch (error: any) {
-    throw new Error(error, { cause: 'deleteAnEventService' });
+    throw new Error(error, { cause: 'getQueriedEventsService' });
   }
 }
 
-async function getAllEventsService(): DatabaseResponse<EventCreatorDocument> {
+async function getQueriedTotalEventsService({
+  filter = {},
+}: QueriedTotalResourceGetRequestServiceInput<EventCreatorDocument>): Promise<number> {
   try {
-    const allEvents = await EventCreatorModel.find({}).lean().exec();
-    return allEvents;
+    const totalEvents = await EventCreatorModel.countDocuments(filter).lean().exec();
+    return totalEvents;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getAllEventsService' });
+    throw new Error(error, { cause: 'getQueriedtotalEventsService' });
+  }
+}
+
+async function getQueriedEventsByUserService({
+  filter = {},
+  projection = null,
+  options = {},
+}: QueriedResourceGetRequestServiceInput<EventCreatorDocument>): DatabaseResponse<EventCreatorDocument> {
+  try {
+    const events = await EventCreatorModel.find(filter, projection, options).lean().exec();
+    return events;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getQueriedEventsByUserService' });
   }
 }
 
@@ -46,14 +70,12 @@ async function getEventByIdService(
   }
 }
 
-async function getEventsByUserService(
-  userId: Types.ObjectId | string
-): DatabaseResponse<EventCreatorDocument> {
+async function deleteAnEventService(eventId: Types.ObjectId | string): Promise<DeleteResult> {
   try {
-    const events = await EventCreatorModel.find({ creatorId: userId }).lean().exec();
-    return events;
+    const deleteResult = await EventCreatorModel.deleteOne({ _id: eventId }).lean().exec();
+    return deleteResult;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getEventsByUserService' });
+    throw new Error(error, { cause: 'deleteAnEventService' });
   }
 }
 
@@ -92,9 +114,10 @@ async function updateAnEventByIdService({
 export {
   createNewEventService,
   deleteAnEventService,
-  getAllEventsService,
+  getQueriedEventsService,
+  getQueriedTotalEventsService,
   getEventByIdService,
-  getEventsByUserService,
+  getQueriedEventsByUserService,
   deleteAllEventsByUserService,
   updateAnEventByIdService,
 };
