@@ -12,17 +12,17 @@ import {
   createNewSurveyHandler,
   deleteASurveyHandler,
   deleteAllSurveysHandler,
-  getAllSurveysHandler,
+  getQueriedSurveysHandler,
   getSurveyByIdHandler,
-  getSurveysByUserHandler,
+  getQueriedSurveysByUserHandler,
 } from './surveyBuilder.controller';
 import {
   createNewSurveyService,
   deleteASurveyService,
   deleteAllSurveysService,
-  getAllSurveysService,
+  getQueriedSurveysService,
   getSurveyByIdService,
-  getSurveysByUserService,
+  getQueriedSurveysByUserService,
 } from './surveyBuilder.service';
 
 import type {
@@ -36,10 +36,9 @@ import type {
   CreateNewSurveyRequest,
   DeleteASurveyRequest,
   DeleteAllSurveysRequest,
-  GetAllSurveysRequest,
+  GetQueriedSurveysRequest,
   GetSurveyByIdRequest,
-  GetSurveysByUserRequest,
-  SurveyServerResponse,
+  GetQueriedSurveysByUserRequest,
 } from './surveyBuilder.types';
 
 /**
@@ -52,15 +51,15 @@ export {
   createNewSurveyHandler,
   deleteASurveyHandler,
   deleteAllSurveysHandler,
-  getAllSurveysHandler,
+  getQueriedSurveysHandler,
   getSurveyByIdHandler,
-  getSurveysByUserHandler,
+  getQueriedSurveysByUserHandler,
   createNewSurveyService,
   deleteASurveyService,
   deleteAllSurveysService,
-  getAllSurveysService,
+  getQueriedSurveysService,
   getSurveyByIdService,
-  getSurveysByUserService,
+  getQueriedSurveysByUserService,
 };
 
 export type {
@@ -72,8 +71,7 @@ export type {
   CreateNewSurveyRequest,
   DeleteASurveyRequest,
   DeleteAllSurveysRequest,
-  GetAllSurveysRequest,
+  GetQueriedSurveysRequest,
   GetSurveyByIdRequest,
-  GetSurveysByUserRequest,
-  SurveyServerResponse,
+  GetQueriedSurveysByUserRequest,
 };

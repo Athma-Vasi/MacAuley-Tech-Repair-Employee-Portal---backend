@@ -8,7 +8,7 @@ type SurveyRecipient = 'All' | 'Active' | 'Inactive' | 'Employees' | 'Admins' | 
 type SurveyResponseKind = {
   chooseOne: 'trueFalse' | 'yesNo' | 'radio';
   chooseAny: 'checkbox' | 'dropdown';
-  shortAnswer: 'shortAnswer';
+  answerKind: 'shortAnswer' | 'longAnswer';
   rating: 'scale' | 'emotion' | 'stars';
 };
 
