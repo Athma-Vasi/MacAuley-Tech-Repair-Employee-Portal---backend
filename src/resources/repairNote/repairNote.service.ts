@@ -1,6 +1,10 @@
 import type { Types } from 'mongoose';
 import type { DeleteResult } from 'mongodb';
-import type { RepairNoteDocument, RepairNoteSchema } from './repairNote.model';
+import type {
+  RepairNoteDocument,
+  RepairNoteInitialSchema,
+  RepairNoteSchema,
+} from './repairNote.model';
 import type {
   DatabaseResponse,
   DatabaseResponseNullable,
@@ -10,7 +14,9 @@ import type {
 
 import { RepairNoteModel } from './repairNote.model';
 
-async function createNewRepairNoteService(input: RepairNoteSchema): Promise<RepairNoteDocument> {
+async function createNewRepairNoteService(
+  input: RepairNoteInitialSchema
+): Promise<RepairNoteDocument> {
   try {
     const repairNote = await RepairNoteModel.create(input);
     return repairNote;

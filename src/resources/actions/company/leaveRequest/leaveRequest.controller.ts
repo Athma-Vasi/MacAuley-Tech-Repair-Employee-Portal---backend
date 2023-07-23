@@ -11,6 +11,12 @@ import type {
   GetQueriedLeaveRequestsByUserRequest,
   GetQueriedLeaveRequestsRequest,
 } from './leaveRequest.types';
+import type {
+  GetQueriedResourceRequestServerResponse,
+  QueryObjectParsedWithDefaults,
+  ResourceRequestServerResponse,
+} from '../../../../types';
+import type { LeaveRequestDocument, LeaveRequestSchema } from './leaveRequest.model';
 
 import {
   createNewLeaveRequestService,
@@ -21,12 +27,6 @@ import {
   getQueriedLeaveRequestsByUserService,
   getQueriedTotalLeaveRequestsService,
 } from './leaveRequest.service';
-import { LeaveRequestDocument, LeaveRequestSchema } from './leaveRequest.model';
-import {
-  GetQueriedResourceRequestServerResponse,
-  QueryObjectParsedWithDefaults,
-  ResourceRequestServerResponse,
-} from '../../../../types';
 
 // @desc   Create a new leave request
 // @route  POST /leave-request

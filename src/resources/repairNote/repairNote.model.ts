@@ -80,6 +80,13 @@ type RepairNoteDocument = RepairNoteSchema & {
   __v: number;
 };
 
+type RepairNoteInitialSchema = Omit<
+  RepairNoteSchema,
+  'repairNotes' | 'testingResults' | 'finalRepairCost' | 'repairStatus'
+>;
+
+type RepairNoteFinalSchema = RepairNoteSchema;
+
 const repairNoteSchema = new Schema<RepairNoteSchema>(
   {
     userId: {
@@ -195,18 +202,22 @@ const repairNoteSchema = new Schema<RepairNoteSchema>(
     repairNotes: {
       type: String,
       required: false,
+      default: '',
     },
     testingResults: {
       type: String,
       required: false,
+      default: '',
     },
     finalRepairCost: {
       type: Number,
       required: false,
+      default: 0,
     },
     repairStatus: {
       type: String,
       required: false,
+      default: 'In progress',
     },
   },
   {
@@ -217,4 +228,12 @@ const repairNoteSchema = new Schema<RepairNoteSchema>(
 const RepairNoteModel = model<RepairNoteDocument>('RepairNote', repairNoteSchema);
 
 export { RepairNoteModel };
-export type { RepairNoteSchema, RepairNoteDocument, RequiredRepairs, PartsNeeded, RepairStatus };
+export type {
+  RepairNoteSchema,
+  RepairNoteDocument,
+  RequiredRepairs,
+  PartsNeeded,
+  RepairStatus,
+  RepairNoteInitialSchema,
+  RepairNoteFinalSchema,
+};
