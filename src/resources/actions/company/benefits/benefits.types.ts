@@ -1,7 +1,8 @@
 import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
 import type { UserRoles } from '../../../user';
-import type { BenefitsDocument, BenefitsPlanKind, Currency } from './benefits.model';
+import type { BenefitsPlanKind, Currency } from './benefits.model';
+import { GetQueriedResourceRequest, RequestStatus } from '../../../../types';
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 
@@ -22,6 +23,7 @@ interface CreateNewBenefitsRequest extends RequestAfterJWTVerification {
       monthlyPremium: number;
       employerContribution: number;
       employeeContribution: number;
+      requestStatus: RequestStatus;
     };
   };
 }
@@ -34,9 +36,9 @@ interface DeleteABenefitRequest extends RequestAfterJWTVerification {
 
 type DeleteAllBenefitsByUserRequest = RequestAfterJWTVerification;
 
-type GetAllBenefitsRequest = RequestAfterJWTVerification;
+type GetQueriedBenefitsRequest = GetQueriedResourceRequest;
 
-type GetBenefitsByUserRequest = RequestAfterJWTVerification;
+type GetQueriedBenefitsByUserRequest = GetQueriedResourceRequest;
 
 interface GetBenefitsByIdRequest extends RequestAfterJWTVerification {
   body: {
@@ -49,17 +51,11 @@ interface GetBenefitsByIdRequest extends RequestAfterJWTVerification {
   params: { benefitsId: string };
 }
 
-type BenefitsServerResponse = {
-  message: string;
-  benefitsData: Array<BenefitsDocument>;
-};
-
 export type {
   CreateNewBenefitsRequest,
   DeleteABenefitRequest,
   DeleteAllBenefitsByUserRequest,
-  GetAllBenefitsRequest,
-  GetBenefitsByUserRequest,
+  GetQueriedBenefitsRequest,
+  GetQueriedBenefitsByUserRequest,
   GetBenefitsByIdRequest,
-  BenefitsServerResponse,
 };

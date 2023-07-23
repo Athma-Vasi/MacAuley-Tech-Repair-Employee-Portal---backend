@@ -14,15 +14,15 @@ import {
   deleteAllBenefitsByUserHandler,
   getAllBenefitsHandler,
   getBenefitByIdHandler,
-  getBenefitsByUserHandler,
+  getQueriedBenefitsByUserHandler,
 } from './benefits.controller';
 import {
   createNewBenefitService,
   deleteABenefitService,
   deleteAllBenefitsByUserService,
-  getAllBenefitsService,
+  getQueriedBenefitsService,
   getBenefitByIdService,
-  getBenefitsByUserService,
+  getQueriedBenefitsByUserService,
 } from './benefits.service';
 
 import type {
@@ -32,13 +32,12 @@ import type {
   Currency,
 } from './benefits.model';
 import type {
-  BenefitsServerResponse,
   CreateNewBenefitsRequest,
   DeleteABenefitRequest,
   DeleteAllBenefitsByUserRequest,
-  GetAllBenefitsRequest,
+  GetQueriedBenefitsRequest,
   GetBenefitsByIdRequest,
-  GetBenefitsByUserRequest,
+  GetQueriedBenefitsByUserRequest,
 } from './benefits.types';
 
 /**
@@ -53,25 +52,24 @@ export {
   deleteAllBenefitsByUserHandler,
   getAllBenefitsHandler,
   getBenefitByIdHandler,
-  getBenefitsByUserHandler,
+  getQueriedBenefitsByUserHandler,
   createNewBenefitService,
   deleteABenefitService,
   deleteAllBenefitsByUserService,
-  getAllBenefitsService,
+  getQueriedBenefitsService,
   getBenefitByIdService,
-  getBenefitsByUserService,
+  getQueriedBenefitsByUserService,
 };
 
 export type {
   BenefitsDocument,
   BenefitsSchema,
   BenefitsPlanKind,
-  BenefitsServerResponse,
   Currency,
   CreateNewBenefitsRequest,
   DeleteABenefitRequest,
   DeleteAllBenefitsByUserRequest,
-  GetAllBenefitsRequest,
+  GetQueriedBenefitsRequest,
   GetBenefitsByIdRequest,
-  GetBenefitsByUserRequest,
+  GetQueriedBenefitsByUserRequest,
 };

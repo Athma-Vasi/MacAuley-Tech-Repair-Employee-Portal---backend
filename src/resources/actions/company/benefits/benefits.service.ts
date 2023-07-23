@@ -4,7 +4,11 @@ import type { DeleteResult } from 'mongodb';
 import type { BenefitsDocument, BenefitsSchema } from './benefits.model';
 
 import { BenefitsModel } from './benefits.model';
-import { DatabaseResponse, DatabaseResponseNullable } from '../../../../types';
+import {
+  DatabaseResponse,
+  DatabaseResponseNullable,
+  QueriedResourceGetRequestServiceInput,
+} from '../../../../types';
 
 async function createNewBenefitService(newBenefitObj: BenefitsSchema): Promise<BenefitsDocument> {
   try {
@@ -15,7 +19,55 @@ async function createNewBenefitService(newBenefitObj: BenefitsSchema): Promise<B
   }
 }
 
-async function deleteABenefitService(benefitId: string): Promise<DeleteResult> {
+async function getQueriedBenefitsService({
+  filter = {},
+  projection = null,
+  options = {},
+}: QueriedResourceGetRequestServiceInput<BenefitsDocument>): DatabaseResponse<BenefitsDocument> {
+  try {
+    const allBenefits = await BenefitsModel.find(filter, projection, options).lean().exec();
+    return allBenefits;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getQueriedBenefitsService' });
+  }
+}
+
+async function getQueriedTotalBenefitsService({
+  filter = {},
+}: QueriedResourceGetRequestServiceInput<BenefitsDocument>): Promise<number> {
+  try {
+    const totalBenefits = await BenefitsModel.countDocuments(filter).lean().exec();
+    return totalBenefits;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getQueriedTotalBenefitsService' });
+  }
+}
+
+async function getQueriedBenefitsByUserService({
+  filter = {},
+  projection = null,
+  options = {},
+}: QueriedResourceGetRequestServiceInput<BenefitsDocument>): DatabaseResponse<BenefitsDocument> {
+  try {
+    const allBenefits = await BenefitsModel.find(filter, projection, options).lean().exec();
+    return allBenefits;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getQueriedBenefitsByUserService' });
+  }
+}
+
+async function getBenefitByIdService(
+  benefitId: Types.ObjectId | string
+): DatabaseResponseNullable<BenefitsDocument> {
+  try {
+    const benefit = await BenefitsModel.findById(benefitId).select('-__v').lean().exec();
+    return benefit;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getBenefitByIdService' });
+  }
+}
+
+async function deleteABenefitService(benefitId: Types.ObjectId | string): Promise<DeleteResult> {
   try {
     const deleteResult = await BenefitsModel.deleteOne({ _id: benefitId }).lean().exec();
     return deleteResult;
@@ -24,7 +76,9 @@ async function deleteABenefitService(benefitId: string): Promise<DeleteResult> {
   }
 }
 
-async function deleteAllBenefitsByUserService(userId: Types.ObjectId): Promise<DeleteResult> {
+async function deleteAllBenefitsByUserService(
+  userId: Types.ObjectId | string
+): Promise<DeleteResult> {
   try {
     const deleteResult = await BenefitsModel.deleteMany({ userId }).lean().exec();
     return deleteResult;
@@ -33,42 +87,12 @@ async function deleteAllBenefitsByUserService(userId: Types.ObjectId): Promise<D
   }
 }
 
-async function getAllBenefitsService(): DatabaseResponse<BenefitsDocument> {
-  try {
-    const allBenefits = await BenefitsModel.find({}).lean().exec();
-    return allBenefits;
-  } catch (error: any) {
-    throw new Error(error, { cause: 'getAllBenefitsService' });
-  }
-}
-
-async function getBenefitsByUserService(
-  userId: Types.ObjectId
-): DatabaseResponse<BenefitsDocument> {
-  try {
-    const allBenefits = await BenefitsModel.find({ userId }).lean().exec();
-    return allBenefits;
-  } catch (error: any) {
-    throw new Error(error, { cause: 'getBenefitsByUserService' });
-  }
-}
-
-async function getBenefitByIdService(
-  benefitId: string
-): DatabaseResponseNullable<BenefitsDocument> {
-  try {
-    const benefit = await BenefitsModel.findById(benefitId).lean().exec();
-    return benefit;
-  } catch (error: any) {
-    throw new Error(error, { cause: 'getBenefitByIdService' });
-  }
-}
-
 export {
   createNewBenefitService,
   deleteABenefitService,
   deleteAllBenefitsByUserService,
-  getAllBenefitsService,
-  getBenefitsByUserService,
+  getQueriedBenefitsService,
+  getQueriedBenefitsByUserService,
   getBenefitByIdService,
+  getQueriedTotalBenefitsService,
 };

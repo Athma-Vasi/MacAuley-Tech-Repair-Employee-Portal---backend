@@ -1,6 +1,7 @@
 import { Schema, Types, model } from 'mongoose';
 import type { Action } from '../../../actions';
 import type { ActionsCompany } from '../../company';
+import { RequestStatus } from '../../../../types';
 
 type BenefitsPlanKind =
   | 'Health'
@@ -29,6 +30,7 @@ type BenefitsSchema = {
   monthlyPremium: number;
   employerContribution: number;
   employeeContribution: number;
+  requestStatus: RequestStatus;
 };
 
 type BenefitsDocument = BenefitsSchema & {
@@ -99,6 +101,13 @@ const benefitsSchema = new Schema<BenefitsSchema>(
     employeeContribution: {
       type: Number,
       required: [true, 'Employee contribution is required'],
+    },
+
+    requestStatus: {
+      type: String,
+      required: false,
+      default: 'pending',
+      index: true,
     },
   },
   {

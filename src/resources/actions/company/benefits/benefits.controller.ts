@@ -3,29 +3,39 @@ import type { DeleteResult } from 'mongodb';
 
 import type { Response } from 'express';
 import type {
-  BenefitsServerResponse,
   CreateNewBenefitsRequest,
   DeleteABenefitRequest,
   DeleteAllBenefitsByUserRequest,
-  GetAllBenefitsRequest,
+  GetQueriedBenefitsRequest,
   GetBenefitsByIdRequest,
-  GetBenefitsByUserRequest,
+  GetQueriedBenefitsByUserRequest,
 } from './benefits.types';
 import {
   createNewBenefitService,
   deleteABenefitService,
   deleteAllBenefitsByUserService,
-  getAllBenefitsService,
+  getQueriedBenefitsService,
   getBenefitByIdService,
-  getBenefitsByUserService,
+  getQueriedBenefitsByUserService,
+  getQueriedTotalBenefitsService,
 } from './benefits.service';
-import { BenefitsSchema } from './benefits.model';
+import { BenefitsDocument, BenefitsSchema } from './benefits.model';
+import {
+  GetQueriedResourceRequestServerResponse,
+  QueryObjectParsedWithDefaults,
+  ResourceRequestServerResponse,
+} from '../../../../types';
+import { FilterQuery, QueryOptions } from 'mongoose';
+import { getQueriedTotalLeaveRequestsService } from '../leaveRequest/leaveRequest.service';
 
 // @desc   Create a new benefits plan
 // @route  POST /benefits
 // @access Private/Admin/Manager
 const createNewBenefitsHandler = expressAsyncHandler(
-  async (request: CreateNewBenefitsRequest, response: Response<BenefitsServerResponse>) => {
+  async (
+    request: CreateNewBenefitsRequest,
+    response: Response<ResourceRequestServerResponse<BenefitsDocument>>
+  ) => {
     const {
       userInfo: { userId, username, roles },
       benefits: {
@@ -38,8 +48,15 @@ const createNewBenefitsHandler = expressAsyncHandler(
         monthlyPremium,
         employerContribution,
         employeeContribution,
+        requestStatus,
       },
     } = request.body;
+
+    // only managers can create a new benefits plan
+    if (!roles.includes('Manager')) {
+      response.status(403).json({ message: 'User does not have permission', resourceData: [] });
+      return;
+    }
 
     // create new benefits plan object
     const newBenefitsObject: BenefitsSchema = {
@@ -57,6 +74,7 @@ const createNewBenefitsHandler = expressAsyncHandler(
       monthlyPremium,
       employerContribution,
       employeeContribution,
+      requestStatus,
     };
 
     // create new benefits plan
@@ -64,49 +82,11 @@ const createNewBenefitsHandler = expressAsyncHandler(
     if (newBenefitsPlan) {
       response
         .status(201)
-        .json({ message: 'New benefits plan created', benefitsData: [newBenefitsPlan] });
+        .json({ message: 'New benefits plan created', resourceData: [newBenefitsPlan] });
     } else {
       response
         .status(400)
-        .json({ message: 'Unable to create new benefits plan', benefitsData: [] });
-    }
-  }
-);
-
-// @desc   Delete a benefits plan by id
-// @route  DELETE /benefits/:benefitsId
-// @access Private/Admin/Manager
-const deleteABenefitHandler = expressAsyncHandler(
-  async (request: DeleteABenefitRequest, response: Response<BenefitsServerResponse>) => {
-    const { benefitsId } = request.params;
-
-    // delete a benefits plan
-    const deleteBenefitResult: DeleteResult = await deleteABenefitService(benefitsId);
-    if (deleteBenefitResult.deletedCount === 1) {
-      response.status(200).json({ message: 'Benefits plan deleted', benefitsData: [] });
-    } else {
-      response.status(400).json({ message: 'Unable to delete benefits plan', benefitsData: [] });
-    }
-  }
-);
-
-// @desc   Delete all benefits plans for a user
-// @route  DELETE /benefits/user
-// @access Private/Admin/Manager
-const deleteAllBenefitsByUserHandler = expressAsyncHandler(
-  async (request: DeleteAllBenefitsByUserRequest, response: Response<BenefitsServerResponse>) => {
-    const userId = request.body.userInfo.userId;
-
-    // delete all benefits plans for a user
-    const deleteAllBenefitsResult: DeleteResult = await deleteAllBenefitsByUserService(userId);
-    if (deleteAllBenefitsResult.deletedCount > 0) {
-      response
-        .status(200)
-        .json({ message: 'All benefits plans for this user deleted', benefitsData: [] });
-    } else {
-      response
-        .status(400)
-        .json({ message: 'Unable to delete all benefits plans for this user', benefitsData: [] });
+        .json({ message: 'Unable to create new benefits plan', resourceData: [] });
     }
   }
 );
@@ -115,16 +95,41 @@ const deleteAllBenefitsByUserHandler = expressAsyncHandler(
 // @route  GET /benefits
 // @access Private/Admin/Manager
 const getAllBenefitsHandler = expressAsyncHandler(
-  async (request: GetAllBenefitsRequest, response: Response<BenefitsServerResponse>) => {
+  async (
+    request: GetQueriedBenefitsRequest,
+    response: Response<GetQueriedResourceRequestServerResponse<BenefitsDocument>>
+  ) => {
+    let { newQueryFlag, totalDocuments } = request.body;
+
+    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+
+    // only perform a countDocuments scan if a new query is being made
+    if (newQueryFlag) {
+      totalDocuments = await getQueriedTotalBenefitsService({
+        filter: filter as FilterQuery<BenefitsDocument> | undefined,
+      });
+    }
+
     // get all benefits plans
-    const allBenefitsPlans = await getAllBenefitsService();
-    if (allBenefitsPlans.length > 0) {
-      response.status(200).json({
-        message: 'All benefits plans fetched successfully',
-        benefitsData: allBenefitsPlans,
+    const allBenefitsPlans = await getQueriedBenefitsService({
+      filter: filter as FilterQuery<BenefitsDocument> | undefined,
+      projection: projection as QueryOptions<BenefitsDocument>,
+      options: options as QueryOptions<BenefitsDocument>,
+    });
+    if (allBenefitsPlans.length === 0) {
+      response.status(404).json({
+        message: 'No benefits that match query parameters were found',
+        pages: 0,
+        totalDocuments: 0,
+        resourceData: [],
       });
     } else {
-      response.status(400).json({ message: 'Unable to get all benefits plans', benefitsData: [] });
+      response.status(200).json({
+        message: 'All benefits plans fetched successfully',
+        pages: Math.ceil(totalDocuments / Number(options?.limit)),
+        totalDocuments,
+        resourceData: allBenefitsPlans,
+      });
     }
   }
 );
@@ -132,19 +137,48 @@ const getAllBenefitsHandler = expressAsyncHandler(
 // @desc   Get all benefits plans for a user
 // @route  GET /benefits/user
 // @access Private/Admin/Manager
-const getBenefitsByUserHandler = expressAsyncHandler(
-  async (request: GetBenefitsByUserRequest, response: Response<BenefitsServerResponse>) => {
-    const userId = request.body.userInfo.userId;
+const getQueriedBenefitsByUserHandler = expressAsyncHandler(
+  async (
+    request: GetQueriedBenefitsByUserRequest,
+    response: Response<GetQueriedResourceRequestServerResponse<BenefitsDocument>>
+  ) => {
+    const {
+      userInfo: { userId },
+    } = request.body;
 
-    // get all benefits plans for a user
-    const allBenefitPlans = await getBenefitsByUserService(userId);
-    if (allBenefitPlans.length > 0) {
-      response.status(200).json({
-        message: 'All benefits plans fetched successfully',
-        benefitsData: allBenefitPlans,
+    let { newQueryFlag, totalDocuments } = request.body;
+
+    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+
+    // only perform a countDocuments scan if a new query is being made
+    if (newQueryFlag) {
+      totalDocuments = await getQueriedTotalLeaveRequestsService({
+        filter: filter as FilterQuery<BenefitsDocument> | undefined,
+      });
+    }
+
+    // assign userId to filter
+    const filterWithUserId = { ...filter, userId };
+
+    const benefits = await getQueriedBenefitsByUserService({
+      filter: filterWithUserId as FilterQuery<BenefitsDocument> | undefined,
+      projection: projection as QueryOptions<BenefitsDocument>,
+      options: options as QueryOptions<BenefitsDocument>,
+    });
+    if (benefits.length === 0) {
+      response.status(404).json({
+        message: 'No benefits that match query parameters were found',
+        pages: 0,
+        totalDocuments: 0,
+        resourceData: [],
       });
     } else {
-      response.status(400).json({ message: 'Unable to get all benefits plans', benefitsData: [] });
+      response.status(200).json({
+        message: 'Benefits plans fetched successfully',
+        pages: Math.ceil(totalDocuments / Number(options?.limit)),
+        totalDocuments,
+        resourceData: benefits,
+      });
     }
   }
 );
@@ -153,7 +187,10 @@ const getBenefitsByUserHandler = expressAsyncHandler(
 // @route  GET /benefits/:benefitsId
 // @access Private/Admin/Manager
 const getBenefitByIdHandler = expressAsyncHandler(
-  async (request: GetBenefitsByIdRequest, response: Response<BenefitsServerResponse>) => {
+  async (
+    request: GetBenefitsByIdRequest,
+    response: Response<ResourceRequestServerResponse<BenefitsDocument>>
+  ) => {
     const { benefitsId } = request.params;
 
     // get a benefits plan by id
@@ -161,10 +198,54 @@ const getBenefitByIdHandler = expressAsyncHandler(
     if (benefitsPlan) {
       response.status(200).json({
         message: 'Benefits plan fetched successfully',
-        benefitsData: [benefitsPlan],
+        resourceData: [benefitsPlan],
       });
     } else {
-      response.status(400).json({ message: 'Unable to get benefits plan', benefitsData: [] });
+      response.status(400).json({ message: 'Unable to get benefits plan', resourceData: [] });
+    }
+  }
+);
+
+// @desc   Delete a benefits plan by id
+// @route  DELETE /benefits/:benefitsId
+// @access Private/Admin/Manager
+const deleteABenefitHandler = expressAsyncHandler(
+  async (
+    request: DeleteABenefitRequest,
+    response: Response<ResourceRequestServerResponse<BenefitsDocument>>
+  ) => {
+    const { benefitsId } = request.params;
+
+    // delete a benefits plan
+    const deleteBenefitResult: DeleteResult = await deleteABenefitService(benefitsId);
+    if (deleteBenefitResult.deletedCount === 1) {
+      response.status(200).json({ message: 'Benefits plan deleted', resourceData: [] });
+    } else {
+      response.status(400).json({ message: 'Unable to delete benefits plan', resourceData: [] });
+    }
+  }
+);
+
+// @desc   Delete all benefits plans for a user
+// @route  DELETE /benefits/user
+// @access Private/Admin/Manager
+const deleteAllBenefitsByUserHandler = expressAsyncHandler(
+  async (
+    request: DeleteAllBenefitsByUserRequest,
+    response: Response<ResourceRequestServerResponse<BenefitsDocument>>
+  ) => {
+    const userId = request.body.userInfo.userId;
+
+    // delete all benefits plans for a user
+    const deleteAllBenefitsResult: DeleteResult = await deleteAllBenefitsByUserService(userId);
+    if (deleteAllBenefitsResult.deletedCount > 0) {
+      response
+        .status(200)
+        .json({ message: 'All benefits plans for this user deleted', resourceData: [] });
+    } else {
+      response
+        .status(400)
+        .json({ message: 'Unable to delete all benefits plans for this user', resourceData: [] });
     }
   }
 );
@@ -174,6 +255,6 @@ export {
   deleteABenefitHandler,
   deleteAllBenefitsByUserHandler,
   getAllBenefitsHandler,
-  getBenefitsByUserHandler,
+  getQueriedBenefitsByUserHandler,
   getBenefitByIdHandler,
 };

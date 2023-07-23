@@ -90,89 +90,6 @@ const createNewLeaveRequestHandler = expressAsyncHandler(
   }
 );
 
-// @desc   Delete a leave request by id
-// @route  DELETE /leave-request/:leaveRequestId
-// @access Private/Admin/Manager
-const deleteALeaveRequestHandler = expressAsyncHandler(
-  async (
-    request: DeleteALeaveRequestRequest,
-    response: Response<ResourceRequestServerResponse<LeaveRequestDocument>>
-  ) => {
-    const leaveRequestId = request.params.leaveRequestId;
-
-    // check if leave request exists
-    const leaveRequestExists = await getLeaveRequestByIdService(leaveRequestId);
-    if (!leaveRequestExists) {
-      response.status(404).json({ message: 'Leave request does not exist', resourceData: [] });
-      return;
-    }
-
-    // delete leave request
-    const deletedResult: DeleteResult = await deleteALeaveRequestService(leaveRequestId);
-    if (deletedResult.deletedCount === 1) {
-      response.status(200).json({
-        message: 'Leave request deleted successfully',
-        resourceData: [],
-      });
-    } else {
-      response.status(400).json({
-        message: 'Leave request could not be deleted',
-        resourceData: [],
-      });
-    }
-  }
-);
-
-// @desc   Delete all leave requests
-// @route  DELETE /leave-request
-// @access Private/Admin/Manager
-const deleteAllLeaveRequestsHandler = expressAsyncHandler(
-  async (
-    _request: DeleteAllLeaveRequestsRequest,
-    response: Response<ResourceRequestServerResponse<LeaveRequestDocument>>
-  ) => {
-    // delete all leave requests
-    const deletedResult: DeleteResult = await deleteAllLeaveRequestsService();
-    if (deletedResult.deletedCount > 0) {
-      response.status(200).json({
-        message: 'All leave requests deleted successfully',
-        resourceData: [],
-      });
-    } else {
-      response.status(400).json({
-        message: 'All leave requests could not be deleted',
-        resourceData: [],
-      });
-    }
-  }
-);
-
-// @desc   Get a leave request by id
-// @route  GET /leave-request/:leaveRequestId
-// @access Private/Admin/Manager
-const getLeaveRequestByIdHandler = expressAsyncHandler(
-  async (
-    request: GetLeaveRequestByIdRequest,
-    response: Response<ResourceRequestServerResponse<LeaveRequestDocument>>
-  ) => {
-    const leaveRequestId = request.params.leaveRequestId;
-
-    // get leave request
-    const leaveRequest = await getLeaveRequestByIdService(leaveRequestId);
-    if (leaveRequest) {
-      response.status(200).json({
-        message: 'Leave request found successfully',
-        resourceData: [leaveRequest],
-      });
-    } else {
-      response.status(404).json({
-        message: 'Leave request not found',
-        resourceData: [],
-      });
-    }
-  }
-);
-
 // @desc   Get all leave requests
 // @route  GET /leave-request
 // @access Private/Admin/Manager
@@ -263,6 +180,90 @@ const getQueriedLeaveRequestsByUserHandler = expressAsyncHandler(
     }
   }
 );
+
+// @desc   Get a leave request by id
+// @route  GET /leave-request/:leaveRequestId
+// @access Private/Admin/Manager
+const getLeaveRequestByIdHandler = expressAsyncHandler(
+  async (
+    request: GetLeaveRequestByIdRequest,
+    response: Response<ResourceRequestServerResponse<LeaveRequestDocument>>
+  ) => {
+    const leaveRequestId = request.params.leaveRequestId;
+
+    // get leave request
+    const leaveRequest = await getLeaveRequestByIdService(leaveRequestId);
+    if (leaveRequest) {
+      response.status(200).json({
+        message: 'Leave request found successfully',
+        resourceData: [leaveRequest],
+      });
+    } else {
+      response.status(404).json({
+        message: 'Leave request not found',
+        resourceData: [],
+      });
+    }
+  }
+);
+
+// @desc   Delete a leave request by id
+// @route  DELETE /leave-request/:leaveRequestId
+// @access Private/Admin/Manager
+const deleteALeaveRequestHandler = expressAsyncHandler(
+  async (
+    request: DeleteALeaveRequestRequest,
+    response: Response<ResourceRequestServerResponse<LeaveRequestDocument>>
+  ) => {
+    const leaveRequestId = request.params.leaveRequestId;
+
+    // check if leave request exists
+    const leaveRequestExists = await getLeaveRequestByIdService(leaveRequestId);
+    if (!leaveRequestExists) {
+      response.status(404).json({ message: 'Leave request does not exist', resourceData: [] });
+      return;
+    }
+
+    // delete leave request
+    const deletedResult: DeleteResult = await deleteALeaveRequestService(leaveRequestId);
+    if (deletedResult.deletedCount === 1) {
+      response.status(200).json({
+        message: 'Leave request deleted successfully',
+        resourceData: [],
+      });
+    } else {
+      response.status(400).json({
+        message: 'Leave request could not be deleted',
+        resourceData: [],
+      });
+    }
+  }
+);
+
+// @desc   Delete all leave requests
+// @route  DELETE /leave-request
+// @access Private/Admin/Manager
+const deleteAllLeaveRequestsHandler = expressAsyncHandler(
+  async (
+    _request: DeleteAllLeaveRequestsRequest,
+    response: Response<ResourceRequestServerResponse<LeaveRequestDocument>>
+  ) => {
+    // delete all leave requests
+    const deletedResult: DeleteResult = await deleteAllLeaveRequestsService();
+    if (deletedResult.deletedCount > 0) {
+      response.status(200).json({
+        message: 'All leave requests deleted successfully',
+        resourceData: [],
+      });
+    } else {
+      response.status(400).json({
+        message: 'All leave requests could not be deleted',
+        resourceData: [],
+      });
+    }
+  }
+);
+
 export {
   createNewLeaveRequestHandler,
   deleteALeaveRequestHandler,

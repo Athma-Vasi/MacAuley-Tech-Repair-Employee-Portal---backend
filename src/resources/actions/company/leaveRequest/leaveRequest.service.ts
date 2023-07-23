@@ -21,38 +21,6 @@ async function createNewLeaveRequestService(
   }
 }
 
-async function getLeaveRequestByIdService(
-  leaveRequestId: Types.ObjectId | string
-): DatabaseResponseNullable<LeaveRequestDocument> {
-  try {
-    const leaveRequest = await LeaveRequestModel.findById(leaveRequestId)
-      .select('-__v')
-      .lean()
-      .exec();
-    return leaveRequest;
-  } catch (error: any) {
-    throw new Error(error, { cause: 'getLeaveRequestByIdService' });
-  }
-}
-
-async function deleteALeaveRequestService(leaveRequestId: string): Promise<DeleteResult> {
-  try {
-    const leaveRequest = await LeaveRequestModel.deleteOne({ _id: leaveRequestId }).lean().exec();
-    return leaveRequest;
-  } catch (error: any) {
-    throw new Error(error, { cause: 'deleteALeaveRequestService' });
-  }
-}
-
-async function deleteAllLeaveRequestsService(): Promise<DeleteResult> {
-  try {
-    const leaveRequests = await LeaveRequestModel.deleteMany({}).lean().exec();
-    return leaveRequests;
-  } catch (error: any) {
-    throw new Error(error, { cause: 'deleteAllLeaveRequestsService' });
-  }
-}
-
 async function getQueriedLeaveRequestsService({
   filter = {},
   projection = null,
@@ -87,6 +55,38 @@ async function getQueriedLeaveRequestsByUserService({
     return leaveRequests;
   } catch (error: any) {
     throw new Error(error, { cause: 'getQueriedLeaveRequestsByUserService' });
+  }
+}
+
+async function getLeaveRequestByIdService(
+  leaveRequestId: Types.ObjectId | string
+): DatabaseResponseNullable<LeaveRequestDocument> {
+  try {
+    const leaveRequest = await LeaveRequestModel.findById(leaveRequestId)
+      .select('-__v')
+      .lean()
+      .exec();
+    return leaveRequest;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getLeaveRequestByIdService' });
+  }
+}
+
+async function deleteALeaveRequestService(leaveRequestId: string): Promise<DeleteResult> {
+  try {
+    const leaveRequest = await LeaveRequestModel.deleteOne({ _id: leaveRequestId }).lean().exec();
+    return leaveRequest;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'deleteALeaveRequestService' });
+  }
+}
+
+async function deleteAllLeaveRequestsService(): Promise<DeleteResult> {
+  try {
+    const leaveRequests = await LeaveRequestModel.deleteMany({}).lean().exec();
+    return leaveRequests;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'deleteAllLeaveRequestsService' });
   }
 }
 
