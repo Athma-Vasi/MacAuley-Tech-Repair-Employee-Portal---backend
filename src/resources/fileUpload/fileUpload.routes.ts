@@ -7,25 +7,28 @@ import {
   fileSizeLimiterMiddleware,
   fileExtensionLimiterMiddleware,
   fileInfoExtracterMiddleware,
+  verifyRoles,
+  assignQueryDefaults,
 } from '../../middlewares';
-import { ALLOWED_FILE_EXTENSIONS } from '../../constants';
+import { ALLOWED_FILE_EXTENSIONS, FIND_QUERY_OPTIONS_KEYWORDS } from '../../constants';
 import {
   createNewFileUploadHandler,
   deleteAFileUploadHandler,
   deleteAllFileUploadsHandler,
   getAllFileUploadsHandler,
   getFileUploadByIdHandler,
-  getFileUploadsByUserHandler,
+  getQueriedFileUploadsByUserHandler,
   insertAssociatedResourceDocumentIdHandler,
 } from './fileUpload.controller';
 
 const fileUploadRouter = Router();
 
 fileUploadRouter.use(verifyJWTMiddleware);
+fileUploadRouter.use(verifyRoles());
 
 fileUploadRouter
   .route('/')
-  .get(getAllFileUploadsHandler)
+  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getAllFileUploadsHandler)
   .post(
     expressFileUpload({ createParentPath: true }),
     filesPayloadExistsMiddleware,
@@ -36,7 +39,9 @@ fileUploadRouter
   )
   .delete(deleteAllFileUploadsHandler);
 
-fileUploadRouter.route('/user').get(getFileUploadsByUserHandler);
+fileUploadRouter
+  .route('/user')
+  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedFileUploadsByUserHandler);
 
 fileUploadRouter
   .route('/:fileUploadId')

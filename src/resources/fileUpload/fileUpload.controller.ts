@@ -15,19 +15,24 @@ import {
   createNewFileUploadService,
   deleteAllFileUploadsService,
   deleteFileUploadByIdService,
-  getAllFileUploadsService,
+  getQueriedFileUploadsService,
   getFileUploadByIdService,
-  getFileUploadsByUserService,
+  getQueriedFileUploadsByUserService,
   insertAssociatedResourceDocumentIdService,
+  getQueriedTotalFileUploadsService,
 } from './fileUpload.service';
+import {
+  GetQueriedResourceRequestServerResponse,
+  QueryObjectParsedWithDefaults,
+} from '../../types';
+import { FileUploadDocument } from './fileUpload.model';
+import { FilterQuery, QueryOptions } from 'mongoose';
 
 // @desc   Create a new file upload
 // @route  POST /file-uploads
 // @access Private
 const createNewFileUploadHandler = expressAsyncHandler(
   async (request: CreateNewFileUploadRequest, response: Response<FileUploadServerResponse>) => {
-    console.log('createNewFileUploadHandler-request.body', request.body);
-
     const {
       userInfo: { userId, username },
       fileUploads,
@@ -60,6 +65,97 @@ const createNewFileUploadHandler = expressAsyncHandler(
   }
 );
 
+// @desc   Get all file uploads
+// @route  GET /file-uploads
+// @access Private/Admin/Manager
+const getAllFileUploadsHandler = expressAsyncHandler(
+  async (
+    request: GetAllFileUploadsRequest,
+    response: Response<GetQueriedResourceRequestServerResponse<FileUploadDocument>>
+  ) => {
+    let { newQueryFlag, totalDocuments } = request.body;
+
+    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+
+    // only perform a countDocuments scan if a new query is being made
+    if (newQueryFlag) {
+      totalDocuments = await getQueriedTotalFileUploadsService({
+        filter: filter as FilterQuery<FileUploadDocument> | undefined,
+      });
+    }
+
+    // get all file uploads
+    const fileUploads = await getQueriedFileUploadsService({
+      filter: filter as FilterQuery<FileUploadDocument> | undefined,
+      projection: projection as QueryOptions<FileUploadDocument>,
+      options: options as QueryOptions<FileUploadDocument>,
+    });
+    if (fileUploads.length === 0) {
+      response.status(404).json({
+        message: 'No file uploads that match query parameters were found',
+        pages: 0,
+        totalDocuments: 0,
+        resourceData: [],
+      });
+    } else {
+      response.status(200).json({
+        message: 'Successfully found file uploads',
+        pages: Math.ceil(totalDocuments / Number(options?.limit)),
+        totalDocuments: fileUploads.length,
+        resourceData: fileUploads,
+      });
+    }
+  }
+);
+
+// @desc   Get file uploads by user
+// @route  GET /file-uploads/user
+// @access Private
+const getQueriedFileUploadsByUserHandler = expressAsyncHandler(
+  async (
+    request: GetFileUploadsByUserRequest,
+    response: Response<GetQueriedResourceRequestServerResponse<FileUploadDocument>>
+  ) => {
+    const {
+      userInfo: { userId },
+    } = request.body;
+    let { newQueryFlag, totalDocuments } = request.body;
+
+    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+
+    // assign userId to filter
+    const filterWithUserId = { ...filter, userId };
+
+    // only perform a countDocuments scan if a new query is being made
+    if (newQueryFlag) {
+      totalDocuments = await getQueriedTotalFileUploadsService({
+        filter: filterWithUserId,
+      });
+    }
+
+    const fileUploads = await getQueriedFileUploadsByUserService({
+      filter: filterWithUserId as FilterQuery<FileUploadDocument> | undefined,
+      projection: projection as QueryOptions<FileUploadDocument>,
+      options: options as QueryOptions<FileUploadDocument>,
+    });
+    if (fileUploads.length === 0) {
+      response.status(404).json({
+        message: 'No file uploads found',
+        pages: 0,
+        totalDocuments: 0,
+        resourceData: [],
+      });
+    } else {
+      response.status(200).json({
+        message: 'File uploads found successfully',
+        pages: Math.ceil(totalDocuments / Number(options?.limit)),
+        totalDocuments: fileUploads.length,
+        resourceData: fileUploads,
+      });
+    }
+  }
+);
+
 // @desc   Insert associated document id into file upload
 // @route  PUT /file-uploads/:fileUploadId
 // @access Private
@@ -68,12 +164,7 @@ const insertAssociatedResourceDocumentIdHandler = expressAsyncHandler(
     request: InsertAssociatedDocumentIdRequest,
     response: Response<FileUploadServerResponse>
   ) => {
-    const {
-      userInfo: { userId, username },
-      fileUploadId,
-      associatedDocumentId,
-      associatedResource,
-    } = request.body;
+    const { fileUploadId, associatedDocumentId, associatedResource } = request.body;
 
     const oldFileUpload = await getFileUploadByIdService(fileUploadId);
     if (!oldFileUpload) {
@@ -145,18 +236,6 @@ const deleteAFileUploadHandler = expressAsyncHandler(
 // @access Private/Admin/Manager
 const deleteAllFileUploadsHandler = expressAsyncHandler(
   async (request: DeleteAllFileUploadsRequest, response: Response<FileUploadServerResponse>) => {
-    const {
-      userInfo: { userId, username, roles },
-    } = request.body;
-
-    // check if user is admin or manager
-    if (roles.includes('Employee')) {
-      response.status(403).json({
-        message: 'Not authorized as user is not an admin or manager',
-      });
-      return;
-    }
-
     // delete all file uploads
     const deletedResult = await deleteAllFileUploadsService();
     if (deletedResult.acknowledged) {
@@ -167,78 +246,12 @@ const deleteAllFileUploadsHandler = expressAsyncHandler(
   }
 );
 
-// @desc   Get all file uploads
-// @route  GET /file-uploads
-// @access Private/Admin/Manager
-const getAllFileUploadsHandler = expressAsyncHandler(
-  async (request: GetAllFileUploadsRequest, response: Response<FileUploadServerResponse>) => {
-    const {
-      userInfo: { userId, username, roles },
-    } = request.body;
-
-    // check if user is admin or manager
-    if (roles.includes('Employee')) {
-      response.status(403).json({
-        message: 'Not authorized as user is not an admin or manager',
-      });
-      return;
-    }
-
-    // get all file uploads
-    const allFileUploads = await getAllFileUploadsService();
-    if (allFileUploads) {
-      response.status(200).json({
-        message: 'All file uploads retrieved successfully',
-        fileUploads: allFileUploads,
-      });
-    } else {
-      response.status(404).json({ message: 'No file uploads found', fileUploads: [] });
-    }
-  }
-);
-
-// @desc   Get file uploads by user
-// @route  GET /file-uploads/user
-// @access Private
-const getFileUploadsByUserHandler = expressAsyncHandler(
-  async (request: GetFileUploadsByUserRequest, response: Response<FileUploadServerResponse>) => {
-    // anyone can get their own file uploads
-    const {
-      userInfo: { userId, username, roles },
-    } = request.body;
-
-    // get all file uploads by user
-    const fileUploads = await getFileUploadsByUserService(userId);
-    if (fileUploads) {
-      response.status(200).json({
-        message: 'File uploads retrieved successfully',
-        fileUploads,
-      });
-    } else {
-      response.status(404).json({ message: 'No file uploads found', fileUploads: [] });
-    }
-  }
-);
-
 // @desc   Get file uploads by its id
 // @route  GET /file-uploads/:fileUploadId
 // @access Private
 const getFileUploadByIdHandler = expressAsyncHandler(
   async (request: GetFileUploadByIdRequest, response: Response<FileUploadServerResponse>) => {
     const { fileUploadId } = request.params;
-
-    // only admin or manager can get file uploads by its id that does not belong to them
-    const {
-      userInfo: { roles, userId, username },
-    } = request.body;
-
-    // check if user is admin or manager
-    if (roles.includes('Employee')) {
-      response.status(403).json({
-        message: 'Not authorized as user is not an admin or manager',
-      });
-      return;
-    }
 
     // get file upload by its id
     const fileUpload = await getFileUploadByIdService(fileUploadId);
@@ -259,6 +272,6 @@ export {
   insertAssociatedResourceDocumentIdHandler,
   deleteAllFileUploadsHandler,
   getAllFileUploadsHandler,
-  getFileUploadsByUserHandler,
+  getQueriedFileUploadsByUserHandler,
   getFileUploadByIdHandler,
 };

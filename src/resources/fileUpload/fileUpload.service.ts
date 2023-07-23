@@ -1,4 +1,4 @@
-import type { FlattenMaps, Types } from 'mongoose';
+import type { Types } from 'mongoose';
 import type { DeleteResult } from 'mongodb';
 import type {
   AssociatedResourceKind,
@@ -8,27 +8,57 @@ import type {
 } from './fileUpload.model';
 
 import { FileUploadModel } from './fileUpload.model';
-import { FileUploadObject } from '../../types';
-
-type CreateNewFileUploadServiceInput = {
-  userId: Types.ObjectId;
-  username: string;
-  uploadedFile: Buffer;
-  fileName: string;
-  fileExtension: FileExtension;
-  fileSize: number;
-  fileMimeType: string;
-  fileEncoding: string;
-};
+import {
+  DatabaseResponse,
+  QueriedResourceGetRequestServiceInput,
+  QueriedTotalResourceGetRequestServiceInput,
+} from '../../types';
 
 async function createNewFileUploadService(
-  newFileUploadObject: CreateNewFileUploadServiceInput
+  newFileUploadObject: FileUploadSchema
 ): Promise<FileUploadDocument> {
   try {
     const newFileUpload = await FileUploadModel.create(newFileUploadObject);
     return newFileUpload;
   } catch (error: any) {
     throw new Error(error, { cause: 'createNewFileUploadService' });
+  }
+}
+
+async function getQueriedFileUploadsService({
+  filter = {},
+  projection = null,
+  options = {},
+}: QueriedResourceGetRequestServiceInput<FileUploadDocument>): DatabaseResponse<FileUploadDocument> {
+  try {
+    const fileUploads = await FileUploadModel.find(filter, projection, options).lean().exec();
+    return fileUploads;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getQueriedFileUploadsService' });
+  }
+}
+
+async function getQueriedTotalFileUploadsService({
+  filter = {},
+}: QueriedTotalResourceGetRequestServiceInput<FileUploadDocument>): Promise<number> {
+  try {
+    const totalFileUploads = await FileUploadModel.countDocuments(filter).lean().exec();
+    return totalFileUploads;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getQueriedTotalFileUploadsService' });
+  }
+}
+
+async function getQueriedFileUploadsByUserService({
+  filter = {},
+  projection = null,
+  options = {},
+}: QueriedResourceGetRequestServiceInput<FileUploadDocument>): DatabaseResponse<FileUploadDocument> {
+  try {
+    const fileUploads = await FileUploadModel.find(filter, projection, options).lean().exec();
+    return fileUploads;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getQueriedFileUploadsByUserService' });
   }
 }
 
@@ -41,7 +71,16 @@ async function getFileUploadByIdService(fileUploadId: Types.ObjectId | string) {
   }
 }
 
-type InsertAssociatedResourceDocumentIdServiceInput = CreateNewFileUploadServiceInput & {
+type InsertAssociatedResourceDocumentIdServiceInput = {
+  userId: Types.ObjectId;
+  username: string;
+  uploadedFile: Buffer;
+  fileName: string;
+  fileExtension: FileExtension;
+  fileSize: number;
+  fileMimeType: string;
+  fileEncoding: string;
+
   _id: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
@@ -57,6 +96,7 @@ async function insertAssociatedResourceDocumentIdService(
     const updatedFileUpload = await FileUploadModel.findOneAndReplace({ _id: input._id }, input, {
       new: true,
     })
+      .select('-__v')
       .lean()
       .exec();
     return updatedFileUpload;
@@ -96,33 +136,14 @@ async function deleteAllFileUploadsByAssociatedResourceService(
   }
 }
 
-async function getAllFileUploadsService(): Promise<Array<FileUploadDocument>> {
-  try {
-    const fileUploads = await FileUploadModel.find({}).lean().exec();
-    return fileUploads;
-  } catch (error: any) {
-    throw new Error(error, { cause: 'getAllFileUploadsService' });
-  }
-}
-
-async function getFileUploadsByUserService(
-  userId: Types.ObjectId
-): Promise<Array<FileUploadDocument>> {
-  try {
-    const fileUploads = await FileUploadModel.find({ userId }).lean().exec();
-    return fileUploads;
-  } catch (error: any) {
-    throw new Error(error, { cause: 'getFileUploadsByUserService' });
-  }
-}
-
 export {
   createNewFileUploadService,
   getFileUploadByIdService,
   insertAssociatedResourceDocumentIdService,
   deleteFileUploadByIdService,
   deleteAllFileUploadsService,
-  getAllFileUploadsService,
-  getFileUploadsByUserService,
+  getQueriedFileUploadsService,
+  getQueriedTotalFileUploadsService,
+  getQueriedFileUploadsByUserService,
   deleteAllFileUploadsByAssociatedResourceService,
 };
