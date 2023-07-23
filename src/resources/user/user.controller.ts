@@ -15,19 +15,28 @@ import {
   checkUserPasswordService,
   createNewUserService,
   deleteUserService,
-  getAllUsersService,
+  getQueriedTotalUsersService,
+  getQueriedUsersService,
   updateUserPasswordService,
   updateUserService,
 } from './user.service';
 import { returnEmptyFieldsTuple } from '../../utils';
-import { add } from 'date-fns';
-import { UserSchema } from './user.model';
+import { UserDocument, UserSchema } from './user.model';
+import {
+  GetQueriedResourceRequestServerResponse,
+  QueryObjectParsedWithDefaults,
+  ResourceRequestServerResponse,
+} from '../../types';
+import { FilterQuery, QueryOptions } from 'mongoose';
 
 // @desc   Create new user
 // @route  POST /users
 // @access Private
 const createNewUserHandler = expressAsyncHandler(
-  async (request: CreateNewUserRequest, response: Response) => {
+  async (
+    request: CreateNewUserRequest,
+    response: Response<ResourceRequestServerResponse<UserDocument>>
+  ) => {
     const {
       email,
       username,
@@ -55,6 +64,7 @@ const createNewUserHandler = expressAsyncHandler(
     if (!state && !province) {
       response.status(400).json({
         message: 'State or province must be filled',
+        resourceData: [],
       });
       return;
     }
@@ -81,6 +91,7 @@ const createNewUserHandler = expressAsyncHandler(
     if (isFieldsEmpty.length > 0) {
       response.status(400).json({
         message: `${isFieldsEmpty.map(([field, _]) => field).join(', ')} are required`,
+        resourceData: [],
       });
       return;
     }
@@ -88,14 +99,14 @@ const createNewUserHandler = expressAsyncHandler(
     // check for duplicate email
     const isDuplicateEmail = await checkUserExistsService({ email });
     if (isDuplicateEmail) {
-      response.status(409).json({ message: 'Email already exists' });
+      response.status(409).json({ message: 'Email already exists', resourceData: [] });
       return;
     }
 
     // check for duplicate username
     const isDuplicateUser = await checkUserExistsService({ username });
     if (isDuplicateUser) {
-      response.status(409).json({ message: 'Username already exists' });
+      response.status(409).json({ message: 'Username already exists', resourceData: [] });
       return;
     }
 
@@ -123,9 +134,54 @@ const createNewUserHandler = expressAsyncHandler(
     // create new user if all checks pass successfully
     const createdUser = await createNewUserService(newUserData);
     if (createdUser) {
-      response.status(201).json({ message: `User ${username} created successfully` });
+      response
+        .status(201)
+        .json({ message: `User ${username} created successfully`, resourceData: [createdUser] });
     } else {
-      response.status(400).json({ message: 'User creation failed' });
+      response.status(400).json({ message: 'User creation failed', resourceData: [] });
+    }
+  }
+);
+
+// @desc   Get all users
+// @route  GET /users
+// @access Private
+const getQueriedUsersHandler = expressAsyncHandler(
+  async (
+    request: GetAllUsersRequest,
+    response: Response<GetQueriedResourceRequestServerResponse<UserDocument>>
+  ) => {
+    let { newQueryFlag, totalDocuments } = request.body;
+
+    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+
+    // only perform a countDocuments scan if a new query is being made
+    if (newQueryFlag) {
+      totalDocuments = await getQueriedTotalUsersService({
+        filter: filter as FilterQuery<UserDocument> | undefined,
+      });
+    }
+
+    // get all users
+    const users = await getQueriedUsersService({
+      filter: filter as FilterQuery<UserDocument> | undefined,
+      projection: projection as QueryOptions<UserDocument>,
+      options: options as QueryOptions<UserDocument>,
+    });
+    if (users.length === 0) {
+      response.status(404).json({
+        message: 'No users that match query parameters were found',
+        pages: 0,
+        totalDocuments: 0,
+        resourceData: [],
+      });
+    } else {
+      response.status(200).json({
+        message: 'Successfully found users',
+        pages: Math.ceil(totalDocuments / Number(options?.limit)),
+        totalDocuments: users.length,
+        resourceData: users,
+      });
     }
   }
 );
@@ -134,20 +190,15 @@ const createNewUserHandler = expressAsyncHandler(
 // @route  DELETE /users
 // @access Private
 const deleteUserHandler = expressAsyncHandler(
-  async (request: DeleteUserRequest, response: Response) => {
+  async (
+    request: DeleteUserRequest,
+    response: Response<ResourceRequestServerResponse<UserDocument>>
+  ) => {
     // only managers/admin are allowed to delete users
-    const {
-      userInfo: { roles },
-      userToBeDeletedId,
-    } = request.body;
-
-    if (roles.includes('Employee')) {
-      response.status(403).json({ message: 'Unauthorized' });
-      return;
-    }
+    const { userToBeDeletedId } = request.body;
 
     if (!userToBeDeletedId) {
-      response.status(400).json({ message: 'userToBeDeletedId is required' });
+      response.status(400).json({ message: 'userToBeDeletedId is required', resourceData: [] });
       return;
     }
 
@@ -156,45 +207,19 @@ const deleteUserHandler = expressAsyncHandler(
     if (userHasNotes.filter((note) => note.completed).length > 0) {
       response
         .status(400)
-        .json({ message: 'User has notes assigned to them that are not completed' });
+        .json({
+          message: 'User has notes assigned to them that are not completed',
+          resourceData: [],
+        });
       return;
     }
 
     // delete user if all checks pass successfully
     const deletedUser = await deleteUserService(userToBeDeletedId);
     if (deletedUser.acknowledged) {
-      response.status(200).json({ message: 'User deleted successfully' });
+      response.status(200).json({ message: 'User deleted successfully', resourceData: [] });
     } else {
-      response.status(400).json({ message: 'User deletion failed' });
-    }
-  }
-);
-
-// @desc   Get all users
-// @route  GET /users
-// @access Private
-const getAllUsersHandler = expressAsyncHandler(
-  async (request: GetAllUsersRequest, response: Response) => {
-    // only managers/admin are allowed to get all users
-    const {
-      userInfo: { roles },
-    } = request.body;
-
-    if (roles.includes('Employee')) {
-      response
-        .status(403)
-        .json({ message: 'Only managers and admins are allowed to get all users' });
-      return;
-    }
-
-    const users = await getAllUsersService();
-    if (users.length === 0) {
-      response.status(404).json({ message: 'No users found' });
-    } else {
-      response.status(200).json({
-        message: 'Users found successfully',
-        userData: users,
-      });
+      response.status(400).json({ message: 'User deletion failed', resourceData: [] });
     }
   }
 );
@@ -203,7 +228,10 @@ const getAllUsersHandler = expressAsyncHandler(
 // @route  PATCH /users
 // @access Private
 const updateUserHandler = expressAsyncHandler(
-  async (request: UpdateUserRequest, response: Response) => {
+  async (
+    request: UpdateUserRequest,
+    response: Response<ResourceRequestServerResponse<UserDocument>>
+  ) => {
     const {
       userInfo: { roles, userId, username },
       email,
@@ -230,6 +258,7 @@ const updateUserHandler = expressAsyncHandler(
     if (!state && !province) {
       response.status(400).json({
         message: 'state and province cannot both be empty',
+        resourceData: [],
       });
       return;
     }
@@ -241,6 +270,7 @@ const updateUserHandler = expressAsyncHandler(
     if (isArraysEmpty.length > 0) {
       response.status(400).json({
         message: 'roles, department, country and jobPosition are required',
+        resourceData: [],
       });
       return;
     }
@@ -265,6 +295,7 @@ const updateUserHandler = expressAsyncHandler(
     if (isFieldsEmpty.length > 0) {
       response.status(400).json({
         message: `${isFieldsEmpty.map(([field, _]) => field).join(', ')} are required`,
+        resourceData: [],
       });
       return;
     }
@@ -273,7 +304,10 @@ const updateUserHandler = expressAsyncHandler(
     if (active === undefined || typeof active !== 'boolean') {
       response
         .status(400)
-        .json({ message: 'Active field is required and must be of type boolean' });
+        .json({
+          message: 'Active field is required and must be of type boolean',
+          resourceData: [],
+        });
       return;
     }
 
@@ -301,9 +335,14 @@ const updateUserHandler = expressAsyncHandler(
     // update user if all checks pass successfully
     const updatedUser = await updateUserService(objToUpdate);
     if (updatedUser) {
-      response.status(200).json({ message: `User ${updatedUser.username} updated successfully` });
+      response
+        .status(200)
+        .json({
+          message: `User ${updatedUser.username} updated successfully`,
+          resourceData: [updatedUser],
+        });
     } else {
-      response.status(400).json({ message: 'User update failed' });
+      response.status(400).json({ message: 'User update failed', resourceData: [] });
     }
   }
 );
@@ -312,7 +351,10 @@ const updateUserHandler = expressAsyncHandler(
 // @route  PATCH /users/password
 // @access Private
 const updateUserPasswordHandler = expressAsyncHandler(
-  async (request: UpdateUserPasswordRequest, response: Response) => {
+  async (
+    request: UpdateUserPasswordRequest,
+    response: Response<ResourceRequestServerResponse<UserDocument>>
+  ) => {
     const {
       userInfo: { userId },
       currentPassword,
@@ -325,22 +367,26 @@ const updateUserPasswordHandler = expressAsyncHandler(
       password: currentPassword,
     });
     if (!isCurrentPasswordCorrect) {
-      response.status(400).json({ message: 'Current password is incorrect' });
+      response.status(400).json({ message: 'Current password is incorrect', resourceData: [] });
       return;
     }
 
     // check if new password is the same as current password
     if (currentPassword === newPassword) {
-      response.status(400).json({ message: 'New password cannot be the same as current password' });
+      response
+        .status(400)
+        .json({ message: 'New password cannot be the same as current password', resourceData: [] });
       return;
     }
 
     // update user password if all checks pass successfully
     const updatedUser = await updateUserPasswordService({ userId, newPassword });
     if (updatedUser) {
-      response.status(200).json({ message: 'Password updated successfully' });
+      response
+        .status(200)
+        .json({ message: 'Password updated successfully', resourceData: [updatedUser] });
     } else {
-      response.status(400).json({ message: 'Password update failed' });
+      response.status(400).json({ message: 'Password update failed', resourceData: [] });
     }
   }
 );
@@ -348,7 +394,7 @@ const updateUserPasswordHandler = expressAsyncHandler(
 export {
   createNewUserHandler,
   deleteUserHandler,
-  getAllUsersHandler,
+  getQueriedUsersHandler,
   updateUserHandler,
   updateUserPasswordHandler,
 };

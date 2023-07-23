@@ -1,4 +1,3 @@
-import { Request } from 'express';
 import { Types } from 'mongoose';
 
 import type { RequestAfterJWTVerification } from '../auth';
@@ -14,6 +13,7 @@ import type {
   StatesUS,
   PreferredPronouns,
 } from './user.model';
+import { GetQueriedResourceRequest } from '../../types';
 
 interface CreateNewUserRequest {
   body: {
@@ -62,7 +62,7 @@ interface DeleteUserRequest extends RequestAfterJWTVerification {
 }
 
 // converted to type alias instead of interface because an interface declaring no members is equivalent to its supertype and rome doesn't like that
-type GetAllUsersRequest = RequestAfterJWTVerification;
+type GetAllUsersRequest = GetQueriedResourceRequest;
 
 interface UpdateUserRequest extends RequestAfterJWTVerification {
   body: {
@@ -112,13 +112,6 @@ interface UpdateUserPasswordRequest extends RequestAfterJWTVerification {
   };
 }
 
-type UsersServerResponse = {
-  message: string;
-  userData?: UserDatabaseResponse[] | undefined;
-};
-
-type UserDatabaseResponse = Omit<UserDocument, 'password'>;
-
 /**
  *
  *
@@ -126,14 +119,9 @@ type UserDatabaseResponse = Omit<UserDocument, 'password'>;
  */
 
 export type {
-  // user requests
   CreateNewUserRequest,
   DeleteUserRequest,
   GetAllUsersRequest,
   UpdateUserRequest,
   UpdateUserPasswordRequest,
-
-  // user return types
-  UsersServerResponse,
-  UserDatabaseResponse,
 };

@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 
-import type { FlattenMaps, Types } from 'mongoose';
+import type { Types } from 'mongoose';
 import type { DeleteResult } from 'mongodb';
 import type {
   Country,
@@ -17,7 +17,10 @@ import type {
 } from './user.model';
 
 import { UserModel } from './user.model';
-import { UserDatabaseResponse } from './user.types';
+import {
+  QueriedResourceGetRequestServiceInput,
+  QueriedTotalResourceGetRequestServiceInput,
+} from '../../types';
 
 type CheckUserExistsServiceInput = {
   email?: string | undefined;
@@ -109,7 +112,7 @@ async function deleteUserService(userId: Types.ObjectId | string): Promise<Delet
 async function getUserByIdService(userId: string | Types.ObjectId) {
   try {
     const user = await UserModel.findById(userId).select('-password').lean().exec();
-    return user as unknown as Promise<UserDatabaseResponse> | null;
+    return user;
   } catch (error: any) {
     throw new Error(error, { cause: 'getUserByIdService' });
   }
@@ -118,7 +121,7 @@ async function getUserByIdService(userId: string | Types.ObjectId) {
 async function getUserByUsernameService(username: string) {
   try {
     const user = await UserModel.findOne({ username }).select('-password').lean().exec();
-    return user as unknown as Promise<UserDatabaseResponse> | null;
+    return user;
   } catch (error: any) {
     throw new Error(error, { cause: 'getUserByUsernameService' });
   }
@@ -133,13 +136,31 @@ async function getUserWithPasswordService(username: string) {
   }
 }
 
-async function getAllUsersService() {
+async function getQueriedUsersService({
+  filter = {},
+  projection = null,
+  options = {},
+}: QueriedResourceGetRequestServiceInput<UserDocument>) {
   try {
     // do not return the password field
-    const users = await UserModel.find({}).select('-password').lean().exec();
-    return users as unknown as Promise<UserDatabaseResponse[]>;
+    const users = await UserModel.find({ filter, projection, options })
+      .select('-password')
+      .lean()
+      .exec();
+    return users;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getAllUsersService' });
+    throw new Error(error, { cause: 'getQueriedUsersService' });
+  }
+}
+
+async function getQueriedTotalUsersService({
+  filter = {},
+}: QueriedTotalResourceGetRequestServiceInput<UserDocument>): Promise<number> {
+  try {
+    const totalUsers = await UserModel.countDocuments(filter).lean().exec();
+    return totalUsers;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getQueriedTotalUsersService' });
   }
 }
 
@@ -189,7 +210,7 @@ async function updateUserService(inputObj: UpdateUserServiceInput) {
       .lean()
       .exec();
 
-    return updatedUser as Promise<UserDatabaseResponse> | null;
+    return updatedUser;
   } catch (error: any) {
     throw new Error(error, { cause: 'updateUserService' });
   }
@@ -250,10 +271,11 @@ export {
   checkUserExistsService,
   checkUserIsActiveService,
   deleteUserService,
-  getAllUsersService,
+  getQueriedUsersService,
   getUserByIdService,
   getUserByUsernameService,
   updateUserService,
+  getQueriedTotalUsersService,
   checkUserPasswordService,
   updateUserPasswordService,
   getUserWithPasswordService,

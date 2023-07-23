@@ -10,7 +10,7 @@ import { userRouter } from './user.routes';
 import {
   createNewUserHandler,
   deleteUserHandler,
-  getAllUsersHandler,
+  getQueriedUsersHandler,
   updateUserHandler,
 } from './user.controller';
 import {
@@ -18,7 +18,7 @@ import {
   checkUserExistsService,
   checkUserIsActiveService,
   deleteUserService,
-  getAllUsersService,
+  getQueriedUsersService,
   getUserByIdService,
   getUserByUsernameService,
   updateUserService,
@@ -45,7 +45,6 @@ import type {
   GetAllUsersRequest,
   UpdateUserRequest,
   UpdateUserPasswordRequest,
-  UsersServerResponse,
 } from './user.types';
 
 /**
@@ -56,13 +55,13 @@ export {
   userRouter,
   createNewUserHandler,
   deleteUserHandler,
-  getAllUsersHandler,
+  getQueriedUsersHandler,
   updateUserHandler,
   createNewUserService,
   checkUserExistsService,
   checkUserIsActiveService,
   deleteUserService,
-  getAllUsersService,
+  getQueriedUsersService,
   getUserByIdService,
   getUserByUsernameService,
   updateUserService,
@@ -86,5 +85,4 @@ export type {
   GetAllUsersRequest,
   UpdateUserRequest,
   UpdateUserPasswordRequest,
-  UsersServerResponse,
 };
