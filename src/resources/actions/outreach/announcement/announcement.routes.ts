@@ -1,32 +1,32 @@
 import { Router } from 'express';
 
-import { verifyJWTMiddleware } from '../../../../middlewares';
+import { assignQueryDefaults, verifyRoles } from '../../../../middlewares';
 import {
   createNewAnnouncementHandler,
   deleteAnnouncementHandler,
-  getAllAnnouncementsHandler,
+  getQueriedAnnouncementsHandler,
   updateAnnouncementHandler,
-  getAnnouncementsByUserHandler,
+  getQueriedAnouncementsByUserHandler,
   deleteAllAnnouncementsHandler,
   getAnnouncementByIdHandler,
 } from './announcement.controller';
+import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
 
 const announcementRouter = Router();
 
-// verifyJWT middleware is applied to all routes in this router
-announcementRouter.use(verifyJWTMiddleware);
+announcementRouter.use(verifyRoles());
 
 announcementRouter
   .route('/')
-  .get(getAllAnnouncementsHandler)
+  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedAnnouncementsHandler)
   .post(createNewAnnouncementHandler)
   .delete(deleteAllAnnouncementsHandler);
 
-announcementRouter.route('/user').get(getAnnouncementsByUserHandler);
+announcementRouter.route('/user').get(getQueriedAnouncementsByUserHandler);
 
 announcementRouter
   .route('/:announcementId')
-  .get(getAnnouncementByIdHandler)
+  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getAnnouncementByIdHandler)
   .delete(deleteAnnouncementHandler)
   .put(updateAnnouncementHandler);
 export { announcementRouter };

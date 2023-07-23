@@ -66,6 +66,17 @@ function verifyRoles() {
         return;
       }
 
+      if (method === 'PUT') {
+        // only managers/admins are allowed to update a resource that does not belong to them by its id
+        if (roles.includes('Manager') || roles.includes('Admin')) {
+          next();
+          return;
+        }
+
+        response.status(403).json({ message: 'User does not have permission', resourceData: [] });
+        return;
+      }
+
       if (method === 'DELETE') {
         // only managers are allowed to delete a resource that does not belong to them by its id
         if (roles.includes('Manager')) {

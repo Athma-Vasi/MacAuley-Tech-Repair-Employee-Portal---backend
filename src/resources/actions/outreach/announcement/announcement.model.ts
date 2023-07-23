@@ -12,14 +12,10 @@ type AnnouncementSchema = {
   action: Action;
   category: ActionsOutreach;
   title: string;
-  imageSrc: string;
-  imageAlt: string;
+  bannerImageSrc: string;
+  bannerImageAlt: string;
   article: Record<ArticleSections, string[]>;
   timeToRead: number;
-  rating: {
-    feel: RatingFeel;
-    count: number;
-  };
 };
 
 type AnnouncementDocument = AnnouncementSchema & {
@@ -56,12 +52,12 @@ const announcementSchema = new Schema<AnnouncementSchema>(
       type: String,
       required: [true, 'Title is required'],
     },
-    imageSrc: {
+    bannerImageSrc: {
       type: String,
       required: false,
       default: '',
     },
-    imageAlt: {
+    bannerImageAlt: {
       type: String,
       required: false,
       default: '',
@@ -74,17 +70,13 @@ const announcementSchema = new Schema<AnnouncementSchema>(
       type: Number,
       required: [true, 'TimeToRead is required'],
     },
-    rating: {
-      type: Object,
-      required: false,
-    },
   },
   {
     timestamps: true,
   }
 );
 
-const AnnouncementModel = model('Announcement', announcementSchema);
+const AnnouncementModel = model<AnnouncementDocument>('Announcement', announcementSchema);
 
 export { AnnouncementModel };
 export type { AnnouncementSchema, AnnouncementDocument, RatingFeel, ArticleSections };

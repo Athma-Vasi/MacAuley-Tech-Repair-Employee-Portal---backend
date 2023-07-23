@@ -9,5 +9,4 @@ actionsOutreachRouter.use('/survey-builder', surveyBuilderRouter);
 actionsOutreachRouter.use('/event-creator', eventCreatorRouter);
 actionsOutreachRouter.use('/announcement', announcementRouter);
 
-//TODO: implement mailer service
 export { actionsOutreachRouter };

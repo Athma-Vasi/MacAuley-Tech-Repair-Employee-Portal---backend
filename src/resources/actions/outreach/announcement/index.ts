@@ -8,18 +8,18 @@
 import { AnnouncementModel } from './announcement.model';
 import { announcementRouter } from './announcement.routes';
 import {
-  getAllAnnouncementsHandler,
+  getQueriedAnnouncementsHandler,
   createNewAnnouncementHandler,
   deleteAnnouncementHandler,
   updateAnnouncementHandler,
-  getAnnouncementsByUserHandler,
+  getQueriedAnouncementsByUserHandler,
 } from './announcement.controller';
 import {
   checkAnnouncementExistsService,
   createNewAnnouncementService,
   deleteAnnouncementService,
-  getAllAnnouncementsService,
-  getAnnouncementsByUserService,
+  getQueriedAnnouncementsService,
+  getQueriedAnouncementsByUserService,
   updateAnnouncementService,
 } from './announcement.service';
 
@@ -35,7 +35,6 @@ import type {
   GetAllAnnouncementsRequest,
   UpdateAnnouncementRequest,
   GetAnnouncementsByUserRequest,
-  AnnouncementsServerResponse,
 } from './announcement.types';
 
 /**
@@ -44,16 +43,16 @@ import type {
 export {
   AnnouncementModel,
   announcementRouter,
-  getAllAnnouncementsHandler,
+  getQueriedAnnouncementsHandler,
   createNewAnnouncementHandler,
   deleteAnnouncementHandler,
   updateAnnouncementHandler,
-  getAnnouncementsByUserHandler,
+  getQueriedAnouncementsByUserHandler,
   checkAnnouncementExistsService,
   createNewAnnouncementService,
   deleteAnnouncementService,
-  getAllAnnouncementsService,
-  getAnnouncementsByUserService,
+  getQueriedAnnouncementsService,
+  getQueriedAnouncementsByUserService,
   updateAnnouncementService,
 };
 
@@ -67,5 +66,4 @@ export type {
   GetAllAnnouncementsRequest,
   UpdateAnnouncementRequest,
   GetAnnouncementsByUserRequest,
-  AnnouncementsServerResponse,
 };

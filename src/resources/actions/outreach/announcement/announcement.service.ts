@@ -1,7 +1,12 @@
 import type { FlattenMaps, Types } from 'mongoose';
 import type { DeleteResult } from 'mongodb';
 import type { AnnouncementDocument, AnnouncementSchema, RatingFeel } from './announcement.model';
-import type { DatabaseResponse, DatabaseResponseNullable } from '../../../../types';
+import type {
+  DatabaseResponse,
+  DatabaseResponseNullable,
+  QueriedResourceGetRequestServiceInput,
+  QueriedTotalResourceGetRequestServiceInput,
+} from '../../../../types';
 
 import { AnnouncementModel } from './announcement.model';
 
@@ -42,12 +47,51 @@ async function checkAnnouncementExistsService({
   }
 }
 
-async function createNewAnnouncementService(input: AnnouncementSchema) {
+async function createNewAnnouncementService(
+  input: AnnouncementSchema
+): Promise<AnnouncementDocument> {
   try {
     const newAnnouncement = await AnnouncementModel.create(input);
     return newAnnouncement;
   } catch (error: any) {
     throw new Error(error, { cause: 'createNewAnnouncementService' });
+  }
+}
+
+async function getQueriedAnnouncementsService({
+  filter = {},
+  projection = null,
+  options = {},
+}: QueriedResourceGetRequestServiceInput<AnnouncementDocument>): DatabaseResponse<AnnouncementDocument> {
+  try {
+    const announcements = await AnnouncementModel.find(filter, projection, options).lean().exec();
+    return announcements;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getQueriedAnnouncementsService' });
+  }
+}
+
+async function getQueriedTotalAnnouncementsService({
+  filter = {},
+}: QueriedTotalResourceGetRequestServiceInput<AnnouncementDocument>): Promise<number> {
+  try {
+    const totalAnnouncements = await AnnouncementModel.countDocuments(filter).lean().exec();
+    return totalAnnouncements;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getQueriedTotalAnnouncementsService' });
+  }
+}
+
+async function getQueriedAnouncementsByUserService({
+  filter = {},
+  projection = null,
+  options = {},
+}: QueriedResourceGetRequestServiceInput<AnnouncementDocument>): DatabaseResponse<AnnouncementDocument> {
+  try {
+    const announcements = await AnnouncementModel.find(filter, projection, options).lean().exec();
+    return announcements;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getQueriedAnouncementsByUserService' });
   }
 }
 
@@ -64,30 +108,15 @@ async function deleteAnnouncementService(id: Types.ObjectId | string): Promise<D
   }
 }
 
-async function getAnnouncementsByUserService(
-  user: Types.ObjectId | string
-): DatabaseResponse<AnnouncementSchema> {
-  try {
-    const announcements = await AnnouncementModel.find({ user }).lean().exec();
-    return announcements;
-  } catch (error: any) {
-    throw new Error(error, { cause: 'getAnnouncementsByUserService' });
-  }
-}
-
 type UpdateAnnouncementServiceInput = {
   announcementId: string;
   userId: Types.ObjectId;
   title: string;
   username: string;
-  imageSrc: string;
-  imageAlt: string;
+  bannerImageSrc: string;
+  bannerImageAlt: string;
   article: Record<string, string[]>;
   timeToRead: number;
-  rating: {
-    feel: RatingFeel;
-    count: number;
-  };
 };
 
 async function updateAnnouncementService({
@@ -95,22 +124,20 @@ async function updateAnnouncementService({
   userId,
   title,
   username,
-  imageSrc,
-  imageAlt,
+  bannerImageSrc,
+  bannerImageAlt,
   article,
   timeToRead,
-  rating,
-}: UpdateAnnouncementServiceInput): DatabaseResponseNullable<AnnouncementSchema> {
+}: UpdateAnnouncementServiceInput): DatabaseResponseNullable<AnnouncementDocument> {
   try {
     const announcementFieldsToUpdateObj = {
       userId,
       title,
       username,
-      imageSrc,
-      imageAlt,
+      bannerImageSrc,
+      bannerImageAlt,
       article,
       timeToRead,
-      rating,
     };
 
     const announcement = await AnnouncementModel.findByIdAndUpdate(
@@ -118,20 +145,12 @@ async function updateAnnouncementService({
       announcementFieldsToUpdateObj,
       { new: true }
     )
+      .select('-__v')
       .lean()
       .exec();
     return announcement;
   } catch (error: any) {
     throw new Error(error, { cause: 'updateAnnouncementService' });
-  }
-}
-
-async function getAllAnnouncementsService(): DatabaseResponse<AnnouncementSchema> {
-  try {
-    const announcements = await AnnouncementModel.find({}).lean().exec();
-    return announcements;
-  } catch (error: any) {
-    throw new Error(error, { cause: 'getAllAnnouncementsService' });
   }
 }
 
@@ -145,10 +164,13 @@ async function deleteAllAnnouncementsService(): Promise<DeleteResult> {
 }
 
 async function getAnnouncementByIdService(
-  announcementId: string
-): DatabaseResponseNullable<AnnouncementSchema> {
+  announcementId: Types.ObjectId | string
+): DatabaseResponseNullable<AnnouncementDocument> {
   try {
-    const announcement = await AnnouncementModel.findById(announcementId).lean().exec();
+    const announcement = await AnnouncementModel.findById(announcementId)
+      .select('-__v')
+      .lean()
+      .exec();
     return announcement;
   } catch (error: any) {
     throw new Error(error, { cause: 'getAnnouncementByIdService' });
@@ -160,8 +182,9 @@ export {
   createNewAnnouncementService,
   deleteAnnouncementService,
   deleteAllAnnouncementsService,
-  getAnnouncementsByUserService,
+  getQueriedTotalAnnouncementsService,
+  getQueriedAnouncementsByUserService,
   updateAnnouncementService,
-  getAllAnnouncementsService,
+  getQueriedAnnouncementsService,
   getAnnouncementByIdService,
 };
