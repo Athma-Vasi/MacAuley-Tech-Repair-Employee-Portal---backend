@@ -3,7 +3,7 @@ import {
   createNewAnonymousRequestHandler,
   deleteAllAnonymousRequestsHandler,
   deleteAnAnonymousRequestHandler,
-  getAllAnonymousRequestsHandler,
+  getQueriedAnonymousRequestsHandler,
   getAnAnonymousRequestHandler,
 } from './anonymousRequest.controller';
 
@@ -11,7 +11,7 @@ const anonymousRequestRouter = Router();
 
 anonymousRequestRouter
   .route('/')
-  .get(getAllAnonymousRequestsHandler)
+  .get(getQueriedAnonymousRequestsHandler)
   .post(createNewAnonymousRequestHandler)
   .delete(deleteAllAnonymousRequestsHandler);
 

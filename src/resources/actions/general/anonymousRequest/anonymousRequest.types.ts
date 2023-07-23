@@ -1,6 +1,5 @@
 import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
-import type { ActionsGeneral } from '../actionsGeneral.types';
 import type {
   AnonymousRequestDocument,
   AnonymousRequestKind,
@@ -8,6 +7,7 @@ import type {
 } from './anonymousRequest.model';
 
 import { PhoneNumber, UserRoles } from '../../../user';
+import { GetQueriedResourceRequest } from '../../../../types';
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 
@@ -55,7 +55,7 @@ interface DeleteAllAnonymousRequestsRequest extends RequestAfterJWTVerification 
   };
 }
 
-type GetAllAnonymousRequestsRequest = RequestAfterJWTVerification;
+type GetQueriedAnonymousRequestsRequest = GetQueriedResourceRequest;
 
 interface GetAnAnonymousRequestRequest extends RequestAfterJWTVerification {
   params: {
@@ -72,7 +72,7 @@ export type {
   CreateNewAnonymousRequestRequest,
   DeleteAnAnonymousRequestRequest,
   DeleteAllAnonymousRequestsRequest,
-  GetAllAnonymousRequestsRequest,
+  GetQueriedAnonymousRequestsRequest,
   GetAnAnonymousRequestRequest,
   AnonymousRequestsServerResponse,
 };

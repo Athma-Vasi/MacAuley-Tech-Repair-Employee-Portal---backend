@@ -17,7 +17,7 @@ import type {
 import type {
   CreateNewAnonymousRequestRequest,
   DeleteAnAnonymousRequestRequest,
-  GetAllAnonymousRequestsRequest,
+  GetQueriedAnonymousRequestsRequest,
   GetAnAnonymousRequestRequest,
   DeleteAllAnonymousRequestsRequest,
   AnonymousRequestsServerResponse,
@@ -32,7 +32,7 @@ export type {
   DeleteAnAnonymousRequestRequest,
   DeleteAllAnonymousRequestsRequest,
   GetAnAnonymousRequestRequest,
-  GetAllAnonymousRequestsRequest,
+  GetQueriedAnonymousRequestsRequest,
   AnonymousRequestsServerResponse,
   AnonymousRequestDocument,
   AnonymousRequestSchema,

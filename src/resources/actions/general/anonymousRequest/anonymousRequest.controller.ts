@@ -4,23 +4,33 @@ import type { Response } from 'express';
 import type {
   CreateNewAnonymousRequestRequest,
   DeleteAnAnonymousRequestRequest,
-  GetAllAnonymousRequestsRequest,
+  GetQueriedAnonymousRequestsRequest,
   GetAnAnonymousRequestRequest,
 } from './anonymousRequest.types';
 import {
   createNewAnonymousRequestService,
   deleteAllAnonymousRequestsService,
   deleteAnAnonymousRequestService,
-  getAllAnonymousRequestsService,
+  getQueriedAnonymousRequestsService,
   getAnAnonymousRequestService,
+  getQueriedTotalAnonymousRequestsService,
 } from './anonymousRequest.service';
-import { AnonymousRequestSchema } from './anonymousRequest.model';
+import { AnonymousRequestDocument, AnonymousRequestSchema } from './anonymousRequest.model';
+import {
+  GetQueriedResourceRequestServerResponse,
+  QueryObjectParsedWithDefaults,
+  ResourceRequestServerResponse,
+} from '../../../../types';
+import { FilterQuery, QueryOptions } from 'mongoose';
 
 // @desc   Create new anonymous request
 // @route  POST /anonymousRequests
 // @access Private
 const createNewAnonymousRequestHandler = expressAsyncHandler(
-  async (request: CreateNewAnonymousRequestRequest, response: Response) => {
+  async (
+    request: CreateNewAnonymousRequestRequest,
+    response: Response<ResourceRequestServerResponse<AnonymousRequestDocument>>
+  ) => {
     // userInfo is not stored in server for anonymous requests
     const {
       additionalInformation,
@@ -49,12 +59,12 @@ const createNewAnonymousRequestHandler = expressAsyncHandler(
     if (newAnonymousRequest) {
       response.status(201).json({
         message: 'Anonymous request created successfully',
-        anonymousRequestData: [newAnonymousRequest],
+        resourceData: [newAnonymousRequest],
       });
     } else {
       response
         .status(400)
-        .json({ message: 'Anonymous request could not be created', anonymousRequestData: [] });
+        .json({ message: 'Anonymous request could not be created', resourceData: [] });
     }
   }
 );
@@ -62,31 +72,41 @@ const createNewAnonymousRequestHandler = expressAsyncHandler(
 // @desc   Get all anonymous requests
 // @route  GET /anonymousRequests
 // @access Private
-const getAllAnonymousRequestsHandler = expressAsyncHandler(
-  async (request: GetAllAnonymousRequestsRequest, response: Response) => {
-    // only managers and admins can view all anonymous requests
-    const {
-      userInfo: { roles },
-    } = request.body;
-    if (roles.includes('Employee')) {
-      response.status(403).json({
-        message: 'Only managers and admins can get all anonymous requests',
-        anonymousRequestData: [],
+const getQueriedAnonymousRequestsHandler = expressAsyncHandler(
+  async (
+    request: GetQueriedAnonymousRequestsRequest,
+    response: Response<GetQueriedResourceRequestServerResponse<AnonymousRequestDocument>>
+  ) => {
+    let { newQueryFlag, totalDocuments } = request.body;
+
+    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+
+    // only perform a countDocuments scan if a new query is being made
+    if (newQueryFlag) {
+      totalDocuments = await getQueriedTotalAnonymousRequestsService({
+        filter: filter as FilterQuery<AnonymousRequestDocument> | undefined,
       });
-      return;
     }
 
-    const allAnonymousRequests = await getAllAnonymousRequestsService();
-
-    if (allAnonymousRequests.length === 0) {
+    // get all anonymous requests
+    const anonymousRequests = await getQueriedAnonymousRequestsService({
+      filter: filter as FilterQuery<AnonymousRequestDocument> | undefined,
+      projection: projection as QueryOptions<AnonymousRequestDocument>,
+      options: options as QueryOptions<AnonymousRequestDocument>,
+    });
+    if (anonymousRequests.length === 0) {
       response.status(404).json({
-        message: 'No anonymous requests found',
-        anonymousRequestData: [],
+        message: 'No anonymous requests that match query parameters were found',
+        pages: 0,
+        totalDocuments: 0,
+        resourceData: [],
       });
     } else {
       response.status(200).json({
-        message: 'Anonymous requests found successfully',
-        anonymousRequestData: allAnonymousRequests,
+        message: 'Successfully found anonymous requests',
+        pages: Math.ceil(totalDocuments / Number(options?.limit)),
+        totalDocuments: anonymousRequests.length,
+        resourceData: anonymousRequests,
       });
     }
   }
@@ -96,19 +116,10 @@ const getAllAnonymousRequestsHandler = expressAsyncHandler(
 // @route  GET /anonymousRequests/:anonymousRequestId
 // @access Private
 const getAnAnonymousRequestHandler = expressAsyncHandler(
-  async (request: GetAnAnonymousRequestRequest, response: Response) => {
-    // only managers and admins can view an anonymous request by its id
-    const {
-      userInfo: { roles },
-    } = request.body;
-    if (roles.includes('Employee')) {
-      response.status(403).json({
-        message: 'Only managers and admins can get view an anonymous request not belonging to them',
-        anonymousRequestData: [],
-      });
-      return;
-    }
-
+  async (
+    request: GetAnAnonymousRequestRequest,
+    response: Response<ResourceRequestServerResponse<AnonymousRequestDocument>>
+  ) => {
     const { anonymousRequestId } = request.params;
 
     const anonymousRequest = await getAnAnonymousRequestService(anonymousRequestId);
@@ -116,12 +127,12 @@ const getAnAnonymousRequestHandler = expressAsyncHandler(
     if (anonymousRequest) {
       response.status(200).json({
         message: 'Anonymous request found successfully',
-        anonymousRequestData: [anonymousRequest],
+        resourceData: [anonymousRequest],
       });
     } else {
       response.status(404).json({
         message: 'Anonymous request not found',
-        anonymousRequestData: [],
+        resourceData: [],
       });
     }
   }
@@ -131,30 +142,21 @@ const getAnAnonymousRequestHandler = expressAsyncHandler(
 // @route  DELETE /anonymousRequests/:anonymousRequestId
 // @access Private
 const deleteAnAnonymousRequestHandler = expressAsyncHandler(
-  async (request: DeleteAnAnonymousRequestRequest, response: Response) => {
-    // only managers can delete anonymous requests
-    const {
-      userInfo: { roles },
-    } = request.body;
-    if (!roles.includes('Manager')) {
-      response.status(403).json({
-        message: 'Only managers can delete anonymous requests',
-        anonymousRequestData: [],
-      });
-      return;
-    }
-
+  async (
+    request: DeleteAnAnonymousRequestRequest,
+    response: Response<ResourceRequestServerResponse<AnonymousRequestDocument>>
+  ) => {
     const { anonymousRequestId } = request.params;
     const anonymousRequest = await deleteAnAnonymousRequestService(anonymousRequestId);
     if (anonymousRequest.deletedCount === 1) {
       response.status(200).json({
         message: 'Anonymous request deleted successfully',
-        anonymousRequestData: anonymousRequest,
+        resourceData: [],
       });
     } else {
       response
         .status(400)
-        .json({ message: 'Anonymous request could not be deleted', anonymousRequestData: [] });
+        .json({ message: 'Anonymous request could not be deleted', resourceData: [] });
     }
   }
 );
@@ -163,37 +165,28 @@ const deleteAnAnonymousRequestHandler = expressAsyncHandler(
 // @route  DELETE /anonymousRequests
 // @access Private
 const deleteAllAnonymousRequestsHandler = expressAsyncHandler(
-  async (request: DeleteAnAnonymousRequestRequest, response: Response) => {
-    // only managers can delete all anonymous requests
-    const {
-      userInfo: { roles },
-    } = request.body;
-    if (!roles.includes('Manager')) {
-      response.status(403).json({
-        message: 'Only managers can delete all anonymous requests',
-        anonymousRequestData: [],
-      });
-      return;
-    }
-
+  async (
+    request: DeleteAnAnonymousRequestRequest,
+    response: Response<ResourceRequestServerResponse<AnonymousRequestDocument>>
+  ) => {
     const deletedResult = await deleteAllAnonymousRequestsService();
 
     if (deletedResult.deletedCount > 0) {
       response.status(200).json({
         message: 'All anonymous requests deleted successfully',
-        anonymousRequestData: [],
+        resourceData: [],
       });
     } else {
       response
         .status(400)
-        .json({ message: 'All anonymous requests could not be deleted', anonymousRequestData: [] });
+        .json({ message: 'All anonymous requests could not be deleted', resourceData: [] });
     }
   }
 );
 
 export {
   createNewAnonymousRequestHandler,
-  getAllAnonymousRequestsHandler,
+  getQueriedAnonymousRequestsHandler,
   getAnAnonymousRequestHandler,
   deleteAnAnonymousRequestHandler,
   deleteAllAnonymousRequestsHandler,

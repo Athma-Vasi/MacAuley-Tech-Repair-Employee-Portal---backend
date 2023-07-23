@@ -2,7 +2,12 @@ import type { DeleteResult } from 'mongodb';
 import type { AnonymousRequestDocument, AnonymousRequestSchema } from './anonymousRequest.model';
 
 import { AnonymousRequestModel } from './anonymousRequest.model';
-import { DatabaseResponse, DatabaseResponseNullable } from '../../../../types';
+import {
+  DatabaseResponse,
+  DatabaseResponseNullable,
+  QueriedResourceGetRequestServiceInput,
+  QueriedTotalResourceGetRequestServiceInput,
+} from '../../../../types';
 
 async function createNewAnonymousRequestService(
   input: AnonymousRequestSchema
@@ -15,12 +20,29 @@ async function createNewAnonymousRequestService(
   }
 }
 
-async function getAllAnonymousRequestsService(): DatabaseResponse<AnonymousRequestDocument> {
+async function getQueriedAnonymousRequestsService({
+  filter = {},
+  projection = null,
+  options = {},
+}: QueriedResourceGetRequestServiceInput<AnonymousRequestDocument>): DatabaseResponse<AnonymousRequestDocument> {
   try {
-    const allAnonymousRequests = await AnonymousRequestModel.find({}).lean().exec();
+    const allAnonymousRequests = await AnonymousRequestModel.find(filter, projection, options)
+      .lean()
+      .exec();
     return allAnonymousRequests;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getAllAnonymousRequestsService' });
+    throw new Error(error, { cause: 'getQueriedAnonymousRequestsService' });
+  }
+}
+
+async function getQueriedTotalAnonymousRequestsService({
+  filter = {},
+}: QueriedTotalResourceGetRequestServiceInput<AnonymousRequestDocument>): Promise<number> {
+  try {
+    const totalAnonymousRequests = await AnonymousRequestModel.countDocuments(filter).lean().exec();
+    return totalAnonymousRequests;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getQueriedTotalAnonymousRequestsService' });
   }
 }
 
@@ -59,8 +81,9 @@ async function deleteAllAnonymousRequestsService(): Promise<DeleteResult> {
 
 export {
   createNewAnonymousRequestService,
-  getAllAnonymousRequestsService,
+  getQueriedAnonymousRequestsService,
   getAnAnonymousRequestService,
   deleteAnAnonymousRequestService,
   deleteAllAnonymousRequestsService,
+  getQueriedTotalAnonymousRequestsService,
 };
