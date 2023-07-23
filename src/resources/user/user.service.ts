@@ -169,7 +169,7 @@ type UpdateUserServiceInput = {
   department: Department;
   emergencyContact: {
     fullName: string;
-    contactNumber: PhoneNumber;
+    phoneNumber: PhoneNumber;
   };
   startDate: NativeDate;
   active: boolean;

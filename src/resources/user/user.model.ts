@@ -115,7 +115,7 @@ type UserSchema = {
   department: Department;
   emergencyContact: {
     fullName: string;
-    contactNumber: PhoneNumber;
+    phoneNumber: PhoneNumber;
   };
   startDate: NativeDate;
   roles: UserRoles;
@@ -160,12 +160,32 @@ const userSchema = new Schema<UserSchema>(
       type: String,
       required: [true, 'Last name is required'],
     },
+    preferredName: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    preferredPronouns: {
+      type: String,
+      required: false,
+      default: 'Prefer not to say',
+    },
+    profilePictureUrl: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    dateOfBirth: {
+      type: Date,
+      required: [true, 'Date of birth is required'],
+    },
+
     contactNumber: {
       type: String,
       required: [true, 'Contact number is required'],
     },
     address: {
-      addressLine1: {
+      addressLine: {
         type: String,
         required: [true, 'Address line 1 is required'],
       },
@@ -205,7 +225,7 @@ const userSchema = new Schema<UserSchema>(
         type: String,
         required: [true, 'Emergency contact full name is required'],
       },
-      contactNumber: {
+      phoneNumber: {
         type: String,
         required: [true, 'Emergency contact number is required'],
       },
@@ -230,7 +250,7 @@ const userSchema = new Schema<UserSchema>(
   }
 );
 
-const UserModel = model('User', userSchema);
+const UserModel = model<UserDocument>('User', userSchema);
 
 export { UserModel };
 export type {

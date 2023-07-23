@@ -55,9 +55,9 @@ const addressChangeSchema = new Schema<AddressChangeSchema>(
     },
 
     newAddress: {
-      addressLine1: {
+      addressLine: {
         type: String,
-        required: [true, 'Address line 1 is required'],
+        required: [true, 'Address line is required'],
       },
       city: {
         type: String,
@@ -86,6 +86,12 @@ const addressChangeSchema = new Schema<AddressChangeSchema>(
       type: Boolean,
       required: [true, 'Acknowledgement is required'],
       default: false,
+    },
+    requestStatus: {
+      type: String,
+      required: false,
+      default: 'pending',
+      index: true,
     },
   },
   { timestamps: true }

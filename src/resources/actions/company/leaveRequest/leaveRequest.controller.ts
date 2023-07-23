@@ -128,7 +128,7 @@ const deleteALeaveRequestHandler = expressAsyncHandler(
 // @access Private/Admin/Manager
 const deleteAllLeaveRequestsHandler = expressAsyncHandler(
   async (
-    request: DeleteAllLeaveRequestsRequest,
+    _request: DeleteAllLeaveRequestsRequest,
     response: Response<ResourceRequestServerResponse<LeaveRequestDocument>>
   ) => {
     // delete all leave requests

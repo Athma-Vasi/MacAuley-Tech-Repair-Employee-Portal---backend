@@ -42,7 +42,7 @@ interface CreateNewUserRequest {
     department: Department;
     emergencyContact: {
       fullName: string;
-      contactNumber: PhoneNumber;
+      phoneNumber: PhoneNumber;
     };
     startDate: NativeDate;
     roles: UserRoles;
@@ -93,7 +93,7 @@ interface UpdateUserRequest extends RequestAfterJWTVerification {
     department: Department;
     emergencyContact: {
       fullName: string;
-      contactNumber: PhoneNumber;
+      phoneNumber: PhoneNumber;
     };
     startDate: NativeDate;
     active: boolean;

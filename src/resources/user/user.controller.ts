@@ -49,7 +49,7 @@ const createNewUserHandler = expressAsyncHandler(
       active = true,
     } = request.body;
     const { addressLine, city, province, state, postalCode, country } = address;
-    const { fullName, contactNumber: emergencyContactNumber } = emergencyContact;
+    const { fullName, phoneNumber: emergencyContactNumber } = emergencyContact;
 
     // both state and province cannot be empty (both are required)
     if (!state && !province) {
@@ -224,7 +224,7 @@ const updateUserHandler = expressAsyncHandler(
       active,
     } = request.body;
     const { addressLine, city, country, postalCode, province, state } = address;
-    const { contactNumber: emergencyContactNumber, fullName } = emergencyContact;
+    const { phoneNumber: emergencyContactNumber, fullName } = emergencyContact;
 
     // both state and provinces cannot be empty (one must be filled)
     if (!state && !province) {
