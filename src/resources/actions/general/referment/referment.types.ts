@@ -2,6 +2,7 @@ import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
 import type { UserRoles, JobPosition, PhoneNumber } from '../../../user';
 import type { RefermentDocument } from './referment.model';
+import { GetQueriedResourceRequest, RequestStatus } from '../../../../types';
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 
@@ -24,6 +25,7 @@ interface CreateNewRefermentRequest extends RequestAfterJWTVerification {
     referralReason: string;
     additionalInformation: string;
     privacyConsent: boolean;
+    requestStatus: RequestStatus;
   };
 }
 
@@ -42,18 +44,18 @@ interface DeleteARefermentRequest extends RequestAfterJWTVerification {
 
 type DeleteAllRefermentsRequest = RequestAfterJWTVerification;
 
-type GetAllRefermentsRequest = RequestAfterJWTVerification;
+type GetQueriedRefermentsRequest = GetQueriedResourceRequest;
 
-type GetRefermentsByUserRequest = RequestAfterJWTVerification;
+type GetQueriedRefermentsByUserRequest = GetQueriedResourceRequest;
 
-interface GetARefermentRequest extends RequestAfterJWTVerification {
+interface GetRefermentRequestById extends RequestAfterJWTVerification {
   body: {
     userInfo: {
       userId: Types.ObjectId;
       username: string;
       roles: UserRoles;
     };
-    refermentId: string;
+    params: { refermentId: string };
   };
 }
 
@@ -76,24 +78,19 @@ interface UpdateARefermentRequest extends RequestAfterJWTVerification {
     referralReason: string;
     additionalInformation: string;
     privacyConsent: boolean;
+    requestStatus: RequestStatus;
   };
   params: {
     refermentId: string;
   };
 }
 
-type RefermentsServerResponse = {
-  message: string;
-  refermentData: Array<RefermentDocument>;
-};
-
 export type {
   CreateNewRefermentRequest,
   DeleteARefermentRequest,
   DeleteAllRefermentsRequest,
-  GetAllRefermentsRequest,
-  GetRefermentsByUserRequest,
-  GetARefermentRequest,
+  GetQueriedRefermentsRequest,
+  GetQueriedRefermentsByUserRequest,
+  GetRefermentRequestById,
   UpdateARefermentRequest,
-  RefermentsServerResponse,
 };

@@ -2,7 +2,12 @@ import type { FlattenMaps, Types } from 'mongoose';
 import type { DeleteResult } from 'mongodb';
 
 import { RefermentDocument, RefermentModel, RefermentSchema } from './referment.model';
-import { DatabaseResponse, DatabaseResponseNullable } from '../../../../types';
+import {
+  DatabaseResponse,
+  DatabaseResponseNullable,
+  QueriedResourceGetRequestServiceInput,
+  QueriedTotalResourceGetRequestServiceInput,
+} from '../../../../types';
 import { JobPosition, PhoneNumber } from '../../../user';
 
 type CheckRefermentExistsServiceInput = {
@@ -46,6 +51,54 @@ async function createNewRefermentService(input: RefermentSchema) {
   }
 }
 
+async function getQueriedRefermentsService({
+  filter = {},
+  projection = null,
+  options = {},
+}: QueriedResourceGetRequestServiceInput<RefermentDocument>): DatabaseResponse<RefermentDocument> {
+  try {
+    const referments = await RefermentModel.find(filter, projection, options).lean().exec();
+    return referments;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getQueriedRefermentsService' });
+  }
+}
+
+async function getQueriedTotalRefermentsService({
+  filter = {},
+}: QueriedTotalResourceGetRequestServiceInput<RefermentDocument>): Promise<number> {
+  try {
+    const totalReferments = await RefermentModel.countDocuments(filter).lean().exec();
+    return totalReferments;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getQueriedTotalRefermentsService' });
+  }
+}
+
+async function getQueriedRefermentsByUserService({
+  filter = {},
+  projection = null,
+  options = {},
+}: QueriedResourceGetRequestServiceInput<RefermentDocument>): DatabaseResponse<RefermentDocument> {
+  try {
+    const referments = await RefermentModel.find(filter, projection, options).lean().exec();
+    return referments;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getQueriedRefermentsByUserService' });
+  }
+}
+
+async function getRefermentByIdService(
+  refermentId: string
+): DatabaseResponseNullable<RefermentDocument> {
+  try {
+    const referment = await RefermentModel.findById(refermentId).lean().exec();
+    return referment;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getRefermentByIdService' });
+  }
+}
+
 async function deleteARefermentService(refermentId: string): Promise<DeleteResult> {
   try {
     const deleteResult = await RefermentModel.deleteOne({
@@ -65,37 +118,6 @@ async function deleteAllRefermentsService(): Promise<DeleteResult> {
     return deleteResult;
   } catch (error: any) {
     throw new Error(error, { cause: 'deleteAllRefermentsService' });
-  }
-}
-
-async function getAllRefermentsService(): DatabaseResponse<RefermentDocument> {
-  try {
-    const referments = await RefermentModel.find({}).lean().exec();
-    return referments;
-  } catch (error: any) {
-    throw new Error(error, { cause: 'getAllRefermentsService' });
-  }
-}
-
-async function getARefermentService(
-  refermentId: string
-): DatabaseResponseNullable<RefermentDocument> {
-  try {
-    const referment = await RefermentModel.findById(refermentId).lean().exec();
-    return referment;
-  } catch (error: any) {
-    throw new Error(error, { cause: 'getARefermentService' });
-  }
-}
-
-async function getRefermentsByUserService(
-  userId: Types.ObjectId
-): DatabaseResponse<RefermentDocument> {
-  try {
-    const referments = await RefermentModel.find({ referrerUserId: userId }).lean().exec();
-    return referments;
-  } catch (error: any) {
-    throw new Error(error, { cause: 'getRefermentsByUserService' });
   }
 }
 
@@ -138,8 +160,9 @@ export {
   createNewRefermentService,
   deleteARefermentService,
   deleteAllRefermentsService,
-  getAllRefermentsService,
-  getARefermentService,
-  getRefermentsByUserService,
+  getQueriedRefermentsService,
+  getRefermentByIdService,
+  getQueriedTotalRefermentsService,
+  getQueriedRefermentsByUserService,
   updateARefermentService,
 };

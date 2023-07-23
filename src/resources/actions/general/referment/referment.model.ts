@@ -2,6 +2,7 @@ import { Schema, model, Types } from 'mongoose';
 import { JobPosition, PhoneNumber } from '../../../user';
 import { Action } from '../../../actions';
 import { ActionsGeneral } from '../../general';
+import { RequestStatus } from '../../../../types';
 
 type RefermentSchema = {
   referrerUserId: Types.ObjectId;
@@ -21,6 +22,7 @@ type RefermentSchema = {
   referralReason: string;
   additionalInformation: string;
   privacyConsent: boolean;
+  requestStatus: RequestStatus;
 };
 
 type RefermentDocument = RefermentSchema & {
@@ -100,6 +102,12 @@ const refermentSchema = new Schema<RefermentSchema>({
   privacyConsent: {
     type: Boolean,
     required: [true, 'PrivacyConsent is required'],
+  },
+  requestStatus: {
+    type: String,
+    required: false,
+    default: 'pending',
+    index: true,
   },
 });
 
