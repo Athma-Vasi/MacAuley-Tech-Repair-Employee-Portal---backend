@@ -33,3 +33,5 @@ repairNoteRouter
   .get(getRepairNoteByIdHandler)
   .delete(deleteRepairNoteByIdHandler)
   .put(updateRepairNoteByIdHandler);
+
+export { repairNoteRouter };
