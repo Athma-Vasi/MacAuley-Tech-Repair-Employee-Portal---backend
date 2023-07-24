@@ -69,6 +69,7 @@ const createNewRepairNoteHandler = expressAsyncHandler(
         partsNeededModels,
         partUnderWarranty,
         estimatedRepairCost,
+        estimatedRepairCostCurrency,
         estimatedCompletionDate,
         repairPriority,
         workOrderId,
@@ -103,6 +104,7 @@ const createNewRepairNoteHandler = expressAsyncHandler(
       partsNeededModels,
       partUnderWarranty,
       estimatedRepairCost,
+      estimatedRepairCostCurrency,
       estimatedCompletionDate,
       repairPriority,
       workOrderId,
@@ -331,6 +333,7 @@ const updateRepairNoteByIdHandler = expressAsyncHandler(
         partsNeededModels,
         partUnderWarranty,
         estimatedRepairCost,
+        estimatedRepairCostCurrency,
         estimatedCompletionDate,
         repairPriority,
         workOrderId,
@@ -339,6 +342,7 @@ const updateRepairNoteByIdHandler = expressAsyncHandler(
         repairNotes,
         testingResults,
         finalRepairCost,
+        finalRepairCostCurrency,
         repairStatus,
       },
     } = request.body;
@@ -371,6 +375,7 @@ const updateRepairNoteByIdHandler = expressAsyncHandler(
       partsNeededModels,
       partUnderWarranty,
       estimatedRepairCost,
+      estimatedRepairCostCurrency,
       estimatedCompletionDate,
       repairPriority,
       workOrderId,
@@ -379,6 +384,7 @@ const updateRepairNoteByIdHandler = expressAsyncHandler(
       repairNotes,
       testingResults,
       finalRepairCost,
+      finalRepairCostCurrency,
       repairStatus,
     };
 

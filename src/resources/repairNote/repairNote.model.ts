@@ -1,6 +1,7 @@
 import { Schema, Types, model } from 'mongoose';
 import { Urgency } from '../actions/general/printerIssue';
 import { Country, PostalCode, Province, StatesUS } from '../user';
+import { Currency } from '../actions/company/expenseClaim';
 
 type RequiredRepairs =
   | 'Cleaning'
@@ -38,12 +39,6 @@ type RepairNoteSchema = {
   username: string;
 
   /** initial repair note state when item was brought in */
-  // part information
-  partName: string;
-  partSerialId: string;
-  dateReceived: Date;
-  descriptionOfIssue: string;
-  initialInspectionNotes: string;
 
   // customer information
   customerName: string;
@@ -56,11 +51,19 @@ type RepairNoteSchema = {
   customerCountry: Country;
   customerPostalCode: PostalCode;
 
+  // part information
+  partName: string;
+  partSerialId: string;
+  dateReceived: Date;
+  descriptionOfIssue: string;
+  initialInspectionNotes: string;
+
   // repair information
   requiredRepairs: RequiredRepairs[];
   partsNeeded: PartsNeeded[];
   partsNeededModels: string;
   partUnderWarranty: boolean;
+  estimatedRepairCostCurrency: Currency;
   estimatedRepairCost: number;
   estimatedCompletionDate: Date;
   repairPriority: Urgency;
@@ -70,6 +73,7 @@ type RepairNoteSchema = {
   repairNotes: string;
   testingResults: string;
   finalRepairCost: number;
+  finalRepairCostCurrency: Currency;
   repairStatus: RepairStatus;
 };
 
@@ -82,7 +86,7 @@ type RepairNoteDocument = RepairNoteSchema & {
 
 type RepairNoteInitialSchema = Omit<
   RepairNoteSchema,
-  'repairNotes' | 'testingResults' | 'finalRepairCost' | 'repairStatus'
+  'repairNotes' | 'testingResults' | 'finalRepairCost' | 'repairStatus' | 'finalRepairCostCurrency'
 >;
 
 type RepairNoteFinalSchema = RepairNoteSchema;
@@ -185,6 +189,10 @@ const repairNoteSchema = new Schema<RepairNoteSchema>(
       type: Number,
       required: [true, 'Estimated repair cost is required'],
     },
+    estimatedRepairCostCurrency: {
+      type: String,
+      required: [true, 'Estimated repair cost currency is required'],
+    },
     estimatedCompletionDate: {
       type: Date,
       required: [true, 'Estimated completion date is required'],
@@ -213,6 +221,11 @@ const repairNoteSchema = new Schema<RepairNoteSchema>(
       type: Number,
       required: false,
       default: 0,
+    },
+    finalRepairCostCurrency: {
+      type: String,
+      required: false,
+      default: 'CAD',
     },
     repairStatus: {
       type: String,
