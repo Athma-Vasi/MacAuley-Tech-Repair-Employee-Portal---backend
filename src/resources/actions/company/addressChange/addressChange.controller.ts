@@ -150,7 +150,7 @@ const getQueriedAddressChangesHandler = expressAsyncHandler(
       });
     } else {
       response.status(200).json({
-        message: 'address changes found successfully',
+        message: 'Address changes found successfully',
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
         totalDocuments: addressChange.length,
         resourceData: addressChange,
@@ -194,14 +194,14 @@ const getAddressChangesByUserHandler = expressAsyncHandler(
     });
     if (addressChanges.length === 0) {
       response.status(404).json({
-        message: 'No addressChange requests found',
+        message: 'No address change requests found',
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
       });
     } else {
       response.status(200).json({
-        message: 'AddressChange requests found successfully',
+        message: 'Address change requests found successfully',
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
         totalDocuments: addressChanges.length,
         resourceData: addressChanges,
@@ -234,7 +234,7 @@ const updateAddressChangeStatusByIdHandler = expressAsyncHandler(
     // check if addressChange request exists
     const addressChangeExists = await getAddressChangeByIdService(addressChangeId);
     if (!addressChangeExists) {
-      response.status(404).json({ message: 'AddressChange does not exist', resourceData: [] });
+      response.status(404).json({ message: 'Address change does not exist', resourceData: [] });
       return;
     }
 
@@ -262,14 +262,14 @@ const updateAddressChangeStatusByIdHandler = expressAsyncHandler(
     });
     if (!updatedAddressChange) {
       response.status(400).json({
-        message: 'AddressChange request status update failed. Please try again!',
+        message: 'Address change request status update failed. Please try again!',
         resourceData: [],
       });
       return;
     }
 
     response.status(200).json({
-      message: 'AddressChange request status updated successfully',
+      message: 'Address change request status updated successfully',
       resourceData: [updatedAddressChange],
     });
   }
@@ -290,7 +290,7 @@ const getAddressChangeByIdHandler = expressAsyncHandler(
       response.status(404).json({ message: 'AddressChange request not found', resourceData: [] });
     } else {
       response.status(200).json({
-        message: 'AddressChange request found successfully',
+        message: 'Address change request found successfully',
         resourceData: [addressChange],
       });
     }
@@ -309,7 +309,7 @@ const deleteAnAddressChangeHandler = expressAsyncHandler(
     if (!addressChangeExists) {
       response
         .status(404)
-        .json({ message: 'AddressChange request does not exist', resourceData: [] });
+        .json({ message: 'Address change request does not exist', resourceData: [] });
       return;
     }
 
@@ -322,7 +322,7 @@ const deleteAnAddressChangeHandler = expressAsyncHandler(
       });
     } else {
       response.status(400).json({
-        message: 'AddressChange request could not be deleted',
+        message: 'Address change request could not be deleted',
         resourceData: [],
       });
     }
@@ -338,12 +338,12 @@ const deleteAllAddressChangesHandler = expressAsyncHandler(
     const deletedResult: DeleteResult = await deleteAllAddressChangesService();
     if (deletedResult.deletedCount > 0) {
       response.status(200).json({
-        message: 'All addressChange requests deleted successfully',
+        message: 'All address change requests deleted successfully',
         resourceData: [],
       });
     } else {
       response.status(400).json({
-        message: 'All addressChange requests could not be deleted',
+        message: 'All address change requests could not be deleted',
         resourceData: [],
       });
     }
