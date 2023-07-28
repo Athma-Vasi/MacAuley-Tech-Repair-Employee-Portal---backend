@@ -5,7 +5,9 @@ import { loginUserHandler, logoutUserHandler, refreshTokenHandler } from '../aut
 
 const authRouter = Router();
 
-authRouter.route('/login').post(loginLimiter, loginUserHandler);
+// ADD LOGIN LIMITER FOR PRODUCTION
+// authRouter.route('/login').post(loginLimiter, loginUserHandler);
+authRouter.route('/login').post(loginUserHandler);
 
 authRouter.route('/refresh').get(refreshTokenHandler);
 

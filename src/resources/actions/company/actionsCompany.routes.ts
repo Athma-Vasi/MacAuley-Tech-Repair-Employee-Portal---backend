@@ -11,6 +11,6 @@ actionsCompanyRouter.use('/address-change', addressChangeRouter);
 actionsCompanyRouter.use('/leave-request', leaveRequestRouter);
 actionsCompanyRouter.use('/expense-claim', expenseClaimRouter);
 actionsCompanyRouter.use('/resource-request', requestResourceRouter);
-actionsCompanyRouter.use('/benefits', benefitsRouter);
+actionsCompanyRouter.use('/benefit', benefitsRouter);
 
 export { actionsCompanyRouter };

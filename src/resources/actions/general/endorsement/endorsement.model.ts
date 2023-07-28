@@ -46,14 +46,14 @@ const endorsementSchema = new Schema<EndorsementSchema>(
     action: {
       type: String,
       required: [true, 'Action is required'],
-      enum: ['endorsement'],
+      enum: ['general'],
       index: true,
     },
     category: {
       type: String,
       required: [true, 'Category is required'],
-      enum: ['general'],
       index: true,
+      enum: ['endorsement'],
     },
     title: {
       type: String,

@@ -8,6 +8,7 @@ import {
   DatabaseResponseNullable,
   QueriedResourceGetRequestServiceInput,
   QueriedTotalResourceGetRequestServiceInput,
+  RequestStatus,
 } from '../../../../types';
 
 async function createNewEndorsementService(input: EndorsementSchema): Promise<EndorsementDocument> {
@@ -89,16 +90,17 @@ async function deleteAllEndorsementsService(): Promise<DeleteResult> {
   }
 }
 
-type UpdateAnEndorsementInput = EndorsementSchema & {
-  endorsementId: string;
-};
-async function updateAnEndorsementService(
-  input: UpdateAnEndorsementInput
-): DatabaseResponseNullable<EndorsementDocument> {
+async function updateEndorsementStatusByIdService({
+  endorsementId,
+  requestStatus,
+}: {
+  endorsementId: Types.ObjectId | string;
+  requestStatus: RequestStatus;
+}): DatabaseResponseNullable<EndorsementDocument> {
   try {
     const updatedEndorsement = await EndorsementModel.findByIdAndUpdate(
-      input.endorsementId,
-      input,
+      endorsementId,
+      { requestStatus },
       { new: true }
     )
       .select('-__v')
@@ -106,7 +108,7 @@ async function updateAnEndorsementService(
       .exec();
     return updatedEndorsement;
   } catch (error: any) {
-    throw new Error(error, { cause: 'updateAnEndorsementService' });
+    throw new Error(error, { cause: 'updateEndorsementStatusByIdService' });
   }
 }
 
@@ -118,5 +120,5 @@ export {
   getQueriedEndorsementsByUserService,
   getAnEndorsementService,
   getQueriedTotalEndorsementsService,
-  updateAnEndorsementService,
+  updateEndorsementStatusByIdService,
 };

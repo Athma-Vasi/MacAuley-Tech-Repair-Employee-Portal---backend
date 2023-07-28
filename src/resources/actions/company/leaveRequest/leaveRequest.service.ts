@@ -6,6 +6,7 @@ import type {
   DatabaseResponseNullable,
   QueriedResourceGetRequestServiceInput,
   QueriedTotalResourceGetRequestServiceInput,
+  RequestStatus,
 } from '../../../../types';
 
 import { LeaveRequestModel } from './leaveRequest.model';
@@ -51,6 +52,11 @@ async function getQueriedLeaveRequestsByUserService({
   options = {},
 }: QueriedResourceGetRequestServiceInput<LeaveRequestDocument>): DatabaseResponse<LeaveRequestDocument> {
   try {
+    console.group('getQueriedLeaveRequestsByUserService');
+    console.log('filter:', filter);
+    console.log('projection:', projection);
+    console.log('options:', options);
+    console.groupEnd();
     const leaveRequests = await LeaveRequestModel.find(filter, projection, options).lean().exec();
     return leaveRequests;
   } catch (error: any) {
@@ -69,6 +75,28 @@ async function getLeaveRequestByIdService(
     return leaveRequest;
   } catch (error: any) {
     throw new Error(error, { cause: 'getLeaveRequestByIdService' });
+  }
+}
+
+async function updateLeaveRequestStatusByIdService({
+  leaveRequestId,
+  requestStatus,
+}: {
+  leaveRequestId: Types.ObjectId | string;
+  requestStatus: RequestStatus;
+}): DatabaseResponseNullable<LeaveRequestDocument> {
+  try {
+    const leaveRequest = await LeaveRequestModel.findByIdAndUpdate(
+      leaveRequestId,
+      { requestStatus },
+      { new: true }
+    )
+      .select('-__v')
+      .lean()
+      .exec();
+    return leaveRequest;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'updateLeaveRequestStatusByIdService' });
   }
 }
 
@@ -98,4 +126,5 @@ export {
   getQueriedLeaveRequestsService,
   getQueriedLeaveRequestsByUserService,
   getQueriedTotalLeaveRequestsService,
+  updateLeaveRequestStatusByIdService,
 };

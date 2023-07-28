@@ -6,7 +6,7 @@ import {
   getQueriedEndorsementsService,
   getAnEndorsementService,
   getQueriedEndorsementsByUserService,
-  updateAnEndorsementService,
+  updateEndorsementStatusByIdService,
   getQueriedTotalEndorsementsService,
 } from './endorsement.service';
 
@@ -19,7 +19,7 @@ import type {
   GetQueriedEndorsementsRequest,
   GetAnEndorsementRequest,
   GetQueriedEndorsementsByUserRequest,
-  UpdateAnEndorsementRequest,
+  UpdateEndorsementStatusByIdRequest,
 } from './endorsement.types';
 import { EndorsementDocument, EndorsementSchema } from './endorsement.model';
 import {
@@ -30,7 +30,7 @@ import {
 import { FilterQuery, QueryOptions } from 'mongoose';
 
 // @desc   Create new endorsement
-// @route  POST /endorsements
+// @route  POST /endorsement
 // @access Private
 const createNewEndorsementHandler = expressAsyncHandler(
   async (
@@ -40,11 +40,13 @@ const createNewEndorsementHandler = expressAsyncHandler(
     const {
       userInfo: { userId, username },
 
-      title,
-      userToBeEndorsed,
-      attributeEndorsed,
-      summaryOfEndorsement,
-      requestStatus,
+      endorsement: {
+        title,
+        userToBeEndorsed,
+        attributeEndorsed,
+        summaryOfEndorsement,
+        requestStatus,
+      },
     } = request.body;
 
     const newEndorsementObject: EndorsementSchema = {
@@ -72,7 +74,7 @@ const createNewEndorsementHandler = expressAsyncHandler(
 );
 
 // @desc   Get all endorsements
-// @route  GET /endorsements
+// @route  GET /endorsement
 // @access Private
 const getQueriedEndorsementsHandler = expressAsyncHandler(
   async (
@@ -115,7 +117,7 @@ const getQueriedEndorsementsHandler = expressAsyncHandler(
 );
 
 // @desc   Get endorsements by user
-// @route  GET /endorsements/user
+// @route  GET /endorsement/user
 // @access Private
 const getQueriedEndorsementsByUserHandler = expressAsyncHandler(
   async (
@@ -164,7 +166,7 @@ const getQueriedEndorsementsByUserHandler = expressAsyncHandler(
 );
 
 // @desc   Get an endorsement
-// @route  GET /endorsements/:endorsementId
+// @route  GET /endorsement/:endorsementId
 // @access Private
 const getAnEndorsementHandler = expressAsyncHandler(
   async (
@@ -186,7 +188,7 @@ const getAnEndorsementHandler = expressAsyncHandler(
 );
 
 // @desc   Delete an endorsement
-// @route  DELETE /endorsements/:id
+// @route  DELETE /endorsement/:id
 // @access Private
 const deleteEndorsementHandler = expressAsyncHandler(
   async (request: DeleteEndorsementRequest, response: Response) => {
@@ -205,7 +207,7 @@ const deleteEndorsementHandler = expressAsyncHandler(
 );
 
 // @desc   Delete all endorsements
-// @route  DELETE /endorsements
+// @route  DELETE /endorsement
 // @access Private
 const deleteAllEndorsementsHandler = expressAsyncHandler(
   async (_request: DeleteAllEndorsementsRequest, response: Response) => {
@@ -222,22 +224,16 @@ const deleteAllEndorsementsHandler = expressAsyncHandler(
 );
 
 // @desc   Update an endorsement
-// @route  PUT /endorsements/:endorsementId
+// @route  PATCH /endorsement/:endorsementId
 // @access Private
 const updateAnEndorsementHandler = expressAsyncHandler(
-  async (request: UpdateAnEndorsementRequest, response: Response) => {
+  async (request: UpdateEndorsementStatusByIdRequest, response: Response) => {
     // anyone can update their own endorsements
     const {
-      userInfo: { userId, username },
-
-      title,
-      attributeEndorsed,
-      summaryOfEndorsement,
-      userToBeEndorsed,
-      requestStatus,
+      endorsement: { requestStatus },
     } = request.body;
-
     const { endorsementId } = request.params;
+
     // check if endorsement exists
     const endorsement = await getAnEndorsementService(endorsementId);
     if (!endorsement) {
@@ -245,26 +241,8 @@ const updateAnEndorsementHandler = expressAsyncHandler(
       return;
     }
 
-    // check if user is the owner of the endorsement
-    if (endorsement.userId !== userId) {
-      response.status(403).json({
-        message:
-          'You are not authorized to update as you are not the originator of this endorsement',
-        resourceData: [],
-      });
-      return;
-    }
-
-    const updatedEndorsement = await updateAnEndorsementService({
+    const updatedEndorsement = await updateEndorsementStatusByIdService({
       endorsementId,
-      userId,
-      username,
-      action: 'general',
-      category: 'endorsement',
-      title,
-      attributeEndorsed,
-      summaryOfEndorsement,
-      userToBeEndorsed,
       requestStatus,
     });
 

@@ -37,7 +37,7 @@ interface CreateNewRepairNoteRequest extends RequestAfterJWTVerification {
       partsNeeded: PartsNeeded[];
       partsNeededModels: string;
       partUnderWarranty: boolean;
-      estimatedRepairCost: number;
+      estimatedRepairCost: string;
       estimatedRepairCostCurrency: Currency;
       estimatedCompletionDate: Date;
       repairPriority: Urgency;
@@ -102,7 +102,7 @@ interface UpdateRepairNoteByIdRequest extends RequestAfterJWTVerification {
       partsNeeded: PartsNeeded[];
       partsNeededModels: string;
       partUnderWarranty: boolean;
-      estimatedRepairCost: number;
+      estimatedRepairCost: string;
       estimatedRepairCostCurrency: Currency;
       estimatedCompletionDate: Date;
       repairPriority: Urgency;
@@ -111,7 +111,7 @@ interface UpdateRepairNoteByIdRequest extends RequestAfterJWTVerification {
       /** ongoing and final (updated) repair note state added after */
       repairNotes: string;
       testingResults: string;
-      finalRepairCost: number;
+      finalRepairCost: string;
       finalRepairCostCurrency: Currency;
       repairStatus: RepairStatus;
     };

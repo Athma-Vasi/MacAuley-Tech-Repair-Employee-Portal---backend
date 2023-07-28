@@ -66,9 +66,9 @@ function verifyRoles() {
         return;
       }
 
-      if (method === 'PUT') {
-        // only managers/admins are allowed to update a resource that does not belong to them by its id
-        if (roles.includes('Manager') || roles.includes('Admin')) {
+      if (method === 'PUT' || method === 'PATCH') {
+        // only managers are allowed to update a resource that does not belong to them by its id
+        if (roles.includes('Manager')) {
           next();
           return;
         }

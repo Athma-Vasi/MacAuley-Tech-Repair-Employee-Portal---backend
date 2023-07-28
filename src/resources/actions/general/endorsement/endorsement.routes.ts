@@ -28,6 +28,6 @@ endorsementRouter
   .route('/:endorsementId')
   .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getAnEndorsementHandler)
   .delete(deleteEndorsementHandler)
-  .put(updateAnEndorsementHandler);
+  .patch(updateAnEndorsementHandler);
 
 export { endorsementRouter };

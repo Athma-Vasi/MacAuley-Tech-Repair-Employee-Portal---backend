@@ -6,9 +6,9 @@ import { refermentRouter } from './referment';
 
 const actionsGeneralRouter = Router();
 
-actionsGeneralRouter.use('/endorsements', endorsementRouter);
-actionsGeneralRouter.use('/printer-issues', printerIssueRouter);
-actionsGeneralRouter.use('/anonymous-requests', anonymousRequestRouter);
-actionsGeneralRouter.use('/referments', refermentRouter);
+actionsGeneralRouter.use('/endorsement', endorsementRouter);
+actionsGeneralRouter.use('/printer-issue', printerIssueRouter);
+actionsGeneralRouter.use('/anonymous-request', anonymousRequestRouter);
+actionsGeneralRouter.use('/referment', refermentRouter);
 
 export { actionsGeneralRouter };

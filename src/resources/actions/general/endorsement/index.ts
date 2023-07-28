@@ -23,7 +23,7 @@ import {
   getQueriedEndorsementsService,
   getAnEndorsementService,
   getQueriedEndorsementsByUserService,
-  updateAnEndorsementService,
+  updateEndorsementStatusByIdService,
 } from './endorsement.service';
 
 import type {
@@ -38,7 +38,7 @@ import type {
   GetAnEndorsementRequest,
   GetQueriedEndorsementsByUserRequest,
   DeleteAllEndorsementsRequest,
-  UpdateAnEndorsementRequest,
+  UpdateEndorsementStatusByIdRequest,
 } from './endorsement.types';
 
 /**
@@ -60,7 +60,7 @@ export {
   getQueriedEndorsementsService,
   getAnEndorsementService,
   getQueriedEndorsementsByUserService,
-  updateAnEndorsementService,
+  updateEndorsementStatusByIdService,
 };
 export type {
   EndorsementDocument,
@@ -72,5 +72,5 @@ export type {
   GetQueriedEndorsementsRequest,
   GetAnEndorsementRequest,
   GetQueriedEndorsementsByUserRequest,
-  UpdateAnEndorsementRequest,
+  UpdateEndorsementStatusByIdRequest,
 };

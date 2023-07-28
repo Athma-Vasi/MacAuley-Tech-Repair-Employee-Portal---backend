@@ -13,26 +13,26 @@ interface CreateNewEndorsementRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     // below are the fields required to be sent with post request
-    title: string;
-    userToBeEndorsed: string;
-    summaryOfEndorsement: string;
-    attributeEndorsed: EmployeeAttributes;
-    requestStatus: RequestStatus;
+    endorsement: {
+      title: string;
+      userToBeEndorsed: string;
+      summaryOfEndorsement: string;
+      attributeEndorsed: EmployeeAttributes;
+      requestStatus: RequestStatus;
+    };
   };
 }
 
-interface UpdateAnEndorsementRequest extends RequestAfterJWTVerification {
+interface UpdateEndorsementStatusByIdRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {
       userId: Types.ObjectId;
       username: string;
       roles: UserRoles;
     };
-    title: string;
-    userToBeEndorsed: string;
-    summaryOfEndorsement: string;
-    attributeEndorsed: EmployeeAttributes;
-    requestStatus: RequestStatus;
+    endorsement: {
+      requestStatus: RequestStatus;
+    };
   };
   params: {
     endorsementId: string;
@@ -64,5 +64,5 @@ export type {
   GetQueriedEndorsementsRequest,
   GetAnEndorsementRequest,
   GetQueriedEndorsementsByUserRequest,
-  UpdateAnEndorsementRequest,
+  UpdateEndorsementStatusByIdRequest,
 };

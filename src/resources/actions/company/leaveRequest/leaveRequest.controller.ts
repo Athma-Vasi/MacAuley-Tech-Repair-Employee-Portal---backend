@@ -10,6 +10,7 @@ import type {
   GetLeaveRequestByIdRequest,
   GetQueriedLeaveRequestsByUserRequest,
   GetQueriedLeaveRequestsRequest,
+  UpdateLeaveRequestStatusByIdRequest,
 } from './leaveRequest.types';
 import type {
   GetQueriedResourceRequestServerResponse,
@@ -26,6 +27,7 @@ import {
   getLeaveRequestByIdService,
   getQueriedLeaveRequestsByUserService,
   getQueriedTotalLeaveRequestsService,
+  updateLeaveRequestStatusByIdService,
 } from './leaveRequest.service';
 
 // @desc   Create a new leave request
@@ -207,6 +209,45 @@ const getLeaveRequestByIdHandler = expressAsyncHandler(
   }
 );
 
+// @desc   Update a leave request status by id
+// @route  PATCH /leave-request/:leaveRequestId
+// @access Private/Admin/Manager
+const updateLeaveRequestStatusByIdHandler = expressAsyncHandler(
+  async (
+    request: UpdateLeaveRequestStatusByIdRequest,
+    response: Response<ResourceRequestServerResponse<LeaveRequestDocument>>
+  ) => {
+    const { leaveRequestId } = request.params;
+    const {
+      leaveRequest: { requestStatus },
+    } = request.body;
+
+    // check if leave request exists
+    const leaveRequestExists = await getLeaveRequestByIdService(leaveRequestId);
+    if (!leaveRequestExists) {
+      response.status(404).json({ message: 'Leave request does not exist', resourceData: [] });
+      return;
+    }
+
+    // update leave request
+    const updatedLeaveRequest = await updateLeaveRequestStatusByIdService({
+      leaveRequestId,
+      requestStatus,
+    });
+    if (updatedLeaveRequest) {
+      response.status(200).json({
+        message: 'Leave request updated successfully',
+        resourceData: [updatedLeaveRequest],
+      });
+    } else {
+      response.status(400).json({
+        message: 'Leave request could not be updated',
+        resourceData: [],
+      });
+    }
+  }
+);
+
 // @desc   Delete a leave request by id
 // @route  DELETE /leave-request/:leaveRequestId
 // @access Private/Admin/Manager
@@ -271,4 +312,5 @@ export {
   getLeaveRequestByIdHandler,
   getQueriedLeaveRequestsHandler,
   getQueriedLeaveRequestsByUserHandler,
+  updateLeaveRequestStatusByIdHandler,
 };

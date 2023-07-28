@@ -48,6 +48,20 @@ interface GetLeaveRequestByIdRequest extends RequestAfterJWTVerification {
   params: { leaveRequestId: string };
 }
 
+interface UpdateLeaveRequestStatusByIdRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    leaveRequest: {
+      requestStatus: RequestStatus;
+    };
+  };
+  params: { leaveRequestId: string };
+}
+
 export type {
   CreateNewLeaveRequestRequest,
   DeleteALeaveRequestRequest,
@@ -55,4 +69,5 @@ export type {
   GetQueriedLeaveRequestsByUserRequest,
   GetLeaveRequestByIdRequest,
   GetQueriedLeaveRequestsRequest,
+  UpdateLeaveRequestStatusByIdRequest,
 };
