@@ -11,14 +11,13 @@ type AddressChangeSchema = {
   action: Action;
   category: ActionsCompany;
 
-  newAddress: {
-    addressLine: string;
-    city: string;
-    province: Province;
-    state: StatesUS;
-    postalCode: PostalCode;
-    country: Country;
-  };
+  addressLine: string;
+  city: string;
+  province: Province | '';
+  state: StatesUS | '';
+  postalCode: PostalCode;
+  country: Country;
+
   acknowledgement: boolean;
   requestStatus: RequestStatus;
 };
@@ -54,33 +53,31 @@ const addressChangeSchema = new Schema<AddressChangeSchema>(
       index: true,
     },
 
-    newAddress: {
-      addressLine: {
-        type: String,
-        required: [true, 'Address line is required'],
-      },
-      city: {
-        type: String,
-        required: [true, 'City is required'],
-      },
-      province: {
-        type: String,
-        required: false,
-        default: '',
-      },
-      state: {
-        type: String,
-        required: false,
-        default: '',
-      },
-      postalCode: {
-        type: String,
-        required: [true, 'Postal code is required'],
-      },
-      country: {
-        type: String,
-        required: [true, 'Country is required'],
-      },
+    addressLine: {
+      type: String,
+      required: [true, 'Address line is required'],
+    },
+    city: {
+      type: String,
+      required: [true, 'City is required'],
+    },
+    province: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    state: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    postalCode: {
+      type: String,
+      required: [true, 'Postal code is required'],
+    },
+    country: {
+      type: String,
+      required: [true, 'Country is required'],
     },
     acknowledgement: {
       type: Boolean,

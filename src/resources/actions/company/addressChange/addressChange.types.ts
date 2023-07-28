@@ -11,16 +11,17 @@ interface CreateNewAddressChangeRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    newAddress: {
+    addressChange: {
       addressLine: string;
       city: string;
       province: Province;
       state: StatesUS;
       postalCode: PostalCode;
       country: Country;
+
+      acknowledgement: boolean;
+      requestStatus: RequestStatus;
     };
-    acknowledgement: boolean;
-    requestStatus: RequestStatus;
   };
 }
 
@@ -45,6 +46,22 @@ interface GetAddressChangeByIdRequest extends RequestAfterJWTVerification {
   };
 }
 
+interface UpdateAddressChangeStatusByIdRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    addressChange: {
+      requestStatus: RequestStatus;
+    };
+  };
+  params: {
+    addressChangeId: string;
+  };
+}
+
 type GetQueriedAddressChangesRequest = GetQueriedResourceRequest;
 
 export type {
@@ -54,4 +71,5 @@ export type {
   GetQueriedAddressChangesByUserRequest,
   GetAddressChangeByIdRequest,
   GetQueriedAddressChangesRequest,
+  UpdateAddressChangeStatusByIdRequest,
 };

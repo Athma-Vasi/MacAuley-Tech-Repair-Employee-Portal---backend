@@ -7,6 +7,7 @@ import {
   DatabaseResponse,
   QueriedResourceGetRequestServiceInput,
   QueriedTotalResourceGetRequestServiceInput,
+  RequestStatus,
 } from '../../../../types';
 
 async function getAddressChangeByIdService(addressChangeId: Types.ObjectId | string) {
@@ -66,6 +67,28 @@ async function getQueriedAddressChangesByUserService({
   }
 }
 
+async function updateAddressChangeStatusByIdService({
+  addressChangeId,
+  requestStatus,
+}: {
+  addressChangeId: Types.ObjectId | string;
+  requestStatus: RequestStatus;
+}) {
+  try {
+    const addressChange = await AddressChangeModel.findByIdAndUpdate(
+      addressChangeId,
+      { requestStatus },
+      { new: true }
+    )
+      .select('-__v')
+      .lean()
+      .exec();
+    return addressChange;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'updateAddressChangeStatusByIdService' });
+  }
+}
+
 async function deleteAddressChangeByIdService(
   addressChangeId: Types.ObjectId | string
 ): Promise<DeleteResult> {
@@ -96,4 +119,5 @@ export {
   getQueriedAddressChangesByUserService,
   deleteAddressChangeByIdService,
   deleteAllAddressChangesService,
+  updateAddressChangeStatusByIdService,
 };

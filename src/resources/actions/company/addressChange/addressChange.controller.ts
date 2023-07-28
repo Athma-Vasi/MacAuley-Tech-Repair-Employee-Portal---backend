@@ -9,6 +9,7 @@ import type {
   DeleteAllAddressChangesRequest,
   GetQueriedAddressChangesByUserRequest,
   GetAddressChangeByIdRequest,
+  UpdateAddressChangeStatusByIdRequest,
 } from './addressChange.types';
 
 import { getUserByIdService, updateUserService } from '../../../user';
@@ -20,6 +21,7 @@ import {
   getQueriedAddressChangesByUserService,
   getQueriedTotalAddressChangesService,
   getQueriedAddressChangesService,
+  updateAddressChangeStatusByIdService,
 } from './addressChange.service';
 import { FilterQuery, QueryOptions } from 'mongoose';
 
@@ -40,10 +42,23 @@ const createNewAddressChangeHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      acknowledgement,
-      newAddress,
-      requestStatus,
+      addressChange: {
+        acknowledgement,
+        addressLine,
+        city,
+        country,
+        postalCode,
+        province,
+        requestStatus,
+        state,
+      },
     } = request.body;
+
+    // user must acknowledge that new address is correct
+    if (!acknowledgement) {
+      response.status(400).json({ message: 'Acknowledgement is required', resourceData: [] });
+      return;
+    }
 
     // check if user exists
     const userExists = await getUserByIdService(userId);
@@ -52,33 +67,20 @@ const createNewAddressChangeHandler = expressAsyncHandler(
       return;
     }
 
-    // user must acknowledge that new address is correct
-    if (!acknowledgement) {
-      response.status(400).json({ message: 'Acknowledgement is required', resourceData: [] });
-      return;
-    }
-
-    // grab user's current address
-    const { address } = userExists;
-
+    const { address: oldAddress } = userExists;
+    const newAddress = {
+      addressLine,
+      city,
+      country,
+      postalCode,
+      province,
+      state,
+    };
     // check if new address is the same as current address
-    if (JSON.stringify(newAddress) === JSON.stringify(address)) {
+    if (JSON.stringify(newAddress) === JSON.stringify(oldAddress)) {
       response
         .status(400)
         .json({ message: 'New address is the same as current address', resourceData: [] });
-      return;
-    }
-
-    // create new user object with new address
-    const newUserObject = {
-      ...userExists,
-      userId,
-      address: newAddress,
-    };
-    // update user's address
-    const updatedUser = await updateUserService(newUserObject);
-    if (!updatedUser) {
-      response.status(400).json({ message: 'User update failed', resourceData: [] });
       return;
     }
 
@@ -88,23 +90,29 @@ const createNewAddressChangeHandler = expressAsyncHandler(
       username,
       action: 'company',
       category: 'address change',
-      newAddress,
+      addressLine,
+      city,
+      country,
+      postalCode,
+      province,
+      state,
       acknowledgement,
       requestStatus,
     };
 
     // save new address change object to database
     const createdAddressChange = await createNewAddressChangeService(newAddressChange);
-    if (createdAddressChange) {
-      response.status(201).json({
-        message: `User ${username} address was changed successfully`,
-        resourceData: [createdAddressChange],
-      });
-    } else {
+    if (!createdAddressChange) {
       response
         .status(400)
         .json({ message: 'New address change request creation failed', resourceData: [] });
+      return;
     }
+
+    response.status(201).json({
+      message: 'Address change request created successfully',
+      resourceData: [createdAddressChange],
+    });
   }
 );
 
@@ -202,6 +210,71 @@ const getAddressChangesByUserHandler = expressAsyncHandler(
   }
 );
 
+// @desc   Update address change status
+// @route  PATCH /address-change/:addressChangeId
+// @access Private/Admin/Manager
+const updateAddressChangeStatusByIdHandler = expressAsyncHandler(
+  async (
+    request: UpdateAddressChangeStatusByIdRequest,
+    response: Response<ResourceRequestServerResponse<AddressChangeDocument>>
+  ) => {
+    const { addressChangeId } = request.params;
+    const {
+      addressChange: { requestStatus },
+      userInfo: { userId },
+    } = request.body;
+
+    // check if user exists
+    const userExists = await getUserByIdService(userId);
+    if (!userExists) {
+      response.status(404).json({ message: 'User does not exist', resourceData: [] });
+      return;
+    }
+
+    // check if addressChange request exists
+    const addressChangeExists = await getAddressChangeByIdService(addressChangeId);
+    if (!addressChangeExists) {
+      response.status(404).json({ message: 'AddressChange does not exist', resourceData: [] });
+      return;
+    }
+
+    // grab the new address from addressChange request
+    const { addressLine, city, province, postalCode, state, country } = addressChangeExists;
+    const newAddress = { addressLine, city, province, postalCode, state, country };
+
+    // create new user object with new address
+    const newUserObject = {
+      ...userExists,
+      userId,
+      address: newAddress,
+    };
+    // update user's address
+    const updatedUser = await updateUserService(newUserObject);
+    if (!updatedUser) {
+      response.status(400).json({ message: 'User update failed', resourceData: [] });
+      return;
+    }
+
+    // update addressChange request status
+    const updatedAddressChange = await updateAddressChangeStatusByIdService({
+      addressChangeId,
+      requestStatus,
+    });
+    if (!updatedAddressChange) {
+      response.status(400).json({
+        message: 'AddressChange request status update failed. Please try again!',
+        resourceData: [],
+      });
+      return;
+    }
+
+    response.status(200).json({
+      message: 'AddressChange request status updated successfully',
+      resourceData: [updatedAddressChange],
+    });
+  }
+);
+
 // @desc   Get an address change request
 // @route  GET /address-change/:addressChangeId
 // @access Private
@@ -284,4 +357,5 @@ export {
   getAddressChangeByIdHandler,
   deleteAnAddressChangeHandler,
   deleteAllAddressChangesHandler,
+  updateAddressChangeStatusByIdHandler,
 };
