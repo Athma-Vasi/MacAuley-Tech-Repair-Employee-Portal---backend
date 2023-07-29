@@ -66,6 +66,16 @@ const printerIssueSchema = new Schema<PrinterIssueSchema>(
       required: [true, 'Username is required'],
       index: true,
     },
+    action: {
+      type: String,
+      required: [true, 'Action is required'],
+      index: true,
+    },
+    category: {
+      type: String,
+      required: [true, 'Category is required'],
+      index: true,
+    },
     title: {
       type: String,
       required: [true, 'Title is required'],
