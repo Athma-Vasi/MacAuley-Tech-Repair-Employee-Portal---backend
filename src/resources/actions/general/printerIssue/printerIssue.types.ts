@@ -1,7 +1,7 @@
 import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
 
-import type { Urgency, PrinterIssueDocument } from './printerIssue.model';
+import type { Urgency, PrinterIssueDocument, PrinterMake, TimeRailway } from './printerIssue.model';
 import type { PhoneNumber, UserRoles } from '../../../user';
 import { GetQueriedResourceRequest, RequestStatus } from '../../../../types';
 
@@ -17,9 +17,9 @@ interface CreateNewPrinterIssueRequest extends RequestAfterJWTVerification {
       title: string;
       contactNumber: PhoneNumber;
       contactEmail: string;
-      dateOfOccurrence: string;
-      timeOfOccurrence: string;
-      printerMake: string;
+      dateOfOccurrence: NativeDate;
+      timeOfOccurrence: TimeRailway;
+      printerMake: PrinterMake;
       printerModel: string;
       printerSerialNumber: string;
       printerIssueDescription: string;
@@ -30,30 +30,6 @@ interface CreateNewPrinterIssueRequest extends RequestAfterJWTVerification {
   };
 }
 
-// interface UpdatePrinterIssueRequest extends RequestAfterJWTVerification {
-//   body: {
-//     userInfo: {
-//       userId: Types.ObjectId;
-//       username: string;
-//       roles: UserRoles;
-//     };
-//     title: string;
-//     contactNumber: PhoneNumber;
-//     contactEmail: string;
-//     dateOfOccurrence: string;
-//     timeOfOccurrence: string;
-//     printerMake: string;
-//     printerModel: string;
-//     printerSerialNumber: string;
-//     printerIssueDescription: string;
-//     urgency: Urgency;
-//     additionalInformation: string;
-//     requestStatus: RequestStatus;
-//   };
-//   params: {
-//     printerIssueId: string;
-//   };
-// }
 interface UpdatePrinterIssueStatusByIdRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {

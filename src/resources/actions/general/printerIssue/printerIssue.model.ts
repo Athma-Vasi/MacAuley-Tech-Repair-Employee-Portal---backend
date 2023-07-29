@@ -6,6 +6,26 @@ import { RequestStatus } from '../../../../types';
 
 type Urgency = 'low' | 'medium' | 'high';
 
+type PrinterMake =
+  | 'HP'
+  | 'Canon'
+  | 'Epson'
+  | 'Brother'
+  | 'Xerox'
+  | 'Ricoh'
+  | 'Lexmark'
+  | 'Dell'
+  | 'Kyocera'
+  | 'Sharp'
+  | 'Konica Minolta'
+  | 'Toshiba TEC'
+  | 'OKI'
+  | 'Panasonic'
+  | 'Fujitsu'
+  | 'Zebra Technologies';
+
+type TimeRailway = `${number}${number}:${number}${number}`;
+
 type PrinterIssueSchema = {
   userId: Types.ObjectId;
   username: string;
@@ -15,9 +35,9 @@ type PrinterIssueSchema = {
   title: string;
   contactNumber: PhoneNumber | string;
   contactEmail: string;
-  dateOfOccurrence: string;
-  timeOfOccurrence: string;
-  printerMake: string;
+  dateOfOccurrence: NativeDate;
+  timeOfOccurrence: TimeRailway;
+  printerMake: PrinterMake;
   printerModel: string;
   printerSerialNumber: string;
   printerIssueDescription: string;
@@ -59,6 +79,14 @@ const printerIssueSchema = new Schema<PrinterIssueSchema>(
       type: String,
       required: [true, 'ContactEmail is required'],
     },
+    dateOfOccurrence: {
+      type: Date,
+      required: [true, 'DateOfOccurrence is required'],
+    },
+    timeOfOccurrence: {
+      type: String,
+      required: [true, 'TimeOfOccurrence is required'],
+    },
     printerMake: {
       type: String,
       required: [true, 'PrinterMake is required'],
@@ -99,4 +127,4 @@ const printerIssueSchema = new Schema<PrinterIssueSchema>(
 const PrinterIssueModel = model<PrinterIssueDocument>('PrinterIssue', printerIssueSchema);
 
 export { PrinterIssueModel };
-export type { PrinterIssueDocument, PrinterIssueSchema, Urgency };
+export type { PrinterIssueDocument, PrinterIssueSchema, Urgency, PrinterMake, TimeRailway };

@@ -6,7 +6,7 @@ import {
   getAPrinterIssueHandler,
   getQueriedPrinterIssuesHandler,
   getQueriedPrinterIssuesByUserHandler,
-  updatePrinterIssueHandler,
+  updatePrinterIssueByIdHandler,
 } from './printerIssue.controller';
 import { assignQueryDefaults, verifyRoles } from '../../../../middlewares';
 import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
@@ -29,6 +29,6 @@ printerIssueRouter
   .route('/:printerIssueId')
   .get(getAPrinterIssueHandler)
   .delete(deletePrinterIssueHandler)
-  .put(updatePrinterIssueHandler);
+  .patch(updatePrinterIssueByIdHandler);
 
 export { printerIssueRouter };

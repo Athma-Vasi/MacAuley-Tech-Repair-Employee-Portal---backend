@@ -13,7 +13,7 @@ import {
   getAPrinterIssueHandler,
   getQueriedPrinterIssuesHandler,
   getQueriedPrinterIssuesByUserHandler,
-  updatePrinterIssueHandler,
+  updatePrinterIssueByIdHandler,
   deleteAllPrinterIssuesHandler,
 } from './printerIssue.controller';
 import {
@@ -55,7 +55,7 @@ export {
   printerIssueRouter,
   deleteAllPrinterIssuesHandler,
   deleteAllPrinterIssuesService,
-  updatePrinterIssueHandler,
+  updatePrinterIssueByIdHandler,
   updatePrinterIssueByIdService,
 };
 

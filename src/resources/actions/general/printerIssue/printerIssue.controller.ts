@@ -250,13 +250,12 @@ const deleteAllPrinterIssuesHandler = expressAsyncHandler(
 // @desc   Update a printer issue
 // @route  PUT /printerIssues/:printerIssueId
 // @access Private
-const updatePrinterIssueHandler = expressAsyncHandler(
+const updatePrinterIssueByIdHandler = expressAsyncHandler(
   async (
     request: UpdatePrinterIssueStatusByIdRequest,
     response: Response<ResourceRequestServerResponse<PrinterIssueDocument>>
   ) => {
     const {
-      userInfo: { userId, username },
       printerIssue: { requestStatus },
     } = request.body;
     const { printerIssueId } = request.params;
@@ -293,5 +292,5 @@ export {
   deleteAllPrinterIssuesHandler,
   getAPrinterIssueHandler,
   getQueriedPrinterIssuesByUserHandler,
-  updatePrinterIssueHandler,
+  updatePrinterIssueByIdHandler,
 };
