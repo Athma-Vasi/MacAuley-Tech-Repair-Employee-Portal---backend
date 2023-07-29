@@ -13,7 +13,8 @@ interface CreateNewBenefitsRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    benefits: {
+    benefit: {
+      username: string;
       planName: string;
       planDescription: string;
       planKind: BenefitsPlanKind;
@@ -51,6 +52,20 @@ interface GetBenefitsByIdRequest extends RequestAfterJWTVerification {
   params: { benefitsId: string };
 }
 
+interface UpdateBenefitsStatusByIdRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    benefit: {
+      requestStatus: RequestStatus;
+    };
+  };
+  params: { benefitId: string };
+}
+
 export type {
   CreateNewBenefitsRequest,
   DeleteABenefitRequest,
@@ -58,4 +73,5 @@ export type {
   GetQueriedBenefitsRequest,
   GetQueriedBenefitsByUserRequest,
   GetBenefitsByIdRequest,
+  UpdateBenefitsStatusByIdRequest,
 };

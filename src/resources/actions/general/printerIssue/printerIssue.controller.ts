@@ -9,7 +9,7 @@ import type {
   GetAPrinterIssueRequest,
   GetQueriedPrinterIssuesByUserRequest,
   DeleteAllPrinterIssuesRequest,
-  UpdatePrinterIssueRequest,
+  UpdatePrinterIssueStatusByIdRequest,
 } from './printerIssue.types';
 
 import {
@@ -19,7 +19,7 @@ import {
   getAPrinterIssueService,
   getQueriedPrinterIssuesService,
   getQueriedPrinterIssuesByUserService,
-  updatePrinterIssueService,
+  updatePrinterIssueByIdService,
   getQueriedTotalPrinterIssuesService,
 } from './printerIssue.service';
 import { PrinterIssueDocument, PrinterIssueSchema } from './printerIssue.model';
@@ -40,18 +40,20 @@ const createNewPrinterIssueHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      title,
-      contactNumber,
-      contactEmail,
-      dateOfOccurrence,
-      timeOfOccurrence,
-      printerMake,
-      printerModel,
-      printerSerialNumber,
-      printerIssueDescription,
-      urgency,
-      additionalInformation,
-      requestStatus,
+      printerIssue: {
+        title,
+        contactNumber,
+        contactEmail,
+        dateOfOccurrence,
+        timeOfOccurrence,
+        printerMake,
+        printerModel,
+        printerSerialNumber,
+        printerIssueDescription,
+        urgency,
+        additionalInformation,
+        requestStatus,
+      },
     } = request.body;
 
     const newPrinterIssueObject: PrinterIssueSchema = {
@@ -250,27 +252,15 @@ const deleteAllPrinterIssuesHandler = expressAsyncHandler(
 // @access Private
 const updatePrinterIssueHandler = expressAsyncHandler(
   async (
-    request: UpdatePrinterIssueRequest,
+    request: UpdatePrinterIssueStatusByIdRequest,
     response: Response<ResourceRequestServerResponse<PrinterIssueDocument>>
   ) => {
-    // anyone can update their own printer issue
     const {
       userInfo: { userId, username },
-      title,
-      contactEmail,
-      contactNumber,
-      dateOfOccurrence,
-      timeOfOccurrence,
-      printerIssueDescription,
-      printerMake,
-      printerModel,
-      printerSerialNumber,
-      urgency,
-      additionalInformation,
-      requestStatus,
+      printerIssue: { requestStatus },
     } = request.body;
-
     const { printerIssueId } = request.params;
+
     // check if printer issue exists
     const printerIssue = await getAPrinterIssueService(printerIssueId);
     if (!printerIssue) {
@@ -278,33 +268,8 @@ const updatePrinterIssueHandler = expressAsyncHandler(
       return;
     }
 
-    // check if user is the owner of the printer issue
-    if (printerIssue.userId !== userId) {
-      response.status(403).json({
-        message:
-          'You are not authorized to update as you are not the originator of this printer issue',
-        resourceData: [],
-      });
-      return;
-    }
-
-    const updatedPrinterIssue = await updatePrinterIssueService({
+    const updatedPrinterIssue = await updatePrinterIssueByIdService({
       printerIssueId,
-      userId,
-      username,
-      action: 'general',
-      category: 'printer issue',
-      title,
-      contactEmail,
-      contactNumber,
-      dateOfOccurrence,
-      timeOfOccurrence,
-      printerIssueDescription,
-      printerMake,
-      printerModel,
-      printerSerialNumber,
-      urgency,
-      additionalInformation,
       requestStatus,
     });
 

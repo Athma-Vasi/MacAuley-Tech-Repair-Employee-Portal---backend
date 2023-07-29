@@ -7,6 +7,7 @@ import {
   getAllBenefitsHandler,
   getBenefitByIdHandler,
   getQueriedBenefitsByUserHandler,
+  updateBenefitStatusByIdHandler,
 } from './benefits.controller';
 import { assignQueryDefaults, verifyRoles } from '../../../../middlewares';
 import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
@@ -25,6 +26,10 @@ benefitsRouter
   .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedBenefitsByUserHandler)
   .delete(deleteAllBenefitsByUserHandler);
 
-benefitsRouter.route('/:benefitsId').get(getBenefitByIdHandler).delete(deleteABenefitHandler);
+benefitsRouter
+  .route('/:benefitId')
+  .get(getBenefitByIdHandler)
+  .delete(deleteABenefitHandler)
+  .patch(updateBenefitStatusByIdHandler);
 
 export { benefitsRouter };

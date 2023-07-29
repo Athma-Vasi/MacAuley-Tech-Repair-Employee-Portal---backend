@@ -16,11 +16,11 @@ type BenefitsPlanKind =
 type Currency = 'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD' | 'JPY' | 'CNY';
 
 type BenefitsSchema = {
-  userId: Types.ObjectId;
-  username: string;
   action: Action;
   category: ActionsCompany;
 
+  benefitUserId: Types.ObjectId;
+  username: string;
   planName: string;
   planDescription: string;
   planKind: BenefitsPlanKind;
@@ -42,7 +42,7 @@ type BenefitsDocument = BenefitsSchema & {
 
 const benefitsSchema = new Schema<BenefitsSchema>(
   {
-    userId: {
+    benefitUserId: {
       type: Schema.Types.ObjectId,
       required: [true, 'User ID is required'],
       ref: 'User',

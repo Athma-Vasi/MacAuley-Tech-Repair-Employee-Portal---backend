@@ -56,6 +56,27 @@ async function getQueriedBenefitsByUserService({
   }
 }
 
+async function updateBenefitStatusByIdService({
+  benefitId,
+  requestStatus,
+}: {
+  benefitId: Types.ObjectId | string;
+  requestStatus: string;
+}) {
+  try {
+    const benefit = await BenefitsModel.findByIdAndUpdate(
+      benefitId,
+      { requestStatus },
+      { new: true }
+    )
+      .lean()
+      .exec();
+    return benefit;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'updateBenefitStatusByIdService' });
+  }
+}
+
 async function getBenefitByIdService(
   benefitId: Types.ObjectId | string
 ): DatabaseResponseNullable<BenefitsDocument> {
@@ -95,4 +116,5 @@ export {
   getQueriedBenefitsByUserService,
   getBenefitByIdService,
   getQueriedTotalBenefitsService,
+  updateBenefitStatusByIdService,
 };

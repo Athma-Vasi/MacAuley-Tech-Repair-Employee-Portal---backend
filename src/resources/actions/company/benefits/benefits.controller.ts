@@ -9,6 +9,7 @@ import type {
   GetQueriedBenefitsRequest,
   GetBenefitsByIdRequest,
   GetQueriedBenefitsByUserRequest,
+  UpdateBenefitsStatusByIdRequest,
 } from './benefits.types';
 import {
   createNewBenefitService,
@@ -18,6 +19,7 @@ import {
   getBenefitByIdService,
   getQueriedBenefitsByUserService,
   getQueriedTotalBenefitsService,
+  updateBenefitStatusByIdService,
 } from './benefits.service';
 import { BenefitsDocument, BenefitsSchema } from './benefits.model';
 import {
@@ -27,6 +29,7 @@ import {
 } from '../../../../types';
 import { FilterQuery, QueryOptions } from 'mongoose';
 import { getQueriedTotalLeaveRequestsService } from '../leaveRequest/leaveRequest.service';
+import { getUserByUsernameService } from '../../../user';
 
 // @desc   Create a new benefits plan
 // @route  POST /benefits
@@ -37,8 +40,9 @@ const createNewBenefitsHandler = expressAsyncHandler(
     response: Response<ResourceRequestServerResponse<BenefitsDocument>>
   ) => {
     const {
-      userInfo: { userId, username, roles },
-      benefits: {
+      userInfo: { roles },
+      benefit: {
+        username,
         planName,
         planDescription,
         planKind,
@@ -53,14 +57,23 @@ const createNewBenefitsHandler = expressAsyncHandler(
     } = request.body;
 
     // only managers can create a new benefits plan
+    // by default, verifyRoles middleware allows all to access POST routes
     if (!roles.includes('Manager')) {
       response.status(403).json({ message: 'User does not have permission', resourceData: [] });
       return;
     }
 
+    // get userId from benefit username
+    const benefitUserDoc = await getUserByUsernameService(username);
+    if (!benefitUserDoc) {
+      response.status(404).json({ message: 'User not found', resourceData: [] });
+      return;
+    }
+    const benefitUserId = benefitUserDoc._id;
+
     // create new benefits plan object
     const newBenefitsObject: BenefitsSchema = {
-      userId,
+      benefitUserId,
       username,
       action: 'company',
       category: 'benefits',
@@ -82,11 +95,9 @@ const createNewBenefitsHandler = expressAsyncHandler(
     if (newBenefitsPlan) {
       response
         .status(201)
-        .json({ message: 'New benefits plan created', resourceData: [newBenefitsPlan] });
+        .json({ message: 'New benefit plan created', resourceData: [newBenefitsPlan] });
     } else {
-      response
-        .status(400)
-        .json({ message: 'Unable to create new benefits plan', resourceData: [] });
+      response.status(400).json({ message: 'Unable to create new benefit plan', resourceData: [] });
     }
   }
 );
@@ -206,6 +217,42 @@ const getBenefitByIdHandler = expressAsyncHandler(
   }
 );
 
+// @desc   Update a benefits plan by id
+// @route  PATCH /benefits/:benefitsId
+// @access Private/Admin/Manager
+const updateBenefitStatusByIdHandler = expressAsyncHandler(
+  async (
+    request: UpdateBenefitsStatusByIdRequest,
+    response: Response<ResourceRequestServerResponse<BenefitsDocument>>
+  ) => {
+    const { benefitId } = request.params;
+    const {
+      benefit: { requestStatus },
+    } = request.body;
+
+    // check if benefits plan exists
+    const benefitsPlan = await getBenefitByIdService(benefitId);
+    if (!benefitsPlan) {
+      response.status(404).json({
+        message: 'Benefits plan does not exist',
+        resourceData: [],
+      });
+      return;
+    }
+
+    // update a benefits plan by id
+    const updatedBenefitsPlan = await updateBenefitStatusByIdService({ benefitId, requestStatus });
+    if (updatedBenefitsPlan) {
+      response.status(200).json({
+        message: 'Benefits plan updated successfully',
+        resourceData: [updatedBenefitsPlan],
+      });
+    } else {
+      response.status(400).json({ message: 'Unable to update benefits plan', resourceData: [] });
+    }
+  }
+);
+
 // @desc   Delete a benefits plan by id
 // @route  DELETE /benefits/:benefitsId
 // @access Private/Admin/Manager
@@ -257,4 +304,5 @@ export {
   getAllBenefitsHandler,
   getQueriedBenefitsByUserHandler,
   getBenefitByIdHandler,
+  updateBenefitStatusByIdHandler,
 };

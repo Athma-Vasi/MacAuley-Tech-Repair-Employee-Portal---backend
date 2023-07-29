@@ -13,40 +13,57 @@ interface CreateNewPrinterIssueRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    title: string;
-    contactNumber: PhoneNumber;
-    contactEmail: string;
-    dateOfOccurrence: string;
-    timeOfOccurrence: string;
-    printerMake: string;
-    printerModel: string;
-    printerSerialNumber: string;
-    printerIssueDescription: string;
-    urgency: Urgency;
-    additionalInformation: string;
-    requestStatus: RequestStatus;
+    printerIssue: {
+      title: string;
+      contactNumber: PhoneNumber;
+      contactEmail: string;
+      dateOfOccurrence: string;
+      timeOfOccurrence: string;
+      printerMake: string;
+      printerModel: string;
+      printerSerialNumber: string;
+      printerIssueDescription: string;
+      urgency: Urgency;
+      additionalInformation: string;
+      requestStatus: RequestStatus;
+    };
   };
 }
 
-interface UpdatePrinterIssueRequest extends RequestAfterJWTVerification {
+// interface UpdatePrinterIssueRequest extends RequestAfterJWTVerification {
+//   body: {
+//     userInfo: {
+//       userId: Types.ObjectId;
+//       username: string;
+//       roles: UserRoles;
+//     };
+//     title: string;
+//     contactNumber: PhoneNumber;
+//     contactEmail: string;
+//     dateOfOccurrence: string;
+//     timeOfOccurrence: string;
+//     printerMake: string;
+//     printerModel: string;
+//     printerSerialNumber: string;
+//     printerIssueDescription: string;
+//     urgency: Urgency;
+//     additionalInformation: string;
+//     requestStatus: RequestStatus;
+//   };
+//   params: {
+//     printerIssueId: string;
+//   };
+// }
+interface UpdatePrinterIssueStatusByIdRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {
       userId: Types.ObjectId;
       username: string;
       roles: UserRoles;
     };
-    title: string;
-    contactNumber: PhoneNumber;
-    contactEmail: string;
-    dateOfOccurrence: string;
-    timeOfOccurrence: string;
-    printerMake: string;
-    printerModel: string;
-    printerSerialNumber: string;
-    printerIssueDescription: string;
-    urgency: Urgency;
-    additionalInformation: string;
-    requestStatus: RequestStatus;
+    printerIssue: {
+      requestStatus: RequestStatus;
+    };
   };
   params: {
     printerIssueId: string;
@@ -78,5 +95,5 @@ export type {
   GetQueriedPrinterIssuesRequest,
   GetAPrinterIssueRequest,
   GetQueriedPrinterIssuesByUserRequest,
-  UpdatePrinterIssueRequest,
+  UpdatePrinterIssueStatusByIdRequest,
 };

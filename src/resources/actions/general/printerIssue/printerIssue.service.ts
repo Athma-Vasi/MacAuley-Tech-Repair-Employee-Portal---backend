@@ -8,6 +8,7 @@ import {
   DatabaseResponseNullable,
   QueriedResourceGetRequestServiceInput,
   QueriedTotalResourceGetRequestServiceInput,
+  RequestStatus,
 } from '../../../../types';
 
 async function createNewPrinterIssueService(
@@ -21,17 +22,17 @@ async function createNewPrinterIssueService(
   }
 }
 
-type UpdatePrinterIssueInput = PrinterIssueSchema & {
-  printerIssueId: string;
-};
-
-async function updatePrinterIssueService(
-  input: UpdatePrinterIssueInput
-): DatabaseResponseNullable<PrinterIssueDocument> {
+async function updatePrinterIssueByIdService({
+  printerIssueId,
+  requestStatus,
+}: {
+  printerIssueId: string | Types.ObjectId;
+  requestStatus: RequestStatus;
+}): DatabaseResponseNullable<PrinterIssueDocument> {
   try {
     const updatedPrinterIssue = await PrinterIssueModel.findByIdAndUpdate(
-      input.printerIssueId,
-      input,
+      printerIssueId,
+      { requestStatus },
       { new: true }
     )
       .select('-__v')
@@ -39,7 +40,7 @@ async function updatePrinterIssueService(
       .exec();
     return updatedPrinterIssue;
   } catch (error: any) {
-    throw new Error(error, { cause: 'updatePrinterIssueService' });
+    throw new Error(error, { cause: 'updatePrinterIssueByIdService' });
   }
 }
 
@@ -119,5 +120,5 @@ export {
   getAPrinterIssueService,
   getQueriedTotalPrinterIssuesService,
   getQueriedPrinterIssuesByUserService,
-  updatePrinterIssueService,
+  updatePrinterIssueByIdService,
 };

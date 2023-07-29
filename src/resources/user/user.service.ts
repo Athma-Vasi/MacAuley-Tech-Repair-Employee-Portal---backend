@@ -18,6 +18,7 @@ import type {
 
 import { UserModel } from './user.model';
 import {
+  DatabaseResponseNullable,
   QueriedResourceGetRequestServiceInput,
   QueriedTotalResourceGetRequestServiceInput,
 } from '../../types';
@@ -109,7 +110,9 @@ async function deleteUserService(userId: Types.ObjectId | string): Promise<Delet
   }
 }
 
-async function getUserByIdService(userId: string | Types.ObjectId) {
+async function getUserByIdService(
+  userId: string | Types.ObjectId
+): DatabaseResponseNullable<UserDocument> {
   try {
     const user = await UserModel.findById(userId).select('-password').lean().exec();
     return user;
@@ -118,7 +121,7 @@ async function getUserByIdService(userId: string | Types.ObjectId) {
   }
 }
 
-async function getUserByUsernameService(username: string) {
+async function getUserByUsernameService(username: string): DatabaseResponseNullable<UserDocument> {
   try {
     const user = await UserModel.findOne({ username }).select('-password').lean().exec();
     return user;
@@ -127,7 +130,9 @@ async function getUserByUsernameService(username: string) {
   }
 }
 
-async function getUserWithPasswordService(username: string) {
+async function getUserWithPasswordService(
+  username: string
+): DatabaseResponseNullable<UserDocument> {
   try {
     const userWithPassword = await UserModel.findOne({ username }).lean().exec();
     return userWithPassword;

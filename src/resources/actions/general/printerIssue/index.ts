@@ -23,7 +23,7 @@ import {
   getQueriedPrinterIssuesService,
   getQueriedPrinterIssuesByUserService,
   deleteAllPrinterIssuesService,
-  updatePrinterIssueService,
+  updatePrinterIssueByIdService,
 } from './printerIssue.service';
 
 import type { PrinterIssueDocument, PrinterIssueSchema, Urgency } from './printerIssue.model';
@@ -34,7 +34,7 @@ import type {
   GetQueriedPrinterIssuesRequest,
   GetQueriedPrinterIssuesByUserRequest,
   DeleteAllPrinterIssuesRequest,
-  UpdatePrinterIssueRequest,
+  UpdatePrinterIssueStatusByIdRequest,
 } from './printerIssue.types';
 
 /**
@@ -56,7 +56,7 @@ export {
   deleteAllPrinterIssuesHandler,
   deleteAllPrinterIssuesService,
   updatePrinterIssueHandler,
-  updatePrinterIssueService,
+  updatePrinterIssueByIdService,
 };
 
 export type {
@@ -69,5 +69,5 @@ export type {
   PrinterIssueDocument,
   PrinterIssueSchema,
   Urgency,
-  UpdatePrinterIssueRequest,
+  UpdatePrinterIssueStatusByIdRequest,
 };
