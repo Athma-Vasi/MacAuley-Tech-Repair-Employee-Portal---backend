@@ -52,6 +52,7 @@ const createNewUserHandler = expressAsyncHandler(
       address,
       jobPosition,
       department,
+      storeLocation,
       emergencyContact,
       startDate,
       roles = ['Employee'],
@@ -124,6 +125,7 @@ const createNewUserHandler = expressAsyncHandler(
       profilePictureUrl,
       jobPosition,
       department,
+      storeLocation,
       startDate,
       roles,
       active,
@@ -205,12 +207,10 @@ const deleteUserHandler = expressAsyncHandler(
     // we do not want to delete the user if they have notes assigned to them that are not completed
     const userHasNotes = await getNotesByUserService(userToBeDeletedId);
     if (userHasNotes.filter((note) => note.completed).length > 0) {
-      response
-        .status(400)
-        .json({
-          message: 'User has notes assigned to them that are not completed',
-          resourceData: [],
-        });
+      response.status(400).json({
+        message: 'User has notes assigned to them that are not completed',
+        resourceData: [],
+      });
       return;
     }
 
@@ -247,6 +247,7 @@ const updateUserHandler = expressAsyncHandler(
       address,
       jobPosition,
       department,
+      storeLocation,
       emergencyContact,
       startDate,
       active,
@@ -302,12 +303,10 @@ const updateUserHandler = expressAsyncHandler(
 
     // confirm that active is a boolean
     if (active === undefined || typeof active !== 'boolean') {
-      response
-        .status(400)
-        .json({
-          message: 'Active field is required and must be of type boolean',
-          resourceData: [],
-        });
+      response.status(400).json({
+        message: 'Active field is required and must be of type boolean',
+        resourceData: [],
+      });
       return;
     }
 
@@ -329,18 +328,17 @@ const updateUserHandler = expressAsyncHandler(
       jobPosition,
       department,
       emergencyContact,
+      storeLocation,
       startDate,
     };
 
     // update user if all checks pass successfully
     const updatedUser = await updateUserService(objToUpdate);
     if (updatedUser) {
-      response
-        .status(200)
-        .json({
-          message: `User ${updatedUser.username} updated successfully`,
-          resourceData: [updatedUser],
-        });
+      response.status(200).json({
+        message: `User ${updatedUser.username} updated successfully`,
+        resourceData: [updatedUser],
+      });
     } else {
       response.status(400).json({ message: 'User update failed', resourceData: [] });
     }

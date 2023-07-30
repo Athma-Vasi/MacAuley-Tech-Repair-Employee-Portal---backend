@@ -12,6 +12,7 @@ import type {
   Province,
   StatesUS,
   PreferredPronouns,
+  StoreLocation,
 } from './user.model';
 import { GetQueriedResourceRequest } from '../../types';
 
@@ -40,6 +41,7 @@ interface CreateNewUserRequest {
     };
     jobPosition: JobPosition;
     department: Department;
+    storeLocation: StoreLocation;
     emergencyContact: {
       fullName: string;
       phoneNumber: PhoneNumber;
@@ -91,6 +93,7 @@ interface UpdateUserRequest extends RequestAfterJWTVerification {
     };
     jobPosition: JobPosition;
     department: Department;
+    storeLocation: StoreLocation;
     emergencyContact: {
       fullName: string;
       phoneNumber: PhoneNumber;

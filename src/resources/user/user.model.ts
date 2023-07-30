@@ -76,16 +76,81 @@ type PhoneNumber =
   `+(${string})(${string}${string}${string}) ${string}${string}${string}-${string}${string}${string}${string}`;
 type Country = 'Canada' | 'United States';
 
-type JobPosition = 'Employee' | 'Supervisor' | 'Manager';
 type Department =
-  | 'Administration'
+  | 'Executive Management'
+  | 'Administrative'
+  | 'Sales and Marketing'
+  | 'Information Technology'
+  | 'Repair Technicians'
+  | 'Field Service Technicians'
+  | 'Logistics and Inventory'
   | 'Customer Service'
-  | 'Human Resources'
-  | 'Repair'
-  | 'Technical Support'
-  | 'Sales'
-  | 'Logistics'
-  | 'Inventory Management';
+  | 'Quality Control'
+  | 'Training and Development'
+  | 'Janitorial and Maintenance'
+  | 'Security';
+
+type StoreLocation = 'Calgary' | 'Edmonton' | 'Vancouver';
+type ExecutiveManagement =
+  | 'Chief Executive Officer'
+  | 'Chief Operations Officer'
+  | 'Chief Financial Officer'
+  | 'Chief Technology Officer'
+  | 'Chief Marketing Officer';
+
+type AdministrativeDepartment =
+  | 'Office Manager'
+  | 'Administrative Assistant'
+  | 'Human Resources Manager'
+  | 'Accountant';
+
+type SalesAndMarketing =
+  | 'Sales Manager'
+  | 'Marketing Manager'
+  | 'Sales Representative'
+  | 'Digital Marketing Specialist';
+
+type InformationTechnology =
+  | 'IT Manager'
+  | 'Network Administrator'
+  | 'Systems Administrator'
+  | 'IT Support Specialist'
+  | 'Database Administrator';
+
+type RepairTechnicians =
+  | 'Electronics Repair Technician'
+  | 'Computer Repair Technician'
+  | 'Smartphone Repair Technician'
+  | 'Tablet Repair Technician'
+  | 'Audio/Video Equipment Repair Technician';
+
+type FieldServiceTechnicians = 'On-Site Repair Technician' | 'Mobile Device Technician';
+
+type LogisticsAndInventory = 'Warehouse Manager' | 'Inventory Clerk' | 'Delivery Driver';
+
+type CustomerService = 'Customer Service Representative' | 'Technical Support Specialist';
+
+type QualityControl = 'Quality Assurance Inspector' | 'Testing and Diagnostics Specialist';
+
+type TrainingAndDevelopment = 'Technical Trainer';
+
+type JanitorialAndMaintenance = 'Janitor/Cleaner';
+
+type Security = 'Security Guard';
+
+type JobPosition =
+  | ExecutiveManagement
+  | AdministrativeDepartment
+  | SalesAndMarketing
+  | InformationTechnology
+  | RepairTechnicians
+  | FieldServiceTechnicians
+  | LogisticsAndInventory
+  | CustomerService
+  | QualityControl
+  | TrainingAndDevelopment
+  | JanitorialAndMaintenance
+  | Security;
 
 type PreferredPronouns = 'He/Him' | 'She/Her' | 'They/Them' | 'Other' | 'Prefer not to say';
 
@@ -111,8 +176,11 @@ type UserSchema = {
     postalCode: PostalCode;
     country: Country;
   };
+
   jobPosition: JobPosition;
   department: Department;
+  storeLocation: StoreLocation;
+
   emergencyContact: {
     fullName: string;
     phoneNumber: PhoneNumber;
@@ -212,6 +280,7 @@ const userSchema = new Schema<UserSchema>(
         required: [true, 'Country is required'],
       },
     },
+
     jobPosition: {
       type: String,
       required: [true, 'Job position is required'],
@@ -220,6 +289,11 @@ const userSchema = new Schema<UserSchema>(
       type: String,
       required: [true, 'Department is required'],
     },
+    storeLocation: {
+      type: String,
+      required: [true, 'Store location is required'],
+    },
+
     emergencyContact: {
       fullName: {
         type: String,
@@ -265,4 +339,5 @@ export type {
   Province,
   PreferredPronouns,
   StatesUS,
+  StoreLocation,
 };

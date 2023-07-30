@@ -11,6 +11,7 @@ import type {
   PreferredPronouns,
   Province,
   StatesUS,
+  StoreLocation,
   UserDocument,
   UserRoles,
   UserSchema,
@@ -193,6 +194,7 @@ type UpdateUserServiceInput = {
   };
   jobPosition: JobPosition;
   department: Department;
+  storeLocation: StoreLocation;
   emergencyContact: {
     fullName: string;
     phoneNumber: PhoneNumber;
