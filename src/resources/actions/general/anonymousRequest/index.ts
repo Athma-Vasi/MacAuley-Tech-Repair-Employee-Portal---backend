@@ -7,6 +7,23 @@
  */
 import { AnonymousRequestModel } from './anonymousRequest.model';
 import { anonymousRequestRouter } from './anonymousRequest.routes';
+import {
+  createNewAnonymousRequestHandler,
+  deleteAllAnonymousRequestsHandler,
+  deleteAnAnonymousRequestHandler,
+  getAnAnonymousRequestHandler,
+  getQueriedAnonymousRequestsHandler,
+  updateAnonymousRequestStatusByIdHandler,
+} from './anonymousRequest.controller';
+import {
+  createNewAnonymousRequestService,
+  deleteAllAnonymousRequestsService,
+  deleteAnAnonymousRequestService,
+  getAnAnonymousRequestService,
+  getQueriedAnonymousRequestsService,
+  updateAnonymousRequestStatusByIdService,
+  getQueriedTotalAnonymousRequestsService,
+} from './anonymousRequest.service';
 
 import type {
   AnonymousRequestDocument,
@@ -20,20 +37,36 @@ import type {
   GetQueriedAnonymousRequestsRequest,
   GetAnAnonymousRequestRequest,
   DeleteAllAnonymousRequestsRequest,
-  AnonymousRequestsServerResponse,
+  UpdateAnonymousRequestStatusByIdRequest,
 } from './anonymousRequest.types';
 
 /**
  * Exports
  */
-export { AnonymousRequestModel, anonymousRequestRouter };
+export {
+  AnonymousRequestModel,
+  anonymousRequestRouter,
+  createNewAnonymousRequestHandler,
+  deleteAllAnonymousRequestsHandler,
+  deleteAnAnonymousRequestHandler,
+  getAnAnonymousRequestHandler,
+  getQueriedAnonymousRequestsHandler,
+  updateAnonymousRequestStatusByIdHandler,
+  createNewAnonymousRequestService,
+  deleteAllAnonymousRequestsService,
+  deleteAnAnonymousRequestService,
+  getAnAnonymousRequestService,
+  getQueriedAnonymousRequestsService,
+  updateAnonymousRequestStatusByIdService,
+  getQueriedTotalAnonymousRequestsService,
+};
 export type {
   CreateNewAnonymousRequestRequest,
   DeleteAnAnonymousRequestRequest,
   DeleteAllAnonymousRequestsRequest,
   GetAnAnonymousRequestRequest,
   GetQueriedAnonymousRequestsRequest,
-  AnonymousRequestsServerResponse,
+  UpdateAnonymousRequestStatusByIdRequest,
   AnonymousRequestDocument,
   AnonymousRequestSchema,
   AnonymousRequestKind,

@@ -40,18 +40,20 @@ const createNewRefermentHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      candidateFullName,
-      candidateEmail,
-      candidateContactNumber,
-      candidateCurrentJobTitle,
-      candidateCurrentCompany,
-      candidateProfileUrl,
-      positionReferredFor,
-      positionJobDescription,
-      referralReason,
-      additionalInformation,
-      privacyConsent,
-      requestStatus,
+      referment: {
+        candidateFullName,
+        candidateEmail,
+        candidateContactNumber,
+        candidateCurrentJobTitle,
+        candidateCurrentCompany,
+        candidateProfileUrl,
+        positionReferredFor,
+        positionJobDescription,
+        referralReason,
+        additionalInformation,
+        privacyConsent,
+        requestStatus,
+      },
     } = request.body;
 
     // user must acknowledge privacy consent

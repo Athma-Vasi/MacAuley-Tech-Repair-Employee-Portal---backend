@@ -7,6 +7,7 @@ import {
   DatabaseResponseNullable,
   QueriedResourceGetRequestServiceInput,
   QueriedTotalResourceGetRequestServiceInput,
+  RequestStatus,
 } from '../../../../types';
 import { Types } from 'mongoose';
 
@@ -58,6 +59,27 @@ async function getAnAnonymousRequestService(
   }
 }
 
+async function updateAnonymousRequestStatusByIdService({
+  anonymousRequestId,
+  requestStatus,
+}: {
+  anonymousRequestId: Types.ObjectId | string;
+  requestStatus: RequestStatus;
+}) {
+  try {
+    const updatedAnonymousRequest = await AnonymousRequestModel.findByIdAndUpdate(
+      anonymousRequestId,
+      { requestStatus },
+      { new: true }
+    )
+      .lean()
+      .exec();
+    return updatedAnonymousRequest;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'updateAnonymousRequestStatusByIdService' });
+  }
+}
+
 async function deleteAnAnonymousRequestService(
   anonymousRequestId: Types.ObjectId | string
 ): Promise<DeleteResult> {
@@ -89,4 +111,5 @@ export {
   deleteAnAnonymousRequestService,
   deleteAllAnonymousRequestsService,
   getQueriedTotalAnonymousRequestsService,
+  updateAnonymousRequestStatusByIdService,
 };

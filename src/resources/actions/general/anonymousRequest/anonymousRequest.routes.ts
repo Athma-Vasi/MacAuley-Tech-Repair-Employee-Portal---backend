@@ -5,9 +5,12 @@ import {
   deleteAnAnonymousRequestHandler,
   getQueriedAnonymousRequestsHandler,
   getAnAnonymousRequestHandler,
+  updateAnonymousRequestStatusByIdHandler,
 } from './anonymousRequest.controller';
 
 const anonymousRequestRouter = Router();
+
+// no roles verification for anonymous requests
 
 anonymousRequestRouter
   .route('/')
@@ -18,6 +21,7 @@ anonymousRequestRouter
 anonymousRequestRouter
   .route('/:anonymousRequestId')
   .get(getAnAnonymousRequestHandler)
-  .delete(deleteAnAnonymousRequestHandler);
+  .delete(deleteAnAnonymousRequestHandler)
+  .patch(updateAnonymousRequestStatusByIdHandler);
 
 export { anonymousRequestRouter };

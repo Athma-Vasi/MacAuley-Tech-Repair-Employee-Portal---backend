@@ -3,14 +3,23 @@ import type { Action } from '../../../actions';
 import type { ActionsGeneral } from '../../general';
 import { Urgency } from '../printerIssue';
 import { PhoneNumber } from '../../../user';
+import { RequestStatus } from '../../../../types';
 
 type AnonymousRequestKind =
-  | 'Workplace safety'
-  | 'Employee conflict'
-  | 'Workplace harassment'
+  | 'Benefits and compensation'
+  | 'Bullying and intimidation'
   | 'Company security'
+  | 'Customer service'
+  | 'Discrimination'
   | 'Diversity and inclusion'
-  | 'LGBTQIA+';
+  | 'Employee conflict'
+  | 'Ethical concerns'
+  | 'LGBTQIA+'
+  | 'Managerial issues'
+  | 'Environmental concerns'
+  | 'Workload and stress'
+  | 'Workplace safety'
+  | 'Workplace harassment';
 
 type AnonymousRequestSchema = {
   // action and category are added in the create handler
@@ -24,6 +33,7 @@ type AnonymousRequestSchema = {
   requestDescription: string;
   additionalInformation: string;
   urgency: Urgency;
+  requestStatus: RequestStatus;
 };
 
 type AnonymousRequestDocument = AnonymousRequestSchema & {
@@ -74,6 +84,12 @@ const anonymousRequestSchema = new Schema<AnonymousRequestSchema>(
     urgency: {
       type: String,
       required: [true, 'Urgency is required'],
+    },
+    requestStatus: {
+      type: String,
+      required: [true, 'RequestStatus is required'],
+      default: 'pending',
+      index: true,
     },
   },
   {

@@ -7,7 +7,7 @@ import type {
 } from './anonymousRequest.model';
 
 import { PhoneNumber, UserRoles } from '../../../user';
-import { GetQueriedResourceRequest } from '../../../../types';
+import { GetQueriedResourceRequest, RequestStatus } from '../../../../types';
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 
@@ -20,13 +20,16 @@ interface CreateNewAnonymousRequestRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    title: string;
-    secureContactNumber: PhoneNumber;
-    secureContactEmail: string;
-    requestKind: AnonymousRequestKind;
-    requestDescription: string;
-    additionalInformation: string;
-    urgency: Urgency;
+    anonymousRequest: {
+      title: string;
+      secureContactNumber: PhoneNumber;
+      secureContactEmail: string;
+      requestKind: AnonymousRequestKind;
+      requestDescription: string;
+      additionalInformation: string;
+      urgency: Urgency;
+      requestStatus: RequestStatus;
+    };
   };
 }
 
@@ -63,10 +66,21 @@ interface GetAnAnonymousRequestRequest extends RequestAfterJWTVerification {
   };
 }
 
-type AnonymousRequestsServerResponse = {
-  message: string;
-  anonymousRequestData: Array<AnonymousRequestDocument>;
-};
+interface UpdateAnonymousRequestStatusByIdRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    anonymousRequest: {
+      requestStatus: RequestStatus;
+    };
+  };
+  params: {
+    anonymousRequestId: string;
+  };
+}
 
 export type {
   CreateNewAnonymousRequestRequest,
@@ -74,5 +88,5 @@ export type {
   DeleteAllAnonymousRequestsRequest,
   GetQueriedAnonymousRequestsRequest,
   GetAnAnonymousRequestRequest,
-  AnonymousRequestsServerResponse,
+  UpdateAnonymousRequestStatusByIdRequest,
 };

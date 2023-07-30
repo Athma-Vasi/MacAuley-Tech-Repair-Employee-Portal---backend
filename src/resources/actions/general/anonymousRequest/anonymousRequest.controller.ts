@@ -6,6 +6,7 @@ import type {
   DeleteAnAnonymousRequestRequest,
   GetQueriedAnonymousRequestsRequest,
   GetAnAnonymousRequestRequest,
+  UpdateAnonymousRequestStatusByIdRequest,
 } from './anonymousRequest.types';
 import {
   createNewAnonymousRequestService,
@@ -14,6 +15,7 @@ import {
   getQueriedAnonymousRequestsService,
   getAnAnonymousRequestService,
   getQueriedTotalAnonymousRequestsService,
+  updateAnonymousRequestStatusByIdService,
 } from './anonymousRequest.service';
 import { AnonymousRequestDocument, AnonymousRequestSchema } from './anonymousRequest.model';
 import {
@@ -33,13 +35,16 @@ const createNewAnonymousRequestHandler = expressAsyncHandler(
   ) => {
     // userInfo is not stored in server for anonymous requests
     const {
-      additionalInformation,
-      requestDescription,
-      requestKind,
-      secureContactEmail,
-      secureContactNumber,
-      title,
-      urgency,
+      anonymousRequest: {
+        additionalInformation,
+        requestDescription,
+        requestKind,
+        secureContactEmail,
+        secureContactNumber,
+        title,
+        urgency,
+        requestStatus,
+      },
     } = request.body;
 
     const input: AnonymousRequestSchema = {
@@ -52,6 +57,7 @@ const createNewAnonymousRequestHandler = expressAsyncHandler(
       secureContactNumber,
       title,
       urgency,
+      requestStatus,
     };
 
     const newAnonymousRequest = await createNewAnonymousRequestService(input);
@@ -138,6 +144,47 @@ const getAnAnonymousRequestHandler = expressAsyncHandler(
   }
 );
 
+// @desc   Update an anonymous request
+// @route  PATCH /anonymousRequests/:anonymousRequestId
+// @access Private
+const updateAnonymousRequestStatusByIdHandler = expressAsyncHandler(
+  async (
+    request: UpdateAnonymousRequestStatusByIdRequest,
+    response: Response<ResourceRequestServerResponse<AnonymousRequestDocument>>
+  ) => {
+    const { anonymousRequestId } = request.params;
+    const {
+      anonymousRequest: { requestStatus },
+    } = request.body;
+
+    // check if anonymous request exists in database
+    const anonymousRequest = await getAnAnonymousRequestService(anonymousRequestId);
+    if (!anonymousRequest) {
+      response.status(404).json({
+        message: 'Anonymous request not found',
+        resourceData: [],
+      });
+      return;
+    }
+
+    const updatedAnonymousRequest = await updateAnonymousRequestStatusByIdService({
+      anonymousRequestId,
+      requestStatus,
+    });
+    if (updatedAnonymousRequest) {
+      response.status(200).json({
+        message: 'Anonymous request updated successfully',
+        resourceData: [updatedAnonymousRequest],
+      });
+    } else {
+      response.status(400).json({
+        message: 'Anonymous request could not be updated',
+        resourceData: [],
+      });
+    }
+  }
+);
+
 // @desc   Delete an anonymous request
 // @route  DELETE /anonymousRequests/:anonymousRequestId
 // @access Private
@@ -166,7 +213,7 @@ const deleteAnAnonymousRequestHandler = expressAsyncHandler(
 // @access Private
 const deleteAllAnonymousRequestsHandler = expressAsyncHandler(
   async (
-    request: DeleteAnAnonymousRequestRequest,
+    _request: DeleteAnAnonymousRequestRequest,
     response: Response<ResourceRequestServerResponse<AnonymousRequestDocument>>
   ) => {
     const deletedResult = await deleteAllAnonymousRequestsService();
@@ -190,4 +237,5 @@ export {
   getAnAnonymousRequestHandler,
   deleteAnAnonymousRequestHandler,
   deleteAllAnonymousRequestsHandler,
+  updateAnonymousRequestStatusByIdHandler,
 };

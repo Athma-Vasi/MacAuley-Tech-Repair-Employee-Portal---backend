@@ -1,7 +1,6 @@
 import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
 import type { UserRoles, JobPosition, PhoneNumber } from '../../../user';
-import type { RefermentDocument } from './referment.model';
 import { GetQueriedResourceRequest, RequestStatus } from '../../../../types';
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
@@ -13,19 +12,21 @@ interface CreateNewRefermentRequest extends RequestAfterJWTVerification {
       username: string; // referrer username
       roles: UserRoles;
     };
-    candidateFullName: string;
-    candidateEmail: string;
-    candidateContactNumber: PhoneNumber;
-    candidateCurrentJobTitle: string;
-    candidateCurrentCompany: string;
-    candidateProfileUrl: string;
+    referment: {
+      candidateFullName: string;
+      candidateEmail: string;
+      candidateContactNumber: PhoneNumber;
+      candidateCurrentJobTitle: string;
+      candidateCurrentCompany: string;
+      candidateProfileUrl: string;
 
-    positionReferredFor: JobPosition;
-    positionJobDescription: string;
-    referralReason: string;
-    additionalInformation: string;
-    privacyConsent: boolean;
-    requestStatus: RequestStatus;
+      positionReferredFor: JobPosition;
+      positionJobDescription: string;
+      referralReason: string;
+      additionalInformation: string;
+      privacyConsent: boolean;
+      requestStatus: RequestStatus;
+    };
   };
 }
 
