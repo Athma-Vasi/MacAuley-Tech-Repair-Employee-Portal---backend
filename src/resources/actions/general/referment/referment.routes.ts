@@ -7,7 +7,7 @@ import {
   getARefermentByIdHandler,
   getQueriedRefermentsHandler,
   getQueriedRefermentsByUserHandler,
-  updateARefermentHandler,
+  updateRefermentStatusByIdHandler,
 } from './referment.controller';
 import { assignQueryDefaults, verifyRoles } from '../../../../middlewares';
 import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
@@ -28,6 +28,6 @@ refermentRouter
   .route('/:refermentId')
   .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getARefermentByIdHandler)
   .delete(deleteARefermentHandler)
-  .put(updateARefermentHandler);
+  .patch(updateRefermentStatusByIdHandler);
 
 export { refermentRouter };

@@ -8,7 +8,7 @@ import type {
   GetRefermentRequestById,
   GetQueriedRefermentsRequest,
   GetQueriedRefermentsByUserRequest,
-  UpdateARefermentRequest,
+  UpdateRefermentStatusByIdRequest,
 } from './referment.types';
 
 import {
@@ -19,7 +19,7 @@ import {
   getRefermentByIdService,
   getQueriedRefermentsService,
   getQueriedRefermentsByUserService,
-  updateARefermentService,
+  updateRefermentStatusByIdService,
   getQueriedTotalRefermentsService,
 } from './referment.service';
 import { RefermentDocument } from './referment.model';
@@ -47,6 +47,7 @@ const createNewRefermentHandler = expressAsyncHandler(
         candidateCurrentJobTitle,
         candidateCurrentCompany,
         candidateProfileUrl,
+        departmentReferredFor,
         positionReferredFor,
         positionJobDescription,
         referralReason,
@@ -62,8 +63,8 @@ const createNewRefermentHandler = expressAsyncHandler(
     }
 
     const newReferment = await createNewRefermentService({
-      referrerUserId: userId,
-      referrerUsername: username,
+      userId,
+      username,
       action: 'general',
       category: 'referment',
 
@@ -74,6 +75,7 @@ const createNewRefermentHandler = expressAsyncHandler(
       candidateCurrentCompany,
       candidateProfileUrl,
 
+      departmentReferredFor,
       positionReferredFor,
       positionJobDescription,
       referralReason,
@@ -207,64 +209,30 @@ const getARefermentByIdHandler = expressAsyncHandler(
 );
 
 // @desc   update a referment
-// @route  PUT /referments/:refermentId
+// @route  PATCH /referments/:refermentId
 // @access Private
-const updateARefermentHandler = expressAsyncHandler(
+const updateRefermentStatusByIdHandler = expressAsyncHandler(
   async (
-    request: UpdateARefermentRequest,
+    request: UpdateRefermentStatusByIdRequest,
     response: Response<ResourceRequestServerResponse<RefermentDocument>>
   ) => {
+    const { refermentId } = request.params;
     const {
-      userInfo: { userId, username },
-      candidateFullName,
-      candidateEmail,
-      candidateContactNumber,
-      candidateCurrentJobTitle,
-      candidateCurrentCompany,
-      candidateProfileUrl,
-      positionReferredFor,
-      positionJobDescription,
-      referralReason,
-      additionalInformation,
-      privacyConsent,
+      referment: { requestStatus },
     } = request.body;
 
-    // anyone can update their own referments
-    const { refermentId } = request.params;
-    // check that referment to be updated exists
-    const referment = await getRefermentByIdService(refermentId);
-    if (!referment) {
+    // check if referment exists
+    const isRefermentExists = await checkRefermentExistsService({ refermentId });
+    if (!isRefermentExists) {
       response.status(404).json({ message: 'Referment not found', resourceData: [] });
       return;
     }
 
-    // check that referment to be updated belongs to the user
-    if (referment.referrerUserId !== userId) {
-      response.status(403).json({
-        message: 'You are not authorized to update as you are not the originator of this referment',
-        resourceData: [],
-      });
-      return;
-    }
-
     // update referment
-    const updatedReferment = await updateARefermentService({
+    const updatedReferment = await updateRefermentStatusByIdService({
       refermentId,
-      referrerUserId: userId,
-      referrerUsername: username,
-      candidateFullName,
-      candidateEmail,
-      candidateContactNumber,
-      candidateCurrentJobTitle,
-      candidateCurrentCompany,
-      candidateProfileUrl,
-      positionReferredFor,
-      positionJobDescription,
-      referralReason,
-      additionalInformation,
-      privacyConsent,
+      requestStatus,
     });
-
     if (updatedReferment) {
       response
         .status(200)
@@ -327,5 +295,5 @@ export {
   getQueriedRefermentsHandler,
   getARefermentByIdHandler,
   getQueriedRefermentsByUserHandler,
-  updateARefermentHandler,
+  updateRefermentStatusByIdHandler,
 };

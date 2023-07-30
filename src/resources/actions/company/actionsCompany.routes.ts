@@ -10,7 +10,7 @@ const actionsCompanyRouter = Router();
 actionsCompanyRouter.use('/address-change', addressChangeRouter);
 actionsCompanyRouter.use('/leave-request', leaveRequestRouter);
 actionsCompanyRouter.use('/expense-claim', expenseClaimRouter);
-actionsCompanyRouter.use('/resource-request', requestResourceRouter);
+actionsCompanyRouter.use('/request-resource', requestResourceRouter);
 actionsCompanyRouter.use('/benefit', benefitsRouter);
 
 export { actionsCompanyRouter };

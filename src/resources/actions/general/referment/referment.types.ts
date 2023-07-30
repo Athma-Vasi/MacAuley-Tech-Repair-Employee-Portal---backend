@@ -1,6 +1,6 @@
 import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
-import type { UserRoles, JobPosition, PhoneNumber } from '../../../user';
+import type { UserRoles, JobPosition, PhoneNumber, Department } from '../../../user';
 import { GetQueriedResourceRequest, RequestStatus } from '../../../../types';
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
@@ -20,6 +20,7 @@ interface CreateNewRefermentRequest extends RequestAfterJWTVerification {
       candidateCurrentCompany: string;
       candidateProfileUrl: string;
 
+      departmentReferredFor: Department;
       positionReferredFor: JobPosition;
       positionJobDescription: string;
       referralReason: string;
@@ -59,30 +60,16 @@ interface GetRefermentRequestById extends RequestAfterJWTVerification {
   };
 }
 
-interface UpdateARefermentRequest extends RequestAfterJWTVerification {
+interface UpdateRefermentStatusByIdRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {
       userId: Types.ObjectId;
       username: string;
       roles: UserRoles;
     };
-    candidateFullName: string;
-    candidateEmail: string;
-    candidateContactNumber: PhoneNumber;
-    candidateCurrentJobTitle: string;
-    candidateCurrentCompany: string;
-    candidateProfileUrl: string;
-
-    positionReferredFor: JobPosition;
-    positionJobDescription: string;
-    referralReason: string;
-    additionalInformation: string;
-    privacyConsent: boolean;
-    requestStatus: RequestStatus;
+    referment: { requestStatus: RequestStatus };
   };
-  params: {
-    refermentId: string;
-  };
+  params: { refermentId: string };
 }
 
 export type {
@@ -92,5 +79,5 @@ export type {
   GetQueriedRefermentsRequest,
   GetQueriedRefermentsByUserRequest,
   GetRefermentRequestById,
-  UpdateARefermentRequest,
+  UpdateRefermentStatusByIdRequest,
 };

@@ -1,22 +1,23 @@
 import { Schema, model, Types } from 'mongoose';
-import { JobPosition, PhoneNumber } from '../../../user';
+import { Department, JobPosition, PhoneNumber } from '../../../user';
 import { Action } from '../../../actions';
 import { ActionsGeneral } from '../../general';
 import { RequestStatus } from '../../../../types';
 
 type RefermentSchema = {
-  referrerUserId: Types.ObjectId;
-  referrerUsername: string;
+  userId: Types.ObjectId;
+  username: string;
   action: Action;
   category: ActionsGeneral;
 
   candidateFullName: string;
   candidateEmail: string;
-  candidateContactNumber: PhoneNumber;
+  candidateContactNumber: PhoneNumber | string;
   candidateCurrentJobTitle: string;
   candidateCurrentCompany: string;
   candidateProfileUrl: string;
 
+  departmentReferredFor: Department;
   positionReferredFor: JobPosition;
   positionJobDescription: string;
   referralReason: string;
@@ -33,15 +34,15 @@ type RefermentDocument = RefermentSchema & {
 };
 
 const refermentSchema = new Schema<RefermentSchema>({
-  referrerUserId: {
+  userId: {
     type: Schema.Types.ObjectId,
-    required: [true, 'ReferrerUserId is required'],
+    required: [true, 'userId is required'],
     ref: 'User', // referring to the User model
     index: true,
   },
-  referrerUsername: {
+  username: {
     type: String,
-    required: [true, 'ReferrerUsername is required'],
+    required: [true, 'Username is required'],
     index: true,
   },
   action: {

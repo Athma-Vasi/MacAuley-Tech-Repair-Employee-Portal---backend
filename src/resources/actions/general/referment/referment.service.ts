@@ -7,6 +7,7 @@ import {
   DatabaseResponseNullable,
   QueriedResourceGetRequestServiceInput,
   QueriedTotalResourceGetRequestServiceInput,
+  RequestStatus,
 } from '../../../../types';
 import { JobPosition, PhoneNumber } from '../../../user';
 
@@ -121,37 +122,25 @@ async function deleteAllRefermentsService(): Promise<DeleteResult> {
   }
 }
 
-type UpdateRefermentServiceInput = {
-  refermentId: string;
-  referrerUserId: Types.ObjectId;
-  referrerUsername: string;
-
-  candidateFullName: string;
-  candidateEmail: string;
-  candidateContactNumber: PhoneNumber;
-  candidateCurrentJobTitle: string;
-  candidateCurrentCompany: string;
-  candidateProfileUrl: string;
-
-  positionReferredFor: JobPosition;
-  positionJobDescription: string;
-  referralReason: string;
-  additionalInformation: string;
-  privacyConsent: boolean;
-};
-
-async function updateARefermentService(
-  input: UpdateRefermentServiceInput
-): DatabaseResponseNullable<RefermentDocument> {
+async function updateRefermentStatusByIdService({
+  refermentId,
+  requestStatus,
+}: {
+  refermentId: Types.ObjectId | string;
+  requestStatus: RequestStatus;
+}) {
   try {
-    const updatedReferment = await RefermentModel.findByIdAndUpdate(input.refermentId, input, {
-      new: true,
-    })
+    const referment = await RefermentModel.findByIdAndUpdate(
+      refermentId,
+      { requestStatus },
+      { new: true }
+    )
+      .select('-__v')
       .lean()
       .exec();
-    return updatedReferment;
+    return referment;
   } catch (error: any) {
-    throw new Error(error, { cause: 'updateRefermentService' });
+    throw new Error(error, { cause: 'updateRefermentStatusByIdService' });
   }
 }
 
@@ -164,5 +153,5 @@ export {
   getRefermentByIdService,
   getQueriedTotalRefermentsService,
   getQueriedRefermentsByUserService,
-  updateARefermentService,
+  updateRefermentStatusByIdService,
 };

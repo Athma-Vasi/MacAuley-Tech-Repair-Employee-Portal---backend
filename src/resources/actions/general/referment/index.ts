@@ -14,7 +14,7 @@ import {
   getARefermentByIdHandler,
   getQueriedRefermentsHandler,
   getQueriedRefermentsByUserHandler,
-  updateARefermentHandler,
+  updateRefermentStatusByIdHandler,
 } from './referment.controller';
 import {
   checkRefermentExistsService,
@@ -24,7 +24,7 @@ import {
   getRefermentByIdService,
   getQueriedRefermentsService,
   getQueriedRefermentsByUserService,
-  updateARefermentService,
+  updateRefermentStatusByIdService,
 } from './referment.service';
 
 import type { RefermentDocument, RefermentSchema } from './referment.model';
@@ -35,7 +35,7 @@ import type {
   GetRefermentRequestById,
   GetQueriedRefermentsRequest,
   GetQueriedRefermentsByUserRequest,
-  UpdateARefermentRequest,
+  UpdateRefermentStatusByIdRequest,
 } from './referment.types';
 
 /**
@@ -50,7 +50,7 @@ export {
   getARefermentByIdHandler,
   getQueriedRefermentsHandler,
   getQueriedRefermentsByUserHandler,
-  updateARefermentHandler,
+  updateRefermentStatusByIdHandler,
   checkRefermentExistsService,
   createNewRefermentService,
   deleteARefermentService,
@@ -58,7 +58,7 @@ export {
   getRefermentByIdService,
   getQueriedRefermentsService,
   getQueriedRefermentsByUserService,
-  updateARefermentService,
+  updateRefermentStatusByIdService,
 };
 export type {
   RefermentDocument,
@@ -69,5 +69,5 @@ export type {
   GetRefermentRequestById,
   GetQueriedRefermentsRequest,
   GetQueriedRefermentsByUserRequest,
-  UpdateARefermentRequest,
+  UpdateRefermentStatusByIdRequest,
 };
