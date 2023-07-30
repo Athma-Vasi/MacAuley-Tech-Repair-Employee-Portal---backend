@@ -4,6 +4,7 @@ import type { RequestAfterJWTVerification } from '../../../auth';
 import type { RequestResourceKind, RequestResourceSchema } from './requestResource.model';
 import type { Urgency } from '../../general/printerIssue';
 import type { Department, UserRoles } from '../../../user';
+import { GetQueriedResourceRequest, RequestStatus } from '../../../../types';
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 interface CreateNewRequestResourceRequest extends RequestAfterJWTVerification {
@@ -34,7 +35,9 @@ interface DeleteARequestResourceRequest extends RequestAfterJWTVerification {
 
 type DeleteAllRequestResourcesRequest = RequestAfterJWTVerification;
 
-type GetAllRequestResourcesRequest = RequestAfterJWTVerification;
+type GetQueriedRequestResourcesRequest = GetQueriedResourceRequest;
+
+type GetQueriedRequestResourcesByUserRequest = GetQueriedResourceRequest;
 
 interface GetRequestResourceByIdRequest extends RequestAfterJWTVerification {
   params: {
@@ -42,19 +45,28 @@ interface GetRequestResourceByIdRequest extends RequestAfterJWTVerification {
   };
 }
 
-type GetRequestResourcesByUserRequest = RequestAfterJWTVerification;
-
-type RequestResourcesServerResponse = {
-  message: string;
-  requestResourceData: Array<RequestResourceSchema>;
-};
+interface UpdateRequestResourceStatusByIdRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    requestResource: {
+      requestStatus: RequestStatus;
+    };
+  };
+  params: {
+    requestResourceId: string;
+  };
+}
 
 export type {
   CreateNewRequestResourceRequest,
   DeleteARequestResourceRequest,
   DeleteAllRequestResourcesRequest,
-  GetAllRequestResourcesRequest,
+  GetQueriedRequestResourcesRequest,
   GetRequestResourceByIdRequest,
-  GetRequestResourcesByUserRequest,
-  RequestResourcesServerResponse,
+  GetQueriedRequestResourcesByUserRequest,
+  UpdateRequestResourceStatusByIdRequest,
 };

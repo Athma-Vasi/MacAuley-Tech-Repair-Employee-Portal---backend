@@ -52,11 +52,6 @@ async function getQueriedLeaveRequestsByUserService({
   options = {},
 }: QueriedResourceGetRequestServiceInput<LeaveRequestDocument>): DatabaseResponse<LeaveRequestDocument> {
   try {
-    console.group('getQueriedLeaveRequestsByUserService');
-    console.log('filter:', filter);
-    console.log('projection:', projection);
-    console.log('options:', options);
-    console.groupEnd();
     const leaveRequests = await LeaveRequestModel.find(filter, projection, options).lean().exec();
     return leaveRequests;
   } catch (error: any) {

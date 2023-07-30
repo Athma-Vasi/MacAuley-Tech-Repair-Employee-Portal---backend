@@ -3,7 +3,7 @@ import {
   createNewRequestResourceHandler,
   deleteARequestResourceHandler,
   deleteAllRequestResourcesHandler,
-  getAllRequestResourcesHandler,
+  getQueriedRequestResourcesHandler,
   getRequestResourceByIdHandler,
   getRequestResourceByUserHandler,
 } from './requestResource.controller';
@@ -12,7 +12,7 @@ const requestResourceRouter = Router();
 
 requestResourceRouter
   .route('/')
-  .get(getAllRequestResourcesHandler)
+  .get(getQueriedRequestResourcesHandler)
   .post(createNewRequestResourceHandler)
   .delete(deleteAllRequestResourcesHandler);
 

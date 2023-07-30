@@ -12,17 +12,20 @@ import {
   createNewRequestResourceHandler,
   deleteARequestResourceHandler,
   deleteAllRequestResourcesHandler,
-  getAllRequestResourcesHandler,
+  getQueriedRequestResourcesHandler,
   getRequestResourceByIdHandler,
   getRequestResourceByUserHandler,
+  updateRequestResourceStatusByIdHandler,
 } from './requestResource.controller';
 import {
   createNewRequestResourceService,
   deleteARequestResourceService,
   deleteAllRequestResourcesService,
-  getAllRequestResourcesService,
+  getQueriedRequestResourceService,
   getRequestResourceByIdService,
-  getRequestResourceByUserService,
+  getQueriedRequestResourceByUserService,
+  getQueriedTotalRequestResourceService,
+  updateRequestResourceStatusByIdService,
 } from './requestResource.service';
 
 import type {
@@ -34,10 +37,10 @@ import type {
   CreateNewRequestResourceRequest,
   DeleteARequestResourceRequest,
   DeleteAllRequestResourcesRequest,
-  GetAllRequestResourcesRequest,
+  GetQueriedRequestResourcesRequest,
   GetRequestResourceByIdRequest,
-  GetRequestResourcesByUserRequest,
-  RequestResourcesServerResponse,
+  GetQueriedRequestResourcesByUserRequest,
+  UpdateRequestResourceStatusByIdRequest,
 } from './requestResource.types';
 
 /**
@@ -50,15 +53,18 @@ export {
   createNewRequestResourceHandler,
   deleteARequestResourceHandler,
   deleteAllRequestResourcesHandler,
-  getAllRequestResourcesHandler,
+  getQueriedRequestResourcesHandler,
   getRequestResourceByIdHandler,
   getRequestResourceByUserHandler,
+  updateRequestResourceStatusByIdHandler,
   createNewRequestResourceService,
   deleteARequestResourceService,
   deleteAllRequestResourcesService,
-  getAllRequestResourcesService,
+  getQueriedRequestResourceService,
   getRequestResourceByIdService,
-  getRequestResourceByUserService,
+  getQueriedRequestResourceByUserService,
+  getQueriedTotalRequestResourceService,
+  updateRequestResourceStatusByIdService,
 };
 
 export type {
@@ -68,8 +74,8 @@ export type {
   CreateNewRequestResourceRequest,
   DeleteARequestResourceRequest,
   DeleteAllRequestResourcesRequest,
-  GetAllRequestResourcesRequest,
+  GetQueriedRequestResourcesRequest,
   GetRequestResourceByIdRequest,
-  GetRequestResourcesByUserRequest,
-  RequestResourcesServerResponse,
+  GetQueriedRequestResourcesByUserRequest,
+  UpdateRequestResourceStatusByIdRequest,
 };

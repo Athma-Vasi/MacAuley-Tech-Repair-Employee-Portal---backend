@@ -101,7 +101,10 @@ const requestResourceSchema = new Schema<RequestResourceSchema>(
   }
 );
 
-const RequestResourceModel = model<RequestResourceSchema>('RequestResource', requestResourceSchema);
+const RequestResourceModel = model<RequestResourceDocument>(
+  'RequestResource',
+  requestResourceSchema
+);
 
 export { RequestResourceModel };
 export type { RequestResourceSchema, RequestResourceKind, RequestResourceDocument };

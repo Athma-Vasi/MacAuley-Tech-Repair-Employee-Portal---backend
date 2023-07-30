@@ -1,25 +1,34 @@
 import expressAsyncHandler from 'express-async-handler';
 
+import type { DeleteResult } from 'mongodb';
 import type { Response } from 'express';
 import type {
   CreateNewRequestResourceRequest,
   DeleteARequestResourceRequest,
   DeleteAllRequestResourcesRequest,
-  GetAllRequestResourcesRequest,
+  GetQueriedRequestResourcesRequest,
   GetRequestResourceByIdRequest,
-  GetRequestResourcesByUserRequest,
-  RequestResourcesServerResponse,
+  GetQueriedRequestResourcesByUserRequest,
+  UpdateRequestResourceStatusByIdRequest,
 } from './requestResource.types';
 
 import {
   createNewRequestResourceService,
   deleteARequestResourceService,
   deleteAllRequestResourcesService,
-  getAllRequestResourcesService,
+  getQueriedRequestResourceService,
   getRequestResourceByIdService,
-  getRequestResourceByUserService,
+  getQueriedRequestResourceByUserService,
+  getQueriedTotalRequestResourceService,
+  updateRequestResourceStatusByIdService,
 } from './requestResource.service';
-import { RequestResourceSchema } from './requestResource.model';
+import { RequestResourceDocument, RequestResourceSchema } from './requestResource.model';
+import {
+  GetQueriedResourceRequestServerResponse,
+  QueryObjectParsedWithDefaults,
+  ResourceRequestServerResponse,
+} from '../../../../types';
+import { FilterQuery, QueryOptions } from 'mongoose';
 
 // @desc   Create a new request resource
 // @route  POST /request-resource
@@ -27,7 +36,7 @@ import { RequestResourceSchema } from './requestResource.model';
 const createNewRequestResourceHandler = expressAsyncHandler(
   async (
     request: CreateNewRequestResourceRequest,
-    response: Response<RequestResourcesServerResponse>
+    response: Response<ResourceRequestServerResponse<RequestResourceDocument>>
   ) => {
     const {
       userInfo: { userId, username },
@@ -65,88 +74,12 @@ const createNewRequestResourceHandler = expressAsyncHandler(
     if (newRequestResource) {
       response.status(201).json({
         message: 'New request resource created',
-        requestResourceData: [newRequestResource],
+        resourceData: [newRequestResource],
       });
     } else {
       response
         .status(400)
-        .json({ message: 'New request resource could not be created', requestResourceData: [] });
-    }
-  }
-);
-
-// @desc   Delete a request resource
-// @route  DELETE /request-resource/:requestResourceId
-// @access Private/Admin/Manager
-const deleteARequestResourceHandler = expressAsyncHandler(
-  async (
-    request: DeleteARequestResourceRequest,
-    response: Response<RequestResourcesServerResponse>
-  ) => {
-    const {
-      userInfo: { roles },
-    } = request.body;
-
-    // check if user is admin or manager
-    if (roles.includes('Employee')) {
-      response.status(403).json({
-        message: 'Only managers/admin can delete a resourceRequest',
-        requestResourceData: [],
-      });
-      return;
-    }
-
-    const requestResourceId = request.params.requestResourceId;
-
-    // delete resourceRequest
-    const deletedResult = await deleteARequestResourceService(requestResourceId);
-    if (deletedResult.acknowledged) {
-      response.status(200).json({
-        message: 'Request resource deleted successfully',
-        requestResourceData: [],
-      });
-    } else {
-      response.status(400).json({
-        message: 'Request resource could not be deleted',
-        requestResourceData: [],
-      });
-    }
-  }
-);
-
-// @desc   Delete all request resources
-// @route  DELETE /request-resource
-// @access Private/Admin/Manager
-const deleteAllRequestResourcesHandler = expressAsyncHandler(
-  async (
-    request: DeleteAllRequestResourcesRequest,
-    response: Response<RequestResourcesServerResponse>
-  ) => {
-    const {
-      userInfo: { roles, userId, username },
-    } = request.body;
-
-    // check if user is admin or manager
-    if (roles.includes('Employee')) {
-      response.status(403).json({
-        message: 'Only managers/admin can delete a resourceRequest',
-        requestResourceData: [],
-      });
-      return;
-    }
-
-    // delete all requestResources
-    const deletedResult = await deleteAllRequestResourcesService();
-    if (deletedResult.acknowledged) {
-      response.status(200).json({
-        message: 'Request resources deleted successfully',
-        requestResourceData: [],
-      });
-    } else {
-      response.status(400).json({
-        message: 'Request resources could not be deleted',
-        requestResourceData: [],
-      });
+        .json({ message: 'New request resource could not be created', resourceData: [] });
     }
   }
 );
@@ -154,35 +87,89 @@ const deleteAllRequestResourcesHandler = expressAsyncHandler(
 // @desc   Get all request resources
 // @route  GET /request-resource
 // @access Private/Admin/Manager
-const getAllRequestResourcesHandler = expressAsyncHandler(
+const getQueriedRequestResourcesHandler = expressAsyncHandler(
   async (
-    request: GetAllRequestResourcesRequest,
-    response: Response<RequestResourcesServerResponse>
+    request: GetQueriedRequestResourcesRequest,
+    response: Response<GetQueriedResourceRequestServerResponse<RequestResourceDocument>>
   ) => {
-    const {
-      userInfo: { roles, userId, username },
-    } = request.body;
+    let { newQueryFlag, totalDocuments } = request.body;
 
-    // check if user is admin or manager
-    if (roles.includes('Employee')) {
-      response.status(403).json({
-        message: 'Only managers/admin can delete a resourceRequest',
-        requestResourceData: [],
+    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+
+    // only perform a countDocuments scan if a new query is being made
+    if (newQueryFlag) {
+      totalDocuments = await getQueriedTotalRequestResourceService({
+        filter: filter as FilterQuery<RequestResourceDocument> | undefined,
       });
-      return;
     }
 
-    // get all requestResources
-    const requestResources = await getAllRequestResourcesService();
-    if (requestResources.length > 0) {
-      response.status(200).json({
-        message: 'Request resources retrieved successfully',
-        requestResourceData: requestResources,
+    // get all resource requests
+    const resourceRequests = await getQueriedRequestResourceService({
+      filter: filter as FilterQuery<RequestResourceDocument> | undefined,
+      projection: projection as QueryOptions<RequestResourceDocument>,
+      options: options as QueryOptions<RequestResourceDocument>,
+    });
+    if (resourceRequests.length === 0) {
+      response.status(404).json({
+        message: 'No resource requests that match query parameters were found',
+        pages: 0,
+        totalDocuments: 0,
+        resourceData: [],
       });
     } else {
-      response.status(400).json({
-        message: 'Request resources could not be retrieved',
-        requestResourceData: [],
+      response.status(200).json({
+        message: 'Successfully found resource requests',
+        pages: Math.ceil(totalDocuments / Number(options?.limit)),
+        totalDocuments: resourceRequests.length,
+        resourceData: resourceRequests,
+      });
+    }
+  }
+);
+
+// @desc   Get request resource by user
+// @route  GET /request-resource/user
+// @access Private
+const getRequestResourceByUserHandler = expressAsyncHandler(
+  async (
+    request: GetQueriedRequestResourcesByUserRequest,
+    response: Response<GetQueriedResourceRequestServerResponse<RequestResourceDocument>>
+  ) => {
+    const {
+      userInfo: { userId },
+    } = request.body;
+    let { newQueryFlag, totalDocuments } = request.body;
+
+    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+
+    // assign userId to filter
+    const filterWithUserId = { ...filter, userId };
+
+    // only perform a countDocuments scan if a new query is being made
+    if (newQueryFlag) {
+      totalDocuments = await getQueriedTotalRequestResourceService({
+        filter: filterWithUserId,
+      });
+    }
+
+    const resourceRequests = await getQueriedRequestResourceByUserService({
+      filter: filterWithUserId as FilterQuery<RequestResourceDocument> | undefined,
+      projection: projection as QueryOptions<RequestResourceDocument>,
+      options: options as QueryOptions<RequestResourceDocument>,
+    });
+    if (resourceRequests.length === 0) {
+      response.status(404).json({
+        message: 'No resource requests found',
+        pages: 0,
+        totalDocuments: 0,
+        resourceData: [],
+      });
+    } else {
+      response.status(200).json({
+        message: 'Resource requests found successfully',
+        pages: Math.ceil(totalDocuments / Number(options?.limit)),
+        totalDocuments: resourceRequests.length,
+        resourceData: resourceRequests,
       });
     }
   }
@@ -194,62 +181,117 @@ const getAllRequestResourcesHandler = expressAsyncHandler(
 const getRequestResourceByIdHandler = expressAsyncHandler(
   async (
     request: GetRequestResourceByIdRequest,
-    response: Response<RequestResourcesServerResponse>
+    response: Response<ResourceRequestServerResponse<RequestResourceDocument>>
   ) => {
-    const {
-      userInfo: { roles, userId, username },
-    } = request.body;
-
-    // check if user is admin or manager
-    if (roles.includes('Employee')) {
-      response.status(403).json({
-        message: 'Only managers/admin can get a resourceRequest',
-        requestResourceData: [],
-      });
-      return;
-    }
-
-    const requestResourceId = request.params.requestResourceId;
+    const { requestResourceId } = request.params;
 
     // get resourceRequest
     const resourceRequest = await getRequestResourceByIdService(requestResourceId);
     if (resourceRequest) {
       response.status(200).json({
         message: 'Request resource retrieved successfully',
-        requestResourceData: [resourceRequest],
+        resourceData: [resourceRequest],
       });
     } else {
       response.status(400).json({
         message: 'Request resource could not be retrieved',
-        requestResourceData: [],
+        resourceData: [],
       });
     }
   }
 );
 
-// @desc   Get request resource by user
-// @route  GET /request-resource/user
-// @access Private
-const getRequestResourceByUserHandler = expressAsyncHandler(
+// @desc   Update a request resource status by id
+// @route  PATCH /request-resource/:requestResourceId
+// @access Private/Admin/Manager
+const updateRequestResourceStatusByIdHandler = expressAsyncHandler(
   async (
-    request: GetRequestResourcesByUserRequest,
-    response: Response<RequestResourcesServerResponse>
+    request: UpdateRequestResourceStatusByIdRequest,
+    response: Response<ResourceRequestServerResponse<RequestResourceDocument>>
   ) => {
+    const { requestResourceId } = request.params;
     const {
-      userInfo: { roles, userId, username },
+      requestResource: { requestStatus },
     } = request.body;
 
-    // anyone can get their own request resources
-    const requestResources = await getRequestResourceByUserService(userId);
-    if (requestResources.length > 0) {
+    // check if request resource exists
+    const requestResourceExists = await getRequestResourceByIdService(requestResourceId);
+    if (!requestResourceExists) {
+      response.status(404).json({ message: 'Request resource does not exist', resourceData: [] });
+      return;
+    }
+
+    // update request resource
+    const updatedRequestResource = await updateRequestResourceStatusByIdService({
+      requestResourceId,
+      requestStatus,
+    });
+    if (updatedRequestResource) {
       response.status(200).json({
-        message: 'Request resources retrieved successfully',
-        requestResourceData: requestResources,
+        message: 'Request resource updated successfully',
+        resourceData: [updatedRequestResource],
       });
     } else {
       response.status(400).json({
-        message: 'Request resources could not be retrieved',
-        requestResourceData: [],
+        message: 'Request resource could not be updated',
+        resourceData: [],
+      });
+    }
+  }
+);
+
+// @desc   Delete a request resource
+// @route  DELETE /request-resource/:requestResourceId
+// @access Private/Admin/Manager
+const deleteARequestResourceHandler = expressAsyncHandler(
+  async (
+    request: DeleteARequestResourceRequest,
+    response: Response<ResourceRequestServerResponse<RequestResourceDocument>>
+  ) => {
+    const { requestResourceId } = request.params;
+
+    // check if request resource exists
+    const requestResourceExists = await getRequestResourceByIdService(requestResourceId);
+    if (!requestResourceExists) {
+      response.status(404).json({ message: 'Request resource does not exist', resourceData: [] });
+      return;
+    }
+
+    // delete resourceRequest
+    const deletedResult: DeleteResult = await deleteARequestResourceService(requestResourceId);
+    if (deletedResult.deletedCount === 1) {
+      response.status(200).json({
+        message: 'Request resource deleted successfully',
+        resourceData: [],
+      });
+    } else {
+      response.status(400).json({
+        message: 'Request resource could not be deleted',
+        resourceData: [],
+      });
+    }
+  }
+);
+
+// @desc   Delete all request resources
+// @route  DELETE /request-resource
+// @access Private/Admin/Manager
+const deleteAllRequestResourcesHandler = expressAsyncHandler(
+  async (
+    _request: DeleteAllRequestResourcesRequest,
+    response: Response<ResourceRequestServerResponse<RequestResourceDocument>>
+  ) => {
+    // delete all requestResources
+    const deletedResult: DeleteResult = await deleteAllRequestResourcesService();
+    if (deletedResult.deletedCount > 0) {
+      response.status(200).json({
+        message: 'Request resources deleted successfully',
+        resourceData: [],
+      });
+    } else {
+      response.status(400).json({
+        message: 'Request resources could not be deleted',
+        resourceData: [],
       });
     }
   }
@@ -259,7 +301,8 @@ export {
   createNewRequestResourceHandler,
   deleteARequestResourceHandler,
   deleteAllRequestResourcesHandler,
-  getAllRequestResourcesHandler,
+  getQueriedRequestResourcesHandler,
   getRequestResourceByIdHandler,
   getRequestResourceByUserHandler,
+  updateRequestResourceStatusByIdHandler,
 };
