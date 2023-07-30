@@ -7,6 +7,8 @@ import {
   getAnAnonymousRequestHandler,
   updateAnonymousRequestStatusByIdHandler,
 } from './anonymousRequest.controller';
+import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
+import { assignQueryDefaults } from '../../../../middlewares';
 
 const anonymousRequestRouter = Router();
 
@@ -14,13 +16,13 @@ const anonymousRequestRouter = Router();
 
 anonymousRequestRouter
   .route('/')
-  .get(getQueriedAnonymousRequestsHandler)
+  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedAnonymousRequestsHandler)
   .post(createNewAnonymousRequestHandler)
   .delete(deleteAllAnonymousRequestsHandler);
 
 anonymousRequestRouter
   .route('/:anonymousRequestId')
-  .get(getAnAnonymousRequestHandler)
+  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getAnAnonymousRequestHandler)
   .delete(deleteAnAnonymousRequestHandler)
   .patch(updateAnonymousRequestStatusByIdHandler);
 
