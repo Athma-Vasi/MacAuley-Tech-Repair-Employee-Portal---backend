@@ -29,6 +29,7 @@ async function getQueriedAnonymousRequestsService({
 }: QueriedResourceGetRequestServiceInput<AnonymousRequestDocument>): DatabaseResponse<AnonymousRequestDocument> {
   try {
     const allAnonymousRequests = await AnonymousRequestModel.find(filter, projection, options)
+      .select('-__v')
       .lean()
       .exec();
     return allAnonymousRequests;
@@ -41,7 +42,10 @@ async function getQueriedTotalAnonymousRequestsService({
   filter = {},
 }: QueriedTotalResourceGetRequestServiceInput<AnonymousRequestDocument>): Promise<number> {
   try {
-    const totalAnonymousRequests = await AnonymousRequestModel.countDocuments(filter).lean().exec();
+    const totalAnonymousRequests = await AnonymousRequestModel.countDocuments(filter)
+      .select('-__v')
+      .lean()
+      .exec();
     return totalAnonymousRequests;
   } catch (error: any) {
     throw new Error(error, { cause: 'getQueriedTotalAnonymousRequestsService' });
@@ -52,7 +56,10 @@ async function getAnAnonymousRequestService(
   anonymousRequestId: Types.ObjectId | string
 ): DatabaseResponseNullable<AnonymousRequestDocument> {
   try {
-    const anonymousRequest = await AnonymousRequestModel.findById(anonymousRequestId).lean().exec();
+    const anonymousRequest = await AnonymousRequestModel.findById(anonymousRequestId)
+      .select('-__v')
+      .lean()
+      .exec();
     return anonymousRequest;
   } catch (error: any) {
     throw new Error(error, { cause: 'getAnAnonymousRequestService' });
@@ -72,6 +79,7 @@ async function updateAnonymousRequestStatusByIdService({
       { requestStatus },
       { new: true }
     )
+      .select('-__v')
       .lean()
       .exec();
     return updatedAnonymousRequest;
