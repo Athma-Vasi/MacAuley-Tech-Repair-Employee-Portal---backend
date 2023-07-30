@@ -127,7 +127,7 @@ const getQueriedLeaveRequestsHandler = expressAsyncHandler(
       response.status(200).json({
         message: 'Successfully found leave requests',
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments: leaveRequests.length,
+        totalDocuments,
         resourceData: leaveRequests,
       });
     }
@@ -175,7 +175,7 @@ const getQueriedLeaveRequestsByUserHandler = expressAsyncHandler(
       response.status(200).json({
         message: 'Leave requests found successfully',
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments: leaveRequests.length,
+        totalDocuments,
         resourceData: leaveRequests,
       });
     }

@@ -103,7 +103,7 @@ const getQueriedSurveysHandler = expressAsyncHandler(
       response.status(200).json({
         message: 'Successfully found surveys',
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments: surveys.length,
+        totalDocuments,
         resourceData: surveys,
       });
     }
@@ -151,7 +151,7 @@ const getQueriedSurveysByUserHandler = expressAsyncHandler(
       response.status(200).json({
         message: 'Surveys found successfully',
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments: surveys.length,
+        totalDocuments,
         resourceData: surveys,
       });
     }

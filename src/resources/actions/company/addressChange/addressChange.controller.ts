@@ -143,7 +143,7 @@ const getQueriedAddressChangesHandler = expressAsyncHandler(
       response.status(200).json({
         message: 'Address changes found successfully',
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments: addressChange.length,
+        totalDocuments,
         resourceData: addressChange,
       });
     }
@@ -194,7 +194,7 @@ const getAddressChangesByUserHandler = expressAsyncHandler(
       response.status(200).json({
         message: 'Address change requests found successfully',
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments: addressChanges.length,
+        totalDocuments,
         resourceData: addressChanges,
       });
     }

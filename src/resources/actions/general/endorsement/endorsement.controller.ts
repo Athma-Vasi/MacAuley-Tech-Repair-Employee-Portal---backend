@@ -103,7 +103,7 @@ const getQueriedEndorsementsHandler = expressAsyncHandler(
       response.status(200).json({
         message: 'Successfully found endorsements',
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments: endorsements.length,
+        totalDocuments,
         resourceData: endorsements,
       });
     }
@@ -152,7 +152,7 @@ const getQueriedEndorsementsByUserHandler = expressAsyncHandler(
       response.status(200).json({
         message: 'Successfully found endorsements',
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments: endorsements.length,
+        totalDocuments,
         resourceData: endorsements,
       });
     }

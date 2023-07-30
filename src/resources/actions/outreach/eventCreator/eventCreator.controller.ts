@@ -121,7 +121,7 @@ const getQueriedEventsHandler = expressAsyncHandler(
       response.status(200).json({
         message: 'Successfully found events',
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments: events.length,
+        totalDocuments,
         resourceData: events,
       });
     }
@@ -169,7 +169,7 @@ const getQueriedEventsByUserHandler = expressAsyncHandler(
       response.status(200).json({
         message: 'events found successfully',
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments: events.length,
+        totalDocuments,
         resourceData: events,
       });
     }

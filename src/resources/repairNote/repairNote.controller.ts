@@ -165,7 +165,7 @@ const getQueriedRepairNotesHandler = expressAsyncHandler(
       response.status(200).json({
         message: 'Successfully found repair notes',
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments: repairNotes.length,
+        totalDocuments,
         resourceData: repairNotes,
       });
     }
@@ -214,7 +214,7 @@ const getQueriedRepairNotesByUserHandler = expressAsyncHandler(
       response.status(200).json({
         message: 'Successfully found repair notes',
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments: repairNotes.length,
+        totalDocuments,
         resourceData: repairNotes,
       });
     }

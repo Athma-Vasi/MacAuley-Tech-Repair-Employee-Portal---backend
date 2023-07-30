@@ -110,7 +110,7 @@ const getQueriedAnonymousRequestsHandler = expressAsyncHandler(
       response.status(200).json({
         message: 'Successfully found anonymous requests',
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments: anonymousRequests.length,
+        totalDocuments,
         resourceData: anonymousRequests,
       });
     }

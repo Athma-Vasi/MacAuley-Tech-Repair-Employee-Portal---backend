@@ -132,7 +132,7 @@ const getQueriedRefermentsHandler = expressAsyncHandler(
       response.status(200).json({
         message: 'Successfully found referments',
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments: referments.length,
+        totalDocuments,
         resourceData: referments,
       });
     }
@@ -180,7 +180,7 @@ const getQueriedRefermentsByUserHandler = expressAsyncHandler(
       response.status(200).json({
         message: 'Referments found successfully',
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments: referments.length,
+        totalDocuments,
         resourceData: referments,
       });
     }

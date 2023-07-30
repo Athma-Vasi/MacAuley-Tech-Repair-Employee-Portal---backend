@@ -120,7 +120,7 @@ const getQueriedRequestResourcesHandler = expressAsyncHandler(
       response.status(200).json({
         message: 'Successfully found resource requests',
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments: totalDocuments,
+        totalDocuments,
         resourceData: resourceRequests,
       });
     }
@@ -168,7 +168,7 @@ const getRequestResourceByUserHandler = expressAsyncHandler(
       response.status(200).json({
         message: 'Resource requests found successfully',
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments: totalDocuments,
+        totalDocuments,
         resourceData: resourceRequests,
       });
     }

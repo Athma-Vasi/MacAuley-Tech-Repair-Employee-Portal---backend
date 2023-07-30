@@ -181,7 +181,7 @@ const getQueriedUsersHandler = expressAsyncHandler(
       response.status(200).json({
         message: 'Successfully found users',
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments: users.length,
+        totalDocuments,
         resourceData: users,
       });
     }

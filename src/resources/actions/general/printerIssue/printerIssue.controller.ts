@@ -124,7 +124,7 @@ const getQueriedPrinterIssuesHandler = expressAsyncHandler(
       response.status(200).json({
         message: 'Successfully found printer issues',
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments: printerIssues.length,
+        totalDocuments,
         resourceData: printerIssues,
       });
     }
@@ -174,7 +174,7 @@ const getQueriedPrinterIssuesByUserHandler = expressAsyncHandler(
       response.status(200).json({
         message: 'Successfully found printer issues',
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments: printerIssues.length,
+        totalDocuments,
         resourceData: printerIssues,
       });
     }

@@ -117,7 +117,7 @@ const getQueriedAnnouncementsHandler = expressAsyncHandler(
       response.status(200).json({
         message: 'Successfully found announcements',
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments: announcements.length,
+        totalDocuments,
         resourceData: announcements,
       });
     }
@@ -166,7 +166,7 @@ const getQueriedAnouncementsByUserHandler = expressAsyncHandler(
       response.status(200).json({
         message: 'Successfully found announcements',
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments: announcements.length,
+        totalDocuments,
         resourceData: announcements,
       });
     }
