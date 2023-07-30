@@ -20,7 +20,6 @@ interface CreateNewAddressChangeRequest extends RequestAfterJWTVerification {
       country: Country;
 
       acknowledgement: boolean;
-      requestStatus: RequestStatus;
     };
   };
 }

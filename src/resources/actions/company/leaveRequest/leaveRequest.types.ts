@@ -20,7 +20,6 @@ interface CreateNewLeaveRequestRequest extends RequestAfterJWTVerification {
       delegatedResponsibilities: string;
       additionalComments: string;
       acknowledgement: boolean;
-      requestStatus: RequestStatus;
     };
   };
 }

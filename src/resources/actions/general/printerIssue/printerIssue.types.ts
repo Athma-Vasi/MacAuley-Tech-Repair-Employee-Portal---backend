@@ -25,7 +25,6 @@ interface CreateNewPrinterIssueRequest extends RequestAfterJWTVerification {
       printerIssueDescription: string;
       urgency: Urgency;
       additionalInformation: string;
-      requestStatus: RequestStatus;
     };
   };
 }

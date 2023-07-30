@@ -43,7 +43,6 @@ const createNewAnonymousRequestHandler = expressAsyncHandler(
         secureContactNumber,
         title,
         urgency,
-        requestStatus,
       },
     } = request.body;
 
@@ -57,7 +56,7 @@ const createNewAnonymousRequestHandler = expressAsyncHandler(
       secureContactNumber,
       title,
       urgency,
-      requestStatus,
+      requestStatus: 'pending',
     };
 
     const newAnonymousRequest = await createNewAnonymousRequestService(input);

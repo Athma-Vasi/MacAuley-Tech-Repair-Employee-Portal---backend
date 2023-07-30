@@ -3,6 +3,7 @@ import type { Department } from '../../../user';
 import type { Urgency } from '../../general/printerIssue';
 import type { Action } from '../../../actions';
 import type { ActionsCompany } from '../../company';
+import { RequestStatus } from '../../../../types';
 
 type RequestResourceKind = 'Hardware' | 'Software' | 'Access' | 'Other';
 
@@ -20,6 +21,7 @@ type RequestResourceSchema = {
   urgency: Urgency;
   dateNeededBy: NativeDate;
   additionalInformation: string;
+  requestStatus: RequestStatus;
 };
 
 type RequestResourceDocument = RequestResourceSchema & {
@@ -86,6 +88,12 @@ const requestResourceSchema = new Schema<RequestResourceSchema>(
       type: String,
       required: false,
       default: '',
+    },
+    requestStatus: {
+      type: String,
+      required: false,
+      default: 'pending',
+      index: true,
     },
   },
   {

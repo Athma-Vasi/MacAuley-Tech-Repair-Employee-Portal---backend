@@ -18,7 +18,6 @@ interface CreateNewEndorsementRequest extends RequestAfterJWTVerification {
       userToBeEndorsed: string;
       summaryOfEndorsement: string;
       attributeEndorsed: EmployeeAttributes;
-      requestStatus: RequestStatus;
     };
   };
 }

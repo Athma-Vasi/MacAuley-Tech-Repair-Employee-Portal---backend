@@ -25,7 +25,6 @@ interface CreateNewRefermentRequest extends RequestAfterJWTVerification {
       referralReason: string;
       additionalInformation: string;
       privacyConsent: boolean;
-      requestStatus: RequestStatus;
     };
   };
 }

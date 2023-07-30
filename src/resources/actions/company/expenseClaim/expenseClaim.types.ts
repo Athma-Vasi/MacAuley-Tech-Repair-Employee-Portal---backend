@@ -23,7 +23,6 @@ interface CreateNewExpenseClaimRequest extends RequestAfterJWTVerification {
       expenseClaimDescription: string;
       additionalComments: string;
       acknowledgement: boolean;
-      requestStatus: RequestStatus;
     };
   };
 }

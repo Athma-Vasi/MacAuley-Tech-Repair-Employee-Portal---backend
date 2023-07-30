@@ -54,7 +54,6 @@ const createNewExpenseClaimHandler = expressAsyncHandler(
         expenseClaimDescription,
         additionalComments,
         acknowledgement,
-        requestStatus,
       },
     } = request.body;
 
@@ -78,7 +77,7 @@ const createNewExpenseClaimHandler = expressAsyncHandler(
       expenseClaimDescription,
       additionalComments,
       acknowledgement,
-      requestStatus,
+      requestStatus: 'pending',
     };
 
     // user must acknowledge that expenseClaim info is correct

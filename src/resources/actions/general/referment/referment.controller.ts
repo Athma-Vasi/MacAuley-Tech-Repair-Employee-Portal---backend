@@ -52,7 +52,6 @@ const createNewRefermentHandler = expressAsyncHandler(
         referralReason,
         additionalInformation,
         privacyConsent,
-        requestStatus,
       },
     } = request.body;
 
@@ -80,7 +79,7 @@ const createNewRefermentHandler = expressAsyncHandler(
       referralReason,
       additionalInformation,
       privacyConsent,
-      requestStatus,
+      requestStatus: 'pending',
     });
 
     if (!newReferment) {

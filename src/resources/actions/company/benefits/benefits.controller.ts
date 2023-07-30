@@ -52,7 +52,6 @@ const createNewBenefitsHandler = expressAsyncHandler(
         monthlyPremium,
         employerContribution,
         employeeContribution,
-        requestStatus,
       },
     } = request.body;
 
@@ -87,7 +86,7 @@ const createNewBenefitsHandler = expressAsyncHandler(
       monthlyPremium,
       employerContribution,
       employeeContribution,
-      requestStatus,
+      requestStatus: 'pending',
     };
 
     // create new benefits plan

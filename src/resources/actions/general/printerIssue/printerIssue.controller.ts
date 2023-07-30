@@ -52,7 +52,6 @@ const createNewPrinterIssueHandler = expressAsyncHandler(
         printerIssueDescription,
         urgency,
         additionalInformation,
-        requestStatus,
       },
     } = request.body;
 
@@ -72,7 +71,7 @@ const createNewPrinterIssueHandler = expressAsyncHandler(
       printerIssueDescription,
       urgency,
       additionalInformation,
-      requestStatus,
+      requestStatus: 'pending',
     };
     const newPrinterIssue = await createNewPrinterIssueService(newPrinterIssueObject);
 

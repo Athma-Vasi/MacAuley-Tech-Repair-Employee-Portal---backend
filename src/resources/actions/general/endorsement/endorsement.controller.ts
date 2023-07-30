@@ -40,13 +40,7 @@ const createNewEndorsementHandler = expressAsyncHandler(
     const {
       userInfo: { userId, username },
 
-      endorsement: {
-        title,
-        userToBeEndorsed,
-        attributeEndorsed,
-        summaryOfEndorsement,
-        requestStatus,
-      },
+      endorsement: { title, userToBeEndorsed, attributeEndorsed, summaryOfEndorsement },
     } = request.body;
 
     const newEndorsementObject: EndorsementSchema = {
@@ -58,7 +52,7 @@ const createNewEndorsementHandler = expressAsyncHandler(
       userToBeEndorsed,
       summaryOfEndorsement,
       attributeEndorsed,
-      requestStatus,
+      requestStatus: 'pending',
     };
     const newEndorsement = await createNewEndorsementService(newEndorsementObject);
 

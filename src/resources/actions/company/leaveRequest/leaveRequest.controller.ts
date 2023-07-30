@@ -48,7 +48,6 @@ const createNewLeaveRequestHandler = expressAsyncHandler(
         delegatedResponsibilities,
         additionalComments,
         acknowledgement,
-        requestStatus,
       },
     } = request.body;
 
@@ -71,7 +70,7 @@ const createNewLeaveRequestHandler = expressAsyncHandler(
       delegatedResponsibilities,
       additionalComments,
       acknowledgement,
-      requestStatus,
+      requestStatus: 'pending',
     };
 
     // create new leave request

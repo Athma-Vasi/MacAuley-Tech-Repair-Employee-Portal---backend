@@ -28,7 +28,6 @@ interface CreateNewAnonymousRequestRequest extends RequestAfterJWTVerification {
       requestDescription: string;
       additionalInformation: string;
       urgency: Urgency;
-      requestStatus: RequestStatus;
     };
   };
 }

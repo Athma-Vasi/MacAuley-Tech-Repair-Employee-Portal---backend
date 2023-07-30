@@ -42,16 +42,7 @@ const createNewAddressChangeHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      addressChange: {
-        acknowledgement,
-        addressLine,
-        city,
-        country,
-        postalCode,
-        province,
-        requestStatus,
-        state,
-      },
+      addressChange: { acknowledgement, addressLine, city, country, postalCode, province, state },
     } = request.body;
 
     // user must acknowledge that new address is correct
@@ -97,7 +88,7 @@ const createNewAddressChangeHandler = expressAsyncHandler(
       province,
       state,
       acknowledgement,
-      requestStatus,
+      requestStatus: 'pending',
     };
 
     // save new address change object to database

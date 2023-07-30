@@ -24,7 +24,6 @@ interface CreateNewBenefitsRequest extends RequestAfterJWTVerification {
       monthlyPremium: number;
       employerContribution: number;
       employeeContribution: number;
-      requestStatus: RequestStatus;
     };
   };
 }

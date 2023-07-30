@@ -31,7 +31,7 @@ const createNewRequestResourceHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      resourceRequest: {
+      requestResource: {
         resourceType,
         department,
         reasonForRequest,
@@ -57,6 +57,7 @@ const createNewRequestResourceHandler = expressAsyncHandler(
       urgency,
       dateNeededBy,
       additionalInformation,
+      requestStatus: 'pending',
     };
 
     // create new request resource

@@ -1,11 +1,7 @@
 import type { Request } from 'express';
 import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
-import type {
-  RequestResourceKind,
-  RequestResourceDocument,
-  RequestResourceSchema,
-} from './requestResource.model';
+import type { RequestResourceKind, RequestResourceSchema } from './requestResource.model';
 import type { Urgency } from '../../general/printerIssue';
 import type { Department, UserRoles } from '../../../user';
 
@@ -17,7 +13,7 @@ interface CreateNewRequestResourceRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    resourceRequest: {
+    requestResource: {
       department: Department;
       resourceType: RequestResourceKind;
       resourceQuantity: number;
