@@ -10,8 +10,10 @@ import type {
 
 import { ExpenseClaimModel } from './expenseClaim.model';
 import {
+  DatabaseResponseNullable,
   QueriedResourceGetRequestServiceInput,
   QueriedTotalResourceGetRequestServiceInput,
+  RequestStatus,
 } from '../../../../types';
 
 async function createNewExpenseClaimService(
@@ -80,6 +82,28 @@ async function getExpenseClaimByIdService(
   }
 }
 
+async function updateExpenseClaimStatusByIdService({
+  expenseClaimId,
+  requestStatus,
+}: {
+  expenseClaimId: Types.ObjectId | string;
+  requestStatus: RequestStatus;
+}): DatabaseResponseNullable<ExpenseClaimDocument> {
+  try {
+    const expenseClaim = await ExpenseClaimModel.findByIdAndUpdate(
+      expenseClaimId,
+      { requestStatus },
+      { new: true }
+    )
+      .select('-__v')
+      .lean()
+      .exec();
+    return expenseClaim;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'updateExpenseClaimStatusByIdService' });
+  }
+}
+
 async function deleteAllExpenseClaimsService(): Promise<DeleteResult> {
   try {
     const deleteResult = await ExpenseClaimModel.deleteMany({}).lean().exec();
@@ -121,4 +145,5 @@ export {
   deleteAllExpenseClaimsService,
   deleteAnExpenseClaimService,
   returnAllUploadedFileIdsService,
+  updateExpenseClaimStatusByIdService,
 };

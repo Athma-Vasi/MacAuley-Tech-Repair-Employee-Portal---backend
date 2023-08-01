@@ -38,6 +38,7 @@ import type {
   GetQueriedExpenseClaimsRequest,
   GetExpenseClaimByIdRequest,
   GetQueriedExpenseClaimsByUserRequest,
+  UpdateExpenseClaimStatusByIdRequest,
 } from './expenseClaim.types';
 
 /**
@@ -72,4 +73,5 @@ export type {
   GetQueriedExpenseClaimsRequest,
   GetExpenseClaimByIdRequest,
   GetQueriedExpenseClaimsByUserRequest,
+  UpdateExpenseClaimStatusByIdRequest,
 };

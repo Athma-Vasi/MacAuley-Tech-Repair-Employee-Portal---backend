@@ -11,8 +11,6 @@ const fileExtensionLimiterMiddleware = (allowedExtensionsArray: string[]) => {
 
     const filesWithDisallowedExtensions: FileUploadObject[] = [];
 
-    console.log('fileExtensionLimiter-files: ', files);
-
     Object.entries(files).forEach((file: [string, FileUploadObject]) => {
       const [_, fileObj] = file;
       // grab the file extension from the file name
@@ -23,10 +21,11 @@ const fileExtensionLimiterMiddleware = (allowedExtensionsArray: string[]) => {
       }
     });
 
-    console.log(
-      'fileExtensionLimiter-filesWithDisallowedExtensions: ',
-      filesWithDisallowedExtensions
-    );
+    console.log('\n');
+    console.group('fileExtensionLimiterMiddleware');
+    console.log({ files });
+    console.log({ filesWithDisallowedExtensions });
+    console.groupEnd();
 
     // if there are files with disallowed extensions, return error
     if (filesWithDisallowedExtensions.length > 0) {

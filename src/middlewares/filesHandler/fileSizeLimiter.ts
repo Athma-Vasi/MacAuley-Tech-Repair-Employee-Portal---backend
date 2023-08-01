@@ -20,7 +20,10 @@ function fileSizeLimiterMiddleware(request: Request, response: Response, next: N
     }
   });
 
-  console.log('fileSizeLimiter-filesOverLimit: ', filesOverLimit);
+  console.log('\n');
+  console.group('fileSizeLimiterMiddleware');
+  console.log({ filesOverLimit });
+  console.groupEnd();
 
   // if there are files over limit, return error
   if (filesOverLimit.length > 0) {

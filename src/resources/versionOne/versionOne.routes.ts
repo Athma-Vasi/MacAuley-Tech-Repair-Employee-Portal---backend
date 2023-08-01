@@ -9,8 +9,8 @@ const versionOneRouter = Router();
 // route: /api/v1
 versionOneRouter.use('/actions', actionsRouter);
 versionOneRouter.use('/users', userRouter);
-versionOneRouter.use('/repair-notes', repairNoteRouter);
-versionOneRouter.use('/file-uploads', fileUploadRouter);
-versionOneRouter.use('/comments', commentRouter);
+versionOneRouter.use('/repair-note', repairNoteRouter);
+versionOneRouter.use('/file-upload', fileUploadRouter);
+versionOneRouter.use('/comment', commentRouter);
 
 export { versionOneRouter };

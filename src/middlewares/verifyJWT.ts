@@ -27,6 +27,11 @@ function verifyJWTMiddleware(
       return;
     }
 
+    console.log('\n');
+    console.group('verifyJWTMiddleware');
+    console.log('decoded: ', decoded);
+    console.groupEnd();
+
     const { userInfo } = decoded as {
       userInfo: { username: string; userId: Types.ObjectId; roles: UserRoles };
     };

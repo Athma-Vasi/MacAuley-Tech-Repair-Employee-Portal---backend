@@ -45,7 +45,10 @@ function loggerMiddleware(request: Request, response: Response, next: NextFuncti
     logFileName: 'requestsLog.log',
   });
 
+  console.group('START:: loggerMiddleware');
+  console.log('⋆.ೃ࿔*:･');
   console.log(`${request.method} \t ${request.path}`);
+  console.groupEnd();
 
   next();
   return;

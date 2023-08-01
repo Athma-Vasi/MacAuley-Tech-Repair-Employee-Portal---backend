@@ -10,6 +10,7 @@ import type {
 import { FileUploadModel } from './fileUpload.model';
 import {
   DatabaseResponse,
+  DatabaseResponseNullable,
   QueriedResourceGetRequestServiceInput,
   QueriedTotalResourceGetRequestServiceInput,
 } from '../../types';
@@ -62,7 +63,9 @@ async function getQueriedFileUploadsByUserService({
   }
 }
 
-async function getFileUploadByIdService(fileUploadId: Types.ObjectId | string) {
+async function getFileUploadByIdService(
+  fileUploadId: Types.ObjectId | string
+): DatabaseResponseNullable<FileUploadDocument> {
   try {
     const fileUpload = await FileUploadModel.findById(fileUploadId).lean().exec();
     return fileUpload;

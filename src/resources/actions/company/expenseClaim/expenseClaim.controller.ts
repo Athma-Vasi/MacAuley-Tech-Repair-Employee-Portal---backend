@@ -2,7 +2,7 @@ import expressAsyncHandler from 'express-async-handler';
 import type { DeleteResult } from 'mongodb';
 
 import type { Response } from 'express';
-import type { AssociatedResourceKind } from '../../../fileUpload';
+import type { AssociatedResourceKind, FileUploadDocument } from '../../../fileUpload';
 import type {
   CreateNewExpenseClaimRequest,
   DeleteAllExpenseClaimsRequest,
@@ -27,7 +27,11 @@ import {
   getFileUploadByIdService,
   insertAssociatedResourceDocumentIdService,
 } from '../../../fileUpload';
-import { ExpenseClaimDocument, ExpenseClaimSchema } from './expenseClaim.model';
+import {
+  ExpenseClaimDocument,
+  ExpenseClaimSchema,
+  ExpenseClaimServerResponse,
+} from './expenseClaim.model';
 import {
   GetQueriedResourceRequestServerResponse,
   QueryObjectParsedWithDefaults,
@@ -46,7 +50,7 @@ const createNewExpenseClaimHandler = expressAsyncHandler(
     const {
       userInfo: { userId, username },
       expenseClaim: {
-        uploadedFileId,
+        uploadedFilesIds,
         expenseClaimKind,
         expenseClaimAmount,
         expenseClaimCurrency,
@@ -69,7 +73,7 @@ const createNewExpenseClaimHandler = expressAsyncHandler(
       username,
       action: 'company',
       category: 'expense claim',
-      uploadedFileId,
+      uploadedFilesIds,
       expenseClaimKind,
       expenseClaimAmount,
       expenseClaimCurrency,
@@ -89,33 +93,75 @@ const createNewExpenseClaimHandler = expressAsyncHandler(
     // create new expenseClaim
     const newExpenseClaim = await createNewExpenseClaimService(newExpenseClaimObject);
 
+    // if (newExpenseClaim) {
+    //   const expenseClaimDocumentId = newExpenseClaim._id;
+    //   // grab the corresponding fileUpload document
+    //   const fileUpload = await getFileUploadByIdService(uploadedFileId);
+    //   if (!fileUpload) {
+    //     response.status(404).json({ message: 'File upload not found', resourceData: [] });
+    //     return;
+    //   }
+
+    //   // insert expenseClaim document id into fileUpload document
+    //   // so that we can query for all fileUploads associated with an expenseClaim
+    //   const fileUploadToUpdateObject = {
+    //     ...fileUpload,
+    //     associatedDocumentId: expenseClaimDocumentId,
+    //     associatedResource: 'Expense Claim' as AssociatedResourceKind,
+    //   };
+
+    //   // put the updated fileUpload document into the database
+    //   const updatedFileUpload = await insertAssociatedResourceDocumentIdService(
+    //     fileUploadToUpdateObject
+    //   );
+    //   if (!updatedFileUpload) {
+    //     response
+    //       .status(400)
+    //       .json({ message: 'File upload could not be updated', resourceData: [] });
+    //     return;
+    //   }
+
+    //   response
+    //     .status(201)
+    //     .json({ message: 'New expense claim created', resourceData: [newExpenseClaim] });
+    // } else {
+    //   response
+    //     .status(400)
+    //     .json({ message: 'New expense claim could not be created', resourceData: [] });
+    // }
+
     if (newExpenseClaim) {
-      const expenseClaimDocumentId = newExpenseClaim._id;
-      // grab the corresponding fileUpload document
-      const fileUpload = await getFileUploadByIdService(uploadedFileId);
-      if (!fileUpload) {
-        response.status(404).json({ message: 'File upload not found', resourceData: [] });
-        return;
-      }
+      // for each fileUploadId, grab the corresponding fileUpload document and insert expenseClaim document id into fileUpload document
+      await Promise.all(
+        uploadedFilesIds.map(async (uploadedFileId) => {
+          const fileUpload = await getFileUploadByIdService(uploadedFileId);
+          if (!fileUpload) {
+            response.status(404).json({ message: 'File upload not found', resourceData: [] });
+            return;
+          }
 
-      // insert expenseClaim document id into fileUpload document
-      // so that we can query for all fileUploads associated with an expenseClaim
-      const fileUploadToUpdateObject = {
-        ...fileUpload,
-        associatedDocumentId: expenseClaimDocumentId,
-        associatedResource: 'Expense Claim' as AssociatedResourceKind,
-      };
+          // insert expenseClaim document id into fileUpload document
+          // so that we can query for all fileUploads associated with an expenseClaim
+          const fileUploadToUpdateObject = {
+            ...fileUpload,
+            associatedDocumentId: newExpenseClaim._id,
+            associatedResource: 'Expense Claim' as AssociatedResourceKind,
+          };
 
-      // put the updated fileUpload document into the database
-      const updatedFileUpload = await insertAssociatedResourceDocumentIdService(
-        fileUploadToUpdateObject
+          // put the updated fileUpload document into the database
+          const updatedFileUpload = await insertAssociatedResourceDocumentIdService(
+            fileUploadToUpdateObject
+          );
+          if (!updatedFileUpload) {
+            response
+              .status(400)
+              .json({ message: 'File upload could not be updated', resourceData: [] });
+            return;
+          }
+
+          return updatedFileUpload;
+        })
       );
-      if (!updatedFileUpload) {
-        response
-          .status(400)
-          .json({ message: 'File upload could not be updated', resourceData: [] });
-        return;
-      }
 
       response
         .status(201)
@@ -134,7 +180,7 @@ const createNewExpenseClaimHandler = expressAsyncHandler(
 const getQueriedExpenseClaimsHandler = expressAsyncHandler(
   async (
     request: GetQueriedExpenseClaimsRequest,
-    response: Response<GetQueriedResourceRequestServerResponse<ExpenseClaimDocument>>
+    response: Response<GetQueriedResourceRequestServerResponse<ExpenseClaimServerResponse>>
   ) => {
     let { newQueryFlag, totalDocuments } = request.body;
 
@@ -160,14 +206,52 @@ const getQueriedExpenseClaimsHandler = expressAsyncHandler(
         totalDocuments: 0,
         resourceData: [],
       });
-    } else {
-      response.status(200).json({
-        message: 'Successfully fetched expense claims',
-        pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments,
-        resourceData: expenseClaims,
-      });
+      return;
     }
+
+    // find all fileUploads associated with the expenseClaims (in parallel)
+    const fileUploadsArrArr = await Promise.all(
+      expenseClaims.map(async (expenseClaim) => {
+        const fileUploadPromises = expenseClaim.uploadedFilesIds.map(async (uploadedFileId) => {
+          const fileUpload = await getFileUploadByIdService(uploadedFileId);
+          if (!fileUpload) {
+            response.status(404).json({
+              message: 'File upload not found',
+              pages: 0,
+              totalDocuments: 0,
+              resourceData: [],
+            });
+            return;
+          }
+
+          return fileUpload;
+        });
+
+        // Wait for all the promises to resolve before continuing to the next iteration
+        const fileUploads = await Promise.all(fileUploadPromises);
+
+        // Filter out any undefined values (in case fileUpload was not found)
+        return fileUploads.filter((fileUpload) => fileUpload);
+      })
+    );
+
+    // create expenseClaimServerResponse array
+    const expenseClaimServerResponseArray = expenseClaims
+      .map((expenseClaim, index) => {
+        const fileUploads = fileUploadsArrArr[index];
+        return {
+          ...expenseClaim,
+          fileUploads,
+        };
+      })
+      .filter((expenseClaim) => expenseClaim);
+
+    response.status(200).json({
+      message: 'Successfully retrieved expense claims',
+      pages: Math.ceil(totalDocuments / Number(options?.limit)),
+      totalDocuments,
+      resourceData: expenseClaimServerResponseArray as ExpenseClaimServerResponse[],
+    });
   }
 );
 
@@ -209,14 +293,52 @@ const getQueriedExpenseClaimsByUserHandler = expressAsyncHandler(
         totalDocuments: 0,
         resourceData: [],
       });
-    } else {
-      response.status(200).json({
-        message: 'Successfully fetched expense claims',
-        pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments,
-        resourceData: expenseClaims,
-      });
+      return;
     }
+
+    // find all fileUploads associated with the expenseClaims (in parallel)
+    const fileUploadsArrArr = await Promise.all(
+      expenseClaims.map(async (expenseClaim) => {
+        const fileUploadPromises = expenseClaim.uploadedFilesIds.map(async (uploadedFileId) => {
+          const fileUpload = await getFileUploadByIdService(uploadedFileId);
+          if (!fileUpload) {
+            response.status(404).json({
+              message: 'File upload not found',
+              pages: 0,
+              totalDocuments: 0,
+              resourceData: [],
+            });
+            return;
+          }
+
+          return fileUpload as FileUploadDocument;
+        });
+
+        // Wait for all the promises to resolve before continuing to the next iteration
+        const fileUploads = await Promise.all(fileUploadPromises);
+
+        // Filter out any undefined values (in case fileUpload was not found)
+        return fileUploads.filter((fileUpload) => fileUpload);
+      })
+    );
+
+    // create expenseClaimServerResponse array
+    const expenseClaimServerResponseArray = expenseClaims
+      .map((expenseClaim, index) => {
+        const fileUploads = fileUploadsArrArr[index];
+        return {
+          ...expenseClaim,
+          fileUploads,
+        };
+      })
+      .filter((expenseClaim) => expenseClaim);
+
+    response.status(200).json({
+      message: 'Successfully retrieved expense claims',
+      pages: Math.ceil(totalDocuments / Number(options?.limit)),
+      totalDocuments,
+      resourceData: expenseClaimServerResponseArray,
+    });
   }
 );
 
@@ -226,20 +348,43 @@ const getQueriedExpenseClaimsByUserHandler = expressAsyncHandler(
 const getExpenseClaimByIdHandler = expressAsyncHandler(
   async (
     request: GetExpenseClaimByIdRequest,
-    response: Response<ResourceRequestServerResponse<ExpenseClaimDocument>>
+    response: Response<ResourceRequestServerResponse<ExpenseClaimServerResponse>>
   ) => {
     const expenseClaimId = request.params.expenseClaimId;
 
     // get expense claim by id
     const expenseClaim = await getExpenseClaimByIdService(expenseClaimId);
-    if (expenseClaim) {
-      response.status(200).json({
-        message: 'Successfully fetched expense claim',
-        resourceData: [expenseClaim],
-      });
-    } else {
+    if (!expenseClaim) {
       response.status(404).json({ message: 'Expense claim not found', resourceData: [] });
+      return;
     }
+
+    // get all fileUploads associated with the expenseClaim
+    const fileUploadsArr = await Promise.all(
+      expenseClaim.uploadedFilesIds.map(async (uploadedFileId) => {
+        const fileUpload = await getFileUploadByIdService(uploadedFileId);
+        if (!fileUpload) {
+          response.status(404).json({
+            message: 'File upload not found',
+            resourceData: [],
+          });
+          return;
+        }
+
+        return fileUpload as FileUploadDocument;
+      })
+    );
+
+    // create expenseClaimServerResponse
+    const expenseClaimServerResponse: ExpenseClaimServerResponse = {
+      ...expenseClaim,
+      fileUploads: fileUploadsArr.filter((fileUpload) => fileUpload) as FileUploadDocument[],
+    };
+
+    response.status(200).json({
+      message: 'Successfully retrieved expense claim',
+      resourceData: [expenseClaimServerResponse],
+    });
   }
 );
 
@@ -284,15 +429,43 @@ const deleteAnExpenseClaimHandler = expressAsyncHandler(
     request: DeleteAnExpenseClaimRequest,
     response: Response<ResourceRequestServerResponse<ExpenseClaimDocument>>
   ) => {
-    const { uploadedFileId } = request.body;
+    const { uploadedFilesIds } = request.body;
     const expenseClaimId = request.params.expenseClaimId;
 
-    // delete associated file upload with this expense claim
-    const deleteFileUploadResult: DeleteResult = await deleteFileUploadByIdService(uploadedFileId);
-    if (deleteFileUploadResult.deletedCount === 0) {
+    // // delete associated file upload with this expense claim
+    // const deleteFileUploadResult: DeleteResult = await deleteFileUploadByIdService(uploadedFileId);
+    // if (deleteFileUploadResult.deletedCount === 0) {
+    //   response.status(400).json({
+    //     message:
+    //       'File upload associated with this expense claim could not be deleted. Expense Claim not deleted. Please try again.',
+    //     resourceData: [],
+    //   });
+    //   return;
+    // }
+
+    // // delete expense claim by id
+    // const deleteExpenseClaimResult: DeleteResult = await deleteAnExpenseClaimService(
+    //   expenseClaimId
+    // );
+
+    // if (deleteExpenseClaimResult.deletedCount > 0) {
+    //   response.status(200).json({ message: 'Expense claim deleted', resourceData: [] });
+    // } else {
+    //   response.status(400).json({
+    //     message: 'Expense claim could not be deleted. Please try again.',
+    //     resourceData: [],
+    //   });
+    // }
+
+    // delete all file uploads associated with this expense claim
+    const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
+      uploadedFilesIds.map((uploadedFileId) => deleteFileUploadByIdService(uploadedFileId))
+    );
+
+    if (deleteFileUploadsResult.some((result) => result.deletedCount === 0)) {
       response.status(400).json({
         message:
-          'File upload associated with this expense claim could not be deleted. Expense Claim not deleted. Please try again.',
+          'File uploads associated with this expense claim could not be deleted. Expense Claim not deleted. Please try again.',
         resourceData: [],
       });
       return;
@@ -303,7 +476,7 @@ const deleteAnExpenseClaimHandler = expressAsyncHandler(
       expenseClaimId
     );
 
-    if (deleteExpenseClaimResult.deletedCount > 0) {
+    if (deleteExpenseClaimResult.deletedCount === 1) {
       response.status(200).json({ message: 'Expense claim deleted', resourceData: [] });
     } else {
       response.status(400).json({

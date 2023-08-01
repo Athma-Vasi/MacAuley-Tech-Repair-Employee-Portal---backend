@@ -29,7 +29,7 @@ import { FileUploadDocument } from './fileUpload.model';
 import { FilterQuery, QueryOptions } from 'mongoose';
 
 // @desc   Create a new file upload
-// @route  POST /file-uploads
+// @route  POST /file-upload
 // @access Private
 const createNewFileUploadHandler = expressAsyncHandler(
   async (request: CreateNewFileUploadRequest, response: Response<FileUploadServerResponse>) => {
@@ -52,6 +52,11 @@ const createNewFileUploadHandler = expressAsyncHandler(
       fileMimeType,
       fileEncoding,
     };
+
+    console.log('\n');
+    console.group('createNewFileUploadHandler');
+    console.log('newFileUploadObject: ', newFileUploadObject);
+    console.groupEnd();
 
     // create new fileUpload
     const newFileUpload = await createNewFileUploadService(newFileUploadObject);
@@ -101,7 +106,7 @@ const getAllFileUploadsHandler = expressAsyncHandler(
       response.status(200).json({
         message: 'Successfully found file uploads',
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments: fileUploads.length,
+        totalDocuments,
         resourceData: fileUploads,
       });
     }
@@ -149,7 +154,7 @@ const getQueriedFileUploadsByUserHandler = expressAsyncHandler(
       response.status(200).json({
         message: 'File uploads found successfully',
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments: fileUploads.length,
+        totalDocuments,
         resourceData: fileUploads,
       });
     }

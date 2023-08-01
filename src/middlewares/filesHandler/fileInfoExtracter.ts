@@ -17,8 +17,6 @@ function fileInfoExtracterMiddleware(request: Request, response: Response, next:
     configurable: true,
   });
 
-  console.log('fileInfoExtracter-files: ', files);
-
   // for each file, extract the file information and push it to the fileUploads array
   Object.entries(files).forEach((file: [string, FileUploadObject]) => {
     const [_, { data, name, mimetype, size, encoding }] = file;
@@ -42,7 +40,11 @@ function fileInfoExtracterMiddleware(request: Request, response: Response, next:
     configurable: true,
   });
 
-  console.log('fileInfoExtracter-request.files after deletion: ', request.files);
+  console.log('\n');
+  console.group('fileInfoExtracterMiddleware');
+  console.log({ files });
+  console.log({ fileUploads: request.body.fileUploads });
+  console.groupEnd();
 
   next();
   return;
