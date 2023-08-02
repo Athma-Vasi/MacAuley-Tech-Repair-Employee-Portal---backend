@@ -93,8 +93,8 @@ async function updateExpenseClaimByIdService({
 }): DatabaseResponseNullable<ExpenseClaimDocument> {
   try {
     const expenseClaim = await ExpenseClaimModel.findByIdAndUpdate(
-      expenseClaimId,
-      { fieldsToUpdate },
+      { _id: expenseClaimId },
+      { $set: fieldsToUpdate },
       { new: true }
     )
       .select('-__v')

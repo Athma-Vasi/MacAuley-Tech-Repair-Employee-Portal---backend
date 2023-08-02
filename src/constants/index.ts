@@ -1,4 +1,4 @@
-const ALLOWED_FILE_EXTENSIONS = ['.jpeg', '.png', '.gif', '.pdf'];
+const ALLOWED_FILE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.pdf'];
 
 const FIND_QUERY_OPTIONS_KEYWORDS = new Set([
   'tailable',

@@ -386,10 +386,16 @@ const updateExpenseClaimByIdHandler = expressAsyncHandler(
       return;
     }
 
+    const newExpenseClaim = {
+      ...expenseClaimExists,
+      ...expenseClaim,
+    };
+    console.log('updateExpenseClaimByIdHandler: ', newExpenseClaim);
+
     // update expense claim
     const updatedExpenseClaim = await updateExpenseClaimByIdService({
       expenseClaimId,
-      fieldsToUpdate: expenseClaim,
+      fieldsToUpdate: newExpenseClaim,
     });
 
     if (updatedExpenseClaim) {
@@ -447,43 +453,29 @@ const deleteAnExpenseClaimHandler = expressAsyncHandler(
     request: DeleteAnExpenseClaimRequest,
     response: Response<ResourceRequestServerResponse<ExpenseClaimDocument>>
   ) => {
-    const { uploadedFilesIds } = request.body;
     const expenseClaimId = request.params.expenseClaimId;
 
-    // // delete associated file upload with this expense claim
-    // const deleteFileUploadResult: DeleteResult = await deleteFileUploadByIdService(uploadedFileId);
-    // if (deleteFileUploadResult.deletedCount === 0) {
-    //   response.status(400).json({
-    //     message:
-    //       'File upload associated with this expense claim could not be deleted. Expense Claim not deleted. Please try again.',
-    //     resourceData: [],
-    //   });
-    //   return;
-    // }
+    // check if expense claim exists
+    const expenseClaimExists = await getExpenseClaimByIdService(expenseClaimId);
+    if (!expenseClaimExists) {
+      response.status(404).json({ message: 'Expense claim does not exist', resourceData: [] });
+      return;
+    }
 
-    // // delete expense claim by id
-    // const deleteExpenseClaimResult: DeleteResult = await deleteAnExpenseClaimService(
-    //   expenseClaimId
-    // );
-
-    // if (deleteExpenseClaimResult.deletedCount > 0) {
-    //   response.status(200).json({ message: 'Expense claim deleted', resourceData: [] });
-    // } else {
-    //   response.status(400).json({
-    //     message: 'Expense claim could not be deleted. Please try again.',
-    //     resourceData: [],
-    //   });
-    // }
+    // DO NOT DELETE: TURN THIS BACK ON AFTER TESTING
+    // find all file uploads associated with this expense claim
+    // if it is not an array, it is made to be an array
+    const uploadedFilesIds = [...expenseClaimExists.uploadedFilesIds];
 
     // delete all file uploads associated with this expense claim
     const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-      uploadedFilesIds.map((uploadedFileId) => deleteFileUploadByIdService(uploadedFileId))
+      uploadedFilesIds.map(async (uploadedFileId) => deleteFileUploadByIdService(uploadedFileId))
     );
 
     if (deleteFileUploadsResult.some((result) => result.deletedCount === 0)) {
       response.status(400).json({
         message:
-          'File uploads associated with this expense claim could not be deleted. Expense Claim not deleted. Please try again.',
+          'Some file uploads associated with this expense claim could not be deleted. Expense Claim not deleted. Please try again.',
         resourceData: [],
       });
       return;

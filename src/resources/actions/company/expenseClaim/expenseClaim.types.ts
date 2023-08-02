@@ -37,7 +37,6 @@ interface DeleteAnExpenseClaimRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    uploadedFilesIds: Types.ObjectId[];
   };
 }
 
@@ -79,16 +78,7 @@ interface UpdateExpenseClaimByIdRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    expenseClaim: {
-      uploadedFilesIds: Types.ObjectId[];
-      expenseClaimKind: ExpenseClaimKind;
-      expenseClaimAmount: number;
-      expenseClaimCurrency: Currency;
-      expenseClaimDate: NativeDate;
-      expenseClaimDescription: string;
-      additionalComments: string;
-      acknowledgement: boolean;
-    };
+    expenseClaim: ExpenseClaimDocument;
   };
   params: { expenseClaimId: string };
 }

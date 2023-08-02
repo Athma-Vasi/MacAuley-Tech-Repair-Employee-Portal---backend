@@ -3,7 +3,7 @@ import type { ActionsCompany } from '../actions/company';
 import type { ActionsGeneral } from '../actions/general';
 import type { ActionsOutreach } from '../actions/outreach';
 
-type FileExtension = 'jpeg' | 'png' | 'gif' | 'pdf';
+type FileExtension = 'jpeg' | 'png' | 'gif' | 'pdf' | 'jpg';
 
 type AssociatedResourceKind =
   | ActionsCompany
