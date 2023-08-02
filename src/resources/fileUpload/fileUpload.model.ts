@@ -3,22 +3,14 @@ import type { ActionsCompany } from '../actions/company';
 import type { ActionsGeneral } from '../actions/general';
 import type { ActionsOutreach } from '../actions/outreach';
 
-type FileExtension =
-  | 'jpg'
-  | 'jpeg'
-  | 'png'
-  | 'pdf'
-  | 'docx'
-  | 'doc'
-  | 'xlsx'
-  | 'xls'
-  | 'ppt'
-  | 'pptx'
-  | 'csv'
-  | 'txt'
-  | 'log';
+type FileExtension = 'jpeg' | 'png' | 'gif' | 'pdf';
 
-type AssociatedResourceKind = ActionsCompany | ActionsGeneral | ActionsOutreach | 'user' | 'note';
+type AssociatedResourceKind =
+  | ActionsCompany
+  | ActionsGeneral
+  | ActionsOutreach
+  | 'user'
+  | 'repairNote';
 
 type FileUploadSchema = {
   userId: Types.ObjectId;

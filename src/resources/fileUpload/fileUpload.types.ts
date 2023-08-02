@@ -33,6 +33,14 @@ interface InsertAssociatedDocumentIdRequest extends RequestAfterJWTVerification 
 }
 
 interface DeleteAFileUploadRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    associatedDocumentId: Types.ObjectId;
+  };
   params: {
     fileUploadId: string;
   };

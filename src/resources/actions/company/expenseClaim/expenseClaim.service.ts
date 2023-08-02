@@ -82,17 +82,19 @@ async function getExpenseClaimByIdService(
   }
 }
 
-async function updateExpenseClaimStatusByIdService({
+async function updateExpenseClaimByIdService({
   expenseClaimId,
-  requestStatus,
+  fieldsToUpdate,
 }: {
   expenseClaimId: Types.ObjectId | string;
-  requestStatus: RequestStatus;
+  fieldsToUpdate: {
+    [key in keyof ExpenseClaimDocument]?: ExpenseClaimDocument[key];
+  };
 }): DatabaseResponseNullable<ExpenseClaimDocument> {
   try {
     const expenseClaim = await ExpenseClaimModel.findByIdAndUpdate(
       expenseClaimId,
-      { requestStatus },
+      { fieldsToUpdate },
       { new: true }
     )
       .select('-__v')
@@ -100,7 +102,7 @@ async function updateExpenseClaimStatusByIdService({
       .exec();
     return expenseClaim;
   } catch (error: any) {
-    throw new Error(error, { cause: 'updateExpenseClaimStatusByIdService' });
+    throw new Error(error, { cause: 'updateExpenseClaimByIdService' });
   }
 }
 
@@ -145,5 +147,5 @@ export {
   deleteAllExpenseClaimsService,
   deleteAnExpenseClaimService,
   returnAllUploadedFileIdsService,
-  updateExpenseClaimStatusByIdService,
+  updateExpenseClaimByIdService,
 };

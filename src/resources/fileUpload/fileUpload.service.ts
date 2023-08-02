@@ -67,7 +67,7 @@ async function getFileUploadByIdService(
   fileUploadId: Types.ObjectId | string
 ): DatabaseResponseNullable<FileUploadDocument> {
   try {
-    const fileUpload = await FileUploadModel.findById(fileUploadId).lean().exec();
+    const fileUpload = await FileUploadModel.findById(fileUploadId).select('-__v').lean().exec();
     return fileUpload;
   } catch (error: any) {
     throw new Error(error, { cause: 'getFileUploadByIdService' });

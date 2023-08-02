@@ -6,6 +6,8 @@ import {
   getQueriedExpenseClaimsHandler,
   getExpenseClaimByIdHandler,
   getQueriedExpenseClaimsByUserHandler,
+  updateExpenseClaimStatusByIdHandler,
+  updateExpenseClaimByIdHandler,
 } from './expenseClaim.controller';
 import { assignQueryDefaults, verifyRoles } from '../../../../middlewares';
 import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
@@ -27,6 +29,8 @@ expenseClaimRouter
 expenseClaimRouter
   .route('/:expenseClaimId')
   .get(getExpenseClaimByIdHandler)
-  .delete(deleteAnExpenseClaimHandler);
+  .delete(deleteAnExpenseClaimHandler)
+  .patch(updateExpenseClaimStatusByIdHandler)
+  .put(updateExpenseClaimByIdHandler);
 
 export { expenseClaimRouter };

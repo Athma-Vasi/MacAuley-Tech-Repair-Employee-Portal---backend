@@ -10,6 +10,8 @@ import type {
   GetQueriedExpenseClaimsRequest,
   GetExpenseClaimByIdRequest,
   GetQueriedExpenseClaimsByUserRequest,
+  UpdateExpenseClaimStatusByIdRequest,
+  UpdateExpenseClaimByIdRequest,
 } from './expenseClaim.types';
 
 import {
@@ -20,6 +22,7 @@ import {
   getExpenseClaimByIdService,
   getQueriedExpenseClaimsByUserService,
   getQueriedTotalExpenseClaimsService,
+  updateExpenseClaimByIdService,
 } from './expenseClaim.service';
 import {
   deleteAllFileUploadsByAssociatedResourceService,
@@ -93,43 +96,6 @@ const createNewExpenseClaimHandler = expressAsyncHandler(
     // create new expenseClaim
     const newExpenseClaim = await createNewExpenseClaimService(newExpenseClaimObject);
 
-    // if (newExpenseClaim) {
-    //   const expenseClaimDocumentId = newExpenseClaim._id;
-    //   // grab the corresponding fileUpload document
-    //   const fileUpload = await getFileUploadByIdService(uploadedFileId);
-    //   if (!fileUpload) {
-    //     response.status(404).json({ message: 'File upload not found', resourceData: [] });
-    //     return;
-    //   }
-
-    //   // insert expenseClaim document id into fileUpload document
-    //   // so that we can query for all fileUploads associated with an expenseClaim
-    //   const fileUploadToUpdateObject = {
-    //     ...fileUpload,
-    //     associatedDocumentId: expenseClaimDocumentId,
-    //     associatedResource: 'Expense Claim' as AssociatedResourceKind,
-    //   };
-
-    //   // put the updated fileUpload document into the database
-    //   const updatedFileUpload = await insertAssociatedResourceDocumentIdService(
-    //     fileUploadToUpdateObject
-    //   );
-    //   if (!updatedFileUpload) {
-    //     response
-    //       .status(400)
-    //       .json({ message: 'File upload could not be updated', resourceData: [] });
-    //     return;
-    //   }
-
-    //   response
-    //     .status(201)
-    //     .json({ message: 'New expense claim created', resourceData: [newExpenseClaim] });
-    // } else {
-    //   response
-    //     .status(400)
-    //     .json({ message: 'New expense claim could not be created', resourceData: [] });
-    // }
-
     if (newExpenseClaim) {
       // for each fileUploadId, grab the corresponding fileUpload document and insert expenseClaim document id into fileUpload document
       await Promise.all(
@@ -145,7 +111,7 @@ const createNewExpenseClaimHandler = expressAsyncHandler(
           const fileUploadToUpdateObject = {
             ...fileUpload,
             associatedDocumentId: newExpenseClaim._id,
-            associatedResource: 'Expense Claim' as AssociatedResourceKind,
+            associatedResource: 'expense claim' as AssociatedResourceKind,
           };
 
           // put the updated fileUpload document into the database
@@ -214,15 +180,6 @@ const getQueriedExpenseClaimsHandler = expressAsyncHandler(
       expenseClaims.map(async (expenseClaim) => {
         const fileUploadPromises = expenseClaim.uploadedFilesIds.map(async (uploadedFileId) => {
           const fileUpload = await getFileUploadByIdService(uploadedFileId);
-          if (!fileUpload) {
-            response.status(404).json({
-              message: 'File upload not found',
-              pages: 0,
-              totalDocuments: 0,
-              resourceData: [],
-            });
-            return;
-          }
 
           return fileUpload;
         });
@@ -301,15 +258,6 @@ const getQueriedExpenseClaimsByUserHandler = expressAsyncHandler(
       expenseClaims.map(async (expenseClaim) => {
         const fileUploadPromises = expenseClaim.uploadedFilesIds.map(async (uploadedFileId) => {
           const fileUpload = await getFileUploadByIdService(uploadedFileId);
-          if (!fileUpload) {
-            response.status(404).json({
-              message: 'File upload not found',
-              pages: 0,
-              totalDocuments: 0,
-              resourceData: [],
-            });
-            return;
-          }
 
           return fileUpload as FileUploadDocument;
         });
@@ -363,13 +311,6 @@ const getExpenseClaimByIdHandler = expressAsyncHandler(
     const fileUploadsArr = await Promise.all(
       expenseClaim.uploadedFilesIds.map(async (uploadedFileId) => {
         const fileUpload = await getFileUploadByIdService(uploadedFileId);
-        if (!fileUpload) {
-          response.status(404).json({
-            message: 'File upload not found',
-            resourceData: [],
-          });
-          return;
-        }
 
         return fileUpload as FileUploadDocument;
       })
@@ -385,6 +326,83 @@ const getExpenseClaimByIdHandler = expressAsyncHandler(
       message: 'Successfully retrieved expense claim',
       resourceData: [expenseClaimServerResponse],
     });
+  }
+);
+
+// @desc   Update an expense claim status by id
+// @route  PATCH /expense-claim/:expenseClaimId
+// @access Private/Admin/Manager
+const updateExpenseClaimStatusByIdHandler = expressAsyncHandler(
+  async (
+    request: UpdateExpenseClaimStatusByIdRequest,
+    response: Response<ResourceRequestServerResponse<ExpenseClaimDocument>>
+  ) => {
+    const { expenseClaimId } = request.params;
+    const {
+      expenseClaim: { requestStatus },
+    } = request.body;
+
+    // check if expense claim exists
+    const expenseClaimExists = await getExpenseClaimByIdService(expenseClaimId);
+    if (!expenseClaimExists) {
+      response.status(404).json({ message: 'Expense claim does not exist', resourceData: [] });
+      return;
+    }
+
+    // update expense claim
+    const updatedExpenseClaim = await updateExpenseClaimByIdService({
+      expenseClaimId,
+      fieldsToUpdate: { requestStatus },
+    });
+    if (updatedExpenseClaim) {
+      response.status(200).json({
+        message: 'Expense claim updated successfully',
+        resourceData: [updatedExpenseClaim],
+      });
+    } else {
+      response.status(400).json({
+        message: 'Expense claim could not be updated',
+        resourceData: [],
+      });
+    }
+  }
+);
+
+// @desc   Update an expense claim by id
+// @route  PUT /expense-claim/:expenseClaimId
+// @access Private/Admin/Manager
+const updateExpenseClaimByIdHandler = expressAsyncHandler(
+  async (
+    request: UpdateExpenseClaimByIdRequest,
+    response: Response<ResourceRequestServerResponse<ExpenseClaimDocument>>
+  ) => {
+    const { expenseClaimId } = request.params;
+    const { expenseClaim } = request.body;
+
+    // check if expense claim exists
+    const expenseClaimExists = await getExpenseClaimByIdService(expenseClaimId);
+    if (!expenseClaimExists) {
+      response.status(404).json({ message: 'Expense claim does not exist', resourceData: [] });
+      return;
+    }
+
+    // update expense claim
+    const updatedExpenseClaim = await updateExpenseClaimByIdService({
+      expenseClaimId,
+      fieldsToUpdate: expenseClaim,
+    });
+
+    if (updatedExpenseClaim) {
+      response.status(200).json({
+        message: 'Expense claim updated successfully',
+        resourceData: [updatedExpenseClaim],
+      });
+    } else {
+      response.status(400).json({
+        message: 'Expense claim could not be updated',
+        resourceData: [],
+      });
+    }
   }
 );
 
@@ -494,4 +512,6 @@ export {
   getExpenseClaimByIdHandler,
   deleteAllExpenseClaimsHandler,
   deleteAnExpenseClaimHandler,
+  updateExpenseClaimStatusByIdHandler,
+  updateExpenseClaimByIdHandler,
 };

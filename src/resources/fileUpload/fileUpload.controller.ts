@@ -205,8 +205,6 @@ const deleteAFileUploadHandler = expressAsyncHandler(
   async (request: DeleteAFileUploadRequest, response: Response<FileUploadServerResponse>) => {
     const { fileUploadId } = request.params;
 
-    // check if existing fileUpload has an associated document id
-    // if it does, do not allow unless the associated document is deleted first (only managers/admin can delete associated documents)
     // users can delete their own file uploads which are not associated with any document
 
     const existingFileUpload = await getFileUploadByIdService(fileUploadId);
@@ -217,22 +215,14 @@ const deleteAFileUploadHandler = expressAsyncHandler(
       return;
     }
 
-    // check if file upload is associated with a document
-    if (existingFileUpload.associatedDocumentId) {
-      response.status(400).json({
-        message:
-          'File upload is associated with a document. Ensure document(example: ExpenseClaim) is deleted first',
-      });
+    // delete file upload
+    const deletedResult = await deleteFileUploadByIdService(fileUploadId);
+    if (deletedResult.deletedCount !== 1) {
+      response.status(400).json({ message: 'File upload could not be deleted' });
       return;
     }
 
-    // delete file upload
-    const deletedResult = await deleteFileUploadByIdService(fileUploadId);
-    if (deletedResult.acknowledged) {
-      response.status(200).json({ message: 'File upload deleted successfully' });
-    } else {
-      response.status(400).json({ message: 'File upload could not be deleted' });
-    }
+    response.status(200).json({ message: 'File upload deleted successfully' });
   }
 );
 
