@@ -26,8 +26,8 @@ type SurveyQuestion = {
 };
 
 type SurveyBuilderSchema = {
-  creatorId: Types.ObjectId;
-  creatorUsername: string;
+  userId: Types.ObjectId;
+  username: string;
   creatorRole: UserRoles;
   action: Action;
   category: ActionsOutreach;
@@ -49,12 +49,12 @@ type SurveyBuilderDocument = SurveyBuilderSchema & {
 
 const surveyBuilderSchema = new Schema<SurveyBuilderSchema>(
   {
-    creatorId: {
+    userId: {
       type: Schema.Types.ObjectId,
       required: [true, 'creatorID (userId) is required'],
       index: true,
     },
-    creatorUsername: {
+    username: {
       type: String,
       required: [true, 'creatorUsername is required'],
       index: true,

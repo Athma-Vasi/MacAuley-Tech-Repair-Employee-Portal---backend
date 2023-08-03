@@ -16,8 +16,8 @@ type EventKind =
   | 'Other';
 
 type EventCreatorSchema = {
-  creatorId: Types.ObjectId;
-  creatorUsername: string;
+  userId: Types.ObjectId;
+  username: string;
   creatorRole: UserRoles;
   action: Action;
   category: ActionsOutreach;
@@ -44,13 +44,13 @@ type EventCreatorDocument = EventCreatorSchema & {
 
 const eventCreatorSchema = new Schema<EventCreatorSchema>(
   {
-    creatorId: {
+    userId: {
       type: Schema.Types.ObjectId,
       required: [true, 'User ID is required'],
       ref: 'User',
       index: true,
     },
-    creatorUsername: {
+    username: {
       type: String,
       required: [true, 'Username is required'],
       index: true,

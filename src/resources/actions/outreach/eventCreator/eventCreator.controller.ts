@@ -56,8 +56,8 @@ const createNewEventHandler = expressAsyncHandler(
 
     // create new event object
     const newEventObject: EventCreatorSchema = {
-      creatorId: userId,
-      creatorUsername: username,
+      userId,
+      username,
       creatorRole: roles,
       action: 'outreach',
       category: 'event creator',
@@ -250,7 +250,7 @@ const updateAnEventHandler = expressAsyncHandler(
     const {
       userInfo: { userId, username, roles },
       event: {
-        eventName,
+        eventTitle,
         eventAttendees,
         eventStartDate,
         eventEndDate,
@@ -271,7 +271,7 @@ const updateAnEventHandler = expressAsyncHandler(
     }
 
     // only the creator can update the event
-    if (existingEvent.creatorId !== userId) {
+    if (existingEvent.userId !== userId) {
       response.status(401).json({
         message: 'Only the originators of an event are allowed to modify the event',
         resourceData: [],
@@ -284,7 +284,7 @@ const updateAnEventHandler = expressAsyncHandler(
       creatorId: userId,
       creatorUsername: username,
       creatorRole: roles,
-      eventName,
+      eventTitle,
       eventDescription,
       eventKind,
       eventStartTime,

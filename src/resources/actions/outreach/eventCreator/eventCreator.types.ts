@@ -60,19 +60,7 @@ interface UpdateAnEventByIdRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    event: {
-      eventName: string;
-      eventDescription: string;
-      eventKind: EventKind;
-      eventStartDate: NativeDate;
-      eventStartTime: string;
-      eventEndDate: NativeDate;
-      eventEndTime: string;
-      eventLocation: string;
-      eventAttendees: string;
-      requiredItems: string;
-      rsvpDeadline: NativeDate;
-    };
+    event: EventCreatorDocument;
   };
   params: { eventId: string };
 }
