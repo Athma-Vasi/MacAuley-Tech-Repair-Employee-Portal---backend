@@ -3,14 +3,44 @@ import type { UserRoles } from '../../../user';
 import type { Action } from '../../../actions';
 import type { ActionsOutreach } from '../../../actions/outreach';
 
-type SurveyRecipient = 'All' | 'Active' | 'Inactive' | 'Employees' | 'Admins' | 'Managers';
+type SurveyRecipient =
+  | 'All'
+  | 'Executive Management'
+  | 'Administrative'
+  | 'Sales and Marketing'
+  | 'Information Technology'
+  | 'Repair Technicians'
+  | 'Field Service Technicians'
+  | 'Logistics and Inventory'
+  | 'Customer Service'
+  | 'Quality Control'
+  | 'Training and Development'
+  | 'Janitorial and Maintenance'
+  | 'Security';
 
 type SurveyResponseKind = {
-  chooseOne: 'trueFalse' | 'yesNo' | 'radio';
-  chooseAny: 'checkbox' | 'dropdown';
-  answerKind: 'shortAnswer' | 'longAnswer';
-  rating: 'scale' | 'emotion' | 'stars';
+  chooseOne: 'agreeDisagree' | 'radio';
+  chooseAny: 'checkbox';
+  rating: 'emotion' | 'stars';
 };
+
+type AgreeDisagreeResponse =
+  | 'Strongly Agree'
+  | 'Agree'
+  | 'Neutral'
+  | 'Disagree'
+  | 'Strongly Disagree';
+type RadioResponse = string;
+type CheckboxResponse = Array<string>;
+type EmotionResponse = 'Upset' | 'Annoyed' | 'Neutral' | 'Happy' | 'Ecstatic';
+type StarsResponse = 1 | 2 | 3 | 4 | 5;
+
+type SurveyDataOptions =
+  | AgreeDisagreeResponse
+  | RadioResponse
+  | CheckboxResponse
+  | EmotionResponse
+  | StarsResponse;
 
 // The mapped type loops over each key in SurveyResponseKind and returns an object, ensuring that the value of `inputHtml` is constrained to the value of `kind` which is a key in the looped object.
 type SurveyQuestion = {
@@ -18,8 +48,8 @@ type SurveyQuestion = {
   responseKind: {
     [Key in keyof SurveyResponseKind]: {
       kind: Key;
-      inputHtml: SurveyResponseKind[Key];
-      dataOptions: Array<string>;
+      kindOption: SurveyResponseKind[Key];
+      dataOptions: SurveyDataOptions;
     };
   }[keyof SurveyResponseKind];
   required: boolean;
@@ -36,7 +66,6 @@ type SurveyBuilderSchema = {
   surveyDescription: string;
   sendTo: SurveyRecipient;
   expiryDate: NativeDate;
-  isAnonymous: boolean;
   questions: Array<SurveyQuestion>;
 };
 
@@ -85,10 +114,6 @@ const surveyBuilderSchema = new Schema<SurveyBuilderSchema>(
     expiryDate: {
       type: Date,
       required: [true, 'expiryDate is required'],
-    },
-    isAnonymous: {
-      type: Boolean,
-      required: [true, 'isAnonymous is required'],
     },
     questions: {
       type: [Array],

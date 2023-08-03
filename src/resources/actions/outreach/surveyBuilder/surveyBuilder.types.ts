@@ -18,7 +18,6 @@ interface CreateNewSurveyRequest extends RequestAfterJWTVerification {
       surveyDescription: string;
       sendTo: SurveyRecipient;
       expiryDate: NativeDate;
-      isAnonymous: boolean;
       questions: Array<SurveyQuestion>;
     };
   };

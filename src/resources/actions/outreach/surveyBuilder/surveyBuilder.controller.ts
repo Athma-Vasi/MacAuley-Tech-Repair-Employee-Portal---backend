@@ -37,13 +37,13 @@ const createNewSurveyHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username, roles },
-      survey: { surveyTitle, surveyDescription, sendTo, expiryDate, isAnonymous, questions },
+      survey: { surveyTitle, surveyDescription, sendTo, expiryDate, questions },
     } = request.body;
 
     // create new survey object
     const newSurveyObject: SurveyBuilderSchema = {
-      creatorId: userId,
-      creatorUsername: username,
+      userId,
+      username,
       creatorRole: roles,
       action: 'outreach',
       category: 'survey builder',
@@ -52,7 +52,6 @@ const createNewSurveyHandler = expressAsyncHandler(
       surveyDescription,
       sendTo,
       expiryDate,
-      isAnonymous,
       questions,
     };
 
