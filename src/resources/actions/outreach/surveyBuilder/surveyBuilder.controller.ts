@@ -62,7 +62,9 @@ const createNewSurveyHandler = expressAsyncHandler(
       return;
     }
 
-    response.status(201).json({ message: 'New survey created', resourceData: [newSurvey] });
+    response
+      .status(201)
+      .json({ message: 'Successfully created new survey!', resourceData: [newSurvey] });
   }
 );
 

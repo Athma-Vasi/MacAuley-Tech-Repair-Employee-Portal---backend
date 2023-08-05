@@ -18,11 +18,8 @@ type SurveyRecipient =
   | 'Janitorial and Maintenance'
   | 'Security';
 
-type SurveyResponseKind = {
-  chooseOne: 'agreeDisagree' | 'radio';
-  chooseAny: 'checkbox';
-  rating: 'emotion' | 'stars';
-};
+type SurveyResponseKind = 'chooseOne' | 'chooseAny' | 'rating';
+type SurveyResponseInput = 'agreeDisagree' | 'radio' | 'checkbox' | 'emotion' | 'stars';
 
 type AgreeDisagreeResponse =
   | 'Strongly Agree'
@@ -35,24 +32,18 @@ type CheckboxResponse = Array<string>;
 type EmotionResponse = 'Upset' | 'Annoyed' | 'Neutral' | 'Happy' | 'Ecstatic';
 type StarsResponse = 1 | 2 | 3 | 4 | 5;
 
-type SurveyDataOptions =
+type SurveyResponseDataOptions =
   | AgreeDisagreeResponse
   | RadioResponse
   | CheckboxResponse
   | EmotionResponse
   | StarsResponse;
 
-// The mapped type loops over each key in SurveyResponseKind and returns an object, ensuring that the value of `inputHtml` is constrained to the value of `kind` which is a key in the looped object.
 type SurveyQuestion = {
   question: string;
-  responseKind: {
-    [Key in keyof SurveyResponseKind]: {
-      kind: Key;
-      kindOption: SurveyResponseKind[Key];
-      dataOptions: SurveyDataOptions;
-    };
-  }[keyof SurveyResponseKind];
-  required: boolean;
+  responseKind: SurveyResponseKind;
+  responseInput: SurveyResponseInput;
+  responseDataOptions: SurveyResponseDataOptions;
 };
 
 type SurveyBuilderSchema = {
