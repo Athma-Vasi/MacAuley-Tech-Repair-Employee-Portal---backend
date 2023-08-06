@@ -2,7 +2,11 @@ import expressAsyncHandler from 'express-async-handler';
 
 import type { DeleteResult } from 'mongodb';
 import type { Response } from 'express';
-import type { SurveyBuilderDocument, SurveyBuilderSchema } from './surveyBuilder.model';
+import type {
+  SurveyBuilderDocument,
+  SurveyBuilderSchema,
+  SurveyStatistics,
+} from './surveyBuilder.model';
 import type {
   CreateNewSurveyRequest,
   DeleteASurveyRequest,
@@ -10,6 +14,7 @@ import type {
   GetQueriedSurveysRequest,
   GetSurveyByIdRequest,
   GetQueriedSurveysByUserRequest,
+  UpdateSurveyStatisticsByIdRequest,
 } from './surveyBuilder.types';
 import {
   createNewSurveyService,
@@ -19,6 +24,7 @@ import {
   getSurveyByIdService,
   getQueriedSurveysByUserService,
   getQueriedTotalSurveysService,
+  updateSurveyStatisticsByIdService,
 } from './surveyBuilder.service';
 import {
   GetQueriedResourceRequestServerResponse,
@@ -37,7 +43,7 @@ const createNewSurveyHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username, roles },
-      survey: { surveyTitle, surveyDescription, sendTo, expiryDate, questions },
+      survey: { surveyTitle, surveyDescription, sendTo, expiryDate, questions, surveyStatistics },
     } = request.body;
 
     // create new survey object
@@ -53,6 +59,8 @@ const createNewSurveyHandler = expressAsyncHandler(
       sendTo,
       expiryDate,
       questions,
+
+      surveyStatistics,
     };
 
     // create new survey
@@ -179,6 +187,92 @@ const getSurveyByIdHandler = expressAsyncHandler(
   }
 );
 
+// @desc   Update survey statistics by id
+// @route  PATCH /survey-builder/:surveyId
+// @access Private/Admin/Manager
+const updateSurveyStatisticsByIdHandler = expressAsyncHandler(
+  async (
+    request: UpdateSurveyStatisticsByIdRequest,
+    response: Response<ResourceRequestServerResponse<SurveyBuilderDocument>>
+  ) => {
+    const { surveyId } = request.params;
+    const { surveyResponses } = request.body;
+
+    // check that survey exists
+    const surveyToUpdate = await getSurveyByIdService(surveyId);
+    if (!surveyToUpdate) {
+      response.status(404).json({ message: 'Survey not found', resourceData: [] });
+      return;
+    }
+
+    // grab survey statistics
+    const surveyStatistics = surveyToUpdate.surveyStatistics as SurveyStatistics[];
+
+    // update survey statistics
+    const updatedSurveyStatistics = surveyResponses.reduce(
+      (surveyStatisticsAcc, { question, response, responseInput }) => {
+        // find question in survey statistics
+        const questionIndex = surveyStatisticsAcc.findIndex(
+          (questionObject) => questionObject.question === question
+        );
+
+        // if question is found, update the question's responses
+        if (questionIndex !== -1) {
+          const questionObject = surveyStatisticsAcc[questionIndex];
+
+          // update total responses
+          questionObject.totalResponses += 1;
+
+          // update the response distribution
+          Object.entries(questionObject.responseDistribution).forEach(
+            ([responseKey, responseValue]) => {
+              // if response is an array of strings
+              if (Array.isArray(response)) {
+                // if responseKey is in response, increment responseDistribution
+                if (response.includes(responseKey)) {
+                  questionObject.responseDistribution[responseKey] += 1;
+                }
+
+                // if response is a string
+              } else if (typeof response === 'string') {
+                // if responseKey is equal to response, increment responseDistribution
+                if (responseKey === response) {
+                  questionObject.responseDistribution[responseKey] += 1;
+                }
+              }
+              // if response is a number
+              else if (typeof response === 'number') {
+                // if responseKey is equal to response, increment responseDistribution
+                if (responseKey === response.toString()) {
+                  questionObject.responseDistribution[responseKey] += 1;
+                }
+              }
+            }
+          );
+
+          // add the questionObject back to the surveyStatisticsAcc
+          surveyStatisticsAcc[questionIndex] = questionObject;
+        }
+
+        return surveyStatisticsAcc;
+      },
+      surveyStatistics
+    );
+
+    // update survey
+    const updatedSurvey = await updateSurveyStatisticsByIdService({
+      surveyId,
+      surveyStatistics: updatedSurveyStatistics,
+    });
+    if (!updatedSurvey) {
+      response.status(400).json({ message: 'Unable to update survey', resourceData: [] });
+      return;
+    }
+
+    response.status(200).json({ message: 'Survey updated', resourceData: [updatedSurvey] });
+  }
+);
+
 // @desc   Delete a survey by id
 // @route  DELETE /survey-builder/:surveyId
 // @access Private/Admin/Manager
@@ -239,4 +333,5 @@ export {
   getQueriedSurveysHandler,
   getSurveyByIdHandler,
   getQueriedSurveysByUserHandler,
+  updateSurveyStatisticsByIdHandler,
 };

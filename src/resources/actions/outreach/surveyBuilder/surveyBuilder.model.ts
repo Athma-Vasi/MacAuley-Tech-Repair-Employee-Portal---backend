@@ -2,6 +2,7 @@ import { Schema, Types, model } from 'mongoose';
 import type { UserRoles } from '../../../user';
 import type { Action } from '../../../actions';
 import type { ActionsOutreach } from '../../../actions/outreach';
+import { tr } from 'date-fns/locale';
 
 type SurveyRecipient =
   | 'All'
@@ -43,7 +44,13 @@ type SurveyQuestion = {
   question: string;
   responseKind: SurveyResponseKind;
   responseInput: SurveyResponseInput;
-  responseDataOptions: SurveyResponseDataOptions;
+  responseDataOptions: string[] | string | number;
+};
+
+type SurveyStatistics = {
+  question: string;
+  totalResponses: number;
+  responseDistribution: Record<string, number>;
 };
 
 type SurveyBuilderSchema = {
@@ -58,6 +65,8 @@ type SurveyBuilderSchema = {
   sendTo: SurveyRecipient;
   expiryDate: NativeDate;
   questions: Array<SurveyQuestion>;
+
+  surveyStatistics: SurveyStatistics[];
 };
 
 type SurveyBuilderDocument = SurveyBuilderSchema & {
@@ -107,8 +116,13 @@ const surveyBuilderSchema = new Schema<SurveyBuilderSchema>(
       required: [true, 'expiryDate is required'],
     },
     questions: {
-      type: [Array],
+      type: [Object],
       required: [true, 'questions is required'],
+    },
+
+    surveyStatistics: {
+      type: [Object],
+      required: true,
     },
   },
   {
@@ -125,4 +139,7 @@ export type {
   SurveyRecipient,
   SurveyResponseKind,
   SurveyQuestion,
+  SurveyStatistics,
+  SurveyResponseDataOptions,
+  SurveyResponseInput,
 };

@@ -1,7 +1,11 @@
 import { Types } from 'mongoose';
 
 import type { DeleteResult } from 'mongodb';
-import type { SurveyBuilderDocument, SurveyBuilderSchema } from './surveyBuilder.model';
+import type {
+  SurveyBuilderDocument,
+  SurveyBuilderSchema,
+  SurveyStatistics,
+} from './surveyBuilder.model';
 import type {
   DatabaseResponse,
   DatabaseResponseNullable,
@@ -70,6 +74,24 @@ async function getSurveyByIdService(
   }
 }
 
+async function updateSurveyStatisticsByIdService({
+  surveyId,
+  surveyStatistics,
+}: {
+  surveyId: string | Types.ObjectId;
+  surveyStatistics: SurveyStatistics[];
+}): DatabaseResponseNullable<SurveyBuilderDocument> {
+  try {
+    const survey = await SurveyBuilderModel.findByIdAndUpdate(surveyId, { surveyStatistics })
+      .select('-__v')
+      .lean()
+      .exec();
+    return survey;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'updateSurveyStatisticsByIdService' });
+  }
+}
+
 async function deleteASurveyService(surveyId: string): Promise<DeleteResult> {
   try {
     const deleteResult = await SurveyBuilderModel.deleteOne({ _id: surveyId }).lean().exec();
@@ -96,4 +118,5 @@ export {
   getQueriedSurveysService,
   getQueriedSurveysByUserService,
   getQueriedTotalSurveysService,
+  updateSurveyStatisticsByIdService,
 };
