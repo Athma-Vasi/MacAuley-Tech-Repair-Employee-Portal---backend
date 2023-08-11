@@ -13,6 +13,7 @@ import type {
   StatesUS,
   PreferredPronouns,
   StoreLocation,
+  UserSchema,
 } from './user.model';
 import { GetQueriedResourceRequest } from '../../types';
 
@@ -34,8 +35,8 @@ interface CreateNewUserRequest {
     address: {
       addressLine: string;
       city: string;
-      province: Province;
-      state: StatesUS;
+      province: Province | '';
+      state: StatesUS | '';
       postalCode: PostalCode;
       country: Country;
     };
@@ -44,11 +45,12 @@ interface CreateNewUserRequest {
     storeLocation: StoreLocation;
     emergencyContact: {
       fullName: string;
-      phoneNumber: PhoneNumber;
+      contactNumber: PhoneNumber;
     };
     startDate: NativeDate;
     roles: UserRoles;
     active: boolean;
+    completedSurveys: (Types.ObjectId | string)[];
   };
 }
 
@@ -63,8 +65,20 @@ interface DeleteUserRequest extends RequestAfterJWTVerification {
   };
 }
 
-// converted to type alias instead of interface because an interface declaring no members is equivalent to its supertype and rome doesn't like that
 type GetAllUsersRequest = GetQueriedResourceRequest;
+
+interface GetUserByIdRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+  };
+  params: {
+    userId: string;
+  };
+}
 
 interface UpdateUserRequest extends RequestAfterJWTVerification {
   body: {
@@ -73,33 +87,7 @@ interface UpdateUserRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    email: string;
-    firstName: string;
-    middleName: string;
-    lastName: string;
-    preferredName: string;
-    preferredPronouns: PreferredPronouns;
-    profilePictureUrl: string;
-    dateOfBirth: NativeDate;
-
-    contactNumber: PhoneNumber;
-    address: {
-      addressLine: string;
-      city: string;
-      province: Province;
-      state: StatesUS;
-      postalCode: PostalCode;
-      country: Country;
-    };
-    jobPosition: JobPosition;
-    department: Department;
-    storeLocation: StoreLocation;
-    emergencyContact: {
-      fullName: string;
-      phoneNumber: PhoneNumber;
-    };
-    startDate: NativeDate;
-    active: boolean;
+    updateObj: Partial<UserSchema>;
   };
 }
 
@@ -125,6 +113,7 @@ export type {
   CreateNewUserRequest,
   DeleteUserRequest,
   GetAllUsersRequest,
+  GetUserByIdRequest,
   UpdateUserRequest,
   UpdateUserPasswordRequest,
 };

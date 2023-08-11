@@ -11,7 +11,7 @@ import {
   createNewUserHandler,
   deleteUserHandler,
   getQueriedUsersHandler,
-  updateUserHandler,
+  updateUserByIdHandler,
 } from './user.controller';
 import {
   createNewUserService,
@@ -21,7 +21,7 @@ import {
   getQueriedUsersService,
   getUserByIdService,
   getUserByUsernameService,
-  updateUserService,
+  updateUserByIdService,
   checkUserPasswordService,
   updateUserPasswordService,
 } from './user.service';
@@ -56,7 +56,7 @@ export {
   createNewUserHandler,
   deleteUserHandler,
   getQueriedUsersHandler,
-  updateUserHandler,
+  updateUserByIdHandler,
   createNewUserService,
   checkUserExistsService,
   checkUserIsActiveService,
@@ -64,7 +64,7 @@ export {
   getQueriedUsersService,
   getUserByIdService,
   getUserByUsernameService,
-  updateUserService,
+  updateUserByIdService,
   checkUserPasswordService,
   updateUserPasswordService,
 };

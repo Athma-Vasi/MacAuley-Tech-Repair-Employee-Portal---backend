@@ -43,7 +43,7 @@ const loginUserHandler = expressAsyncHandler(
     // find user
     const foundUser = await getUserWithPasswordService(username);
     if (!foundUser) {
-      response.status(400).json({ message: 'User not found' });
+      response.status(404).json({ message: 'User not found' });
       return;
     }
 

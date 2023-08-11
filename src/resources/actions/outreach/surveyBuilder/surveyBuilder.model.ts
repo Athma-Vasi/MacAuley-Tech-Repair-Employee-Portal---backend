@@ -50,6 +50,7 @@ type SurveyQuestion = {
 type SurveyStatistics = {
   question: string;
   totalResponses: number;
+  responseInput: SurveyResponseInput;
   responseDistribution: Record<string, number>;
 };
 

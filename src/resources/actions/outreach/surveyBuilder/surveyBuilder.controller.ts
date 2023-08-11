@@ -24,14 +24,15 @@ import {
   getSurveyByIdService,
   getQueriedSurveysByUserService,
   getQueriedTotalSurveysService,
-  updateSurveyStatisticsByIdService,
+  updateSurveyByIdService,
 } from './surveyBuilder.service';
 import {
   GetQueriedResourceRequestServerResponse,
   QueryObjectParsedWithDefaults,
   ResourceRequestServerResponse,
 } from '../../../../types';
-import { FilterQuery, QueryOptions } from 'mongoose';
+import { FilterQuery, QueryOptions, Types } from 'mongoose';
+import { UserDocument, getUserByIdService, updateUserByIdService } from '../../../user';
 
 // @desc   Create a new survey
 // @route  POST /survey-builder
@@ -193,10 +194,13 @@ const getSurveyByIdHandler = expressAsyncHandler(
 const updateSurveyStatisticsByIdHandler = expressAsyncHandler(
   async (
     request: UpdateSurveyStatisticsByIdRequest,
-    response: Response<ResourceRequestServerResponse<SurveyBuilderDocument>>
+    response: Response<ResourceRequestServerResponse<SurveyBuilderDocument | UserDocument>>
   ) => {
     const { surveyId } = request.params;
-    const { surveyResponses } = request.body;
+    const {
+      surveyResponses,
+      userInfo: { userId },
+    } = request.body;
 
     // check that survey exists
     const surveyToUpdate = await getSurveyByIdService(surveyId);
@@ -212,46 +216,47 @@ const updateSurveyStatisticsByIdHandler = expressAsyncHandler(
     const updatedSurveyStatistics = surveyResponses.reduce(
       (surveyStatisticsAcc, { question, response, responseInput }) => {
         // find question in survey statistics
-        const questionIndex = surveyStatisticsAcc.findIndex(
-          (questionObject) => questionObject.question === question
+        const statisticsIdx = surveyStatisticsAcc.findIndex(
+          (surveyStatistic) => surveyStatistic.question === question
         );
 
         // if question is found, update the question's responses
-        if (questionIndex !== -1) {
-          const questionObject = surveyStatisticsAcc[questionIndex];
+        if (statisticsIdx !== -1) {
+          const surveyStatisticObj = surveyStatisticsAcc[statisticsIdx];
 
           // update total responses
-          questionObject.totalResponses += 1;
+          surveyStatisticObj.totalResponses += 1;
 
           // update the response distribution
-          Object.entries(questionObject.responseDistribution).forEach(
-            ([responseKey, responseValue]) => {
+          Object.entries(surveyStatisticObj.responseDistribution).forEach(
+            ([responseOption, _responseValue]) => {
               // if response is an array of strings
               if (Array.isArray(response)) {
-                // if responseKey is in response, increment responseDistribution
-                if (response.includes(responseKey)) {
-                  questionObject.responseDistribution[responseKey] += 1;
-                }
+                // loop through response array
+                response.forEach((responseValue) => {
+                  // if responseOption is in response, increment responseDistribution
+                  if (responseOption === responseValue) {
+                    surveyStatisticObj.responseDistribution[responseOption] += 1;
+                  }
+                });
 
                 // if response is a string
               } else if (typeof response === 'string') {
-                // if responseKey is equal to response, increment responseDistribution
-                if (responseKey === response) {
-                  questionObject.responseDistribution[responseKey] += 1;
+                if (responseOption === response) {
+                  surveyStatisticObj.responseDistribution[responseOption] += 1;
                 }
               }
               // if response is a number
               else if (typeof response === 'number') {
-                // if responseKey is equal to response, increment responseDistribution
-                if (responseKey === response.toString()) {
-                  questionObject.responseDistribution[responseKey] += 1;
+                if (responseOption === response.toString()) {
+                  surveyStatisticObj.responseDistribution[responseOption] += 1;
                 }
               }
             }
           );
 
-          // add the questionObject back to the surveyStatisticsAcc
-          surveyStatisticsAcc[questionIndex] = questionObject;
+          // add the surveyStatisticObj back to the surveyStatisticsAcc
+          surveyStatisticsAcc[statisticsIdx] = surveyStatisticObj;
         }
 
         return surveyStatisticsAcc;
@@ -260,16 +265,47 @@ const updateSurveyStatisticsByIdHandler = expressAsyncHandler(
     );
 
     // update survey
-    const updatedSurvey = await updateSurveyStatisticsByIdService({
+    const updatedSurvey = await updateSurveyByIdService({
       surveyId,
-      surveyStatistics: updatedSurveyStatistics,
+      surveyField: { surveyStatistics: updatedSurveyStatistics },
     });
     if (!updatedSurvey) {
       response.status(400).json({ message: 'Unable to update survey', resourceData: [] });
       return;
     }
 
-    response.status(200).json({ message: 'Survey updated', resourceData: [updatedSurvey] });
+    // fetch user
+    const user = await getUserByIdService(userId);
+    if (!user) {
+      response.status(404).json({ message: 'User not found', resourceData: [] });
+      return;
+    }
+
+    const { completedSurveys } = user;
+    const updatedCompletedSurveys = Array.from(new Set([...completedSurveys, surveyId]));
+
+    console.group('updateSurveyStatisticsByIdHandler');
+    console.log({
+      surveyId,
+      updatedSurveyStatistics,
+      completedSurveys,
+      updatedCompletedSurveys,
+    });
+    console.groupEnd();
+
+    // update completedSurveys field with surveyId
+    const updatedUser = await updateUserByIdService({
+      userId: user._id,
+      updateObj: { completedSurveys: updatedCompletedSurveys },
+    });
+    if (!updatedUser) {
+      response.status(400).json({ message: 'Unable to update user', resourceData: [] });
+      return;
+    }
+
+    response
+      .status(200)
+      .json({ message: 'Survey updated', resourceData: [updatedSurvey, updatedUser] });
   }
 );
 

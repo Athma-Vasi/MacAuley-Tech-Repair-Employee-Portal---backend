@@ -171,8 +171,8 @@ type UserSchema = {
   address: {
     addressLine: string;
     city: string;
-    province: Province;
-    state: StatesUS;
+    province: Province | '';
+    state: StatesUS | '';
     postalCode: PostalCode;
     country: Country;
   };
@@ -183,11 +183,13 @@ type UserSchema = {
 
   emergencyContact: {
     fullName: string;
-    phoneNumber: PhoneNumber;
+    contactNumber: PhoneNumber;
   };
   startDate: NativeDate;
   roles: UserRoles;
   active: boolean;
+
+  completedSurveys: (Types.ObjectId | string)[];
 };
 
 type UserDocument = UserSchema & {
@@ -299,7 +301,7 @@ const userSchema = new Schema<UserSchema>(
         type: String,
         required: [true, 'Emergency contact full name is required'],
       },
-      phoneNumber: {
+      contactNumber: {
         type: String,
         required: [true, 'Emergency contact number is required'],
       },
@@ -317,6 +319,12 @@ const userSchema = new Schema<UserSchema>(
       type: Boolean,
       required: [true, 'Active status is required'],
       default: true,
+    },
+
+    completedSurveys: {
+      type: [Schema.Types.ObjectId],
+      required: false,
+      default: [],
     },
   },
   {

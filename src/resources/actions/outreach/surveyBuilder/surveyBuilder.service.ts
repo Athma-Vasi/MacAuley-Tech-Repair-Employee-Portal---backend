@@ -74,21 +74,25 @@ async function getSurveyByIdService(
   }
 }
 
-async function updateSurveyStatisticsByIdService({
+async function updateSurveyByIdService({
   surveyId,
-  surveyStatistics,
+  surveyField,
 }: {
   surveyId: string | Types.ObjectId;
-  surveyStatistics: SurveyStatistics[];
+  surveyField: Partial<SurveyBuilderSchema>;
 }): DatabaseResponseNullable<SurveyBuilderDocument> {
   try {
-    const survey = await SurveyBuilderModel.findByIdAndUpdate(surveyId, { surveyStatistics })
+    const survey = await SurveyBuilderModel.findByIdAndUpdate(
+      surveyId,
+      { ...surveyField },
+      { new: true }
+    )
       .select('-__v')
       .lean()
       .exec();
     return survey;
   } catch (error: any) {
-    throw new Error(error, { cause: 'updateSurveyStatisticsByIdService' });
+    throw new Error(error, { cause: 'updateSurveyByIdService' });
   }
 }
 
@@ -118,5 +122,5 @@ export {
   getQueriedSurveysService,
   getQueriedSurveysByUserService,
   getQueriedTotalSurveysService,
-  updateSurveyStatisticsByIdService,
+  updateSurveyByIdService,
 };

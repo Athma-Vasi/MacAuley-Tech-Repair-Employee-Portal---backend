@@ -142,6 +142,15 @@ async function getUserWithPasswordService(
   }
 }
 
+async function getAllUsersService() {
+  try {
+    const users = await UserModel.find().select('-password').lean().exec();
+    return users;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getAllUsersService' });
+  }
+}
+
 async function getQueriedUsersService({
   filter = {},
   projection = null,
@@ -149,7 +158,7 @@ async function getQueriedUsersService({
 }: QueriedResourceGetRequestServiceInput<UserDocument>) {
   try {
     // do not return the password field
-    const users = await UserModel.find({ filter, projection, options })
+    const users = await UserModel.find(filter, projection, options)
       .select('-password')
       .lean()
       .exec();
@@ -170,56 +179,35 @@ async function getQueriedTotalUsersService({
   }
 }
 
-type UpdateUserServiceInput = {
-  username: string;
+async function updateUserByIdService({
+  userId,
+  updateObj,
+}: {
   userId: Types.ObjectId;
-  roles: UserRoles;
-  email: string;
-  firstName: string;
-  middleName: string;
-  lastName: string;
-  preferredName: string;
-  preferredPronouns: PreferredPronouns;
-  profilePictureUrl: string;
-  dateOfBirth: NativeDate;
-
-  contactNumber: PhoneNumber;
-  address: {
-    addressLine: string;
-    city: string;
-    province: Province | '';
-    state: StatesUS | '';
-    postalCode: PostalCode;
-    country: Country;
-  };
-  jobPosition: JobPosition;
-  department: Department;
-  storeLocation: StoreLocation;
-  emergencyContact: {
-    fullName: string;
-    phoneNumber: PhoneNumber;
-  };
-  startDate: NativeDate;
-  active: boolean;
-};
-
-async function updateUserService(inputObj: UpdateUserServiceInput) {
+  updateObj: Partial<UserSchema>;
+}): DatabaseResponseNullable<UserDocument> {
   try {
-    // get existing user
-    const existingUser = await UserModel.findById(inputObj.userId).lean().exec();
-    // replace existing user with new user minus the password
-    const updatedUser = await UserModel.findByIdAndUpdate(
-      inputObj.userId,
-      { ...inputObj, password: existingUser?.password },
-      { new: true }
-    )
-      .select('-password')
+    // // get existing user
+    // const existingUser = await UserModel.findById(userId).lean().exec();
+    // // replace existing user with new user minus the password
+    // const updatedUser = await UserModel.findByIdAndUpdate(
+    //   inputObj.userId,
+    //   { ...inputObj, password: existingUser?.password },
+    //   { new: true }
+    // )
+    //   .select('-password')
+    //   .lean()
+    //   .exec();
+
+    // return updatedUser;
+
+    const updatedUser = await UserModel.findByIdAndUpdate(userId, { ...updateObj }, { new: true })
+      .select('-password -__v')
       .lean()
       .exec();
-
     return updatedUser;
   } catch (error: any) {
-    throw new Error(error, { cause: 'updateUserService' });
+    throw new Error(error, { cause: 'updateUserByIdService' });
   }
 }
 
@@ -267,12 +255,6 @@ async function updateUserPasswordService({ userId, newPassword }: UpdateUserPass
   }
 }
 
-/**
- *
- *
- *
- */
-
 export {
   createNewUserService,
   checkUserExistsService,
@@ -281,9 +263,10 @@ export {
   getQueriedUsersService,
   getUserByIdService,
   getUserByUsernameService,
-  updateUserService,
+  updateUserByIdService,
   getQueriedTotalUsersService,
   checkUserPasswordService,
   updateUserPasswordService,
   getUserWithPasswordService,
+  getAllUsersService,
 };

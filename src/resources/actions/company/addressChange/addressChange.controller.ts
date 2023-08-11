@@ -12,7 +12,7 @@ import type {
   UpdateAddressChangeStatusByIdRequest,
 } from './addressChange.types';
 
-import { getUserByIdService, updateUserService } from '../../../user';
+import { getUserByIdService, updateUserByIdService } from '../../../user';
 import {
   createNewAddressChangeService,
   deleteAddressChangeByIdService,
@@ -240,7 +240,10 @@ const updateAddressChangeStatusByIdHandler = expressAsyncHandler(
       address: newAddress,
     };
     // update user's address
-    const updatedUser = await updateUserService(newUserObject);
+    const updatedUser = await updateUserByIdService({
+      userId,
+      updateObj: newUserObject,
+    });
     if (!updatedUser) {
       response.status(400).json({ message: 'User update failed', resourceData: [] });
       return;

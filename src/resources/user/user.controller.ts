@@ -5,6 +5,7 @@ import type {
   CreateNewUserRequest,
   DeleteUserRequest,
   GetAllUsersRequest,
+  GetUserByIdRequest,
   UpdateUserPasswordRequest,
   UpdateUserRequest,
 } from './user.types';
@@ -18,7 +19,9 @@ import {
   getQueriedTotalUsersService,
   getQueriedUsersService,
   updateUserPasswordService,
-  updateUserService,
+  updateUserByIdService,
+  getAllUsersService,
+  getUserByIdService,
 } from './user.service';
 import { returnEmptyFieldsTuple } from '../../utils';
 import { UserDocument, UserSchema } from './user.model';
@@ -28,6 +31,7 @@ import {
   ResourceRequestServerResponse,
 } from '../../types';
 import { FilterQuery, QueryOptions } from 'mongoose';
+import { get } from 'http';
 
 // @desc   Create new user
 // @route  POST /users
@@ -59,7 +63,7 @@ const createNewUserHandler = expressAsyncHandler(
       active = true,
     } = request.body;
     const { addressLine, city, province, state, postalCode, country } = address;
-    const { fullName, phoneNumber: emergencyContactNumber } = emergencyContact;
+    const { fullName, contactNumber: emergencyContactNumber } = emergencyContact;
 
     // both state and province cannot be empty (both are required)
     if (!state && !province) {
@@ -75,7 +79,6 @@ const createNewUserHandler = expressAsyncHandler(
       username,
       password,
       firstName,
-      middleName,
       lastName,
       contactNumber,
       addressLine,
@@ -131,6 +134,7 @@ const createNewUserHandler = expressAsyncHandler(
       active,
       address,
       emergencyContact,
+      completedSurveys: [],
     };
 
     // create new user if all checks pass successfully
@@ -162,6 +166,8 @@ const getQueriedUsersHandler = expressAsyncHandler(
       totalDocuments = await getQueriedTotalUsersService({
         filter: filter as FilterQuery<UserDocument> | undefined,
       });
+
+      console.log('totalDocuments', totalDocuments);
     }
 
     // get all users
@@ -184,6 +190,41 @@ const getQueriedUsersHandler = expressAsyncHandler(
         totalDocuments,
         resourceData: users,
       });
+    }
+
+    // const users = await getAllUsersService();
+    // if (users.length === 0) {
+    //   response.status(404).json({
+    //     message: 'No users that match query parameters were found',
+    //     pages: 0,
+    //     totalDocuments: 0,
+    //     resourceData: [],
+    //   });
+    // }
+    // response.status(200).json({
+    //   message: 'Successfully found users',
+    //   pages: 1,
+    //   totalDocuments: users.length,
+    //   resourceData: users,
+    // });
+  }
+);
+
+// @desc   Get a user by id
+// @route  GET /users/:id
+// @access Private
+const getUserByIdHandler = expressAsyncHandler(
+  async (
+    request: GetUserByIdRequest,
+    response: Response<ResourceRequestServerResponse<UserDocument>>
+  ) => {
+    const { userId } = request.params;
+
+    const user = await getUserByIdService(userId);
+    if (user) {
+      response.status(200).json({ message: 'Successfully found user data!', resourceData: [user] });
+    } else {
+      response.status(404).json({ message: 'User not found.', resourceData: [] });
     }
   }
 );
@@ -227,113 +268,21 @@ const deleteUserHandler = expressAsyncHandler(
 // @desc   Update a user
 // @route  PATCH /users
 // @access Private
-const updateUserHandler = expressAsyncHandler(
+const updateUserByIdHandler = expressAsyncHandler(
   async (
     request: UpdateUserRequest,
     response: Response<ResourceRequestServerResponse<UserDocument>>
   ) => {
     const {
       userInfo: { roles, userId, username },
-      email,
-      firstName,
-      middleName,
-      lastName,
-      preferredName,
-      preferredPronouns,
-      profilePictureUrl,
-      dateOfBirth,
-
-      contactNumber,
-      address,
-      jobPosition,
-      department,
-      storeLocation,
-      emergencyContact,
-      startDate,
-      active,
+      updateObj,
     } = request.body;
-    const { addressLine, city, country, postalCode, province, state } = address;
-    const { phoneNumber: emergencyContactNumber, fullName } = emergencyContact;
-
-    // both state and provinces cannot be empty (one must be filled)
-    if (!state && !province) {
-      response.status(400).json({
-        message: 'state and province cannot both be empty',
-        resourceData: [],
-      });
-      return;
-    }
-
-    // check arrays exist
-    const isArraysEmpty = [roles, department, jobPosition, country]
-      .map((field) => !field || field.length === 0)
-      .filter((value) => value === true);
-    if (isArraysEmpty.length > 0) {
-      response.status(400).json({
-        message: 'roles, department, country and jobPosition are required',
-        resourceData: [],
-      });
-      return;
-    }
-
-    // all fields except password are required
-    const isFieldsEmpty: [string, boolean][] = returnEmptyFieldsTuple({
-      email,
-      firstName,
-      middleName,
-      lastName,
-      contactNumber,
-      startDate,
-      addressLine,
-      country,
-      jobPosition,
-      department,
-      city,
-      postalCode,
-      emergencyContactNumber,
-      fullName,
-    });
-    if (isFieldsEmpty.length > 0) {
-      response.status(400).json({
-        message: `${isFieldsEmpty.map(([field, _]) => field).join(', ')} are required`,
-        resourceData: [],
-      });
-      return;
-    }
-
-    // confirm that active is a boolean
-    if (active === undefined || typeof active !== 'boolean') {
-      response.status(400).json({
-        message: 'Active field is required and must be of type boolean',
-        resourceData: [],
-      });
-      return;
-    }
-
-    const objToUpdate = {
-      userId,
-      email,
-      username,
-      roles,
-      active,
-      firstName,
-      middleName,
-      lastName,
-      contactNumber,
-      preferredName,
-      preferredPronouns,
-      profilePictureUrl,
-      dateOfBirth,
-      address,
-      jobPosition,
-      department,
-      emergencyContact,
-      storeLocation,
-      startDate,
-    };
 
     // update user if all checks pass successfully
-    const updatedUser = await updateUserService(objToUpdate);
+    const updatedUser = await updateUserByIdService({
+      userId,
+      updateObj,
+    });
     if (updatedUser) {
       response.status(200).json({
         message: `User ${updatedUser.username} updated successfully`,
@@ -393,6 +342,7 @@ export {
   createNewUserHandler,
   deleteUserHandler,
   getQueriedUsersHandler,
-  updateUserHandler,
+  updateUserByIdHandler,
   updateUserPasswordHandler,
+  getUserByIdHandler,
 };
