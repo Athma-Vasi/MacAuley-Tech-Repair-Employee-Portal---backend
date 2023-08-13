@@ -2,9 +2,18 @@ import { Schema, model, Types } from 'mongoose';
 import type { Action } from '../../../actions';
 import type { ActionsOutreach } from '../../outreach';
 
-type RatingFeel = 'estatic' | 'happy' | 'neutral' | 'sad' | 'devastated' | '';
+type RatingEmotion = {
+  estatic: number;
+  happy: number;
+  neutral: number;
+  annoyed: number;
+  devastated: number;
+};
 
-type ArticleSections = 'title' | 'body';
+type RatingResponse = {
+  ratingEmotion: RatingEmotion;
+  ratingCount: number;
+};
 
 type AnnouncementSchema = {
   userId: Types.ObjectId;
@@ -12,10 +21,13 @@ type AnnouncementSchema = {
   action: Action;
   category: ActionsOutreach;
   title: string;
+  author: string;
   bannerImageSrc: string;
   bannerImageAlt: string;
-  article: Record<ArticleSections, string[]>;
+  article: string[];
   timeToRead: number;
+  ratingResponse: RatingResponse;
+  commentIds: Types.ObjectId[];
 };
 
 type AnnouncementDocument = AnnouncementSchema & {
@@ -30,7 +42,7 @@ const announcementSchema = new Schema<AnnouncementSchema>(
     userId: {
       type: Schema.Types.ObjectId,
       required: [true, 'User is required'],
-      ref: 'User', // referring to the User model
+      ref: 'User',
       index: true,
     },
     username: {
@@ -52,6 +64,10 @@ const announcementSchema = new Schema<AnnouncementSchema>(
       type: String,
       required: [true, 'Title is required'],
     },
+    author: {
+      type: String,
+      required: [true, 'Author is required'],
+    },
     bannerImageSrc: {
       type: String,
       required: false,
@@ -63,12 +79,31 @@ const announcementSchema = new Schema<AnnouncementSchema>(
       default: '',
     },
     article: {
-      type: Object,
+      type: [String],
       required: [true, 'Article is required'],
     },
     timeToRead: {
       type: Number,
       required: [true, 'TimeToRead is required'],
+    },
+    ratingResponse: {
+      type: Object,
+      required: false,
+      default: {
+        ratingEmotion: {
+          estatic: 0,
+          happy: 0,
+          neutral: 0,
+          annoyed: 0,
+          devastated: 0,
+        },
+        ratingCount: 0,
+      },
+    },
+    commentIds: {
+      type: [Schema.Types.ObjectId],
+      required: false,
+      default: [],
     },
   },
   {
@@ -79,4 +114,4 @@ const announcementSchema = new Schema<AnnouncementSchema>(
 const AnnouncementModel = model<AnnouncementDocument>('Announcement', announcementSchema);
 
 export { AnnouncementModel };
-export type { AnnouncementSchema, AnnouncementDocument, RatingFeel, ArticleSections };
+export type { AnnouncementSchema, AnnouncementDocument, RatingEmotion, RatingResponse };

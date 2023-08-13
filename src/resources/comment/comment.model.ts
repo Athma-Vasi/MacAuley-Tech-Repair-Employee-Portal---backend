@@ -2,14 +2,24 @@ import { Schema, Types, model } from 'mongoose';
 import type { UserRoles } from '../user';
 
 type CommentSchema = {
-  creatorId: Types.ObjectId;
-  creatorUsername: string;
-  creatorRole: UserRoles;
+  userId: Types.ObjectId;
+  username: string;
+  roles: UserRoles;
 
-  announcementId: Types.ObjectId;
+  // id of resource the comment is attached to: announcement, article, etc.
+  resourceId: Types.ObjectId;
+  // id of parent comment that will be updated
   parentCommentId: Types.ObjectId;
+  // children comment ids
+  childrenIds: Types.ObjectId[];
+
   comment: string;
-  isAnonymous: boolean;
+  repliesCount: number;
+  likes: number;
+  dislikes: number;
+  reportsCount: number;
+
+  isFeatured: boolean;
   isDeleted: boolean;
 };
 
@@ -22,24 +32,24 @@ type CommentDocument = CommentSchema & {
 
 const commentSchema = new Schema<CommentSchema>(
   {
-    creatorId: {
+    userId: {
       type: Schema.Types.ObjectId,
-      required: [true, 'creatorID (userId) is required'],
+      required: [true, 'userId is required'],
       index: true,
     },
-    creatorUsername: {
+    username: {
       type: String,
-      required: [true, 'creatorUsername is required'],
+      required: [true, 'username is required'],
       index: true,
     },
-    creatorRole: {
+    roles: {
       type: [String],
-      required: [true, 'creatorRole is required'],
+      required: [true, 'roles is required'],
     },
 
-    announcementId: {
+    resourceId: {
       type: Schema.Types.ObjectId,
-      required: [true, 'announcementId is required'],
+      required: [true, 'resourceId is required'],
       ref: 'Announcement',
       index: true,
     },
@@ -47,20 +57,49 @@ const commentSchema = new Schema<CommentSchema>(
       type: Schema.Types.ObjectId,
       required: false,
       ref: 'Comment',
-      index: true,
+      default: '',
+    },
+    childrenIds: {
+      type: [Schema.Types.ObjectId],
+      required: false,
+      ref: 'Comment',
+      default: [],
     },
 
     comment: {
       type: String,
       required: [true, 'comment is required'],
     },
-    isAnonymous: {
+    repliesCount: {
+      type: Number,
+      required: [true, 'repliesCount is required'],
+      default: 0,
+    },
+    likes: {
+      type: Number,
+      required: [true, 'likes is required'],
+      default: 0,
+    },
+    dislikes: {
+      type: Number,
+      required: [true, 'dislikes is required'],
+      default: 0,
+    },
+    reportsCount: {
+      type: Number,
+      required: [true, 'reportsCount is required'],
+      default: 0,
+    },
+
+    isFeatured: {
       type: Boolean,
-      required: [true, 'isAnonymous is required'],
+      required: [true, 'isFeatured is required'],
+      default: false,
     },
     isDeleted: {
       type: Boolean,
       required: [true, 'isDeleted is required'],
+      default: false,
     },
   },
   { timestamps: true }

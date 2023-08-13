@@ -39,20 +39,36 @@ const createNewCommentHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username, roles },
-      comment: { announcementId, parentCommentId, comment, isAnonymous, isDeleted },
+      comment: {
+        childrenIds,
+        comment,
+        dislikes,
+        isDeleted,
+        isFeatured,
+        likes,
+        parentCommentId,
+        repliesCount,
+        reportsCount,
+        resourceId,
+      },
     } = request.body;
 
     // create new comment object
     const newCommentObject: CommentSchema = {
-      creatorId: userId,
-      creatorUsername: username,
-      creatorRole: roles,
+      userId,
+      username,
+      roles,
 
-      announcementId,
-      parentCommentId,
+      childrenIds,
       comment,
-      isAnonymous,
+      dislikes,
       isDeleted,
+      isFeatured,
+      likes,
+      parentCommentId,
+      repliesCount,
+      reportsCount,
+      resourceId,
     };
 
     // create new comment

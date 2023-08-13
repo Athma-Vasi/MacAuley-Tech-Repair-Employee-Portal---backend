@@ -41,11 +41,7 @@ const createNewAnnouncementHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      title,
-      article,
-      bannerImageAlt,
-      bannerImageSrc,
-      timeToRead,
+      announcement: { title, author, article, bannerImageAlt, bannerImageSrc, timeToRead },
     } = request.body;
 
     // check if announcement with same title already exists
@@ -64,15 +60,17 @@ const createNewAnnouncementHandler = expressAsyncHandler(
       action: 'outreach',
       category: 'announcement',
       title,
+      author,
       article,
       bannerImageAlt,
       bannerImageSrc,
       timeToRead,
     };
+
     const newAnnouncement = await createNewAnnouncementService(newAnnouncementObject);
     if (newAnnouncement) {
       response.status(201).json({
-        message: 'Announcement created successfully',
+        message: 'Announcement created successfully!',
         resourceData: [newAnnouncement],
       });
     } else {

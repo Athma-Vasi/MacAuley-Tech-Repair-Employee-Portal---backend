@@ -1,6 +1,5 @@
 import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../auth';
-import type { CommentDocument, CommentSchema } from './comment.model';
 import type { UserRoles } from '../user';
 import { GetQueriedResourceRequest, QueryObjectParsed } from '../../types';
 
@@ -14,14 +13,19 @@ interface CreateNewCommentRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     comment: {
-      creatorId: Types.ObjectId;
-      creatorUsername: string;
-      creatorRole: UserRoles;
-
-      announcementId: Types.ObjectId;
+      // id of resource the comment is attached to: announcement, article, etc.
+      resourceId: Types.ObjectId;
+      // id of parent comment that will be updated
       parentCommentId: Types.ObjectId;
+      // children comment ids
+      childrenIds: Types.ObjectId[];
+
       comment: string;
-      isAnonymous: boolean;
+      repliesCount: number;
+      likes: number;
+      dislikes: number;
+      reportsCount: number;
+      isFeatured: boolean;
       isDeleted: boolean;
     };
   };
