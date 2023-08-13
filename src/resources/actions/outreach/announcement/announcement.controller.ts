@@ -41,7 +41,16 @@ const createNewAnnouncementHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      announcement: { title, author, article, bannerImageAlt, bannerImageSrc, timeToRead },
+      announcement: {
+        title,
+        author,
+        article,
+        bannerImageAlt,
+        bannerImageSrc,
+        timeToRead,
+        commentIds,
+        ratingResponse,
+      },
     } = request.body;
 
     // check if announcement with same title already exists
@@ -65,6 +74,8 @@ const createNewAnnouncementHandler = expressAsyncHandler(
       bannerImageAlt,
       bannerImageSrc,
       timeToRead,
+      commentIds,
+      ratingResponse,
     };
 
     const newAnnouncement = await createNewAnnouncementService(newAnnouncementObject);
@@ -181,25 +192,9 @@ const updateAnnouncementHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      title,
-      article,
-      bannerImageAlt,
-      bannerImageSrc,
-      timeToRead,
+      announcementField,
     } = request.body;
-
     const { announcementId } = request.params;
-
-    const updateAnnouncementObject = {
-      announcementId,
-      userId,
-      username,
-      title,
-      article,
-      bannerImageAlt,
-      bannerImageSrc,
-      timeToRead,
-    };
 
     // check if announcement exists
     const isAnnouncement = await getAnnouncementByIdService(announcementId);
@@ -208,7 +203,10 @@ const updateAnnouncementHandler = expressAsyncHandler(
       return;
     }
 
-    const updatedAnnouncement = await updateAnnouncementService(updateAnnouncementObject);
+    const updatedAnnouncement = await updateAnnouncementService({
+      announcementId,
+      announcementField,
+    });
     if (updatedAnnouncement) {
       response.status(201).json({
         message: 'Announcement updated successfully',

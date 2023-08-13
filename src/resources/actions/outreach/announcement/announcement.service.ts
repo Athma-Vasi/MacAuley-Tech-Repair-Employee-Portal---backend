@@ -1,6 +1,6 @@
 import type { FlattenMaps, Types } from 'mongoose';
 import type { DeleteResult } from 'mongodb';
-import type { AnnouncementDocument, AnnouncementSchema, RatingFeel } from './announcement.model';
+import type { AnnouncementDocument, AnnouncementSchema } from './announcement.model';
 import type {
   DatabaseResponse,
   DatabaseResponseNullable,
@@ -108,41 +108,17 @@ async function deleteAnnouncementService(id: Types.ObjectId | string): Promise<D
   }
 }
 
-type UpdateAnnouncementServiceInput = {
-  announcementId: string;
-  userId: Types.ObjectId;
-  title: string;
-  username: string;
-  bannerImageSrc: string;
-  bannerImageAlt: string;
-  article: Record<string, string[]>;
-  timeToRead: number;
-};
-
 async function updateAnnouncementService({
+  announcementField,
   announcementId,
-  userId,
-  title,
-  username,
-  bannerImageSrc,
-  bannerImageAlt,
-  article,
-  timeToRead,
-}: UpdateAnnouncementServiceInput): DatabaseResponseNullable<AnnouncementDocument> {
+}: {
+  announcementField: Partial<AnnouncementSchema>;
+  announcementId: string | Types.ObjectId;
+}): DatabaseResponseNullable<AnnouncementDocument> {
   try {
-    const announcementFieldsToUpdateObj = {
-      userId,
-      title,
-      username,
-      bannerImageSrc,
-      bannerImageAlt,
-      article,
-      timeToRead,
-    };
-
     const announcement = await AnnouncementModel.findByIdAndUpdate(
       announcementId,
-      announcementFieldsToUpdateObj,
+      { ...announcementField },
       { new: true }
     )
       .select('-__v')

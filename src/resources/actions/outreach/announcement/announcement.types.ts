@@ -2,7 +2,7 @@ import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
 import type { UserRoles } from '../../../user';
 import { GetQueriedResourceRequest } from '../../../../types';
-import { RatingResponse } from './announcement.model';
+import { AnnouncementDocument, AnnouncementSchema, RatingResponse } from './announcement.model';
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 interface CreateNewAnnouncementRequest extends RequestAfterJWTVerification {
@@ -56,14 +56,7 @@ interface UpdateAnnouncementRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    title: string;
-    author: string;
-    bannerImageSrc: string;
-    bannerImageAlt: string;
-    article: string[];
-    timeToRead: number;
-    ratingResponse: RatingResponse;
-    commentIds: Types.ObjectId[];
+    announcementField: Partial<AnnouncementSchema>;
   };
   params: {
     announcementId: string;

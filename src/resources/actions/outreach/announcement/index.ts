@@ -26,8 +26,8 @@ import {
 import type {
   AnnouncementDocument,
   AnnouncementSchema,
-  RatingFeel,
-  ArticleSections,
+  RatingEmotion,
+  RatingResponse,
 } from './announcement.model';
 import type {
   CreateNewAnnouncementRequest,
@@ -59,8 +59,8 @@ export {
 export type {
   AnnouncementDocument,
   AnnouncementSchema,
-  RatingFeel,
-  ArticleSections,
+  RatingEmotion,
+  RatingResponse,
   CreateNewAnnouncementRequest,
   DeleteAnAnnouncementRequest,
   GetAllAnnouncementsRequest,
