@@ -22,8 +22,8 @@ interface CreateNewCommentRequest extends RequestAfterJWTVerification {
 
       comment: string;
       repliesCount: number;
-      likes: number;
-      dislikes: number;
+      likesCount: number;
+      dislikesCount: number;
       reportsCount: number;
       isFeatured: boolean;
       isDeleted: boolean;
@@ -54,20 +54,6 @@ interface GetCommentByIdRequest extends RequestAfterJWTVerification {
   params: { commentId: string };
 }
 
-interface GetCommentsByAnnouncementIdRequest extends GetQueriedResourceRequest {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-    newQueryFlag: boolean;
-    totalDocuments: number;
-  };
-  query: QueryObjectParsed;
-  params: { announcementId: string };
-}
-
 export type {
   CreateNewCommentRequest,
   DeleteACommentRequest,
@@ -75,5 +61,4 @@ export type {
   GetQueriedCommentsRequest,
   GetQueriedCommentsByUserRequest,
   GetCommentByIdRequest,
-  GetCommentsByAnnouncementIdRequest,
 };

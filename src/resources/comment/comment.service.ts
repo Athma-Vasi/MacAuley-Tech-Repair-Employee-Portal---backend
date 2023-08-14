@@ -86,19 +86,6 @@ async function deleteAllCommentsService(): Promise<DeleteResult> {
   }
 }
 
-async function getQueriedCommentsByAnnouncementIdService({
-  filter = {},
-  projection = null,
-  options = {},
-}: QueriedResourceGetRequestServiceInput<CommentDocument>): DatabaseResponse<CommentDocument> {
-  try {
-    const comments = await CommentModel.find(filter, projection, options).lean().exec();
-    return comments;
-  } catch (error: any) {
-    throw new Error(error, { cause: 'getQueriedCommentsByAnnouncementIdService' });
-  }
-}
-
 export {
   createNewCommentService,
   getCommentByIdService,
@@ -106,6 +93,5 @@ export {
   deleteAllCommentsService,
   getQueriedCommentsService,
   getQueriedCommentsByUserService,
-  getQueriedCommentsByAnnouncementIdService,
   getQueriedTotalCommentsService,
 };

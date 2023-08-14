@@ -56,7 +56,7 @@ interface UpdateAnnouncementRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    announcementField: Partial<AnnouncementSchema>;
+    announcementFields: Partial<AnnouncementSchema>;
   };
   params: {
     announcementId: string;

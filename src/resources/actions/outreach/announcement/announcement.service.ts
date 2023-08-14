@@ -22,22 +22,18 @@ async function checkAnnouncementExistsService({
   userId,
 }: CheckAnnouncementExistsServiceInput): Promise<boolean> {
   try {
-    // const announcement = await AnnouncementModel.findOne({
-    //   $or: [{ _id: id }, { title }, { user }],
-    // }).lean();
-
     if (announcementId) {
-      const announcement = await AnnouncementModel.findById(announcementId).lean().exec();
+      const announcement = await AnnouncementModel.countDocuments().lean().exec();
       return announcement ? true : false;
     }
 
     if (title) {
-      const announcement = await AnnouncementModel.find({ title }).lean().exec();
-      return announcement.length > 0 ? true : false;
+      const announcement = await AnnouncementModel.countDocuments({ title }).lean().exec();
+      return announcement ? true : false;
     }
 
     if (userId) {
-      const announcement = await AnnouncementModel.findById(userId).lean().exec();
+      const announcement = await AnnouncementModel.countDocuments({ userId }).lean().exec();
       return announcement ? true : false;
     }
 
@@ -109,16 +105,16 @@ async function deleteAnnouncementService(id: Types.ObjectId | string): Promise<D
 }
 
 async function updateAnnouncementService({
-  announcementField,
+  announcementFields,
   announcementId,
 }: {
-  announcementField: Partial<AnnouncementSchema>;
+  announcementFields: Partial<AnnouncementSchema>;
   announcementId: string | Types.ObjectId;
 }): DatabaseResponseNullable<AnnouncementDocument> {
   try {
     const announcement = await AnnouncementModel.findByIdAndUpdate(
       announcementId,
-      { ...announcementField },
+      { ...announcementFields },
       { new: true }
     )
       .select('-__v')

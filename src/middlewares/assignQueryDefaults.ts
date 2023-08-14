@@ -1,13 +1,13 @@
 import { NextFunction, Request, Response } from 'express';
 
 /**
- * - This middleware uses closure to pass in the keywords that are used to determine if a query parameter is a find query option and sets default values for sorting and projection options when querying a MongoDB database using query parameters in an Express application
+ * - This middleware uses closure to pass in the keywords that are used to determine if a query parameter is a find query option and sets default values for sorting and projection options when querying a MongoDB database
  * - Queries must be of the form:
  * /resource?filter1[operator]=value1&filter2[operator]=value2&projection=-field1ToExclude&projection=-field2ToExclude&sort[sortField1]=number&skip=number&limit=number  and so on
  */
 const assignQueryDefaults =
   (findQueryOptionsKeywords: Set<string>) =>
-  (request: Request, response: Response, next: NextFunction) => {
+  (request: Request, _response: Response, next: NextFunction) => {
     /**
      * Object.defineProperty is used to satisfy the typescript compiler
      */
@@ -29,32 +29,41 @@ const assignQueryDefaults =
     const filter: Record<string, string | number | boolean> = {};
     // if keys are in the findQueryOptionsKeywords set, then they will be part of the options object passed in the mongoose find method
     // else they will be part of the filter object passed in same method
-    for (const key in rest) {
+    const propertyDescriptor: PropertyDescriptor = {
+      writable: true,
+      enumerable: true,
+      configurable: true,
+    };
+
+    // for (const key in rest) {
+    //   findQueryOptionsKeywords.has(key)
+    //     ? Object.defineProperty(options, key, {
+    //         value: rest[key],
+    //         ...propertyDescriptor,
+    //       })
+    //     : Object.defineProperty(filter, key, {
+    //         value: rest[key],
+    //         ...propertyDescriptor,
+    //       });
+    // }
+    Object.entries(rest).forEach(([key, value]) => {
       findQueryOptionsKeywords.has(key)
         ? Object.defineProperty(options, key, {
-            value: rest[key],
-            writable: true,
-            enumerable: true,
-            configurable: true,
+            value,
+            ...propertyDescriptor,
           })
         : Object.defineProperty(filter, key, {
-            value: rest[key],
-            writable: true,
-            enumerable: true,
-            configurable: true,
+            value,
+            ...propertyDescriptor,
           });
-    }
+    });
 
-    /**
-     * if no sort is specified by client, default: { createdAt: -1, _id: -1 }  */
-    // set default createdAt sort field if it does not exist
+    // set default createdAt sort field if it does not exist: { createdAt: -1, _id: -1 }
     // as all schemas have timestamps enabled, createdAt field is guaranteed to exist
     if (!Object.hasOwn(options, 'sort')) {
       Object.defineProperty(options, 'sort', {
         value: { createdAt: -1 },
-        writable: true,
-        enumerable: true,
-        configurable: true,
+        ...propertyDescriptor,
       });
     }
     // if there is only one sort field, _id field with corresponding sort direction is added for consistent results
@@ -64,9 +73,7 @@ const assignQueryDefaults =
       const sortDirection = Number(Object.values(sort)[0]) < 0 ? -1 : 1;
       Object.defineProperty(sort, '_id', {
         value: sortDirection,
-        writable: true,
-        enumerable: true,
-        configurable: true,
+        ...propertyDescriptor,
       });
     }
 
@@ -89,7 +96,7 @@ const assignQueryDefaults =
         }
       } else if (typeof projection === 'object') {
         const calculateProjectionScore = (projection: Record<string, number>): number => {
-          // rome-ignore lint: <basic reduce 【・_・?】>
+          // rome-ignore lint: basic reduce 【・_・?】
           return Object.values(projection).reduce((acc, curr) => (acc += curr), 0);
         };
         // projection score of 0 means it is exclusive
@@ -97,9 +104,7 @@ const assignQueryDefaults =
           if (!Object.hasOwn(projection, '__v')) {
             Object.defineProperty(projection, '__v', {
               value: 0,
-              writable: true,
-              enumerable: true,
-              configurable: true,
+              ...propertyDescriptor,
             });
           }
         }
@@ -114,23 +119,17 @@ const assignQueryDefaults =
     skip = skip < 1 ? 0 : skip;
     Object.defineProperty(options, 'limit', {
       value: limit,
-      writable: true,
-      enumerable: true,
-      configurable: true,
+      ...propertyDescriptor,
     });
     Object.defineProperty(options, 'skip', {
       value: skip,
-      writable: true,
-      enumerable: true,
-      configurable: true,
+      ...propertyDescriptor,
     });
 
     // overwrite query object with new values
     Object.defineProperty(request, 'query', {
       value: { projection, options, filter },
-      writable: true,
-      enumerable: true,
-      configurable: true,
+      ...propertyDescriptor,
     });
 
     // add newQueryFlag and totalDocuments to request body
@@ -140,9 +139,7 @@ const assignQueryDefaults =
         newQueryFlag: query.newQueryFlag,
         totalDocuments: query.totalDocuments,
       },
-      writable: true,
-      enumerable: true,
-      configurable: true,
+      ...propertyDescriptor,
     });
 
     console.group('assignQueryDefaults');

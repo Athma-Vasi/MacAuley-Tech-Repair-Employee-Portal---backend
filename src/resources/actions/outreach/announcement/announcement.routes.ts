@@ -28,5 +28,5 @@ announcementRouter
   .route('/:announcementId')
   .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getAnnouncementByIdHandler)
   .delete(deleteAnnouncementHandler)
-  .put(updateAnnouncementHandler);
+  .patch(updateAnnouncementHandler);
 export { announcementRouter };

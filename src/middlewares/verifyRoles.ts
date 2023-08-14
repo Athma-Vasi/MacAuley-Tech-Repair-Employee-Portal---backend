@@ -28,7 +28,7 @@ function verifyRoles() {
         return;
       }
 
-      if (method === 'POST') {
+      if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
         // anyone can create a resource
         next();
         return;

@@ -15,8 +15,8 @@ type CommentSchema = {
 
   comment: string;
   repliesCount: number;
-  likes: number;
-  dislikes: number;
+  likesCount: number;
+  dislikesCount: number;
   reportsCount: number;
 
   isFeatured: boolean;
@@ -75,14 +75,14 @@ const commentSchema = new Schema<CommentSchema>(
       required: [true, 'repliesCount is required'],
       default: 0,
     },
-    likes: {
+    likesCount: {
       type: Number,
-      required: [true, 'likes is required'],
+      required: [true, 'likesCount is required'],
       default: 0,
     },
-    dislikes: {
+    dislikesCount: {
       type: Number,
-      required: [true, 'dislikes is required'],
+      required: [true, 'dislikesCount is required'],
       default: 0,
     },
     reportsCount: {

@@ -79,14 +79,15 @@ const createNewAnnouncementHandler = expressAsyncHandler(
     };
 
     const newAnnouncement = await createNewAnnouncementService(newAnnouncementObject);
-    if (newAnnouncement) {
-      response.status(201).json({
-        message: 'Announcement created successfully!',
-        resourceData: [newAnnouncement],
-      });
-    } else {
+    if (!newAnnouncement) {
       response.status(400).json({ message: 'Announcement could not be created', resourceData: [] });
+      return;
     }
+
+    response.status(201).json({
+      message: 'Announcement created successfully!',
+      resourceData: [newAnnouncement],
+    });
   }
 );
 
@@ -115,21 +116,22 @@ const getQueriedAnnouncementsHandler = expressAsyncHandler(
       projection: projection as QueryOptions<AnnouncementDocument>,
       options: options as QueryOptions<AnnouncementDocument>,
     });
-    if (announcements.length === 0) {
+
+    if (!announcements?.length) {
       response.status(404).json({
         message: 'No announcements that match query parameters were found',
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
       });
-    } else {
-      response.status(200).json({
-        message: 'Successfully found announcements',
-        pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments,
-        resourceData: announcements,
-      });
     }
+
+    response.status(200).json({
+      message: 'Successfully found announcements',
+      pages: Math.ceil(totalDocuments / Number(options?.limit)),
+      totalDocuments,
+      resourceData: announcements,
+    });
   }
 );
 
@@ -164,37 +166,38 @@ const getQueriedAnouncementsByUserHandler = expressAsyncHandler(
       projection: projection as QueryOptions<AnnouncementDocument>,
       options: options as QueryOptions<AnnouncementDocument>,
     });
-    if (announcements.length === 0) {
+
+    if (!announcements?.length) {
       response.status(404).json({
         message: 'No announcements that match query parameters were found',
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
       });
-    } else {
-      response.status(200).json({
-        message: 'Successfully found announcements',
-        pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments,
-        resourceData: announcements,
-      });
+      return;
     }
+
+    response.status(200).json({
+      message: 'Successfully found announcements',
+      pages: Math.ceil(totalDocuments / Number(options?.limit)),
+      totalDocuments,
+      resourceData: announcements,
+    });
   }
 );
 
 // @desc   update announcement
-// @route  PUT /announcements/:announcementId
+// @route  PATCH /announcements/:announcementId
 // @access Private
 const updateAnnouncementHandler = expressAsyncHandler(
   async (
     request: UpdateAnnouncementRequest,
     response: Response<ResourceRequestServerResponse<AnnouncementDocument>>
   ) => {
-    const {
-      userInfo: { userId, username },
-      announcementField,
-    } = request.body;
+    const { announcementFields } = request.body;
     const { announcementId } = request.params;
+
+    console.log({ announcementFields, announcementId });
 
     // check if announcement exists
     const isAnnouncement = await getAnnouncementByIdService(announcementId);
@@ -205,16 +208,18 @@ const updateAnnouncementHandler = expressAsyncHandler(
 
     const updatedAnnouncement = await updateAnnouncementService({
       announcementId,
-      announcementField,
+      announcementFields,
     });
-    if (updatedAnnouncement) {
-      response.status(201).json({
-        message: 'Announcement updated successfully',
-        resourceData: [updatedAnnouncement],
-      });
-    } else {
+
+    if (!updatedAnnouncement) {
       response.status(400).json({ message: 'Announcement could not be updated', resourceData: [] });
+      return;
     }
+
+    response.status(201).json({
+      message: 'Announcement updated successfully',
+      resourceData: [updatedAnnouncement],
+    });
   }
 );
 
@@ -237,14 +242,15 @@ const deleteAnnouncementHandler = expressAsyncHandler(
 
     // delete announcement if all checks pass successfully
     const deletedAnnouncement: DeleteResult = await deleteAnnouncementService(announcementId);
-    if (deletedAnnouncement.deletedCount === 1) {
-      response.status(201).json({
-        message: 'Announcement deleted successfully',
-        resourceData: [],
-      });
-    } else {
+    if (deletedAnnouncement.deletedCount === 0) {
       response.status(400).json({ message: 'Announcement could not be deleted', resourceData: [] });
+      return;
     }
+
+    response.status(201).json({
+      message: 'Announcement deleted successfully',
+      resourceData: [],
+    });
   }
 );
 
@@ -252,20 +258,21 @@ const deleteAnnouncementHandler = expressAsyncHandler(
 // @route   DELETE /announcements
 // @access  Private
 const deleteAllAnnouncementsHandler = expressAsyncHandler(
-  async (request: DeleteAllAnnouncementsRequest, response: Response) => {
+  async (_request: DeleteAllAnnouncementsRequest, response: Response) => {
     // delete all announcements if all checks pass successfully
     const deletedResult: DeleteResult = await deleteAllAnnouncementsService();
-    if (deletedResult.deletedCount > 0) {
-      response.status(200).json({
-        message: 'All announcements deleted successfully',
-        resourceData: [],
-      });
-    } else {
+    if (deletedResult.deletedCount === 0) {
       response.status(400).json({
         message: 'Announcements could not be deleted',
         resourceData: [],
       });
+      return;
     }
+
+    response.status(200).json({
+      message: 'All announcements deleted successfully',
+      resourceData: [],
+    });
   }
 );
 
@@ -291,17 +298,18 @@ const getAnnouncementByIdHandler = expressAsyncHandler(
 
     // get announcement if all checks pass successfully
     const announcement = await getAnnouncementByIdService(announcementId);
-    if (announcement) {
-      response.status(200).json({
-        message: 'Announcement retrieved successfully',
-        resourceData: [announcement],
-      });
-    } else {
+    if (!announcement) {
       response.status(400).json({
         message: 'Announcement could not be retrieved',
         resourceData: [],
       });
+      return;
     }
+
+    response.status(200).json({
+      message: 'Announcement retrieved successfully',
+      resourceData: [announcement],
+    });
   }
 );
 

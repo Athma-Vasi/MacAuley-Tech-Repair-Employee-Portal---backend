@@ -32,7 +32,6 @@ import type {
   DeleteAllCommentsRequest,
   GetQueriedCommentsRequest,
   GetCommentByIdRequest,
-  GetCommentsByAnnouncementIdRequest,
   GetQueriedCommentsByUserRequest,
 } from './comment.types';
 
@@ -65,6 +64,5 @@ export type {
   DeleteAllCommentsRequest,
   GetQueriedCommentsRequest,
   GetCommentByIdRequest,
-  GetCommentsByAnnouncementIdRequest,
   GetQueriedCommentsByUserRequest,
 };

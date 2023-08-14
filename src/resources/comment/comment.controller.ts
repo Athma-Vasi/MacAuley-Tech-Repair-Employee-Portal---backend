@@ -9,7 +9,6 @@ import type {
   DeleteAllCommentsRequest,
   GetQueriedCommentsRequest,
   GetCommentByIdRequest,
-  GetCommentsByAnnouncementIdRequest,
   GetQueriedCommentsByUserRequest,
 } from './comment.types';
 import {
@@ -18,7 +17,6 @@ import {
   deleteAllCommentsService,
   getQueriedCommentsService,
   getCommentByIdService,
-  getQueriedCommentsByAnnouncementIdService,
   getQueriedCommentsByUserService,
   getQueriedTotalCommentsService,
 } from './comment.service';
@@ -42,10 +40,10 @@ const createNewCommentHandler = expressAsyncHandler(
       comment: {
         childrenIds,
         comment,
-        dislikes,
+        dislikesCount,
         isDeleted,
         isFeatured,
-        likes,
+        likesCount,
         parentCommentId,
         repliesCount,
         reportsCount,
@@ -61,10 +59,10 @@ const createNewCommentHandler = expressAsyncHandler(
 
       childrenIds,
       comment,
-      dislikes,
+      dislikesCount,
       isDeleted,
       isFeatured,
-      likes,
+      likesCount,
       parentCommentId,
       repliesCount,
       reportsCount,
@@ -152,53 +150,6 @@ const getQueriedCommentsByUserHandler = expressAsyncHandler(
 
     const comments = await getQueriedCommentsByUserService({
       filter: filterWithUserId as FilterQuery<CommentDocument> | undefined,
-      projection: projection as QueryOptions<CommentDocument>,
-      options: options as QueryOptions<CommentDocument>,
-    });
-    if (comments.length === 0) {
-      response.status(404).json({
-        message: 'No comments found',
-        pages: 0,
-        totalDocuments: 0,
-        resourceData: [],
-      });
-    } else {
-      response.status(200).json({
-        message: 'Comments found successfully',
-        pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments: comments.length,
-        resourceData: comments,
-      });
-    }
-  }
-);
-
-// @desc   get all comments by announcement id
-// @route  GET /comments/announcement/:announcementId
-// @access Private
-const getQueriedCommentsByAnnouncementIdHandler = expressAsyncHandler(
-  async (
-    request: GetCommentsByAnnouncementIdRequest,
-    response: Response<GetQueriedResourceRequestServerResponse<CommentDocument>>
-  ) => {
-    const { announcementId } = request.params;
-
-    let { newQueryFlag, totalDocuments } = request.body;
-
-    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
-
-    // assign announcementId to filter
-    const filterWithAnnouncementId = { ...filter, announcementId };
-
-    // only perform a countDocuments scan if a new query is being made
-    if (newQueryFlag) {
-      totalDocuments = await getQueriedTotalCommentsService({
-        filter: filterWithAnnouncementId,
-      });
-    }
-
-    const comments = await getQueriedCommentsByUserService({
-      filter: filterWithAnnouncementId as FilterQuery<CommentDocument> | undefined,
       projection: projection as QueryOptions<CommentDocument>,
       options: options as QueryOptions<CommentDocument>,
     });
