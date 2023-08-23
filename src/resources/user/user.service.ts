@@ -36,22 +36,19 @@ async function checkUserExistsService({
   userId,
 }: CheckUserExistsServiceInput): Promise<boolean> {
   try {
-    // lean is used to return a plain javascript object instead of a mongoose document
-    // exec is used when passing an argument and returning a promise and also provides better error handling
-
     if (userId) {
-      const duplicateId = await UserModel.findById(userId).lean().exec();
-      return duplicateId ? true : false;
+      const userCount = await UserModel.countDocuments().lean().exec();
+      return userCount ? true : false;
     }
 
     if (email) {
-      const duplicateEmail = await UserModel.findOne({ email }).lean().exec();
-      return duplicateEmail ? true : false;
+      const userCount = await UserModel.countDocuments({ email }).lean().exec();
+      return userCount ? true : false;
     }
 
     if (username) {
-      const duplicateUsername = await UserModel.findOne({ username }).lean().exec();
-      return duplicateUsername ? true : false;
+      const userCount = await UserModel.countDocuments({ username }).lean().exec();
+      return userCount ? true : false;
     }
 
     return false;

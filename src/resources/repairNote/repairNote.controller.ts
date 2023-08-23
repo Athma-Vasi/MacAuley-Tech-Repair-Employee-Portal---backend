@@ -33,6 +33,7 @@ import {
   getQueriedTotalRepairNotesService,
   updateRepairNoteByIdService,
 } from './repairNote.service';
+import mongoose from 'mongoose';
 
 // @desc   Create a new repair note
 // @route  POST /repair-note
@@ -44,84 +45,27 @@ const createNewRepairNoteHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      repairNote: {
-        // part information
-        partName,
-        partSerialId,
-        dateReceived,
-        descriptionOfIssue,
-        initialInspectionNotes,
-
-        // customer information
-        customerName,
-        customerPhone,
-        customerEmail,
-        customerAddressLine,
-        customerCity,
-        customerState,
-        customerProvince,
-        customerCountry,
-        customerPostalCode,
-
-        // repair information
-        requiredRepairs,
-        partsNeeded,
-        partsNeededModels,
-        partUnderWarranty,
-        estimatedRepairCost,
-        estimatedRepairCostCurrency,
-        estimatedCompletionDate,
-        repairPriority,
-        workOrderId,
-      },
+      repairNote,
     } = request.body;
 
     // create new repair note object
-    const newRepairNoteObject: RepairNoteInitialSchema = {
+    const newRepairNoteObject: RepairNoteSchema = {
+      ...repairNote,
       userId,
       username,
-      // part information
-      partName,
-      partSerialId,
-      dateReceived,
-      descriptionOfIssue,
-      initialInspectionNotes,
-
-      // customer information
-      customerName,
-      customerPhone,
-      customerEmail,
-      customerAddressLine,
-      customerCity,
-      customerState,
-      customerProvince,
-      customerCountry,
-      customerPostalCode,
-
-      // repair information
-      requiredRepairs,
-      partsNeeded,
-      partsNeededModels,
-      partUnderWarranty,
-      estimatedRepairCost,
-      estimatedRepairCostCurrency,
-      estimatedCompletionDate,
-      repairPriority,
-      workOrderId,
-
-      // ongoing and final (updated) repair note state added after
+      workOrderId: new mongoose.Types.ObjectId(),
     };
 
     // create new repair note
     const newRepairNote = await createNewRepairNoteService(newRepairNoteObject);
-
     if (!newRepairNote) {
-      response
-        .status(400)
-        .json({ message: 'New repair note could not be created', resourceData: [] });
+      response.status(400).json({
+        message: 'New repair note could not be created. Please try again!',
+        resourceData: [],
+      });
       return;
     }
-    // return new repair note
+
     response.status(201).json({
       message: 'New repair note created successfully',
       resourceData: [newRepairNote],
@@ -154,21 +98,22 @@ const getQueriedRepairNotesHandler = expressAsyncHandler(
       projection: projection as QueryOptions<RepairNoteDocument>,
       options: options as QueryOptions<RepairNoteDocument>,
     });
-    if (repairNotes.length === 0) {
-      response.status(404).json({
+    if (!repairNotes.length) {
+      response.status(200).json({
         message: 'No repair notes that match query parameters were found',
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
       });
-    } else {
-      response.status(200).json({
-        message: 'Successfully found repair notes',
-        pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments,
-        resourceData: repairNotes,
-      });
+      return;
     }
+
+    response.status(200).json({
+      message: 'Successfully found repair notes',
+      pages: Math.ceil(totalDocuments / Number(options?.limit)),
+      totalDocuments,
+      resourceData: repairNotes,
+    });
   }
 );
 
@@ -203,21 +148,22 @@ const getQueriedRepairNotesByUserHandler = expressAsyncHandler(
       projection: projection as QueryOptions<RepairNoteDocument>,
       options: options as QueryOptions<RepairNoteDocument>,
     });
-    if (repairNotes.length === 0) {
-      response.status(404).json({
+    if (!repairNotes.length) {
+      response.status(200).json({
         message: 'No repair notes that match query parameters were found',
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
       });
-    } else {
-      response.status(200).json({
-        message: 'Successfully found repair notes',
-        pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments,
-        resourceData: repairNotes,
-      });
+      return;
     }
+
+    response.status(200).json({
+      message: 'Successfully found repair notes',
+      pages: Math.ceil(totalDocuments / Number(options?.limit)),
+      totalDocuments,
+      resourceData: repairNotes,
+    });
   }
 );
 
@@ -234,16 +180,17 @@ const getRepairNoteByIdHandler = expressAsyncHandler(
     // get repair note by id
     const repairNote = await getRepairNoteByIdService(repairNoteId);
     if (!repairNote) {
-      response.status(404).json({
+      response.status(200).json({
         message: 'Repair note not found',
         resourceData: [],
       });
-    } else {
-      response.status(200).json({
-        message: 'Successfully found repair note',
-        resourceData: [repairNote],
-      });
+      return;
     }
+
+    response.status(200).json({
+      message: 'Successfully found repair note',
+      resourceData: [repairNote],
+    });
   }
 );
 
@@ -260,16 +207,17 @@ const deleteRepairNoteByIdHandler = expressAsyncHandler(
     // delete repair note by id
     const deleteResult = await deleteRepairNoteByIdService(repairNoteId);
     if (!deleteResult) {
-      response.status(404).json({
-        message: 'Repair note not found',
+      response.status(400).json({
+        message: 'Unable to delete repair note. Please try again!',
         resourceData: [],
       });
-    } else {
-      response.status(200).json({
-        message: 'Successfully deleted repair note',
-        resourceData: [],
-      });
+      return;
     }
+
+    response.status(200).json({
+      message: 'Successfully deleted repair note',
+      resourceData: [],
+    });
   }
 );
 
@@ -283,17 +231,18 @@ const deleteAllRepairNotesHandler = expressAsyncHandler(
   ) => {
     // delete all repair notes
     const deleteResult = await deleteAllRepairNotesService();
-    if (deleteResult.deletedCount > 0) {
+    if (deleteResult.deletedCount) {
       response.status(200).json({
         message: 'Successfully deleted all repair notes',
         resourceData: [],
       });
-    } else {
-      response.status(404).json({
-        message: 'All repair notes could not be deleted. Please try again!',
-        resourceData: [],
-      });
+      return;
     }
+
+    response.status(400).json({
+      message: 'All repair notes could not be deleted. Please try again!',
+      resourceData: [],
+    });
   }
 );
 
@@ -306,104 +255,22 @@ const updateRepairNoteByIdHandler = expressAsyncHandler(
     response: Response<ResourceRequestServerResponse<RepairNoteDocument>>
   ) => {
     const { repairNoteId } = request.params;
-    const {
-      userInfo: { userId, username },
-      repairNote: {
-        // part information
-        partName,
-        partSerialId,
-        dateReceived,
-        descriptionOfIssue,
-        initialInspectionNotes,
-
-        // customer information
-        customerName,
-        customerPhone,
-        customerEmail,
-        customerAddressLine,
-        customerCity,
-        customerState,
-        customerProvince,
-        customerCountry,
-        customerPostalCode,
-
-        // repair information
-        requiredRepairs,
-        partsNeeded,
-        partsNeededModels,
-        partUnderWarranty,
-        estimatedRepairCost,
-        estimatedRepairCostCurrency,
-        estimatedCompletionDate,
-        repairPriority,
-        workOrderId,
-
-        // ongoing and final (updated) repair note state
-        repairNotes,
-        testingResults,
-        finalRepairCost,
-        finalRepairCostCurrency,
-        repairStatus,
-      },
-    } = request.body;
-
-    // create new repair note object
-    const updatedRepairNoteObject: RepairNoteSchema = {
-      userId,
-      username,
-      // part information
-      partName,
-      partSerialId,
-      dateReceived,
-      descriptionOfIssue,
-      initialInspectionNotes,
-
-      // customer information
-      customerName,
-      customerPhone,
-      customerEmail,
-      customerAddressLine,
-      customerCity,
-      customerState,
-      customerProvince,
-      customerCountry,
-      customerPostalCode,
-
-      // repair information
-      requiredRepairs,
-      partsNeeded,
-      partsNeededModels,
-      partUnderWarranty,
-      estimatedRepairCost,
-      estimatedRepairCostCurrency,
-      estimatedCompletionDate,
-      repairPriority,
-      workOrderId,
-
-      // ongoing and final (updated) repair note state
-      repairNotes,
-      testingResults,
-      finalRepairCost,
-      finalRepairCostCurrency,
-      repairStatus,
-    };
+    const { repairNoteFields } = request.body;
 
     // update repair note by id
-    const updatedRepairNote = await updateRepairNoteByIdService(
-      repairNoteId,
-      updatedRepairNoteObject
-    );
+    const updatedRepairNote = await updateRepairNoteByIdService(repairNoteId, repairNoteFields);
     if (!updatedRepairNote) {
-      response.status(404).json({
-        message: 'Repair note not found',
+      response.status(400).json({
+        message: 'Unable to update repair note. Please try again!',
         resourceData: [],
       });
-    } else {
-      response.status(200).json({
-        message: 'Successfully updated repair note',
-        resourceData: [updatedRepairNote],
-      });
+      return;
     }
+
+    response.status(200).json({
+      message: 'Successfully updated repair note',
+      resourceData: [updatedRepairNote],
+    });
   }
 );
 

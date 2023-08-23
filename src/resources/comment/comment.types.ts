@@ -1,7 +1,8 @@
 import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../auth';
-import type { UserRoles } from '../user';
-import { GetQueriedResourceRequest, QueryObjectParsed } from '../../types';
+import type { Department, JobPosition, UserRoles } from '../user';
+import { GetQueriedResourceRequest } from '../../types';
+import { CommentDocument } from './comment.model';
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 
@@ -13,20 +14,21 @@ interface CreateNewCommentRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     comment: {
-      // id of resource the comment is attached to: announcement, article, etc.
-      resourceId: Types.ObjectId;
-      // id of parent comment that will be updated
-      parentCommentId: Types.ObjectId;
-      // children comment ids
-      childrenIds: Types.ObjectId[];
-
+      department: Department;
+      jobPosition: JobPosition;
+      profilePictureUrl: string;
+      parentResourceId: Types.ObjectId;
       comment: string;
-      repliesCount: number;
+      quotedUsername: string;
+      quotedComment: string;
       likesCount: number;
       dislikesCount: number;
       reportsCount: number;
       isFeatured: boolean;
       isDeleted: boolean;
+      likedUserIds: Types.ObjectId[];
+      dislikedUserIds: Types.ObjectId[];
+      reportedUserIds: Types.ObjectId[];
     };
   };
 }
@@ -41,6 +43,8 @@ type DeleteAllCommentsRequest = RequestAfterJWTVerification;
 
 type GetQueriedCommentsRequest = GetQueriedResourceRequest;
 
+type GetQueriedCommentsByParentResourceIdRequest = GetQueriedResourceRequest;
+
 type GetQueriedCommentsByUserRequest = GetQueriedResourceRequest;
 
 interface GetCommentByIdRequest extends RequestAfterJWTVerification {
@@ -54,11 +58,25 @@ interface GetCommentByIdRequest extends RequestAfterJWTVerification {
   params: { commentId: string };
 }
 
+interface UpdateCommentByIdRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    fieldsToUpdate: Partial<CommentDocument>;
+  };
+  params: { commentId: string };
+}
+
 export type {
   CreateNewCommentRequest,
   DeleteACommentRequest,
   DeleteAllCommentsRequest,
   GetQueriedCommentsRequest,
   GetQueriedCommentsByUserRequest,
+  GetQueriedCommentsByParentResourceIdRequest,
+  UpdateCommentByIdRequest,
   GetCommentByIdRequest,
 };

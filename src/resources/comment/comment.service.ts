@@ -68,6 +68,27 @@ async function getCommentByIdService(
   }
 }
 
+async function updateCommentByIdService({
+  commentId,
+  fieldsToUpdate,
+}: {
+  commentId: string | Types.ObjectId;
+  fieldsToUpdate: Partial<CommentSchema>;
+}) {
+  try {
+    const updatedComment = await CommentModel.findByIdAndUpdate(
+      commentId,
+      { ...fieldsToUpdate },
+      { new: true }
+    )
+      .lean()
+      .exec();
+    return updatedComment;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'updateCommentByIdService' });
+  }
+}
+
 async function deleteACommentService(commentId: string): Promise<DeleteResult> {
   try {
     const deleteResult = await CommentModel.deleteOne({ _id: commentId }).lean().exec();
@@ -94,4 +115,5 @@ export {
   getQueriedCommentsService,
   getQueriedCommentsByUserService,
   getQueriedTotalCommentsService,
+  updateCommentByIdService,
 };

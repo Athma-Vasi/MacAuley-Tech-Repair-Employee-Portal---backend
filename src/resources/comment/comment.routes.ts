@@ -7,6 +7,8 @@ import {
   getQueriedCommentsHandler,
   getCommentByIdHandler,
   getQueriedCommentsByUserHandler,
+  getQueriedCommentsByParentResourceIdHandler,
+  updateCommentByIdHandler,
 } from './comment.controller';
 import { assignQueryDefaults, verifyJWTMiddleware, verifyRoles } from '../../middlewares';
 import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../constants';
@@ -26,10 +28,17 @@ commentRouter
   .route('/user')
   .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedCommentsByUserHandler);
 
-commentRouter.route('/:commentId').get(getCommentByIdHandler).delete(deleteACommentHandler);
+commentRouter
+  .route('/parentResource/:parentResourceId')
+  .get(
+    assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
+    getQueriedCommentsByParentResourceIdHandler
+  );
 
 commentRouter
-  .route('/announcement/:announcementId')
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedCommentsHandler);
+  .route('/:commentId')
+  .get(getCommentByIdHandler)
+  .delete(deleteACommentHandler)
+  .patch(updateCommentByIdHandler);
 
 export { commentRouter };

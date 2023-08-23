@@ -12,10 +12,58 @@ const assignQueryDefaults =
      * Object.defineProperty is used to satisfy the typescript compiler
      */
 
+    const propertyDescriptor: PropertyDescriptor = {
+      writable: true,
+      enumerable: true,
+      configurable: true,
+    };
+
     const { query } = request;
-    const queryObject = { ...query };
+
+    // if query is undefined, set default values and return
+    if (!query) {
+      Object.defineProperty(request, 'query', {
+        value: {
+          projection: '-__v',
+          options: { sort: { createdAt: -1, _id: -1 }, limit: 10, skip: 0 },
+          filter: {},
+        },
+        ...propertyDescriptor,
+      });
+      next();
+      return;
+    }
+
+    const queryObject = structuredClone(query);
     const excludedFields = ['page', 'fields', 'newQueryFlag', 'totalDocuments'];
     excludedFields.forEach((field) => delete queryObject[field]);
+
+    // convert 'in' values to array if only one value is provided
+    // mongoose does not accept a single value for 'in' operator
+    console.log('queryObject: ', queryObject);
+    Object.entries(queryObject).forEach(([queryKey, query]) => {
+      if (!query) {
+        return;
+      }
+
+      Object.entries(query).forEach(([operator, value]) => {
+        if (operator.endsWith('in')) {
+          // if its already in array form, return
+          if (Array.isArray(value)) {
+            return;
+          }
+          Object.defineProperty(query, operator, {
+            value: [value],
+            ...propertyDescriptor,
+          });
+        }
+      });
+
+      Object.defineProperty(queryObject, queryKey, {
+        value: query,
+        ...propertyDescriptor,
+      });
+    });
 
     // convert query object to string
     let queryString = JSON.stringify(queryObject);
@@ -27,32 +75,16 @@ const assignQueryDefaults =
     let { projection, ...rest } = mongoDbQueryObject;
     const options: Record<string, string | number | boolean> = {};
     const filter: Record<string, string | number | boolean> = {};
-    // if keys are in the findQueryOptionsKeywords set, then they will be part of the options object passed in the mongoose find method
-    // else they will be part of the filter object passed in same method
-    const propertyDescriptor: PropertyDescriptor = {
-      writable: true,
-      enumerable: true,
-      configurable: true,
-    };
 
-    // for (const key in rest) {
-    //   findQueryOptionsKeywords.has(key)
-    //     ? Object.defineProperty(options, key, {
-    //         value: rest[key],
-    //         ...propertyDescriptor,
-    //       })
-    //     : Object.defineProperty(filter, key, {
-    //         value: rest[key],
-    //         ...propertyDescriptor,
-    //       });
-    // }
     Object.entries(rest).forEach(([key, value]) => {
+      // if keys are in the findQueryOptionsKeywords set, then they will be part of the options object passed in the mongoose find method
       findQueryOptionsKeywords.has(key)
         ? Object.defineProperty(options, key, {
             value,
             ...propertyDescriptor,
           })
-        : Object.defineProperty(filter, key, {
+        : // else they will be part of the filter object passed in same method
+          Object.defineProperty(filter, key, {
             value,
             ...propertyDescriptor,
           });
@@ -114,7 +146,7 @@ const assignQueryDefaults =
     // set pagination default values for limit and skip
     const page = Number(query.page) || 1;
     let limit = Number(query.limit) || 10;
-    limit = limit < 1 ? 10 : limit > 20 ? 20 : limit;
+    limit = limit < 1 ? 10 : limit > 25 ? 25 : limit;
     let skip = query.skip ? Number(query.skip) : (page - 1) * limit; // offset
     skip = skip < 1 ? 0 : skip;
     Object.defineProperty(options, 'limit', {

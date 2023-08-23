@@ -10,6 +10,7 @@ import type {
   GetAnnouncementsByUserRequest,
   DeleteAllAnnouncementsRequest,
   GetAnnouncementRequestById,
+  UpdateAnnouncementRatingRequest,
 } from './announcement.types';
 
 import {
@@ -25,11 +26,18 @@ import {
 } from './announcement.service';
 import { AnnouncementDocument, AnnouncementSchema } from './announcement.model';
 import {
+  DatabaseResponseNullable,
   GetQueriedResourceRequestServerResponse,
   QueryObjectParsedWithDefaults,
   ResourceRequestServerResponse,
 } from '../../../../types';
 import { FilterQuery, QueryOptions } from 'mongoose';
+import {
+  UserDocument,
+  checkUserExistsService,
+  getUserByIdService,
+  updateUserByIdService,
+} from '../../../user';
 
 // @desc   create new announcement
 // @route  POST /announcements
@@ -48,8 +56,8 @@ const createNewAnnouncementHandler = expressAsyncHandler(
         bannerImageAlt,
         bannerImageSrc,
         timeToRead,
-        commentIds,
         ratingResponse,
+        ratedUserIds,
       },
     } = request.body;
 
@@ -74,8 +82,8 @@ const createNewAnnouncementHandler = expressAsyncHandler(
       bannerImageAlt,
       bannerImageSrc,
       timeToRead,
-      commentIds,
       ratingResponse,
+      ratedUserIds,
     };
 
     const newAnnouncement = await createNewAnnouncementService(newAnnouncementObject);
@@ -136,7 +144,7 @@ const getQueriedAnnouncementsHandler = expressAsyncHandler(
 );
 
 // @desc   get corresponding announcements for requesting user
-// @route  GET /announcements/user
+// @route  GET /announcement/user
 // @access Private
 const getQueriedAnouncementsByUserHandler = expressAsyncHandler(
   async (
@@ -187,7 +195,7 @@ const getQueriedAnouncementsByUserHandler = expressAsyncHandler(
 );
 
 // @desc   update announcement
-// @route  PATCH /announcements/:announcementId
+// @route  PATCH /announcement/:announcementId
 // @access Private
 const updateAnnouncementHandler = expressAsyncHandler(
   async (
@@ -223,8 +231,44 @@ const updateAnnouncementHandler = expressAsyncHandler(
   }
 );
 
+// @desc   update announcement rating
+// @route  PATCH /announcement/:announcementId/rating
+// @access Private
+const updateAnnouncementRatingHandler = expressAsyncHandler(
+  async (
+    request: UpdateAnnouncementRatingRequest,
+    response: Response<ResourceRequestServerResponse<AnnouncementDocument | UserDocument>>
+  ) => {
+    const { announcementId } = request.params;
+    const {
+      announcementFields: { ratedUserIds, ratingResponse },
+    } = request.body;
+
+    // check if announcement exists
+    const isAnnouncement = await getAnnouncementByIdService(announcementId);
+    if (!isAnnouncement) {
+      response.status(400).json({ message: 'Announcement does not exist', resourceData: [] });
+      return;
+    }
+
+    const updatedAnnouncement = await updateAnnouncementService({
+      announcementId,
+      announcementFields: { ratedUserIds, ratingResponse },
+    });
+    if (!updatedAnnouncement) {
+      response.status(400).json({ message: 'Announcement could not be updated', resourceData: [] });
+      return;
+    }
+
+    response.status(201).json({
+      message: 'Announcement rating updated successfully!',
+      resourceData: [updatedAnnouncement],
+    });
+  }
+);
+
 // @desc   delete announcement
-// @route  DELETE /announcements/:announcementId
+// @route  DELETE /announcement/:announcementId
 // @access Private
 const deleteAnnouncementHandler = expressAsyncHandler(
   async (
@@ -277,7 +321,7 @@ const deleteAllAnnouncementsHandler = expressAsyncHandler(
 );
 
 // @desc   get an announcement by its id
-// @route  GET /announcements/:announcementId
+// @route  GET /announcement/:announcementId
 // @access Private
 const getAnnouncementByIdHandler = expressAsyncHandler(
   async (
@@ -321,4 +365,5 @@ export {
   updateAnnouncementHandler,
   deleteAllAnnouncementsHandler,
   getAnnouncementByIdHandler,
+  updateAnnouncementRatingHandler,
 };

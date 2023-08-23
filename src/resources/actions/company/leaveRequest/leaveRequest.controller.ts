@@ -116,21 +116,22 @@ const getQueriedLeaveRequestsHandler = expressAsyncHandler(
       projection: projection as QueryOptions<LeaveRequestDocument>,
       options: options as QueryOptions<LeaveRequestDocument>,
     });
-    if (leaveRequests.length === 0) {
-      response.status(404).json({
+    if (!leaveRequests.length) {
+      response.status(200).json({
         message: 'No leave requests that match query parameters were found',
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
       });
-    } else {
-      response.status(200).json({
-        message: 'Successfully found leave requests',
-        pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments,
-        resourceData: leaveRequests,
-      });
+      return;
     }
+
+    response.status(200).json({
+      message: 'Successfully found leave requests',
+      pages: Math.ceil(totalDocuments / Number(options?.limit)),
+      totalDocuments,
+      resourceData: leaveRequests,
+    });
   }
 );
 
@@ -164,21 +165,22 @@ const getQueriedLeaveRequestsByUserHandler = expressAsyncHandler(
       projection: projection as QueryOptions<LeaveRequestDocument>,
       options: options as QueryOptions<LeaveRequestDocument>,
     });
-    if (leaveRequests.length === 0) {
-      response.status(404).json({
+    if (!leaveRequests.length) {
+      response.status(200).json({
         message: 'No leave requests found',
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
       });
-    } else {
-      response.status(200).json({
-        message: 'Leave requests found successfully',
-        pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments,
-        resourceData: leaveRequests,
-      });
+      return;
     }
+
+    response.status(200).json({
+      message: 'Leave requests found successfully',
+      pages: Math.ceil(totalDocuments / Number(options?.limit)),
+      totalDocuments,
+      resourceData: leaveRequests,
+    });
   }
 );
 
@@ -194,17 +196,18 @@ const getLeaveRequestByIdHandler = expressAsyncHandler(
 
     // get leave request
     const leaveRequest = await getLeaveRequestByIdService(leaveRequestId);
-    if (leaveRequest) {
+    if (!leaveRequest) {
       response.status(200).json({
-        message: 'Leave request found successfully',
-        resourceData: [leaveRequest],
-      });
-    } else {
-      response.status(404).json({
         message: 'Leave request not found',
         resourceData: [],
       });
+      return;
     }
+
+    response.status(200).json({
+      message: 'Leave request found successfully',
+      resourceData: [leaveRequest],
+    });
   }
 );
 
@@ -233,17 +236,18 @@ const updateLeaveRequestStatusByIdHandler = expressAsyncHandler(
       leaveRequestId,
       requestStatus,
     });
-    if (updatedLeaveRequest) {
-      response.status(200).json({
-        message: 'Leave request updated successfully',
-        resourceData: [updatedLeaveRequest],
-      });
-    } else {
+    if (!updatedLeaveRequest) {
       response.status(400).json({
         message: 'Leave request could not be updated',
         resourceData: [],
       });
+      return;
     }
+
+    response.status(200).json({
+      message: 'Leave request updated successfully',
+      resourceData: [updatedLeaveRequest],
+    });
   }
 );
 
@@ -266,17 +270,18 @@ const deleteALeaveRequestHandler = expressAsyncHandler(
 
     // delete leave request
     const deletedResult: DeleteResult = await deleteALeaveRequestService(leaveRequestId);
-    if (deletedResult.deletedCount === 1) {
-      response.status(200).json({
-        message: 'Leave request deleted successfully',
-        resourceData: [],
-      });
-    } else {
+    if (!deletedResult.deletedCount) {
       response.status(400).json({
         message: 'Leave request could not be deleted',
         resourceData: [],
       });
+      return;
     }
+
+    response.status(200).json({
+      message: 'Leave request deleted successfully',
+      resourceData: [],
+    });
   }
 );
 
@@ -290,17 +295,18 @@ const deleteAllLeaveRequestsHandler = expressAsyncHandler(
   ) => {
     // delete all leave requests
     const deletedResult: DeleteResult = await deleteAllLeaveRequestsService();
-    if (deletedResult.deletedCount > 0) {
-      response.status(200).json({
-        message: 'All leave requests deleted successfully',
-        resourceData: [],
-      });
-    } else {
+    if (!deletedResult.deletedCount) {
       response.status(400).json({
         message: 'All leave requests could not be deleted. Please try again!',
         resourceData: [],
       });
+      return;
     }
+
+    response.status(200).json({
+      message: 'All leave requests deleted successfully',
+      resourceData: [],
+    });
   }
 );
 

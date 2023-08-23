@@ -2,7 +2,7 @@ import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
 import type { UserRoles } from '../../../user';
 import { GetQueriedResourceRequest } from '../../../../types';
-import { AnnouncementDocument, AnnouncementSchema, RatingResponse } from './announcement.model';
+import { AnnouncementSchema, RatingResponse } from './announcement.model';
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 interface CreateNewAnnouncementRequest extends RequestAfterJWTVerification {
@@ -21,7 +21,7 @@ interface CreateNewAnnouncementRequest extends RequestAfterJWTVerification {
       article: string[];
       timeToRead: number;
       ratingResponse: RatingResponse;
-      commentIds: Types.ObjectId[];
+      ratedUserIds: Types.ObjectId[];
     };
   };
 }
@@ -63,6 +63,23 @@ interface UpdateAnnouncementRequest extends RequestAfterJWTVerification {
   };
 }
 
+interface UpdateAnnouncementRatingRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    announcementFields: {
+      ratedUserIds: Types.ObjectId[];
+      ratingResponse: RatingResponse;
+    };
+  };
+  params: {
+    announcementId: string;
+  };
+}
+
 export type {
   CreateNewAnnouncementRequest,
   DeleteAnAnnouncementRequest,
@@ -71,4 +88,5 @@ export type {
   UpdateAnnouncementRequest,
   GetAnnouncementsByUserRequest,
   GetAnnouncementRequestById,
+  UpdateAnnouncementRatingRequest,
 };

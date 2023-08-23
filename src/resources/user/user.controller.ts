@@ -61,6 +61,7 @@ const createNewUserHandler = expressAsyncHandler(
       startDate,
       roles = ['Employee'],
       active = true,
+      completedSurveys,
     } = request.body;
     const { addressLine, city, province, state, postalCode, country } = address;
     const { fullName, contactNumber: emergencyContactNumber } = emergencyContact;
@@ -134,7 +135,7 @@ const createNewUserHandler = expressAsyncHandler(
       active,
       address,
       emergencyContact,
-      completedSurveys: [],
+      completedSurveys,
     };
 
     // create new user if all checks pass successfully

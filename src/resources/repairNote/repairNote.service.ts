@@ -15,7 +15,7 @@ import type {
 import { RepairNoteModel } from './repairNote.model';
 
 async function createNewRepairNoteService(
-  input: RepairNoteInitialSchema
+  input: RepairNoteSchema | RepairNoteInitialSchema
 ): Promise<RepairNoteDocument> {
   try {
     const repairNote = await RepairNoteModel.create(input);
@@ -75,12 +75,12 @@ async function getRepairNoteByIdService(
 
 async function updateRepairNoteByIdService(
   repairNoteId: Types.ObjectId | string,
-  update: Partial<RepairNoteSchema>
+  repairNoteFields: Partial<RepairNoteSchema>
 ): Promise<DatabaseResponseNullable<RepairNoteDocument>> {
   try {
     const repairNote = await RepairNoteModel.findByIdAndUpdate(
       repairNoteId,
-      { $set: update },
+      { ...repairNoteFields },
       { new: true }
     )
       .select('-__v')

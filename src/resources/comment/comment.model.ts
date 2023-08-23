@@ -1,26 +1,28 @@
 import { Schema, Types, model } from 'mongoose';
-import type { UserRoles } from '../user';
+import type { Department, JobPosition, UserRoles } from '../user';
 
 type CommentSchema = {
   userId: Types.ObjectId;
   username: string;
   roles: UserRoles;
 
-  // id of resource the comment is attached to: announcement, article, etc.
-  resourceId: Types.ObjectId;
-  // id of parent comment that will be updated
-  parentCommentId: Types.ObjectId;
-  // children comment ids
-  childrenIds: Types.ObjectId[];
-
+  jobPosition: JobPosition;
+  department: Department;
+  profilePictureUrl: string;
+  parentResourceId: Types.ObjectId;
   comment: string;
-  repliesCount: number;
+  quotedUsername: string;
+  quotedComment: string;
   likesCount: number;
   dislikesCount: number;
   reportsCount: number;
 
   isFeatured: boolean;
   isDeleted: boolean;
+
+  likedUserIds: Types.ObjectId[];
+  dislikedUserIds: Types.ObjectId[];
+  reportedUserIds: Types.ObjectId[];
 };
 
 type CommentDocument = CommentSchema & {
@@ -47,34 +49,27 @@ const commentSchema = new Schema<CommentSchema>(
       required: [true, 'roles is required'],
     },
 
-    resourceId: {
+    parentResourceId: {
       type: Schema.Types.ObjectId,
-      required: [true, 'resourceId is required'],
-      ref: 'Announcement',
+      required: true,
       index: true,
-    },
-    parentCommentId: {
-      type: Schema.Types.ObjectId,
-      required: false,
-      ref: 'Comment',
-      default: '',
-    },
-    childrenIds: {
-      type: [Schema.Types.ObjectId],
-      required: false,
-      ref: 'Comment',
-      default: [],
     },
 
     comment: {
       type: String,
       required: [true, 'comment is required'],
     },
-    repliesCount: {
-      type: Number,
-      required: [true, 'repliesCount is required'],
-      default: 0,
+    quotedUsername: {
+      type: String,
+      required: false,
+      default: '',
     },
+    quotedComment: {
+      type: String,
+      required: false,
+      default: '',
+    },
+
     likesCount: {
       type: Number,
       required: [true, 'likesCount is required'],
@@ -100,6 +95,22 @@ const commentSchema = new Schema<CommentSchema>(
       type: Boolean,
       required: [true, 'isDeleted is required'],
       default: false,
+    },
+
+    likedUserIds: {
+      type: [Schema.Types.ObjectId],
+      required: false,
+      default: [],
+    },
+    dislikedUserIds: {
+      type: [Schema.Types.ObjectId],
+      required: false,
+      default: [],
+    },
+    reportedUserIds: {
+      type: [Schema.Types.ObjectId],
+      required: false,
+      default: [],
     },
   },
   { timestamps: true }

@@ -27,7 +27,7 @@ type AnnouncementSchema = {
   article: string[];
   timeToRead: number;
   ratingResponse: RatingResponse;
-  commentIds: Types.ObjectId[];
+  ratedUserIds: Types.ObjectId[];
 };
 
 type AnnouncementDocument = AnnouncementSchema & {
@@ -100,7 +100,7 @@ const announcementSchema = new Schema<AnnouncementSchema>(
         ratingCount: 0,
       },
     },
-    commentIds: {
+    ratedUserIds: {
       type: [Schema.Types.ObjectId],
       required: false,
       default: [],

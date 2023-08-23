@@ -9,6 +9,7 @@ import {
   getQueriedAnouncementsByUserHandler,
   deleteAllAnnouncementsHandler,
   getAnnouncementByIdHandler,
+  updateAnnouncementRatingHandler,
 } from './announcement.controller';
 import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
 
@@ -29,4 +30,6 @@ announcementRouter
   .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getAnnouncementByIdHandler)
   .delete(deleteAnnouncementHandler)
   .patch(updateAnnouncementHandler);
+
+announcementRouter.route('/:announcementId/rating').patch(updateAnnouncementRatingHandler);
 export { announcementRouter };
