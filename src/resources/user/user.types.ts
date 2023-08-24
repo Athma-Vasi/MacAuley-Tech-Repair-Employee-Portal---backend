@@ -8,7 +8,6 @@ import type {
   JobPosition,
   PhoneNumber,
   PostalCode,
-  UserDocument,
   Province,
   StatesUS,
   PreferredPronouns,
@@ -19,38 +18,7 @@ import { GetQueriedResourceRequest } from '../../types';
 
 interface CreateNewUserRequest {
   body: {
-    username: string;
-    password: string;
-    email: string;
-
-    firstName: string;
-    middleName: string;
-    lastName: string;
-    preferredName: string;
-    preferredPronouns: PreferredPronouns;
-    profilePictureUrl: string;
-    dateOfBirth: NativeDate;
-
-    contactNumber: PhoneNumber;
-    address: {
-      addressLine: string;
-      city: string;
-      province: Province | '';
-      state: StatesUS | '';
-      postalCode: PostalCode;
-      country: Country;
-    };
-    jobPosition: JobPosition;
-    department: Department;
-    storeLocation: StoreLocation;
-    emergencyContact: {
-      fullName: string;
-      contactNumber: PhoneNumber;
-    };
-    startDate: NativeDate;
-    roles: UserRoles;
-    active: boolean;
-    completedSurveys: (Types.ObjectId | string)[];
+    user: UserSchema;
   };
 }
 
@@ -75,9 +43,7 @@ interface GetUserByIdRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
   };
-  params: {
-    userId: string;
-  };
+  params: { userId: string };
 }
 
 interface UpdateUserRequest extends RequestAfterJWTVerification {
@@ -87,7 +53,7 @@ interface UpdateUserRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    updateObj: Partial<UserSchema>;
+    userFields: Partial<UserSchema>;
   };
 }
 

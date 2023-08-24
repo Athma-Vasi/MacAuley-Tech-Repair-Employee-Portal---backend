@@ -178,27 +178,13 @@ async function getQueriedTotalUsersService({
 
 async function updateUserByIdService({
   userId,
-  updateObj,
+  userFields,
 }: {
   userId: Types.ObjectId;
-  updateObj: Partial<UserSchema>;
+  userFields: Partial<UserSchema>;
 }): DatabaseResponseNullable<UserDocument> {
   try {
-    // // get existing user
-    // const existingUser = await UserModel.findById(userId).lean().exec();
-    // // replace existing user with new user minus the password
-    // const updatedUser = await UserModel.findByIdAndUpdate(
-    //   inputObj.userId,
-    //   { ...inputObj, password: existingUser?.password },
-    //   { new: true }
-    // )
-    //   .select('-password')
-    //   .lean()
-    //   .exec();
-
-    // return updatedUser;
-
-    const updatedUser = await UserModel.findByIdAndUpdate(userId, { ...updateObj }, { new: true })
+    const updatedUser = await UserModel.findByIdAndUpdate(userId, { ...userFields }, { new: true })
       .select('-password -__v')
       .lean()
       .exec();

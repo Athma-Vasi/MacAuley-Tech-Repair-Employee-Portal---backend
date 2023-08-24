@@ -10,7 +10,6 @@ import type {
   UpdateUserRequest,
 } from './user.types';
 
-import { getNotesByUserService } from '../note';
 import {
   checkUserExistsService,
   checkUserPasswordService,
@@ -20,7 +19,6 @@ import {
   getQueriedUsersService,
   updateUserPasswordService,
   updateUserByIdService,
-  getAllUsersService,
   getUserByIdService,
 } from './user.service';
 import { returnEmptyFieldsTuple } from '../../utils';
@@ -31,7 +29,6 @@ import {
   ResourceRequestServerResponse,
 } from '../../types';
 import { FilterQuery, QueryOptions } from 'mongoose';
-import { get } from 'http';
 
 // @desc   Create new user
 // @route  POST /users
@@ -42,34 +39,36 @@ const createNewUserHandler = expressAsyncHandler(
     response: Response<ResourceRequestServerResponse<UserDocument>>
   ) => {
     const {
-      email,
-      username,
-      password,
-      firstName,
-      middleName,
-      lastName,
-      contactNumber,
-      dateOfBirth,
-      preferredName,
-      preferredPronouns,
-      profilePictureUrl,
-      address,
-      jobPosition,
-      department,
-      storeLocation,
-      emergencyContact,
-      startDate,
-      roles = ['Employee'],
-      active = true,
-      completedSurveys,
+      user: {
+        email,
+        username,
+        password,
+        firstName,
+        middleName,
+        lastName,
+        contactNumber,
+        dateOfBirth,
+        preferredName,
+        preferredPronouns,
+        profilePictureUrl,
+        address,
+        jobPosition,
+        department,
+        storeLocation,
+        emergencyContact,
+        startDate,
+        roles = ['Employee'],
+        active = true,
+        completedSurveys,
+      },
     } = request.body;
     const { addressLine, city, province, state, postalCode, country } = address;
     const { fullName, contactNumber: emergencyContactNumber } = emergencyContact;
 
-    // both state and province cannot be empty (both are required)
+    // both state and province cannot be empty (one is required)
     if (!state && !province) {
       response.status(400).json({
-        message: 'State or province must be filled',
+        message: 'State or province is required',
         resourceData: [],
       });
       return;
@@ -140,13 +139,14 @@ const createNewUserHandler = expressAsyncHandler(
 
     // create new user if all checks pass successfully
     const createdUser = await createNewUserService(newUserData);
-    if (createdUser) {
-      response
-        .status(201)
-        .json({ message: `User ${username} created successfully`, resourceData: [createdUser] });
-    } else {
+    if (!createdUser) {
       response.status(400).json({ message: 'User creation failed', resourceData: [] });
+      return;
     }
+
+    response
+      .status(201)
+      .json({ message: `User ${username} created successfully`, resourceData: [createdUser] });
   }
 );
 
@@ -177,37 +177,22 @@ const getQueriedUsersHandler = expressAsyncHandler(
       projection: projection as QueryOptions<UserDocument>,
       options: options as QueryOptions<UserDocument>,
     });
-    if (users.length === 0) {
-      response.status(404).json({
+    if (!users.length) {
+      response.status(200).json({
         message: 'No users that match query parameters were found',
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
       });
-    } else {
-      response.status(200).json({
-        message: 'Successfully found users',
-        pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments,
-        resourceData: users,
-      });
+      return;
     }
 
-    // const users = await getAllUsersService();
-    // if (users.length === 0) {
-    //   response.status(404).json({
-    //     message: 'No users that match query parameters were found',
-    //     pages: 0,
-    //     totalDocuments: 0,
-    //     resourceData: [],
-    //   });
-    // }
-    // response.status(200).json({
-    //   message: 'Successfully found users',
-    //   pages: 1,
-    //   totalDocuments: users.length,
-    //   resourceData: users,
-    // });
+    response.status(200).json({
+      message: 'Successfully found users',
+      pages: Math.ceil(totalDocuments / Number(options?.limit)),
+      totalDocuments,
+      resourceData: users,
+    });
   }
 );
 
@@ -246,22 +231,14 @@ const deleteUserHandler = expressAsyncHandler(
       return;
     }
 
-    // we do not want to delete the user if they have notes assigned to them that are not completed
-    const userHasNotes = await getNotesByUserService(userToBeDeletedId);
-    if (userHasNotes.filter((note) => note.completed).length > 0) {
-      response.status(400).json({
-        message: 'User has notes assigned to them that are not completed',
-        resourceData: [],
-      });
-      return;
-    }
-
     // delete user if all checks pass successfully
     const deletedUser = await deleteUserService(userToBeDeletedId);
     if (deletedUser.acknowledged) {
-      response.status(200).json({ message: 'User deleted successfully', resourceData: [] });
+      response.status(200).json({ message: 'Successfully deleted user!', resourceData: [] });
     } else {
-      response.status(400).json({ message: 'User deletion failed', resourceData: [] });
+      response
+        .status(400)
+        .json({ message: 'Failed to delete user. Please try again!', resourceData: [] });
     }
   }
 );
@@ -275,14 +252,14 @@ const updateUserByIdHandler = expressAsyncHandler(
     response: Response<ResourceRequestServerResponse<UserDocument>>
   ) => {
     const {
-      userInfo: { roles, userId, username },
-      updateObj,
+      userInfo: { userId },
+      userFields,
     } = request.body;
 
     // update user if all checks pass successfully
     const updatedUser = await updateUserByIdService({
       userId,
-      updateObj,
+      userFields,
     });
     if (updatedUser) {
       response.status(200).json({

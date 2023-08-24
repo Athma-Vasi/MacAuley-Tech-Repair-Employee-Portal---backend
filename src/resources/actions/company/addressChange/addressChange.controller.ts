@@ -242,7 +242,7 @@ const updateAddressChangeStatusByIdHandler = expressAsyncHandler(
     // update user's address
     const updatedUser = await updateUserByIdService({
       userId,
-      updateObj: newUserObject,
+      userFields: newUserObject,
     });
     if (!updatedUser) {
       response.status(400).json({ message: 'User update failed', resourceData: [] });

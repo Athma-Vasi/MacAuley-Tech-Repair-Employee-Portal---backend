@@ -1,7 +1,6 @@
-import { NextFunction, Response } from 'express';
+import { NextFunction, Response, Request } from 'express';
 import jwt from 'jsonwebtoken';
 
-import type { RequestAfterJWTVerification } from '../resources/auth';
 import type { UserRoles } from '../resources/user';
 import type { Types } from 'mongoose';
 
@@ -9,7 +8,7 @@ import { config } from '../config';
 
 function verifyJWTMiddleware(
   // technically this request is only modified after this middleware function runs
-  request: RequestAfterJWTVerification,
+  request: Request,
   response: Response,
   next: NextFunction
 ) {
@@ -27,16 +26,31 @@ function verifyJWTMiddleware(
       return;
     }
 
-    console.log('\n');
-    console.group('verifyJWTMiddleware');
-    console.log('decoded: ', decoded);
-    console.groupEnd();
-
     const { userInfo } = decoded as {
       userInfo: { username: string; userId: Types.ObjectId; roles: UserRoles };
     };
 
-    request.body.userInfo = userInfo;
+    const propertyDescriptor: PropertyDescriptor = {
+      writable: true,
+      enumerable: true,
+      configurable: true,
+    };
+
+    const newBody = Object.defineProperty({}, 'userInfo', {
+      value: userInfo,
+      ...propertyDescriptor,
+    });
+
+    Object.defineProperty(request, 'body', {
+      value: newBody,
+      ...propertyDescriptor,
+    });
+
+    console.log('\n');
+    console.group('verifyJWTMiddleware');
+    console.log('decoded: ', decoded);
+    console.log('request.body: ', request.body);
+    console.groupEnd();
 
     next();
     return;

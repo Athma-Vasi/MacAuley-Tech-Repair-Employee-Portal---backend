@@ -296,7 +296,7 @@ const updateSurveyStatisticsByIdHandler = expressAsyncHandler(
     // update completedSurveys field with surveyId
     const updatedUser = await updateUserByIdService({
       userId: user._id,
-      updateObj: { completedSurveys: updatedCompletedSurveys },
+      userFields: { completedSurveys: updatedCompletedSurveys },
     });
     if (!updatedUser) {
       response.status(400).json({ message: 'Unable to update user', resourceData: [] });

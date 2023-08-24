@@ -84,11 +84,7 @@ type Department =
   | 'Repair Technicians'
   | 'Field Service Technicians'
   | 'Logistics and Inventory'
-  | 'Customer Service'
-  | 'Quality Control'
-  | 'Training and Development'
-  | 'Janitorial and Maintenance'
-  | 'Security';
+  | 'Customer Service';
 
 type StoreLocation = 'Calgary' | 'Edmonton' | 'Vancouver';
 type ExecutiveManagement =
@@ -99,6 +95,9 @@ type ExecutiveManagement =
   | 'Chief Marketing Officer';
 
 type AdministrativeDepartment =
+  | 'Store Manager'
+  | 'Assistant Store Manager'
+  | 'Shift Supervisor'
   | 'Office Manager'
   | 'Administrative Assistant'
   | 'Human Resources Manager'
@@ -130,14 +129,6 @@ type LogisticsAndInventory = 'Warehouse Manager' | 'Inventory Clerk' | 'Delivery
 
 type CustomerService = 'Customer Service Representative' | 'Technical Support Specialist';
 
-type QualityControl = 'Quality Assurance Inspector' | 'Testing and Diagnostics Specialist';
-
-type TrainingAndDevelopment = 'Technical Trainer';
-
-type JanitorialAndMaintenance = 'Janitor/Cleaner';
-
-type Security = 'Security Guard';
-
 type JobPosition =
   | ExecutiveManagement
   | AdministrativeDepartment
@@ -146,11 +137,7 @@ type JobPosition =
   | RepairTechnicians
   | FieldServiceTechnicians
   | LogisticsAndInventory
-  | CustomerService
-  | QualityControl
-  | TrainingAndDevelopment
-  | JanitorialAndMaintenance
-  | Security;
+  | CustomerService;
 
 type PreferredPronouns = 'He/Him' | 'She/Her' | 'They/Them' | 'Other' | 'Prefer not to say';
 
