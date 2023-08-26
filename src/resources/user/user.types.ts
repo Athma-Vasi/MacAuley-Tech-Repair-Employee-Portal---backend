@@ -13,8 +13,22 @@ import type {
   PreferredPronouns,
   StoreLocation,
   UserSchema,
+  UserDocument,
 } from './user.model';
 import { GetQueriedResourceRequest } from '../../types';
+
+type DirectoryUserDocument = Omit<
+  UserDocument,
+  | 'password'
+  | '__v'
+  | 'dateOfBirth'
+  | 'address'
+  | 'contactNumber'
+  | 'emergencyContact'
+  | 'startDate'
+  | 'completedSurveys'
+  | 'email'
+>;
 
 interface CreateNewUserRequest {
   body: {
@@ -34,6 +48,8 @@ interface DeleteUserRequest extends RequestAfterJWTVerification {
 }
 
 type GetAllUsersRequest = GetQueriedResourceRequest;
+
+type GetUsersDirectoryRequest = RequestAfterJWTVerification;
 
 interface GetUserByIdRequest extends RequestAfterJWTVerification {
   body: {
@@ -69,12 +85,6 @@ interface UpdateUserPasswordRequest extends RequestAfterJWTVerification {
   };
 }
 
-/**
- *
- *
- *
- */
-
 export type {
   CreateNewUserRequest,
   DeleteUserRequest,
@@ -82,4 +92,6 @@ export type {
   GetUserByIdRequest,
   UpdateUserRequest,
   UpdateUserPasswordRequest,
+  GetUsersDirectoryRequest,
+  DirectoryUserDocument,
 };

@@ -92,7 +92,8 @@ type ExecutiveManagement =
   | 'Chief Operations Officer'
   | 'Chief Financial Officer'
   | 'Chief Technology Officer'
-  | 'Chief Marketing Officer';
+  | 'Chief Marketing Officer'
+  | 'Chief Human Resources Officer';
 
 type AdministrativeDepartment =
   | 'Store Manager'
@@ -100,7 +101,6 @@ type AdministrativeDepartment =
   | 'Shift Supervisor'
   | 'Office Manager'
   | 'Administrative Assistant'
-  | 'Human Resources Manager'
   | 'Accountant';
 
 type SalesAndMarketing =

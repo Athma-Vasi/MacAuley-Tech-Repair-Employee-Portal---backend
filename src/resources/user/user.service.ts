@@ -23,6 +23,7 @@ import {
   QueriedResourceGetRequestServiceInput,
   QueriedTotalResourceGetRequestServiceInput,
 } from '../../types';
+import { DirectoryUserDocument } from './user.types';
 
 type CheckUserExistsServiceInput = {
   email?: string | undefined;
@@ -176,6 +177,26 @@ async function getQueriedTotalUsersService({
   }
 }
 
+async function getUsersDirectoryService(): Promise<DirectoryUserDocument[]> {
+  try {
+    const exclusionArray = [
+      '-password',
+      '-__v',
+      '-dateOfBirth',
+      '-address',
+      '-contactNumber',
+      '-emergencyContact',
+      '-startDate',
+      '-completedSurveys',
+      '-email',
+    ];
+    const users = await UserModel.find().select(exclusionArray).lean().exec();
+    return users;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'getUsersDirectoryService' });
+  }
+}
+
 async function updateUserByIdService({
   userId,
   userFields,
@@ -251,5 +272,6 @@ export {
   checkUserPasswordService,
   updateUserPasswordService,
   getUserWithPasswordService,
+  getUsersDirectoryService,
   getAllUsersService,
 };

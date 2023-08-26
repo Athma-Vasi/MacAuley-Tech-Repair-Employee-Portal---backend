@@ -6,6 +6,7 @@ import {
   deleteUserHandler,
   getQueriedUsersHandler,
   getUserByIdHandler,
+  getUsersDirectoryHandler,
   updateUserByIdHandler,
   updateUserPasswordHandler,
 } from './user.controller';
@@ -30,6 +31,8 @@ userRouter
 userRouter
   .route('/update-password')
   .put(verifyJWTMiddleware, verifyRoles(), updateUserPasswordHandler);
+
+userRouter.route('/directory').get(verifyJWTMiddleware, verifyRoles(), getUsersDirectoryHandler);
 
 userRouter.route('/:userId').get(verifyJWTMiddleware, verifyRoles(), getUserByIdHandler);
 

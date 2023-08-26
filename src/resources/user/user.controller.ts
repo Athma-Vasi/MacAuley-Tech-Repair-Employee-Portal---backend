@@ -4,8 +4,10 @@ import type { Response } from 'express';
 import type {
   CreateNewUserRequest,
   DeleteUserRequest,
+  DirectoryUserDocument,
   GetAllUsersRequest,
   GetUserByIdRequest,
+  GetUsersDirectoryRequest,
   UpdateUserPasswordRequest,
   UpdateUserRequest,
 } from './user.types';
@@ -20,6 +22,7 @@ import {
   updateUserPasswordService,
   updateUserByIdService,
   getUserByIdService,
+  getUsersDirectoryService,
 } from './user.service';
 import { returnEmptyFieldsTuple } from '../../utils';
 import { UserDocument, UserSchema } from './user.model';
@@ -31,7 +34,7 @@ import {
 import { FilterQuery, QueryOptions } from 'mongoose';
 
 // @desc   Create new user
-// @route  POST /users
+// @route  POST /user
 // @access Private
 const createNewUserHandler = expressAsyncHandler(
   async (
@@ -150,8 +153,33 @@ const createNewUserHandler = expressAsyncHandler(
   }
 );
 
+// @desc   Get users directory
+// @route  GET /user/directory
+// @access Private
+const getUsersDirectoryHandler = expressAsyncHandler(
+  async (
+    _request: GetUsersDirectoryRequest,
+    response: Response<ResourceRequestServerResponse<DirectoryUserDocument>>
+  ) => {
+    // fetch all users
+    const users = await getUsersDirectoryService();
+    if (!users.length) {
+      response.status(200).json({
+        message: 'No users were found',
+        resourceData: [],
+      });
+      return;
+    }
+
+    response.status(200).json({
+      message: 'Successfully found users',
+      resourceData: users,
+    });
+  }
+);
+
 // @desc   Get all users
-// @route  GET /users
+// @route  GET /user
 // @access Private
 const getQueriedUsersHandler = expressAsyncHandler(
   async (
@@ -197,7 +225,7 @@ const getQueriedUsersHandler = expressAsyncHandler(
 );
 
 // @desc   Get a user by id
-// @route  GET /users/:id
+// @route  GET /user/:id
 // @access Private
 const getUserByIdHandler = expressAsyncHandler(
   async (
@@ -216,7 +244,7 @@ const getUserByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Delete a user
-// @route  DELETE /users
+// @route  DELETE /user
 // @access Private
 const deleteUserHandler = expressAsyncHandler(
   async (
@@ -244,7 +272,7 @@ const deleteUserHandler = expressAsyncHandler(
 );
 
 // @desc   Update a user
-// @route  PATCH /users
+// @route  PATCH /user
 // @access Private
 const updateUserByIdHandler = expressAsyncHandler(
   async (
@@ -273,7 +301,7 @@ const updateUserByIdHandler = expressAsyncHandler(
 );
 
 // @desc   update user password
-// @route  PATCH /users/password
+// @route  PATCH /user/password
 // @access Private
 const updateUserPasswordHandler = expressAsyncHandler(
   async (
@@ -321,6 +349,7 @@ export {
   deleteUserHandler,
   getQueriedUsersHandler,
   updateUserByIdHandler,
+  getUsersDirectoryHandler,
   updateUserPasswordHandler,
   getUserByIdHandler,
 };
