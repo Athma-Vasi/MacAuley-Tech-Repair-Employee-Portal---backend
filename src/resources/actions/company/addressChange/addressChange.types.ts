@@ -22,8 +22,8 @@ interface CreateNewAddressChangeRequest extends RequestAfterJWTVerification {
       contactNumber: PhoneNumber;
       addressLine: string;
       city: string;
-      province: Province;
-      state: StatesUS;
+      province?: Province;
+      state?: StatesUS;
       postalCode: PostalCode;
       country: Country;
 

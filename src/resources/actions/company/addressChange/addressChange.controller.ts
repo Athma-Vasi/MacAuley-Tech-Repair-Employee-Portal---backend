@@ -135,21 +135,23 @@ const getQueriedAddressChangesHandler = expressAsyncHandler(
       projection: projection as QueryOptions<AddressChangeDocument>,
       options: options as QueryOptions<AddressChangeDocument>,
     });
-    if (addressChange.length === 0) {
+
+    if (!addressChange.length) {
       response.status(200).json({
         message: 'No address changes that match query parameters were found',
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
       });
-    } else {
-      response.status(200).json({
-        message: 'Address changes found successfully',
-        pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments,
-        resourceData: addressChange,
-      });
+      return;
     }
+
+    response.status(200).json({
+      message: 'Address changes found successfully',
+      pages: Math.ceil(totalDocuments / Number(options?.limit)),
+      totalDocuments,
+      resourceData: addressChange,
+    });
   }
 );
 
