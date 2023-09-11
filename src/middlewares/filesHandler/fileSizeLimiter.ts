@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { FileUploadObject } from '../../types';
 
-const MB = 3; // 3MB
+const MB = 1; // 1MB
 const FILE_SIZE_LIMIT = MB * 1024 * 1024;
 
 function fileSizeLimiterMiddleware(request: Request, response: Response, next: NextFunction) {

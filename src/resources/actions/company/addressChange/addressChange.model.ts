@@ -2,7 +2,7 @@ import { Schema, Types, model } from 'mongoose';
 
 import type { Action } from '../../../actions';
 import type { ActionsCompany } from '../../../actions/company';
-import type { Country, PostalCode, Province, StatesUS } from '../../../user';
+import type { Country, PhoneNumber, PostalCode, Province, StatesUS } from '../../../user';
 import { RequestStatus } from '../../../../types';
 
 type AddressChangeSchema = {
@@ -11,10 +11,11 @@ type AddressChangeSchema = {
   action: Action;
   category: ActionsCompany;
 
+  contactNumber: PhoneNumber;
   addressLine: string;
   city: string;
-  province: Province | '';
-  state: StatesUS | '';
+  province?: Province;
+  state?: StatesUS;
   postalCode: PostalCode;
   country: Country;
 
@@ -53,6 +54,10 @@ const addressChangeSchema = new Schema<AddressChangeSchema>(
       index: true,
     },
 
+    contactNumber: {
+      type: String,
+      required: [true, 'Contact number is required'],
+    },
     addressLine: {
       type: String,
       required: [true, 'Address line is required'],

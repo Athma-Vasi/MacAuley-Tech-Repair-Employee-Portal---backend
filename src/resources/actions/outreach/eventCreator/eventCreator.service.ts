@@ -103,6 +103,7 @@ async function updateAnEventByIdService({
     const event = await EventCreatorModel.findByIdAndUpdate(eventId, eventToBeUpdated, {
       new: true,
     })
+      .select(['-__v', '-action', '-category'])
       .lean()
       .exec();
     return event;

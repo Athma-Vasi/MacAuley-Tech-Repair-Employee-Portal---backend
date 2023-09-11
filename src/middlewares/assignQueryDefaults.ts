@@ -182,6 +182,32 @@ const assignQueryDefaults =
 
     next();
     return;
+
+    /**
+     * example: here is a sample query object before transformation:
+     * queryObject:  {
+          createdAt: { eq: '2023-11-11' },
+          reasonForLeave: { in: 'Vacation' },
+          requestStatus: { in: 'pending' },
+          acknowledgement: { in: 'true' },
+          projection: [ '-action', '-category' ]
+       }
+
+        and here is the transformed query object:
+        {
+          options: { sort: { createdAt: -1, _id: -1 }, limit: 10, skip: 0 },
+          projection: [ '-action', '-category', '-__v' ],
+            filter: {
+              createdAt: { '$eq': '2023-11-11' },
+              reasonForLeave: { '$in': ['Vacation'] },
+              requestStatus: { '$in': ['pending'] },
+              acknowledgement: { '$in': ['true'] }
+            }
+        }
+
+
+        
+     */
   };
 
 export { assignQueryDefaults };

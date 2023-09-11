@@ -97,7 +97,7 @@ async function updateExpenseClaimByIdService({
       { $set: fieldsToUpdate },
       { new: true }
     )
-      .select('-__v')
+      .select(['-__v', '-action', '-category'])
       .lean()
       .exec();
     return expenseClaim;

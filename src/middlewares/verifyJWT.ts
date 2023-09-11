@@ -36,20 +36,22 @@ function verifyJWTMiddleware(
       configurable: true,
     };
 
-    const newBody = Object.defineProperty({}, 'userInfo', {
+    console.log('original request.body: ', request.body);
+
+    const userInfoBody = Object.defineProperty(Object.create(null), 'userInfo', {
       value: userInfo,
       ...propertyDescriptor,
     });
 
     Object.defineProperty(request, 'body', {
-      value: newBody,
+      value: { ...request.body, ...userInfoBody },
       ...propertyDescriptor,
     });
 
     console.log('\n');
     console.group('verifyJWTMiddleware');
     console.log('decoded: ', decoded);
-    console.log('request.body: ', request.body);
+    console.log('modified request.body: ', request.body);
     console.groupEnd();
 
     next();

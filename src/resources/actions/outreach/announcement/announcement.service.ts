@@ -117,7 +117,7 @@ async function updateAnnouncementService({
       { ...announcementFields },
       { new: true }
     )
-      .select('-__v')
+      .select(['-__v', '-action', '-category'])
       .lean()
       .exec();
     return announcement;

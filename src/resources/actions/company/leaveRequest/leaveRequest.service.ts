@@ -86,7 +86,7 @@ async function updateLeaveRequestStatusByIdService({
       { requestStatus },
       { new: true }
     )
-      .select('-__v')
+      .select(['-__v', '-action', '-category'])
       .lean()
       .exec();
     return leaveRequest;

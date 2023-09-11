@@ -42,7 +42,16 @@ const createNewAddressChangeHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      addressChange: { acknowledgement, addressLine, city, country, postalCode, province, state },
+      addressChange: {
+        contactNumber,
+        acknowledgement,
+        addressLine,
+        city,
+        country,
+        postalCode,
+        province,
+        state,
+      },
     } = request.body;
 
     // user must acknowledge that new address is correct
@@ -59,14 +68,7 @@ const createNewAddressChangeHandler = expressAsyncHandler(
     }
 
     const { address: oldAddress } = userExists;
-    const newAddress = {
-      addressLine,
-      city,
-      country,
-      postalCode,
-      province,
-      state,
-    };
+    const newAddress = { contactNumber, addressLine, city, country, postalCode, province, state };
     // check if new address is the same as current address
     if (JSON.stringify(newAddress) === JSON.stringify(oldAddress)) {
       response
@@ -81,6 +83,7 @@ const createNewAddressChangeHandler = expressAsyncHandler(
       username,
       action: 'company',
       category: 'address change',
+      contactNumber,
       addressLine,
       city,
       country,
@@ -133,7 +136,7 @@ const getQueriedAddressChangesHandler = expressAsyncHandler(
       options: options as QueryOptions<AddressChangeDocument>,
     });
     if (addressChange.length === 0) {
-      response.status(404).json({
+      response.status(200).json({
         message: 'No address changes that match query parameters were found',
         pages: 0,
         totalDocuments: 0,
@@ -184,7 +187,7 @@ const getAddressChangesByUserHandler = expressAsyncHandler(
       options: options as QueryOptions<AddressChangeDocument>,
     });
     if (addressChanges.length === 0) {
-      response.status(404).json({
+      response.status(200).json({
         message: 'No address change requests found',
         pages: 0,
         totalDocuments: 0,

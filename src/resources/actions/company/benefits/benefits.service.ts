@@ -69,6 +69,7 @@ async function updateBenefitStatusByIdService({
       { requestStatus },
       { new: true }
     )
+      .select(['-__v', '-action', '-category'])
       .lean()
       .exec();
     return benefit;

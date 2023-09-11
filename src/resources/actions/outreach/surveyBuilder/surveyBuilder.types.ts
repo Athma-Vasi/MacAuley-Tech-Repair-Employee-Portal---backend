@@ -63,7 +63,7 @@ interface UpdateSurveyStatisticsByIdRequest extends RequestAfterJWTVerification 
     };
     surveyResponses: {
       question: string;
-      responseInput: SurveyResponseInput;
+      inputKind: SurveyResponseInput;
       response: string[] | string | number;
     }[];
   };

@@ -75,69 +75,110 @@ type PostalCode = CanadianPostalCode | USPostalCode;
 type PhoneNumber =
   `+(${string})(${string}${string}${string}) ${string}${string}${string}-${string}${string}${string}${string}`;
 type Country = 'Canada' | 'United States';
+type StoreLocation = 'Calgary' | 'Edmonton' | 'Vancouver';
 
 type Department =
   | 'Executive Management'
-  | 'Administrative'
-  | 'Sales and Marketing'
+  | 'Store Administration'
+  | 'Office Administration'
+  | 'Accounting'
+  | 'Human Resources'
+  | 'Sales'
+  | 'Marketing'
   | 'Information Technology'
   | 'Repair Technicians'
   | 'Field Service Technicians'
   | 'Logistics and Inventory'
-  | 'Customer Service';
+  | 'Customer Service'
+  | 'Maintenance';
 
-type StoreLocation = 'Calgary' | 'Edmonton' | 'Vancouver';
 type ExecutiveManagement =
   | 'Chief Executive Officer'
   | 'Chief Operations Officer'
   | 'Chief Financial Officer'
   | 'Chief Technology Officer'
   | 'Chief Marketing Officer'
+  | 'Chief Sales Officer'
   | 'Chief Human Resources Officer';
 
-type AdministrativeDepartment =
-  | 'Store Manager'
-  | 'Assistant Store Manager'
-  | 'Shift Supervisor'
-  | 'Office Manager'
-  | 'Administrative Assistant'
-  | 'Accountant';
+type HumanResources =
+  | 'Human Resources Manager'
+  | 'Compensation and Benefits Specialist'
+  | 'Health and Safety Specialist'
+  | 'Training Specialist'
+  | 'Recruiting Specialist';
 
-type SalesAndMarketing =
+type StoreAdministration = 'Store Manager' | 'Shift Supervisor' | 'Office Manager';
+
+type OfficeAdministration = 'Office Administrator' | 'Receptionist' | 'Data Entry Specialist';
+
+type Accounting =
+  | 'Accounting Manager'
+  | 'Accounts Payable Clerk'
+  | 'Accounts Receivable Clerk'
+  | 'Financial Analyst';
+
+type Sales =
   | 'Sales Manager'
-  | 'Marketing Manager'
   | 'Sales Representative'
-  | 'Digital Marketing Specialist';
+  | 'Business Development Specialist'
+  | 'Sales Support Specialist'
+  | 'Sales Operations Analyst';
+
+type Marketing =
+  | 'Marketing Manager'
+  | 'Digital Marketing Specialist'
+  | 'Graphic Designer'
+  | 'Public Relations Specialist'
+  | 'Marketing Analyst';
 
 type InformationTechnology =
   | 'IT Manager'
-  | 'Network Administrator'
   | 'Systems Administrator'
   | 'IT Support Specialist'
-  | 'Database Administrator';
+  | 'Database Administrator'
+  | 'Web Developer'
+  | 'Software Developer'
+  | 'Software Engineer';
 
 type RepairTechnicians =
-  | 'Electronics Repair Technician'
-  | 'Computer Repair Technician'
-  | 'Smartphone Repair Technician'
-  | 'Tablet Repair Technician'
-  | 'Audio/Video Equipment Repair Technician';
+  | 'Repair Technicians Supervisor'
+  | 'Electronics Technician'
+  | 'Computer Technician'
+  | 'Smartphone Technician'
+  | 'Tablet Technician'
+  | 'Audio/Video Equipment Technician';
 
-type FieldServiceTechnicians = 'On-Site Repair Technician' | 'Mobile Device Technician';
+type FieldServiceTechnicians = 'Field Service Supervisor' | 'On-Site Technician';
 
-type LogisticsAndInventory = 'Warehouse Manager' | 'Inventory Clerk' | 'Delivery Driver';
+type LogisticsAndInventory =
+  | 'Warehouse Supervisor'
+  | 'Inventory Clerk'
+  | 'Delivery Driver'
+  | 'Parts and Materials Handler'
+  | 'Shipper/Receiver';
 
-type CustomerService = 'Customer Service Representative' | 'Technical Support Specialist';
+type CustomerService =
+  | 'Customer Service Supervisor'
+  | 'Customer Service Representative'
+  | 'Technical Support Specialist';
+
+type Maintenance = 'Maintenance Supervisor' | 'Maintenance Worker' | 'Custodian';
 
 type JobPosition =
   | ExecutiveManagement
-  | AdministrativeDepartment
-  | SalesAndMarketing
+  | StoreAdministration
+  | OfficeAdministration
+  | Sales
+  | Marketing
   | InformationTechnology
   | RepairTechnicians
   | FieldServiceTechnicians
   | LogisticsAndInventory
-  | CustomerService;
+  | CustomerService
+  | HumanResources
+  | Accounting
+  | Maintenance;
 
 type PreferredPronouns = 'He/Him' | 'She/Her' | 'They/Them' | 'Other' | 'Prefer not to say';
 
@@ -158,15 +199,15 @@ type UserSchema = {
   address: {
     addressLine: string;
     city: string;
-    province: Province | '';
-    state: StatesUS | '';
+    province?: Province;
+    state?: StatesUS;
     postalCode: PostalCode;
     country: Country;
   };
 
   jobPosition: JobPosition;
   department: Department;
-  storeLocation: StoreLocation;
+  storeLocation?: StoreLocation;
 
   emergencyContact: {
     fullName: string;
@@ -184,6 +225,32 @@ type UserDocument = UserSchema & {
   createdAt: NativeDate;
   updatedAt: NativeDate;
   __v: number;
+};
+
+//  subset of UserDocument used only for Directory page
+type DirectoryUserDocument = {
+  username: string;
+  email: string;
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  preferredName: string;
+  preferredPronouns: PreferredPronouns;
+  profilePictureUrl: string;
+
+  contactNumber: PhoneNumber;
+  address: {
+    city: string;
+    province?: Province;
+    state?: StatesUS;
+    country: Country;
+  };
+
+  jobPosition: JobPosition;
+  department: Department;
+  storeLocation?: StoreLocation;
+  startDate: NativeDate;
+  active: boolean;
 };
 
 const userSchema = new Schema<UserSchema>(
@@ -253,12 +320,10 @@ const userSchema = new Schema<UserSchema>(
       province: {
         type: String,
         required: false,
-        default: '',
       },
       state: {
         type: String,
         required: false,
-        default: '',
       },
       postalCode: {
         type: String,
@@ -280,7 +345,7 @@ const userSchema = new Schema<UserSchema>(
     },
     storeLocation: {
       type: String,
-      required: [true, 'Store location is required'],
+      required: false,
     },
 
     emergencyContact: {
@@ -335,4 +400,5 @@ export type {
   PreferredPronouns,
   StatesUS,
   StoreLocation,
+  DirectoryUserDocument,
 };

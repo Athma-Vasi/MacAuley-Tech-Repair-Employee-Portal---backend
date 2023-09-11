@@ -1,34 +1,8 @@
 import { Types } from 'mongoose';
 
 import type { RequestAfterJWTVerification } from '../auth';
-import type {
-  UserRoles,
-  Country,
-  Department,
-  JobPosition,
-  PhoneNumber,
-  PostalCode,
-  Province,
-  StatesUS,
-  PreferredPronouns,
-  StoreLocation,
-  UserSchema,
-  UserDocument,
-} from './user.model';
+import type { UserRoles, UserSchema, UserDocument, DirectoryUserDocument } from './user.model';
 import { GetQueriedResourceRequest } from '../../types';
-
-type DirectoryUserDocument = Omit<
-  UserDocument,
-  | 'password'
-  | '__v'
-  | 'dateOfBirth'
-  | 'address'
-  | 'contactNumber'
-  | 'emergencyContact'
-  | 'startDate'
-  | 'completedSurveys'
-  | 'email'
->;
 
 interface CreateNewUserRequest {
   body: {

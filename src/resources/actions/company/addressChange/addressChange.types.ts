@@ -1,6 +1,13 @@
 import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
-import type { Country, PostalCode, Province, StatesUS, UserRoles } from '../../../user';
+import type {
+  Country,
+  PhoneNumber,
+  PostalCode,
+  Province,
+  StatesUS,
+  UserRoles,
+} from '../../../user';
 import { GetQueriedResourceRequest, RequestStatus } from '../../../../types';
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
@@ -12,6 +19,7 @@ interface CreateNewAddressChangeRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     addressChange: {
+      contactNumber: PhoneNumber;
       addressLine: string;
       city: string;
       province: Province;

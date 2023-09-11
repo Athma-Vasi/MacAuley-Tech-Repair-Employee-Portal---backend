@@ -202,6 +202,8 @@ const updateSurveyStatisticsByIdHandler = expressAsyncHandler(
       userInfo: { userId },
     } = request.body;
 
+    console.log({ surveyResponses, userId, surveyId });
+
     // check that survey exists
     const surveyToUpdate = await getSurveyByIdService(surveyId);
     if (!surveyToUpdate) {
@@ -214,7 +216,7 @@ const updateSurveyStatisticsByIdHandler = expressAsyncHandler(
 
     // update survey statistics
     const updatedSurveyStatistics = surveyResponses.reduce(
-      (surveyStatisticsAcc, { question, response, responseInput }) => {
+      (surveyStatisticsAcc, { question, response, inputKind }) => {
         // find question in survey statistics
         const statisticsIdx = surveyStatisticsAcc.findIndex(
           (surveyStatistic) => surveyStatistic.question === question

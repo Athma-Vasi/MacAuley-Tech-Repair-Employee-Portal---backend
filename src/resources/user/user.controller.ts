@@ -65,39 +65,12 @@ const createNewUserHandler = expressAsyncHandler(
         completedSurveys,
       },
     } = request.body;
-    const { addressLine, city, province, state, postalCode, country } = address;
-    const { fullName, contactNumber: emergencyContactNumber } = emergencyContact;
+    const { province, state } = address;
 
-    // both state and province cannot be empty (one is required)
+    // both state and province cannot be undefined (one is required)
     if (!state && !province) {
       response.status(400).json({
         message: 'State or province is required',
-        resourceData: [],
-      });
-      return;
-    }
-
-    const isFieldsEmpty: [string, boolean][] = returnEmptyFieldsTuple({
-      email,
-      username,
-      password,
-      firstName,
-      lastName,
-      contactNumber,
-      addressLine,
-      city,
-      startDate,
-      country,
-      postalCode,
-      jobPosition,
-      department,
-      fullName,
-      emergencyContactNumber,
-    });
-
-    if (isFieldsEmpty.length > 0) {
-      response.status(400).json({
-        message: `${isFieldsEmpty.map(([field, _]) => field).join(', ')} are required`,
         resourceData: [],
       });
       return;
