@@ -127,7 +127,7 @@ const getAllBenefitsHandler = expressAsyncHandler(
       options: options as QueryOptions<BenefitsDocument>,
     });
     if (allBenefitsPlans.length === 0) {
-      response.status(404).json({
+      response.status(200).json({
         message: 'No benefits that match query parameters were found',
         pages: 0,
         totalDocuments: 0,
@@ -176,7 +176,7 @@ const getQueriedBenefitsByUserHandler = expressAsyncHandler(
       options: options as QueryOptions<BenefitsDocument>,
     });
     if (benefits.length === 0) {
-      response.status(404).json({
+      response.status(200).json({
         message: 'No benefits that match query parameters were found',
         pages: 0,
         totalDocuments: 0,

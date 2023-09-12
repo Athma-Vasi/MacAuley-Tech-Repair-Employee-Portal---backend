@@ -79,7 +79,7 @@ const createNewLeaveRequestHandler = expressAsyncHandler(
     // check if new leave request was created
     if (newLeaveRequest) {
       response.status(201).json({
-        message: 'New leave request created successfully',
+        message: `Successfully created ${reasonForLeave} leave request`,
         resourceData: [newLeaveRequest],
       });
     } else {

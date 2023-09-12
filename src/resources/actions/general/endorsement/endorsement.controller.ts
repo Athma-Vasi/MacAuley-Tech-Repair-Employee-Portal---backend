@@ -93,7 +93,7 @@ const getQueriedEndorsementsHandler = expressAsyncHandler(
       options: options as QueryOptions<EndorsementDocument>,
     });
     if (endorsements.length === 0) {
-      response.status(404).json({
+      response.status(200).json({
         message: 'No endorsements that match query parameters were found',
         pages: 0,
         totalDocuments: 0,
@@ -142,7 +142,7 @@ const getQueriedEndorsementsByUserHandler = expressAsyncHandler(
       options: options as QueryOptions<EndorsementDocument>,
     });
     if (endorsements.length === 0) {
-      response.status(404).json({
+      response.status(200).json({
         message: 'No endorsements that match query parameters were found',
         pages: 0,
         totalDocuments: 0,

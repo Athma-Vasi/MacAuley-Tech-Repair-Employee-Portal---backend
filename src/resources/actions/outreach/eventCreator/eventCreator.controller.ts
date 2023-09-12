@@ -78,7 +78,9 @@ const createNewEventHandler = expressAsyncHandler(
     // create new event
     const newEvent = await createNewEventService(newEventObject);
     if (newEvent) {
-      response.status(201).json({ message: 'New event created', resourceData: [newEvent] });
+      response
+        .status(201)
+        .json({ message: `Successfully created event: ${eventTitle}`, resourceData: [newEvent] });
     } else {
       response.status(400).json({ message: 'Unable to create new event', resourceData: [] });
     }
@@ -111,7 +113,7 @@ const getQueriedEventsHandler = expressAsyncHandler(
       options: options as QueryOptions<EventCreatorDocument>,
     });
     if (events.length === 0) {
-      response.status(404).json({
+      response.status(200).json({
         message: 'No events that match query parameters were found',
         pages: 0,
         totalDocuments: 0,
@@ -159,7 +161,7 @@ const getQueriedEventsByUserHandler = expressAsyncHandler(
       options: options as QueryOptions<EventCreatorDocument>,
     });
     if (events.length === 0) {
-      response.status(404).json({
+      response.status(200).json({
         message: 'No events found',
         pages: 0,
         totalDocuments: 0,

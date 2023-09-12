@@ -100,7 +100,7 @@ const getQueriedAnonymousRequestsHandler = expressAsyncHandler(
       options: options as QueryOptions<AnonymousRequestDocument>,
     });
     if (anonymousRequests.length === 0) {
-      response.status(404).json({
+      response.status(200).json({
         message: 'No anonymous requests that match query parameters were found',
         pages: 0,
         totalDocuments: 0,

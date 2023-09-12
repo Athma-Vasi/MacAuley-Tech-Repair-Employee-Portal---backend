@@ -73,7 +73,7 @@ const createNewRequestResourceHandler = expressAsyncHandler(
     const newRequestResource = await createNewRequestResourceService(newRequestResourceObject);
     if (newRequestResource) {
       response.status(201).json({
-        message: 'New request resource created',
+        message: `New request resource of kind ${resourceType} for ${department} created`,
         resourceData: [newRequestResource],
       });
     } else {
@@ -110,7 +110,7 @@ const getQueriedRequestResourcesHandler = expressAsyncHandler(
       options: options as QueryOptions<RequestResourceDocument>,
     });
     if (resourceRequests.length === 0) {
-      response.status(404).json({
+      response.status(200).json({
         message: 'No resource requests that match query parameters were found',
         pages: 0,
         totalDocuments: 0,
@@ -158,7 +158,7 @@ const getRequestResourceByUserHandler = expressAsyncHandler(
       options: options as QueryOptions<RequestResourceDocument>,
     });
     if (resourceRequests.length === 0) {
-      response.status(404).json({
+      response.status(200).json({
         message: 'No resource requests found',
         pages: 0,
         totalDocuments: 0,

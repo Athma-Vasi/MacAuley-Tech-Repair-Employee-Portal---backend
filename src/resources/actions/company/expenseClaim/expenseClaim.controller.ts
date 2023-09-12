@@ -166,7 +166,7 @@ const getQueriedExpenseClaimsHandler = expressAsyncHandler(
       options: options as QueryOptions<ExpenseClaimDocument>,
     });
     if (expenseClaims.length === 0) {
-      response.status(404).json({
+      response.status(200).json({
         message: 'No expense claims that match query parameters were found',
         pages: 0,
         totalDocuments: 0,
@@ -244,7 +244,7 @@ const getQueriedExpenseClaimsByUserHandler = expressAsyncHandler(
       options: options as QueryOptions<ExpenseClaimDocument>,
     });
     if (expenseClaims.length === 0) {
-      response.status(404).json({
+      response.status(200).json({
         message: 'No expense claims that match query parameters were found',
         pages: 0,
         totalDocuments: 0,

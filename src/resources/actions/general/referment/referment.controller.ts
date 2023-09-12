@@ -90,7 +90,7 @@ const createNewRefermentHandler = expressAsyncHandler(
     }
 
     response.status(201).json({
-      message: 'New referment created successfully',
+      message: `Successfully submitted candidate ${candidateFullName} for referment.`,
       resourceData: [newReferment],
     });
   }
@@ -122,7 +122,7 @@ const getQueriedRefermentsHandler = expressAsyncHandler(
       options: options as QueryOptions<RefermentDocument>,
     });
     if (referments.length === 0) {
-      response.status(404).json({
+      response.status(200).json({
         message: 'No referments that match query parameters were found',
         pages: 0,
         totalDocuments: 0,
@@ -170,7 +170,7 @@ const getQueriedRefermentsByUserHandler = expressAsyncHandler(
       options: options as QueryOptions<RefermentDocument>,
     });
     if (referments.length === 0) {
-      response.status(404).json({
+      response.status(200).json({
         message: 'No referments found',
         pages: 0,
         totalDocuments: 0,

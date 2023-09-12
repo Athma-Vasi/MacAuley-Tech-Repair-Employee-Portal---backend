@@ -67,7 +67,7 @@ const createNewRepairNoteHandler = expressAsyncHandler(
     }
 
     response.status(201).json({
-      message: 'New repair note created successfully',
+      message: `New repair note for ${repairNote.customerName} created successfully`,
       resourceData: [newRepairNote],
     });
   }

@@ -77,7 +77,7 @@ const createNewPrinterIssueHandler = expressAsyncHandler(
 
     if (newPrinterIssue) {
       response.status(201).json({
-        message: 'Printer issue created successfully',
+        message: `Printer issue: ${title} created successfully`,
         resourceData: [newPrinterIssue],
       });
     } else {
@@ -114,7 +114,7 @@ const getQueriedPrinterIssuesHandler = expressAsyncHandler(
       options: options as QueryOptions<PrinterIssueDocument>,
     });
     if (printerIssues.length === 0) {
-      response.status(404).json({
+      response.status(200).json({
         message: 'No printer issues that match query parameters were found',
         pages: 0,
         totalDocuments: 0,
@@ -164,7 +164,7 @@ const getQueriedPrinterIssuesByUserHandler = expressAsyncHandler(
     });
 
     if (printerIssues.length === 0) {
-      response.status(404).json({
+      response.status(200).json({
         message: 'No printer issues that match query parameters were found',
         pages: 0,
         totalDocuments: 0,
