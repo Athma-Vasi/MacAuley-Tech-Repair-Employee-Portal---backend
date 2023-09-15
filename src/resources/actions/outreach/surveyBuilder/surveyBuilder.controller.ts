@@ -53,7 +53,7 @@ const createNewSurveyHandler = expressAsyncHandler(
       username,
       creatorRole: roles,
       action: 'outreach',
-      category: 'survey builder',
+      category: 'survey',
 
       surveyTitle,
       surveyDescription,

@@ -45,8 +45,9 @@ interface UpdateRepairNoteByIdRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    repairNoteFields: Partial<RepairNoteSchema>;
+    repairNote: Partial<RepairNoteSchema>;
   };
+  params: { repairNoteId: string };
 }
 
 export type {

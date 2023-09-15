@@ -73,17 +73,20 @@ async function getRepairNoteByIdService(
   }
 }
 
-async function updateRepairNoteByIdService(
-  repairNoteId: Types.ObjectId | string,
-  repairNoteFields: Partial<RepairNoteSchema>
-): Promise<DatabaseResponseNullable<RepairNoteDocument>> {
+async function updateRepairNoteByIdService({
+  repairNoteId,
+  repairNoteFields,
+}: {
+  repairNoteId: Types.ObjectId | string;
+  repairNoteFields: Partial<RepairNoteSchema>;
+}): Promise<DatabaseResponseNullable<RepairNoteDocument>> {
   try {
     const repairNote = await RepairNoteModel.findByIdAndUpdate(
       repairNoteId,
       { ...repairNoteFields },
       { new: true }
     )
-      .select('-__v')
+      .select(['-__v', '-action', '-category'])
       .lean()
       .exec();
     return repairNote;

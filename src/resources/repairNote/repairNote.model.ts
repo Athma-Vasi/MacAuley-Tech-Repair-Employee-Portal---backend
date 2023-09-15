@@ -47,8 +47,8 @@ type RepairNoteSchema = {
   customerEmail: string;
   customerAddressLine: string;
   customerCity: string;
-  customerState: StatesUS;
-  customerProvince: Province;
+  customerState?: StatesUS;
+  customerProvince?: Province;
   customerCountry: Country;
   customerPostalCode: PostalCode;
 
@@ -152,11 +152,13 @@ const repairNoteSchema = new Schema<RepairNoteSchema>(
     },
     customerState: {
       type: String,
-      required: [true, 'Customer state is required'],
+      required: false,
+      default: '',
     },
     customerProvince: {
       type: String,
-      required: [true, 'Customer province is required'],
+      required: false,
+      default: '',
     },
     customerCountry: {
       type: String,

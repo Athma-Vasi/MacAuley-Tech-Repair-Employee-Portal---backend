@@ -1,3 +1,3 @@
-type ActionsOutreach = 'survey builder' | 'event creator' | 'announcement';
+type ActionsOutreach = 'survey' | 'event' | 'announcement';
 
 export type { ActionsOutreach };

@@ -32,6 +32,6 @@ repairNoteRouter
   .route('/:repairNoteId')
   .get(getRepairNoteByIdHandler)
   .delete(deleteRepairNoteByIdHandler)
-  .put(updateRepairNoteByIdHandler);
+  .patch(updateRepairNoteByIdHandler);
 
 export { repairNoteRouter };

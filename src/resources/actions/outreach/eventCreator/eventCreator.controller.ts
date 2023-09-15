@@ -60,7 +60,7 @@ const createNewEventHandler = expressAsyncHandler(
       username,
       creatorRole: roles,
       action: 'outreach',
-      category: 'event creator',
+      category: 'event',
 
       eventTitle,
       eventDescription,

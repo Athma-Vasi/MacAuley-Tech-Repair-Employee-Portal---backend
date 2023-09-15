@@ -255,10 +255,13 @@ const updateRepairNoteByIdHandler = expressAsyncHandler(
     response: Response<ResourceRequestServerResponse<RepairNoteDocument>>
   ) => {
     const { repairNoteId } = request.params;
-    const { repairNoteFields } = request.body;
+    const { repairNote } = request.body;
 
     // update repair note by id
-    const updatedRepairNote = await updateRepairNoteByIdService(repairNoteId, repairNoteFields);
+    const updatedRepairNote = await updateRepairNoteByIdService({
+      repairNoteId,
+      repairNoteFields: repairNote,
+    });
     if (!updatedRepairNote) {
       response.status(400).json({
         message: 'Unable to update repair note. Please try again!',

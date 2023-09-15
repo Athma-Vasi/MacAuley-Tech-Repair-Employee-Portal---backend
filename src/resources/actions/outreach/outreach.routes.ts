@@ -5,8 +5,8 @@ import { announcementRouter } from './announcement';
 
 const actionsOutreachRouter = Router();
 
-actionsOutreachRouter.use('/survey-builder', surveyBuilderRouter);
-actionsOutreachRouter.use('/event-creator', eventCreatorRouter);
+actionsOutreachRouter.use('/survey', surveyBuilderRouter);
+actionsOutreachRouter.use('/event', eventCreatorRouter);
 actionsOutreachRouter.use('/announcement', announcementRouter);
 
 export { actionsOutreachRouter };
