@@ -7,7 +7,7 @@ import type {
   SurveyResponseInput,
   SurveyResponseKind,
   SurveyStatistics,
-} from './surveyBuilder.model';
+} from './survey.model';
 import type { UserRoles } from '../../../user';
 import { GetQueriedResourceRequest } from '../../../../types';
 

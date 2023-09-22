@@ -126,12 +126,13 @@ const getQueriedAnnouncementsHandler = expressAsyncHandler(
     });
 
     if (!announcements?.length) {
-      response.status(404).json({
+      response.status(200).json({
         message: 'No announcements that match query parameters were found',
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
       });
+      return;
     }
 
     response.status(200).json({
@@ -176,7 +177,7 @@ const getQueriedAnouncementsByUserHandler = expressAsyncHandler(
     });
 
     if (!announcements?.length) {
-      response.status(404).json({
+      response.status(200).json({
         message: 'No announcements that match query parameters were found',
         pages: 0,
         totalDocuments: 0,

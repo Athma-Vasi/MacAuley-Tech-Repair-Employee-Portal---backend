@@ -6,8 +6,8 @@
  * Imports
  */
 
-import { EventCreatorModel } from './eventCreator.model';
-import { eventCreatorRouter } from './eventCreator.routes';
+import { EventCreatorModel } from './event.model';
+import { eventCreatorRouter } from './event.routes';
 import {
   createNewEventHandler,
   deleteAllEventsByUserHandler,
@@ -16,7 +16,7 @@ import {
   getEventByIdHandler,
   getQueriedEventsByUserHandler,
   updateAnEventHandler,
-} from './eventCreator.controller';
+} from './event.controller';
 import {
   createNewEventService,
   deleteAllEventsByUserService,
@@ -25,7 +25,7 @@ import {
   getEventByIdService,
   getQueriedEventsByUserService,
   updateAnEventByIdService,
-} from './eventCreator.service';
+} from './event.service';
 
 import type {
   CreateNewEventRequest,
@@ -35,8 +35,8 @@ import type {
   GetEventByIdRequest,
   GetQueriedEventsByUserRequest,
   UpdateAnEventByIdRequest,
-} from './eventCreator.types';
-import type { EventCreatorDocument, EventCreatorSchema, EventKind } from './eventCreator.model';
+} from './event.types';
+import type { EventCreatorDocument, EventCreatorSchema, EventKind } from './event.model';
 
 /**
  * Exports

@@ -10,7 +10,7 @@ import type {
   GetEventByIdRequest,
   GetQueriedEventsByUserRequest,
   UpdateAnEventByIdRequest,
-} from './eventCreator.types';
+} from './event.types';
 import {
   createNewEventService,
   deleteAllEventsByUserService,
@@ -20,8 +20,8 @@ import {
   getQueriedEventsByUserService,
   updateAnEventByIdService,
   getQueriedTotalEventsService,
-} from './eventCreator.service';
-import { EventCreatorDocument, EventCreatorSchema } from './eventCreator.model';
+} from './event.service';
+import { EventCreatorDocument, EventCreatorSchema } from './event.model';
 import {
   GetQueriedResourceRequestServerResponse,
   QueryObjectParsedWithDefaults,

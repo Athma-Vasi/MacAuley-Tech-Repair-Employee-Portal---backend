@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 
 import type { DeleteResult } from 'mongodb';
-import type { EventCreatorDocument, EventCreatorSchema } from './eventCreator.model';
+import type { EventCreatorDocument, EventCreatorSchema } from './event.model';
 import type {
   DatabaseResponse,
   DatabaseResponseNullable,
@@ -9,7 +9,7 @@ import type {
   QueriedTotalResourceGetRequestServiceInput,
 } from '../../../../types';
 
-import { EventCreatorModel } from './eventCreator.model';
+import { EventCreatorModel } from './event.model';
 
 async function createNewEventService(
   newEventObj: EventCreatorSchema

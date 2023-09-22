@@ -67,8 +67,11 @@ const assignQueryDefaults =
 
     // convert query object to string
     let queryString = JSON.stringify(queryObject);
-    // replace gte, gt, lte, lt, eq, in, ne, nin with $gte, $gt, $lte, $lt, $eq, $in, $ne, $nin
-    queryString = queryString.replace(/\b(lte|lt|gte|gt|eq|in|ne|nin)\b/g, (match) => `$${match}`);
+    // replace operator with $operator
+    queryString = queryString.replace(
+      /\b(lte|lt|gte|gt|eq|in|ne|nin|search)\b/g,
+      (match) => `$${match}`
+    );
     // convert string to object
     const mongoDbQueryObject = JSON.parse(queryString);
 
@@ -78,16 +81,59 @@ const assignQueryDefaults =
 
     Object.entries(rest).forEach(([key, value]) => {
       // if keys are in the findQueryOptionsKeywords set, then they will be part of the options object passed in the mongoose find method
-      findQueryOptionsKeywords.has(key)
-        ? Object.defineProperty(options, key, {
-            value,
-            ...propertyDescriptor,
-          })
-        : // else they will be part of the filter object passed in same method
-          Object.defineProperty(filter, key, {
+      if (findQueryOptionsKeywords.has(key)) {
+        Object.defineProperty(options, key, {
+          value,
+          ...propertyDescriptor,
+        });
+      } // else they will be part of the filter object passed in same method
+      else {
+        // if key is text, then it is converted to $text for general text search of entire collection (with fields that have a 'text' index)
+        // from front-end's General Search inside QueryBuilder
+        // ex: { $text: { $search: 'searchTerm1 -searchTerm2', $caseSensitive: "true" } }
+        if (key === 'text') {
+          Object.defineProperty(filter, '$text', {
             value,
             ...propertyDescriptor,
           });
+        }
+        // else convert string array into regex array for case insensitive search per field
+        // from front-end's Search Chain inside QueryBuilder
+        // ex: { field: { $in: [/searchTerm1/i, /searchTerm2/i] } }
+        else {
+          // if value is an object, check if it has a $in property
+          const isInPropertyPresent = Object.hasOwn(value as {}, '$in');
+
+          if (isInPropertyPresent) {
+            let inValue = Object.getOwnPropertyDescriptor(value as {}, '$in')?.value;
+
+            // if value is string, convert to regex
+            if (typeof inValue === 'string') {
+              inValue = new RegExp(inValue, 'i');
+            } else if (Array.isArray(inValue)) {
+              inValue = inValue.flatMap((val: string) => {
+                const splitRegexedVal = val.split(' ').map((word) => new RegExp(word, 'i'));
+
+                return splitRegexedVal;
+              });
+            }
+
+            console.log('inValue: ', inValue);
+
+            Object.defineProperty(filter, key, {
+              value: { $in: inValue },
+              ...propertyDescriptor,
+            });
+          }
+          // ex: { field: { $eq: 'searchTerm' } }
+          else {
+            Object.defineProperty(filter, key, {
+              value,
+              ...propertyDescriptor,
+            });
+          }
+        }
+      }
     });
 
     // set default createdAt sort field if it does not exist: { createdAt: -1, _id: -1 }
@@ -100,6 +146,7 @@ const assignQueryDefaults =
     }
     // if there is only one sort field, _id field with corresponding sort direction is added for consistent results
     // as _id is unique, orderable and immutable
+    // ex: { createdAt: -1, _id: -1 }
     const { sort } = options;
     if (Object.keys(sort).length === 1) {
       const sortDirection = Number(Object.values(sort)[0]) < 0 ? -1 : 1;
@@ -115,24 +162,28 @@ const assignQueryDefaults =
     } else {
       // check if projection is exclusive or inclusive and add -__v to projection exclusion if it does not exist
       if (typeof projection === 'string') {
+        // ex: '-field1 -field2'
         if (projection.startsWith('-')) {
           if (!projection.includes('-__v')) {
             projection = projection.concat(' -__v');
           }
         }
       } else if (Array.isArray(projection)) {
+        // ex: ['-field1', '-field2']
         if (projection[0].startsWith('-')) {
           if (!projection[0].includes('-__v')) {
             projection.push('-__v');
           }
         }
       } else if (typeof projection === 'object') {
+        // ex: { field1: 1, field2: 1 }
         const calculateProjectionScore = (projection: Record<string, number>): number => {
           // rome-ignore lint: basic reduce 【・_・?】
           return Object.values(projection).reduce((acc, curr) => (acc += curr), 0);
         };
         // projection score of 0 means it is exclusive
         if (calculateProjectionScore(projection) === 0) {
+          // ex: { field1: 0, field2: 0 }
           if (!Object.hasOwn(projection, '__v')) {
             Object.defineProperty(projection, '__v', {
               value: 0,
@@ -178,6 +229,7 @@ const assignQueryDefaults =
     console.log('query.newQueryFlag: ', query.newQueryFlag);
     console.log('query.totalDocuments: ', query.totalDocuments);
     console.log({ options, projection, filter });
+    console.log('stringified filter: ', JSON.stringify(filter));
     console.groupEnd();
 
     next();

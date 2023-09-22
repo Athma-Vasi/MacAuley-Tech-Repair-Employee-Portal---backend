@@ -1,7 +1,7 @@
 import { Schema, Types, model } from 'mongoose';
 import type { UserRoles } from '../../../user';
-import type { Action } from '../../../actions';
-import type { ActionsOutreach } from '../../../actions/outreach';
+import type { Action } from '../..';
+import type { ActionsOutreach } from '..';
 import { tr } from 'date-fns/locale';
 
 type SurveyRecipient =

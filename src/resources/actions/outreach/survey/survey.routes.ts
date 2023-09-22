@@ -8,7 +8,7 @@ import {
   getSurveyByIdHandler,
   getQueriedSurveysByUserHandler,
   updateSurveyStatisticsByIdHandler,
-} from './surveyBuilder.controller';
+} from './survey.controller';
 import { assignQueryDefaults, verifyRoles } from '../../../../middlewares';
 import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
 

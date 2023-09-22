@@ -1,11 +1,7 @@
 import { Types } from 'mongoose';
 
 import type { DeleteResult } from 'mongodb';
-import type {
-  SurveyBuilderDocument,
-  SurveyBuilderSchema,
-  SurveyStatistics,
-} from './surveyBuilder.model';
+import type { SurveyBuilderDocument, SurveyBuilderSchema, SurveyStatistics } from './survey.model';
 import type {
   DatabaseResponse,
   DatabaseResponseNullable,
@@ -13,7 +9,7 @@ import type {
   QueriedTotalResourceGetRequestServiceInput,
 } from '../../../../types';
 
-import { SurveyBuilderModel } from './surveyBuilder.model';
+import { SurveyBuilderModel } from './survey.model';
 
 async function createNewSurveyService(
   surveyObj: SurveyBuilderSchema

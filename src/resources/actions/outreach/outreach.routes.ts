@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { surveyBuilderRouter } from './surveyBuilder';
-import { eventCreatorRouter } from './eventCreator';
+import { surveyBuilderRouter } from './survey';
+import { eventCreatorRouter } from './event';
 import { announcementRouter } from './announcement';
 
 const actionsOutreachRouter = Router();

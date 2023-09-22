@@ -2,11 +2,7 @@ import expressAsyncHandler from 'express-async-handler';
 
 import type { DeleteResult } from 'mongodb';
 import type { Response } from 'express';
-import type {
-  SurveyBuilderDocument,
-  SurveyBuilderSchema,
-  SurveyStatistics,
-} from './surveyBuilder.model';
+import type { SurveyBuilderDocument, SurveyBuilderSchema, SurveyStatistics } from './survey.model';
 import type {
   CreateNewSurveyRequest,
   DeleteASurveyRequest,
@@ -15,7 +11,7 @@ import type {
   GetSurveyByIdRequest,
   GetQueriedSurveysByUserRequest,
   UpdateSurveyStatisticsByIdRequest,
-} from './surveyBuilder.types';
+} from './survey.types';
 import {
   createNewSurveyService,
   deleteASurveyService,
@@ -25,7 +21,7 @@ import {
   getQueriedSurveysByUserService,
   getQueriedTotalSurveysService,
   updateSurveyByIdService,
-} from './surveyBuilder.service';
+} from './survey.service';
 import {
   GetQueriedResourceRequestServerResponse,
   QueryObjectParsedWithDefaults,

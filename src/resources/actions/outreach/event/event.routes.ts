@@ -8,7 +8,7 @@ import {
   getEventByIdHandler,
   getQueriedEventsByUserHandler,
   updateAnEventHandler,
-} from './eventCreator.controller';
+} from './event.controller';
 import { assignQueryDefaults, verifyRoles } from '../../../../middlewares';
 import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
 

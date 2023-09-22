@@ -105,6 +105,12 @@ const leaveRequestSchema = new Schema<LeaveRequestSchema>(
   { timestamps: true }
 );
 
+leaveRequestSchema.index({
+  delegatedToEmployee: 'text',
+  delegatedResponsibilities: 'text',
+  additionalComments: 'text',
+});
+
 const LeaveRequestModel = model<LeaveRequestDocument>('LeaveRequest', leaveRequestSchema);
 
 export { LeaveRequestModel };

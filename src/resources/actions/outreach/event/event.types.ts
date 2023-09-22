@@ -2,7 +2,7 @@ import type { Request } from 'express';
 import type { Types } from 'mongoose';
 import type { RequestAfterJWTVerification } from '../../../auth';
 import type { UserRoles } from '../../../user';
-import type { EventCreatorDocument, EventKind } from './eventCreator.model';
+import type { EventCreatorDocument, EventKind } from './event.model';
 import { GetQueriedResourceRequest } from '../../../../types';
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body

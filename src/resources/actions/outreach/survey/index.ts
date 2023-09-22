@@ -6,8 +6,8 @@
  * Imports
  */
 
-import { SurveyBuilderModel } from './surveyBuilder.model';
-import { surveyBuilderRouter } from './surveyBuilder.routes';
+import { SurveyBuilderModel } from './survey.model';
+import { surveyBuilderRouter } from './survey.routes';
 import {
   createNewSurveyHandler,
   deleteASurveyHandler,
@@ -15,7 +15,7 @@ import {
   getQueriedSurveysHandler,
   getSurveyByIdHandler,
   getQueriedSurveysByUserHandler,
-} from './surveyBuilder.controller';
+} from './survey.controller';
 import {
   createNewSurveyService,
   deleteASurveyService,
@@ -23,7 +23,7 @@ import {
   getQueriedSurveysService,
   getSurveyByIdService,
   getQueriedSurveysByUserService,
-} from './surveyBuilder.service';
+} from './survey.service';
 
 import type {
   SurveyBuilderDocument,
@@ -31,7 +31,7 @@ import type {
   SurveyQuestion,
   SurveyRecipient,
   SurveyResponseKind,
-} from './surveyBuilder.model';
+} from './survey.model';
 import type {
   CreateNewSurveyRequest,
   DeleteASurveyRequest,
@@ -39,7 +39,7 @@ import type {
   GetQueriedSurveysRequest,
   GetSurveyByIdRequest,
   GetQueriedSurveysByUserRequest,
-} from './surveyBuilder.types';
+} from './survey.types';
 
 /**
  * Exports
