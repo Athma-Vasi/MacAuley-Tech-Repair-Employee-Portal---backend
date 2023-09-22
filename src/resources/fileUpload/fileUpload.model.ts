@@ -49,12 +49,12 @@ const fileUploadSchema = new Schema<FileUploadSchema>(
     username: {
       type: String,
       required: [true, 'Username is required'],
-      index: true,
     },
 
     fileExtension: {
       type: String,
       required: [true, 'File extension is required'],
+      index: true,
     },
     fileName: {
       type: String,
@@ -77,6 +77,13 @@ const fileUploadSchema = new Schema<FileUploadSchema>(
     timestamps: true,
   }
 );
+
+// text index for searching
+fileUploadSchema.index({
+  username: 'text',
+  fileMimeType: 'text',
+  fileEncoding: 'text',
+});
 
 const FileUploadModel = model<FileUploadDocument>('FileUpload', fileUploadSchema);
 

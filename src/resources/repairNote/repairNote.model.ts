@@ -103,7 +103,6 @@ const repairNoteSchema = new Schema<RepairNoteSchema>(
     username: {
       type: String,
       required: [true, 'Username is required'],
-      index: true,
     },
 
     // part information
@@ -154,15 +153,18 @@ const repairNoteSchema = new Schema<RepairNoteSchema>(
       type: String,
       required: false,
       default: '',
+      index: true,
     },
     customerProvince: {
       type: String,
       required: false,
       default: '',
+      index: true,
     },
     customerCountry: {
       type: String,
       required: [true, 'Customer country is required'],
+      index: true,
     },
     customerPostalCode: {
       type: String,
@@ -191,10 +193,12 @@ const repairNoteSchema = new Schema<RepairNoteSchema>(
     estimatedRepairCost: {
       type: String,
       required: [true, 'Estimated repair cost is required'],
+      index: true,
     },
     estimatedRepairCostCurrency: {
       type: String,
       required: [true, 'Estimated repair cost currency is required'],
+      index: true,
     },
     estimatedCompletionDate: {
       type: Date,
@@ -203,10 +207,12 @@ const repairNoteSchema = new Schema<RepairNoteSchema>(
     repairPriority: {
       type: String,
       required: [true, 'Repair priority is required'],
+      index: true,
     },
     workOrderId: {
       type: Schema.Types.ObjectId,
       required: false,
+      index: true,
     },
 
     // repair notes
@@ -224,22 +230,43 @@ const repairNoteSchema = new Schema<RepairNoteSchema>(
       type: String,
       required: false,
       default: '',
+      index: true,
     },
     finalRepairCostCurrency: {
       type: String,
       required: false,
       default: 'CAD',
+      index: true,
     },
     repairStatus: {
       type: String,
       required: false,
       default: 'In progress',
+      index: true,
     },
   },
   {
     timestamps: true,
   }
 );
+
+// text index for searching
+repairNoteSchema.index({
+  username: 'text',
+  partName: 'text',
+  partSerialId: 'text',
+  descriptionOfIssue: 'text',
+  initialInspectionNotes: 'text',
+  customerName: 'text',
+  customerPhone: 'text',
+  customerEmail: 'text',
+  customerAddressLine: 'text',
+  customerCity: 'text',
+  customerPostalCode: 'text',
+  partsNeededModels: 'text',
+  repairNotes: 'text',
+  testingResults: 'text',
+});
 
 const RepairNoteModel = model<RepairNoteDocument>('RepairNote', repairNoteSchema);
 

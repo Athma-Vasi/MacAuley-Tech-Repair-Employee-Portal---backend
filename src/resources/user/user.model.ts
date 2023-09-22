@@ -259,7 +259,6 @@ const userSchema = new Schema<UserSchema>(
       type: String,
       required: [true, 'Username is required'],
       unique: true,
-      index: true,
     },
     password: {
       type: String,
@@ -293,6 +292,7 @@ const userSchema = new Schema<UserSchema>(
       type: String,
       required: false,
       default: 'Prefer not to say',
+      index: true,
     },
     profilePictureUrl: {
       type: String,
@@ -320,10 +320,12 @@ const userSchema = new Schema<UserSchema>(
       province: {
         type: String,
         required: false,
+        index: true,
       },
       state: {
         type: String,
         required: false,
+        index: true,
       },
       postalCode: {
         type: String,
@@ -332,20 +334,24 @@ const userSchema = new Schema<UserSchema>(
       country: {
         type: String,
         required: [true, 'Country is required'],
+        index: true,
       },
     },
 
     jobPosition: {
       type: String,
       required: [true, 'Job position is required'],
+      index: true,
     },
     department: {
       type: String,
       required: [true, 'Department is required'],
+      index: true,
     },
     storeLocation: {
       type: String,
       required: false,
+      index: true,
     },
 
     emergencyContact: {
@@ -366,11 +372,13 @@ const userSchema = new Schema<UserSchema>(
       type: [String],
       required: false,
       default: ['Employee'],
+      index: true,
     },
     active: {
       type: Boolean,
       required: [true, 'Active status is required'],
       default: true,
+      index: true,
     },
 
     completedSurveys: {
@@ -383,6 +391,23 @@ const userSchema = new Schema<UserSchema>(
     timestamps: true,
   }
 );
+
+// text index for searching
+userSchema.index({
+  username: 'text',
+  email: 'text',
+  firstName: 'text',
+  middleName: 'text',
+  lastName: 'text',
+  preferredName: 'text',
+  contactNumber: 'text',
+  'address.addressLine': 'text',
+  'address.city': 'text',
+  'address.postalCode': 'text',
+  emergencyContact: 'text',
+  'emergencyContact.fullName': 'text',
+  'emergencyContact.contactNumber': 'text',
+});
 
 const UserModel = model<UserDocument>('User', userSchema);
 
