@@ -57,17 +57,14 @@ const expenseClaimSchema = new Schema<ExpenseClaimSchema>(
     username: {
       type: String,
       required: [true, 'Username is required'],
-      index: true,
     },
     action: {
       type: String,
       required: [true, 'Action is required'],
-      index: true,
     },
     category: {
       type: String,
       required: [true, 'Category is required'],
-      index: true,
     },
 
     uploadedFilesIds: {
@@ -79,6 +76,7 @@ const expenseClaimSchema = new Schema<ExpenseClaimSchema>(
     expenseClaimKind: {
       type: String,
       required: [true, 'Expense claim type is required'],
+      index: true,
     },
     expenseClaimAmount: {
       type: Number,
@@ -87,6 +85,7 @@ const expenseClaimSchema = new Schema<ExpenseClaimSchema>(
     expenseClaimCurrency: {
       type: String,
       required: [true, 'Expense claim currency is required'],
+      index: true,
     },
     expenseClaimDate: {
       type: Date,
@@ -116,6 +115,12 @@ const expenseClaimSchema = new Schema<ExpenseClaimSchema>(
     timestamps: true,
   }
 );
+
+expenseClaimSchema.index({
+  username: 'text',
+  expenseClaimDescription: 'text',
+  additionalComments: 'text',
+});
 
 const ExpenseClaimModel = model<ExpenseClaimDocument>('ExpenseClaim', expenseClaimSchema);
 
