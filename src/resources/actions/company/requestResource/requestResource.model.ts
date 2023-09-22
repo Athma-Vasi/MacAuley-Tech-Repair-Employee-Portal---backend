@@ -42,26 +42,25 @@ const requestResourceSchema = new Schema<RequestResourceSchema>(
     username: {
       type: String,
       required: [true, 'Username is required'],
-      index: true,
     },
     action: {
       type: String,
       required: [true, 'Action is required'],
-      index: true,
     },
     category: {
       type: String,
       required: [true, 'Category is required'],
-      index: true,
     },
 
     department: {
       type: String,
       required: [true, 'Department is required'],
+      index: true,
     },
     resourceType: {
       type: String,
       required: [true, 'Resource type is required'],
+      index: true,
     },
     resourceQuantity: {
       type: Number,
@@ -79,6 +78,7 @@ const requestResourceSchema = new Schema<RequestResourceSchema>(
     urgency: {
       type: String,
       required: [true, 'Urgency is required'],
+      index: true,
     },
     dateNeededBy: {
       type: Date,
@@ -100,6 +100,13 @@ const requestResourceSchema = new Schema<RequestResourceSchema>(
     timestamps: true,
   }
 );
+
+requestResourceSchema.index({
+  username: 'text',
+  resourceDescription: 'text',
+  reasonForRequest: 'text',
+  additionalInformation: 'text',
+});
 
 const RequestResourceModel = model<RequestResourceDocument>(
   'RequestResource',
