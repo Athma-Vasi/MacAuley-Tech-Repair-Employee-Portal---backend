@@ -46,7 +46,6 @@ const benefitsSchema = new Schema<BenefitsSchema>(
       type: Schema.Types.ObjectId,
       required: [true, 'User ID is required'],
       ref: 'User',
-      index: true,
     },
     username: {
       type: String,
@@ -56,18 +55,15 @@ const benefitsSchema = new Schema<BenefitsSchema>(
     action: {
       type: String,
       required: [true, 'Action is required'],
-      index: true,
     },
     category: {
       type: String,
       required: [true, 'Category is required'],
-      index: true,
     },
 
     planName: {
       type: String,
       required: [true, 'Plan name is required'],
-      index: true,
     },
     planDescription: {
       type: String,
@@ -77,6 +73,7 @@ const benefitsSchema = new Schema<BenefitsSchema>(
     planKind: {
       type: String,
       required: [true, 'Plan kind is required'],
+      index: true,
     },
     planStartDate: {
       type: String,
@@ -85,10 +82,12 @@ const benefitsSchema = new Schema<BenefitsSchema>(
     isPlanActive: {
       type: Boolean,
       required: [true, 'Plan active status is required'],
+      index: true,
     },
     currency: {
       type: String,
       required: [true, 'Currency is required'],
+      index: true,
     },
     monthlyPremium: {
       type: Number,
@@ -114,6 +113,12 @@ const benefitsSchema = new Schema<BenefitsSchema>(
     timestamps: true,
   }
 );
+
+benefitsSchema.index({
+  username: 'text',
+  planName: 'text',
+  planDescription: 'text',
+});
 
 const BenefitsModel = model<BenefitsDocument>('Benefits', benefitsSchema);
 
