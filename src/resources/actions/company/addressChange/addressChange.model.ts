@@ -36,22 +36,18 @@ const addressChangeSchema = new Schema<AddressChangeSchema>(
       type: Schema.Types.ObjectId,
       required: [true, 'User ID is required'],
       ref: 'User',
-      index: true,
     },
     username: {
       type: String,
       required: [true, 'Username is required'],
-      index: true,
     },
     action: {
       type: String,
       required: [true, 'Action is required'],
-      index: true,
     },
     category: {
       type: String,
       required: [true, 'Category is required'],
-      index: true,
     },
 
     contactNumber: {
@@ -93,11 +89,20 @@ const addressChangeSchema = new Schema<AddressChangeSchema>(
       type: String,
       required: false,
       default: 'pending',
-      index: true,
     },
   },
   { timestamps: true }
 );
+
+addressChangeSchema.index({
+  userId: 1,
+  username: 'text',
+  contactNumber: 'text',
+  addressLine: 'text',
+  city: 'text',
+  postalCode: 'text',
+  requestStatus: 1,
+});
 
 const AddressChangeModel = model<AddressChangeDocument>('AddressChange', addressChangeSchema);
 
