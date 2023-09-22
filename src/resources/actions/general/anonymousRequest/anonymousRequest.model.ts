@@ -48,12 +48,10 @@ const anonymousRequestSchema = new Schema<AnonymousRequestSchema>(
     action: {
       type: String,
       required: [true, 'Action is required'],
-      index: true,
     },
     category: {
       type: String,
       required: [true, 'Category is required'],
-      index: true,
     },
     title: {
       type: String,
@@ -71,6 +69,7 @@ const anonymousRequestSchema = new Schema<AnonymousRequestSchema>(
     requestKind: {
       type: String,
       required: [true, 'RequestKind is required'],
+      index: true,
     },
     requestDescription: {
       type: String,
@@ -84,6 +83,7 @@ const anonymousRequestSchema = new Schema<AnonymousRequestSchema>(
     urgency: {
       type: String,
       required: [true, 'Urgency is required'],
+      index: true,
     },
     requestStatus: {
       type: String,
@@ -96,6 +96,15 @@ const anonymousRequestSchema = new Schema<AnonymousRequestSchema>(
     timestamps: true,
   }
 );
+
+// text indexes for search
+anonymousRequestSchema.index({
+  title: 'text',
+  secureContactNumber: 'text',
+  secureContactEmail: 'text',
+  requestDescription: 'text',
+  additionalInformation: 'text',
+});
 
 const AnonymousRequestModel = model<AnonymousRequestDocument>(
   'AnonymousRequest',

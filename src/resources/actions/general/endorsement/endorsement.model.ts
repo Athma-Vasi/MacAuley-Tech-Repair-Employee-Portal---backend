@@ -47,12 +47,10 @@ const endorsementSchema = new Schema<EndorsementSchema>(
       type: String,
       required: [true, 'Action is required'],
       enum: ['general'],
-      index: true,
     },
     category: {
       type: String,
       required: [true, 'Category is required'],
-      index: true,
       enum: ['endorsement'],
     },
     title: {
@@ -62,7 +60,6 @@ const endorsementSchema = new Schema<EndorsementSchema>(
     username: {
       type: String,
       required: [true, 'Username is required'],
-      index: true,
     },
     userToBeEndorsed: {
       type: String,
@@ -75,6 +72,7 @@ const endorsementSchema = new Schema<EndorsementSchema>(
     attributeEndorsed: {
       type: [String],
       required: [true, 'AttributeEndorsed is required'],
+      index: true,
     },
     requestStatus: {
       type: String,
@@ -87,6 +85,15 @@ const endorsementSchema = new Schema<EndorsementSchema>(
     timestamps: true,
   }
 );
+
+// text index for searching
+endorsementSchema.index({
+  username: 'text',
+  userToBeEndorsed: 'text',
+  title: 'text',
+  summaryOfEndorsement: 'text',
+  attributeEndorsed: 'text',
+});
 
 const EndorsementModel = model<EndorsementDocument>('Endorsement', endorsementSchema);
 
