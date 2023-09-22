@@ -53,7 +53,6 @@ const eventCreatorSchema = new Schema<EventCreatorSchema>(
     username: {
       type: String,
       required: [true, 'Username is required'],
-      index: true,
     },
     creatorRole: {
       type: [String],
@@ -62,12 +61,10 @@ const eventCreatorSchema = new Schema<EventCreatorSchema>(
     action: {
       type: String,
       required: [true, 'Action is required'],
-      index: true,
     },
     category: {
       type: String,
       required: [true, 'Category is required'],
-      index: true,
     },
     eventTitle: {
       type: String,
@@ -80,6 +77,7 @@ const eventCreatorSchema = new Schema<EventCreatorSchema>(
     eventKind: {
       type: String,
       required: [true, 'Event kind is required'],
+      index: true,
     },
     eventStartDate: {
       type: Date,
@@ -116,6 +114,16 @@ const eventCreatorSchema = new Schema<EventCreatorSchema>(
     timestamps: true,
   }
 );
+
+// text indexes for search
+eventCreatorSchema.index({
+  username: 'text',
+  eventTitle: 'text',
+  eventDescription: 'text',
+  eventLocation: 'text',
+  eventAttendees: 'text',
+  requiredItems: 'text',
+});
 
 const EventCreatorModel = model<EventCreatorDocument>('EventCreator', eventCreatorSchema);
 

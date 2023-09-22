@@ -52,12 +52,10 @@ const announcementSchema = new Schema<AnnouncementSchema>(
     action: {
       type: String,
       required: [true, 'Action is required'],
-      index: true,
     },
     category: {
       type: String,
       required: [true, 'Category is required'],
-      index: true,
     },
 
     title: {
@@ -110,6 +108,16 @@ const announcementSchema = new Schema<AnnouncementSchema>(
     timestamps: true,
   }
 );
+
+// text index for searching
+announcementSchema.index({
+  title: 'text',
+  article: 'text',
+  username: 'text',
+  author: 'text',
+  bannerImageAlt: 'text',
+  bannerImageSrc: 'text',
+});
 
 const AnnouncementModel = model<AnnouncementDocument>('Announcement', announcementSchema);
 

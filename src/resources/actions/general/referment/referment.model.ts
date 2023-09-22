@@ -43,19 +43,16 @@ const refermentSchema = new Schema<RefermentSchema>({
   username: {
     type: String,
     required: [true, 'Username is required'],
-    index: true,
   },
   action: {
     type: String,
     required: [true, 'Action is required'],
     enum: ['company', 'general', 'outreach'],
-    index: true,
   },
   category: {
     type: String,
     required: [true, 'Category is required'],
     enum: ['endorsement', 'printer issue', 'anonymous request', 'referment'],
-    index: true,
   },
   candidateFullName: {
     type: String,
@@ -82,9 +79,16 @@ const refermentSchema = new Schema<RefermentSchema>({
     required: false,
     default: '',
   },
+
+  departmentReferredFor: {
+    type: String,
+    required: [true, 'DepartmentReferredFor is required'],
+    index: true,
+  },
   positionReferredFor: {
     type: String,
     required: [true, 'PositionReferredFor is required'],
+    index: true,
   },
   positionJobDescription: {
     type: String,
@@ -110,6 +114,20 @@ const refermentSchema = new Schema<RefermentSchema>({
     default: 'pending',
     index: true,
   },
+});
+
+// text indexes for search
+refermentSchema.index({
+  username: 'text',
+  candidateFullName: 'text',
+  candidateEmail: 'text',
+  candidateContactNumber: 'text',
+  candidateCurrentJobTitle: 'text',
+  candidateCurrentCompany: 'text',
+  candidateProfileUrl: 'text',
+  positionJobDescription: 'text',
+  referralReason: 'text',
+  additionalInformation: 'text',
 });
 
 const RefermentModel = model<RefermentDocument>('Referment', refermentSchema);

@@ -42,11 +42,11 @@ const commentSchema = new Schema<CommentSchema>(
     username: {
       type: String,
       required: [true, 'username is required'],
-      index: true,
     },
     roles: {
       type: [String],
       required: [true, 'roles is required'],
+      index: true,
     },
 
     parentResourceId: {
@@ -90,6 +90,7 @@ const commentSchema = new Schema<CommentSchema>(
       type: Boolean,
       required: [true, 'isFeatured is required'],
       default: false,
+      index: true,
     },
     isDeleted: {
       type: Boolean,
@@ -115,6 +116,14 @@ const commentSchema = new Schema<CommentSchema>(
   },
   { timestamps: true }
 );
+
+// text index for searching
+commentSchema.index({
+  username: 'text',
+  comment: 'text',
+  quotedUsername: 'text',
+  quotedComment: 'text',
+});
 
 const CommentModel = model<CommentDocument>('Comment', commentSchema);
 

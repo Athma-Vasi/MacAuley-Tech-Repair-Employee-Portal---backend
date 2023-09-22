@@ -87,21 +87,19 @@ const surveyBuilderSchema = new Schema<SurveyBuilderSchema>(
     username: {
       type: String,
       required: [true, 'creatorUsername is required'],
-      index: true,
     },
     creatorRole: {
       type: [String],
       required: [true, 'creatorRole is required'],
+      index: true,
     },
     action: {
       type: String,
       required: [true, 'action is required'],
-      index: true,
     },
     category: {
       type: String,
       required: [true, 'category is required'],
-      index: true,
     },
 
     surveyTitle: {
@@ -111,6 +109,7 @@ const surveyBuilderSchema = new Schema<SurveyBuilderSchema>(
     sendTo: {
       type: String,
       required: [true, 'sendTo is required'],
+      index: true,
     },
     expiryDate: {
       type: Date,
@@ -130,6 +129,15 @@ const surveyBuilderSchema = new Schema<SurveyBuilderSchema>(
     timestamps: true,
   }
 );
+
+// text index for searching
+surveyBuilderSchema.index({
+  username: 'text',
+  surveyTitle: 'text',
+  sendTo: 'text',
+  expiryDate: 'text',
+  questions: 'text',
+});
 
 const SurveyBuilderModel = model<SurveyBuilderDocument>('SurveyBuilder', surveyBuilderSchema);
 

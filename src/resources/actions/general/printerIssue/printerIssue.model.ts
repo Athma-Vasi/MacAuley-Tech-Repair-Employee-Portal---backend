@@ -64,17 +64,14 @@ const printerIssueSchema = new Schema<PrinterIssueSchema>(
     username: {
       type: String,
       required: [true, 'Username is required'],
-      index: true,
     },
     action: {
       type: String,
       required: [true, 'Action is required'],
-      index: true,
     },
     category: {
       type: String,
       required: [true, 'Category is required'],
-      index: true,
     },
     title: {
       type: String,
@@ -100,6 +97,7 @@ const printerIssueSchema = new Schema<PrinterIssueSchema>(
     printerMake: {
       type: String,
       required: [true, 'PrinterMake is required'],
+      index: true,
     },
     printerModel: {
       type: String,
@@ -116,6 +114,7 @@ const printerIssueSchema = new Schema<PrinterIssueSchema>(
     urgency: {
       type: String,
       required: [true, 'Urgency is required'],
+      index: true,
     },
     additionalInformation: {
       type: String,
@@ -133,6 +132,18 @@ const printerIssueSchema = new Schema<PrinterIssueSchema>(
     timestamps: true,
   }
 );
+
+// text indexes for search
+printerIssueSchema.index({
+  username: 'text',
+  title: 'text',
+  contactNumber: 'text',
+  contactEmail: 'text',
+  printerModel: 'text',
+  printerSerialNumber: 'text',
+  printerIssueDescription: 'text',
+  additionalInformation: 'text',
+});
 
 const PrinterIssueModel = model<PrinterIssueDocument>('PrinterIssue', printerIssueSchema);
 
