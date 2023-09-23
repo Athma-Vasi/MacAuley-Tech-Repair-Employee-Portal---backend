@@ -26,8 +26,8 @@ interface CreateNewAddressChangeRequest extends RequestAfterJWTVerification {
       state?: StatesUS;
       postalCode: PostalCode;
       country: Country;
-
       acknowledgement: boolean;
+      requestStatus: RequestStatus;
     };
   };
 }

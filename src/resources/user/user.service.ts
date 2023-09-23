@@ -183,11 +183,10 @@ async function getUsersDirectoryService(): Promise<DirectoryUserDocument[]> {
       '-password',
       '-__v',
       '-dateOfBirth',
-      '-addressLine',
-      '-postalCode',
+      '-address.addressLine',
+      '-address.postalCode',
       '-emergencyContact',
       '-startDate',
-      '-roles',
       '-completedSurveys',
     ];
     const users = await UserModel.find().select(exclusionArray).lean().exec();
