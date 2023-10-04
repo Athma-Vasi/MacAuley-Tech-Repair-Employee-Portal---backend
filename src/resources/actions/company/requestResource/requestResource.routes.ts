@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import {
+  createNewRequestResourceBulkHandler,
   createNewRequestResourceHandler,
   deleteARequestResourceHandler,
   deleteAllRequestResourcesHandler,
@@ -24,6 +25,9 @@ requestResourceRouter
 requestResourceRouter
   .route('/user')
   .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getRequestResourceByUserHandler);
+
+// DEV ROUTE
+requestResourceRouter.route('/dev').post(createNewRequestResourceBulkHandler);
 
 requestResourceRouter
   .route('/:requestResourceId')

@@ -11,6 +11,7 @@ import type {
   GetSurveyByIdRequest,
   GetQueriedSurveysByUserRequest,
   UpdateSurveyStatisticsByIdRequest,
+  CreateNewSurveysBulkRequest,
 } from './survey.types';
 import {
   createNewSurveyService,
@@ -70,6 +71,72 @@ const createNewSurveyHandler = expressAsyncHandler(
     response
       .status(201)
       .json({ message: 'Successfully created new survey!', resourceData: [newSurvey] });
+  }
+);
+
+// DEV ROUTE
+// @desc   Create new surveys in bulk
+// @route  POST /survey-builder/dev
+// @access Private/Admin/Manager
+const createNewSurveysBulkHandler = expressAsyncHandler(
+  async (
+    request: CreateNewSurveysBulkRequest,
+    response: Response<ResourceRequestServerResponse<SurveyBuilderDocument>>
+  ) => {
+    const { surveys } = request.body;
+
+    // create new surveys
+    const newSurveys = await Promise.all(
+      surveys.map(async (survey) => {
+        const {
+          userId,
+          username,
+          creatorRole,
+          surveyTitle,
+          surveyDescription,
+          sendTo,
+          expiryDate,
+          questions,
+          surveyStatistics,
+        } = survey;
+
+        // create new survey object
+        const newSurveyObject: SurveyBuilderSchema = {
+          userId,
+          username,
+          creatorRole,
+          action: 'outreach',
+          category: 'survey',
+
+          surveyTitle,
+          surveyDescription,
+          sendTo,
+          expiryDate,
+          questions,
+
+          surveyStatistics,
+        };
+
+        // create new survey
+        const newSurvey = await createNewSurveyService(newSurveyObject);
+
+        return newSurvey;
+      })
+    );
+
+    // filter out undefined values
+    const newSurveysFiltered = newSurveys.filter(
+      (survey) => survey !== undefined
+    ) as SurveyBuilderDocument[];
+
+    // check if any surveys were created
+    if (newSurveysFiltered.length === surveys.length) {
+      response
+        .status(201)
+        .json({ message: 'Successfully created new surveys!', resourceData: newSurveysFiltered });
+    } else {
+      response.status(400).json({ message: 'Unable to create new surveys', resourceData: [] });
+    }
   }
 );
 
@@ -362,6 +429,7 @@ const deleteAllSurveysHandler = expressAsyncHandler(
 
 export {
   createNewSurveyHandler,
+  createNewSurveysBulkHandler,
   deleteASurveyHandler,
   deleteAllSurveysHandler,
   getQueriedSurveysHandler,

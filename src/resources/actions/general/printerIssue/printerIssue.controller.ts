@@ -10,6 +10,7 @@ import type {
   GetQueriedPrinterIssuesByUserRequest,
   DeleteAllPrinterIssuesRequest,
   UpdatePrinterIssueStatusByIdRequest,
+  CreateNewPrinterIssuesBulkRequest,
 } from './printerIssue.types';
 
 import {
@@ -84,6 +85,77 @@ const createNewPrinterIssueHandler = expressAsyncHandler(
       response
         .status(400)
         .json({ message: 'Printer issue could not be created', resourceData: [] });
+    }
+  }
+);
+
+// DEV ROUTE
+// @desc   Create new printer issues in bulk
+// @route  POST /printerIssues/dev
+// @access Private/Manager/Admin
+const createNewPrinterIssuesBulkHandler = expressAsyncHandler(
+  async (
+    request: CreateNewPrinterIssuesBulkRequest,
+    response: Response<ResourceRequestServerResponse<PrinterIssueDocument>>
+  ) => {
+    const { printerIssues } = request.body;
+
+    const newPrinterIssues = await Promise.all(
+      printerIssues.map(async (printerIssue) => {
+        const {
+          userId,
+          username,
+          title,
+          contactNumber,
+          contactEmail,
+          dateOfOccurrence,
+          timeOfOccurrence,
+          printerMake,
+          printerModel,
+          printerSerialNumber,
+          printerIssueDescription,
+          urgency,
+          additionalInformation,
+          requestStatus,
+        } = printerIssue;
+
+        const newPrinterIssueObject: PrinterIssueSchema = {
+          userId,
+          username,
+          action: 'general',
+          category: 'printer issue',
+          title,
+          contactNumber,
+          contactEmail,
+          dateOfOccurrence,
+          timeOfOccurrence,
+          printerMake,
+          printerModel,
+          printerSerialNumber,
+          printerIssueDescription,
+          urgency,
+          additionalInformation,
+          requestStatus,
+        };
+        const newPrinterIssue = await createNewPrinterIssueService(newPrinterIssueObject);
+        return newPrinterIssue;
+      })
+    );
+
+    // check if all printer issues were created successfully
+    const allPrinterIssuesCreatedSuccessfully = newPrinterIssues.every(
+      (printerIssue) => printerIssue !== null && printerIssue !== undefined
+    );
+
+    if (allPrinterIssuesCreatedSuccessfully) {
+      response.status(201).json({
+        message: 'All printer issues created successfully',
+        resourceData: newPrinterIssues,
+      });
+    } else {
+      response
+        .status(400)
+        .json({ message: 'Printer issues could not be created', resourceData: [] });
     }
   }
 );
@@ -286,6 +358,7 @@ const updatePrinterIssueByIdHandler = expressAsyncHandler(
 
 export {
   createNewPrinterIssueHandler,
+  createNewPrinterIssuesBulkHandler,
   getQueriedPrinterIssuesHandler,
   deletePrinterIssueHandler,
   deleteAllPrinterIssuesHandler,

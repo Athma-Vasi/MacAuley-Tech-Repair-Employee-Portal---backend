@@ -7,6 +7,7 @@ import {
   getLeaveRequestByIdHandler,
   getQueriedLeaveRequestsByUserHandler,
   updateLeaveRequestStatusByIdHandler,
+  createNewLeaveRequestBulkHandler,
 } from './leaveRequest.controller';
 import { assignQueryDefaults, verifyRoles } from '../../../../middlewares';
 import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
@@ -24,6 +25,9 @@ leaveRequestRouter
 leaveRequestRouter
   .route('/user')
   .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedLeaveRequestsByUserHandler);
+
+// DEV ROUTE
+leaveRequestRouter.route('/dev').post(createNewLeaveRequestBulkHandler);
 
 leaveRequestRouter
   .route('/:leaveRequestId')

@@ -30,6 +30,35 @@ interface CreateNewRefermentRequest extends RequestAfterJWTVerification {
   };
 }
 
+// DEV ROUTE
+interface CreateNewRefermentsBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId; // referrer userId
+      username: string; // referrer username
+      roles: UserRoles;
+    };
+    referments: {
+      userId: Types.ObjectId; // referrer userId
+      username: string; // referrer username
+      candidateFullName: string;
+      candidateEmail: string;
+      candidateContactNumber: PhoneNumber;
+      candidateCurrentJobTitle: string;
+      candidateCurrentCompany: string;
+      candidateProfileUrl: string;
+
+      departmentReferredFor: Department;
+      positionReferredFor: JobPosition;
+      positionJobDescription: string;
+      referralReason: string;
+      additionalInformation: string;
+      privacyConsent: boolean;
+      requestStatus: RequestStatus;
+    }[];
+  };
+}
+
 interface DeleteARefermentRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {
@@ -74,6 +103,7 @@ interface UpdateRefermentStatusByIdRequest extends RequestAfterJWTVerification {
 
 export type {
   CreateNewRefermentRequest,
+  CreateNewRefermentsBulkRequest,
   DeleteARefermentRequest,
   DeleteAllRefermentsRequest,
   GetQueriedRefermentsRequest,

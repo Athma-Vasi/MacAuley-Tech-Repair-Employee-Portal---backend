@@ -8,6 +8,7 @@ import {
   getEventByIdHandler,
   getQueriedEventsByUserHandler,
   updateAnEventHandler,
+  createNewEventsBulkHandler,
 } from './event.controller';
 import { assignQueryDefaults, verifyRoles } from '../../../../middlewares';
 import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
@@ -25,6 +26,9 @@ eventCreatorRouter
   .route('/user')
   .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedEventsByUserHandler)
   .delete(deleteAllEventsByUserHandler);
+
+// DEV ROUTE
+eventCreatorRouter.route('/dev').post(createNewEventsBulkHandler);
 
 eventCreatorRouter
   .route('/:eventId')

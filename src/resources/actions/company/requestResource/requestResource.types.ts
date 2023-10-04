@@ -27,6 +27,30 @@ interface CreateNewRequestResourceRequest extends RequestAfterJWTVerification {
   };
 }
 
+// DEV ROUTE
+interface CreateNewRequestResourceBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    requestResources: {
+      userId: Types.ObjectId;
+      username: string;
+      department: Department;
+      resourceType: RequestResourceKind;
+      resourceQuantity: number;
+      resourceDescription: string;
+      reasonForRequest: string;
+      urgency: Urgency;
+      dateNeededBy: NativeDate;
+      additionalInformation: string;
+      requestStatus: RequestStatus;
+    }[];
+  };
+}
+
 interface DeleteARequestResourceRequest extends RequestAfterJWTVerification {
   params: {
     requestResourceId: string;
@@ -63,6 +87,7 @@ interface UpdateRequestResourceStatusByIdRequest extends RequestAfterJWTVerifica
 
 export type {
   CreateNewRequestResourceRequest,
+  CreateNewRequestResourceBulkRequest,
   DeleteARequestResourceRequest,
   DeleteAllRequestResourcesRequest,
   GetQueriedRequestResourcesRequest,

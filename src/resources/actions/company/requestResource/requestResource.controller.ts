@@ -10,6 +10,7 @@ import type {
   GetRequestResourceByIdRequest,
   GetQueriedRequestResourcesByUserRequest,
   UpdateRequestResourceStatusByIdRequest,
+  CreateNewRequestResourceBulkRequest,
 } from './requestResource.types';
 
 import {
@@ -80,6 +81,75 @@ const createNewRequestResourceHandler = expressAsyncHandler(
       response
         .status(400)
         .json({ message: 'New request resource could not be created', resourceData: [] });
+    }
+  }
+);
+
+// DEV ROUTE
+// @desc   Create new request resources in bulk
+// @route  POST /request-resource/dev
+// @access Private/Admin/Manager
+const createNewRequestResourceBulkHandler = expressAsyncHandler(
+  async (
+    request: CreateNewRequestResourceBulkRequest,
+    response: Response<ResourceRequestServerResponse<RequestResourceDocument>>
+  ) => {
+    const { requestResources } = request.body;
+
+    // promise all array
+    const newRequestResources = await Promise.all(
+      requestResources.map(async (requestResource) => {
+        const {
+          userId,
+          username,
+          department,
+          resourceType,
+          resourceQuantity,
+          resourceDescription,
+          reasonForRequest,
+          urgency,
+          dateNeededBy,
+          additionalInformation,
+          requestStatus,
+        } = requestResource;
+
+        // create new request resource object
+        const newRequestResourceObject: RequestResourceSchema = {
+          userId,
+          username,
+          action: 'company',
+          category: 'request resource',
+          resourceType,
+          department,
+          resourceQuantity,
+          resourceDescription,
+          reasonForRequest,
+          urgency,
+          dateNeededBy,
+          additionalInformation,
+          requestStatus,
+        };
+
+        // create new request resource
+        const newRequestResource = await createNewRequestResourceService(newRequestResourceObject);
+
+        return newRequestResource;
+      })
+    );
+
+    // filter out undefined values
+    const filteredRequestResources = requestResources.filter((requestResource) => requestResource);
+
+    if (filteredRequestResources.length === newRequestResources.length) {
+      response.status(201).json({
+        message: 'New request resources created successfully',
+        resourceData: newRequestResources,
+      });
+    } else {
+      response.status(400).json({
+        message: 'New request resources could not be created',
+        resourceData: [],
+      });
     }
   }
 );
@@ -299,6 +369,7 @@ const deleteAllRequestResourcesHandler = expressAsyncHandler(
 
 export {
   createNewRequestResourceHandler,
+  createNewRequestResourceBulkHandler,
   deleteARequestResourceHandler,
   deleteAllRequestResourcesHandler,
   getQueriedRequestResourcesHandler,

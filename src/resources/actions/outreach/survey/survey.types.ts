@@ -31,6 +31,28 @@ interface CreateNewSurveyRequest extends RequestAfterJWTVerification {
   };
 }
 
+// DEV ROUTE
+interface CreateNewSurveysBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    surveys: {
+      userId: Types.ObjectId;
+      username: string;
+      creatorRole: UserRoles;
+      surveyTitle: string;
+      surveyDescription: string;
+      sendTo: SurveyRecipient;
+      expiryDate: NativeDate;
+      questions: Array<SurveyQuestion>;
+      surveyStatistics: SurveyStatistics[];
+    }[];
+  };
+}
+
 interface DeleteASurveyRequest extends RequestAfterJWTVerification {
   params: {
     surveyId: string;
@@ -72,6 +94,7 @@ interface UpdateSurveyStatisticsByIdRequest extends RequestAfterJWTVerification 
 
 export type {
   CreateNewSurveyRequest,
+  CreateNewSurveysBulkRequest,
   DeleteASurveyRequest,
   DeleteAllSurveysRequest,
   GetQueriedSurveysRequest,

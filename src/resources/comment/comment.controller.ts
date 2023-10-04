@@ -12,6 +12,7 @@ import type {
   GetQueriedCommentsByUserRequest,
   GetQueriedCommentsByParentResourceIdRequest,
   UpdateCommentByIdRequest,
+  CreateNewCommentsBulkRequest,
 } from './comment.types';
 import {
   createNewCommentService,
@@ -41,6 +42,9 @@ const createNewCommentHandler = expressAsyncHandler(
     const {
       userInfo: { userId, username, roles },
       comment: {
+        firstName,
+        lastName,
+        middleName,
         comment,
         department,
         jobPosition,
@@ -65,6 +69,9 @@ const createNewCommentHandler = expressAsyncHandler(
       username,
       roles,
 
+      firstName,
+      lastName,
+      middleName,
       department,
       jobPosition,
       profilePictureUrl,
@@ -95,6 +102,96 @@ const createNewCommentHandler = expressAsyncHandler(
   }
 );
 
+// DEV ROUTE
+// @desc   Create new comments in bulk
+// @route  POST /comment/dev
+// @access Private/Manager/Admin
+const createNewCommentsBulkHandler = expressAsyncHandler(
+  async (
+    request: CreateNewCommentsBulkRequest,
+    response: Response<ResourceRequestServerResponse<CommentDocument>>
+  ) => {
+    const { comments } = request.body;
+
+    // promise array of new comments
+    const newComments = await Promise.all(
+      comments.map(async (commentBody) => {
+        const {
+          userId,
+          username,
+          roles,
+          firstName,
+          lastName,
+          middleName,
+          department,
+          jobPosition,
+          profilePictureUrl,
+          comment,
+          quotedUsername,
+          quotedComment,
+          likesCount,
+          dislikesCount,
+          reportsCount,
+          isFeatured,
+          isDeleted,
+          parentResourceId,
+          likedUserIds,
+          dislikedUserIds,
+          reportedUserIds,
+        } = commentBody;
+
+        // create new comment object
+        const newCommentObject: CommentSchema = {
+          userId,
+          username,
+          roles,
+
+          firstName,
+          lastName,
+          middleName,
+          department,
+          jobPosition,
+          profilePictureUrl,
+          comment,
+          quotedUsername,
+          quotedComment,
+          likesCount,
+          dislikesCount,
+          reportsCount,
+          isFeatured,
+          isDeleted,
+          parentResourceId,
+          likedUserIds,
+          dislikedUserIds,
+          reportedUserIds,
+        };
+
+        // create new comment
+        const newComment = await createNewCommentService(newCommentObject);
+
+        return newComment;
+      })
+    );
+
+    // filter out undefined values
+    const newCommentsFiltered = newComments.filter(
+      (comment) => comment !== undefined
+    ) as CommentDocument[];
+
+    if (newCommentsFiltered.length === comments.length) {
+      response.status(201).json({
+        message: 'Successfully created new comments',
+        resourceData: newCommentsFiltered,
+      });
+    } else {
+      response.status(400).json({
+        message: 'Some comments were not created successfully',
+        resourceData: newCommentsFiltered,
+      });
+    }
+  }
+);
+
 // @desc   Get all comments
 // @route  GET /comment
 // @access Private
@@ -120,21 +217,23 @@ const getQueriedCommentsHandler = expressAsyncHandler(
       projection: projection as QueryOptions<CommentDocument>,
       options: options as QueryOptions<CommentDocument>,
     });
-    if (comments.length === 0) {
+
+    if (!comments.length) {
       response.status(200).json({
         message: 'No comments that match query parameters were found',
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
       });
-    } else {
-      response.status(200).json({
-        message: 'Successfully found comments',
-        pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments: comments.length,
-        resourceData: comments,
-      });
+      return;
     }
+
+    response.status(200).json({
+      message: 'Successfully found comments',
+      pages: Math.ceil(totalDocuments / Number(options?.limit)),
+      totalDocuments,
+      resourceData: comments,
+    });
   }
 );
 
@@ -168,21 +267,23 @@ const getQueriedCommentsByUserHandler = expressAsyncHandler(
       projection: projection as QueryOptions<CommentDocument>,
       options: options as QueryOptions<CommentDocument>,
     });
-    if (comments.length === 0) {
+
+    if (!comments.length) {
       response.status(200).json({
-        message: 'No comments found',
+        message: 'No comments that match query parameters were found',
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
       });
-    } else {
-      response.status(200).json({
-        message: 'Comments found successfully',
-        pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments: comments.length,
-        resourceData: comments,
-      });
+      return;
     }
+
+    response.status(200).json({
+      message: 'Successfully found comments',
+      pages: Math.ceil(totalDocuments / Number(options?.limit)),
+      totalDocuments,
+      resourceData: comments,
+    });
   }
 );
 
@@ -207,6 +308,7 @@ const getQueriedCommentsByParentResourceIdHandler = expressAsyncHandler(
       totalDocuments = await getQueriedTotalCommentsService({
         filter: filter as FilterQuery<CommentDocument> | undefined,
       });
+      console.log({ totalDocuments });
     }
 
     // get all comments
@@ -215,21 +317,23 @@ const getQueriedCommentsByParentResourceIdHandler = expressAsyncHandler(
       projection: projection as QueryOptions<CommentDocument>,
       options: options as QueryOptions<CommentDocument>,
     });
-    if (comments.length === 0) {
+
+    if (!comments.length) {
       response.status(200).json({
         message: 'No comments that match query parameters were found',
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
       });
-    } else {
-      response.status(200).json({
-        message: 'Successfully found comments',
-        pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments: comments.length,
-        resourceData: comments,
-      });
+      return;
     }
+
+    response.status(200).json({
+      message: 'Successfully found comments',
+      pages: Math.ceil(totalDocuments / Number(options?.limit)),
+      totalDocuments,
+      resourceData: comments,
+    });
   }
 );
 
@@ -336,6 +440,7 @@ const deleteAllCommentsHandler = expressAsyncHandler(
 
 export {
   createNewCommentHandler,
+  createNewCommentsBulkHandler,
   deleteACommentHandler,
   deleteAllCommentsHandler,
   getQueriedCommentsByParentResourceIdHandler,

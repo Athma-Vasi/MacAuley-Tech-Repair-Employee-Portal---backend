@@ -28,6 +28,30 @@ interface CreateNewBenefitsRequest extends RequestAfterJWTVerification {
   };
 }
 
+// dev route for testing
+interface CreateNewBenefitsBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    benefits: {
+      username: string;
+      planName: string;
+      planDescription: string;
+      planKind: BenefitsPlanKind;
+      planStartDate: string;
+      isPlanActive: boolean;
+      currency: Currency;
+      monthlyPremium: number;
+      employerContribution: number;
+      employeeContribution: number;
+      requestStatus: RequestStatus;
+    }[];
+  };
+}
+
 interface DeleteABenefitRequest extends RequestAfterJWTVerification {
   params: {
     benefitsId: string;
@@ -67,6 +91,7 @@ interface UpdateBenefitsStatusByIdRequest extends RequestAfterJWTVerification {
 
 export type {
   CreateNewBenefitsRequest,
+  CreateNewBenefitsBulkRequest,
   DeleteABenefitRequest,
   DeleteAllBenefitsByUserRequest,
   GetQueriedBenefitsRequest,

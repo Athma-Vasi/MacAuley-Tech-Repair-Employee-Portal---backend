@@ -10,6 +10,7 @@ import type {
   GetBenefitsByIdRequest,
   GetQueriedBenefitsByUserRequest,
   UpdateBenefitsStatusByIdRequest,
+  CreateNewBenefitsBulkRequest,
 } from './benefits.types';
 import {
   createNewBenefitService,
@@ -97,6 +98,100 @@ const createNewBenefitsHandler = expressAsyncHandler(
         .json({ message: 'New benefit plan created', resourceData: [newBenefitsPlan] });
     } else {
       response.status(400).json({ message: 'Unable to create new benefit plan', resourceData: [] });
+    }
+  }
+);
+
+// DEV ROUTE
+// @desc   Create new benefits plans in bulk
+// @route  POST /benefits/dev
+// @access Private/Admin/Manager
+const createNewBenefitsBulkHandler = expressAsyncHandler(
+  async (
+    request: CreateNewBenefitsBulkRequest,
+    response: Response<ResourceRequestServerResponse<BenefitsDocument>>
+  ) => {
+    const {
+      userInfo: { roles },
+      benefits,
+    } = request.body;
+
+    // only managers can create a new benefits plan
+    // by default, verifyRoles middleware allows all to access POST routes
+    if (!roles.includes('Manager')) {
+      response.status(403).json({ message: 'User does not have permission', resourceData: [] });
+      return;
+    }
+
+    // create new benefits plans
+    const newBenefitsPlans = await Promise.all(
+      benefits.map(async (benefit) => {
+        const {
+          username,
+          planName,
+          planDescription,
+          planKind,
+          planStartDate,
+          isPlanActive,
+          currency,
+          monthlyPremium,
+          employerContribution,
+          employeeContribution,
+          requestStatus,
+        } = benefit;
+
+        // get userId from benefit username
+        const benefitUserDoc = await getUserByUsernameService(username);
+        if (!benefitUserDoc) {
+          response.status(404).json({ message: 'User not found', resourceData: [] });
+          return;
+        }
+        const benefitUserId = benefitUserDoc._id;
+
+        // create new benefits plan object
+        const newBenefitsObject: BenefitsSchema = {
+          benefitUserId,
+          username,
+          action: 'company',
+          category: 'benefits',
+
+          planName,
+          planDescription,
+          planKind,
+          planStartDate,
+          isPlanActive,
+          currency,
+          monthlyPremium,
+          employerContribution,
+          employeeContribution,
+          requestStatus,
+        };
+
+        // create new benefits plan
+        const newBenefitsPlan = await createNewBenefitService(newBenefitsObject);
+        if (newBenefitsPlan) {
+          return newBenefitsPlan;
+        } else {
+          response
+            .status(400)
+            .json({ message: 'Unable to create new benefit plan', resourceData: [] });
+          return;
+        }
+      })
+    );
+
+    if (newBenefitsPlans) {
+      const filteredNewBenefitsPlans = newBenefitsPlans.filter(
+        (benefitsPlan) => benefitsPlan !== undefined
+      ) as BenefitsDocument[];
+
+      response
+        .status(201)
+        .json({ message: 'New benefit plans created', resourceData: filteredNewBenefitsPlans });
+    } else {
+      response
+        .status(400)
+        .json({ message: 'Unable to create new benefit plans', resourceData: [] });
     }
   }
 );
@@ -298,6 +393,7 @@ const deleteAllBenefitsByUserHandler = expressAsyncHandler(
 
 export {
   createNewBenefitsHandler,
+  createNewBenefitsBulkHandler,
   deleteABenefitHandler,
   deleteAllBenefitsByUserHandler,
   getAllBenefitsHandler,

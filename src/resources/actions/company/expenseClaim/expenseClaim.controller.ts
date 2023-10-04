@@ -12,6 +12,7 @@ import type {
   GetQueriedExpenseClaimsByUserRequest,
   UpdateExpenseClaimStatusByIdRequest,
   UpdateExpenseClaimByIdRequest,
+  CreateNewExpenseClaimBulkRequest,
 } from './expenseClaim.types';
 
 import {
@@ -136,6 +137,71 @@ const createNewExpenseClaimHandler = expressAsyncHandler(
       response
         .status(400)
         .json({ message: 'New expense claim could not be created', resourceData: [] });
+    }
+  }
+);
+
+// DEV ROUTE
+// @desc   Create bulk expense claims without file uploads
+// @route  POST /expense-claim/dev
+// @access Private/Admin/Manager
+const createNewExpenseClaimBulkHandler = expressAsyncHandler(
+  async (
+    request: CreateNewExpenseClaimBulkRequest,
+    response: Response<ResourceRequestServerResponse<ExpenseClaimDocument>>
+  ) => {
+    const { expenseClaims } = request.body;
+
+    // create new expenseClaim object
+    const newExpenseClaimObjectArray: ExpenseClaimSchema[] = expenseClaims.map(
+      ({
+        userId,
+        username,
+        uploadedFilesIds,
+        expenseClaimKind,
+        expenseClaimAmount,
+        expenseClaimCurrency,
+        expenseClaimDate,
+        expenseClaimDescription,
+        additionalComments,
+        acknowledgement,
+        requestStatus,
+      }) => {
+        return {
+          userId,
+          username,
+          action: 'company',
+          category: 'expense claim',
+          uploadedFilesIds,
+          expenseClaimKind,
+          expenseClaimAmount,
+          expenseClaimCurrency,
+          expenseClaimDate,
+          expenseClaimDescription,
+          additionalComments,
+          acknowledgement,
+          requestStatus,
+        };
+      }
+    );
+
+    // create new expenseClaim
+    const newExpenseClaimArray = await Promise.all(
+      newExpenseClaimObjectArray.map(async (newExpenseClaimObject) => {
+        const newExpenseClaim = await createNewExpenseClaimService(newExpenseClaimObject);
+
+        return newExpenseClaim;
+      })
+    );
+
+    if (newExpenseClaimArray) {
+      response
+        .status(201)
+        .json({ message: 'New expense claims created', resourceData: newExpenseClaimArray });
+    } else {
+      response
+        .status(400)
+        .json({ message: 'New expense claims could not be created', resourceData: [] });
     }
   }
 );
@@ -499,6 +565,7 @@ const deleteAnExpenseClaimHandler = expressAsyncHandler(
 
 export {
   createNewExpenseClaimHandler,
+  createNewExpenseClaimBulkHandler,
   getQueriedExpenseClaimsHandler,
   getQueriedExpenseClaimsByUserHandler,
   getExpenseClaimByIdHandler,

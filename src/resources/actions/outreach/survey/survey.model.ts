@@ -1,23 +1,9 @@
 import { Schema, Types, model } from 'mongoose';
-import type { UserRoles } from '../../../user';
+import type { Department, UserRoles } from '../../../user';
 import type { Action } from '../..';
 import type { ActionsOutreach } from '..';
-import { tr } from 'date-fns/locale';
 
-type SurveyRecipient =
-  | 'All'
-  | 'Executive Management'
-  | 'Administrative'
-  | 'Sales and Marketing'
-  | 'Information Technology'
-  | 'Repair Technicians'
-  | 'Field Service Technicians'
-  | 'Logistics and Inventory'
-  | 'Customer Service'
-  | 'Quality Control'
-  | 'Training and Development'
-  | 'Janitorial and Maintenance'
-  | 'Security';
+type SurveyRecipient = Department | 'All';
 
 type SurveyResponseKind = 'chooseOne' | 'chooseAny' | 'rating';
 type SurveyResponseInput = 'agreeDisagree' | 'radio' | 'checkbox' | 'emotion' | 'stars';

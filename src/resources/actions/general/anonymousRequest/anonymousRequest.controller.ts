@@ -7,6 +7,7 @@ import type {
   GetQueriedAnonymousRequestsRequest,
   GetAnAnonymousRequestRequest,
   UpdateAnonymousRequestStatusByIdRequest,
+  CreateNewAnonymousRequestsBulkRequest,
 } from './anonymousRequest.types';
 import {
   createNewAnonymousRequestService,
@@ -70,6 +71,57 @@ const createNewAnonymousRequestHandler = expressAsyncHandler(
       response
         .status(400)
         .json({ message: 'Anonymous request could not be created', resourceData: [] });
+    }
+  }
+);
+
+// DEV ROUTE
+// @desc   Create new anonymous requests in bulk
+// @route  POST /anonymousRequests/dev
+// @access Private/Manager/Admin
+const createNewAnonymousRequestsBulkHandler = expressAsyncHandler(
+  async (
+    request: CreateNewAnonymousRequestsBulkRequest,
+    response: Response<ResourceRequestServerResponse<AnonymousRequestDocument>>
+  ) => {
+    const { anonymousRequests } = request.body;
+
+    const newAnonymousRequests = await Promise.all(
+      anonymousRequests.map(async (anonymousRequest) => {
+        const input: AnonymousRequestSchema = {
+          action: 'general',
+          category: 'anonymous request',
+          additionalInformation: anonymousRequest.additionalInformation,
+          requestDescription: anonymousRequest.requestDescription,
+          requestKind: anonymousRequest.requestKind,
+          secureContactEmail: anonymousRequest.secureContactEmail,
+          secureContactNumber: anonymousRequest.secureContactNumber,
+          title: anonymousRequest.title,
+          urgency: anonymousRequest.urgency,
+          requestStatus: anonymousRequest.requestStatus,
+        };
+
+        const newAnonymousRequest = await createNewAnonymousRequestService(input);
+        return newAnonymousRequest;
+      })
+    );
+
+    // filter out any null/undefined values
+    const newAnonymousRequestsFiltered = newAnonymousRequests.filter(
+      (newAnonymousRequest) => newAnonymousRequest
+    );
+
+    // check if all anonymous requests were created successfully
+    if (newAnonymousRequestsFiltered.length === anonymousRequests.length) {
+      response.status(201).json({
+        message: 'All anonymous requests created successfully',
+        resourceData: newAnonymousRequestsFiltered,
+      });
+    } else {
+      response.status(400).json({
+        message: 'Some anonymous requests could not be created',
+        resourceData: newAnonymousRequestsFiltered,
+      });
     }
   }
 );
@@ -232,6 +284,7 @@ const deleteAllAnonymousRequestsHandler = expressAsyncHandler(
 
 export {
   createNewAnonymousRequestHandler,
+  createNewAnonymousRequestsBulkHandler,
   getQueriedAnonymousRequestsHandler,
   getAnAnonymousRequestHandler,
   deleteAnAnonymousRequestHandler,

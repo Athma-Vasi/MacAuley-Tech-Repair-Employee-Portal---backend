@@ -30,6 +30,33 @@ interface CreateNewEventRequest extends RequestAfterJWTVerification {
   };
 }
 
+// DEV ROUTE
+interface CreateNewEventsBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    events: {
+      userId: Types.ObjectId;
+      username: string;
+      creatorRole: UserRoles;
+      eventTitle: string;
+      eventDescription: string;
+      eventKind: EventKind;
+      eventStartDate: NativeDate;
+      eventEndDate: NativeDate;
+      eventStartTime: string;
+      eventEndTime: string;
+      eventLocation: string;
+      eventAttendees: string;
+      requiredItems: string;
+      rsvpDeadline: NativeDate;
+    }[];
+  };
+}
+
 interface DeleteAnEventRequest extends RequestAfterJWTVerification {
   params: {
     eventId: string;
@@ -67,6 +94,7 @@ interface UpdateAnEventByIdRequest extends RequestAfterJWTVerification {
 
 export type {
   CreateNewEventRequest,
+  CreateNewEventsBulkRequest,
   DeleteAnEventRequest,
   DeleteAllEventsByUserRequest,
   GetQueriedEventsRequest,

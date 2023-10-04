@@ -4,6 +4,7 @@ import type { FilterQuery, QueryOptions } from 'mongoose';
 import type { Response } from 'express';
 import type { DeleteResult } from 'mongodb';
 import type {
+  CreateNewLeaveRequestBulkRequest,
   CreateNewLeaveRequestRequest,
   DeleteALeaveRequestRequest,
   DeleteAllLeaveRequestsRequest,
@@ -76,18 +77,79 @@ const createNewLeaveRequestHandler = expressAsyncHandler(
     // create new leave request
     const newLeaveRequest = await createNewLeaveRequestService(newLeaveRequestObject);
 
-    // check if new leave request was created
-    if (newLeaveRequest) {
-      response.status(201).json({
-        message: `Successfully created ${reasonForLeave} leave request`,
-        resourceData: [newLeaveRequest],
-      });
-    } else {
+    if (!newLeaveRequest) {
       response.status(400).json({
         message: 'New leave request could not be created',
         resourceData: [],
       });
+      return;
     }
+
+    response.status(201).json({
+      message: `Successfully created ${reasonForLeave} leave request`,
+      resourceData: [newLeaveRequest],
+    });
+  }
+);
+
+// DEV ROUTE
+// @desc   Create new leave requests in bulk
+// @route  POST /leave-request/dev
+// @access Private/Admin/Manager
+const createNewLeaveRequestBulkHandler = expressAsyncHandler(
+  async (
+    request: CreateNewLeaveRequestBulkRequest,
+    response: Response<ResourceRequestServerResponse<LeaveRequestDocument>>
+  ) => {
+    const { leaveRequests } = request.body;
+
+    // promise array of new leave requests
+    const newLeaveRequests = await Promise.all(
+      leaveRequests.map(async (leaveRequest) => {
+        const {
+          userId,
+          username,
+          startDate,
+          endDate,
+          reasonForLeave,
+          delegatedToEmployee,
+          delegatedResponsibilities,
+          additionalComments,
+          acknowledgement,
+          requestStatus,
+        } = leaveRequest;
+
+        // create new leave request object
+        const newLeaveRequestObject: LeaveRequestSchema = {
+          userId,
+          username,
+          action: 'company',
+          category: 'leave request',
+          startDate,
+          endDate,
+          reasonForLeave,
+          delegatedToEmployee,
+          delegatedResponsibilities,
+          additionalComments,
+          acknowledgement,
+          requestStatus,
+        };
+
+        // create new leave request
+        const newLeaveRequest = await createNewLeaveRequestService(newLeaveRequestObject);
+
+        return newLeaveRequest;
+      })
+    );
+    // filter out undefined values
+    const newLeaveRequestsFiltered = newLeaveRequests.filter(
+      (leaveRequest) => leaveRequest !== undefined
+    ) as LeaveRequestDocument[];
+
+    response.status(201).json({
+      message: 'Successfully created new leave requests',
+      resourceData: newLeaveRequestsFiltered,
+    });
   }
 );
 
@@ -312,6 +374,7 @@ const deleteAllLeaveRequestsHandler = expressAsyncHandler(
 
 export {
   createNewLeaveRequestHandler,
+  createNewLeaveRequestBulkHandler,
   deleteALeaveRequestHandler,
   deleteAllLeaveRequestsHandler,
   getLeaveRequestByIdHandler,

@@ -10,6 +10,7 @@ import type {
   GetEventByIdRequest,
   GetQueriedEventsByUserRequest,
   UpdateAnEventByIdRequest,
+  CreateNewEventsBulkRequest,
 } from './event.types';
 import {
   createNewEventService,
@@ -83,6 +84,84 @@ const createNewEventHandler = expressAsyncHandler(
         .json({ message: `Successfully created event: ${eventTitle}`, resourceData: [newEvent] });
     } else {
       response.status(400).json({ message: 'Unable to create new event', resourceData: [] });
+    }
+  }
+);
+
+// DEV ROUTE
+// @desc   Create new events in bulk
+// @route  POST /events/dev
+// @access Private/Manager/Admin
+const createNewEventsBulkHandler = expressAsyncHandler(
+  async (
+    request: CreateNewEventsBulkRequest,
+    response: Response<ResourceRequestServerResponse<EventCreatorDocument>>
+  ) => {
+    const { events } = request.body;
+
+    // create new events
+    const newEvents = await Promise.all(
+      events.map(async (event) => {
+        const {
+          userId,
+          username,
+          creatorRole,
+          eventTitle,
+          eventDescription,
+          eventKind,
+          eventStartTime,
+          eventEndTime,
+          eventLocation,
+          eventStartDate,
+          eventEndDate,
+          rsvpDeadline,
+          eventAttendees,
+          requiredItems,
+        } = event;
+
+        // create new event object
+        const newEventObject: EventCreatorSchema = {
+          userId,
+          username,
+          creatorRole,
+          action: 'outreach',
+          category: 'event',
+
+          eventTitle,
+          eventDescription,
+          eventKind,
+          eventStartTime,
+          eventEndTime,
+          eventLocation,
+          eventStartDate,
+          eventEndDate,
+          rsvpDeadline,
+          eventAttendees,
+          requiredItems,
+        };
+
+        // create new event
+        const newEvent = await createNewEventService(newEventObject);
+        return newEvent;
+      })
+    );
+
+    // filter out any events that were not created
+    const successfullyCreatedEvents = newEvents.filter((event) => event);
+
+    // check if any events were created
+    if (successfullyCreatedEvents.length === events.length) {
+      response.status(201).json({
+        message: `Successfully created ${successfullyCreatedEvents.length} events`,
+        resourceData: successfullyCreatedEvents,
+      });
+    } else {
+      response.status(400).json({
+        message: `Successfully created ${
+          successfullyCreatedEvents.length
+        } events, but failed to create ${events.length - successfullyCreatedEvents.length} events`,
+        resourceData: successfullyCreatedEvents,
+      });
     }
   }
 );
@@ -311,6 +390,7 @@ const updateAnEventHandler = expressAsyncHandler(
 
 export {
   createNewEventHandler,
+  createNewEventsBulkHandler,
   deleteAnEventHandler,
   getQueriedEventsHandler,
   getEventByIdHandler,

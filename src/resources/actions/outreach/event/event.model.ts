@@ -125,7 +125,7 @@ eventCreatorSchema.index({
   requiredItems: 'text',
 });
 
-const EventCreatorModel = model<EventCreatorDocument>('EventCreator', eventCreatorSchema);
+const EventCreatorModel = model<EventCreatorDocument>('Events', eventCreatorSchema);
 
 export { EventCreatorModel };
 export type { EventCreatorSchema, EventCreatorDocument, EventKind };

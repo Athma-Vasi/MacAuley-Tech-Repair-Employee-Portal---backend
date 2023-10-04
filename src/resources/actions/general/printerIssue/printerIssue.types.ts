@@ -29,6 +29,33 @@ interface CreateNewPrinterIssueRequest extends RequestAfterJWTVerification {
   };
 }
 
+// DEV ROUTE
+interface CreateNewPrinterIssuesBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    printerIssues: {
+      userId: Types.ObjectId;
+      username: string;
+      title: string;
+      contactNumber: PhoneNumber;
+      contactEmail: string;
+      dateOfOccurrence: NativeDate;
+      timeOfOccurrence: TimeRailway;
+      printerMake: PrinterMake;
+      printerModel: string;
+      printerSerialNumber: string;
+      printerIssueDescription: string;
+      urgency: Urgency;
+      additionalInformation: string;
+      requestStatus: RequestStatus;
+    }[];
+  };
+}
+
 interface UpdatePrinterIssueStatusByIdRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {
@@ -65,6 +92,7 @@ type GetQueriedPrinterIssuesByUserRequest = GetQueriedResourceRequest;
 
 export type {
   CreateNewPrinterIssueRequest,
+  CreateNewPrinterIssuesBulkRequest,
   DeletePrinterIssueRequest,
   DeleteAllPrinterIssuesRequest,
   GetQueriedPrinterIssuesRequest,

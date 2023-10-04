@@ -11,6 +11,7 @@ import type {
   DeleteAllAnnouncementsRequest,
   GetAnnouncementRequestById,
   UpdateAnnouncementRatingRequest,
+  CreateNewAnnouncementsBulkRequest,
 } from './announcement.types';
 
 import {
@@ -53,6 +54,7 @@ const createNewAnnouncementHandler = expressAsyncHandler(
         title,
         author,
         article,
+        bannerImageSrcCompressed,
         bannerImageAlt,
         bannerImageSrc,
         timeToRead,
@@ -79,6 +81,7 @@ const createNewAnnouncementHandler = expressAsyncHandler(
       title,
       author,
       article,
+      bannerImageSrcCompressed,
       bannerImageAlt,
       bannerImageSrc,
       timeToRead,
@@ -96,6 +99,80 @@ const createNewAnnouncementHandler = expressAsyncHandler(
       message: 'Announcement created successfully!',
       resourceData: [newAnnouncement],
     });
+  }
+);
+
+// DEV ROUTE
+// @desc   create new announcements in bulk
+// @route  POST /announcements/dev
+// @access Private/Manager/Admin
+const createNewAnnouncementsBulkHandler = expressAsyncHandler(
+  async (
+    request: CreateNewAnnouncementsBulkRequest,
+    response: Response<ResourceRequestServerResponse<AnnouncementDocument>>
+  ) => {
+    const { announcements } = request.body;
+
+    // create new announcements in bulk
+    const newAnnouncements = await Promise.all(
+      announcements.map(async (announcement) => {
+        const {
+          userId,
+          username,
+          title,
+          author,
+          article,
+          bannerImageAlt,
+          bannerImageSrc,
+          bannerImageSrcCompressed,
+          timeToRead,
+          ratingResponse,
+          ratedUserIds,
+        } = announcement;
+
+        // create new announcement object
+        const newAnnouncementObject: AnnouncementSchema = {
+          userId,
+          username,
+          action: 'outreach',
+          category: 'announcement',
+          title,
+          author,
+          article,
+          bannerImageAlt,
+          bannerImageSrc,
+          bannerImageSrcCompressed,
+          timeToRead,
+          ratingResponse,
+          ratedUserIds,
+        };
+
+        // create new announcement
+        const newAnnouncement = await createNewAnnouncementService(newAnnouncementObject);
+
+        return newAnnouncement;
+      })
+    );
+
+    // filter out undefined values
+    const newAnnouncementsFiltered = newAnnouncements.filter(
+      (announcement) => announcement
+    ) as AnnouncementDocument[];
+
+    // check if any announcements were created
+    if (newAnnouncementsFiltered.length === announcements.length) {
+      response.status(201).json({
+        message: 'Announcements created successfully!',
+        resourceData: newAnnouncementsFiltered,
+      });
+      return;
+    } else {
+      response.status(400).json({
+        message: 'Announcements could not be created',
+        resourceData: [],
+      });
+      return;
+    }
   }
 );
 
@@ -359,12 +436,13 @@ const getAnnouncementByIdHandler = expressAsyncHandler(
 );
 
 export {
-  deleteAnnouncementHandler,
-  getQueriedAnnouncementsHandler,
-  getQueriedAnouncementsByUserHandler,
   createNewAnnouncementHandler,
-  updateAnnouncementHandler,
+  createNewAnnouncementsBulkHandler,
+  deleteAnnouncementHandler,
   deleteAllAnnouncementsHandler,
   getAnnouncementByIdHandler,
+  getQueriedAnnouncementsHandler,
+  getQueriedAnouncementsByUserHandler,
+  updateAnnouncementHandler,
   updateAnnouncementRatingHandler,
 };

@@ -5,7 +5,7 @@ import { RequestStatus } from '../../../../types';
 import { FileUploadDocument } from '../../../fileUpload';
 
 type ExpenseClaimKind =
-  | 'Travel and Accomodation'
+  | 'Travel and Accommodation'
   | 'Equipment and Supplies'
   | 'Communication and Utilities'
   | 'Training and Certifications'

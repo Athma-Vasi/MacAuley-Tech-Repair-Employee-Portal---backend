@@ -7,6 +7,7 @@ import {
   getQueriedPrinterIssuesHandler,
   getQueriedPrinterIssuesByUserHandler,
   updatePrinterIssueByIdHandler,
+  createNewPrinterIssuesBulkHandler,
 } from './printerIssue.controller';
 import { assignQueryDefaults, verifyRoles } from '../../../../middlewares';
 import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
@@ -24,6 +25,9 @@ printerIssueRouter
 printerIssueRouter
   .route('/user')
   .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedPrinterIssuesByUserHandler);
+
+// DEV ROUTE
+printerIssueRouter.route('/dev').post(createNewPrinterIssuesBulkHandler);
 
 printerIssueRouter
   .route('/:printerIssueId')

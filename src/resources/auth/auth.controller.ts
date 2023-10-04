@@ -65,19 +65,19 @@ const loginUserHandler = expressAsyncHandler(
         },
       },
       ACCESS_TOKEN_SECRET,
-      { expiresIn: '1d' }
+      { expiresIn: '10s' }
     );
 
     // create refresh token
     const refreshToken = jwt.sign({ username: foundUser.username }, REFRESH_TOKEN_SECRET, {
-      expiresIn: '1y',
+      expiresIn: '1d',
     });
 
     // create secure cookie with refresh token
     response.cookie('jwt', refreshToken, {
-      httpOnly: true, // cookie is only accessible by the server
-      secure: true, // cookie is only sent over https
-      sameSite: 'none', // cookie is not sent in cross-site requests
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
       maxAge: 1000 * 60 * 60 * 24, // cookie expires in 1 day
     });
 
@@ -89,13 +89,28 @@ const loginUserHandler = expressAsyncHandler(
 // @desc Refresh token
 // @route GET /auth/refresh
 // @access Public - because access token has expired
+/**
+ * @description implements 'Refresh Token Rotation' as defined in the OAuth 2.0 RFC
+ * @see https://www.rfc-editor.org/rfc/rfc6749#:~:text=refresh%20token%0A%20%20%20rotation
+ * - Issues a new refresh&access token pair if the refresh token is valid
+ * - mitigates 'replay attacks' resulting from compromised tokens
+ * @see https://auth0.com/docs/secure/security-guidance/prevent-threats#replay-attacks
+ */
 const refreshTokenHandler = expressAsyncHandler(
   async (request: RefreshTokenRequest, response: Response) => {
     const { jwt: refreshToken } = request.cookies;
 
+    console.log({ refreshToken });
+
     // check if refresh token exists
     if (!refreshToken) {
       response.status(401).json({ message: 'Unauthorized: Refresh token is required' });
+      response.clearCookie('jwt', {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+      });
+
       return;
     }
 
@@ -111,6 +126,12 @@ const refreshTokenHandler = expressAsyncHandler(
       // check if user exists
       const userExists = await checkUserExistsService({ username });
       if (!userExists) {
+        response.clearCookie('jwt', {
+          httpOnly: true,
+          secure: true,
+          sameSite: 'none',
+        });
+
         response.status(401).json({ message: 'Unauthorized: User does not exist' });
         return;
       }
@@ -118,6 +139,12 @@ const refreshTokenHandler = expressAsyncHandler(
       // check user is active
       const userIsActive = await checkUserIsActiveService({ username });
       if (!userIsActive) {
+        response.clearCookie('jwt', {
+          httpOnly: true,
+          secure: true,
+          sameSite: 'none',
+        });
+
         response.status(401).json({ message: 'Unauthorized: User is not active' });
         return;
       }
@@ -125,9 +152,20 @@ const refreshTokenHandler = expressAsyncHandler(
       // find user
       const foundUser = await getUserByUsernameService(username);
       if (!foundUser) {
+        response.clearCookie('jwt', {
+          httpOnly: true,
+          secure: true,
+          sameSite: 'none',
+        });
+
         response.status(401).json({ message: 'Unauthorized: User not found' });
         return;
       }
+
+      // create refresh token
+      const refreshToken = jwt.sign({ username: foundUser.username }, REFRESH_TOKEN_SECRET, {
+        expiresIn: '1d',
+      });
 
       // create access token
       const { ACCESS_TOKEN_SECRET } = config;
@@ -143,6 +181,14 @@ const refreshTokenHandler = expressAsyncHandler(
         { expiresIn: '10s' }
       );
 
+      // create secure cookie with refresh token
+      response.cookie('jwt', refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        maxAge: 1000 * 60 * 60 * 24, // cookie expires in 1 day
+      });
+
       // send access token in response
       response.status(200).json({ accessToken });
     });
@@ -154,18 +200,18 @@ const refreshTokenHandler = expressAsyncHandler(
 // @access Private
 const logoutUserHandler = expressAsyncHandler(
   async (request: LogoutUserRequest, response: Response) => {
-    const { jwt: refreshToken } = request.cookies;
+    // const { jwt: refreshToken } = request.cookies;
 
-    // check if refresh token exists
-    if (!refreshToken) {
-      response.status(204).json({ message: 'No content' });
-      return;
-    }
+    // // check if refresh token exists
+    // if (!refreshToken) {
+    //   response.status(204).json({ message: 'No content' });
+    //   return;
+    // }
 
     response.clearCookie('jwt', {
-      httpOnly: true, // cookie is only accessible by the server
-      secure: true, // cookie is only sent over https
-      sameSite: 'none', // cookie is not sent in cross-site requests
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
     });
 
     response.status(200).json({ message: 'User logged out' });

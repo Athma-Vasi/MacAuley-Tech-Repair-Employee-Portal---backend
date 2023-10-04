@@ -9,6 +9,7 @@ import type {
   GetQueriedRefermentsRequest,
   GetQueriedRefermentsByUserRequest,
   UpdateRefermentStatusByIdRequest,
+  CreateNewRefermentsBulkRequest,
 } from './referment.types';
 
 import {
@@ -93,6 +94,86 @@ const createNewRefermentHandler = expressAsyncHandler(
       message: `Successfully submitted candidate ${candidateFullName} for referment.`,
       resourceData: [newReferment],
     });
+  }
+);
+
+// DEV ROUTE
+// @desc   create new referments in bulk
+// @route  POST /referments/dev
+// @access Private/Manager/Admin
+const createNewRefermentsBulkHandler = expressAsyncHandler(
+  async (
+    request: CreateNewRefermentsBulkRequest,
+    response: Response<ResourceRequestServerResponse<RefermentDocument>>
+  ) => {
+    const { referments } = request.body;
+
+    // create new referments
+    const newReferments = await Promise.all(
+      referments.map(async (referment) => {
+        const {
+          userId,
+          username,
+          candidateFullName,
+          candidateEmail,
+          candidateContactNumber,
+          candidateCurrentJobTitle,
+          candidateCurrentCompany,
+          candidateProfileUrl,
+          departmentReferredFor,
+          positionReferredFor,
+          positionJobDescription,
+          referralReason,
+          additionalInformation,
+          privacyConsent,
+          requestStatus,
+        } = referment;
+
+        // create new referment object
+        const newReferment = await createNewRefermentService({
+          userId,
+          username,
+          action: 'general',
+          category: 'referment',
+
+          candidateFullName,
+          candidateEmail,
+          candidateContactNumber,
+          candidateCurrentJobTitle,
+          candidateCurrentCompany,
+          candidateProfileUrl,
+
+          departmentReferredFor,
+          positionReferredFor,
+          positionJobDescription,
+          referralReason,
+          additionalInformation,
+          privacyConsent,
+          requestStatus,
+        });
+
+        return newReferment;
+      })
+    );
+
+    // filter out any referments that were not created
+    const successfullyCreatedReferments = newReferments.filter((referment) => referment);
+
+    if (successfullyCreatedReferments.length === referments.length) {
+      response.status(201).json({
+        message: `Successfully created ${successfullyCreatedReferments.length} referments.`,
+        resourceData: successfullyCreatedReferments,
+      });
+    } else {
+      response.status(400).json({
+        message: `Successfully created ${
+          successfullyCreatedReferments.length
+        } referments. Could not create ${
+          referments.length - successfullyCreatedReferments.length
+        } referments.`,
+        resourceData: successfullyCreatedReferments,
+      });
+    }
   }
 );
 
@@ -290,6 +371,7 @@ const deleteAllRefermentsHandler = expressAsyncHandler(
 
 export {
   createNewRefermentHandler,
+  createNewRefermentsBulkHandler,
   deleteARefermentHandler,
   deleteAllRefermentsHandler,
   getQueriedRefermentsHandler,

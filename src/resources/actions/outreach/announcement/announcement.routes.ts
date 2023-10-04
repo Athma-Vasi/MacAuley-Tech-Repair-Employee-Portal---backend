@@ -10,6 +10,7 @@ import {
   deleteAllAnnouncementsHandler,
   getAnnouncementByIdHandler,
   updateAnnouncementRatingHandler,
+  createNewAnnouncementsBulkHandler,
 } from './announcement.controller';
 import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
 
@@ -24,6 +25,9 @@ announcementRouter
   .delete(deleteAllAnnouncementsHandler);
 
 announcementRouter.route('/user').get(getQueriedAnouncementsByUserHandler);
+
+// DEV ROUTE
+announcementRouter.route('/dev').post(createNewAnnouncementsBulkHandler);
 
 announcementRouter
   .route('/:announcementId')

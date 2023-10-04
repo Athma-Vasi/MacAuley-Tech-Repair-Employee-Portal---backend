@@ -22,6 +22,7 @@ type AnnouncementSchema = {
   category: ActionsOutreach;
   title: string;
   author: string;
+  bannerImageSrcCompressed: string;
   bannerImageSrc: string;
   bannerImageAlt: string;
   article: string[];

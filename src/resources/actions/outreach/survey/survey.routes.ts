@@ -8,6 +8,7 @@ import {
   getSurveyByIdHandler,
   getQueriedSurveysByUserHandler,
   updateSurveyStatisticsByIdHandler,
+  createNewSurveysBulkHandler,
 } from './survey.controller';
 import { assignQueryDefaults, verifyRoles } from '../../../../middlewares';
 import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
@@ -25,6 +26,9 @@ surveyBuilderRouter
 surveyBuilderRouter
   .route('/user')
   .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedSurveysByUserHandler);
+
+// DEV ROUTE
+surveyBuilderRouter.route('/dev').post(createNewSurveysBulkHandler);
 
 surveyBuilderRouter
   .route('/:surveyId')

@@ -16,6 +16,7 @@ interface CreateNewAnnouncementRequest extends RequestAfterJWTVerification {
     announcement: {
       title: string;
       author: string;
+      bannerImageSrcCompressed: string;
       bannerImageSrc: string;
       bannerImageAlt: string;
       article: string[];
@@ -23,6 +24,31 @@ interface CreateNewAnnouncementRequest extends RequestAfterJWTVerification {
       ratingResponse: RatingResponse;
       ratedUserIds: Types.ObjectId[];
     };
+  };
+}
+
+// DEV ROUTE
+interface CreateNewAnnouncementsBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    // below are the fields required to be sent with post request
+    announcements: {
+      userId: Types.ObjectId;
+      username: string;
+      title: string;
+      author: string;
+      bannerImageSrcCompressed: string;
+      bannerImageSrc: string;
+      bannerImageAlt: string;
+      article: string[];
+      timeToRead: number;
+      ratingResponse: RatingResponse;
+      ratedUserIds: Types.ObjectId[];
+    }[];
   };
 }
 
@@ -82,6 +108,7 @@ interface UpdateAnnouncementRatingRequest extends RequestAfterJWTVerification {
 
 export type {
   CreateNewAnnouncementRequest,
+  CreateNewAnnouncementsBulkRequest,
   DeleteAnAnnouncementRequest,
   DeleteAllAnnouncementsRequest,
   GetAllAnnouncementsRequest,

@@ -8,6 +8,7 @@ import {
   getQueriedExpenseClaimsByUserHandler,
   updateExpenseClaimStatusByIdHandler,
   updateExpenseClaimByIdHandler,
+  createNewExpenseClaimBulkHandler,
 } from './expenseClaim.controller';
 import { assignQueryDefaults, verifyRoles } from '../../../../middlewares';
 import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
@@ -25,6 +26,9 @@ expenseClaimRouter
 expenseClaimRouter
   .route('/user')
   .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedExpenseClaimsByUserHandler);
+
+// DEV ROUTE
+expenseClaimRouter.route('/dev').post(createNewExpenseClaimBulkHandler);
 
 expenseClaimRouter
   .route('/:expenseClaimId')

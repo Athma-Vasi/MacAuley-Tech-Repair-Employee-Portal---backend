@@ -53,6 +53,14 @@ function verifyRoles() {
         return;
       }
     }
+    // dev route
+    else if (url.includes('/dev')) {
+      // only admins/managers are allowed to
+      if (roles.includes('Manager') || roles.includes('Admin')) {
+        next();
+        return;
+      }
+    }
     // the dynamic param id route
     else {
       if (method === 'GET') {

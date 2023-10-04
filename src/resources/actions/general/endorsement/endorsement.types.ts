@@ -22,6 +22,26 @@ interface CreateNewEndorsementRequest extends RequestAfterJWTVerification {
   };
 }
 
+// DEV ROUTE
+interface CreateNewEndorsementsBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    endorsements: {
+      userId: Types.ObjectId;
+      username: string;
+      title: string;
+      userToBeEndorsed: string;
+      summaryOfEndorsement: string;
+      attributeEndorsed: EmployeeAttributes;
+      requestStatus: RequestStatus;
+    }[];
+  };
+}
+
 interface UpdateEndorsementStatusByIdRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {
@@ -58,6 +78,7 @@ type GetQueriedEndorsementsByUserRequest = GetQueriedResourceRequest;
 
 export type {
   CreateNewEndorsementRequest,
+  CreateNewEndorsementsBulkRequest,
   DeleteEndorsementRequest,
   DeleteAllEndorsementsRequest,
   GetQueriedEndorsementsRequest,

@@ -27,6 +27,30 @@ interface CreateNewExpenseClaimRequest extends RequestAfterJWTVerification {
   };
 }
 
+// DEV ROUTE
+interface CreateNewExpenseClaimBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    expenseClaims: {
+      userId: Types.ObjectId;
+      username: string;
+      uploadedFilesIds: Types.ObjectId[];
+      expenseClaimKind: ExpenseClaimKind;
+      expenseClaimAmount: number;
+      expenseClaimCurrency: Currency;
+      expenseClaimDate: NativeDate;
+      expenseClaimDescription: string;
+      additionalComments: string;
+      acknowledgement: boolean;
+      requestStatus: RequestStatus;
+    }[];
+  };
+}
+
 interface DeleteAnExpenseClaimRequest extends RequestAfterJWTVerification {
   params: {
     expenseClaimId: string;
@@ -85,6 +109,7 @@ interface UpdateExpenseClaimByIdRequest extends RequestAfterJWTVerification {
 
 export type {
   CreateNewExpenseClaimRequest,
+  CreateNewExpenseClaimBulkRequest,
   DeleteAnExpenseClaimRequest,
   DeleteAllExpenseClaimsRequest,
   GetQueriedExpenseClaimsRequest,

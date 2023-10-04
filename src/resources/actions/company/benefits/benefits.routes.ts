@@ -1,6 +1,7 @@
 import { Router } from 'express';
 
 import {
+  createNewBenefitsBulkHandler,
   createNewBenefitsHandler,
   deleteABenefitHandler,
   deleteAllBenefitsByUserHandler,
@@ -25,6 +26,9 @@ benefitsRouter
   .route('/user')
   .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedBenefitsByUserHandler)
   .delete(deleteAllBenefitsByUserHandler);
+
+// dev route
+benefitsRouter.route('/dev').post(createNewBenefitsBulkHandler);
 
 benefitsRouter
   .route('/:benefitId')

@@ -14,6 +14,9 @@ interface CreateNewCommentRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     comment: {
+      firstName: string;
+      middleName: string;
+      lastName: string;
       department: Department;
       jobPosition: JobPosition;
       profilePictureUrl: string;
@@ -30,6 +33,40 @@ interface CreateNewCommentRequest extends RequestAfterJWTVerification {
       dislikedUserIds: Types.ObjectId[];
       reportedUserIds: Types.ObjectId[];
     };
+  };
+}
+
+// DEV ROUTE
+interface CreateNewCommentsBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    comments: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+      firstName: string;
+      middleName: string;
+      lastName: string;
+      department: Department;
+      jobPosition: JobPosition;
+      profilePictureUrl: string;
+      parentResourceId: Types.ObjectId;
+      comment: string;
+      quotedUsername: string;
+      quotedComment: string;
+      likesCount: number;
+      dislikesCount: number;
+      reportsCount: number;
+      isFeatured: boolean;
+      isDeleted: boolean;
+      likedUserIds: Types.ObjectId[];
+      dislikedUserIds: Types.ObjectId[];
+      reportedUserIds: Types.ObjectId[];
+    }[];
   };
 }
 
@@ -72,6 +109,7 @@ interface UpdateCommentByIdRequest extends RequestAfterJWTVerification {
 
 export type {
   CreateNewCommentRequest,
+  CreateNewCommentsBulkRequest,
   DeleteACommentRequest,
   DeleteAllCommentsRequest,
   GetQueriedCommentsRequest,

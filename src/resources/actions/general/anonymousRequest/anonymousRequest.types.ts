@@ -32,6 +32,27 @@ interface CreateNewAnonymousRequestRequest extends RequestAfterJWTVerification {
   };
 }
 
+// DEV ROUTE
+interface CreateNewAnonymousRequestsBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    anonymousRequests: {
+      title: string;
+      secureContactNumber: PhoneNumber;
+      secureContactEmail: string;
+      requestKind: AnonymousRequestKind;
+      requestDescription: string;
+      additionalInformation: string;
+      urgency: Urgency;
+      requestStatus: RequestStatus;
+    }[];
+  };
+}
+
 interface DeleteAnAnonymousRequestRequest extends RequestAfterJWTVerification {
   body: {
     // only managers can delete anonymous requests
@@ -83,6 +104,7 @@ interface UpdateAnonymousRequestStatusByIdRequest extends RequestAfterJWTVerific
 
 export type {
   CreateNewAnonymousRequestRequest,
+  CreateNewAnonymousRequestsBulkRequest,
   DeleteAnAnonymousRequestRequest,
   DeleteAllAnonymousRequestsRequest,
   GetQueriedAnonymousRequestsRequest,

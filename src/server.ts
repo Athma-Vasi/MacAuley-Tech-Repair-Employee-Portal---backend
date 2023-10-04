@@ -15,6 +15,7 @@ import { rootRouter } from './resources/root';
 import { notFoundRouter } from './resources/notFound404';
 import { authRouter } from './resources/auth';
 import { apiRouter } from './resources/api';
+import { credentials } from './middlewares/credentials';
 
 const app = express();
 
@@ -23,7 +24,11 @@ connectDB(config);
 
 app.use(loggerMiddleware);
 app.use(helmet());
+// handle options credentials check before cors
+// and fetch cookies credentials requirement
+app.use(credentials);
 app.use(cors(corsOptions));
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));

@@ -6,6 +6,7 @@ import {
   getQueriedAnonymousRequestsHandler,
   getAnAnonymousRequestHandler,
   updateAnonymousRequestStatusByIdHandler,
+  createNewAnonymousRequestsBulkHandler,
 } from './anonymousRequest.controller';
 import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
 import { assignQueryDefaults } from '../../../../middlewares';
@@ -19,6 +20,9 @@ anonymousRequestRouter
   .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedAnonymousRequestsHandler)
   .post(createNewAnonymousRequestHandler)
   .delete(deleteAllAnonymousRequestsHandler);
+
+// DEV ROUTE
+anonymousRequestRouter.route('/dev').post(createNewAnonymousRequestsBulkHandler);
 
 anonymousRequestRouter
   .route('/:anonymousRequestId')

@@ -8,6 +8,7 @@ import {
   getQueriedRefermentsHandler,
   getQueriedRefermentsByUserHandler,
   updateRefermentStatusByIdHandler,
+  createNewRefermentsBulkHandler,
 } from './referment.controller';
 import { assignQueryDefaults, verifyRoles } from '../../../../middlewares';
 import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
@@ -23,6 +24,9 @@ refermentRouter
   .delete(deleteAllRefermentsHandler);
 
 refermentRouter.route('/user').get(getQueriedRefermentsByUserHandler);
+
+// DEV ROUTE
+refermentRouter.route('/dev').post(createNewRefermentsBulkHandler);
 
 refermentRouter
   .route('/:refermentId')

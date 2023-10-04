@@ -8,6 +8,7 @@ import {
   getAnEndorsementHandler,
   getQueriedEndorsementsByUserHandler,
   updateAnEndorsementHandler,
+  createNewEndorsementsBulkHandler,
 } from './endorsement.controller';
 import { assignQueryDefaults, verifyRoles } from '../../../../middlewares';
 import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
@@ -23,6 +24,9 @@ endorsementRouter
   .delete(deleteAllEndorsementsHandler);
 
 endorsementRouter.route('/user').get(getQueriedEndorsementsByUserHandler);
+
+// DEV ROUTE
+endorsementRouter.route('/dev').post(createNewEndorsementsBulkHandler);
 
 endorsementRouter
   .route('/:endorsementId')

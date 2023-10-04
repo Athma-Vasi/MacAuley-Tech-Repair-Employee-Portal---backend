@@ -24,6 +24,29 @@ interface CreateNewLeaveRequestRequest extends RequestAfterJWTVerification {
   };
 }
 
+// DEV ROUTE
+interface CreateNewLeaveRequestBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    leaveRequests: {
+      userId: Types.ObjectId;
+      username: string;
+      startDate: Date;
+      endDate: Date;
+      reasonForLeave: ReasonForLeave;
+      delegatedToEmployee: string;
+      delegatedResponsibilities: string;
+      additionalComments: string;
+      acknowledgement: boolean;
+      requestStatus: RequestStatus;
+    }[];
+  };
+}
+
 interface DeleteALeaveRequestRequest extends RequestAfterJWTVerification {
   params: {
     leaveRequestId: string;
@@ -63,6 +86,7 @@ interface UpdateLeaveRequestStatusByIdRequest extends RequestAfterJWTVerificatio
 
 export type {
   CreateNewLeaveRequestRequest,
+  CreateNewLeaveRequestBulkRequest,
   DeleteALeaveRequestRequest,
   DeleteAllLeaveRequestsRequest,
   GetQueriedLeaveRequestsByUserRequest,

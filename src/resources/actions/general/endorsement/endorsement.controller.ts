@@ -20,6 +20,7 @@ import type {
   GetAnEndorsementRequest,
   GetQueriedEndorsementsByUserRequest,
   UpdateEndorsementStatusByIdRequest,
+  CreateNewEndorsementsBulkRequest,
 } from './endorsement.types';
 import { EndorsementDocument, EndorsementSchema } from './endorsement.model';
 import {
@@ -63,6 +64,47 @@ const createNewEndorsementHandler = expressAsyncHandler(
       });
     } else {
       response.status(400).json({ message: 'Endorsement could not be created', resourceData: [] });
+    }
+  }
+);
+
+// DEV ROUTE
+// @desc   Create new endorsements in bulk
+// @route  POST /endorsement/dev
+// @access Private/Manager/Admin
+const createNewEndorsementsBulkHandler = expressAsyncHandler(
+  async (
+    request: CreateNewEndorsementsBulkRequest,
+    response: Response<ResourceRequestServerResponse<EndorsementDocument>>
+  ) => {
+    const { endorsements } = request.body;
+
+    const newEndorsements = await Promise.all(
+      endorsements.map(async (endorsement) => {
+        const newEndorsementObject: EndorsementSchema = {
+          ...endorsement,
+          action: 'general',
+          category: 'endorsement',
+        };
+
+        const newEndorsement = await createNewEndorsementService(newEndorsementObject);
+        return newEndorsement;
+      })
+    );
+
+    // filter out undefined values
+    const filteredNewEndorsements = newEndorsements.filter(
+      (newEndorsement) => newEndorsement !== undefined
+    );
+
+    // check if any endorsements were created
+    if (filteredNewEndorsements.length === endorsements.length) {
+      response.status(201).json({
+        message: 'Endorsements created successfully',
+        resourceData: filteredNewEndorsements,
+      });
+    } else {
+      response.status(400).json({ message: 'Endorsements could not be created', resourceData: [] });
     }
   }
 );
@@ -253,6 +295,7 @@ const updateAnEndorsementHandler = expressAsyncHandler(
 
 export {
   createNewEndorsementHandler,
+  createNewEndorsementsBulkHandler,
   getAnEndorsementHandler,
   deleteEndorsementHandler,
   deleteAllEndorsementsHandler,
