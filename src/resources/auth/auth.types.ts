@@ -11,15 +11,44 @@ interface LoginUserRequest extends Request {
 
 interface RefreshTokenRequest extends Request {
   cookies: {
-    jwt: string;
+    refreshToken: string;
+  };
+  body: {
+    sessionId: Types.ObjectId;
   };
 }
 
 interface LogoutUserRequest extends Request {
   cookies: {
-    jwt: string;
+    refreshToken: string;
+  };
+  body: {
+    sessionId: Types.ObjectId;
   };
 }
+
+type AccessTokenDecoded = {
+  userInfo: {
+    userId: Types.ObjectId;
+    username: string;
+    roles: UserRoles;
+  };
+  sessionId: Types.ObjectId;
+  iat: number;
+  exp: number;
+};
+
+type RefreshTokenDecoded = {
+  userInfo: {
+    userId: Types.ObjectId;
+    username: string;
+    roles: UserRoles;
+  };
+  sessionId: Types.ObjectId;
+  iat: number;
+  exp: number;
+  jti: string;
+};
 
 /**
  * -RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body.
@@ -32,6 +61,7 @@ interface RequestAfterJWTVerification extends Request {
       username: string;
       roles: UserRoles;
     };
+    sessionId: Types.ObjectId;
   };
 }
 
@@ -40,4 +70,6 @@ export type {
   RefreshTokenRequest,
   LogoutUserRequest,
   RequestAfterJWTVerification,
+  AccessTokenDecoded,
+  RefreshTokenDecoded,
 };

@@ -1,10 +1,8 @@
 import { NextFunction, Response, Request } from 'express';
-import jwt from 'jsonwebtoken';
-
-import type { UserRoles } from '../resources/user';
-import type { Types } from 'mongoose';
+import jwt, { VerifyErrors } from 'jsonwebtoken';
 
 import { config } from '../config';
+import { AccessTokenDecoded } from '../resources/auth/auth.types';
 
 function verifyJWTMiddleware(
   // technically this request is only modified after this middleware function runs
@@ -14,21 +12,31 @@ function verifyJWTMiddleware(
 ) {
   const { ACCESS_TOKEN_SECRET } = config;
 
-  const token = request.headers.authorization?.split(' ')[1];
-  if (!token) {
+  const accessToken = request.headers.authorization?.split(' ')[1];
+  if (!accessToken) {
+    response.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+    });
+
     response.status(401).json({ message: 'No token provided' });
     return;
   }
 
-  jwt.verify(token, ACCESS_TOKEN_SECRET, (error, decoded) => {
+  jwt.verify(accessToken, ACCESS_TOKEN_SECRET, async (error: VerifyErrors | null, decoded) => {
     if (error) {
-      response.status(403).json({ message: 'Forbidden' });
+      response.clearCookie('refreshToken', {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+      });
+
+      response.status(403).json({ message: 'Forbidden - Access token invalid' });
       return;
     }
 
-    const { userInfo } = decoded as {
-      userInfo: { username: string; userId: Types.ObjectId; roles: UserRoles };
-    };
+    const { userInfo, sessionId } = decoded as AccessTokenDecoded;
 
     const propertyDescriptor: PropertyDescriptor = {
       writable: true,
@@ -38,13 +46,13 @@ function verifyJWTMiddleware(
 
     console.log('original request.body: ', request.body);
 
-    const userInfoBody = Object.defineProperty(Object.create(null), 'userInfo', {
-      value: userInfo,
-      ...propertyDescriptor,
-    });
+    const updatedRequestBody = {
+      userInfo,
+      sessionId,
+    };
 
     Object.defineProperty(request, 'body', {
-      value: { ...request.body, ...userInfoBody },
+      value: { ...request.body, ...updatedRequestBody },
       ...propertyDescriptor,
     });
 

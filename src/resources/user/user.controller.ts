@@ -2,14 +2,14 @@ import expressAsyncHandler from 'express-async-handler';
 
 import type { Response } from 'express';
 import type {
-  CreateNewUserRequest,
-  DeleteUserRequest,
-  DirectoryUserDocument,
-  GetAllUsersRequest,
-  GetUserByIdRequest,
-  GetUsersDirectoryRequest,
-  UpdateUserPasswordRequest,
   UpdateUserRequest,
+  UpdateUserPasswordRequest,
+  GetUsersDirectoryRequest,
+  GetUserByIdRequest,
+  GetAllUsersRequest,
+  DirectoryUserDocument,
+  DeleteUserRequest,
+  CreateNewUserRequest,
 } from './user.types';
 
 import {
@@ -19,12 +19,11 @@ import {
   deleteUserService,
   getQueriedTotalUsersService,
   getQueriedUsersService,
-  updateUserPasswordService,
-  updateUserByIdService,
   getUserByIdService,
   getUsersDirectoryService,
+  updateUserByIdService,
+  updateUserPasswordService,
 } from './user.service';
-import { returnEmptyFieldsTuple } from '../../utils';
 import { UserDocument, UserSchema } from './user.model';
 import {
   GetQueriedResourceRequestServerResponse,
@@ -43,26 +42,26 @@ const createNewUserHandler = expressAsyncHandler(
   ) => {
     const {
       user: {
-        email,
-        username,
-        password,
-        firstName,
-        middleName,
-        lastName,
+        active = true,
+        address,
+        completedSurveys,
         contactNumber,
         dateOfBirth,
+        department,
+        email,
+        emergencyContact,
+        firstName,
+        jobPosition,
+        lastName,
+        middleName,
+        password,
         preferredName,
         preferredPronouns,
         profilePictureUrl,
-        address,
-        jobPosition,
-        department,
-        storeLocation,
-        emergencyContact,
-        startDate,
         roles = ['Employee'],
-        active = true,
-        completedSurveys,
+        startDate,
+        storeLocation,
+        username,
       },
     } = request.body;
     const { province, state } = address;
@@ -91,26 +90,26 @@ const createNewUserHandler = expressAsyncHandler(
     }
 
     const newUserData: UserSchema = {
-      email,
-      username,
-      password,
-      firstName,
-      middleName,
-      lastName,
+      active,
+      address,
+      completedSurveys,
       contactNumber,
       dateOfBirth,
+      department,
+      email,
+      emergencyContact,
+      firstName,
+      jobPosition,
+      lastName,
+      middleName,
+      password,
       preferredName,
       preferredPronouns,
       profilePictureUrl,
-      jobPosition,
-      department,
-      storeLocation,
-      startDate,
       roles,
-      active,
-      address,
-      emergencyContact,
-      completedSurveys,
+      startDate,
+      storeLocation,
+      username,
     };
 
     // create new user if all checks pass successfully
@@ -321,8 +320,8 @@ export {
   createNewUserHandler,
   deleteUserHandler,
   getQueriedUsersHandler,
-  updateUserByIdHandler,
-  getUsersDirectoryHandler,
-  updateUserPasswordHandler,
   getUserByIdHandler,
+  getUsersDirectoryHandler,
+  updateUserByIdHandler,
+  updateUserPasswordHandler,
 };

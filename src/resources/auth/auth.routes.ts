@@ -9,7 +9,7 @@ const authRouter = Router();
 // authRouter.route('/login').post(loginLimiter, loginUserHandler);
 authRouter.route('/login').post(loginUserHandler);
 
-authRouter.route('/refresh').get(refreshTokenHandler);
+authRouter.route('/refresh').post(refreshTokenHandler);
 
 authRouter.route('/logout').post(logoutUserHandler);
 

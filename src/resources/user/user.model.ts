@@ -199,20 +199,17 @@ type UserSchema = {
   address: {
     addressLine: string;
     city: string;
+    country: Country;
+    postalCode: PostalCode;
     province?: Province;
     state?: StatesUS;
-    postalCode: PostalCode;
-    country: Country;
   };
 
   jobPosition: JobPosition;
   department: Department;
   storeLocation?: StoreLocation;
 
-  emergencyContact: {
-    fullName: string;
-    contactNumber: PhoneNumber;
-  };
+  emergencyContact: { fullName: string; contactNumber: PhoneNumber };
   startDate: NativeDate;
   roles: UserRoles;
   active: boolean;
@@ -413,17 +410,17 @@ const UserModel = model<UserDocument>('User', userSchema);
 
 export { UserModel };
 export type {
-  UserSchema,
-  UserDocument,
-  UserRoles,
-  PostalCode,
-  PhoneNumber,
   Country,
-  JobPosition,
   Department,
-  Province,
+  DirectoryUserDocument,
+  JobPosition,
+  PhoneNumber,
+  PostalCode,
   PreferredPronouns,
+  Province,
   StatesUS,
   StoreLocation,
-  DirectoryUserDocument,
+  UserDocument,
+  UserRoles,
+  UserSchema,
 };
