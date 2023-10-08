@@ -141,15 +141,28 @@ const createNewLeaveRequestBulkHandler = expressAsyncHandler(
         return newLeaveRequest;
       })
     );
-    // filter out undefined values
-    const newLeaveRequestsFiltered = newLeaveRequests.filter(
-      (leaveRequest) => leaveRequest !== undefined
-    ) as LeaveRequestDocument[];
 
-    response.status(201).json({
-      message: 'Successfully created new leave requests',
-      resourceData: newLeaveRequestsFiltered,
-    });
+    // filter out any leave requests that were not created
+    const successfullyCreatedLeaveRequests = newLeaveRequests.filter(
+      (leaveRequest) => leaveRequest
+    );
+
+    // check if any leave requests were created
+    if (successfullyCreatedLeaveRequests.length === leaveRequests.length) {
+      response.status(201).json({
+        message: `Successfully created ${successfullyCreatedLeaveRequests.length} leave requests`,
+        resourceData: successfullyCreatedLeaveRequests,
+      });
+    } else {
+      response.status(400).json({
+        message: `Successfully created ${
+          successfullyCreatedLeaveRequests.length
+        } leave requests, but failed to create ${
+          leaveRequests.length - successfullyCreatedLeaveRequests.length
+        } leave requests`,
+        resourceData: successfullyCreatedLeaveRequests,
+      });
+    }
   }
 );
 

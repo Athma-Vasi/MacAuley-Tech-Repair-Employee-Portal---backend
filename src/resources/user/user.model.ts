@@ -215,6 +215,7 @@ type UserSchema = {
   active: boolean;
 
   completedSurveys: (Types.ObjectId | string)[];
+  isPrefersReducedMotion: boolean;
 };
 
 type UserDocument = UserSchema & {
@@ -382,6 +383,11 @@ const userSchema = new Schema<UserSchema>(
       type: [Schema.Types.ObjectId],
       required: false,
       default: [],
+    },
+    isPrefersReducedMotion: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   {

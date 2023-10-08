@@ -136,17 +136,17 @@ const assignQueryDefaults =
       }
     });
 
-    // set default createdAt sort field if it does not exist: { createdAt: 1, _id: -1 }
+    // set default createdAt sort field if it does not exist: { createdAt: -1, _id: -1 }
     // as all schemas have timestamps enabled, createdAt field is guaranteed to exist
     if (!Object.hasOwn(options, 'sort')) {
       Object.defineProperty(options, 'sort', {
-        value: { createdAt: 1 },
+        value: { createdAt: -1 },
         ...propertyDescriptor,
       });
     }
     // if there is only one sort field, _id field with corresponding sort direction is added for consistent results
     // as _id is unique, orderable and immutable
-    // ex: { createdAt: 1, _id: -1 }
+    // ex: { createdAt: -1, _id: -1 }
     const { sort } = options;
     if (Object.keys(sort).length === 1) {
       const sortDirection = Number(Object.values(sort)[0]) < 0 ? -1 : 1;

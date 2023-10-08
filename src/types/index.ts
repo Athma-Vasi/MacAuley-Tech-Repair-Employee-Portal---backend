@@ -75,6 +75,7 @@ interface GetQueriedResourceRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
+    sessionId: Types.ObjectId;
     // these are added by the assignQueryDefaults middleware
     // if its a brand new query, get total number of documents that match the query options and filter
     // a performance optimization at an acceptable cost in accuracy as the actual number of documents may change between new queries

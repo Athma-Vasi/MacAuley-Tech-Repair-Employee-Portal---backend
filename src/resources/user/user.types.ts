@@ -17,7 +17,25 @@ interface DeleteUserRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
+    sessionId: Types.ObjectId;
     userToBeDeletedId: string;
+  };
+}
+
+// DEV ROUTE
+interface AddFieldToUsersBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    users: {
+      userId: Types.ObjectId;
+      field: string;
+      value: string;
+    }[];
   };
 }
 
@@ -32,6 +50,7 @@ interface GetUserByIdRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
+    sessionId: Types.ObjectId;
   };
   params: { userId: string };
 }
@@ -43,6 +62,7 @@ interface UpdateUserRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
+    sessionId: Types.ObjectId;
     userFields: Partial<UserSchema>;
   };
 }
@@ -54,18 +74,20 @@ interface UpdateUserPasswordRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
+    sessionId: Types.ObjectId;
     currentPassword: string;
     newPassword: string;
   };
 }
 
 export type {
+  AddFieldToUsersBulkRequest,
   CreateNewUserRequest,
   DeleteUserRequest,
+  DirectoryUserDocument,
   GetAllUsersRequest,
   GetUserByIdRequest,
-  UpdateUserRequest,
-  UpdateUserPasswordRequest,
   GetUsersDirectoryRequest,
-  DirectoryUserDocument,
+  UpdateUserPasswordRequest,
+  UpdateUserRequest,
 };

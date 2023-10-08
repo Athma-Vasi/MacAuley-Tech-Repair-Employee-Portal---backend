@@ -12,6 +12,7 @@ interface CreateNewLeaveRequestRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
+    sessionId: Types.ObjectId;
     leaveRequest: {
       startDate: Date;
       endDate: Date;
@@ -32,6 +33,7 @@ interface CreateNewLeaveRequestBulkRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
+    sessionId: Types.ObjectId;
     leaveRequests: {
       userId: Types.ObjectId;
       username: string;
@@ -66,6 +68,7 @@ interface GetLeaveRequestByIdRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
+    sessionId: Types.ObjectId;
   };
   params: { leaveRequestId: string };
 }
@@ -77,6 +80,7 @@ interface UpdateLeaveRequestStatusByIdRequest extends RequestAfterJWTVerificatio
       username: string;
       roles: UserRoles;
     };
+    sessionId: Types.ObjectId;
     leaveRequest: {
       requestStatus: RequestStatus;
     };

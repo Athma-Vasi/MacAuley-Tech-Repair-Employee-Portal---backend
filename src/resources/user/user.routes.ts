@@ -2,6 +2,7 @@ import { Router } from 'express';
 
 import { assignQueryDefaults, verifyJWTMiddleware, verifyRoles } from '../../middlewares';
 import {
+  addFieldToUsersBulkHandler,
   createNewUserHandler,
   deleteUserHandler,
   getQueriedUsersHandler,
@@ -31,6 +32,8 @@ userRouter
 userRouter
   .route('/update-password')
   .put(verifyJWTMiddleware, verifyRoles(), updateUserPasswordHandler);
+
+userRouter.route('/dev/add-field').post(addFieldToUsersBulkHandler);
 
 userRouter.route('/directory').get(verifyJWTMiddleware, verifyRoles(), getUsersDirectoryHandler);
 

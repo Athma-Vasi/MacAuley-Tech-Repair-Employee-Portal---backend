@@ -10,9 +10,11 @@ import type {
   DirectoryUserDocument,
   DeleteUserRequest,
   CreateNewUserRequest,
+  AddFieldToUsersBulkRequest,
 } from './user.types';
 
 import {
+  addFieldToUserService,
   checkUserExistsService,
   checkUserPasswordService,
   createNewUserService,
@@ -51,6 +53,7 @@ const createNewUserHandler = expressAsyncHandler(
         email,
         emergencyContact,
         firstName,
+        isPrefersReducedMotion,
         jobPosition,
         lastName,
         middleName,
@@ -99,6 +102,7 @@ const createNewUserHandler = expressAsyncHandler(
       email,
       emergencyContact,
       firstName,
+      isPrefersReducedMotion,
       jobPosition,
       lastName,
       middleName,
@@ -122,6 +126,52 @@ const createNewUserHandler = expressAsyncHandler(
     response
       .status(201)
       .json({ message: `User ${username} created successfully`, resourceData: [createdUser] });
+  }
+);
+
+// DEV ROUTE
+// @desc   Add field to all users
+// @route  PATCH /user/dev/add-field
+// @access Private
+const addFieldToUsersBulkHandler = expressAsyncHandler(
+  async (
+    request: AddFieldToUsersBulkRequest,
+    response: Response<ResourceRequestServerResponse<UserDocument>>
+  ) => {
+    const { users } = request.body;
+
+    const updatedUsers = await Promise.all(
+      users.map(async (user) => {
+        const { field, userId, value } = user;
+        const updatedUser = await addFieldToUserService({
+          field,
+          userId,
+          value,
+        });
+
+        return updatedUser;
+      })
+    );
+
+    // filter out undefined values
+    const updatedUsersFiltered = updatedUsers.filter(
+      (user) => user !== undefined
+    ) as UserDocument[];
+
+    // check if any users were updated
+    if (updatedUsersFiltered.length === users.length) {
+      response.status(201).json({
+        message: `Successfully updated ${updatedUsersFiltered.length} users`,
+        resourceData: updatedUsersFiltered,
+      });
+    } else {
+      response.status(400).json({
+        message: `Successfully updated ${updatedUsersFiltered.length} users, but failed to update ${
+          users.length - updatedUsersFiltered.length
+        } users`,
+        resourceData: updatedUsersFiltered,
+      });
+    }
   }
 );
 
@@ -207,11 +257,13 @@ const getUserByIdHandler = expressAsyncHandler(
     const { userId } = request.params;
 
     const user = await getUserByIdService(userId);
-    if (user) {
-      response.status(200).json({ message: 'Successfully found user data!', resourceData: [user] });
-    } else {
+
+    if (!user) {
       response.status(404).json({ message: 'User not found.', resourceData: [] });
+      return;
     }
+
+    response.status(200).json({ message: 'Successfully found user data!', resourceData: [user] });
   }
 );
 
@@ -233,13 +285,15 @@ const deleteUserHandler = expressAsyncHandler(
 
     // delete user if all checks pass successfully
     const deletedUser = await deleteUserService(userToBeDeletedId);
-    if (deletedUser.acknowledged) {
-      response.status(200).json({ message: 'Successfully deleted user!', resourceData: [] });
-    } else {
+
+    if (!deletedUser.acknowledged) {
       response
         .status(400)
         .json({ message: 'Failed to delete user. Please try again!', resourceData: [] });
+      return;
     }
+
+    response.status(200).json({ message: 'Successfully deleted user!', resourceData: [] });
   }
 );
 
@@ -261,14 +315,16 @@ const updateUserByIdHandler = expressAsyncHandler(
       userId,
       userFields,
     });
-    if (updatedUser) {
-      response.status(200).json({
-        message: `User ${updatedUser.username} updated successfully`,
-        resourceData: [updatedUser],
-      });
-    } else {
+
+    if (!updatedUser) {
       response.status(400).json({ message: 'User update failed', resourceData: [] });
+      return;
     }
+
+    response.status(200).json({
+      message: `User ${updatedUser.username} updated successfully`,
+      resourceData: [updatedUser],
+    });
   }
 );
 
@@ -306,17 +362,20 @@ const updateUserPasswordHandler = expressAsyncHandler(
 
     // update user password if all checks pass successfully
     const updatedUser = await updateUserPasswordService({ userId, newPassword });
-    if (updatedUser) {
-      response
-        .status(200)
-        .json({ message: 'Password updated successfully', resourceData: [updatedUser] });
-    } else {
+
+    if (!updatedUser) {
       response.status(400).json({ message: 'Password update failed', resourceData: [] });
+      return;
     }
+
+    response
+      .status(200)
+      .json({ message: 'Password updated successfully', resourceData: [updatedUser] });
   }
 );
 
 export {
+  addFieldToUsersBulkHandler,
   createNewUserHandler,
   deleteUserHandler,
   getQueriedUsersHandler,

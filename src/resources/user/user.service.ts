@@ -214,6 +214,31 @@ async function updateUserByIdService({
   }
 }
 
+// DEV ROUTE
+async function addFieldToUserService({
+  userId,
+  field,
+  value,
+}: {
+  userId: Types.ObjectId;
+  field: string;
+  value: UserSchema[keyof UserSchema]; // only for testing purposes
+}) {
+  try {
+    const updatedUser = await UserModel.findByIdAndUpdate(
+      userId,
+      { $set: { [field]: value } },
+      { new: true }
+    )
+      .select('-password -__v')
+      .lean()
+      .exec();
+    return updatedUser;
+  } catch (error: any) {
+    throw new Error(error, { cause: 'addFieldToUserService' });
+  }
+}
+
 type CheckUserPasswordServiceInput = {
   userId: Types.ObjectId;
   password: string;
@@ -259,6 +284,7 @@ async function updateUserPasswordService({ userId, newPassword }: UpdateUserPass
 }
 
 export {
+  addFieldToUserService,
   createNewUserService,
   checkUserExistsService,
   checkUserIsActiveService,

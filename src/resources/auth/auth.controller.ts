@@ -123,13 +123,13 @@ const loginUserHandler = expressAsyncHandler(
       { expiresIn: '60s' }
     );
 
-    const userDocWithoutPassword = Object.entries(foundUser).reduce((acc, [key, value]) => {
+    const userDocWithoutPassword = Object.entries(foundUser).reduce((userDocAcc, [key, value]) => {
       if (key === 'password' || key === '__v') {
-        return acc;
+        return userDocAcc;
       }
-      acc[key] = value;
+      userDocAcc[key] = value;
 
-      return acc;
+      return userDocAcc;
     }, Object.create(null));
 
     // send access token in response

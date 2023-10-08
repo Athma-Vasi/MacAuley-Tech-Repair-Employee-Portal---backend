@@ -12,6 +12,7 @@ interface CreateNewRefermentRequest extends RequestAfterJWTVerification {
       username: string; // referrer username
       roles: UserRoles;
     };
+    sessionId: Types.ObjectId;
     referment: {
       candidateFullName: string;
       candidateEmail: string;
@@ -38,6 +39,7 @@ interface CreateNewRefermentsBulkRequest extends RequestAfterJWTVerification {
       username: string; // referrer username
       roles: UserRoles;
     };
+    sessionId: Types.ObjectId;
     referments: {
       userId: Types.ObjectId; // referrer userId
       username: string; // referrer username
@@ -66,6 +68,7 @@ interface DeleteARefermentRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
+    sessionId: Types.ObjectId;
   };
   params: {
     refermentId: string;
@@ -85,6 +88,7 @@ interface GetRefermentRequestById extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
+    sessionId: Types.ObjectId;
     params: { refermentId: string };
   };
 }
@@ -96,6 +100,7 @@ interface UpdateRefermentStatusByIdRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
+    sessionId: Types.ObjectId;
     referment: { requestStatus: RequestStatus };
   };
   params: { refermentId: string };
