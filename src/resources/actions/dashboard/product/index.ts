@@ -16,6 +16,7 @@ import type {
   GetProductByIdRequest,
   GetQueriedProductsRequest,
   UpdateProductByIdRequest,
+  ProductServerResponse,
 } from './product.types';
 
 /**
@@ -32,4 +33,5 @@ export type {
   GetProductByIdRequest,
   GetQueriedProductsRequest,
   UpdateProductByIdRequest,
+  ProductServerResponse,
 };

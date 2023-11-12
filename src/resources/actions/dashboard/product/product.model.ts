@@ -205,7 +205,6 @@ type ProductSchema = {
   category: ActionsDashboard;
 
   // page 1
-  productId: Types.ObjectId;
   brand: string;
   model: string;
   productCategory: ProductCategory;
@@ -257,11 +256,6 @@ const productSchema = new Schema<ProductSchema>(
     },
 
     // page 1
-    productId: {
-      type: Schema.Types.ObjectId,
-      required: [true, 'Product ID is required'],
-      index: true,
-    },
     brand: {
       type: String,
       required: [true, 'Brand is required'],

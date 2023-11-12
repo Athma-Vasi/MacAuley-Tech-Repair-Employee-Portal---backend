@@ -5,11 +5,13 @@ import { GetQueriedResourceRequest, RequestStatus } from '../../../../types';
 import {
   ProductCategory,
   ProductDimensions,
+  ProductDocument,
   ProductReview,
   ProductSchema,
   Specifications,
 } from './product.model';
 import { Currency } from '../../company/expenseClaim';
+import { FileUploadDocument } from '../../../fileUpload';
 
 interface CreateNewProductRequest extends RequestAfterJWTVerification {
   body: {
@@ -112,6 +114,10 @@ interface UpdateProductByIdRequest extends RequestAfterJWTVerification {
   params: { productId: string };
 }
 
+type ProductServerResponse = ProductDocument & {
+  fileUploads: FileUploadDocument[];
+};
+
 export type {
   CreateNewProductRequest,
   CreateNewProductBulkRequest,
@@ -120,4 +126,5 @@ export type {
   GetProductByIdRequest,
   GetQueriedProductsRequest,
   UpdateProductByIdRequest,
+  ProductServerResponse,
 };

@@ -456,7 +456,6 @@ const updateExpenseClaimByIdHandler = expressAsyncHandler(
       ...expenseClaimExists,
       ...expenseClaim,
     };
-    console.log('updateExpenseClaimByIdHandler: ', newExpenseClaim);
 
     // update expense claim
     const updatedExpenseClaim = await updateExpenseClaimByIdService({
