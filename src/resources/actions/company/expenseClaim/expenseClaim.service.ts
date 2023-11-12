@@ -1,19 +1,13 @@
 import { Types } from 'mongoose';
 
 import type { DeleteResult } from 'mongodb';
-import type {
-  Currency,
-  ExpenseClaimDocument,
-  ExpenseClaimSchema,
-  ExpenseClaimKind,
-} from './expenseClaim.model';
+import type { ExpenseClaimDocument, ExpenseClaimSchema } from './expenseClaim.model';
 
 import { ExpenseClaimModel } from './expenseClaim.model';
 import {
   DatabaseResponseNullable,
   QueriedResourceGetRequestServiceInput,
   QueriedTotalResourceGetRequestServiceInput,
-  RequestStatus,
 } from '../../../../types';
 
 async function createNewExpenseClaimService(
@@ -117,11 +111,9 @@ async function deleteAllExpenseClaimsService(): Promise<DeleteResult> {
 
 async function returnAllUploadedFileIdsService(): Promise<Types.ObjectId[]> {
   try {
-    const allUploadedFileIds = await ExpenseClaimModel.find({})
-      .distinct('uploadedFileId')
-      .lean()
-      .exec();
-    return allUploadedFileIds as Array<Types.ObjectId>;
+    const expenseClaims = await ExpenseClaimModel.find({}).select('uploadedFilesIds').lean().exec();
+    const uploadedFileIds = expenseClaims.flatMap((expenseClaim) => expenseClaim.uploadedFilesIds);
+    return uploadedFileIds;
   } catch (error: any) {
     throw new Error(error, { cause: 'returnAllUploadedFileIdsService' });
   }

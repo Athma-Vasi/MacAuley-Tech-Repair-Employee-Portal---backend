@@ -921,9 +921,9 @@ productSchema.index({
   'reviews.review': 'text',
 });
 
-const ProductsModel = model<ProductDocument>('Products', productSchema);
+const ProductModel = model<ProductDocument>('Products', productSchema);
 
-export { ProductsModel };
+export { ProductModel };
 export type {
   ProductSchema,
   ProductDocument,

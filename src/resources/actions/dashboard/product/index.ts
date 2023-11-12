@@ -6,8 +6,30 @@
  * Imports
  */
 import { productRouter } from './product.routes';
+import { ProductModel } from './product.model';
+
+import type { ProductDocument, ProductSchema } from './product.model';
+import type {
+  CreateNewProductRequest,
+  DeleteAProductRequest,
+  DeleteAllProductsRequest,
+  GetProductByIdRequest,
+  GetQueriedProductsRequest,
+  UpdateProductByIdRequest,
+} from './product.types';
 
 /**
  * Exports
  */
-export { productRouter };
+export { productRouter, ProductModel };
+
+export type {
+  ProductDocument,
+  ProductSchema,
+  CreateNewProductRequest,
+  DeleteAProductRequest,
+  DeleteAllProductsRequest,
+  GetProductByIdRequest,
+  GetQueriedProductsRequest,
+  UpdateProductByIdRequest,
+};

@@ -85,8 +85,6 @@ interface DeleteAProductRequest extends RequestAfterJWTVerification {
 
 type DeleteAllProductsRequest = RequestAfterJWTVerification;
 
-type GetQueriedProductsByUserRequest = GetQueriedResourceRequest;
-
 type GetQueriedProductsRequest = GetQueriedResourceRequest;
 
 interface GetProductByIdRequest extends RequestAfterJWTVerification {
@@ -101,7 +99,7 @@ interface GetProductByIdRequest extends RequestAfterJWTVerification {
   params: { productId: string };
 }
 
-interface UpdateProductStatusByIdRequest extends RequestAfterJWTVerification {
+interface UpdateProductByIdRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {
       userId: Types.ObjectId;
@@ -113,3 +111,13 @@ interface UpdateProductStatusByIdRequest extends RequestAfterJWTVerification {
   };
   params: { productId: string };
 }
+
+export type {
+  CreateNewProductRequest,
+  CreateNewProductBulkRequest,
+  DeleteAProductRequest,
+  DeleteAllProductsRequest,
+  GetProductByIdRequest,
+  GetQueriedProductsRequest,
+  UpdateProductByIdRequest,
+};
