@@ -6,7 +6,7 @@ import { Schema, Types, model } from 'mongoose';
  * - on every refresh token rotation, the previous refresh token is checked against the deny list. If it exists, then a 'replay attack' is detected and all session ids are deleted, triggering a logout for all devices.
  */
 type AuthSchema = {
-  expireAt: Date; // user will be required to log in their session again after 7 days - back up measure, as any expired refresh tokens will trigger a logout and deletion of current session document
+  expireAt: Date; // user will be required to log in their session again after 1 day - back up measure, as any expired refresh tokens will trigger a logout and deletion of current session document
   userId: Types.ObjectId;
   username: string;
   refreshTokensDenyList: string[]; // will be the family of refresh tokens jwtid created per session

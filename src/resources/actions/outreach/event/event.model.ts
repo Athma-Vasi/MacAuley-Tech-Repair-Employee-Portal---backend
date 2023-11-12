@@ -83,6 +83,10 @@ const eventCreatorSchema = new Schema<EventCreatorSchema>(
       type: Date,
       required: [true, 'Event date is required'],
     },
+    eventEndDate: {
+      type: Date,
+      required: [true, 'Event date is required'],
+    },
     eventStartTime: {
       type: String,
       required: [true, 'Event start time is required'],

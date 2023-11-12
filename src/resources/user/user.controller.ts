@@ -193,6 +193,8 @@ const getUsersDirectoryHandler = expressAsyncHandler(
       return;
     }
 
+    console.log('users directory', users);
+
     response.status(200).json({
       message: 'Successfully found users',
       resourceData: users,

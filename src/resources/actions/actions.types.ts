@@ -1,7 +1,6 @@
-type Action = 'company' | 'general' | 'outreach';
 import { Types } from 'mongoose';
 import { RequestAfterJWTVerification } from '../auth';
-import { UserRoles } from '../user';
+import { UserDocument, UserRoles } from '../user';
 import { AddressChangeDocument } from './company/addressChange';
 import { ExpenseClaimDocument } from './company/expenseClaim';
 import { RequestResourceDocument } from './company/requestResource';
@@ -15,6 +14,9 @@ import { RefermentDocument } from './general/referment';
 import { AnnouncementDocument } from './outreach/announcement';
 import { SurveyBuilderDocument } from './outreach/survey';
 import { EventCreatorDocument } from './outreach/event';
+import { RepairNoteDocument } from '../repairNote';
+
+type Action = 'company' | 'general' | 'outreach' | 'dashboard';
 
 type GetAllActionsResourceRequest = GetQueriedResourceRequest;
 
@@ -31,6 +33,7 @@ interface GetUsersActionsResourceRequest extends RequestAfterJWTVerification {
 
 type ActionsResourceRequestServerResponse = {
   message: string;
+  repairNoteData: RepairNoteDocument[];
   companyData: {
     addressChangeData: AddressChangeDocument[];
     expenseClaimData: ExpenseClaimDocument[];
@@ -49,6 +52,7 @@ type ActionsResourceRequestServerResponse = {
     surveyData: SurveyBuilderDocument[];
     eventData: EventCreatorDocument[];
   };
+  employeeData: UserDocument[];
 };
 
 export type {

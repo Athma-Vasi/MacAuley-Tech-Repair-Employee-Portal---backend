@@ -134,21 +134,22 @@ const getQueriedEndorsementsHandler = expressAsyncHandler(
       projection: projection as QueryOptions<EndorsementDocument>,
       options: options as QueryOptions<EndorsementDocument>,
     });
-    if (endorsements.length === 0) {
+
+    if (!endorsements.length) {
       response.status(200).json({
         message: 'No endorsements that match query parameters were found',
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
       });
-    } else {
-      response.status(200).json({
-        message: 'Successfully found endorsements',
-        pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments,
-        resourceData: endorsements,
-      });
     }
+
+    response.status(200).json({
+      message: 'Successfully found endorsements',
+      pages: Math.ceil(totalDocuments / Number(options?.limit)),
+      totalDocuments,
+      resourceData: endorsements,
+    });
   }
 );
 
@@ -183,21 +184,22 @@ const getQueriedEndorsementsByUserHandler = expressAsyncHandler(
       projection: projection as QueryOptions<EndorsementDocument>,
       options: options as QueryOptions<EndorsementDocument>,
     });
-    if (endorsements.length === 0) {
+
+    if (!endorsements.length) {
       response.status(200).json({
         message: 'No endorsements that match query parameters were found',
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
       });
-    } else {
-      response.status(200).json({
-        message: 'Successfully found endorsements',
-        pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments,
-        resourceData: endorsements,
-      });
     }
+
+    response.status(200).json({
+      message: 'Successfully found endorsements',
+      pages: Math.ceil(totalDocuments / Number(options?.limit)),
+      totalDocuments,
+      resourceData: endorsements,
+    });
   }
 );
 
@@ -212,14 +214,15 @@ const getAnEndorsementHandler = expressAsyncHandler(
     const { endorsementId } = request.params;
 
     const endorsement = await getAnEndorsementService(endorsementId);
-    if (endorsement) {
-      response.status(200).json({
-        message: 'Endorsement fetched successfully',
-        resourceData: [endorsement],
-      });
-    } else {
-      response.status(400).json({ message: 'Endorsement could not be fetched', resourceData: [] });
+    if (!endorsement) {
+      response.status(404).json({ message: 'Endorsement does not exist', resourceData: [] });
+      return;
     }
+
+    response.status(200).json({
+      message: 'Endorsement fetched successfully',
+      resourceData: [endorsement],
+    });
   }
 );
 

@@ -142,7 +142,7 @@ async function getUserWithPasswordService(
 
 async function getAllUsersService() {
   try {
-    const users = await UserModel.find().select('-password').lean().exec();
+    const users = await UserModel.find().select('-password -__v').lean().exec();
     return users;
   } catch (error: any) {
     throw new Error(error, { cause: 'getAllUsersService' });
@@ -155,7 +155,6 @@ async function getQueriedUsersService({
   options = {},
 }: QueriedResourceGetRequestServiceInput<UserDocument>) {
   try {
-    // do not return the password field
     const users = await UserModel.find(filter, projection, options)
       .select('-password')
       .lean()

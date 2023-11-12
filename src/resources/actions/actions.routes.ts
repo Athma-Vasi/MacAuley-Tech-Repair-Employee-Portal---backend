@@ -9,6 +9,7 @@ import {
   getUsersActionsDocumentsHandler,
 } from './actions.controller';
 import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../constants';
+import { actionsDashboardRouter } from './dashboard';
 
 const actionsRouter = Router();
 
@@ -18,12 +19,13 @@ actionsRouter.use(verifyJWTMiddleware);
 actionsRouter.use('/company', actionsCompanyRouter);
 actionsRouter.use('/general', actionsGeneralRouter);
 actionsRouter.use('/outreach', actionsOutreachRouter);
+actionsRouter.use('/dashboard', actionsDashboardRouter);
 
 actionsRouter
-  .route('/dashboard')
+  .route('/home')
   .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getAllActionsDocumentsHandler);
 actionsRouter
-  .route('/dashboard/:userId')
+  .route('/home/:userId')
   .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getUsersActionsDocumentsHandler);
 
 export { actionsRouter };

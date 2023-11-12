@@ -67,7 +67,7 @@ const loginUserHandler = expressAsyncHandler(
 
     // create new auth session
     const authSessionSchema: AuthSchema = {
-      expireAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // user will be required to log in their session again after 7 days
+      expireAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 1), // user will be required to log in their session again after 1 day
       userId: foundUser._id,
       username: foundUser.username,
       refreshTokensDenyList: [],
