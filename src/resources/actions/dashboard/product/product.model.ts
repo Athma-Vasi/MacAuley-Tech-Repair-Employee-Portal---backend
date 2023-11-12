@@ -1,5 +1,5 @@
 import { Schema, Types, model } from 'mongoose';
-import type { Action } from '../../../actions';
+import type { Action } from '../..';
 import type { ActionsDashboard } from '../dashboard.types';
 import { Currency } from '../../company/expenseClaim';
 
@@ -198,7 +198,7 @@ type ProductReview = {
   review: string;
 };
 
-type ProductsSchema = {
+type ProductSchema = {
   userId: Types.ObjectId;
   username: string;
   action: Action;
@@ -226,14 +226,14 @@ type ProductsSchema = {
   uploadedFilesIds: Types.ObjectId[];
 };
 
-type ProductsDocument = ProductsSchema & {
+type ProductDocument = ProductSchema & {
   _id: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
   __v: number;
 };
 
-const productsSchema = new Schema<ProductsSchema>(
+const productSchema = new Schema<ProductSchema>(
   {
     userId: {
       type: Schema.Types.ObjectId,
@@ -836,7 +836,7 @@ const productsSchema = new Schema<ProductsSchema>(
 );
 
 // text index for searching all fields that are of type string
-productsSchema.index({
+productSchema.index({
   // cpu
   'specifications.cpu.socket': 'text',
   'specifications.cpu.speed': 'text',
@@ -921,12 +921,12 @@ productsSchema.index({
   'reviews.review': 'text',
 });
 
-const ProductsModel = model<ProductsDocument>('Products', productsSchema);
+const ProductsModel = model<ProductDocument>('Products', productSchema);
 
 export { ProductsModel };
 export type {
-  ProductsSchema,
-  ProductsDocument,
+  ProductSchema,
+  ProductDocument,
   ProductCategory,
   ColorVariant,
   CpuSpecifications,

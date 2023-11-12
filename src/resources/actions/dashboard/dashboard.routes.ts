@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { productsRouter } from './products';
+import { productRouter } from './product';
 
 const actionsDashboardRouter = Router();
 
-actionsDashboardRouter.use('/products', productsRouter);
+actionsDashboardRouter.use('/product', productRouter);
 
 export { actionsDashboardRouter };

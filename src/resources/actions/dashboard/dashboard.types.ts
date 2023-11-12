@@ -1,3 +1,3 @@
-type ActionsDashboard = 'products' | 'transactions' | 'customers';
+type ActionsDashboard = 'product' | 'transaction' | 'customer';
 
 export type { ActionsDashboard };

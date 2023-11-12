@@ -5,9 +5,9 @@
 /**
  * Imports
  */
-import { productsRouter } from './products.routes';
+import { productRouter } from './product.routes';
 
 /**
  * Exports
  */
-export { productsRouter };
+export { productRouter };
