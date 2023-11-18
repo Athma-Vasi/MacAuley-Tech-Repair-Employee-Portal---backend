@@ -1,14 +1,18 @@
 import { Schema, Types, model } from 'mongoose';
+
 import type {
   DimensionUnit,
-  PeripheralsInterface,
   ProductAvailability,
   ProductReview,
   WeightUnit,
+  PeripheralsInterface,
+  KeyboardLayout,
+  KeyboardSwitch,
+  KeyboardBacklight,
 } from '../types';
 import type { Currency } from '../../../company/expenseClaim';
 
-type AccessorySchema = {
+type KeyboardSchema = {
   userId: Types.ObjectId;
   username: string;
 
@@ -31,9 +35,10 @@ type AccessorySchema = {
   additionalComments: string;
 
   // page 2
-  accessoryType: string; // Headphones, Speakers, etc.
-  accessoryColor: string; // Black, White, etc.
-  accessoryInterface: PeripheralsInterface; // USB, Bluetooth, etc.
+  keyboardSwitch: KeyboardSwitch; // Cherry MX Red, Cherry MX Blue, etc.
+  keyboardLayout: KeyboardLayout; // ANSI, ISO, etc.
+  keyboardBacklight: KeyboardBacklight; // RGB, etc.
+  keyboardInterface: PeripheralsInterface; // USB, Bluetooth, etc.
   additionalFields: {
     [key: string]: string;
   };
@@ -43,14 +48,14 @@ type AccessorySchema = {
   uploadedFilesIds: Types.ObjectId[];
 };
 
-type AccessoryDocument = AccessorySchema & {
+type KeyboardDocument = KeyboardSchema & {
   _id: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
   __v: number;
 };
 
-const accessorySchema = new Schema<AccessorySchema>(
+const keyboardSchema = new Schema<KeyboardSchema>(
   {
     userId: {
       type: Schema.Types.ObjectId,
@@ -137,17 +142,25 @@ const accessorySchema = new Schema<AccessorySchema>(
     },
 
     // page 2
-    accessoryType: {
+    keyboardSwitch: {
       type: String,
-      required: [true, 'Type is required'],
+      required: [true, 'Switch is required'],
+      index: true,
     },
-    accessoryColor: {
+    keyboardLayout: {
       type: String,
-      required: [true, 'Color is required'],
+      required: [true, 'Layout is required'],
+      index: true,
     },
-    accessoryInterface: {
+    keyboardBacklight: {
+      type: String,
+      required: [true, 'Backlight is required'],
+      index: true,
+    },
+    keyboardInterface: {
       type: String,
       required: [true, 'Interface is required'],
+      index: true,
     },
     // user defined fields
     additionalFields: {
@@ -195,11 +208,9 @@ const accessorySchema = new Schema<AccessorySchema>(
 );
 
 // text indexes for searching all user entered text input fields
-accessorySchema.index({
-  'specifications.accessory.type': 'text',
+keyboardSchema.index({
   brand: 'text',
   model: 'text',
-  price: 'text',
   description: 'text',
   additionalComments: 'text',
   // reviews
@@ -207,7 +218,14 @@ accessorySchema.index({
   'reviews.review': 'text',
 });
 
-const AccessoryModel = model<AccessoryDocument>('Accessory', accessorySchema);
+const KeyboardModel = model<KeyboardDocument>('Keyboard', keyboardSchema);
 
-export type { AccessoryDocument, AccessorySchema };
-export { AccessoryModel };
+export { KeyboardModel };
+export type {
+  KeyboardDocument,
+  KeyboardSchema,
+  KeyboardSwitch,
+  KeyboardLayout,
+  KeyboardBacklight,
+  PeripheralsInterface,
+};

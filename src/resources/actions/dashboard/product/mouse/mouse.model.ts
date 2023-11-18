@@ -1,14 +1,16 @@
 import { Schema, Types, model } from 'mongoose';
+
 import type {
   DimensionUnit,
-  PeripheralsInterface,
   ProductAvailability,
   ProductReview,
   WeightUnit,
+  PeripheralsInterface,
+  MouseSensor,
 } from '../types';
 import type { Currency } from '../../../company/expenseClaim';
 
-type AccessorySchema = {
+type MouseSchema = {
   userId: Types.ObjectId;
   username: string;
 
@@ -31,9 +33,11 @@ type AccessorySchema = {
   additionalComments: string;
 
   // page 2
-  accessoryType: string; // Headphones, Speakers, etc.
-  accessoryColor: string; // Black, White, etc.
-  accessoryInterface: PeripheralsInterface; // USB, Bluetooth, etc.
+  mouseSensor: MouseSensor; // Optical, Laser, etc.
+  mouseDpi: number; // 800, 1600, etc.
+  mouseButtons: number; // 6, 8, etc.
+  mouseColor: string; // Black, White, etc.
+  mouseInterface: PeripheralsInterface; // USB, Bluetooth, etc.
   additionalFields: {
     [key: string]: string;
   };
@@ -43,14 +47,14 @@ type AccessorySchema = {
   uploadedFilesIds: Types.ObjectId[];
 };
 
-type AccessoryDocument = AccessorySchema & {
+type MouseDocument = MouseSchema & {
   _id: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
   __v: number;
 };
 
-const accessorySchema = new Schema<AccessorySchema>(
+const mouseSchema = new Schema<MouseSchema>(
   {
     userId: {
       type: Schema.Types.ObjectId,
@@ -137,15 +141,24 @@ const accessorySchema = new Schema<AccessorySchema>(
     },
 
     // page 2
-    accessoryType: {
+    mouseSensor: {
       type: String,
-      required: [true, 'Type is required'],
+      required: [true, 'Sensor is required'],
+      index: true,
     },
-    accessoryColor: {
+    mouseDpi: {
+      type: Number,
+      required: [true, 'DPI is required'],
+    },
+    mouseButtons: {
+      type: Number,
+      required: [true, 'Buttons is required'],
+    },
+    mouseColor: {
       type: String,
       required: [true, 'Color is required'],
     },
-    accessoryInterface: {
+    mouseInterface: {
       type: String,
       required: [true, 'Interface is required'],
     },
@@ -195,19 +208,19 @@ const accessorySchema = new Schema<AccessorySchema>(
 );
 
 // text indexes for searching all user entered text input fields
-accessorySchema.index({
-  'specifications.accessory.type': 'text',
+mouseSchema.index({
   brand: 'text',
   model: 'text',
-  price: 'text',
   description: 'text',
   additionalComments: 'text',
   // reviews
   'reviews.username': 'text',
   'reviews.review': 'text',
+  // mouse
+  mouseColor: 'text',
 });
 
-const AccessoryModel = model<AccessoryDocument>('Accessory', accessorySchema);
+const MouseModel = model<MouseDocument>('Mouse', mouseSchema);
 
-export type { AccessoryDocument, AccessorySchema };
-export { AccessoryModel };
+export { MouseModel };
+export type { MouseDocument, MouseSchema, MouseSensor };

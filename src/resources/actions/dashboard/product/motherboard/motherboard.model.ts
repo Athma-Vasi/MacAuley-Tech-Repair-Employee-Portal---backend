@@ -1,14 +1,17 @@
 import { Schema, Types, model } from 'mongoose';
+
 import type {
   DimensionUnit,
-  PeripheralsInterface,
+  MemoryType,
+  MemoryUnit,
+  MotherboardFormFactor,
   ProductAvailability,
   ProductReview,
   WeightUnit,
 } from '../types';
 import type { Currency } from '../../../company/expenseClaim';
 
-type AccessorySchema = {
+type MotherboardSchema = {
   userId: Types.ObjectId;
   username: string;
 
@@ -31,9 +34,18 @@ type AccessorySchema = {
   additionalComments: string;
 
   // page 2
-  accessoryType: string; // Headphones, Speakers, etc.
-  accessoryColor: string; // Black, White, etc.
-  accessoryInterface: PeripheralsInterface; // USB, Bluetooth, etc.
+  motherboardSocket: string; // LGA 1200, AM4, etc.
+  motherboardChipset: string; // Intel Z490, AMD B550, etc.
+  motherboardFormFactor: MotherboardFormFactor; // ATX, Micro ATX, etc.
+  motherboardMemoryMax: number; // 128, 256, etc.
+  motherboardMemoryMaxUnit: MemoryUnit; // GB, etc.
+  motherboardMemorySlots: number; // 4, 8, etc.
+  motherboardMemoryType: MemoryType; // DDR4, etc.
+  motherboardSataPorts: number; // 6, 8, etc.
+  motherboardM2Slots: number; // 2, 3, etc.
+  motherboardPcie3Slots: number; // 2, 3, etc.
+  motherboardPcie4Slots: number; // 1, 2, etc.
+  motherboardPcie5Slots: number; // 0, 1, etc.
   additionalFields: {
     [key: string]: string;
   };
@@ -43,14 +55,14 @@ type AccessorySchema = {
   uploadedFilesIds: Types.ObjectId[];
 };
 
-type AccessoryDocument = AccessorySchema & {
+type MotherboardDocument = MotherboardSchema & {
   _id: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
   __v: number;
 };
 
-const accessorySchema = new Schema<AccessorySchema>(
+const motherboardSchema = new Schema<MotherboardSchema>(
   {
     userId: {
       type: Schema.Types.ObjectId,
@@ -137,17 +149,56 @@ const accessorySchema = new Schema<AccessorySchema>(
     },
 
     // page 2
-    accessoryType: {
+    motherboardSocket: {
       type: String,
-      required: [true, 'Type is required'],
+      required: [true, 'Socket is required'],
     },
-    accessoryColor: {
+    motherboardChipset: {
       type: String,
-      required: [true, 'Color is required'],
+      required: [true, 'Chipset is required'],
     },
-    accessoryInterface: {
+    motherboardFormFactor: {
       type: String,
-      required: [true, 'Interface is required'],
+      required: [true, 'Form factor is required'],
+      index: true,
+    },
+    motherboardMemoryMax: {
+      type: Number,
+      required: [true, 'Memory max is required'],
+    },
+    motherboardMemoryMaxUnit: {
+      type: String,
+      required: [true, 'Memory slots is required'],
+    },
+    motherboardMemoryType: {
+      type: String,
+      required: [true, 'Memory type is required'],
+      index: true,
+    },
+    motherboardMemorySlots: {
+      type: Number,
+      required: [true, 'Memory type is required'],
+      index: true,
+    },
+    motherboardSataPorts: {
+      type: Number,
+      required: [true, 'SATA ports is required'],
+    },
+    motherboardM2Slots: {
+      type: Number,
+      required: [true, 'M.2 slots is required'],
+    },
+    motherboardPcie3Slots: {
+      type: Number,
+      required: [true, 'PCIe 3.0 slots is required'],
+    },
+    motherboardPcie4Slots: {
+      type: Number,
+      required: [true, 'PCIe 4.0 slots is required'],
+    },
+    motherboardPcie5Slots: {
+      type: Number,
+      required: [true, 'PCIe 5.0 slots is required'],
     },
     // user defined fields
     additionalFields: {
@@ -195,19 +246,20 @@ const accessorySchema = new Schema<AccessorySchema>(
 );
 
 // text indexes for searching all user entered text input fields
-accessorySchema.index({
-  'specifications.accessory.type': 'text',
+motherboardSchema.index({
   brand: 'text',
   model: 'text',
-  price: 'text',
   description: 'text',
   additionalComments: 'text',
   // reviews
   'reviews.username': 'text',
   'reviews.review': 'text',
+  // motherboard
+  motherboardSocket: 'text',
+  motherboardChipset: 'text',
 });
 
-const AccessoryModel = model<AccessoryDocument>('Accessory', accessorySchema);
+const MotherboardModel = model<MotherboardDocument>('Motherboard', motherboardSchema);
 
-export type { AccessoryDocument, AccessorySchema };
-export { AccessoryModel };
+export type { MotherboardDocument, MotherboardSchema, MotherboardFormFactor };
+export { MotherboardModel };

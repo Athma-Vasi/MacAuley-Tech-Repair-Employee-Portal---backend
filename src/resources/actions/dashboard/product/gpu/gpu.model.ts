@@ -1,10 +1,7 @@
 import { Schema, Types, model } from 'mongoose';
-import type { Action } from '../../..';
-import type { ActionsDashboard } from '../../dashboard.types';
 import type {
   DimensionUnit,
   ProductAvailability,
-  ProductCategory,
   MemoryUnit,
   ProductReview,
   WeightUnit,
@@ -14,14 +11,12 @@ import type { Currency } from '../../../company/expenseClaim';
 type GpuSchema = {
   userId: Types.ObjectId;
   username: string;
-  action: Action;
-  category: ActionsDashboard;
 
   // page 1
   brand: string;
   model: string;
   description: string;
-  price: string;
+  price: Number;
   currency: Currency;
   availability: ProductAvailability;
   quantity: number;
@@ -36,7 +31,6 @@ type GpuSchema = {
   additionalComments: string;
 
   // page 2
-  productCategory: ProductCategory;
   gpuChipset: string; // NVIDIA GeForce RTX 3080,
   gpuMemory: number; // 10 GB, 16 GB, etc.
   gpuMemoryUnit: MemoryUnit; // GB, etc.
@@ -71,16 +65,6 @@ const gpuSchema = new Schema<GpuSchema>(
       type: String,
       required: [true, 'Username is required'],
     },
-    action: {
-      type: String,
-      required: [true, 'Action is required'],
-      index: true,
-    },
-    category: {
-      type: String,
-      required: [true, 'Category is required'],
-      index: true,
-    },
 
     // page 1
     brand: {
@@ -91,17 +75,12 @@ const gpuSchema = new Schema<GpuSchema>(
       type: String,
       required: [true, 'Model is required'],
     },
-    productCategory: {
-      type: String,
-      required: [true, 'Product category is required'],
-      index: true,
-    },
     description: {
       type: String,
       required: [true, 'Description is required'],
     },
     price: {
-      type: String,
+      type: Number,
       required: [true, 'Price is required'],
     },
     currency: {
@@ -172,6 +151,7 @@ const gpuSchema = new Schema<GpuSchema>(
     gpuMemoryUnit: {
       type: String,
       required: [true, 'Memory unit is required'],
+      index: true,
     },
     gpuCoreClock: {
       type: Number,
@@ -189,6 +169,7 @@ const gpuSchema = new Schema<GpuSchema>(
     additionalFields: {
       type: Object,
       required: false,
+      default: {},
     },
 
     // page 3
@@ -229,27 +210,17 @@ const gpuSchema = new Schema<GpuSchema>(
   { timestamps: true }
 );
 
-// text indexes for searching all fields of type string
+// text indexes for searching all user entered text input fields
 gpuSchema.index({
   brand: 'text',
   model: 'text',
-  price: 'text',
   description: 'text',
   additionalComments: 'text',
-  weight: 'text',
-  // dimensions
-  'dimensions.length': 'text',
-  'dimensions.width': 'text',
-  'dimensions.height': 'text',
-  // gpu
-  'specifications.gpu.chipset': 'text',
-  'specifications.gpu.memory': 'text',
-  'specifications.gpu.coreClock': 'text',
-  'specifications.gpu.boostClock': 'text',
-  'specifications.gpu.tdp': 'text',
   // reviews
   'reviews.username': 'text',
   'reviews.review': 'text',
+  // gpu
+  gpuChipset: 'text',
 });
 
 const GpuModel = model<GpuDocument>('GPU', gpuSchema);

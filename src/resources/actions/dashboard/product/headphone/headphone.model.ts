@@ -1,14 +1,12 @@
 import { Schema, Types, model } from 'mongoose';
-import type {
-  DimensionUnit,
-  PeripheralsInterface,
-  ProductAvailability,
-  ProductReview,
-  WeightUnit,
-} from '../types';
+
+import type { DimensionUnit, ProductAvailability, ProductReview, WeightUnit } from '../types';
 import type { Currency } from '../../../company/expenseClaim';
 
-type AccessorySchema = {
+type HeadphoneType = 'Over-ear' | 'On-ear' | 'In-ear' | 'Other';
+type HeadphoneInterface = 'USB' | 'Bluetooth' | '3.5 mm' | '2.5 mm' | 'MMCX' | 'Other';
+
+type HeadphoneSchema = {
   userId: Types.ObjectId;
   username: string;
 
@@ -31,9 +29,12 @@ type AccessorySchema = {
   additionalComments: string;
 
   // page 2
-  accessoryType: string; // Headphones, Speakers, etc.
-  accessoryColor: string; // Black, White, etc.
-  accessoryInterface: PeripheralsInterface; // USB, Bluetooth, etc.
+  headphoneType: HeadphoneType; // Over-ear, On-ear, etc.
+  headphoneDriver: number; // 50 mm, 53 mm, etc.
+  headphoneFrequencyResponse: string; // 20 Hz - 20 kHz, etc.
+  headphoneImpedance: number; // 32 Ohm, 64 Ohm, etc.
+  headphoneColor: string; // Black, White, etc.
+  headphoneInterface: HeadphoneInterface; // USB, Bluetooth, etc.
   additionalFields: {
     [key: string]: string;
   };
@@ -43,14 +44,14 @@ type AccessorySchema = {
   uploadedFilesIds: Types.ObjectId[];
 };
 
-type AccessoryDocument = AccessorySchema & {
+type HeadphoneDocument = HeadphoneSchema & {
   _id: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
   __v: number;
 };
 
-const accessorySchema = new Schema<AccessorySchema>(
+const headphoneSchema = new Schema<HeadphoneDocument>(
   {
     userId: {
       type: Schema.Types.ObjectId,
@@ -137,17 +138,31 @@ const accessorySchema = new Schema<AccessorySchema>(
     },
 
     // page 2
-    accessoryType: {
+    headphoneType: {
       type: String,
       required: [true, 'Type is required'],
+      index: true,
     },
-    accessoryColor: {
+    headphoneDriver: {
+      type: Number,
+      required: [true, 'Driver is required'],
+    },
+    headphoneFrequencyResponse: {
+      type: String,
+      required: [true, 'Frequency response is required'],
+    },
+    headphoneImpedance: {
+      type: Number,
+      required: [true, 'Impedance is required'],
+    },
+    headphoneColor: {
       type: String,
       required: [true, 'Color is required'],
     },
-    accessoryInterface: {
+    headphoneInterface: {
       type: String,
       required: [true, 'Interface is required'],
+      index: true,
     },
     // user defined fields
     additionalFields: {
@@ -195,19 +210,20 @@ const accessorySchema = new Schema<AccessorySchema>(
 );
 
 // text indexes for searching all user entered text input fields
-accessorySchema.index({
-  'specifications.accessory.type': 'text',
+headphoneSchema.index({
   brand: 'text',
   model: 'text',
-  price: 'text',
   description: 'text',
   additionalComments: 'text',
   // reviews
   'reviews.username': 'text',
   'reviews.review': 'text',
+  // headphone
+  headphoneFrequencyResponse: 'text',
+  headphoneColor: 'text',
 });
 
-const AccessoryModel = model<AccessoryDocument>('Accessory', accessorySchema);
+const HeadphoneModel = model<HeadphoneDocument>('Headphone', headphoneSchema);
 
-export type { AccessoryDocument, AccessorySchema };
-export { AccessoryModel };
+export { HeadphoneModel };
+export type { HeadphoneSchema, HeadphoneDocument, HeadphoneType, HeadphoneInterface };

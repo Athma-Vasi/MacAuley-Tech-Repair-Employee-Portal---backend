@@ -1,14 +1,17 @@
 import { Schema, Types, model } from 'mongoose';
+
 import type {
   DimensionUnit,
-  PeripheralsInterface,
   ProductAvailability,
   ProductReview,
+  PsuEfficiency,
+  PsuFormFactor,
+  PsuModularity,
   WeightUnit,
 } from '../types';
 import type { Currency } from '../../../company/expenseClaim';
 
-type AccessorySchema = {
+type PsuSchema = {
   userId: Types.ObjectId;
   username: string;
 
@@ -31,9 +34,10 @@ type AccessorySchema = {
   additionalComments: string;
 
   // page 2
-  accessoryType: string; // Headphones, Speakers, etc.
-  accessoryColor: string; // Black, White, etc.
-  accessoryInterface: PeripheralsInterface; // USB, Bluetooth, etc.
+  psuWattage: number; // 650 W, 750 W, etc.
+  psuEfficiency: PsuEfficiency; // 80+ Gold, 80+ Platinum, etc.
+  psuFormFactor: PsuFormFactor; // ATX, SFX, etc.
+  psuModularity: PsuModularity; // Full, Semi, etc.
   additionalFields: {
     [key: string]: string;
   };
@@ -43,14 +47,14 @@ type AccessorySchema = {
   uploadedFilesIds: Types.ObjectId[];
 };
 
-type AccessoryDocument = AccessorySchema & {
+type PsuDocument = PsuSchema & {
   _id: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
   __v: number;
 };
 
-const accessorySchema = new Schema<AccessorySchema>(
+const psuSchema = new Schema<PsuSchema>(
   {
     userId: {
       type: Schema.Types.ObjectId,
@@ -137,17 +141,24 @@ const accessorySchema = new Schema<AccessorySchema>(
     },
 
     // page 2
-    accessoryType: {
-      type: String,
-      required: [true, 'Type is required'],
+    psuWattage: {
+      type: Number,
+      required: [true, 'Wattage is required'],
     },
-    accessoryColor: {
+    psuEfficiency: {
       type: String,
-      required: [true, 'Color is required'],
+      required: [true, 'Efficiency is required'],
+      index: true,
     },
-    accessoryInterface: {
+    psuFormFactor: {
       type: String,
-      required: [true, 'Interface is required'],
+      required: [true, 'Form factor is required'],
+      index: true,
+    },
+    psuModularity: {
+      type: String,
+      required: [true, 'Modular is required'],
+      index: true,
     },
     // user defined fields
     additionalFields: {
@@ -195,11 +206,9 @@ const accessorySchema = new Schema<AccessorySchema>(
 );
 
 // text indexes for searching all user entered text input fields
-accessorySchema.index({
-  'specifications.accessory.type': 'text',
+psuSchema.index({
   brand: 'text',
   model: 'text',
-  price: 'text',
   description: 'text',
   additionalComments: 'text',
   // reviews
@@ -207,7 +216,7 @@ accessorySchema.index({
   'reviews.review': 'text',
 });
 
-const AccessoryModel = model<AccessoryDocument>('Accessory', accessorySchema);
+const PsuModel = model<PsuDocument>('Psu', psuSchema);
 
-export type { AccessoryDocument, AccessorySchema };
-export { AccessoryModel };
+export type { PsuDocument, PsuSchema, PsuEfficiency, PsuFormFactor, PsuModularity };
+export { PsuModel };

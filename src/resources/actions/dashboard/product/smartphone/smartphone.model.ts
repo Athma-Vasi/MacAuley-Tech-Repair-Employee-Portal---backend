@@ -1,14 +1,16 @@
 import { Schema, Types, model } from 'mongoose';
+
 import type {
   DimensionUnit,
-  PeripheralsInterface,
+  MemoryUnit,
   ProductAvailability,
   ProductReview,
   WeightUnit,
+  MobileOs,
 } from '../types';
 import type { Currency } from '../../../company/expenseClaim';
 
-type AccessorySchema = {
+type SmartphoneSchema = {
   userId: Types.ObjectId;
   username: string;
 
@@ -31,9 +33,17 @@ type AccessorySchema = {
   additionalComments: string;
 
   // page 2
-  accessoryType: string; // Headphones, Speakers, etc.
-  accessoryColor: string; // Black, White, etc.
-  accessoryInterface: PeripheralsInterface; // USB, Bluetooth, etc.
+  smartphoneOs: MobileOs; // Android, iOS, etc.
+  smartphoneChipset: string; // Snapdragon 888, Apple A14 Bionic, etc.
+  smartphoneDisplay: number; // 6.7", 6.9", etc.
+  smartphoneHorizontalResolution: number;
+  smartphoneVerticalResolution: number;
+  smartphoneRamCapacity: number; // 12, 16, etc.
+  smartphoneRamCapacityUnit: MemoryUnit; // GB, etc.
+  smartphoneStorage: number; // 128 GB, 256 GB, etc.
+  smartphoneBattery: number; // 5000 mAh, 6000 mAh, etc.
+  smartphoneCamera: string; // 108 MP, 64 MP, etc.
+  smartphoneColor: string; // Black, White, etc.
   additionalFields: {
     [key: string]: string;
   };
@@ -43,14 +53,14 @@ type AccessorySchema = {
   uploadedFilesIds: Types.ObjectId[];
 };
 
-type AccessoryDocument = AccessorySchema & {
+type SmartphoneDocument = SmartphoneSchema & {
   _id: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
   __v: number;
 };
 
-const accessorySchema = new Schema<AccessorySchema>(
+const smartphoneSchema = new Schema<SmartphoneSchema>(
   {
     userId: {
       type: Schema.Types.ObjectId,
@@ -137,17 +147,51 @@ const accessorySchema = new Schema<AccessorySchema>(
     },
 
     // page 2
-    accessoryType: {
+    smartphoneOs: {
       type: String,
-      required: [true, 'Type is required'],
+      required: [true, 'OS is required'],
+      index: true,
     },
-    accessoryColor: {
+    smartphoneChipset: {
+      type: String,
+      required: [true, 'Chipset is required'],
+    },
+    smartphoneDisplay: {
+      type: Number,
+      required: [true, 'Display is required'],
+    },
+    smartphoneHorizontalResolution: {
+      type: Number,
+      required: [true, 'Horizontal resolution is required'],
+    },
+    smartphoneVerticalResolution: {
+      type: Number,
+      required: [true, 'Vertical resolution is required'],
+    },
+    smartphoneRamCapacity: {
+      type: Number,
+      required: [true, 'RAM is required'],
+    },
+    smartphoneRamCapacityUnit: {
+      type: String,
+      required: [true, 'RAM unit is required'],
+      index: true,
+    },
+    smartphoneStorage: {
+      type: Number,
+      required: [true, 'Storage is required'],
+    },
+    smartphoneBattery: {
+      type: Number,
+      required: [true, 'Battery is required'],
+    },
+    smartphoneCamera: {
+      type: String,
+      required: [true, 'Camera is required'],
+    },
+    smartphoneColor: {
       type: String,
       required: [true, 'Color is required'],
-    },
-    accessoryInterface: {
-      type: String,
-      required: [true, 'Interface is required'],
     },
     // user defined fields
     additionalFields: {
@@ -195,19 +239,21 @@ const accessorySchema = new Schema<AccessorySchema>(
 );
 
 // text indexes for searching all user entered text input fields
-accessorySchema.index({
-  'specifications.accessory.type': 'text',
+smartphoneSchema.index({
   brand: 'text',
   model: 'text',
-  price: 'text',
   description: 'text',
   additionalComments: 'text',
   // reviews
   'reviews.username': 'text',
   'reviews.review': 'text',
+  // smartphone
+  smartphoneChipset: 'text',
+  smartphoneCamera: 'text',
+  smartphoneColor: 'text',
 });
 
-const AccessoryModel = model<AccessoryDocument>('Accessory', accessorySchema);
+const SmartphoneModel = model<SmartphoneDocument>('Smartphone', smartphoneSchema);
 
-export type { AccessoryDocument, AccessorySchema };
-export { AccessoryModel };
+export { SmartphoneModel };
+export type { SmartphoneSchema, SmartphoneDocument };

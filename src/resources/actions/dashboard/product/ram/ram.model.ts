@@ -1,14 +1,16 @@
 import { Schema, Types, model } from 'mongoose';
+
 import type {
   DimensionUnit,
-  PeripheralsInterface,
+  MemoryType,
+  MemoryUnit,
   ProductAvailability,
   ProductReview,
   WeightUnit,
 } from '../types';
 import type { Currency } from '../../../company/expenseClaim';
 
-type AccessorySchema = {
+type RamSchema = {
   userId: Types.ObjectId;
   username: string;
 
@@ -31,9 +33,14 @@ type AccessorySchema = {
   additionalComments: string;
 
   // page 2
-  accessoryType: string; // Headphones, Speakers, etc.
-  accessoryColor: string; // Black, White, etc.
-  accessoryInterface: PeripheralsInterface; // USB, Bluetooth, etc.
+  ramDataRate: number; // 3200 MT/s, 3600 MT/s, etc.
+  ramModulesQuantity: number;
+  ramModulesCapacity: number;
+  ramModulesCapacityUnit: MemoryUnit; // GB, etc.
+  ramType: MemoryType; // DDR4, etc.
+  ramColor: string; // Black, White, etc.
+  ramVoltage: number; // 1.35 V, etc.
+  ramTiming: string; // 16-18-18-38, etc.
   additionalFields: {
     [key: string]: string;
   };
@@ -43,14 +50,14 @@ type AccessorySchema = {
   uploadedFilesIds: Types.ObjectId[];
 };
 
-type AccessoryDocument = AccessorySchema & {
+type RamDocument = RamSchema & {
   _id: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
   __v: number;
 };
 
-const accessorySchema = new Schema<AccessorySchema>(
+const ramSchema = new Schema<RamSchema>(
   {
     userId: {
       type: Schema.Types.ObjectId,
@@ -137,17 +144,40 @@ const accessorySchema = new Schema<AccessorySchema>(
     },
 
     // page 2
-    accessoryType: {
-      type: String,
-      required: [true, 'Type is required'],
+    ramDataRate: {
+      type: Number,
+      required: [true, 'Speed is required'],
     },
-    accessoryColor: {
+    ramModulesQuantity: {
+      type: Number,
+      required: [true, 'Modules quantity is required'],
+    },
+    ramModulesCapacity: {
+      type: Number,
+      required: [true, 'Modules capacity is required'],
+    },
+    ramModulesCapacityUnit: {
+      type: String,
+      required: [true, 'Modules capacity unit is required'],
+      index: true,
+    },
+    ramType: {
+      type: String,
+      required: [true, 'RAM type is required'],
+      index: true,
+    },
+    ramColor: {
       type: String,
       required: [true, 'Color is required'],
+      index: true,
     },
-    accessoryInterface: {
+    ramVoltage: {
+      type: Number,
+      required: [true, 'Voltage is required'],
+    },
+    ramTiming: {
       type: String,
-      required: [true, 'Interface is required'],
+      required: [true, 'Timing is required'],
     },
     // user defined fields
     additionalFields: {
@@ -195,19 +225,19 @@ const accessorySchema = new Schema<AccessorySchema>(
 );
 
 // text indexes for searching all user entered text input fields
-accessorySchema.index({
-  'specifications.accessory.type': 'text',
+ramSchema.index({
   brand: 'text',
   model: 'text',
-  price: 'text',
   description: 'text',
   additionalComments: 'text',
   // reviews
   'reviews.username': 'text',
   'reviews.review': 'text',
+  // ram
+  ramColor: 'text',
 });
 
-const AccessoryModel = model<AccessoryDocument>('Accessory', accessorySchema);
+const RamModel = model<RamDocument>('RAM', ramSchema);
 
-export type { AccessoryDocument, AccessorySchema };
-export { AccessoryModel };
+export type { RamDocument, RamSchema };
+export { RamModel };

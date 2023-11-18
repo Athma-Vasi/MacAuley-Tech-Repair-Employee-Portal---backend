@@ -26,7 +26,7 @@ type ExpenseClaimSchema = {
 
   uploadedFilesIds: Types.ObjectId[];
   expenseClaimKind: ExpenseClaimKind;
-  expenseClaimAmount: string;
+  expenseClaimAmount: Number;
   expenseClaimCurrency: Currency;
   expenseClaimDate: NativeDate;
   expenseClaimDescription: string;
@@ -79,7 +79,7 @@ const expenseClaimSchema = new Schema<ExpenseClaimSchema>(
       index: true,
     },
     expenseClaimAmount: {
-      type: String,
+      type: Number,
       required: [true, 'Expense claim amount is required'],
     },
     expenseClaimCurrency: {

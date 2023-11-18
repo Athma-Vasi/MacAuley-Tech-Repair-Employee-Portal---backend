@@ -1,14 +1,16 @@
 import { Schema, Types, model } from 'mongoose';
+
 import type {
   DimensionUnit,
-  PeripheralsInterface,
+  MemoryUnit,
   ProductAvailability,
   ProductReview,
   WeightUnit,
+  MobileOs,
 } from '../types';
 import type { Currency } from '../../../company/expenseClaim';
 
-type AccessorySchema = {
+type TabletSchema = {
   userId: Types.ObjectId;
   username: string;
 
@@ -31,9 +33,17 @@ type AccessorySchema = {
   additionalComments: string;
 
   // page 2
-  accessoryType: string; // Headphones, Speakers, etc.
-  accessoryColor: string; // Black, White, etc.
-  accessoryInterface: PeripheralsInterface; // USB, Bluetooth, etc.
+  tabletOs: MobileOs; // Android, iOS, etc.
+  tabletChipset: string; // Snapdragon 888, Apple A14 Bionic, etc.
+  tabletDisplay: number; // 6.7", 6.9", etc.
+  tabletHorizontalResolution: number;
+  tabletVerticalResolution: number;
+  tabletRamCapacity: number; // 12, 16, etc.
+  tabletRamCapacityUnit: MemoryUnit; // GB, etc.
+  tabletStorage: number; // 128 GB, 256 GB, etc.
+  tabletBattery: number; // 5000 mAh, 6000 mAh, etc.
+  tabletCamera: string; // 108 MP, 64 MP, etc.
+  tabletColor: string; // Black, White, etc.
   additionalFields: {
     [key: string]: string;
   };
@@ -43,14 +53,14 @@ type AccessorySchema = {
   uploadedFilesIds: Types.ObjectId[];
 };
 
-type AccessoryDocument = AccessorySchema & {
+type TabletDocument = TabletSchema & {
   _id: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
   __v: number;
 };
 
-const accessorySchema = new Schema<AccessorySchema>(
+const tabletSchema = new Schema<TabletSchema>(
   {
     userId: {
       type: Schema.Types.ObjectId,
@@ -137,17 +147,51 @@ const accessorySchema = new Schema<AccessorySchema>(
     },
 
     // page 2
-    accessoryType: {
+    tabletOs: {
       type: String,
-      required: [true, 'Type is required'],
+      required: [true, 'OS is required'],
+      index: true,
     },
-    accessoryColor: {
+    tabletChipset: {
+      type: String,
+      required: [true, 'Chipset is required'],
+    },
+    tabletDisplay: {
+      type: Number,
+      required: [true, 'Display is required'],
+    },
+    tabletHorizontalResolution: {
+      type: Number,
+      required: [true, 'Horizontal resolution is required'],
+    },
+    tabletVerticalResolution: {
+      type: Number,
+      required: [true, 'Vertical resolution is required'],
+    },
+    tabletRamCapacity: {
+      type: Number,
+      required: [true, 'RAM is required'],
+    },
+    tabletRamCapacityUnit: {
+      type: String,
+      required: [true, 'RAM unit is required'],
+      index: true,
+    },
+    tabletStorage: {
+      type: Number,
+      required: [true, 'Storage is required'],
+    },
+    tabletBattery: {
+      type: Number,
+      required: [true, 'Battery is required'],
+    },
+    tabletCamera: {
+      type: String,
+      required: [true, 'Camera is required'],
+    },
+    tabletColor: {
       type: String,
       required: [true, 'Color is required'],
-    },
-    accessoryInterface: {
-      type: String,
-      required: [true, 'Interface is required'],
     },
     // user defined fields
     additionalFields: {
@@ -195,19 +239,21 @@ const accessorySchema = new Schema<AccessorySchema>(
 );
 
 // text indexes for searching all user entered text input fields
-accessorySchema.index({
-  'specifications.accessory.type': 'text',
+tabletSchema.index({
   brand: 'text',
   model: 'text',
-  price: 'text',
   description: 'text',
   additionalComments: 'text',
   // reviews
   'reviews.username': 'text',
   'reviews.review': 'text',
+  // tablet
+  tabletChipset: 'text',
+  tabletCamera: 'text',
+  tabletColor: 'text',
 });
 
-const AccessoryModel = model<AccessoryDocument>('Accessory', accessorySchema);
+const TabletModel = model<TabletDocument>('Tablet', tabletSchema);
 
-export type { AccessoryDocument, AccessorySchema };
-export { AccessoryModel };
+export { TabletModel };
+export type { TabletSchema, TabletDocument };

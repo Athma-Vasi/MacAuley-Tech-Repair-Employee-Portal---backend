@@ -1,10 +1,7 @@
 import { Schema, Types, model } from 'mongoose';
-import type { Action } from '../../..';
-import type { ActionsDashboard } from '../../dashboard.types';
 import type {
   DimensionUnit,
   ProductAvailability,
-  ProductCategory,
   MemoryUnit,
   ProductReview,
   WeightUnit,
@@ -14,14 +11,12 @@ import type { Currency } from '../../../company/expenseClaim';
 type CpuSchema = {
   userId: Types.ObjectId;
   username: string;
-  action: Action;
-  category: ActionsDashboard;
 
   // page 1
   brand: string;
   model: string;
   description: string;
-  price: string;
+  price: Number;
   currency: Currency;
   availability: ProductAvailability;
   quantity: number;
@@ -36,15 +31,14 @@ type CpuSchema = {
   additionalComments: string;
 
   // page 2
-  productCategory: ProductCategory;
   cpuSocket: string; // LGA 1200, AM4, etc.
   cpuFrequency: number; // 3.6 GHz, 4.2 GHz, etc.
   cpuCores: number; // 6 cores, 8 cores, etc.
-  cpuL1Cache: string; // 384, 512, etc.
+  cpuL1Cache: number; // 384, 512, etc.
   cpuL1CacheUnit: MemoryUnit; // KB, etc.
-  cpuL2Cache: string; // 1.5, 2, etc.
+  cpuL2Cache: number; // 1.5, 2, etc.
   cpuL2CacheUnit: MemoryUnit; // MB, etc.
-  cpuL3Cache: string; // 12, 16, etc.
+  cpuL3Cache: number; // 12, 16, etc.
   cpuL3CacheUnit: MemoryUnit; // MB, etc.
   cpuWattage: number; // 65 W, 95 W, etc.
   additionalFields: {
@@ -75,16 +69,6 @@ const cpuSchema = new Schema<CpuSchema>(
       type: String,
       required: [true, 'Username is required'],
     },
-    action: {
-      type: String,
-      required: [true, 'Action is required'],
-      index: true,
-    },
-    category: {
-      type: String,
-      required: [true, 'Category is required'],
-      index: true,
-    },
 
     // page 1
     brand: {
@@ -95,17 +79,12 @@ const cpuSchema = new Schema<CpuSchema>(
       type: String,
       required: [true, 'Model is required'],
     },
-    productCategory: {
-      type: String,
-      required: [true, 'Product category is required'],
-      index: true,
-    },
     description: {
       type: String,
       required: [true, 'Description is required'],
     },
     price: {
-      type: String,
+      type: Number,
       required: [true, 'Price is required'],
     },
     currency: {
@@ -178,28 +157,31 @@ const cpuSchema = new Schema<CpuSchema>(
       required: [true, 'Cores is required'],
     },
     cpuL1Cache: {
-      type: String,
+      type: Number,
       required: [true, 'Cache is required'],
     },
     cpuL1CacheUnit: {
       type: String,
       required: [true, 'Cache unit is required'],
+      index: true,
     },
     cpuL2Cache: {
-      type: String,
+      type: Number,
       required: [true, 'Cache is required'],
     },
     cpuL2CacheUnit: {
       type: String,
       required: [true, 'Cache unit is required'],
+      index: true,
     },
     cpuL3Cache: {
-      type: String,
+      type: Number,
       required: [true, 'Cache is required'],
     },
     cpuL3CacheUnit: {
       type: String,
       required: [true, 'Cache unit is required'],
+      index: true,
     },
     cpuWattage: {
       type: Number,
@@ -209,6 +191,7 @@ const cpuSchema = new Schema<CpuSchema>(
     additionalFields: {
       type: Object,
       required: false,
+      default: {},
     },
 
     // page 3
@@ -249,25 +232,14 @@ const cpuSchema = new Schema<CpuSchema>(
   { timestamps: true }
 );
 
-// text indexes for searching all fields of type string
+// text indexes for searching all user entered text input fields
 cpuSchema.index({
   brand: 'text',
   model: 'text',
-  price: 'text',
   description: 'text',
   additionalComments: 'text',
-  weight: 'text',
-  // dimensions
-  'dimensions.length': 'text',
-  'dimensions.width': 'text',
-  'dimensions.height': 'text',
   // cpu
-  'specifications.cpu.socket': 'text',
-  'specifications.cpu.speed': 'text',
-  'specifications.cpu.l1Cache': 'text',
-  'specifications.cpu.l2Cache': 'text',
-  'specifications.cpu.l3Cache': 'text',
-  'specifications.cpu.wattage': 'text',
+  cpuSocket: 'text',
   // reviews
   'reviews.username': 'text',
   'reviews.review': 'text',

@@ -1,14 +1,18 @@
 import { Schema, Types, model } from 'mongoose';
+
 import type {
   DimensionUnit,
-  PeripheralsInterface,
+  MemoryUnit,
   ProductAvailability,
   ProductReview,
+  StorageFormFactor,
+  StorageInterface,
+  StorageType,
   WeightUnit,
 } from '../types';
 import type { Currency } from '../../../company/expenseClaim';
 
-type AccessorySchema = {
+type StorageSchema = {
   userId: Types.ObjectId;
   username: string;
 
@@ -31,9 +35,13 @@ type AccessorySchema = {
   additionalComments: string;
 
   // page 2
-  accessoryType: string; // Headphones, Speakers, etc.
-  accessoryColor: string; // Black, White, etc.
-  accessoryInterface: PeripheralsInterface; // USB, Bluetooth, etc.
+  storageType: StorageType; // SSD, HDD, etc.
+  storageCapacity: number; // 1, 2, etc.
+  storageCapacityUnit: MemoryUnit; // TB, etc.
+  storageCache: number; // 64 MB, 128 MB, etc.
+  storageCacheUnit: MemoryUnit; // MB, etc.
+  storageFormFactor: StorageFormFactor; // 2.5", M.2 2280, etc.
+  storageInterface: StorageInterface; // SATA III, PCIe 3.0 x4, etc.
   additionalFields: {
     [key: string]: string;
   };
@@ -43,14 +51,14 @@ type AccessorySchema = {
   uploadedFilesIds: Types.ObjectId[];
 };
 
-type AccessoryDocument = AccessorySchema & {
+type StorageDocument = StorageSchema & {
   _id: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
   __v: number;
 };
 
-const accessorySchema = new Schema<AccessorySchema>(
+const storageSchema = new Schema<StorageSchema>(
   {
     userId: {
       type: Schema.Types.ObjectId,
@@ -137,17 +145,37 @@ const accessorySchema = new Schema<AccessorySchema>(
     },
 
     // page 2
-    accessoryType: {
+    storageType: {
       type: String,
-      required: [true, 'Type is required'],
+      required: [true, 'Storage type is required'],
+      index: true,
     },
-    accessoryColor: {
+    storageCapacity: {
+      type: Number,
+      required: [true, 'Capacity is required'],
+    },
+    storageCapacityUnit: {
       type: String,
-      required: [true, 'Color is required'],
+      required: [true, 'Capacity unit is required'],
     },
-    accessoryInterface: {
+    storageCache: {
+      type: Number,
+      required: [true, 'Cache is required'],
+    },
+    storageCacheUnit: {
+      type: String,
+      required: [true, 'Cache unit is required'],
+      index: true,
+    },
+    storageFormFactor: {
+      type: String,
+      required: [true, 'Form factor is required'],
+      index: true,
+    },
+    storageInterface: {
       type: String,
       required: [true, 'Interface is required'],
+      index: true,
     },
     // user defined fields
     additionalFields: {
@@ -195,11 +223,9 @@ const accessorySchema = new Schema<AccessorySchema>(
 );
 
 // text indexes for searching all user entered text input fields
-accessorySchema.index({
-  'specifications.accessory.type': 'text',
+storageSchema.index({
   brand: 'text',
   model: 'text',
-  price: 'text',
   description: 'text',
   additionalComments: 'text',
   // reviews
@@ -207,7 +233,7 @@ accessorySchema.index({
   'reviews.review': 'text',
 });
 
-const AccessoryModel = model<AccessoryDocument>('Accessory', accessorySchema);
+const StorageModel = model<StorageDocument>('Storage', storageSchema);
 
-export type { AccessoryDocument, AccessorySchema };
-export { AccessoryModel };
+export type { StorageDocument, StorageSchema, StorageType, StorageFormFactor, StorageInterface };
+export { StorageModel };

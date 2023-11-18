@@ -1,14 +1,16 @@
 import { Schema, Types, model } from 'mongoose';
+
 import type {
   DimensionUnit,
-  PeripheralsInterface,
   ProductAvailability,
   ProductReview,
+  SpeakerInterface,
+  SpeakerType,
   WeightUnit,
 } from '../types';
 import type { Currency } from '../../../company/expenseClaim';
 
-type AccessorySchema = {
+type SpeakerSchema = {
   userId: Types.ObjectId;
   username: string;
 
@@ -31,9 +33,11 @@ type AccessorySchema = {
   additionalComments: string;
 
   // page 2
-  accessoryType: string; // Headphones, Speakers, etc.
-  accessoryColor: string; // Black, White, etc.
-  accessoryInterface: PeripheralsInterface; // USB, Bluetooth, etc.
+  speakerType: SpeakerType; // 2.0, 2.1, etc.
+  speakerTotalWattage: number; // 10 W, 20 W, etc.
+  speakerFrequencyResponse: string; // 20 Hz - 20 kHz, etc.
+  speakerColor: string; // Black, White, etc.
+  speakerInterface: SpeakerInterface; // USB, Bluetooth, etc.
   additionalFields: {
     [key: string]: string;
   };
@@ -43,14 +47,14 @@ type AccessorySchema = {
   uploadedFilesIds: Types.ObjectId[];
 };
 
-type AccessoryDocument = AccessorySchema & {
+type SpeakerDocument = SpeakerSchema & {
   _id: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
   __v: number;
 };
 
-const accessorySchema = new Schema<AccessorySchema>(
+const speakerSchema = new Schema<SpeakerSchema>(
   {
     userId: {
       type: Schema.Types.ObjectId,
@@ -137,17 +141,27 @@ const accessorySchema = new Schema<AccessorySchema>(
     },
 
     // page 2
-    accessoryType: {
+    speakerType: {
       type: String,
       required: [true, 'Type is required'],
+      index: true,
     },
-    accessoryColor: {
+    speakerTotalWattage: {
+      type: Number,
+      required: [true, 'Total wattage is required'],
+    },
+    speakerFrequencyResponse: {
+      type: String,
+      required: [true, 'Frequency response is required'],
+    },
+    speakerColor: {
       type: String,
       required: [true, 'Color is required'],
     },
-    accessoryInterface: {
+    speakerInterface: {
       type: String,
       required: [true, 'Interface is required'],
+      index: true,
     },
     // user defined fields
     additionalFields: {
@@ -195,19 +209,20 @@ const accessorySchema = new Schema<AccessorySchema>(
 );
 
 // text indexes for searching all user entered text input fields
-accessorySchema.index({
-  'specifications.accessory.type': 'text',
+speakerSchema.index({
   brand: 'text',
   model: 'text',
-  price: 'text',
   description: 'text',
   additionalComments: 'text',
   // reviews
   'reviews.username': 'text',
   'reviews.review': 'text',
+  // speaker
+  speakerFrequencyResponse: 'text',
+  speakerColor: 'text',
 });
 
-const AccessoryModel = model<AccessoryDocument>('Accessory', accessorySchema);
+const SpeakerModel = model<SpeakerDocument>('Speaker', speakerSchema);
 
-export type { AccessoryDocument, AccessorySchema };
-export { AccessoryModel };
+export { SpeakerModel };
+export type { SpeakerDocument, SpeakerSchema, SpeakerType, SpeakerInterface };

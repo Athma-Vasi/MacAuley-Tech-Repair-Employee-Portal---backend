@@ -1,14 +1,16 @@
 import { Schema, Types, model } from 'mongoose';
+
 import type {
+  CaseSidePanel,
+  CaseType,
   DimensionUnit,
-  PeripheralsInterface,
   ProductAvailability,
   ProductReview,
   WeightUnit,
 } from '../types';
 import type { Currency } from '../../../company/expenseClaim';
 
-type AccessorySchema = {
+type ComputerCaseSchema = {
   userId: Types.ObjectId;
   username: string;
 
@@ -31,9 +33,9 @@ type AccessorySchema = {
   additionalComments: string;
 
   // page 2
-  accessoryType: string; // Headphones, Speakers, etc.
-  accessoryColor: string; // Black, White, etc.
-  accessoryInterface: PeripheralsInterface; // USB, Bluetooth, etc.
+  caseType: CaseType; // Mid Tower, Full Tower, etc.
+  caseColor: string; // Black, White, etc.
+  caseSidePanel: CaseSidePanel; // windowed or not
   additionalFields: {
     [key: string]: string;
   };
@@ -43,14 +45,14 @@ type AccessorySchema = {
   uploadedFilesIds: Types.ObjectId[];
 };
 
-type AccessoryDocument = AccessorySchema & {
+type ComputerCaseDocument = ComputerCaseSchema & {
   _id: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
   __v: number;
 };
 
-const accessorySchema = new Schema<AccessorySchema>(
+const computerCaseSchema = new Schema<ComputerCaseSchema>(
   {
     userId: {
       type: Schema.Types.ObjectId,
@@ -137,17 +139,19 @@ const accessorySchema = new Schema<AccessorySchema>(
     },
 
     // page 2
-    accessoryType: {
+    caseType: {
       type: String,
-      required: [true, 'Type is required'],
+      required: [true, 'Case type is required'],
+      index: true,
     },
-    accessoryColor: {
+    caseColor: {
       type: String,
       required: [true, 'Color is required'],
     },
-    accessoryInterface: {
+    caseSidePanel: {
       type: String,
-      required: [true, 'Interface is required'],
+      required: [true, 'Side panel is required'],
+      index: true,
     },
     // user defined fields
     additionalFields: {
@@ -195,19 +199,19 @@ const accessorySchema = new Schema<AccessorySchema>(
 );
 
 // text indexes for searching all user entered text input fields
-accessorySchema.index({
-  'specifications.accessory.type': 'text',
+computerCaseSchema.index({
   brand: 'text',
   model: 'text',
-  price: 'text',
   description: 'text',
   additionalComments: 'text',
   // reviews
   'reviews.username': 'text',
   'reviews.review': 'text',
+  // computer case
+  caseColor: 'text',
 });
 
-const AccessoryModel = model<AccessoryDocument>('Accessory', accessorySchema);
+const ComputerCaseModel = model<ComputerCaseDocument>('ComputerCase', computerCaseSchema);
 
-export type { AccessoryDocument, AccessorySchema };
-export { AccessoryModel };
+export type { ComputerCaseDocument, ComputerCaseSchema, CaseType, CaseSidePanel };
+export { ComputerCaseModel };
