@@ -3,15 +3,15 @@ import type { Action } from '../../..';
 import type { ActionsDashboard } from '../../dashboard.types';
 import type {
   DimensionUnit,
-  PeripheralsInterface,
   ProductAvailability,
   ProductCategory,
+  MemoryUnit,
   ProductReview,
   WeightUnit,
 } from '../types';
 import type { Currency } from '../../../company/expenseClaim';
 
-type AccessorySchema = {
+type GpuSchema = {
   userId: Types.ObjectId;
   username: string;
   action: Action;
@@ -37,9 +37,12 @@ type AccessorySchema = {
 
   // page 2
   productCategory: ProductCategory;
-  accessoryType: string; // Headphones, Speakers, etc.
-  accessoryColor: string; // Black, White, etc.
-  accessoryInterface: PeripheralsInterface; // USB, Bluetooth, etc.
+  gpuChipset: string; // NVIDIA GeForce RTX 3080,
+  gpuMemory: number; // 10 GB, 16 GB, etc.
+  gpuMemoryUnit: MemoryUnit; // GB, etc.
+  gpuCoreClock: number; // 1440 MHz, 1770 MHz, etc.
+  gpuBoostClock: number; // 1710 MHz, 2250 MHz, etc.
+  gpuTdp: number; // 320 W, 350 W, etc.
   additionalFields: {
     [key: string]: string;
   };
@@ -49,14 +52,14 @@ type AccessorySchema = {
   uploadedFilesIds: Types.ObjectId[];
 };
 
-type AccessoryDocument = AccessorySchema & {
+type GpuDocument = GpuSchema & {
   _id: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
   __v: number;
 };
 
-const accessorySchema = new Schema<AccessorySchema>(
+const gpuSchema = new Schema<GpuSchema>(
   {
     userId: {
       type: Schema.Types.ObjectId,
@@ -158,17 +161,29 @@ const accessorySchema = new Schema<AccessorySchema>(
     },
 
     // page 2
-    accessoryType: {
+    gpuChipset: {
       type: String,
-      required: [true, 'Type is required'],
+      required: [true, 'Chipset is required'],
     },
-    accessoryColor: {
-      type: String,
-      required: [true, 'Color is required'],
+    gpuMemory: {
+      type: Number,
+      required: [true, 'Memory is required'],
     },
-    accessoryInterface: {
+    gpuMemoryUnit: {
       type: String,
-      required: [true, 'Interface is required'],
+      required: [true, 'Memory unit is required'],
+    },
+    gpuCoreClock: {
+      type: Number,
+      required: [true, 'Core clock is required'],
+    },
+    gpuBoostClock: {
+      type: Number,
+      required: [true, 'Boost clock is required'],
+    },
+    gpuTdp: {
+      type: Number,
+      required: [true, 'TDP is required'],
     },
     // user defined fields
     additionalFields: {
@@ -215,8 +230,7 @@ const accessorySchema = new Schema<AccessorySchema>(
 );
 
 // text indexes for searching all fields of type string
-accessorySchema.index({
-  'specifications.accessory.type': 'text',
+gpuSchema.index({
   brand: 'text',
   model: 'text',
   price: 'text',
@@ -227,12 +241,18 @@ accessorySchema.index({
   'dimensions.length': 'text',
   'dimensions.width': 'text',
   'dimensions.height': 'text',
+  // gpu
+  'specifications.gpu.chipset': 'text',
+  'specifications.gpu.memory': 'text',
+  'specifications.gpu.coreClock': 'text',
+  'specifications.gpu.boostClock': 'text',
+  'specifications.gpu.tdp': 'text',
   // reviews
   'reviews.username': 'text',
   'reviews.review': 'text',
 });
 
-const AccessoryModel = model<AccessoryDocument>('Accessory', accessorySchema);
+const GpuModel = model<GpuDocument>('GPU', gpuSchema);
 
-export type { AccessoryDocument, AccessorySchema };
-export { AccessoryModel };
+export type { GpuDocument, GpuSchema };
+export { GpuModel };

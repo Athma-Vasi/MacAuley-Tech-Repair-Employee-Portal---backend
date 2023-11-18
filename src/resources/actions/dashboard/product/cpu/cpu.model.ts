@@ -3,15 +3,15 @@ import type { Action } from '../../..';
 import type { ActionsDashboard } from '../../dashboard.types';
 import type {
   DimensionUnit,
-  PeripheralsInterface,
   ProductAvailability,
   ProductCategory,
+  MemoryUnit,
   ProductReview,
   WeightUnit,
 } from '../types';
 import type { Currency } from '../../../company/expenseClaim';
 
-type AccessorySchema = {
+type CpuSchema = {
   userId: Types.ObjectId;
   username: string;
   action: Action;
@@ -37,9 +37,16 @@ type AccessorySchema = {
 
   // page 2
   productCategory: ProductCategory;
-  accessoryType: string; // Headphones, Speakers, etc.
-  accessoryColor: string; // Black, White, etc.
-  accessoryInterface: PeripheralsInterface; // USB, Bluetooth, etc.
+  cpuSocket: string; // LGA 1200, AM4, etc.
+  cpuFrequency: number; // 3.6 GHz, 4.2 GHz, etc.
+  cpuCores: number; // 6 cores, 8 cores, etc.
+  cpuL1Cache: string; // 384, 512, etc.
+  cpuL1CacheUnit: MemoryUnit; // KB, etc.
+  cpuL2Cache: string; // 1.5, 2, etc.
+  cpuL2CacheUnit: MemoryUnit; // MB, etc.
+  cpuL3Cache: string; // 12, 16, etc.
+  cpuL3CacheUnit: MemoryUnit; // MB, etc.
+  cpuWattage: number; // 65 W, 95 W, etc.
   additionalFields: {
     [key: string]: string;
   };
@@ -49,14 +56,14 @@ type AccessorySchema = {
   uploadedFilesIds: Types.ObjectId[];
 };
 
-type AccessoryDocument = AccessorySchema & {
+type CpuDocument = CpuSchema & {
   _id: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
   __v: number;
 };
 
-const accessorySchema = new Schema<AccessorySchema>(
+const cpuSchema = new Schema<CpuSchema>(
   {
     userId: {
       type: Schema.Types.ObjectId,
@@ -158,17 +165,45 @@ const accessorySchema = new Schema<AccessorySchema>(
     },
 
     // page 2
-    accessoryType: {
+    cpuSocket: {
       type: String,
-      required: [true, 'Type is required'],
+      required: [true, 'Socket is required'],
     },
-    accessoryColor: {
-      type: String,
-      required: [true, 'Color is required'],
+    cpuFrequency: {
+      type: Number,
+      required: [true, 'Speed is required'],
     },
-    accessoryInterface: {
+    cpuCores: {
+      type: Number,
+      required: [true, 'Cores is required'],
+    },
+    cpuL1Cache: {
       type: String,
-      required: [true, 'Interface is required'],
+      required: [true, 'Cache is required'],
+    },
+    cpuL1CacheUnit: {
+      type: String,
+      required: [true, 'Cache unit is required'],
+    },
+    cpuL2Cache: {
+      type: String,
+      required: [true, 'Cache is required'],
+    },
+    cpuL2CacheUnit: {
+      type: String,
+      required: [true, 'Cache unit is required'],
+    },
+    cpuL3Cache: {
+      type: String,
+      required: [true, 'Cache is required'],
+    },
+    cpuL3CacheUnit: {
+      type: String,
+      required: [true, 'Cache unit is required'],
+    },
+    cpuWattage: {
+      type: Number,
+      required: [true, 'Wattage is required'],
     },
     // user defined fields
     additionalFields: {
@@ -215,8 +250,7 @@ const accessorySchema = new Schema<AccessorySchema>(
 );
 
 // text indexes for searching all fields of type string
-accessorySchema.index({
-  'specifications.accessory.type': 'text',
+cpuSchema.index({
   brand: 'text',
   model: 'text',
   price: 'text',
@@ -227,12 +261,19 @@ accessorySchema.index({
   'dimensions.length': 'text',
   'dimensions.width': 'text',
   'dimensions.height': 'text',
+  // cpu
+  'specifications.cpu.socket': 'text',
+  'specifications.cpu.speed': 'text',
+  'specifications.cpu.l1Cache': 'text',
+  'specifications.cpu.l2Cache': 'text',
+  'specifications.cpu.l3Cache': 'text',
+  'specifications.cpu.wattage': 'text',
   // reviews
   'reviews.username': 'text',
   'reviews.review': 'text',
 });
 
-const AccessoryModel = model<AccessoryDocument>('Accessory', accessorySchema);
+const CpuModel = model<CpuDocument>('CPU', cpuSchema);
 
-export type { AccessoryDocument, AccessorySchema };
-export { AccessoryModel };
+export type { CpuDocument, CpuSchema };
+export { CpuModel };
