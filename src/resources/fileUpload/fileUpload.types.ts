@@ -13,6 +13,7 @@ interface RequestAfterFileInfoExtraction extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
+    sessionId: Types.ObjectId;
     fileUploads: Array<FileInfoObject>;
   };
 }
@@ -26,6 +27,7 @@ interface InsertAssociatedDocumentIdRequest extends RequestAfterJWTVerification 
       username: string;
       roles: UserRoles;
     };
+    sessionId: Types.ObjectId;
     fileUploadId: string;
     associatedDocumentId: Types.ObjectId;
     associatedResource: AssociatedResourceKind;
@@ -39,6 +41,7 @@ interface DeleteAFileUploadRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
+    sessionId: Types.ObjectId;
     associatedDocumentId: Types.ObjectId;
   };
   params: {
@@ -53,6 +56,7 @@ interface DeleteAllFileUploadsRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
+    sessionId: Types.ObjectId;
   };
 }
 
@@ -67,6 +71,7 @@ interface GetFileUploadByIdRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
+    sessionId: Types.ObjectId;
   };
   params: { fileUploadId: string };
 }

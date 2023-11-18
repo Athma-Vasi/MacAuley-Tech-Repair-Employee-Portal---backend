@@ -3,12 +3,14 @@ import type { RequestAfterJWTVerification } from '../../../auth';
 import { UserRoles } from '../../../user';
 import { GetQueriedResourceRequest, RequestStatus } from '../../../../types';
 import {
+  DimensionUnit,
+  ProductAvailability,
   ProductCategory,
-  ProductDimensions,
   ProductDocument,
   ProductReview,
   ProductSchema,
   Specifications,
+  WeightUnit,
 } from './product.model';
 import { Currency } from '../../company/expenseClaim';
 import { FileUploadDocument } from '../../../fileUpload';
@@ -25,17 +27,23 @@ interface CreateNewProductRequest extends RequestAfterJWTVerification {
       // page 1
       brand: string;
       model: string;
-      productCategory: ProductCategory;
       description: string;
-      price: number;
+      price: string;
       currency: Currency;
-      availability: boolean;
+      availability: ProductAvailability;
       quantity: number;
-      weight: string;
-      dimensions: ProductDimensions;
+      weight: number;
+      weightUnit: WeightUnit;
+      length: number;
+      lengthUnit: DimensionUnit;
+      width: number;
+      widthUnit: DimensionUnit;
+      height: number;
+      heightUnit: DimensionUnit;
       additionalComments: string;
 
       // page 2
+      productCategory: ProductCategory;
       specifications: Specifications;
 
       // page 3
@@ -60,17 +68,23 @@ interface CreateNewProductBulkRequest extends RequestAfterJWTVerification {
       // page 1
       brand: string;
       model: string;
-      productCategory: ProductCategory;
       description: string;
-      price: number;
+      price: string;
       currency: Currency;
-      availability: boolean;
+      availability: ProductAvailability;
       quantity: number;
-      weight: string;
-      dimensions: ProductDimensions;
+      weight: number;
+      weightUnit: WeightUnit;
+      length: number;
+      lengthUnit: DimensionUnit;
+      width: number;
+      widthUnit: DimensionUnit;
+      height: number;
+      heightUnit: DimensionUnit;
       additionalComments: string;
 
       // page 2
+      productCategory: ProductCategory;
       specifications: Specifications;
 
       // page 3

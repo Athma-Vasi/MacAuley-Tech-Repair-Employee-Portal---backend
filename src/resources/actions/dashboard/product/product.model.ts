@@ -22,152 +22,227 @@ type ProductCategory =
   | 'Tablets'
   | 'Accessories';
 
-type ColorVariant = 'Black' | 'White' | 'Silver' | 'Gold' | 'Space Gray' | 'Blue' | 'Green' | 'Red';
+type DesktopComputerSpecifications = {
+  cpu: CpuSpecifications;
+  gpu: GpuSpecifications;
+  motherboard: MotherboardSpecifications;
+  ram: RamSpecifications;
+  storage: StorageSpecifications;
+  psu: PsuSpecifications;
+  case: CaseSpecifications;
+  monitor: MonitorSpecifications;
+  keyboard: KeyboardSpecifications;
+  mouse: MouseSpecifications;
+  speaker: SpeakerSpecifications;
+};
+
+type LaptopSpecifications = {
+  cpu: CpuSpecifications;
+  gpu: GpuSpecifications;
+  ram: RamSpecifications;
+  storage: StorageSpecifications;
+  display: MonitorSpecifications;
+};
+
+type MemoryUnit = 'KB' | 'MB' | 'GB' | 'TB';
 
 type CpuSpecifications = {
-  socket: string; // LGA 1200, AM4, etc.
-  speed: string; // 3.6 GHz, 4.2 GHz, etc.
-  cores: string; // 6 cores, 8 cores, etc.
-  cache: string; // 12 MB, 16 MB, etc.
-  wattage: string; // 65 W, 95 W, etc.
+  cpuSocket: string; // LGA 1200, AM4, etc.
+  cpuFrequency: number; // 3.6 GHz, 4.2 GHz, etc.
+  cpuCores: number; // 6 cores, 8 cores, etc.
+  cpuL1Cache: string; // 384, 512, etc.
+  cpuL1CacheUnit: MemoryUnit; // KB, etc.
+  cpuL2Cache: string; // 1.5, 2, etc.
+  cpuL2CacheUnit: MemoryUnit; // MB, etc.
+  cpuL3Cache: string; // 12, 16, etc.
+  cpuL3CacheUnit: MemoryUnit; // MB, etc.
+  cpuWattage: number; // 65 W, 95 W, etc.
 };
 
 type GpuSpecifications = {
-  chipset: string; // NVIDIA GeForce RTX 3080, AMD Radeon RX 6800 XT, etc.
-  memory: string; // 10 GB, 16 GB, etc.
-  coreClock: string; // 1440 MHz, 1770 MHz, etc.
-  boostClock: string; // 1710 MHz, 2250 MHz, etc.
-  tdp: string; // 320 W, 350 W, etc.
+  gpuChipset: string; // NVIDIA GeForce RTX 3080,
+  gpuMemory: number; // 10 GB, 16 GB, etc.
+  gpuMemoryUnit: MemoryUnit; // GB, etc.
+  gpuCoreClock: number; // 1440 MHz, 1770 MHz, etc.
+  gpuBoostClock: number; // 1710 MHz, 2250 MHz, etc.
+  gpuTdp: number; // 320 W, 350 W, etc.
 };
 
+type MotherboardFormFactor = 'ATX' | 'Micro ATX' | 'Mini ITX' | 'E-ATX' | 'XL-ATX';
+type MemoryType = 'DDR5' | 'DDR4' | 'DDR3' | 'DDR2' | 'DDR';
 type MotherboardSpecifications = {
-  socket: string; // LGA 1200, AM4, etc.
-  chipset: string; // Intel Z490, AMD B550, etc.
-  formFactor: string; // ATX, Micro ATX, etc.
-  memoryMax: string; // 128 GB, 256 GB, etc.
-  memorySlots: string; // 4, 8, etc.
-  memoryType: string; // DDR4, etc.
-  sataPorts: string; // 6, 8, etc.
-  m2Slots: string; // 2, 3, etc.
-  pcie3Slots: string; // 2, 3, etc.
-  pcie4Slots: string; // 1, 2, etc.
+  motherboardSocket: string; // LGA 1200, AM4, etc.
+  motherboardChipset: string; // Intel Z490, AMD B550, etc.
+  motherboardFormFactor: MotherboardFormFactor; // ATX, Micro ATX, etc.
+  motherboardMemoryMax: number; // 128, 256, etc.
+  motherboardMemoryMaxUnit: MemoryUnit; // GB, etc.
+  motherboardMemorySlots: number; // 4, 8, etc.
+  motherboardMemoryType: MemoryType; // DDR4, etc.
+  motherboardSataPorts: number; // 6, 8, etc.
+  motherboardM2Slots: number; // 2, 3, etc.
+  motherboardPcie3Slots: number; // 2, 3, etc.
+  motherboardPcie4Slots: number; // 1, 2, etc.
+  motherboardPcie5Slots: number; // 0, 1, etc.
 };
 
-type RamType = 'DDR5' | 'DDR4' | 'DDR3' | 'DDR2' | 'DDR';
 type RamSpecifications = {
-  speed: string; // 3200 MHz, 3600 MHz, etc.
-  modules: string; // 2 x 8 GB, 4 x 8 GB, etc.
-  ramType: RamType; // DDR4, etc.
-  color: ColorVariant; // Black, White, etc.
-  voltage: string; // 1.35 V, etc.
-  timing: string; // 16-18-18-38, etc.
+  ramDataRate: number; // 3200 MT/s, 3600 MT/s, etc.
+  ramModulesQuantity: number;
+  ramModulesCapacity: number;
+  ramModulesCapacityUnit: MemoryUnit; // GB, etc.
+  ramType: MemoryType; // DDR4, etc.
+  ramColor: string; // Black, White, etc.
+  ramVoltage: number; // 1.35 V, etc.
+  ramTiming: string; // 16-18-18-38, etc.
 };
 
-type StorageType = 'SSD' | 'HDD' | 'SSHD' | 'NVMe SSD' | 'SATA SSD' | 'M.2 SSD';
-type StorageFormFactor = '2.5"' | 'M.2 2280' | 'M.2 22110' | 'M.2 2242' | 'M.2 2230';
-type StorageInterface = 'SATA III' | 'PCIe 3.0 x4' | 'PCIe 4.0 x4' | 'PCIe 3.0 x2' | 'PCIe 3.0 x1';
+type StorageType = 'SSD' | 'HDD' | 'SSHD' | 'NVMe SSD' | 'SATA SSD' | 'M.2 SSD' | 'Other';
+type StorageFormFactor = '2.5"' | 'M.2 2280' | 'M.2 22110' | 'M.2 2242' | 'M.2 2230' | 'Other';
+type StorageInterface =
+  | 'SATA III'
+  | 'PCIe 3.0 x4'
+  | 'PCIe 4.0 x4'
+  | 'PCIe 3.0 x2'
+  | 'PCIe 3.0 x1'
+  | 'Other';
 type StorageSpecifications = {
   storageType: StorageType; // SSD, HDD, etc.
-  capacity: string; // 1 TB, 2 TB, etc.
-  cache: string; // 64 MB, 128 MB, etc.
-  formFactor: StorageFormFactor; // 2.5", M.2 2280, etc.
-  interface: StorageInterface; // SATA III, PCIe 3.0 x4, etc.
+  storageCapacity: number; // 1, 2, etc.
+  storageCapacityUnit: MemoryUnit; // TB, etc.
+  storageCache: number; // 64 MB, 128 MB, etc.
+  storageCacheUnit: MemoryUnit; // MB, etc.
+  storageFormFactor: StorageFormFactor; // 2.5", M.2 2280, etc.
+  storageInterface: StorageInterface; // SATA III, PCIe 3.0 x4, etc.
 };
 
-type PsuEfficiency = '80+ Bronze' | '80+ Gold' | '80+ Platinum' | '80+ Titanium';
-type PsuModular = 'Full' | 'Semi' | 'None';
+type PsuEfficiency =
+  | '80+ Bronze'
+  | '80+ Gold'
+  | '80+ Platinum'
+  | '80+ Titanium'
+  | '80+ Silver'
+  | '80+'
+  | '80+ White'
+  | '80+ Standard';
+type PsuModularity = 'Full' | 'Semi' | 'None' | 'Other';
+type PsuFormFactor = 'ATX' | 'SFX' | 'SFX-L' | 'TFX' | 'Flex ATX' | 'Other';
 type PsuSpecifications = {
-  wattage: string; // 650 W, 750 W, etc.
-  efficiency: PsuEfficiency; // 80+ Gold, 80+ Platinum, etc.
-  modular: PsuModular; // Full, Semi, etc.
+  psuWattage: number; // 650 W, 750 W, etc.
+  psuEfficiency: PsuEfficiency; // 80+ Gold, 80+ Platinum, etc.
+  psuFormFactor: PsuFormFactor; // ATX, SFX, etc.
+  psuModularity: PsuModularity; // Full, Semi, etc.
 };
 
-type CaseType = 'Mid Tower' | 'Full Tower' | 'Mini Tower' | 'Cube' | 'Slim' | 'Desktop';
+type CaseType = 'Mid Tower' | 'Full Tower' | 'Mini Tower' | 'Cube' | 'Slim' | 'Desktop' | 'Other';
 type CaseSidePanel = 'Windowed' | 'Solid';
 type CaseSpecifications = {
   caseType: CaseType; // Mid Tower, Full Tower, etc.
-  color: ColorVariant; // Black, White, etc.
-  sidePanel: CaseSidePanel; // windowed or not
+  caseColor: string; // Black, White, etc.
+  caseSidePanel: CaseSidePanel; // windowed or not
 };
 
-type MonitorPanelType = 'IPS' | 'TN' | 'VA';
+type MonitorPanelType = 'IPS' | 'TN' | 'VA' | 'OLED' | 'QLED' | 'Other';
+
 type MonitorSpecifications = {
-  size: string; // 24", 27", etc.
-  resolution: string; // 1920 x 1080, 2560 x 1440, etc.
-  refreshRate: string; // 144 Hz, 165 Hz, etc.
-  panelType: MonitorPanelType; // IPS, TN, etc.
-  responseTime: string; // 1 ms, 4 ms, etc.
-  aspectRatio: string; // 16:9, 21:9, etc.
+  monitorSize: number; // 24", 27", etc.
+  monitorHorizontalResolution: number;
+  monitorVerticalResolution: number;
+  monitorRefreshRate: number; // 144 Hz, 165 Hz, etc.
+  monitorPanelType: MonitorPanelType; // IPS, TN, etc.
+  monitorResponseTime: number; // 1 ms, 4 ms, etc.
+  monitorAspectRatio: string; // 16:9, 21:9, etc.
 };
 
 type KeyboardSwitch =
   | 'Cherry MX Red'
   | 'Cherry MX Blue'
   | 'Cherry MX Brown'
-  | 'Cherry MX Speed'
+  | 'Cherry MX Silent Red'
   | 'Cherry MX Black'
-  | 'Membrane';
-type KeyboardLayout = 'ANSI' | 'ISO';
-type KeyboardBacklight = 'RGB' | 'Single Color';
-type PeripheralsInterface = 'USB' | 'Bluetooth';
+  | 'Cherry MX Clear'
+  | 'Membrane'
+  | 'Other';
+type KeyboardLayout = 'ANSI' | 'ISO' | 'Other';
+type KeyboardBacklight = 'RGB' | 'Single Color' | 'None';
+type PeripheralsInterface = 'USB' | 'Bluetooth' | 'Other';
 type KeyboardSpecifications = {
-  switch: KeyboardSwitch; // Cherry MX Red, Cherry MX Blue, etc.
-  layout: KeyboardLayout; // ANSI, ISO, etc.
-  backlight: KeyboardBacklight; // RGB, etc.
-  interface: PeripheralsInterface; // USB, Bluetooth, etc.
+  keyboardSwitch: KeyboardSwitch; // Cherry MX Red, Cherry MX Blue, etc.
+  keyboardLayout: KeyboardLayout; // ANSI, ISO, etc.
+  keyboardBacklight: KeyboardBacklight; // RGB, etc.
+  keyboardInterface: PeripheralsInterface; // USB, Bluetooth, etc.
 };
 
-type MouseSensor = 'Optical' | 'Laser' | 'Infrared';
+type MouseSensor = 'Optical' | 'Laser' | 'Infrared' | 'Other';
 type MouseSpecifications = {
-  sensor: MouseSensor; // Optical, Laser, etc.
-  dpi: string; // 800, 1600, etc.
-  buttons: string; // 6, 8, etc.
-  color: ColorVariant; // Black, White, etc.
-  interface: PeripheralsInterface; // USB, Bluetooth, etc.
+  mouseSensor: MouseSensor; // Optical, Laser, etc.
+  mouseDpi: number; // 800, 1600, etc.
+  mouseButtons: number; // 6, 8, etc.
+  mouseColor: string; // Black, White, etc.
+  mouseInterface: PeripheralsInterface; // USB, Bluetooth, etc.
 };
 
-type HeadphoneType = 'Over-ear' | 'On-ear' | 'In-ear';
-type HeadphoneInterface = 'USB' | 'Bluetooth' | '3.5 mm' | '2.5 mm';
+type HeadphoneType = 'Over-ear' | 'On-ear' | 'In-ear' | 'Other';
+type HeadphoneInterface = 'USB' | 'Bluetooth' | '3.5 mm' | '2.5 mm' | 'Other';
 type HeadphoneSpecifications = {
-  type: HeadphoneType; // Over-ear, On-ear, etc.
-  driver: string; // 50 mm, 53 mm, etc.
-  frequencyResponse: string; // 20 Hz - 20 kHz, etc.
-  impedance: string; // 32 Ohm, 64 Ohm, etc.
-  color: ColorVariant; // Black, White, etc.
-  interface: HeadphoneInterface; // USB, Bluetooth, etc.
+  headphoneType: HeadphoneType; // Over-ear, On-ear, etc.
+  headphoneDriver: number; // 50 mm, 53 mm, etc.
+  headphoneFrequencyResponse: string; // 20 Hz - 20 kHz, etc.
+  headphoneImpedance: number; // 32 Ohm, 64 Ohm, etc.
+  headphoneColor: string; // Black, White, etc.
+  headphoneInterface: HeadphoneInterface; // USB, Bluetooth, etc.
 };
 
-type SpeakerType = '2.0' | '2.1' | '5.1' | '7.1';
+type SpeakerType = '2.0' | '2.1' | '3.1' | '4.1' | '5.1' | '7.1' | 'Other';
 type SpeakerInterface = HeadphoneInterface;
 type SpeakerSpecifications = {
-  type: SpeakerType; // 2.0, 2.1, etc.
-  totalWattage: string; // 10 W, 20 W, etc.
-  frequencyResponse: string; // 20 Hz - 20 kHz, etc.
-  color: ColorVariant; // Black, White, etc.
-  interface: SpeakerInterface; // USB, Bluetooth, etc.
+  speakerType: SpeakerType; // 2.0, 2.1, etc.
+  speakerTotalWattage: number; // 10 W, 20 W, etc.
+  speakerFrequencyResponse: string; // 20 Hz - 20 kHz, etc.
+  speakerColor: string; // Black, White, etc.
+  speakerInterface: SpeakerInterface; // USB, Bluetooth, etc.
 };
 
+type MobileOs = 'Android' | 'iOS' | 'Windows' | 'Linux' | 'Other';
 type SmartphoneSpecifications = {
-  os: string; // Android, iOS, etc.
-  chipset: string; // Snapdragon 888, Apple A14 Bionic, etc.
-  display: string; // 6.7", 6.9", etc.
-  resolution: string; // 1440 x 3200, 1170 x 2532, etc.
-  ram: string; // 12 GB, 16 GB, etc.
-  storage: string; // 128 GB, 256 GB, etc.
-  battery: string; // 5000 mAh, 6000 mAh, etc.
-  camera: string; // 108 MP, 64 MP, etc.
-  color: ColorVariant; // Black, White, etc.
+  smartphoneOs: MobileOs; // Android, iOS, etc.
+  smartphoneChipset: string; // Snapdragon 888, Apple A14 Bionic, etc.
+  smartphoneDisplay: number; // 6.7", 6.9", etc.
+  smartphoneHorizontalResolution: number;
+  smartphoneVerticalResolution: number;
+  smartphoneRamCapacity: number; // 12, 16, etc.
+  smartphoneRamCapacityUnit: MemoryUnit; // GB, etc.
+  smartphoneStorage: number; // 128 GB, 256 GB, etc.
+  smartphoneBattery: number; // 5000 mAh, 6000 mAh, etc.
+  smartphoneCamera: string; // 108 MP, 64 MP, etc.
+  smartphoneColor: string; // Black, White, etc.
 };
 
-type TabletSpecifications = SmartphoneSpecifications;
+type TabletSpecifications = {
+  tabletOs: MobileOs; // Android, iOS, etc.
+  tabletChipset: string; // Snapdragon 888, Apple A14 Bionic, etc.
+  tabletDisplay: number; // 6.7", 6.9", etc.
+  tabletHorizontalResolution: number;
+  tabletVerticalResolution: number;
+  tabletRamCapacity: number; // 12, 16, etc.
+  tabletRamCapacityUnit: MemoryUnit; // GB, etc.
+  tabletStorage: number; // 128 GB, 256 GB, etc.
+  tabletBattery: number; // 5000 mAh, 6000 mAh, etc.
+  tabletCamera: string; // 108 MP, 64 MP, etc.
+  tabletColor: string; // Black, White, etc.
+};
 
 type AccessorySpecifications = {
-  type: string; // Headphones, Speakers, etc.
-  color: ColorVariant; // Black, White, etc.
-  interface: PeripheralsInterface; // USB, Bluetooth, etc.
+  accessoryType: string; // Headphones, Speakers, etc.
+  accessoryColor: string; // Black, White, etc.
+  accessoryInterface: PeripheralsInterface; // USB, Bluetooth, etc.
+  userDefinedFields: {
+    [key: string]: string;
+  };
 };
 
 type Specifications = {
+  desktopComputer?: DesktopComputerSpecifications;
+  laptop?: LaptopSpecifications;
   cpu?: CpuSpecifications;
   gpu?: GpuSpecifications;
   motherboard?: MotherboardSpecifications;
@@ -185,11 +260,8 @@ type Specifications = {
   accessory?: AccessorySpecifications;
 };
 
-type ProductDimensions = {
-  length: string;
-  width: string;
-  height: string;
-};
+type DimensionUnit = 'mm' | 'cm' | 'm' | 'in' | 'ft';
+type WeightUnit = 'g' | 'kg' | 'lb';
 
 type ProductReview = {
   userId: Types.ObjectId;
@@ -197,6 +269,8 @@ type ProductReview = {
   rating: number;
   review: string;
 };
+
+type ProductAvailability = 'In Stock' | 'Out of Stock' | 'Pre-order' | 'Discontinued' | 'Other';
 
 type ProductSchema = {
   userId: Types.ObjectId;
@@ -207,17 +281,23 @@ type ProductSchema = {
   // page 1
   brand: string;
   model: string;
-  productCategory: ProductCategory;
   description: string;
-  price: number;
+  price: string;
   currency: Currency;
-  availability: boolean;
+  availability: ProductAvailability;
   quantity: number;
-  weight: string;
-  dimensions: ProductDimensions;
+  weight: number;
+  weightUnit: WeightUnit;
+  length: number;
+  lengthUnit: DimensionUnit;
+  width: number;
+  widthUnit: DimensionUnit;
+  height: number;
+  heightUnit: DimensionUnit;
   additionalComments: string;
 
   // page 2
+  productCategory: ProductCategory;
   specifications: Specifications;
 
   // page 3
@@ -231,6 +311,657 @@ type ProductDocument = ProductSchema & {
   updatedAt: Date;
   __v: number;
 };
+
+const cpuSchema = new Schema<CpuSpecifications>(
+  {
+    cpuSocket: {
+      type: String,
+      required: [true, 'Socket is required'],
+    },
+    cpuFrequency: {
+      type: Number,
+      required: [true, 'Speed is required'],
+    },
+    cpuCores: {
+      type: Number,
+      required: [true, 'Cores is required'],
+    },
+    cpuL1Cache: {
+      type: String,
+      required: [true, 'Cache is required'],
+    },
+    cpuL1CacheUnit: {
+      type: String,
+      required: [true, 'Cache unit is required'],
+    },
+    cpuL2Cache: {
+      type: String,
+      required: [true, 'Cache is required'],
+    },
+    cpuL2CacheUnit: {
+      type: String,
+      required: [true, 'Cache unit is required'],
+    },
+    cpuL3Cache: {
+      type: String,
+      required: [true, 'Cache is required'],
+    },
+    cpuL3CacheUnit: {
+      type: String,
+      required: [true, 'Cache unit is required'],
+    },
+    cpuWattage: {
+      type: Number,
+      required: [true, 'Wattage is required'],
+    },
+  },
+  {
+    _id: false,
+  }
+);
+
+const gpuSchema = new Schema<GpuSpecifications>(
+  {
+    gpuChipset: {
+      type: String,
+      required: [true, 'Chipset is required'],
+    },
+    gpuMemory: {
+      type: Number,
+      required: [true, 'Memory is required'],
+    },
+    gpuMemoryUnit: {
+      type: String,
+      required: [true, 'Memory unit is required'],
+    },
+    gpuCoreClock: {
+      type: Number,
+      required: [true, 'Core clock is required'],
+    },
+    gpuBoostClock: {
+      type: Number,
+      required: [true, 'Boost clock is required'],
+    },
+    gpuTdp: {
+      type: Number,
+      required: [true, 'TDP is required'],
+    },
+  },
+  {
+    _id: false,
+  }
+);
+
+const motherboardSchema = new Schema<MotherboardSpecifications>(
+  {
+    motherboardSocket: {
+      type: String,
+      required: [true, 'Socket is required'],
+    },
+    motherboardChipset: {
+      type: String,
+      required: [true, 'Chipset is required'],
+    },
+    motherboardFormFactor: {
+      type: String,
+      required: [true, 'Form factor is required'],
+      index: true,
+    },
+    motherboardMemoryMax: {
+      type: Number,
+      required: [true, 'Memory max is required'],
+    },
+    motherboardMemoryMaxUnit: {
+      type: String,
+      required: [true, 'Memory slots is required'],
+    },
+    motherboardMemorySlots: {
+      type: Number,
+      required: [true, 'Memory type is required'],
+      index: true,
+    },
+    motherboardSataPorts: {
+      type: Number,
+      required: [true, 'SATA ports is required'],
+    },
+    motherboardM2Slots: {
+      type: Number,
+      required: [true, 'M.2 slots is required'],
+    },
+    motherboardPcie3Slots: {
+      type: Number,
+      required: [true, 'PCIe 3.0 slots is required'],
+    },
+    motherboardPcie4Slots: {
+      type: Number,
+      required: [true, 'PCIe 4.0 slots is required'],
+    },
+    motherboardPcie5Slots: {
+      type: Number,
+      required: [true, 'PCIe 5.0 slots is required'],
+    },
+  },
+  {
+    _id: false,
+  }
+);
+
+const ramSchema = new Schema<RamSpecifications>(
+  {
+    ramDataRate: {
+      type: Number,
+      required: [true, 'Speed is required'],
+    },
+    ramModulesQuantity: {
+      type: Number,
+      required: [true, 'Modules quantity is required'],
+    },
+    ramModulesCapacity: {
+      type: Number,
+      required: [true, 'Modules capacity is required'],
+    },
+    ramModulesCapacityUnit: {
+      type: String,
+      required: [true, 'Modules capacity unit is required'],
+    },
+    ramType: {
+      type: String,
+      required: [true, 'RAM type is required'],
+      index: true,
+    },
+    ramColor: {
+      type: String,
+      required: [true, 'Color is required'],
+      index: true,
+    },
+    ramVoltage: {
+      type: Number,
+      required: [true, 'Voltage is required'],
+    },
+    ramTiming: {
+      type: String,
+      required: [true, 'Timing is required'],
+    },
+  },
+  {
+    _id: false,
+  }
+);
+
+const storageSchema = new Schema<StorageSpecifications>(
+  {
+    storageType: {
+      type: String,
+      required: [true, 'Storage type is required'],
+      index: true,
+    },
+    storageCapacity: {
+      type: Number,
+      required: [true, 'Capacity is required'],
+    },
+    storageCapacityUnit: {
+      type: String,
+      required: [true, 'Capacity unit is required'],
+    },
+    storageCache: {
+      type: Number,
+      required: [true, 'Cache is required'],
+    },
+    storageCacheUnit: {
+      type: String,
+      required: [true, 'Cache unit is required'],
+    },
+    storageFormFactor: {
+      type: String,
+      required: [true, 'Form factor is required'],
+      index: true,
+    },
+    storageInterface: {
+      type: String,
+      required: [true, 'Interface is required'],
+      index: true,
+    },
+  },
+  {
+    _id: false,
+  }
+);
+
+const psuSchema = new Schema<PsuSpecifications>(
+  {
+    psuWattage: {
+      type: Number,
+      required: [true, 'Wattage is required'],
+    },
+    psuEfficiency: {
+      type: String,
+      required: [true, 'Efficiency is required'],
+      index: true,
+    },
+    psuFormFactor: {
+      type: String,
+      required: [true, 'Form factor is required'],
+      index: true,
+    },
+    psuModularity: {
+      type: String,
+      required: [true, 'Modular is required'],
+      index: true,
+    },
+  },
+  {
+    _id: false,
+  }
+);
+
+const caseSchema = new Schema<CaseSpecifications>(
+  {
+    caseType: {
+      type: String,
+      required: [true, 'Case type is required'],
+      index: true,
+    },
+    caseColor: {
+      type: String,
+      required: [true, 'Color is required'],
+      index: true,
+    },
+    caseSidePanel: {
+      type: String,
+      required: [true, 'Side panel is required'],
+      index: true,
+    },
+  },
+  {
+    _id: false,
+  }
+);
+
+const monitorSchema = new Schema<MonitorSpecifications>(
+  {
+    monitorSize: {
+      type: Number,
+      required: [true, 'Size is required'],
+    },
+    monitorHorizontalResolution: {
+      type: Number,
+      required: [true, 'Horizontal resolution is required'],
+    },
+    monitorVerticalResolution: {
+      type: Number,
+      required: [true, 'Vertical resolution is required'],
+    },
+    monitorRefreshRate: {
+      type: Number,
+      required: [true, 'Refresh rate is required'],
+    },
+    monitorPanelType: {
+      type: String,
+      required: [true, 'Panel type is required'],
+      index: true,
+    },
+    monitorResponseTime: {
+      type: Number,
+      required: [true, 'Response time is required'],
+    },
+    monitorAspectRatio: {
+      type: String,
+      required: [true, 'Aspect ratio is required'],
+    },
+  },
+  {
+    _id: false,
+  }
+);
+
+const keyboardSchema = new Schema<KeyboardSpecifications>(
+  {
+    keyboardSwitch: {
+      type: String,
+      required: [true, 'Switch is required'],
+      index: true,
+    },
+    keyboardLayout: {
+      type: String,
+      required: [true, 'Layout is required'],
+      index: true,
+    },
+    keyboardBacklight: {
+      type: String,
+      required: [true, 'Backlight is required'],
+      index: true,
+    },
+    keyboardInterface: {
+      type: String,
+      required: [true, 'Interface is required'],
+      index: true,
+    },
+  },
+  {
+    _id: false,
+  }
+);
+
+const mouseSchema = new Schema<MouseSpecifications>(
+  {
+    mouseSensor: {
+      type: String,
+      required: [true, 'Sensor is required'],
+      index: true,
+    },
+    mouseDpi: {
+      type: Number,
+      required: [true, 'DPI is required'],
+    },
+    mouseButtons: {
+      type: Number,
+      required: [true, 'Buttons is required'],
+    },
+    mouseColor: {
+      type: String,
+      required: [true, 'Color is required'],
+      index: true,
+    },
+    mouseInterface: {
+      type: String,
+      required: [true, 'Interface is required'],
+    },
+  },
+  {
+    _id: false,
+  }
+);
+
+const headphoneSchema = new Schema<HeadphoneSpecifications>(
+  {
+    headphoneType: {
+      type: String,
+      required: [true, 'Type is required'],
+      index: true,
+    },
+    headphoneDriver: {
+      type: Number,
+      required: [true, 'Driver is required'],
+    },
+    headphoneFrequencyResponse: {
+      type: String,
+      required: [true, 'Frequency response is required'],
+    },
+    headphoneImpedance: {
+      type: Number,
+      required: [true, 'Impedance is required'],
+    },
+    headphoneColor: {
+      type: String,
+      required: [true, 'Color is required'],
+      index: true,
+    },
+    headphoneInterface: {
+      type: String,
+      required: [true, 'Interface is required'],
+      index: true,
+    },
+  },
+  {
+    _id: false,
+  }
+);
+
+const speakerSchema = new Schema<SpeakerSpecifications>(
+  {
+    speakerType: {
+      type: String,
+      required: [true, 'Type is required'],
+      index: true,
+    },
+    speakerTotalWattage: {
+      type: Number,
+      required: [true, 'Total wattage is required'],
+    },
+    speakerFrequencyResponse: {
+      type: String,
+      required: [true, 'Frequency response is required'],
+    },
+    speakerColor: {
+      type: String,
+      required: [true, 'Color is required'],
+      index: true,
+    },
+    speakerInterface: {
+      type: String,
+      required: [true, 'Interface is required'],
+      index: true,
+    },
+  },
+  {
+    _id: false,
+  }
+);
+
+const smartphoneSchema = new Schema<SmartphoneSpecifications>(
+  {
+    smartphoneOs: {
+      type: String,
+      required: [true, 'OS is required'],
+    },
+    smartphoneChipset: {
+      type: String,
+      required: [true, 'Chipset is required'],
+    },
+    smartphoneDisplay: {
+      type: Number,
+      required: [true, 'Display is required'],
+    },
+    smartphoneHorizontalResolution: {
+      type: Number,
+      required: [true, 'Horizontal resolution is required'],
+    },
+    smartphoneVerticalResolution: {
+      type: Number,
+      required: [true, 'Vertical resolution is required'],
+    },
+    smartphoneRamCapacity: {
+      type: Number,
+      required: [true, 'RAM is required'],
+    },
+    smartphoneRamCapacityUnit: {
+      type: String,
+      required: [true, 'RAM unit is required'],
+    },
+    smartphoneStorage: {
+      type: Number,
+      required: [true, 'Storage is required'],
+    },
+    smartphoneBattery: {
+      type: Number,
+      required: [true, 'Battery is required'],
+    },
+    smartphoneCamera: {
+      type: String,
+      required: [true, 'Camera is required'],
+    },
+    smartphoneColor: {
+      type: String,
+      required: [true, 'Color is required'],
+    },
+  },
+  {
+    _id: false,
+  }
+);
+
+const tabletSchema = new Schema<TabletSpecifications>(
+  {
+    tabletOs: {
+      type: String,
+      required: [true, 'OS is required'],
+    },
+    tabletChipset: {
+      type: String,
+      required: [true, 'Chipset is required'],
+    },
+    tabletDisplay: {
+      type: Number,
+      required: [true, 'Display is required'],
+    },
+    tabletHorizontalResolution: {
+      type: Number,
+      required: [true, 'Horizontal resolution is required'],
+    },
+    tabletVerticalResolution: {
+      type: Number,
+      required: [true, 'Vertical resolution is required'],
+    },
+    tabletRamCapacity: {
+      type: Number,
+      required: [true, 'RAM is required'],
+    },
+    tabletRamCapacityUnit: {
+      type: String,
+      required: [true, 'RAM unit is required'],
+    },
+    tabletStorage: {
+      type: Number,
+      required: [true, 'Storage is required'],
+    },
+    tabletBattery: {
+      type: Number,
+      required: [true, 'Battery is required'],
+    },
+    tabletCamera: {
+      type: String,
+      required: [true, 'Camera is required'],
+    },
+    tabletColor: {
+      type: String,
+      required: [true, 'Color is required'],
+    },
+  },
+  {
+    _id: false,
+  }
+);
+
+const accessorySchema = new Schema<AccessorySpecifications>(
+  {
+    accessoryType: {
+      type: String,
+      required: [true, 'Type is required'],
+    },
+    accessoryColor: {
+      type: String,
+      required: [true, 'Color is required'],
+    },
+    accessoryInterface: {
+      type: String,
+      required: [true, 'Interface is required'],
+    },
+    // user defined fields
+    userDefinedFields: {
+      type: Object,
+      required: false,
+    },
+  },
+  {
+    _id: false,
+  }
+);
+
+const desktopComputerSchema = new Schema<DesktopComputerSpecifications>(
+  {
+    cpu: {
+      type: cpuSchema,
+      required: false,
+      default: {},
+    },
+    gpu: {
+      type: gpuSchema,
+      required: false,
+      default: {},
+    },
+    motherboard: {
+      type: motherboardSchema,
+      required: false,
+      default: {},
+    },
+    ram: {
+      type: ramSchema,
+      required: false,
+      default: {},
+    },
+    storage: {
+      type: storageSchema,
+      required: false,
+      default: {},
+    },
+    psu: {
+      type: psuSchema,
+      required: false,
+      default: {},
+    },
+    case: {
+      type: caseSchema,
+      required: false,
+      default: {},
+    },
+    monitor: {
+      type: monitorSchema,
+      required: false,
+      default: {},
+    },
+    keyboard: {
+      type: keyboardSchema,
+      required: false,
+      default: {},
+    },
+    mouse: {
+      type: mouseSchema,
+      required: false,
+      default: {},
+    },
+    speaker: {
+      type: speakerSchema,
+      required: false,
+      default: {},
+    },
+  },
+  {
+    _id: false,
+  }
+);
+
+const laptopSchema = new Schema<LaptopSpecifications>(
+  {
+    cpu: {
+      type: cpuSchema,
+      required: false,
+      default: {},
+    },
+    gpu: {
+      type: gpuSchema,
+      required: false,
+      default: {},
+    },
+    ram: {
+      type: ramSchema,
+      required: false,
+      default: {},
+    },
+    storage: {
+      type: storageSchema,
+      required: false,
+      default: {},
+    },
+    display: {
+      type: monitorSchema,
+      required: false,
+      default: {},
+    },
+  },
+  {
+    _id: false,
+  }
+);
 
 const productSchema = new Schema<ProductSchema>(
   {
@@ -274,7 +1005,7 @@ const productSchema = new Schema<ProductSchema>(
       required: [true, 'Description is required'],
     },
     price: {
-      type: Number,
+      type: String,
       required: [true, 'Price is required'],
     },
     currency: {
@@ -283,7 +1014,7 @@ const productSchema = new Schema<ProductSchema>(
       index: true,
     },
     availability: {
-      type: Boolean,
+      type: String,
       required: [true, 'Availability is required'],
       index: true,
     },
@@ -292,25 +1023,40 @@ const productSchema = new Schema<ProductSchema>(
       required: [true, 'Quantity is required'],
     },
     weight: {
-      type: String,
+      type: Number,
       required: [true, 'Weight is required'],
     },
-    dimensions: {
-      type: {
-        length: {
-          type: String,
-          required: [true, 'Length is required'],
-        },
-        width: {
-          type: String,
-          required: [true, 'Width is required'],
-        },
-        height: {
-          type: String,
-          required: [true, 'Height is required'],
-        },
-      },
-      required: [true, 'Dimensions is required'],
+    weightUnit: {
+      type: String,
+      required: [true, 'Weight unit is required'],
+      index: true,
+    },
+    length: {
+      type: Number,
+      required: [true, 'Length is required'],
+    },
+    lengthUnit: {
+      type: String,
+      required: [true, 'Length unit is required'],
+      index: true,
+    },
+    width: {
+      type: Number,
+      required: [true, 'Width is required'],
+    },
+    widthUnit: {
+      type: String,
+      required: [true, 'Width unit is required'],
+      index: true,
+    },
+    height: {
+      type: Number,
+      required: [true, 'Height is required'],
+    },
+    heightUnit: {
+      type: String,
+      required: [true, 'Height unit is required'],
+      index: true,
     },
     additionalComments: {
       type: String,
@@ -321,472 +1067,111 @@ const productSchema = new Schema<ProductSchema>(
     // page 2
     specifications: {
       type: {
+        //  desktop computer
+        desktopComputer: {
+          type: desktopComputerSchema,
+          required: false,
+        },
+
+        // laptop
+        laptop: {
+          type: laptopSchema,
+          required: false,
+        },
+
+        // cpu
         cpu: {
-          type: {
-            socket: {
-              type: String,
-              required: [true, 'Socket is required'],
-            },
-            speed: {
-              type: String,
-              required: [true, 'Speed is required'],
-            },
-            cores: {
-              type: String,
-              required: [true, 'Cores is required'],
-            },
-            cache: {
-              type: String,
-              required: [true, 'Cache is required'],
-            },
-            wattage: {
-              type: String,
-              required: [true, 'Wattage is required'],
-            },
-          },
+          type: cpuSchema,
           required: false,
-          default: {},
         },
+
+        // gpu
         gpu: {
-          type: {
-            chipset: {
-              type: String,
-              required: [true, 'Chipset is required'],
-            },
-            memory: {
-              type: String,
-              required: [true, 'Memory is required'],
-            },
-            coreClock: {
-              type: String,
-              required: [true, 'Core clock is required'],
-            },
-            boostClock: {
-              type: String,
-              required: [true, 'Boost clock is required'],
-            },
-            tdp: {
-              type: String,
-              required: [true, 'TDP is required'],
-            },
-          },
+          type: gpuSchema,
           required: false,
-          default: {},
         },
+
+        // motherboard
         motherboard: {
-          type: {
-            socket: {
-              type: String,
-              required: [true, 'Socket is required'],
-            },
-            chipset: {
-              type: String,
-              required: [true, 'Chipset is required'],
-            },
-            formFactor: {
-              type: String,
-              required: [true, 'Form factor is required'],
-            },
-            memoryMax: {
-              type: String,
-              required: [true, 'Memory max is required'],
-            },
-            memorySlots: {
-              type: String,
-              required: [true, 'Memory slots is required'],
-            },
-            memoryType: {
-              type: String,
-              required: [true, 'Memory type is required'],
-            },
-            sataPorts: {
-              type: String,
-              required: [true, 'SATA ports is required'],
-            },
-            m2Slots: {
-              type: String,
-              required: [true, 'M.2 slots is required'],
-            },
-            pcie3Slots: {
-              type: String,
-              required: [true, 'PCIe 3.0 slots is required'],
-            },
-            pcie4Slots: {
-              type: String,
-              required: [true, 'PCIe 4.0 slots is required'],
-            },
-          },
+          type: motherboardSchema,
           required: false,
-          default: {},
         },
 
+        // ram
         ram: {
-          type: {
-            speed: {
-              type: String,
-              required: [true, 'Speed is required'],
-            },
-            modules: {
-              type: String,
-              required: [true, 'Modules is required'],
-            },
-            ramType: {
-              type: String,
-              required: [true, 'RAM type is required'],
-              index: true,
-            },
-            color: {
-              type: String,
-              required: [true, 'Color is required'],
-              index: true,
-            },
-            voltage: {
-              type: String,
-              required: [true, 'Voltage is required'],
-            },
-            timing: {
-              type: String,
-              required: [true, 'Timing is required'],
-            },
-          },
+          type: ramSchema,
           required: false,
-          default: {},
         },
 
+        // storage
         storage: {
-          type: {
-            storageType: {
-              type: String,
-              required: [true, 'Storage type is required'],
-              index: true,
-            },
-            capacity: {
-              type: String,
-              required: [true, 'Capacity is required'],
-            },
-            cache: {
-              type: String,
-              required: [true, 'Cache is required'],
-            },
-            formFactor: {
-              type: String,
-              required: [true, 'Form factor is required'],
-              index: true,
-            },
-            interface: {
-              type: String,
-              required: [true, 'Interface is required'],
-              index: true,
-            },
-          },
+          type: storageSchema,
           required: false,
-          default: {},
         },
 
+        // psu
         psu: {
-          type: {
-            wattage: {
-              type: String,
-              required: [true, 'Wattage is required'],
-            },
-            efficiency: {
-              type: String,
-              required: [true, 'Efficiency is required'],
-              index: true,
-            },
-            modular: {
-              type: String,
-              required: [true, 'Modular is required'],
-              index: true,
-            },
-          },
+          type: psuSchema,
           required: false,
-          default: {},
         },
 
+        // case
         case: {
-          type: {
-            caseType: {
-              type: String,
-              required: [true, 'Case type is required'],
-              index: true,
-            },
-            color: {
-              type: String,
-              required: [true, 'Color is required'],
-              index: true,
-            },
-            sidePanel: {
-              type: String,
-              required: [true, 'Side panel is required'],
-              index: true,
-            },
-          },
+          type: caseSchema,
           required: false,
-          default: {},
         },
 
+        // monitor
         monitor: {
-          type: {
-            size: {
-              type: String,
-              required: [true, 'Size is required'],
-            },
-            resolution: {
-              type: String,
-              required: [true, 'Resolution is required'],
-            },
-            refreshRate: {
-              type: String,
-              required: [true, 'Refresh rate is required'],
-            },
-            panelType: {
-              type: String,
-              required: [true, 'Panel type is required'],
-              index: true,
-            },
-            responseTime: {
-              type: String,
-              required: [true, 'Response time is required'],
-            },
-            aspectRatio: {
-              type: String,
-              required: [true, 'Aspect ratio is required'],
-            },
-          },
+          type: monitorSchema,
           required: false,
-          default: {},
         },
 
+        // keyboard
         keyboard: {
-          type: {
-            switch: {
-              type: String,
-              required: [true, 'Switch is required'],
-              index: true,
-            },
-            layout: {
-              type: String,
-              required: [true, 'Layout is required'],
-              index: true,
-            },
-            backlight: {
-              type: String,
-              required: [true, 'Backlight is required'],
-              index: true,
-            },
-            interface: {
-              type: String,
-              required: [true, 'Interface is required'],
-              index: true,
-            },
-          },
+          type: keyboardSchema,
           required: false,
-          default: {},
         },
 
+        // mouse
         mouse: {
-          type: {
-            sensor: {
-              type: String,
-              required: [true, 'Sensor is required'],
-              index: true,
-            },
-            dpi: {
-              type: String,
-              required: [true, 'DPI is required'],
-            },
-            buttons: {
-              type: String,
-              required: [true, 'Buttons is required'],
-            },
-            color: {
-              type: String,
-              required: [true, 'Color is required'],
-              index: true,
-            },
-            interface: {
-              type: String,
-              required: [true, 'Interface is required'],
-            },
-          },
+          type: mouseSchema,
           required: false,
-          default: {},
         },
 
+        // headphone
         headphone: {
-          type: {
-            type: {
-              type: String,
-              required: [true, 'Type is required'],
-              index: true,
-            },
-            driver: {
-              type: String,
-              required: [true, 'Driver is required'],
-            },
-            frequencyResponse: {
-              type: String,
-              required: [true, 'Frequency response is required'],
-            },
-            impedance: {
-              type: String,
-              required: [true, 'Impedance is required'],
-            },
-            color: {
-              type: String,
-              required: [true, 'Color is required'],
-              index: true,
-            },
-            interface: {
-              type: String,
-              required: [true, 'Interface is required'],
-              index: true,
-            },
-          },
+          type: headphoneSchema,
           required: false,
-          default: {},
         },
 
+        // speaker
         speaker: {
-          type: {
-            type: {
-              type: String,
-              required: [true, 'Type is required'],
-              index: true,
-            },
-            totalWattage: {
-              type: String,
-              required: [true, 'Total wattage is required'],
-            },
-            frequencyResponse: {
-              type: String,
-              required: [true, 'Frequency response is required'],
-            },
-            color: {
-              type: String,
-              required: [true, 'Color is required'],
-              index: true,
-            },
-            interface: {
-              type: String,
-              required: [true, 'Interface is required'],
-              index: true,
-            },
-          },
+          type: speakerSchema,
           required: false,
-          default: {},
         },
 
+        // smartphone
         smartphone: {
-          type: {
-            os: {
-              type: String,
-              required: [true, 'OS is required'],
-            },
-            chipset: {
-              type: String,
-              required: [true, 'Chipset is required'],
-            },
-            display: {
-              type: String,
-              required: [true, 'Display is required'],
-            },
-            resolution: {
-              type: String,
-              required: [true, 'Resolution is required'],
-            },
-            ram: {
-              type: String,
-              required: [true, 'RAM is required'],
-            },
-            storage: {
-              type: String,
-              required: [true, 'Storage is required'],
-            },
-            battery: {
-              type: String,
-              required: [true, 'Battery is required'],
-            },
-            camera: {
-              type: String,
-              required: [true, 'Camera is required'],
-            },
-            color: {
-              type: String,
-              required: [true, 'Color is required'],
-            },
-          },
+          type: smartphoneSchema,
           required: false,
-          default: {},
         },
 
+        // tablet
         tablet: {
-          type: {
-            os: {
-              type: String,
-              required: [true, 'OS is required'],
-            },
-            chipset: {
-              type: String,
-              required: [true, 'Chipset is required'],
-            },
-            display: {
-              type: String,
-              required: [true, 'Display is required'],
-            },
-            resolution: {
-              type: String,
-              required: [true, 'Resolution is required'],
-            },
-            ram: {
-              type: String,
-              required: [true, 'RAM is required'],
-            },
-            storage: {
-              type: String,
-              required: [true, 'Storage is required'],
-            },
-            battery: {
-              type: String,
-              required: [true, 'Battery is required'],
-            },
-            camera: {
-              type: String,
-              required: [true, 'Camera is required'],
-            },
-            color: {
-              type: String,
-              required: [true, 'Color is required'],
-            },
-          },
+          type: tabletSchema,
           required: false,
-          default: {},
         },
 
+        // accessory
         accessory: {
-          type: {
-            type: {
-              type: String,
-              required: [true, 'Type is required'],
-            },
-            color: {
-              type: String,
-              required: [true, 'Color is required'],
-              index: true,
-            },
-            interface: {
-              type: String,
-              required: [true, 'Interface is required'],
-              index: true,
-            },
-          },
+          type: accessorySchema,
           required: false,
-          default: {},
         },
       },
       required: false,
       default: {},
+      _id: false,
     },
 
     // page 3
@@ -834,8 +1219,9 @@ productSchema.index({
   // cpu
   'specifications.cpu.socket': 'text',
   'specifications.cpu.speed': 'text',
-  'specifications.cpu.cores': 'text',
-  'specifications.cpu.cache': 'text',
+  'specifications.cpu.l1Cache': 'text',
+  'specifications.cpu.l2Cache': 'text',
+  'specifications.cpu.l3Cache': 'text',
   'specifications.cpu.wattage': 'text',
   // gpu
   'specifications.gpu.chipset': 'text',
@@ -846,14 +1232,8 @@ productSchema.index({
   // motherboard
   'specifications.motherboard.socket': 'text',
   'specifications.motherboard.chipset': 'text',
-  'specifications.motherboard.formFactor': 'text',
   'specifications.motherboard.memoryMax': 'text',
-  'specifications.motherboard.memorySlots': 'text',
-  'specifications.motherboard.memoryType': 'text',
-  'specifications.motherboard.sataPorts': 'text',
-  'specifications.motherboard.m2Slots': 'text',
-  'specifications.motherboard.pcie3Slots': 'text',
-  'specifications.motherboard.pcie4Slots': 'text',
+
   // ram
   'specifications.ram.speed': 'text',
   'specifications.ram.modules': 'text',
@@ -903,6 +1283,7 @@ productSchema.index({
   // product
   brand: 'text',
   model: 'text',
+  price: 'text',
   description: 'text',
   additionalComments: 'text',
   weight: 'text',
@@ -922,18 +1303,17 @@ export type {
   ProductSchema,
   ProductDocument,
   ProductCategory,
-  ColorVariant,
   CpuSpecifications,
   GpuSpecifications,
   MotherboardSpecifications,
   RamSpecifications,
-  RamType,
+  MemoryType,
   StorageType,
   StorageFormFactor,
   StorageInterface,
   StorageSpecifications,
   PsuEfficiency,
-  PsuModular,
+  PsuModularity,
   PsuSpecifications,
   CaseType,
   CaseSidePanel,
@@ -957,6 +1337,8 @@ export type {
   TabletSpecifications,
   AccessorySpecifications,
   Specifications,
-  ProductDimensions,
+  DimensionUnit,
+  WeightUnit,
   ProductReview,
+  ProductAvailability,
 };
