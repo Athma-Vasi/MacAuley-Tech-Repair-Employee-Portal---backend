@@ -6,25 +6,11 @@ import type {
   ProductAvailability,
   ProductReview,
   WeightUnit,
-  MobileOs,
   MemoryType,
-  MotherboardFormFactor,
   StorageType,
   StorageFormFactor,
   StorageInterface,
-  PsuEfficiency,
-  PsuFormFactor,
-  PsuModularity,
-  CaseType,
-  CaseSidePanel,
   DisplayPanelType,
-  KeyboardSwitch,
-  KeyboardLayout,
-  KeyboardBacklight,
-  PeripheralsInterface,
-  MouseSensor,
-  SpeakerType,
-  SpeakerInterface,
 } from '../types';
 import type { Currency } from '../../../company/expenseClaim';
 
@@ -63,9 +49,6 @@ type LaptopSchema = {
   cpuL3Cache: number; // 12, 16, etc.
   cpuL3CacheUnit: MemoryUnit; // MB, etc.
   cpuWattage: number; // 65 W, 95 W, etc.
-  additionalCpuFields: {
-    [key: string]: string;
-  };
 
   // page 2 -> gpu
   gpuChipset: string; // NVIDIA GeForce RTX 3080,
@@ -74,9 +57,6 @@ type LaptopSchema = {
   gpuCoreClock: number; // 1440 MHz, 1770 MHz, etc.
   gpuBoostClock: number; // 1710 MHz, 2250 MHz, etc.
   gpuTdp: number; // 320 W, 350 W, etc.
-  additionalGpuFields: {
-    [key: string]: string;
-  };
 
   // page 2 -> ram
   ramDataRate: number; // 3200 MT/s, 3600 MT/s, etc.
@@ -87,9 +67,6 @@ type LaptopSchema = {
   ramColor: string; // Black, White, etc.
   ramVoltage: number; // 1.35 V, etc.
   ramTiming: string; // 16-18-18-38, etc.
-  additionalRamFields: {
-    [key: string]: string;
-  };
 
   // page 2 -> storage
   storageType: StorageType; // SSD, HDD, etc.
@@ -99,9 +76,6 @@ type LaptopSchema = {
   storageCacheUnit: MemoryUnit; // MB, etc.
   storageFormFactor: StorageFormFactor; // 2.5", M.2 2280, etc.
   storageInterface: StorageInterface; // SATA III, PCIe 3.0 x4, etc.
-  additionalStorageFields: {
-    [key: string]: string;
-  };
 
   // page 2 -> display
   displaySize: number; // 24", 27", etc.
@@ -111,7 +85,8 @@ type LaptopSchema = {
   displayPanelType: DisplayPanelType; // IPS, TN, etc.
   displayResponseTime: number; // 1 ms, 4 ms, etc.
   displayAspectRatio: string; // 16:9, 21:9, etc.
-  additionalDisplayFields: {
+
+  additionalFields: {
     [key: string]: string;
   };
 
@@ -127,7 +102,7 @@ type LaptopDocument = LaptopSchema & {
   __v: number;
 };
 
-const laptopSchema = new Schema<LaptopDocument>(
+const laptopSchema = new Schema<LaptopSchema>(
   {
     userId: {
       type: Schema.Types.ObjectId,
@@ -259,12 +234,6 @@ const laptopSchema = new Schema<LaptopDocument>(
       type: Number,
       required: [true, 'Wattage is required'],
     },
-    // user defined fields
-    additionalCpuFields: {
-      type: Object,
-      required: false,
-      default: {},
-    },
 
     // page 2 -> gpu
     gpuChipset: {
@@ -291,12 +260,6 @@ const laptopSchema = new Schema<LaptopDocument>(
     gpuTdp: {
       type: Number,
       required: [true, 'TDP is required'],
-    },
-    // user defined fields
-    additionalGpuFields: {
-      type: Object,
-      required: false,
-      default: {},
     },
 
     // page 2 -> ram
@@ -335,12 +298,6 @@ const laptopSchema = new Schema<LaptopDocument>(
       type: String,
       required: [true, 'Timing is required'],
     },
-    // user defined fields
-    additionalRamFields: {
-      type: Object,
-      required: false,
-      default: {},
-    },
 
     // page 2 -> storage
     storageType: {
@@ -374,12 +331,6 @@ const laptopSchema = new Schema<LaptopDocument>(
       required: [true, 'Interface is required'],
       index: true,
     },
-    // user defined fields
-    additionalStorageFields: {
-      type: Object,
-      required: false,
-      default: {},
-    },
 
     // page 2 -> display
     displaySize: {
@@ -411,8 +362,9 @@ const laptopSchema = new Schema<LaptopDocument>(
       type: String,
       required: [true, 'Aspect ratio is required'],
     },
+
     // user defined fields
-    additionalDisplayFields: {
+    additionalFields: {
       type: Object,
       required: false,
       default: {},

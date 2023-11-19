@@ -63,9 +63,6 @@ type DesktopComputerSchema = {
   cpuL3Cache: number; // 12, 16, etc.
   cpuL3CacheUnit: MemoryUnit; // MB, etc.
   cpuWattage: number; // 65 W, 95 W, etc.
-  additionalCpuFields: {
-    [key: string]: string;
-  };
 
   // page 2 -> gpu
   gpuChipset: string; // NVIDIA GeForce RTX 3080,
@@ -74,9 +71,6 @@ type DesktopComputerSchema = {
   gpuCoreClock: number; // 1440 MHz, 1770 MHz, etc.
   gpuBoostClock: number; // 1710 MHz, 2250 MHz, etc.
   gpuTdp: number; // 320 W, 350 W, etc.
-  additionalGpuFields: {
-    [key: string]: string;
-  };
 
   // page 2 -> motherboard
   motherboardSocket: string; // LGA 1200, AM4, etc.
@@ -91,9 +85,6 @@ type DesktopComputerSchema = {
   motherboardPcie3Slots: number; // 2, 3, etc.
   motherboardPcie4Slots: number; // 1, 2, etc.
   motherboardPcie5Slots: number; // 0, 1, etc.
-  additionalMotherboardFields: {
-    [key: string]: string;
-  };
 
   // page 2 -> ram
   ramDataRate: number; // 3200 MT/s, 3600 MT/s, etc.
@@ -104,9 +95,6 @@ type DesktopComputerSchema = {
   ramColor: string; // Black, White, etc.
   ramVoltage: number; // 1.35 V, etc.
   ramTiming: string; // 16-18-18-38, etc.
-  additionalRamFields: {
-    [key: string]: string;
-  };
 
   // page 2 -> storage
   storageType: StorageType; // SSD, HDD, etc.
@@ -116,26 +104,17 @@ type DesktopComputerSchema = {
   storageCacheUnit: MemoryUnit; // MB, etc.
   storageFormFactor: StorageFormFactor; // 2.5", M.2 2280, etc.
   storageInterface: StorageInterface; // SATA III, PCIe 3.0 x4, etc.
-  additionalStorageFields: {
-    [key: string]: string;
-  };
 
   // page 2 -> psu
   psuWattage: number; // 650 W, 750 W, etc.
   psuEfficiency: PsuEfficiency; // 80+ Gold, 80+ Platinum, etc.
   psuFormFactor: PsuFormFactor; // ATX, SFX, etc.
   psuModularity: PsuModularity; // Full, Semi, etc.
-  additionalPsuFields: {
-    [key: string]: string;
-  };
 
   // page 2 -> case
   caseType: CaseType; // Mid Tower, Full Tower, etc.
   caseColor: string; // Black, White, etc.
   caseSidePanel: CaseSidePanel; // windowed or not
-  additionalCaseFields: {
-    [key: string]: string;
-  };
 
   // page 2 -> display
   displaySize: number; // 24", 27", etc.
@@ -145,18 +124,12 @@ type DesktopComputerSchema = {
   displayPanelType: DisplayPanelType; // IPS, TN, etc.
   displayResponseTime: number; // 1 ms, 4 ms, etc.
   displayAspectRatio: string; // 16:9, 21:9, etc.
-  additionalDisplayFields: {
-    [key: string]: string;
-  };
 
   // page 2 -> keyboard
   keyboardSwitch: KeyboardSwitch; // Cherry MX Red, Cherry MX Blue, etc.
   keyboardLayout: KeyboardLayout; // ANSI, ISO, etc.
   keyboardBacklight: KeyboardBacklight; // RGB, etc.
   keyboardInterface: PeripheralsInterface; // USB, Bluetooth, etc.
-  additionalKeyboardFields: {
-    [key: string]: string;
-  };
 
   // page 2 -> mouse
   mouseSensor: MouseSensor; // Optical, Laser, etc.
@@ -164,9 +137,6 @@ type DesktopComputerSchema = {
   mouseButtons: number; // 6, 8, etc.
   mouseColor: string; // Black, White, etc.
   mouseInterface: PeripheralsInterface; // USB, Bluetooth, etc.
-  additionalMouseFields: {
-    [key: string]: string;
-  };
 
   // page 2 -> speaker
   speakerType: SpeakerType; // 2.0, 2.1, etc.
@@ -174,7 +144,8 @@ type DesktopComputerSchema = {
   speakerFrequencyResponse: string; // 20 Hz - 20 kHz, etc.
   speakerColor: string; // Black, White, etc.
   speakerInterface: SpeakerInterface; // USB, Bluetooth, etc.
-  additionalSpeakerFields: {
+
+  additionalFields: {
     [key: string]: string;
   };
 
@@ -190,7 +161,7 @@ type DesktopComputerDocument = DesktopComputerSchema & {
   __v: number;
 };
 
-const desktopComputerSchema = new Schema<DesktopComputerDocument>(
+const desktopComputerSchema = new Schema<DesktopComputerSchema>(
   {
     userId: {
       type: Schema.Types.ObjectId,
@@ -322,12 +293,6 @@ const desktopComputerSchema = new Schema<DesktopComputerDocument>(
       type: Number,
       required: [true, 'Wattage is required'],
     },
-    // user defined fields
-    additionalCpuFields: {
-      type: Object,
-      required: false,
-      default: {},
-    },
 
     // page 2 -> gpu
     gpuChipset: {
@@ -354,12 +319,6 @@ const desktopComputerSchema = new Schema<DesktopComputerDocument>(
     gpuTdp: {
       type: Number,
       required: [true, 'TDP is required'],
-    },
-    // user defined fields
-    additionalGpuFields: {
-      type: Object,
-      required: false,
-      default: {},
     },
 
     // page 2 -> motherboard
@@ -414,12 +373,6 @@ const desktopComputerSchema = new Schema<DesktopComputerDocument>(
       type: Number,
       required: [true, 'PCIe 5.0 slots is required'],
     },
-    // user defined fields
-    additionalMotherboardFields: {
-      type: Object,
-      required: false,
-      default: {},
-    },
 
     // page 2 -> ram
     ramDataRate: {
@@ -457,12 +410,6 @@ const desktopComputerSchema = new Schema<DesktopComputerDocument>(
       type: String,
       required: [true, 'Timing is required'],
     },
-    // user defined fields
-    additionalRamFields: {
-      type: Object,
-      required: false,
-      default: {},
-    },
 
     // page 2 -> storage
     storageType: {
@@ -496,12 +443,6 @@ const desktopComputerSchema = new Schema<DesktopComputerDocument>(
       required: [true, 'Interface is required'],
       index: true,
     },
-    // user defined fields
-    additionalStorageFields: {
-      type: Object,
-      required: false,
-      default: {},
-    },
 
     // page 2 -> psu
     psuWattage: {
@@ -523,12 +464,6 @@ const desktopComputerSchema = new Schema<DesktopComputerDocument>(
       required: [true, 'Modular is required'],
       index: true,
     },
-    // user defined fields
-    additionalPsuFields: {
-      type: Object,
-      required: false,
-      default: {},
-    },
 
     // page 2 -> case
     caseType: {
@@ -544,12 +479,6 @@ const desktopComputerSchema = new Schema<DesktopComputerDocument>(
       type: String,
       required: [true, 'Side panel is required'],
       index: true,
-    },
-    // user defined fields
-    additionalCaseFields: {
-      type: Object,
-      required: false,
-      default: {},
     },
 
     // page 2 -> display
@@ -582,12 +511,6 @@ const desktopComputerSchema = new Schema<DesktopComputerDocument>(
       type: String,
       required: [true, 'Aspect ratio is required'],
     },
-    // user defined fields
-    additionalDisplayFields: {
-      type: Object,
-      required: false,
-      default: {},
-    },
 
     // page 2 -> keyboard
     keyboardSwitch: {
@@ -609,12 +532,6 @@ const desktopComputerSchema = new Schema<DesktopComputerDocument>(
       type: String,
       required: [true, 'Interface is required'],
       index: true,
-    },
-    // user defined fields
-    additionalKeyboardFields: {
-      type: Object,
-      required: false,
-      default: {},
     },
 
     // page 2 -> mouse
@@ -638,12 +555,6 @@ const desktopComputerSchema = new Schema<DesktopComputerDocument>(
     mouseInterface: {
       type: String,
       required: [true, 'Interface is required'],
-    },
-    // user defined fields
-    additionalMouseFields: {
-      type: Object,
-      required: false,
-      default: {},
     },
 
     // page 2 -> speaker
@@ -669,8 +580,9 @@ const desktopComputerSchema = new Schema<DesktopComputerDocument>(
       required: [true, 'Interface is required'],
       index: true,
     },
+
     // user defined fields
-    additionalSpeakerFields: {
+    additionalFields: {
       type: Object,
       required: false,
       default: {},

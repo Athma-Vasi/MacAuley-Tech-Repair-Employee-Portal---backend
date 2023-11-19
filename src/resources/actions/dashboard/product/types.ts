@@ -96,6 +96,21 @@ type MouseSensor = 'Optical' | 'Laser' | 'Infrared' | 'Other';
 type SpeakerType = '2.0' | '2.1' | '3.1' | '4.1' | '5.1' | '7.1' | 'Other';
 type SpeakerInterface = 'USB' | 'Bluetooth' | '3.5 mm' | '2.5 mm' | 'RCA' | 'TRS' | 'Other';
 
+type WebcamResolution = '720p' | '1080p' | '1440p' | '4K' | 'Other';
+type WebcamFrameRate = '30 fps' | '60 fps' | '120 fps';
+type WebcamInterface = 'USB' | 'Bluetooth' | 'Other';
+
+type MicrophoneType = 'Condenser' | 'Dynamic' | 'Ribbon' | 'USB' | 'Wireless' | 'Other';
+type MicrophonePolarPattern =
+  | 'Cardioid'
+  | 'Supercardioid'
+  | 'Hypercardioid'
+  | 'Omnidirectional'
+  | 'Bidirectional'
+  | 'Other';
+
+type MicrophoneInterface = 'XLR' | 'USB' | '3.5mm' | 'Wireless' | 'Other';
+
 export type {
   CaseSidePanel,
   CaseType,
@@ -107,6 +122,9 @@ export type {
   MemoryUnit,
   MobileOs,
   DisplayPanelType,
+  MicrophoneInterface,
+  MicrophonePolarPattern,
+  MicrophoneType,
   MotherboardFormFactor,
   MouseSensor,
   PeripheralsInterface,
@@ -121,5 +139,8 @@ export type {
   StorageFormFactor,
   StorageInterface,
   StorageType,
+  WebcamFrameRate,
+  WebcamInterface,
+  WebcamResolution,
   WeightUnit,
 };
