@@ -128,17 +128,6 @@ async function deleteAllFileUploadsService(): Promise<DeleteResult> {
   }
 }
 
-async function deleteAllFileUploadsByAssociatedResourceService(
-  associatedResource: AssociatedResourceKind
-): Promise<DeleteResult> {
-  try {
-    const deleteResult = await FileUploadModel.deleteMany({ associatedResource }).lean().exec();
-    return deleteResult;
-  } catch (error: any) {
-    throw new Error(error, { cause: 'deleteAllFileUploadsByAssociatedResourceService' });
-  }
-}
-
 export {
   createNewFileUploadService,
   getFileUploadByIdService,
@@ -148,5 +137,4 @@ export {
   getQueriedFileUploadsService,
   getQueriedTotalFileUploadsService,
   getQueriedFileUploadsByUserService,
-  deleteAllFileUploadsByAssociatedResourceService,
 };
