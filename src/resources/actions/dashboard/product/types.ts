@@ -1,4 +1,5 @@
 import { Types } from 'mongoose';
+import { FileUploadDocument } from '../../../fileUpload';
 
 type DimensionUnit = 'mm' | 'cm' | 'm' | 'in' | 'ft';
 type WeightUnit = 'g' | 'kg' | 'lb';
@@ -110,6 +111,10 @@ type MicrophonePolarPattern =
   | 'Other';
 
 type MicrophoneInterface = 'XLR' | 'USB' | '3.5mm' | 'Wireless' | 'Other';
+
+type ProductServerResponse<Doc> = Doc & {
+  fileUploads: FileUploadDocument[];
+};
 
 export type {
   CaseSidePanel,

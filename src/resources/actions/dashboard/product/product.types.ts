@@ -128,7 +128,7 @@ interface UpdateProductByIdRequest extends RequestAfterJWTVerification {
   params: { productId: string };
 }
 
-type ProductServerResponse = ProductDocument & {
+type ProductServerResponse<Doc> = Doc & {
   fileUploads: FileUploadDocument[];
 };
 
