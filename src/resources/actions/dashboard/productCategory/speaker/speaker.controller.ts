@@ -35,7 +35,7 @@ import {
   deleteFileUploadByIdService,
   getFileUploadByIdService,
 } from '../../../../fileUpload';
-import { ProductServerResponse } from '../types';
+import { ProductServerResponse } from '../product.types';
 
 // @desc   Create new speaker
 // @route  POST /api/v1/actions/dashboard/product-category/speaker

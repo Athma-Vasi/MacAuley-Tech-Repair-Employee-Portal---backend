@@ -25,7 +25,7 @@ import type {
   MouseSensor,
   SpeakerType,
   SpeakerInterface,
-} from '../types';
+} from '../product.types';
 import type { Currency } from '../../../company/expenseClaim';
 
 type DesktopComputerSchema = {

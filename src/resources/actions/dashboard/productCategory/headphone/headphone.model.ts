@@ -1,6 +1,11 @@
 import { Schema, Types, model } from 'mongoose';
 
-import type { DimensionUnit, ProductAvailability, ProductReview, WeightUnit } from '../types';
+import type {
+  DimensionUnit,
+  ProductAvailability,
+  ProductReview,
+  WeightUnit,
+} from '../product.types';
 import type { Currency } from '../../../company/expenseClaim';
 
 type HeadphoneType = 'Over-ear' | 'On-ear' | 'In-ear' | 'Other';

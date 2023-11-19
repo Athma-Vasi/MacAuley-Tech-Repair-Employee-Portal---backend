@@ -9,7 +9,7 @@ import type {
   KeyboardLayout,
   KeyboardSwitch,
   KeyboardBacklight,
-} from '../types';
+} from '../product.types';
 import type { Currency } from '../../../company/expenseClaim';
 
 type KeyboardSchema = {

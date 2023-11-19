@@ -7,7 +7,7 @@ import type {
   WeightUnit,
   PeripheralsInterface,
   MouseSensor,
-} from '../types';
+} from '../product.types';
 import type { Currency } from '../../../company/expenseClaim';
 
 type MouseSchema = {

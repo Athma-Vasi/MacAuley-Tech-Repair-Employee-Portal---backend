@@ -8,7 +8,7 @@ import type {
   ProductAvailability,
   ProductReview,
   WeightUnit,
-} from '../types';
+} from '../product.types';
 import type { Currency } from '../../../company/expenseClaim';
 
 type MicrophoneSchema = {

@@ -7,7 +7,7 @@ import type {
   ProductReview,
   WeightUnit,
   MobileOs,
-} from '../types';
+} from '../product.types';
 import type { Currency } from '../../../company/expenseClaim';
 
 type TabletSchema = {

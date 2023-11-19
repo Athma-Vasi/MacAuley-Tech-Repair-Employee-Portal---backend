@@ -9,7 +9,7 @@ import type {
   StorageInterface,
   StorageType,
   WeightUnit,
-} from '../types';
+} from '../product.types';
 import type { Currency } from '../../../company/expenseClaim';
 
 type StorageSchema = {

@@ -11,7 +11,7 @@ import type {
   StorageFormFactor,
   StorageInterface,
   DisplayPanelType,
-} from '../types';
+} from '../product.types';
 import type { Currency } from '../../../company/expenseClaim';
 
 type LaptopSchema = {
