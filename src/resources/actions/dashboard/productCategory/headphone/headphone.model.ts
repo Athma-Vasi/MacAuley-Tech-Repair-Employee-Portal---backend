@@ -2,14 +2,13 @@ import { Schema, Types, model } from 'mongoose';
 
 import type {
   DimensionUnit,
+  HeadphoneInterface,
+  HeadphoneType,
   ProductAvailability,
   ProductReview,
   WeightUnit,
 } from '../product.types';
 import type { Currency } from '../../../company/expenseClaim';
-
-type HeadphoneType = 'Over-ear' | 'On-ear' | 'In-ear' | 'Other';
-type HeadphoneInterface = 'USB' | 'Bluetooth' | '3.5 mm' | '2.5 mm' | 'MMCX' | 'Other';
 
 type HeadphoneSchema = {
   userId: Types.ObjectId;
@@ -19,7 +18,7 @@ type HeadphoneSchema = {
   brand: string;
   model: string;
   description: string;
-  price: Number;
+  price: number;
   currency: Currency;
   availability: ProductAvailability;
   quantity: number;

@@ -31,7 +31,6 @@ import {
 } from './storage.service';
 import {
   FileUploadDocument,
-  deleteAllFileUploadsByAssociatedResourceService,
   deleteFileUploadByIdService,
   getFileUploadByIdService,
 } from '../../../../fileUpload';
@@ -47,18 +46,18 @@ const createNewStorageHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      storageSchema,
+      storageFields,
     } = request.body;
 
-    const newStorageObject: StorageSchema = {
+    const storageSchema: StorageSchema = {
       userId,
       username,
-      ...storageSchema,
+      ...storageFields,
     };
 
-    const newStorage = await createNewStorageService(newStorageObject);
+    const storageDocument: StorageDocument = await createNewStorageService(storageSchema);
 
-    if (!newStorage) {
+    if (!storageDocument) {
       response.status(400).json({
         message: 'Could not create new storage',
         resourceData: [],
@@ -67,8 +66,8 @@ const createNewStorageHandler = expressAsyncHandler(
     }
 
     response.status(201).json({
-      message: `Successfully created new ${newStorage.model} storage`,
-      resourceData: [newStorage],
+      message: `Successfully created new ${storageDocument.model} storage`,
+      resourceData: [storageDocument],
     });
   }
 );

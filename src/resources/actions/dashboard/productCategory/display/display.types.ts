@@ -3,8 +3,7 @@ import type { RequestAfterJWTVerification } from '../../../../auth';
 import { UserRoles } from '../../../../user';
 import { GetQueriedResourceRequest } from '../../../../../types';
 
-import { FileUploadDocument } from '../../../../fileUpload';
-import { DisplayDocument, DisplaySchema } from './display.model';
+import { DisplaySchema } from './display.model';
 
 interface CreateNewDisplayRequest extends RequestAfterJWTVerification {
   body: {
@@ -14,7 +13,7 @@ interface CreateNewDisplayRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    displaySchema: Omit<DisplaySchema, 'userId' | 'username'>;
+    displayFields: Omit<DisplaySchema, 'userId' | 'username'>;
   };
 }
 

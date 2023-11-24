@@ -3,8 +3,7 @@ import type { RequestAfterJWTVerification } from '../../../../auth';
 import { UserRoles } from '../../../../user';
 import { GetQueriedResourceRequest } from '../../../../../types';
 
-import { FileUploadDocument } from '../../../../fileUpload';
-import { SmartphoneDocument, SmartphoneSchema } from './smartphone.model';
+import { SmartphoneSchema } from './smartphone.model';
 
 interface CreateNewSmartphoneRequest extends RequestAfterJWTVerification {
   body: {
@@ -14,7 +13,7 @@ interface CreateNewSmartphoneRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    smartphoneSchema: Omit<SmartphoneSchema, 'userId' | 'username'>;
+    smartphoneFields: Omit<SmartphoneSchema, 'userId' | 'username'>;
   };
 }
 

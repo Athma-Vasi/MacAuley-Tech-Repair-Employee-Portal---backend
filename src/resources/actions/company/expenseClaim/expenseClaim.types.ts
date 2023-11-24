@@ -18,7 +18,7 @@ interface CreateNewExpenseClaimRequest extends RequestAfterJWTVerification {
     expenseClaim: {
       uploadedFilesIds: Types.ObjectId[];
       expenseClaimKind: ExpenseClaimKind;
-      expenseClaimAmount: string;
+      expenseClaimAmount: number;
       expenseClaimCurrency: Currency;
       expenseClaimDate: NativeDate;
       expenseClaimDescription: string;
@@ -42,7 +42,7 @@ interface CreateNewExpenseClaimBulkRequest extends RequestAfterJWTVerification {
       username: string;
       uploadedFilesIds: Types.ObjectId[];
       expenseClaimKind: ExpenseClaimKind;
-      expenseClaimAmount: string;
+      expenseClaimAmount: number;
       expenseClaimCurrency: Currency;
       expenseClaimDate: NativeDate;
       expenseClaimDescription: string;

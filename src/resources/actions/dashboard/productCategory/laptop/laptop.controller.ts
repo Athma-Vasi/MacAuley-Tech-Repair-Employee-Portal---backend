@@ -31,7 +31,6 @@ import {
 } from './laptop.service';
 import {
   FileUploadDocument,
-  deleteAllFileUploadsByAssociatedResourceService,
   deleteFileUploadByIdService,
   getFileUploadByIdService,
 } from '../../../../fileUpload';
@@ -47,18 +46,18 @@ const createNewLaptopHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      laptopSchema,
+      laptopFields,
     } = request.body;
 
-    const newLaptopObject: LaptopSchema = {
+    const laptopSchema: LaptopSchema = {
       userId,
       username,
-      ...laptopSchema,
+      ...laptopFields,
     };
 
-    const newLaptop = await createNewLaptopService(newLaptopObject);
+    const laptopDocument: LaptopDocument = await createNewLaptopService(laptopSchema);
 
-    if (!newLaptop) {
+    if (!laptopDocument) {
       response.status(400).json({
         message: 'Could not create new laptop',
         resourceData: [],
@@ -67,8 +66,8 @@ const createNewLaptopHandler = expressAsyncHandler(
     }
 
     response.status(201).json({
-      message: `Successfully created new ${newLaptop.model} laptop`,
-      resourceData: [newLaptop],
+      message: `Successfully created new ${laptopDocument.model} laptop`,
+      resourceData: [laptopDocument],
     });
   }
 );

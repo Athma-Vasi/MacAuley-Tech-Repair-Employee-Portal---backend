@@ -31,7 +31,6 @@ import {
 } from './speaker.service';
 import {
   FileUploadDocument,
-  deleteAllFileUploadsByAssociatedResourceService,
   deleteFileUploadByIdService,
   getFileUploadByIdService,
 } from '../../../../fileUpload';
@@ -47,18 +46,18 @@ const createNewSpeakerHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      speakerSchema,
+      speakerFields,
     } = request.body;
 
-    const newSpeakerObject: SpeakerSchema = {
+    const speakerSchema: SpeakerSchema = {
       userId,
       username,
-      ...speakerSchema,
+      ...speakerFields,
     };
 
-    const newSpeaker = await createNewSpeakerService(newSpeakerObject);
+    const speakerDocument: SpeakerDocument = await createNewSpeakerService(speakerSchema);
 
-    if (!newSpeaker) {
+    if (!speakerDocument) {
       response.status(400).json({
         message: 'Could not create new speaker',
         resourceData: [],
@@ -67,8 +66,8 @@ const createNewSpeakerHandler = expressAsyncHandler(
     }
 
     response.status(201).json({
-      message: `Successfully created new ${newSpeaker.model} speaker`,
-      resourceData: [newSpeaker],
+      message: `Successfully created new ${speakerDocument.model} speaker`,
+      resourceData: [speakerDocument],
     });
   }
 );

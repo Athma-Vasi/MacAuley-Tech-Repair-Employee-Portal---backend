@@ -31,7 +31,6 @@ import {
 } from './keyboard.service';
 import {
   FileUploadDocument,
-  deleteAllFileUploadsByAssociatedResourceService,
   deleteFileUploadByIdService,
   getFileUploadByIdService,
 } from '../../../../fileUpload';
@@ -47,18 +46,18 @@ const createNewKeyboardHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      keyboardSchema,
+      keyboardFields,
     } = request.body;
 
-    const newKeyboardObject: KeyboardSchema = {
+    const keyboardSchema: KeyboardSchema = {
       userId,
       username,
-      ...keyboardSchema,
+      ...keyboardFields,
     };
 
-    const newKeyboard = await createNewKeyboardService(newKeyboardObject);
+    const keyboardDocument: KeyboardDocument = await createNewKeyboardService(keyboardSchema);
 
-    if (!newKeyboard) {
+    if (!keyboardDocument) {
       response.status(400).json({
         message: 'Could not create new keyboard',
         resourceData: [],
@@ -67,8 +66,8 @@ const createNewKeyboardHandler = expressAsyncHandler(
     }
 
     response.status(201).json({
-      message: `Successfully created new ${newKeyboard.model} keyboard`,
-      resourceData: [newKeyboard],
+      message: `Successfully created new ${keyboardDocument.model} keyboard`,
+      resourceData: [keyboardDocument],
     });
   }
 );

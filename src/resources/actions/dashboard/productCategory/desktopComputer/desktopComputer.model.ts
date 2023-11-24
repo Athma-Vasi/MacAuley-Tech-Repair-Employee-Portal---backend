@@ -36,7 +36,7 @@ type DesktopComputerSchema = {
   brand: string;
   model: string;
   description: string;
-  price: Number;
+  price: number;
   currency: Currency;
   availability: ProductAvailability;
   quantity: number;
@@ -52,7 +52,12 @@ type DesktopComputerSchema = {
 
   // page 2
 
-  // page 2 -> cpu
+  // case
+  caseType: CaseType; // Mid Tower, Full Tower, etc.
+  caseColor: string; // Black, White, etc.
+  caseSidePanel: CaseSidePanel; // windowed or not
+
+  // cpu
   cpuSocket: string; // LGA 1200, AM4, etc.
   cpuFrequency: number; // 3.6 GHz, 4.2 GHz, etc.
   cpuCores: number; // 6 cores, 8 cores, etc.
@@ -64,7 +69,16 @@ type DesktopComputerSchema = {
   cpuL3CacheUnit: MemoryUnit; // MB, etc.
   cpuWattage: number; // 65 W, 95 W, etc.
 
-  // page 2 -> gpu
+  // display
+  displaySize: number; // 24", 27", etc.
+  displayHorizontalResolution: number;
+  displayVerticalResolution: number;
+  displayRefreshRate: number; // 144 Hz, 165 Hz, etc.
+  displayPanelType: DisplayPanelType; // IPS, TN, etc.
+  displayResponseTime: number; // 1 ms, 4 ms, etc.
+  displayAspectRatio: string; // 16:9, 21:9, etc.
+
+  // gpu
   gpuChipset: string; // NVIDIA GeForce RTX 3080,
   gpuMemory: number; // 10 GB, 16 GB, etc.
   gpuMemoryUnit: MemoryUnit; // GB, etc.
@@ -72,7 +86,13 @@ type DesktopComputerSchema = {
   gpuBoostClock: number; // 1710 MHz, 2250 MHz, etc.
   gpuTdp: number; // 320 W, 350 W, etc.
 
-  // page 2 -> motherboard
+  // keyboard
+  keyboardSwitch: KeyboardSwitch; // Cherry MX Red, Cherry MX Blue, etc.
+  keyboardLayout: KeyboardLayout; // ANSI, ISO, etc.
+  keyboardBacklight: KeyboardBacklight; // RGB, etc.
+  keyboardInterface: PeripheralsInterface; // USB, Bluetooth, etc.
+
+  // motherboard
   motherboardSocket: string; // LGA 1200, AM4, etc.
   motherboardChipset: string; // Intel Z490, AMD B550, etc.
   motherboardFormFactor: MotherboardFormFactor; // ATX, Micro ATX, etc.
@@ -86,7 +106,20 @@ type DesktopComputerSchema = {
   motherboardPcie4Slots: number; // 1, 2, etc.
   motherboardPcie5Slots: number; // 0, 1, etc.
 
-  // page 2 -> ram
+  // mouse
+  mouseSensor: MouseSensor; // Optical, Laser, etc.
+  mouseDpi: number; // 800, 1600, etc.
+  mouseButtons: number; // 6, 8, etc.
+  mouseColor: string; // Black, White, etc.
+  mouseInterface: PeripheralsInterface; // USB, Bluetooth, etc.
+
+  // psu
+  psuWattage: number; // 650 W, 750 W, etc.
+  psuEfficiency: PsuEfficiency; // 80+ Gold, 80+ Platinum, etc.
+  psuFormFactor: PsuFormFactor; // ATX, SFX, etc.
+  psuModularity: PsuModularity; // Full, Semi, etc.
+
+  // ram
   ramDataRate: number; // 3200 MT/s, 3600 MT/s, etc.
   ramModulesQuantity: number;
   ramModulesCapacity: number;
@@ -96,7 +129,14 @@ type DesktopComputerSchema = {
   ramVoltage: number; // 1.35 V, etc.
   ramTiming: string; // 16-18-18-38, etc.
 
-  // page 2 -> storage
+  // speaker
+  speakerType: SpeakerType; // 2.0, 2.1, etc.
+  speakerTotalWattage: number; // 10 W, 20 W, etc.
+  speakerFrequencyResponse: string; // 20 Hz - 20 kHz, etc.
+  speakerColor: string; // Black, White, etc.
+  speakerInterface: SpeakerInterface; // USB, Bluetooth, etc.
+
+  // storage
   storageType: StorageType; // SSD, HDD, etc.
   storageCapacity: number; // 1, 2, etc.
   storageCapacityUnit: MemoryUnit; // TB, etc.
@@ -105,46 +145,7 @@ type DesktopComputerSchema = {
   storageFormFactor: StorageFormFactor; // 2.5", M.2 2280, etc.
   storageInterface: StorageInterface; // SATA III, PCIe 3.0 x4, etc.
 
-  // page 2 -> psu
-  psuWattage: number; // 650 W, 750 W, etc.
-  psuEfficiency: PsuEfficiency; // 80+ Gold, 80+ Platinum, etc.
-  psuFormFactor: PsuFormFactor; // ATX, SFX, etc.
-  psuModularity: PsuModularity; // Full, Semi, etc.
-
-  // page 2 -> case
-  caseType: CaseType; // Mid Tower, Full Tower, etc.
-  caseColor: string; // Black, White, etc.
-  caseSidePanel: CaseSidePanel; // windowed or not
-
-  // page 2 -> display
-  displaySize: number; // 24", 27", etc.
-  displayHorizontalResolution: number;
-  displayVerticalResolution: number;
-  displayRefreshRate: number; // 144 Hz, 165 Hz, etc.
-  displayPanelType: DisplayPanelType; // IPS, TN, etc.
-  displayResponseTime: number; // 1 ms, 4 ms, etc.
-  displayAspectRatio: string; // 16:9, 21:9, etc.
-
-  // page 2 -> keyboard
-  keyboardSwitch: KeyboardSwitch; // Cherry MX Red, Cherry MX Blue, etc.
-  keyboardLayout: KeyboardLayout; // ANSI, ISO, etc.
-  keyboardBacklight: KeyboardBacklight; // RGB, etc.
-  keyboardInterface: PeripheralsInterface; // USB, Bluetooth, etc.
-
-  // page 2 -> mouse
-  mouseSensor: MouseSensor; // Optical, Laser, etc.
-  mouseDpi: number; // 800, 1600, etc.
-  mouseButtons: number; // 6, 8, etc.
-  mouseColor: string; // Black, White, etc.
-  mouseInterface: PeripheralsInterface; // USB, Bluetooth, etc.
-
-  // page 2 -> speaker
-  speakerType: SpeakerType; // 2.0, 2.1, etc.
-  speakerTotalWattage: number; // 10 W, 20 W, etc.
-  speakerFrequencyResponse: string; // 20 Hz - 20 kHz, etc.
-  speakerColor: string; // Black, White, etc.
-  speakerInterface: SpeakerInterface; // USB, Bluetooth, etc.
-
+  // accumulated additional fields
   additionalFields: {
     [key: string]: string;
   };
@@ -249,7 +250,23 @@ const desktopComputerSchema = new Schema<DesktopComputerSchema>(
 
     // page 2
 
-    // page 2 -> cpu
+    // case
+    caseType: {
+      type: String,
+      required: [true, 'Case type is required'],
+      index: true,
+    },
+    caseColor: {
+      type: String,
+      required: [true, 'Color is required'],
+    },
+    caseSidePanel: {
+      type: String,
+      required: [true, 'Side panel is required'],
+      index: true,
+    },
+
+    // cpu
     cpuSocket: {
       type: String,
       required: [true, 'Socket is required'],
@@ -294,7 +311,38 @@ const desktopComputerSchema = new Schema<DesktopComputerSchema>(
       required: [true, 'Wattage is required'],
     },
 
-    // page 2 -> gpu
+    // display
+    displaySize: {
+      type: Number,
+      required: [true, 'Size is required'],
+    },
+    displayHorizontalResolution: {
+      type: Number,
+      required: [true, 'Horizontal resolution is required'],
+    },
+    displayVerticalResolution: {
+      type: Number,
+      required: [true, 'Vertical resolution is required'],
+    },
+    displayRefreshRate: {
+      type: Number,
+      required: [true, 'Refresh rate is required'],
+    },
+    displayPanelType: {
+      type: String,
+      required: [true, 'Panel type is required'],
+      index: true,
+    },
+    displayResponseTime: {
+      type: Number,
+      required: [true, 'Response time is required'],
+    },
+    displayAspectRatio: {
+      type: String,
+      required: [true, 'Aspect ratio is required'],
+    },
+
+    // gpu
     gpuChipset: {
       type: String,
       required: [true, 'Chipset is required'],
@@ -321,7 +369,29 @@ const desktopComputerSchema = new Schema<DesktopComputerSchema>(
       required: [true, 'TDP is required'],
     },
 
-    // page 2 -> motherboard
+    // keyboard
+    keyboardSwitch: {
+      type: String,
+      required: [true, 'Switch is required'],
+      index: true,
+    },
+    keyboardLayout: {
+      type: String,
+      required: [true, 'Layout is required'],
+      index: true,
+    },
+    keyboardBacklight: {
+      type: String,
+      required: [true, 'Backlight is required'],
+      index: true,
+    },
+    keyboardInterface: {
+      type: String,
+      required: [true, 'Interface is required'],
+      index: true,
+    },
+
+    // motherboard
     motherboardSocket: {
       type: String,
       required: [true, 'Socket is required'],
@@ -374,7 +444,51 @@ const desktopComputerSchema = new Schema<DesktopComputerSchema>(
       required: [true, 'PCIe 5.0 slots is required'],
     },
 
-    // page 2 -> ram
+    // mouse
+    mouseSensor: {
+      type: String,
+      required: [true, 'Sensor is required'],
+      index: true,
+    },
+    mouseDpi: {
+      type: Number,
+      required: [true, 'DPI is required'],
+    },
+    mouseButtons: {
+      type: Number,
+      required: [true, 'Buttons is required'],
+    },
+    mouseColor: {
+      type: String,
+      required: [true, 'Color is required'],
+    },
+    mouseInterface: {
+      type: String,
+      required: [true, 'Interface is required'],
+    },
+
+    // psu
+    psuWattage: {
+      type: Number,
+      required: [true, 'Wattage is required'],
+    },
+    psuEfficiency: {
+      type: String,
+      required: [true, 'Efficiency is required'],
+      index: true,
+    },
+    psuFormFactor: {
+      type: String,
+      required: [true, 'Form factor is required'],
+      index: true,
+    },
+    psuModularity: {
+      type: String,
+      required: [true, 'Modular is required'],
+      index: true,
+    },
+
+    // ram
     ramDataRate: {
       type: Number,
       required: [true, 'Speed is required'],
@@ -411,7 +525,31 @@ const desktopComputerSchema = new Schema<DesktopComputerSchema>(
       required: [true, 'Timing is required'],
     },
 
-    // page 2 -> storage
+    // speaker
+    speakerType: {
+      type: String,
+      required: [true, 'Type is required'],
+      index: true,
+    },
+    speakerTotalWattage: {
+      type: Number,
+      required: [true, 'Total wattage is required'],
+    },
+    speakerFrequencyResponse: {
+      type: String,
+      required: [true, 'Frequency response is required'],
+    },
+    speakerColor: {
+      type: String,
+      required: [true, 'Color is required'],
+    },
+    speakerInterface: {
+      type: String,
+      required: [true, 'Interface is required'],
+      index: true,
+    },
+
+    // storage
     storageType: {
       type: String,
       required: [true, 'Storage type is required'],
@@ -439,143 +577,6 @@ const desktopComputerSchema = new Schema<DesktopComputerSchema>(
       index: true,
     },
     storageInterface: {
-      type: String,
-      required: [true, 'Interface is required'],
-      index: true,
-    },
-
-    // page 2 -> psu
-    psuWattage: {
-      type: Number,
-      required: [true, 'Wattage is required'],
-    },
-    psuEfficiency: {
-      type: String,
-      required: [true, 'Efficiency is required'],
-      index: true,
-    },
-    psuFormFactor: {
-      type: String,
-      required: [true, 'Form factor is required'],
-      index: true,
-    },
-    psuModularity: {
-      type: String,
-      required: [true, 'Modular is required'],
-      index: true,
-    },
-
-    // page 2 -> case
-    caseType: {
-      type: String,
-      required: [true, 'Case type is required'],
-      index: true,
-    },
-    caseColor: {
-      type: String,
-      required: [true, 'Color is required'],
-    },
-    caseSidePanel: {
-      type: String,
-      required: [true, 'Side panel is required'],
-      index: true,
-    },
-
-    // page 2 -> display
-    displaySize: {
-      type: Number,
-      required: [true, 'Size is required'],
-    },
-    displayHorizontalResolution: {
-      type: Number,
-      required: [true, 'Horizontal resolution is required'],
-    },
-    displayVerticalResolution: {
-      type: Number,
-      required: [true, 'Vertical resolution is required'],
-    },
-    displayRefreshRate: {
-      type: Number,
-      required: [true, 'Refresh rate is required'],
-    },
-    displayPanelType: {
-      type: String,
-      required: [true, 'Panel type is required'],
-      index: true,
-    },
-    displayResponseTime: {
-      type: Number,
-      required: [true, 'Response time is required'],
-    },
-    displayAspectRatio: {
-      type: String,
-      required: [true, 'Aspect ratio is required'],
-    },
-
-    // page 2 -> keyboard
-    keyboardSwitch: {
-      type: String,
-      required: [true, 'Switch is required'],
-      index: true,
-    },
-    keyboardLayout: {
-      type: String,
-      required: [true, 'Layout is required'],
-      index: true,
-    },
-    keyboardBacklight: {
-      type: String,
-      required: [true, 'Backlight is required'],
-      index: true,
-    },
-    keyboardInterface: {
-      type: String,
-      required: [true, 'Interface is required'],
-      index: true,
-    },
-
-    // page 2 -> mouse
-    mouseSensor: {
-      type: String,
-      required: [true, 'Sensor is required'],
-      index: true,
-    },
-    mouseDpi: {
-      type: Number,
-      required: [true, 'DPI is required'],
-    },
-    mouseButtons: {
-      type: Number,
-      required: [true, 'Buttons is required'],
-    },
-    mouseColor: {
-      type: String,
-      required: [true, 'Color is required'],
-    },
-    mouseInterface: {
-      type: String,
-      required: [true, 'Interface is required'],
-    },
-
-    // page 2 -> speaker
-    speakerType: {
-      type: String,
-      required: [true, 'Type is required'],
-      index: true,
-    },
-    speakerTotalWattage: {
-      type: Number,
-      required: [true, 'Total wattage is required'],
-    },
-    speakerFrequencyResponse: {
-      type: String,
-      required: [true, 'Frequency response is required'],
-    },
-    speakerColor: {
-      type: String,
-      required: [true, 'Color is required'],
-    },
-    speakerInterface: {
       type: String,
       required: [true, 'Interface is required'],
       index: true,

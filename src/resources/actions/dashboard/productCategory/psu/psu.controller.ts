@@ -31,7 +31,6 @@ import {
 } from './psu.service';
 import {
   FileUploadDocument,
-  deleteAllFileUploadsByAssociatedResourceService,
   deleteFileUploadByIdService,
   getFileUploadByIdService,
 } from '../../../../fileUpload';
@@ -47,18 +46,18 @@ const createNewPsuHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      psuSchema,
+      psuFields,
     } = request.body;
 
-    const newPsuObject: PsuSchema = {
+    const psuSchema: PsuSchema = {
       userId,
       username,
-      ...psuSchema,
+      ...psuFields,
     };
 
-    const newPsu = await createNewPsuService(newPsuObject);
+    const psuDocument: PsuDocument = await createNewPsuService(psuSchema);
 
-    if (!newPsu) {
+    if (!psuDocument) {
       response.status(400).json({
         message: 'Could not create new psu',
         resourceData: [],
@@ -67,8 +66,8 @@ const createNewPsuHandler = expressAsyncHandler(
     }
 
     response.status(201).json({
-      message: `Successfully created new ${newPsu.model} psu`,
-      resourceData: [newPsu],
+      message: `Successfully created new ${psuDocument.model} psu`,
+      resourceData: [psuDocument],
     });
   }
 );

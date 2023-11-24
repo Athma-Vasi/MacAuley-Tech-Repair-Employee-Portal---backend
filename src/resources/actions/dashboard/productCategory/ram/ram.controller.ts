@@ -31,7 +31,6 @@ import {
 } from './ram.service';
 import {
   FileUploadDocument,
-  deleteAllFileUploadsByAssociatedResourceService,
   deleteFileUploadByIdService,
   getFileUploadByIdService,
 } from '../../../../fileUpload';
@@ -47,18 +46,18 @@ const createNewRamHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      ramSchema,
+      ramFields,
     } = request.body;
 
-    const newRamObject: RamSchema = {
+    const ramSchema: RamSchema = {
       userId,
       username,
-      ...ramSchema,
+      ...ramFields,
     };
 
-    const newRam = await createNewRamService(newRamObject);
+    const ramDocument: RamDocument = await createNewRamService(ramSchema);
 
-    if (!newRam) {
+    if (!ramDocument) {
       response.status(400).json({
         message: 'Could not create new ram',
         resourceData: [],
@@ -67,8 +66,8 @@ const createNewRamHandler = expressAsyncHandler(
     }
 
     response.status(201).json({
-      message: `Successfully created new ${newRam.model} ram`,
-      resourceData: [newRam],
+      message: `Successfully created new ${ramDocument.model} ram`,
+      resourceData: [ramDocument],
     });
   }
 );

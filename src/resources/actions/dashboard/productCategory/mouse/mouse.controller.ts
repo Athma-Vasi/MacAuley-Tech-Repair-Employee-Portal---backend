@@ -31,7 +31,6 @@ import {
 } from './mouse.service';
 import {
   FileUploadDocument,
-  deleteAllFileUploadsByAssociatedResourceService,
   deleteFileUploadByIdService,
   getFileUploadByIdService,
 } from '../../../../fileUpload';
@@ -47,18 +46,18 @@ const createNewMouseHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      mouseSchema,
+      mouseFields,
     } = request.body;
 
-    const newMouseObject: MouseSchema = {
+    const mouseSchema: MouseSchema = {
       userId,
       username,
-      ...mouseSchema,
+      ...mouseFields,
     };
 
-    const newMouse = await createNewMouseService(newMouseObject);
+    const mouseDocument: MouseDocument = await createNewMouseService(mouseSchema);
 
-    if (!newMouse) {
+    if (!mouseDocument) {
       response.status(400).json({
         message: 'Could not create new mouse',
         resourceData: [],
@@ -67,8 +66,8 @@ const createNewMouseHandler = expressAsyncHandler(
     }
 
     response.status(201).json({
-      message: `Successfully created new ${newMouse.model} mouse`,
-      resourceData: [newMouse],
+      message: `Successfully created new ${mouseDocument.model} mouse`,
+      resourceData: [mouseDocument],
     });
   }
 );

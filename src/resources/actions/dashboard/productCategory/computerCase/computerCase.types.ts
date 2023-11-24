@@ -3,8 +3,7 @@ import type { RequestAfterJWTVerification } from '../../../../auth';
 import { UserRoles } from '../../../../user';
 import { GetQueriedResourceRequest } from '../../../../../types';
 
-import { FileUploadDocument } from '../../../../fileUpload';
-import { ComputerCaseDocument, ComputerCaseSchema } from './computerCase.model';
+import { ComputerCaseSchema } from './computerCase.model';
 
 interface CreateNewComputerCaseRequest extends RequestAfterJWTVerification {
   body: {
@@ -14,7 +13,7 @@ interface CreateNewComputerCaseRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    computerCaseSchema: Omit<ComputerCaseSchema, 'userId' | 'username'>;
+    computerCaseFields: Omit<ComputerCaseSchema, 'userId' | 'username'>;
   };
 }
 

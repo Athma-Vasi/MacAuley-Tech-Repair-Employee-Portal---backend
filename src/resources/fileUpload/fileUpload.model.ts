@@ -2,8 +2,7 @@ import { Schema, Types, model } from 'mongoose';
 import type { ActionsCompany } from '../actions/company';
 import type { ActionsGeneral } from '../actions/general';
 import type { ActionsOutreach } from '../actions/outreach';
-import { ActionsDashboard } from '../actions/dashboard/dashboard.types';
-import { ProductCategory } from '../actions/dashboard/productCategory/product.model';
+import { ProductCategory } from '../actions/dashboard/productCategory';
 
 type FileExtension = 'jpeg' | 'png' | 'gif' | 'pdf' | 'jpg';
 

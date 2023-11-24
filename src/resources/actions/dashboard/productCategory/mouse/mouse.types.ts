@@ -14,7 +14,7 @@ interface CreateNewMouseRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    mouseSchema: Omit<MouseSchema, 'userId' | 'username'>;
+    mouseFields: Omit<MouseSchema, 'userId' | 'username'>;
   };
 }
 

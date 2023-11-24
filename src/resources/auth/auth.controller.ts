@@ -6,12 +6,8 @@ import type { Response } from 'express';
 import type { LoginUserRequest, LogoutUserRequest, RefreshTokenRequest } from '../auth';
 
 import { config } from '../../config';
-import {
-  checkUserExistsService,
-  checkUserIsActiveService,
-  getUserByUsernameService,
-} from '../user';
-import { getUserByIdService, getUserWithPasswordService } from '../user/user.service';
+
+import { getUserWithPasswordService } from '../user/user.service';
 import { v4 as uuidv4 } from 'uuid';
 import { RefreshTokenDecoded } from './auth.types';
 import {

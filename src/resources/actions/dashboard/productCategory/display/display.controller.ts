@@ -31,7 +31,6 @@ import {
 } from './display.service';
 import {
   FileUploadDocument,
-  deleteAllFileUploadsByAssociatedResourceService,
   deleteFileUploadByIdService,
   getFileUploadByIdService,
 } from '../../../../fileUpload';
@@ -47,18 +46,18 @@ const createNewDisplayHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      displaySchema,
+      displayFields,
     } = request.body;
 
-    const newDisplayObject: DisplaySchema = {
+    const displaySchema: DisplaySchema = {
       userId,
       username,
-      ...displaySchema,
+      ...displayFields,
     };
 
-    const newDisplay = await createNewDisplayService(newDisplayObject);
+    const displayDocument: DisplayDocument = await createNewDisplayService(displaySchema);
 
-    if (!newDisplay) {
+    if (!displayDocument) {
       response.status(400).json({
         message: 'Could not create new display',
         resourceData: [],
@@ -67,8 +66,8 @@ const createNewDisplayHandler = expressAsyncHandler(
     }
 
     response.status(201).json({
-      message: `Successfully created new ${newDisplay.model} display`,
-      resourceData: [newDisplay],
+      message: `Successfully created new ${displayDocument.model} display`,
+      resourceData: [displayDocument],
     });
   }
 );

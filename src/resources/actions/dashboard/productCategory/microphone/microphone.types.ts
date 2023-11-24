@@ -3,8 +3,7 @@ import type { RequestAfterJWTVerification } from '../../../../auth';
 import { UserRoles } from '../../../../user';
 import { GetQueriedResourceRequest } from '../../../../../types';
 
-import { FileUploadDocument } from '../../../../fileUpload';
-import { MicrophoneDocument, MicrophoneSchema } from './microphone.model';
+import { MicrophoneSchema } from './microphone.model';
 
 interface CreateNewMicrophoneRequest extends RequestAfterJWTVerification {
   body: {
@@ -14,7 +13,7 @@ interface CreateNewMicrophoneRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    microphoneSchema: Omit<MicrophoneSchema, 'userId' | 'username'>;
+    microphoneFields: Omit<MicrophoneSchema, 'userId' | 'username'>;
   };
 }
 

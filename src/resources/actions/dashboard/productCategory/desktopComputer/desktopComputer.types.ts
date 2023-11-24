@@ -3,8 +3,7 @@ import type { RequestAfterJWTVerification } from '../../../../auth';
 import { UserRoles } from '../../../../user';
 import { GetQueriedResourceRequest } from '../../../../../types';
 
-import { FileUploadDocument } from '../../../../fileUpload';
-import { DesktopComputerDocument, DesktopComputerSchema } from './desktopComputer.model';
+import { DesktopComputerSchema } from './desktopComputer.model';
 
 interface CreateNewDesktopComputerRequest extends RequestAfterJWTVerification {
   body: {
@@ -14,7 +13,7 @@ interface CreateNewDesktopComputerRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    desktopComputerSchema: Omit<DesktopComputerSchema, 'userId' | 'username'>;
+    desktopComputerFields: Omit<DesktopComputerSchema, 'userId' | 'username'>;
   };
 }
 

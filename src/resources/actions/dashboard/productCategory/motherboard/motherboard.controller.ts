@@ -31,7 +31,6 @@ import {
 } from './motherboard.service';
 import {
   FileUploadDocument,
-  deleteAllFileUploadsByAssociatedResourceService,
   deleteFileUploadByIdService,
   getFileUploadByIdService,
 } from '../../../../fileUpload';
@@ -47,18 +46,20 @@ const createNewMotherboardHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      motherboardSchema,
+      motherboardFields,
     } = request.body;
 
-    const newMotherboardObject: MotherboardSchema = {
+    const motherboardSchema: MotherboardSchema = {
       userId,
       username,
-      ...motherboardSchema,
+      ...motherboardFields,
     };
 
-    const newMotherboard = await createNewMotherboardService(newMotherboardObject);
+    const motherboardDocument: MotherboardDocument = await createNewMotherboardService(
+      motherboardSchema
+    );
 
-    if (!newMotherboard) {
+    if (!motherboardDocument) {
       response.status(400).json({
         message: 'Could not create new motherboard',
         resourceData: [],
@@ -67,8 +68,8 @@ const createNewMotherboardHandler = expressAsyncHandler(
     }
 
     response.status(201).json({
-      message: `Successfully created new ${newMotherboard.model} motherboard`,
-      resourceData: [newMotherboard],
+      message: `Successfully created new ${motherboardDocument.model} motherboard`,
+      resourceData: [motherboardDocument],
     });
   }
 );

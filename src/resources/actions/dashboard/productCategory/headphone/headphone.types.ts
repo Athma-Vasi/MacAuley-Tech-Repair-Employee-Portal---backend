@@ -3,8 +3,7 @@ import type { RequestAfterJWTVerification } from '../../../../auth';
 import { UserRoles } from '../../../../user';
 import { GetQueriedResourceRequest } from '../../../../../types';
 
-import { FileUploadDocument } from '../../../../fileUpload';
-import { HeadphoneDocument, HeadphoneSchema } from './headphone.model';
+import { HeadphoneSchema } from './headphone.model';
 
 interface CreateNewHeadphoneRequest extends RequestAfterJWTVerification {
   body: {
@@ -14,7 +13,7 @@ interface CreateNewHeadphoneRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    headphoneSchema: Omit<HeadphoneSchema, 'userId' | 'username'>;
+    headphoneFields: Omit<HeadphoneSchema, 'userId' | 'username'>;
   };
 }
 

@@ -1,8 +1,38 @@
 import { Types } from 'mongoose';
 import { FileUploadDocument } from '../../../fileUpload';
 
+type ProductCategory =
+  | 'Accessory'
+  | 'Central Processing Unit (CPU)'
+  | 'Computer Case'
+  | 'Desktop Computer'
+  | 'Display'
+  | 'Graphics Processing Unit (GPU)'
+  | 'Headphone'
+  | 'Keyboard'
+  | 'Laptop'
+  | 'Memory (RAM)'
+  | 'Mouse'
+  | 'Microphone'
+  | 'Motherboard'
+  | 'Power Supply Unit (PSU)'
+  | 'Smartphone'
+  | 'Speaker'
+  | 'Storage'
+  | 'Tablet'
+  | 'Webcam';
+
 type DimensionUnit = 'mm' | 'cm' | 'm' | 'in' | 'ft';
 type WeightUnit = 'g' | 'kg' | 'lb';
+
+type MemoryType = 'DDR5' | 'DDR4' | 'DDR3' | 'DDR2' | 'DDR';
+type MemoryUnit = 'KB' | 'MB' | 'GB' | 'TB';
+
+type PeripheralsInterface = 'USB' | 'Bluetooth' | 'PS/2' | 'Other';
+
+type MobileOs = 'Android' | 'iOS' | 'Windows' | 'Linux' | 'Other';
+
+type ProductAvailability = 'In Stock' | 'Out of Stock' | 'Pre-order' | 'Discontinued' | 'Other';
 
 type ProductReview = {
   userId: Types.ObjectId;
@@ -10,34 +40,8 @@ type ProductReview = {
   rating: number;
   review: string;
 };
-type ProductCategory =
-  | 'Desktop Computers'
-  | 'Laptops'
-  | 'Central Processing Units (CPUs)'
-  | 'Graphics Processing Units (GPUs)'
-  | 'Motherboards'
-  | 'Memory (RAM)'
-  | 'Storage'
-  | 'Power Supplies'
-  | 'Computer Cases'
-  | 'Displays'
-  | 'Keyboards'
-  | 'Mice'
-  | 'Headphones'
-  | 'Speakers'
-  | 'Smartphones'
-  | 'Tablets'
-  | 'Accessories';
-
-type ProductAvailability = 'In Stock' | 'Out of Stock' | 'Pre-order' | 'Discontinued' | 'Other';
 
 type MotherboardFormFactor = 'ATX' | 'Micro ATX' | 'Mini ITX' | 'E-ATX' | 'XL-ATX';
-type MemoryType = 'DDR5' | 'DDR4' | 'DDR3' | 'DDR2' | 'DDR';
-type MemoryUnit = 'KB' | 'MB' | 'GB' | 'TB';
-
-type PeripheralsInterface = 'USB' | 'Bluetooth' | 'PS/2' | 'Other';
-
-type MobileOs = 'Android' | 'iOS' | 'Windows' | 'Linux' | 'Other';
 
 type StorageType = 'SSD' | 'HDD' | 'SSHD' | 'Other';
 type StorageFormFactor =
@@ -97,12 +101,16 @@ type KeyboardBacklight = 'RGB' | 'Single Color' | 'None';
 
 type MouseSensor = 'Optical' | 'Laser' | 'Infrared' | 'Other';
 
+type HeadphoneType = 'Over-ear' | 'On-ear' | 'In-ear' | 'Other';
+type HeadphoneInterface = 'USB' | 'Bluetooth' | '3.5 mm' | '2.5 mm' | 'MMCX' | 'Other';
+
 type SpeakerType = '2.0' | '2.1' | '3.1' | '4.1' | '5.1' | '7.1' | 'Other';
 type SpeakerInterface = 'USB' | 'Bluetooth' | '3.5 mm' | '2.5 mm' | 'RCA' | 'TRS' | 'Other';
 
 type WebcamResolution = '720p' | '1080p' | '1440p' | '4K' | 'Other';
-type WebcamFrameRate = '30 fps' | '60 fps' | '120 fps';
+type WebcamFrameRate = '30 fps' | '60 fps' | '120 fps' | '240 fps' | 'Other';
 type WebcamInterface = 'USB' | 'Bluetooth' | 'Other';
+type WebcamMicrophone = 'Yes' | 'No';
 
 type MicrophoneType = 'Condenser' | 'Dynamic' | 'Ribbon' | 'USB' | 'Wireless' | 'Other';
 type MicrophonePolarPattern =
@@ -112,7 +120,6 @@ type MicrophonePolarPattern =
   | 'Omnidirectional'
   | 'Bidirectional'
   | 'Other';
-
 type MicrophoneInterface = 'XLR' | 'USB' | '3.5mm' | 'Wireless' | 'Other';
 
 type ProductServerResponse<Doc> = Doc & {
@@ -124,6 +131,8 @@ export type {
   CaseType,
   DimensionUnit,
   DisplayPanelType,
+  HeadphoneInterface,
+  HeadphoneType,
   KeyboardBacklight,
   KeyboardLayout,
   KeyboardSwitch,
@@ -150,6 +159,7 @@ export type {
   StorageType,
   WebcamFrameRate,
   WebcamInterface,
+  WebcamMicrophone,
   WebcamResolution,
   WeightUnit,
 };

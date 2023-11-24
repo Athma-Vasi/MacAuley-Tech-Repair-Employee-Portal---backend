@@ -14,7 +14,7 @@ interface CreateNewSpeakerRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    speakerSchema: Omit<SpeakerSchema, 'userId' | 'username'>;
+    speakerFields: Omit<SpeakerSchema, 'userId' | 'username'>;
   };
 }
 

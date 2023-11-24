@@ -31,7 +31,6 @@ import {
 } from './smartphone.service';
 import {
   FileUploadDocument,
-  deleteAllFileUploadsByAssociatedResourceService,
   deleteFileUploadByIdService,
   getFileUploadByIdService,
 } from '../../../../fileUpload';
@@ -47,18 +46,20 @@ const createNewSmartphoneHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      smartphoneSchema,
+      smartphoneFields,
     } = request.body;
 
-    const newSmartphoneObject: SmartphoneSchema = {
+    const smartphoneSchema: SmartphoneSchema = {
       userId,
       username,
-      ...smartphoneSchema,
+      ...smartphoneFields,
     };
 
-    const newSmartphone = await createNewSmartphoneService(newSmartphoneObject);
+    const smartphoneDocument: SmartphoneDocument = await createNewSmartphoneService(
+      smartphoneSchema
+    );
 
-    if (!newSmartphone) {
+    if (!smartphoneDocument) {
       response.status(400).json({
         message: 'Could not create new smartphone',
         resourceData: [],
@@ -67,8 +68,8 @@ const createNewSmartphoneHandler = expressAsyncHandler(
     }
 
     response.status(201).json({
-      message: `Successfully created new ${newSmartphone.model} smartphone`,
-      resourceData: [newSmartphone],
+      message: `Successfully created new ${smartphoneDocument.model} smartphone`,
+      resourceData: [smartphoneDocument],
     });
   }
 );

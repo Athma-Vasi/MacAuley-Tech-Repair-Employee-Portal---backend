@@ -3,8 +3,7 @@ import type { RequestAfterJWTVerification } from '../../../../auth';
 import { UserRoles } from '../../../../user';
 import { GetQueriedResourceRequest } from '../../../../../types';
 
-import { FileUploadDocument } from '../../../../fileUpload';
-import { RamDocument, RamSchema } from './ram.model';
+import { RamSchema } from './ram.model';
 
 interface CreateNewRamRequest extends RequestAfterJWTVerification {
   body: {
@@ -14,7 +13,7 @@ interface CreateNewRamRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    ramSchema: Omit<RamSchema, 'userId' | 'username'>;
+    ramFields: Omit<RamSchema, 'userId' | 'username'>;
   };
 }
 

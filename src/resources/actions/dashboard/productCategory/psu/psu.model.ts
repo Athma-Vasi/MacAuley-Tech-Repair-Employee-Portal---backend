@@ -19,7 +19,7 @@ type PsuSchema = {
   brand: string;
   model: string;
   description: string;
-  price: Number;
+  price: number;
   currency: Currency;
   availability: ProductAvailability;
   quantity: number;

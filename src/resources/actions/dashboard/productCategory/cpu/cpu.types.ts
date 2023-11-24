@@ -3,8 +3,7 @@ import type { RequestAfterJWTVerification } from '../../../../auth';
 import { UserRoles } from '../../../../user';
 import { GetQueriedResourceRequest } from '../../../../../types';
 
-import { FileUploadDocument } from '../../../../fileUpload';
-import { CpuDocument, CpuSchema } from './cpu.model';
+import { CpuSchema } from './cpu.model';
 
 interface CreateNewCpuRequest extends RequestAfterJWTVerification {
   body: {
@@ -14,7 +13,7 @@ interface CreateNewCpuRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    cpuSchema: Omit<CpuSchema, 'userId' | 'username'>;
+    cpuFields: Omit<CpuSchema, 'userId' | 'username'>;
   };
 }
 

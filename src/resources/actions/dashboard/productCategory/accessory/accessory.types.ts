@@ -3,8 +3,7 @@ import type { RequestAfterJWTVerification } from '../../../../auth';
 import { UserRoles } from '../../../../user';
 import { GetQueriedResourceRequest } from '../../../../../types';
 
-import { FileUploadDocument } from '../../../../fileUpload';
-import { AccessoryDocument, AccessorySchema } from './accessory.model';
+import { AccessorySchema } from './accessory.model';
 
 interface CreateNewAccessoryRequest extends RequestAfterJWTVerification {
   body: {
@@ -14,7 +13,7 @@ interface CreateNewAccessoryRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    accessorySchema: Omit<AccessorySchema, 'userId' | 'username'>;
+    accessoryFields: Omit<AccessorySchema, 'userId' | 'username'>;
   };
 }
 

@@ -31,7 +31,6 @@ import {
 } from './tablet.service';
 import {
   FileUploadDocument,
-  deleteAllFileUploadsByAssociatedResourceService,
   deleteFileUploadByIdService,
   getFileUploadByIdService,
 } from '../../../../fileUpload';
@@ -47,18 +46,18 @@ const createNewTabletHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      tabletSchema,
+      tabletFields,
     } = request.body;
 
-    const newTabletObject: TabletSchema = {
+    const tabletSchema: TabletSchema = {
       userId,
       username,
-      ...tabletSchema,
+      ...tabletFields,
     };
 
-    const newTablet = await createNewTabletService(newTabletObject);
+    const tabletDocument: TabletDocument = await createNewTabletService(tabletSchema);
 
-    if (!newTablet) {
+    if (!tabletDocument) {
       response.status(400).json({
         message: 'Could not create new tablet',
         resourceData: [],
@@ -67,8 +66,8 @@ const createNewTabletHandler = expressAsyncHandler(
     }
 
     response.status(201).json({
-      message: `Successfully created new ${newTablet.model} tablet`,
-      resourceData: [newTablet],
+      message: `Successfully created new ${tabletDocument.model} tablet`,
+      resourceData: [tabletDocument],
     });
   }
 );

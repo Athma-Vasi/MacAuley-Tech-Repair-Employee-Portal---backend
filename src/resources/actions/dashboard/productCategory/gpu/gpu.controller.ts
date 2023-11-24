@@ -31,7 +31,6 @@ import {
 } from './gpu.service';
 import {
   FileUploadDocument,
-  deleteAllFileUploadsByAssociatedResourceService,
   deleteFileUploadByIdService,
   getFileUploadByIdService,
 } from '../../../../fileUpload';
@@ -47,18 +46,18 @@ const createNewGpuHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      gpuSchema,
+      gpuFields,
     } = request.body;
 
-    const newGpuObject: GpuSchema = {
+    const gpuSchema: GpuSchema = {
       userId,
       username,
-      ...gpuSchema,
+      ...gpuFields,
     };
 
-    const newGpu = await createNewGpuService(newGpuObject);
+    const gpuDocument: GpuDocument = await createNewGpuService(gpuSchema);
 
-    if (!newGpu) {
+    if (!gpuDocument) {
       response.status(400).json({
         message: 'Could not create new gpu',
         resourceData: [],
@@ -67,8 +66,8 @@ const createNewGpuHandler = expressAsyncHandler(
     }
 
     response.status(201).json({
-      message: `Successfully created new ${newGpu.model} gpu`,
-      resourceData: [newGpu],
+      message: `Successfully created new ${gpuDocument.model} gpu`,
+      resourceData: [gpuDocument],
     });
   }
 );

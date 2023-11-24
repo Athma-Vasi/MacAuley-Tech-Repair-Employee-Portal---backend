@@ -31,7 +31,6 @@ import {
 } from './headphone.service';
 import {
   FileUploadDocument,
-  deleteAllFileUploadsByAssociatedResourceService,
   deleteFileUploadByIdService,
   getFileUploadByIdService,
 } from '../../../../fileUpload';
@@ -47,18 +46,18 @@ const createNewHeadphoneHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      headphoneSchema,
+      headphoneFields,
     } = request.body;
 
-    const newHeadphoneObject: HeadphoneSchema = {
+    const headphoneSchema: HeadphoneSchema = {
       userId,
       username,
-      ...headphoneSchema,
+      ...headphoneFields,
     };
 
-    const newHeadphone = await createNewHeadphoneService(newHeadphoneObject);
+    const headphoneDocument: HeadphoneDocument = await createNewHeadphoneService(headphoneSchema);
 
-    if (!newHeadphone) {
+    if (!headphoneDocument) {
       response.status(400).json({
         message: 'Could not create new headphone',
         resourceData: [],
@@ -67,8 +66,8 @@ const createNewHeadphoneHandler = expressAsyncHandler(
     }
 
     response.status(201).json({
-      message: `Successfully created new ${newHeadphone.model} headphone`,
-      resourceData: [newHeadphone],
+      message: `Successfully created new ${headphoneDocument.model} headphone`,
+      resourceData: [headphoneDocument],
     });
   }
 );

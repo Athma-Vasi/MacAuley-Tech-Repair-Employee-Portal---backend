@@ -31,7 +31,6 @@ import {
 } from './computerCase.service';
 import {
   FileUploadDocument,
-  deleteAllFileUploadsByAssociatedResourceService,
   deleteFileUploadByIdService,
   getFileUploadByIdService,
 } from '../../../../fileUpload';
@@ -47,18 +46,20 @@ const createNewComputerCaseHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      computerCaseSchema,
+      computerCaseFields,
     } = request.body;
 
-    const newComputerCaseObject: ComputerCaseSchema = {
+    const computerCaseSchema: ComputerCaseSchema = {
       userId,
       username,
-      ...computerCaseSchema,
+      ...computerCaseFields,
     };
 
-    const newComputerCase = await createNewComputerCaseService(newComputerCaseObject);
+    const computerCaseDocument: ComputerCaseDocument = await createNewComputerCaseService(
+      computerCaseSchema
+    );
 
-    if (!newComputerCase) {
+    if (!computerCaseDocument) {
       response.status(400).json({
         message: 'Could not create new computerCase',
         resourceData: [],
@@ -67,8 +68,8 @@ const createNewComputerCaseHandler = expressAsyncHandler(
     }
 
     response.status(201).json({
-      message: `Successfully created new ${newComputerCase.model} computerCase`,
-      resourceData: [newComputerCase],
+      message: `Successfully created new ${computerCaseDocument.model} computerCase`,
+      resourceData: [computerCaseDocument],
     });
   }
 );

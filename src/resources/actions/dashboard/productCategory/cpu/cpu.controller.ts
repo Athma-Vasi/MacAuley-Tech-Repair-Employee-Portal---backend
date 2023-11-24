@@ -31,7 +31,6 @@ import {
 } from './cpu.service';
 import {
   FileUploadDocument,
-  deleteAllFileUploadsByAssociatedResourceService,
   deleteFileUploadByIdService,
   getFileUploadByIdService,
 } from '../../../../fileUpload';
@@ -47,18 +46,18 @@ const createNewCpuHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      cpuSchema,
+      cpuFields,
     } = request.body;
 
-    const newCpuObject: CpuSchema = {
+    const cpuSchema: CpuSchema = {
       userId,
       username,
-      ...cpuSchema,
+      ...cpuFields,
     };
 
-    const newCpu = await createNewCpuService(newCpuObject);
+    const cpuDocument: CpuDocument = await createNewCpuService(cpuSchema);
 
-    if (!newCpu) {
+    if (!cpuDocument) {
       response.status(400).json({
         message: 'Could not create new cpu',
         resourceData: [],
@@ -67,8 +66,8 @@ const createNewCpuHandler = expressAsyncHandler(
     }
 
     response.status(201).json({
-      message: `Successfully created new ${newCpu.model} cpu`,
-      resourceData: [newCpu],
+      message: `Successfully created new ${cpuDocument.model} cpu`,
+      resourceData: [cpuDocument],
     });
   }
 );

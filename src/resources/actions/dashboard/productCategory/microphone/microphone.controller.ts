@@ -31,7 +31,6 @@ import {
 } from './microphone.service';
 import {
   FileUploadDocument,
-  deleteAllFileUploadsByAssociatedResourceService,
   deleteFileUploadByIdService,
   getFileUploadByIdService,
 } from '../../../../fileUpload';
@@ -47,18 +46,20 @@ const createNewMicrophoneHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      microphoneSchema,
+      microphoneFields,
     } = request.body;
 
-    const newMicrophoneObject: MicrophoneSchema = {
+    const microphoneSchema: MicrophoneSchema = {
       userId,
       username,
-      ...microphoneSchema,
+      ...microphoneFields,
     };
 
-    const newMicrophone = await createNewMicrophoneService(newMicrophoneObject);
+    const microphoneDocument: MicrophoneDocument = await createNewMicrophoneService(
+      microphoneSchema
+    );
 
-    if (!newMicrophone) {
+    if (!microphoneDocument) {
       response.status(400).json({
         message: 'Could not create new microphone',
         resourceData: [],
@@ -67,8 +68,8 @@ const createNewMicrophoneHandler = expressAsyncHandler(
     }
 
     response.status(201).json({
-      message: `Successfully created new ${newMicrophone.model} microphone`,
-      resourceData: [newMicrophone],
+      message: `Successfully created new ${microphoneDocument.model} microphone`,
+      resourceData: [microphoneDocument],
     });
   }
 );

@@ -3,8 +3,7 @@ import type { RequestAfterJWTVerification } from '../../../../auth';
 import { UserRoles } from '../../../../user';
 import { GetQueriedResourceRequest } from '../../../../../types';
 
-import { FileUploadDocument } from '../../../../fileUpload';
-import { MotherboardDocument, MotherboardSchema } from './motherboard.model';
+import { MotherboardSchema } from './motherboard.model';
 
 interface CreateNewMotherboardRequest extends RequestAfterJWTVerification {
   body: {
@@ -14,7 +13,7 @@ interface CreateNewMotherboardRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    motherboardSchema: Omit<MotherboardSchema, 'userId' | 'username'>;
+    motherboardFields: Omit<MotherboardSchema, 'userId' | 'username'>;
   };
 }
 

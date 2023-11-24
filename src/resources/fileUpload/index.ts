@@ -25,7 +25,6 @@ import {
   getFileUploadByIdService,
   getQueriedFileUploadsByUserService,
   insertAssociatedResourceDocumentIdService,
-  deleteAllFileUploadsByAssociatedResourceService,
 } from './fileUpload.service';
 
 import type {
@@ -66,7 +65,6 @@ export {
   getFileUploadByIdService,
   getQueriedFileUploadsByUserService,
   insertAssociatedResourceDocumentIdService,
-  deleteAllFileUploadsByAssociatedResourceService,
 };
 
 export type {

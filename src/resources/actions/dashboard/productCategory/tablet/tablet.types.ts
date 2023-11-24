@@ -14,7 +14,7 @@ interface CreateNewTabletRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    tabletSchema: Omit<TabletSchema, 'userId' | 'username'>;
+    tabletFields: Omit<TabletSchema, 'userId' | 'username'>;
   };
 }
 

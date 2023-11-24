@@ -31,7 +31,6 @@ import {
 } from './webcam.service';
 import {
   FileUploadDocument,
-  deleteAllFileUploadsByAssociatedResourceService,
   deleteFileUploadByIdService,
   getFileUploadByIdService,
 } from '../../../../fileUpload';
@@ -47,18 +46,18 @@ const createNewWebcamHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      webcamSchema,
+      webcamFields,
     } = request.body;
 
-    const newWebcamObject: WebcamSchema = {
+    const webcamSchema: WebcamSchema = {
       userId,
       username,
-      ...webcamSchema,
+      ...webcamFields,
     };
 
-    const newWebcam = await createNewWebcamService(newWebcamObject);
+    const webcamDocument: WebcamDocument = await createNewWebcamService(webcamSchema);
 
-    if (!newWebcam) {
+    if (!webcamDocument) {
       response.status(400).json({
         message: 'Could not create new webcam',
         resourceData: [],
@@ -67,8 +66,8 @@ const createNewWebcamHandler = expressAsyncHandler(
     }
 
     response.status(201).json({
-      message: `Successfully created new ${newWebcam.model} webcam`,
-      resourceData: [newWebcam],
+      message: `Successfully created new ${webcamDocument.model} webcam`,
+      resourceData: [webcamDocument],
     });
   }
 );

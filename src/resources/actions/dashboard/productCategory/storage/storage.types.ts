@@ -3,8 +3,7 @@ import type { RequestAfterJWTVerification } from '../../../../auth';
 import { UserRoles } from '../../../../user';
 import { GetQueriedResourceRequest } from '../../../../../types';
 
-import { FileUploadDocument } from '../../../../fileUpload';
-import { StorageDocument, StorageSchema } from './storage.model';
+import { StorageSchema } from './storage.model';
 
 interface CreateNewStorageRequest extends RequestAfterJWTVerification {
   body: {
@@ -14,7 +13,7 @@ interface CreateNewStorageRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    storageSchema: Omit<StorageSchema, 'userId' | 'username'>;
+    storageFields: Omit<StorageSchema, 'userId' | 'username'>;
   };
 }
 

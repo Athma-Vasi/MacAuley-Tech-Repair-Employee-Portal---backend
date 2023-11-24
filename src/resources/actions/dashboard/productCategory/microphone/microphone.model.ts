@@ -19,7 +19,7 @@ type MicrophoneSchema = {
   brand: string;
   model: string;
   description: string;
-  price: Number;
+  price: number;
   currency: Currency;
   availability: ProductAvailability;
   quantity: number;
@@ -35,7 +35,7 @@ type MicrophoneSchema = {
 
   // page 2
   microphoneType: MicrophoneType; // Condenser, Dynamic, etc.
-  microphonePolarPattern: MicrophonePolarPattern; // Cardioid, Omnidirectional, etc.
+  microphonePolarPattern: MicrophonePolarPattern; // Cardioid, etc.
   microphoneFrequencyResponse: string; // 20Hz-20kHz, etc.
   microphoneColor: string; // Black, White, etc.
   microphoneInterface: MicrophoneInterface; // XLR, USB, etc.

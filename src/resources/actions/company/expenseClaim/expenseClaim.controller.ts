@@ -24,9 +24,9 @@ import {
   getQueriedExpenseClaimsByUserService,
   getQueriedTotalExpenseClaimsService,
   updateExpenseClaimByIdService,
+  returnAllExpenseClaimsUploadedFileIdsService,
 } from './expenseClaim.service';
 import {
-  deleteAllFileUploadsByAssociatedResourceService,
   deleteFileUploadByIdService,
   getFileUploadByIdService,
   insertAssociatedResourceDocumentIdService,
@@ -485,13 +485,16 @@ const deleteAllExpenseClaimsHandler = expressAsyncHandler(
     _request: DeleteAllExpenseClaimsRequest,
     response: Response<ResourceRequestServerResponse<ExpenseClaimDocument>>
   ) => {
-    // delete all file uploads with associated resource 'Expense Claim'
-    const deleteFileUploadsResult: DeleteResult =
-      await deleteAllFileUploadsByAssociatedResourceService('expense claim');
-    if (deleteFileUploadsResult.deletedCount === 0) {
+    // grab all expense claims file upload ids
+    const fileUploadsIds = await returnAllExpenseClaimsUploadedFileIdsService();
+
+    // delete all file uploads associated with all expense claims
+    const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
+      fileUploadsIds.map(async (fileUploadId) => deleteFileUploadByIdService(fileUploadId))
+    );
+    if (!deleteFileUploadsResult.every((result) => result.deletedCount !== 0)) {
       response.status(400).json({
-        message:
-          'All file uploads associated with all expense claims could not be deleted. Expense Claims not deleted. Please try again.',
+        message: 'Some file uploads could not be deleted. Please try again.',
         resourceData: [],
       });
       return;

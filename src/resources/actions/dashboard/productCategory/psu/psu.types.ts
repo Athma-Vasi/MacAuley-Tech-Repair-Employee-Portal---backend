@@ -3,8 +3,7 @@ import type { RequestAfterJWTVerification } from '../../../../auth';
 import { UserRoles } from '../../../../user';
 import { GetQueriedResourceRequest } from '../../../../../types';
 
-import { FileUploadDocument } from '../../../../fileUpload';
-import { PsuDocument, PsuSchema } from './psu.model';
+import { PsuSchema } from './psu.model';
 
 interface CreateNewPsuRequest extends RequestAfterJWTVerification {
   body: {
@@ -14,7 +13,7 @@ interface CreateNewPsuRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    psuSchema: Omit<PsuSchema, 'userId' | 'username'>;
+    psuFields: Omit<PsuSchema, 'userId' | 'username'>;
   };
 }
 

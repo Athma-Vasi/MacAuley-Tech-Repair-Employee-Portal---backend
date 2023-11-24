@@ -109,13 +109,13 @@ async function deleteAllExpenseClaimsService(): Promise<DeleteResult> {
   }
 }
 
-async function returnAllUploadedFileIdsService(): Promise<Types.ObjectId[]> {
+async function returnAllExpenseClaimsUploadedFileIdsService(): Promise<Types.ObjectId[]> {
   try {
     const expenseClaims = await ExpenseClaimModel.find({}).select('uploadedFilesIds').lean().exec();
     const uploadedFileIds = expenseClaims.flatMap((expenseClaim) => expenseClaim.uploadedFilesIds);
     return uploadedFileIds;
   } catch (error: any) {
-    throw new Error(error, { cause: 'returnAllUploadedFileIdsService' });
+    throw new Error(error, { cause: 'returnAllExpenseClaimsUploadedFileIdsService' });
   }
 }
 
@@ -138,6 +138,6 @@ export {
   getQueriedTotalExpenseClaimsService,
   deleteAllExpenseClaimsService,
   deleteAnExpenseClaimService,
-  returnAllUploadedFileIdsService,
+  returnAllExpenseClaimsUploadedFileIdsService,
   updateExpenseClaimByIdService,
 };

@@ -31,7 +31,6 @@ import {
 } from './accessory.service';
 import {
   FileUploadDocument,
-  deleteAllFileUploadsByAssociatedResourceService,
   deleteFileUploadByIdService,
   getFileUploadByIdService,
 } from '../../../../fileUpload';
@@ -47,18 +46,18 @@ const createNewAccessoryHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      accessorySchema,
+      accessoryFields,
     } = request.body;
 
-    const newAccessoryObject: AccessorySchema = {
+    const accessorySchema: AccessorySchema = {
       userId,
       username,
-      ...accessorySchema,
+      ...accessoryFields,
     };
 
-    const newAccessory = await createNewAccessoryService(newAccessoryObject);
+    const accessoryDocument: AccessoryDocument = await createNewAccessoryService(accessorySchema);
 
-    if (!newAccessory) {
+    if (!accessoryDocument) {
       response.status(400).json({
         message: 'Could not create new accessory',
         resourceData: [],
@@ -67,8 +66,8 @@ const createNewAccessoryHandler = expressAsyncHandler(
     }
 
     response.status(201).json({
-      message: `Successfully created new ${newAccessory.model} accessory`,
-      resourceData: [newAccessory],
+      message: `Successfully created new ${accessoryDocument.model} accessory`,
+      resourceData: [accessoryDocument],
     });
   }
 );

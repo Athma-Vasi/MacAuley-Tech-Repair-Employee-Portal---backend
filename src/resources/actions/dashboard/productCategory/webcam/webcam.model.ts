@@ -6,6 +6,7 @@ import type {
   ProductReview,
   WebcamFrameRate,
   WebcamInterface,
+  WebcamMicrophone,
   WebcamResolution,
   WeightUnit,
 } from '../product.types';
@@ -19,7 +20,7 @@ type WebcamSchema = {
   brand: string;
   model: string;
   description: string;
-  price: Number;
+  price: number;
   currency: Currency;
   availability: ProductAvailability;
   quantity: number;
@@ -36,7 +37,7 @@ type WebcamSchema = {
   // page 2
   webcamResolution: WebcamResolution; // 720p, 1080p, etc.
   webcamInterface: WebcamInterface; // USB, Bluetooth, etc.
-  webcamMicrophone: boolean; // true, false
+  webcamMicrophone: WebcamMicrophone; // Yes, No
   webcamFrameRate: WebcamFrameRate; // 30 fps, 60 fps, etc.
   webcamColor: string; // Black, White, etc.
   additionalFields: {
@@ -153,8 +154,9 @@ const webcamSchema = new Schema<WebcamSchema>(
       index: true,
     },
     webcamMicrophone: {
-      type: Boolean,
+      type: String,
       required: [true, 'Webcam microphone is required'],
+      index: true,
     },
     webcamFrameRate: {
       type: String,

@@ -3,8 +3,7 @@ import type { RequestAfterJWTVerification } from '../../../../auth';
 import { UserRoles } from '../../../../user';
 import { GetQueriedResourceRequest } from '../../../../../types';
 
-import { FileUploadDocument } from '../../../../fileUpload';
-import { GpuDocument, GpuSchema } from './gpu.model';
+import { GpuSchema } from './gpu.model';
 
 interface CreateNewGpuRequest extends RequestAfterJWTVerification {
   body: {
@@ -14,7 +13,7 @@ interface CreateNewGpuRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    gpuSchema: Omit<GpuSchema, 'userId' | 'username'>;
+    gpuFields: Omit<GpuSchema, 'userId' | 'username'>;
   };
 }
 

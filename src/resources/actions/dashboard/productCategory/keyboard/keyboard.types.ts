@@ -3,8 +3,7 @@ import type { RequestAfterJWTVerification } from '../../../../auth';
 import { UserRoles } from '../../../../user';
 import { GetQueriedResourceRequest } from '../../../../../types';
 
-import { FileUploadDocument } from '../../../../fileUpload';
-import { KeyboardDocument, KeyboardSchema } from './keyboard.model';
+import { KeyboardSchema } from './keyboard.model';
 
 interface CreateNewKeyboardRequest extends RequestAfterJWTVerification {
   body: {
@@ -14,7 +13,7 @@ interface CreateNewKeyboardRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    keyboardSchema: Omit<KeyboardSchema, 'userId' | 'username'>;
+    keyboardFields: Omit<KeyboardSchema, 'userId' | 'username'>;
   };
 }
 

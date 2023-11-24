@@ -31,7 +31,6 @@ import {
 } from './desktopComputer.service';
 import {
   FileUploadDocument,
-  deleteAllFileUploadsByAssociatedResourceService,
   deleteFileUploadByIdService,
   getFileUploadByIdService,
 } from '../../../../fileUpload';
@@ -47,18 +46,20 @@ const createNewDesktopComputerHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      desktopComputerSchema,
+      desktopComputerFields,
     } = request.body;
 
-    const newDesktopComputerObject: DesktopComputerSchema = {
+    const desktopComputerSchema: DesktopComputerSchema = {
       userId,
       username,
-      ...desktopComputerSchema,
+      ...desktopComputerFields,
     };
 
-    const newDesktopComputer = await createNewDesktopComputerService(newDesktopComputerObject);
+    const desktopComputerDocument: DesktopComputerDocument = await createNewDesktopComputerService(
+      desktopComputerSchema
+    );
 
-    if (!newDesktopComputer) {
+    if (!desktopComputerDocument) {
       response.status(400).json({
         message: 'Could not create new desktopComputer',
         resourceData: [],
@@ -67,8 +68,8 @@ const createNewDesktopComputerHandler = expressAsyncHandler(
     }
 
     response.status(201).json({
-      message: `Successfully created new ${newDesktopComputer.model} desktopComputer`,
-      resourceData: [newDesktopComputer],
+      message: `Successfully created new ${desktopComputerDocument.model} desktopComputer`,
+      resourceData: [desktopComputerDocument],
     });
   }
 );
