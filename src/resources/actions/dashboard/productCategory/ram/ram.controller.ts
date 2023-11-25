@@ -59,14 +59,14 @@ const createNewRamHandler = expressAsyncHandler(
 
     if (!ramDocument) {
       response.status(400).json({
-        message: 'Could not create new ram',
+        message: 'Could not create new RAM',
         resourceData: [],
       });
       return;
     }
 
     response.status(201).json({
-      message: `Successfully created new ${ramDocument.model} ram`,
+      message: `Successfully created new ${ramDocument.model} RAM`,
       resourceData: [ramDocument],
     });
   }
@@ -102,7 +102,7 @@ const createNewRamBulkHandler = expressAsyncHandler(
       return;
     } else if (successfullyCreatedRams.length === 0) {
       response.status(400).json({
-        message: 'Could not create any rams',
+        message: 'Could not create any RAMs',
         resourceData: [],
       });
       return;
@@ -143,7 +143,7 @@ const getQueriedRamsHandler = expressAsyncHandler(
     });
     if (rams.length === 0) {
       response.status(200).json({
-        message: 'No rams that match query parameters were found',
+        message: 'No RAMs that match query parameters were found',
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
@@ -180,7 +180,7 @@ const getQueriedRamsHandler = expressAsyncHandler(
       .filter((ram) => ram);
 
     response.status(200).json({
-      message: 'Successfully retrieved rams',
+      message: 'Successfully retrieved RAMs',
       pages: Math.ceil(totalDocuments / Number(options?.limit)),
       totalDocuments,
       resourceData: ramServerResponseArray as RamDocument[],
@@ -201,7 +201,7 @@ const getRamByIdHandler = expressAsyncHandler(
     // get ram by id
     const ram = await getRamByIdService(ramId);
     if (!ram) {
-      response.status(404).json({ message: 'Ram not found', resourceData: [] });
+      response.status(404).json({ message: 'RAM not found', resourceData: [] });
       return;
     }
 
@@ -221,7 +221,7 @@ const getRamByIdHandler = expressAsyncHandler(
     };
 
     response.status(200).json({
-      message: 'Successfully retrieved ram',
+      message: 'Successfully retrieved RAM',
       resourceData: [ramServerResponse],
     });
   }
@@ -241,7 +241,7 @@ const updateRamByIdHandler = expressAsyncHandler(
     // check if ram exists
     const ramExists = await getRamByIdService(ramId);
     if (!ramExists) {
-      response.status(404).json({ message: 'Ram does not exist', resourceData: [] });
+      response.status(404).json({ message: 'RAM does not exist', resourceData: [] });
       return;
     }
 
@@ -258,14 +258,14 @@ const updateRamByIdHandler = expressAsyncHandler(
 
     if (!updatedRam) {
       response.status(400).json({
-        message: 'Ram could not be updated',
+        message: 'RAM could not be updated',
         resourceData: [],
       });
       return;
     }
 
     response.status(200).json({
-      message: 'Ram updated successfully',
+      message: 'RAM updated successfully',
       resourceData: [updatedRam],
     });
   }
@@ -340,13 +340,13 @@ const deleteAllRamsHandler = expressAsyncHandler(
 
     if (deleteRamsResult.deletedCount === 0) {
       response.status(400).json({
-        message: 'All rams could not be deleted. Please try again.',
+        message: 'All RAMs could not be deleted. Please try again.',
         resourceData: [],
       });
       return;
     }
 
-    response.status(200).json({ message: 'All rams deleted', resourceData: [] });
+    response.status(200).json({ message: 'All RAMs deleted', resourceData: [] });
   }
 );
 
@@ -363,7 +363,7 @@ const deleteARamHandler = expressAsyncHandler(
     // check if ram exists
     const ramExists = await getRamByIdService(ramId);
     if (!ramExists) {
-      response.status(404).json({ message: 'Ram does not exist', resourceData: [] });
+      response.status(404).json({ message: 'RAM does not exist', resourceData: [] });
       return;
     }
 
@@ -379,7 +379,7 @@ const deleteARamHandler = expressAsyncHandler(
     if (deleteFileUploadsResult.some((result) => result.deletedCount === 0)) {
       response.status(400).json({
         message:
-          'Some file uploads associated with this ram could not be deleted. Ram not deleted. Please try again.',
+          'Some file uploads associated with this ram could not be deleted. RAM not deleted. Please try again.',
         resourceData: [],
       });
       return;
@@ -390,13 +390,13 @@ const deleteARamHandler = expressAsyncHandler(
 
     if (deleteRamResult.deletedCount === 0) {
       response.status(400).json({
-        message: 'Ram could not be deleted. Please try again.',
+        message: 'RAM could not be deleted. Please try again.',
         resourceData: [],
       });
       return;
     }
 
-    response.status(200).json({ message: 'Ram deleted', resourceData: [] });
+    response.status(200).json({ message: 'RAM deleted', resourceData: [] });
   }
 );
 

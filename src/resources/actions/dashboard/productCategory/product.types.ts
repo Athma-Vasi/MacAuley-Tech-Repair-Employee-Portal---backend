@@ -12,9 +12,9 @@ type ProductCategory =
   | 'Keyboard'
   | 'Laptop'
   | 'Memory (RAM)'
-  | 'Mouse'
   | 'Microphone'
   | 'Motherboard'
+  | 'Mouse'
   | 'Power Supply Unit (PSU)'
   | 'Smartphone'
   | 'Speaker'
@@ -28,7 +28,7 @@ type WeightUnit = 'g' | 'kg' | 'lb';
 type MemoryType = 'DDR5' | 'DDR4' | 'DDR3' | 'DDR2' | 'DDR';
 type MemoryUnit = 'KB' | 'MB' | 'GB' | 'TB';
 
-type PeripheralsInterface = 'USB' | 'Bluetooth' | 'PS/2' | 'Other';
+type PeripheralsInterface = 'USB' | 'Bluetooth' | 'PS/2' | 'Wi-Fi' | 'Other';
 
 type MobileOs = 'Android' | 'iOS' | 'Windows' | 'Linux' | 'Other';
 
@@ -105,11 +105,19 @@ type HeadphoneType = 'Over-ear' | 'On-ear' | 'In-ear' | 'Other';
 type HeadphoneInterface = 'USB' | 'Bluetooth' | '3.5 mm' | '2.5 mm' | 'MMCX' | 'Other';
 
 type SpeakerType = '2.0' | '2.1' | '3.1' | '4.1' | '5.1' | '7.1' | 'Other';
-type SpeakerInterface = 'USB' | 'Bluetooth' | '3.5 mm' | '2.5 mm' | 'RCA' | 'TRS' | 'Other';
+type SpeakerInterface =
+  | 'USB'
+  | 'Bluetooth'
+  | '3.5 mm'
+  | '2.5 mm'
+  | 'RCA'
+  | 'TRS'
+  | 'Wi-Fi'
+  | 'Other';
 
 type WebcamResolution = '720p' | '1080p' | '1440p' | '4K' | 'Other';
 type WebcamFrameRate = '30 fps' | '60 fps' | '120 fps' | '240 fps' | 'Other';
-type WebcamInterface = 'USB' | 'Bluetooth' | 'Other';
+type WebcamInterface = 'USB' | 'Bluetooth' | 'Wi-Fi' | 'Other';
 type WebcamMicrophone = 'Yes' | 'No';
 
 type MicrophoneType = 'Condenser' | 'Dynamic' | 'Ribbon' | 'USB' | 'Wireless' | 'Other';

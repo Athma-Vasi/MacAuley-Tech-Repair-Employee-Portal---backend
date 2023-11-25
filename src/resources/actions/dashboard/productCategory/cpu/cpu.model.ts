@@ -1,11 +1,5 @@
 import { Schema, Types, model } from 'mongoose';
-import type {
-  DimensionUnit,
-  ProductAvailability,
-  MemoryUnit,
-  ProductReview,
-  WeightUnit,
-} from '../product.types';
+import type { DimensionUnit, ProductAvailability, MemoryUnit, WeightUnit } from '../product.types';
 import type { Currency } from '../../../company/expenseClaim';
 
 type CpuSchema = {
