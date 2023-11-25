@@ -91,7 +91,7 @@ type LaptopSchema = {
   };
 
   // page 3
-  reviews: ProductReview[];
+  reviewsIds: Types.ObjectId[];
   uploadedFilesIds: Types.ObjectId[];
 };
 
@@ -370,32 +370,12 @@ const laptopSchema = new Schema<LaptopSchema>(
       default: {},
     },
 
-    // page 3
-    reviews: {
-      type: [
-        {
-          userId: {
-            type: Schema.Types.ObjectId,
-            required: [true, 'User ID is required'],
-            ref: 'User',
-            index: true,
-          },
-          username: {
-            type: String,
-            required: [true, 'Username is required'],
-          },
-          rating: {
-            type: Number,
-            required: [true, 'Rating is required'],
-          },
-          review: {
-            type: String,
-            required: [true, 'Review is required'],
-          },
-        },
-      ],
+    reviewsIds: {
+      type: [Schema.Types.ObjectId],
       required: false,
       default: [],
+      ref: 'Review',
+      index: true,
     },
     uploadedFilesIds: {
       type: [Schema.Types.ObjectId],

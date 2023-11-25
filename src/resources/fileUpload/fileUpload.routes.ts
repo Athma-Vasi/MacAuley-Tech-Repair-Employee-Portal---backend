@@ -36,8 +36,9 @@ fileUploadRouter
     fileExtensionLimiterMiddleware(ALLOWED_FILE_EXTENSIONS),
     fileInfoExtracterMiddleware,
     createNewFileUploadHandler
-  )
-  .delete(deleteAllFileUploadsHandler);
+  );
+
+fileUploadRouter.route('/delete-all').delete(deleteAllFileUploadsHandler);
 
 fileUploadRouter
   .route('/user')

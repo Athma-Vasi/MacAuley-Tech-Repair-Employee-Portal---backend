@@ -42,7 +42,7 @@ interface DeleteAFileUploadRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    associatedDocumentId: Types.ObjectId;
+    associatedDocumentId?: Types.ObjectId;
   };
   params: {
     fileUploadId: string;

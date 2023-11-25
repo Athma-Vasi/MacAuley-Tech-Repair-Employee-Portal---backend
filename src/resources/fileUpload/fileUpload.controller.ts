@@ -25,7 +25,7 @@ import {
   GetQueriedResourceRequestServerResponse,
   QueryObjectParsedWithDefaults,
 } from '../../types';
-import { FileUploadDocument } from './fileUpload.model';
+import { FileUploadDocument, FileUploadSchema } from './fileUpload.model';
 import { FilterQuery, QueryOptions } from 'mongoose';
 
 // @desc   Create a new file upload
@@ -42,7 +42,7 @@ const createNewFileUploadHandler = expressAsyncHandler(
       fileUploads[0];
 
     // create new fileUpload object
-    const newFileUploadObject = {
+    const fileUploadSchema: FileUploadSchema = {
       userId,
       username,
       uploadedFile,
@@ -55,15 +55,17 @@ const createNewFileUploadHandler = expressAsyncHandler(
 
     console.log('\n');
     console.group('createNewFileUploadHandler');
-    console.log('newFileUploadObject: ', newFileUploadObject);
+    console.log('fileUploadSchema: ', fileUploadSchema);
     console.groupEnd();
 
     // create new fileUpload
-    const newFileUpload = await createNewFileUploadService(newFileUploadObject);
-    if (newFileUpload) {
+    const fileUploadDocument: FileUploadDocument = await createNewFileUploadService(
+      fileUploadSchema
+    );
+    if (fileUploadDocument) {
       response
         .status(201)
-        .json({ message: 'File uploaded successfully', documentId: newFileUpload._id });
+        .json({ message: 'File uploaded successfully', documentId: fileUploadDocument._id });
     } else {
       response.status(400).json({ message: 'File could not be uploaded' });
     }
@@ -71,7 +73,7 @@ const createNewFileUploadHandler = expressAsyncHandler(
 );
 
 // @desc   Get all file uploads
-// @route  GET /file-uploads
+// @route  GET /file-upload
 // @access Private/Admin/Manager
 const getAllFileUploadsHandler = expressAsyncHandler(
   async (
@@ -114,7 +116,7 @@ const getAllFileUploadsHandler = expressAsyncHandler(
 );
 
 // @desc   Get file uploads by user
-// @route  GET /file-uploads/user
+// @route  GET /file-upload/user
 // @access Private
 const getQueriedFileUploadsByUserHandler = expressAsyncHandler(
   async (
@@ -162,7 +164,7 @@ const getQueriedFileUploadsByUserHandler = expressAsyncHandler(
 );
 
 // @desc   Insert associated document id into file upload
-// @route  PUT /file-uploads/:fileUploadId
+// @route  PUT /file-upload/:fileUploadId
 // @access Private
 const insertAssociatedResourceDocumentIdHandler = expressAsyncHandler(
   async (
@@ -199,7 +201,7 @@ const insertAssociatedResourceDocumentIdHandler = expressAsyncHandler(
 );
 
 // @desc   Delete a file upload
-// @route  DELETE /file-uploads/:fileUploadId
+// @route  DELETE /file-upload/:fileUploadId
 // @access Private
 const deleteAFileUploadHandler = expressAsyncHandler(
   async (request: DeleteAFileUploadRequest, response: Response<FileUploadServerResponse>) => {
@@ -227,7 +229,7 @@ const deleteAFileUploadHandler = expressAsyncHandler(
 );
 
 // @desc   Delete all file uploads
-// @route  DELETE /file-uploads
+// @route  DELETE /file-upload/delete-all
 // @access Private/Admin/Manager
 const deleteAllFileUploadsHandler = expressAsyncHandler(
   async (request: DeleteAllFileUploadsRequest, response: Response<FileUploadServerResponse>) => {
