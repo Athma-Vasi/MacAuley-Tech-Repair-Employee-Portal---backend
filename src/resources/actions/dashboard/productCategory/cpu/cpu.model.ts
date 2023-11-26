@@ -214,9 +214,6 @@ cpuSchema.index({
   additionalComments: 'text',
   // cpu
   cpuSocket: 'text',
-  // reviews
-  'reviews.username': 'text',
-  'reviews.review': 'text',
 });
 
 const CpuModel = model<CpuDocument>('CPU', cpuSchema);

@@ -224,9 +224,7 @@ smartphoneSchema.index({
   model: 'text',
   description: 'text',
   additionalComments: 'text',
-  // reviews
-  'reviews.username': 'text',
-  'reviews.review': 'text',
+
   // smartphone
   smartphoneChipset: 'text',
   smartphoneCamera: 'text',

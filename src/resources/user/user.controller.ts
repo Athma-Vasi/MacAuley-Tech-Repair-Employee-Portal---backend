@@ -7,7 +7,6 @@ import type {
   GetUsersDirectoryRequest,
   GetUserByIdRequest,
   GetAllUsersRequest,
-  DirectoryUserDocument,
   DeleteUserRequest,
   CreateNewUserRequest,
   AddFieldToUsersBulkRequest,
@@ -26,7 +25,7 @@ import {
   updateUserByIdService,
   updateUserPasswordService,
 } from './user.service';
-import { UserDocument, UserSchema } from './user.model';
+import { DirectoryUserDocument, UserDocument, UserSchema } from './user.model';
 import {
   GetQueriedResourceRequestServerResponse,
   QueryObjectParsedWithDefaults,

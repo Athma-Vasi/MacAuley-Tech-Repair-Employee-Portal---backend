@@ -210,9 +210,7 @@ ramSchema.index({
   model: 'text',
   description: 'text',
   additionalComments: 'text',
-  // reviews
-  'reviews.username': 'text',
-  'reviews.review': 'text',
+
   // ram
   ramColor: 'text',
 });

@@ -130,7 +130,7 @@ type MicrophonePolarPattern =
   | 'Other';
 type MicrophoneInterface = 'XLR' | 'USB' | '3.5mm' | 'Wireless' | 'Other';
 
-type ProductServerResponse<Doc> = Doc & {
+type ProductServerResponse<Doc extends Record<string, any> = Record<string, any>> = Doc & {
   fileUploads: FileUploadDocument[];
 };
 

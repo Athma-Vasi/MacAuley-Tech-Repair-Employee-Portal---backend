@@ -7,4 +7,8 @@ function returnEmptyFieldsTuple(input: Record<string, any>) {
   return fieldValuesTuples.filter(([_, value]) => value === true);
 }
 
-export { returnEmptyFieldsTuple };
+function removeUndefinedAndNullValues<T>(value?: T | null): value is T {
+  return value !== undefined && value !== null;
+}
+
+export { returnEmptyFieldsTuple, removeUndefinedAndNullValues };

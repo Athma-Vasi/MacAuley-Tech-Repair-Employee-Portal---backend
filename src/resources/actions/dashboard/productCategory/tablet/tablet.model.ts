@@ -224,9 +224,7 @@ tabletSchema.index({
   model: 'text',
   description: 'text',
   additionalComments: 'text',
-  // reviews
-  'reviews.username': 'text',
-  'reviews.review': 'text',
+
   // tablet
   tabletChipset: 'text',
   tabletCamera: 'text',

@@ -208,9 +208,6 @@ storageSchema.index({
   model: 'text',
   description: 'text',
   additionalComments: 'text',
-  // reviews
-  'reviews.username': 'text',
-  'reviews.review': 'text',
 });
 
 const StorageModel = model<StorageDocument>('Storage', storageSchema);

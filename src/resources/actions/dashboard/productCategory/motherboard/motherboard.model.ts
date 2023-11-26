@@ -231,9 +231,7 @@ motherboardSchema.index({
   model: 'text',
   description: 'text',
   additionalComments: 'text',
-  // reviews
-  'reviews.username': 'text',
-  'reviews.review': 'text',
+
   // motherboard
   motherboardSocket: 'text',
   motherboardChipset: 'text',

@@ -5,6 +5,7 @@ import type { DeleteResult } from 'mongodb';
 import type {
   Country,
   Department,
+  DirectoryUserDocument,
   JobPosition,
   PhoneNumber,
   PostalCode,
@@ -23,7 +24,6 @@ import {
   QueriedResourceGetRequestServiceInput,
   QueriedTotalResourceGetRequestServiceInput,
 } from '../../types';
-import { DirectoryUserDocument } from './user.types';
 
 type CheckUserExistsServiceInput = {
   email?: string | undefined;

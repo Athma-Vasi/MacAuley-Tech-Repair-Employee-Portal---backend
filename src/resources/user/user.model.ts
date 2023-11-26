@@ -182,6 +182,15 @@ type JobPosition =
 
 type PreferredPronouns = 'He/Him' | 'She/Her' | 'They/Them' | 'Other' | 'Prefer not to say';
 
+type Address = {
+  addressLine: string;
+  city: string;
+  province?: Province;
+  state?: StatesUS;
+  postalCode: PostalCode;
+  country: Country;
+};
+
 type UserSchema = {
   username: string;
   password: string;
@@ -196,14 +205,7 @@ type UserSchema = {
   dateOfBirth: NativeDate;
 
   contactNumber: PhoneNumber;
-  address: {
-    addressLine: string;
-    city: string;
-    country: Country;
-    postalCode: PostalCode;
-    province?: Province;
-    state?: StatesUS;
-  };
+  address: Address;
 
   jobPosition: JobPosition;
   department: Department;
@@ -381,8 +383,10 @@ const userSchema = new Schema<UserSchema>(
 
     completedSurveys: {
       type: [Schema.Types.ObjectId],
+      ref: 'SurveyBuilder',
       required: false,
       default: [],
+      index: true,
     },
     isPrefersReducedMotion: {
       type: Boolean,
@@ -416,6 +420,7 @@ const UserModel = model<UserDocument>('User', userSchema);
 
 export { UserModel };
 export type {
+  Address,
   Country,
   Department,
   DirectoryUserDocument,

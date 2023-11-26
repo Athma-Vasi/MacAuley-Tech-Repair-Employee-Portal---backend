@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 
 import type { RequestAfterJWTVerification } from '../auth';
-import type { UserRoles, UserSchema, UserDocument, DirectoryUserDocument } from './user.model';
+import type { UserRoles, UserSchema } from './user.model';
 import { GetQueriedResourceRequest } from '../../types';
 
 interface CreateNewUserRequest {
@@ -84,7 +84,6 @@ export type {
   AddFieldToUsersBulkRequest,
   CreateNewUserRequest,
   DeleteUserRequest,
-  DirectoryUserDocument,
   GetAllUsersRequest,
   GetUserByIdRequest,
   GetUsersDirectoryRequest,

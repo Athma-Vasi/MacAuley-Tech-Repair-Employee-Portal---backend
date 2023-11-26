@@ -193,9 +193,6 @@ keyboardSchema.index({
   model: 'text',
   description: 'text',
   additionalComments: 'text',
-  // reviews
-  'reviews.username': 'text',
-  'reviews.review': 'text',
 });
 
 const KeyboardModel = model<KeyboardDocument>('Keyboard', keyboardSchema);
