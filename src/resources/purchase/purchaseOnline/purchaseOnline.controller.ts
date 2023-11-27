@@ -34,7 +34,7 @@ import { removeUndefinedAndNullValues } from '../../../utils';
 import { GetQueriedPurchasesOnlineByUserRequest } from './purchaseOnline.types';
 
 // @desc   Create new user
-// @route  POST /api/v1/purchase
+// @route  POST /api/v1/purchase/online
 // @access Private
 const createNewPurchaseOnlineHandler = expressAsyncHandler(
   async (
@@ -43,7 +43,6 @@ const createNewPurchaseOnlineHandler = expressAsyncHandler(
   ) => {
     const { purchaseOnlineSchema } = request.body;
 
-    // create new user if all checks pass successfully
     const purchaseOnlineDocument: PurchaseOnlineDocument = await createNewPurchaseOnlineService(
       purchaseOnlineSchema
     );
@@ -61,7 +60,7 @@ const createNewPurchaseOnlineHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   create new purchases in bulk
-// @route  POST /api/v1/purchase/in-store/dev
+// @route  POST /api/v1/purchase/online/dev
 // @access Private
 const createNewPurchaseOnlinesBulkHandler = expressAsyncHandler(
   async (
@@ -110,10 +109,10 @@ const addFieldToPurchaseOnlinesBulkHandler = expressAsyncHandler(
     request: AddFieldsToPurchaseOnlinesBulkRequest,
     response: Response<ResourceRequestServerResponse<PurchaseOnlineDocument>>
   ) => {
-    const { purchaseOnlineFields } = request.body;
+    const { purchaseOnlineObjs } = request.body;
 
     const updatedPurchaseOnlines = await Promise.all(
-      purchaseOnlineFields.map(async ({ purchaseOnlineFields, purchaseOnlineId }) => {
+      purchaseOnlineObjs.map(async ({ purchaseOnlineFields, purchaseOnlineId }) => {
         const updatedPurchaseOnline = await updatePurchaseOnlineByIdService({
           purchaseOnlineFields,
           purchaseOnlineId,
@@ -129,7 +128,7 @@ const addFieldToPurchaseOnlinesBulkHandler = expressAsyncHandler(
     );
 
     // check if any purchases were updated
-    if (updatedPurchaseOnlinesFiltered.length === purchaseOnlineFields.length) {
+    if (updatedPurchaseOnlinesFiltered.length === purchaseOnlineObjs.length) {
       response.status(201).json({
         message: `Successfully updated ${updatedPurchaseOnlinesFiltered.length} purchases`,
         resourceData: updatedPurchaseOnlinesFiltered,
@@ -139,7 +138,7 @@ const addFieldToPurchaseOnlinesBulkHandler = expressAsyncHandler(
         message: `Successfully updated ${
           updatedPurchaseOnlinesFiltered.length
         } purchase(s), but failed to update ${
-          purchaseOnlineFields.length - updatedPurchaseOnlinesFiltered.length
+          purchaseOnlineObjs.length - updatedPurchaseOnlinesFiltered.length
         } purchase(s)`,
         resourceData: updatedPurchaseOnlinesFiltered,
       });
@@ -149,7 +148,7 @@ const addFieldToPurchaseOnlinesBulkHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   get all purchases bulk (no filter, projection or options)
-// @route  GET /api/v1/purchase/in-store/dev
+// @route  GET /api/v1/purchase/online/dev
 // @access Private
 const getAllPurchaseOnlinesBulkHandler = expressAsyncHandler(
   async (
@@ -174,7 +173,7 @@ const getAllPurchaseOnlinesBulkHandler = expressAsyncHandler(
 );
 
 // @desc   Get all purchases queried
-// @route  GET /api/v1/purchase/in-store
+// @route  GET /api/v1/purchase/online
 // @access Private
 const getQueriedPurchaseOnlinesHandler = expressAsyncHandler(
   async (
@@ -218,7 +217,7 @@ const getQueriedPurchaseOnlinesHandler = expressAsyncHandler(
 );
 
 // @desc   Get all purchases queried by a user
-// @route  GET /api/v1/purchase/in-store/user
+// @route  GET /api/v1/purchase/online/user
 // @access Private
 const getQueriedPurchasesOnlineByUserHandler = expressAsyncHandler(
   async (
@@ -265,7 +264,7 @@ const getQueriedPurchasesOnlineByUserHandler = expressAsyncHandler(
 );
 
 // @desc   Get a purchase by id
-// @route  GET /api/v1/purchase/in-store/:id
+// @route  GET /api/v1/purchase/online/:id
 // @access Private
 const getPurchaseOnlineByIdHandler = expressAsyncHandler(
   async (
@@ -288,7 +287,7 @@ const getPurchaseOnlineByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Delete a purchase
-// @route  DELETE /api/v1/purchase/in-store
+// @route  DELETE /api/v1/purchase/online
 // @access Private
 const deletePurchaseOnlineHandler = expressAsyncHandler(
   async (
@@ -317,8 +316,8 @@ const deletePurchaseOnlineHandler = expressAsyncHandler(
   }
 );
 
-// @desc   Update a purchase in-store
-// @route  PATCH /api/v1/purchase/in-store
+// @desc   Update a purchase online
+// @route  PATCH /api/v1/purchase/online
 // @access Private
 const updatePurchaseOnlineByIdHandler = expressAsyncHandler(
   async (

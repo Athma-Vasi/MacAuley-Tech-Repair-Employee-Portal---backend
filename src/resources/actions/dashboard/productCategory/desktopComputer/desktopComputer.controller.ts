@@ -37,7 +37,7 @@ import {
 import { ProductServerResponse } from '../product.types';
 
 // @desc   Create new desktopComputer
-// @route  POST /api/v1/actions/dashboard/product-category/desktopComputer
+// @route  POST /api/v1/actions/dashboard/product-category/desktop-computer
 // @access Private/Admin/Manager
 const createNewDesktopComputerHandler = expressAsyncHandler(
   async (
@@ -61,14 +61,14 @@ const createNewDesktopComputerHandler = expressAsyncHandler(
 
     if (!desktopComputerDocument) {
       response.status(400).json({
-        message: 'Could not create new desktopComputer',
+        message: 'Could not create new Desktop Computer',
         resourceData: [],
       });
       return;
     }
 
     response.status(201).json({
-      message: `Successfully created new ${desktopComputerDocument.model} desktopComputer`,
+      message: `Successfully created new ${desktopComputerDocument.model} Desktop Computer`,
       resourceData: [desktopComputerDocument],
     });
   }
@@ -76,7 +76,7 @@ const createNewDesktopComputerHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Create new desktopComputers bulk
-// @route  POST /api/v1/actions/dashboard/product-category/desktopComputer/dev
+// @route  POST /api/v1/actions/dashboard/product-category/desktop-computer/dev
 // @access Private/Admin/Manager
 const createNewDesktopComputerBulkHandler = expressAsyncHandler(
   async (
@@ -100,13 +100,13 @@ const createNewDesktopComputerBulkHandler = expressAsyncHandler(
     // check if any desktopComputers were created
     if (successfullyCreatedDesktopComputers.length === desktopComputerSchemas.length) {
       response.status(201).json({
-        message: `Successfully created ${successfullyCreatedDesktopComputers.length} desktopComputers`,
+        message: `Successfully created ${successfullyCreatedDesktopComputers.length} Desktop Computers`,
         resourceData: successfullyCreatedDesktopComputers,
       });
       return;
     } else if (successfullyCreatedDesktopComputers.length === 0) {
       response.status(400).json({
-        message: 'Could not create any desktopComputers',
+        message: 'Could not create any Desktop Computers',
         resourceData: [],
       });
       return;
@@ -114,7 +114,7 @@ const createNewDesktopComputerBulkHandler = expressAsyncHandler(
       response.status(201).json({
         message: `Successfully created ${
           desktopComputerSchemas.length - successfullyCreatedDesktopComputers.length
-        } desktopComputers`,
+        } Desktop Computers`,
         resourceData: successfullyCreatedDesktopComputers,
       });
       return;
@@ -123,7 +123,7 @@ const createNewDesktopComputerBulkHandler = expressAsyncHandler(
 );
 
 // @desc   Get all desktopComputers
-// @route  GET /api/v1/actions/dashboard/product-category/desktopComputer
+// @route  GET /api/v1/actions/dashboard/product-category/desktop-computer
 // @access Private/Admin/Manager
 const getQueriedDesktopComputersHandler = expressAsyncHandler(
   async (
@@ -149,7 +149,7 @@ const getQueriedDesktopComputersHandler = expressAsyncHandler(
     });
     if (desktopComputers.length === 0) {
       response.status(200).json({
-        message: 'No desktopComputers that match query parameters were found',
+        message: 'No Desktop Computer that match query parameters were found',
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
@@ -186,7 +186,7 @@ const getQueriedDesktopComputersHandler = expressAsyncHandler(
       .filter((desktopComputer) => desktopComputer);
 
     response.status(200).json({
-      message: 'Successfully retrieved desktopComputers',
+      message: 'Successfully retrieved Desktop Computers',
       pages: Math.ceil(totalDocuments / Number(options?.limit)),
       totalDocuments,
       resourceData: desktopComputerServerResponseArray as DesktopComputerDocument[],
@@ -195,7 +195,7 @@ const getQueriedDesktopComputersHandler = expressAsyncHandler(
 );
 
 // @desc   Get desktopComputer by id
-// @route  GET /api/v1/actions/dashboard/product-category/desktopComputer/:desktopComputerId
+// @route  GET /api/v1/actions/dashboard/product-category/desktop-computer/:desktopComputerId
 // @access Private/Admin/Manager
 const getDesktopComputerByIdHandler = expressAsyncHandler(
   async (
@@ -207,7 +207,7 @@ const getDesktopComputerByIdHandler = expressAsyncHandler(
     // get desktopComputer by id
     const desktopComputer = await getDesktopComputerByIdService(desktopComputerId);
     if (!desktopComputer) {
-      response.status(404).json({ message: 'DesktopComputer not found', resourceData: [] });
+      response.status(404).json({ message: 'Desktop Computer not found', resourceData: [] });
       return;
     }
 
@@ -227,14 +227,14 @@ const getDesktopComputerByIdHandler = expressAsyncHandler(
     };
 
     response.status(200).json({
-      message: 'Successfully retrieved desktopComputer',
+      message: 'Successfully retrieved Desktop Computer',
       resourceData: [desktopComputerServerResponse],
     });
   }
 );
 
 // @desc   Update a desktopComputer by id
-// @route  PUT /api/v1/actions/dashboard/product-category/desktopComputer/:desktopComputerId
+// @route  PUT /api/v1/actions/dashboard/product-category/desktop-computer/:desktopComputerId
 // @access Private/Admin/Manager
 const updateDesktopComputerByIdHandler = expressAsyncHandler(
   async (
@@ -247,7 +247,7 @@ const updateDesktopComputerByIdHandler = expressAsyncHandler(
     // check if desktopComputer exists
     const desktopComputerExists = await getDesktopComputerByIdService(desktopComputerId);
     if (!desktopComputerExists) {
-      response.status(404).json({ message: 'DesktopComputer does not exist', resourceData: [] });
+      response.status(404).json({ message: 'Desktop Computer does not exist', resourceData: [] });
       return;
     }
 
@@ -264,21 +264,21 @@ const updateDesktopComputerByIdHandler = expressAsyncHandler(
 
     if (!updatedDesktopComputer) {
       response.status(400).json({
-        message: 'DesktopComputer could not be updated',
+        message: 'Desktop Computer could not be updated',
         resourceData: [],
       });
       return;
     }
 
     response.status(200).json({
-      message: 'DesktopComputer updated successfully',
+      message: 'Desktop Computer updated successfully',
       resourceData: [updatedDesktopComputer],
     });
   }
 );
 
 // @desc   Return all associated file uploads
-// @route  GET /api/v1/actions/dashboard/product-category/desktopComputer/fileUploads
+// @route  GET /api/v1/actions/dashboard/product-category/desktop-computer/fileUploads
 // @access Private/Admin/Manager
 const returnAllFileUploadsForDesktopComputersHandler = expressAsyncHandler(
   async (
@@ -319,7 +319,7 @@ const returnAllFileUploadsForDesktopComputersHandler = expressAsyncHandler(
 );
 
 // @desc   Delete all desktopComputers
-// @route  DELETE /api/v1/actions/dashboard/product-category/desktopComputer
+// @route  DELETE /api/v1/actions/dashboard/product-category/desktop-computer
 // @access Private/Admin/Manager
 const deleteAllDesktopComputersHandler = expressAsyncHandler(
   async (
@@ -346,18 +346,18 @@ const deleteAllDesktopComputersHandler = expressAsyncHandler(
 
     if (deleteDesktopComputersResult.deletedCount === 0) {
       response.status(400).json({
-        message: 'All desktopComputers could not be deleted. Please try again.',
+        message: 'All Desktop Computer could not be deleted. Please try again.',
         resourceData: [],
       });
       return;
     }
 
-    response.status(200).json({ message: 'All desktopComputers deleted', resourceData: [] });
+    response.status(200).json({ message: 'All Desktop Computer deleted', resourceData: [] });
   }
 );
 
 // @desc   Delete a desktopComputer by id
-// @route  DELETE /api/v1/actions/dashboard/product-category/desktopComputer/:desktopComputerId
+// @route  DELETE /api/v1/actions/dashboard/product-category/desktop-computer/:desktopComputerId
 // @access Private/Admin/Manager
 const deleteADesktopComputerHandler = expressAsyncHandler(
   async (
@@ -369,7 +369,7 @@ const deleteADesktopComputerHandler = expressAsyncHandler(
     // check if desktopComputer exists
     const desktopComputerExists = await getDesktopComputerByIdService(desktopComputerId);
     if (!desktopComputerExists) {
-      response.status(404).json({ message: 'DesktopComputer does not exist', resourceData: [] });
+      response.status(404).json({ message: 'Desktop Computer does not exist', resourceData: [] });
       return;
     }
 
@@ -385,7 +385,7 @@ const deleteADesktopComputerHandler = expressAsyncHandler(
     if (deleteFileUploadsResult.some((result) => result.deletedCount === 0)) {
       response.status(400).json({
         message:
-          'Some file uploads associated with this desktopComputer could not be deleted. DesktopComputer not deleted. Please try again.',
+          'Some file uploads associated with this desktopComputer could not be deleted. Desktop Computer not deleted. Please try again.',
         resourceData: [],
       });
       return;
@@ -398,13 +398,13 @@ const deleteADesktopComputerHandler = expressAsyncHandler(
 
     if (deleteDesktopComputerResult.deletedCount === 0) {
       response.status(400).json({
-        message: 'DesktopComputer could not be deleted. Please try again.',
+        message: 'Desktop Computer could not be deleted. Please try again.',
         resourceData: [],
       });
       return;
     }
 
-    response.status(200).json({ message: 'DesktopComputer deleted', resourceData: [] });
+    response.status(200).json({ message: 'Desktop Computer deleted', resourceData: [] });
   }
 );
 

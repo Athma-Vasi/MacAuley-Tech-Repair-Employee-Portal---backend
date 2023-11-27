@@ -74,7 +74,7 @@ interface AddFieldsToPurchaseOnlinesBulkRequest extends RequestAfterJWTVerificat
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    purchaseOnlineFields: {
+    purchaseOnlineObjs: {
       purchaseOnlineId: Types.ObjectId;
       purchaseOnlineFields: Record<string, any>;
     }[];
