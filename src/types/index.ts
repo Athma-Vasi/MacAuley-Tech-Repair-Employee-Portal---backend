@@ -75,7 +75,25 @@ interface GetQueriedResourceRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    sessionId: Types.ObjectId;
+    sessionId: Types.ObjectId; // added by verifyJWTMiddleware
+    // these are added by the assignQueryDefaults middleware
+    // if its a brand new query, get total number of documents that match the query options and filter
+    // a performance optimization at an acceptable cost in accuracy as the actual number of documents may change between new queries
+    newQueryFlag: boolean;
+    totalDocuments: number;
+  };
+  query: QueryObjectParsed;
+}
+
+interface GetQueriedResourceByUserRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId; // added by verifyJWTMiddleware
+    userToBeQueriedId: Types.ObjectId; // id of the actual user to be queried
     // these are added by the assignQueryDefaults middleware
     // if its a brand new query, get total number of documents that match the query options and filter
     // a performance optimization at an acceptable cost in accuracy as the actual number of documents may change between new queries
@@ -125,14 +143,15 @@ type RequestStatus = 'pending' | 'approved' | 'rejected';
 export type {
   DatabaseResponse,
   DatabaseResponseNullable,
-  FileUploadObject,
   FileInfoObject,
+  FileUploadObject,
+  GetQueriedResourceByUserRequest,
+  GetQueriedResourceRequest,
+  GetQueriedResourceRequestServerResponse,
+  QueriedResourceGetRequestServiceInput,
+  QueriedTotalResourceGetRequestServiceInput,
   QueryObjectParsed,
   QueryObjectParsedWithDefaults,
   RequestStatus,
-  GetQueriedResourceRequest,
-  QueriedResourceGetRequestServiceInput,
-  QueriedTotalResourceGetRequestServiceInput,
   ResourceRequestServerResponse,
-  GetQueriedResourceRequestServerResponse,
 };

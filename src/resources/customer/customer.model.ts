@@ -1,6 +1,6 @@
 import { Schema, Types, model } from 'mongoose';
-import { PreferredPronouns, PhoneNumber } from '../../../user';
-import { Address } from '../../../user/user.model';
+import { PreferredPronouns, PhoneNumber } from '../user';
+import { Address } from '../user/user.model';
 
 type PaymentInformation = {
   cardholderName: string;

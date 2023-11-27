@@ -10,6 +10,8 @@ import type {
   DeleteCustomerRequest,
   CreateNewCustomerRequest,
   AddFieldsToCustomersBulkRequest,
+  CreateNewCustomersBulkRequest,
+  GetAllCustomersBulkRequest,
 } from './customer.types';
 
 import {
@@ -23,15 +25,16 @@ import {
   getCustomerByIdService,
   updateCustomerByIdService,
   updateCustomerPasswordService,
+  getAllCustomersService,
 } from './customer.service';
 import { CustomerDocument, CustomerSchema } from './customer.model';
 import {
   GetQueriedResourceRequestServerResponse,
   QueryObjectParsedWithDefaults,
   ResourceRequestServerResponse,
-} from '../../../../types';
+} from '../../types';
 import { FilterQuery, QueryOptions } from 'mongoose';
-import { removeUndefinedAndNullValues } from '../../../../utils';
+import { removeUndefinedAndNullValues } from '../../utils';
 
 // @desc   Create new user
 // @route  POST /api/v1/actions/dashboard/customer
@@ -83,6 +86,74 @@ const createNewCustomerHandler = expressAsyncHandler(
 );
 
 // DEV ROUTE
+// @desc   create new customers in bulk
+// @route  POST /api/v1/actions/dashboard/customer/dev
+// @access Private
+const createNewCustomersBulkHandler = expressAsyncHandler(
+  async (
+    request: CreateNewCustomersBulkRequest,
+    response: Response<ResourceRequestServerResponse<CustomerDocument>>
+  ) => {
+    const { customerSchemas } = request.body;
+
+    const customerDocuments = await Promise.all(
+      customerSchemas.map(async (customerSchema) => {
+        const { email, address, username } = customerSchema;
+        const { province, state } = address;
+
+        // both state and province cannot be undefined (one is required)
+        if (!state && !province) {
+          response.status(400).json({
+            message: 'State or Province is required',
+            resourceData: [],
+          });
+          return;
+        }
+
+        // check for duplicate email
+        const isDuplicateEmail = await checkCustomerExistsService({ email });
+        if (isDuplicateEmail) {
+          response.status(409).json({ message: 'Email already exists', resourceData: [] });
+          return;
+        }
+
+        // check for duplicate username
+        const isDuplicateCustomer = await checkCustomerExistsService({ username });
+        if (isDuplicateCustomer) {
+          response.status(409).json({ message: 'Customername already exists', resourceData: [] });
+          return;
+        }
+
+        // create new user if all checks pass successfully
+        const customerDocument: CustomerDocument = await createNewCustomerService(customerSchema);
+
+        return customerDocument;
+      })
+    );
+
+    // filter out undefined values
+    const customerDocumentsFiltered = customerDocuments.filter(removeUndefinedAndNullValues);
+
+    // check if any customers were created
+    if (customerDocumentsFiltered.length === customerSchemas.length) {
+      response.status(201).json({
+        message: `Successfully created ${customerDocumentsFiltered.length} customers`,
+        resourceData: customerDocumentsFiltered,
+      });
+    } else {
+      response.status(400).json({
+        message: `Successfully created ${
+          customerDocumentsFiltered.length
+        } customer(s), but failed to create ${
+          customerSchemas.length - customerDocumentsFiltered.length
+        } customer(s)`,
+        resourceData: customerDocumentsFiltered,
+      });
+    }
+  }
+);
+
+// DEV ROUTE
 // @desc   Add field to all customers
 // @route  PATCH /api/v1/actions/dashboard/customer/dev/add-field
 // @access Private
@@ -123,6 +194,32 @@ const addFieldToCustomersBulkHandler = expressAsyncHandler(
         resourceData: updatedCustomersFiltered,
       });
     }
+  }
+);
+
+// DEV ROUTE
+// @desc   get all customers bulk (no filter, projection or options)
+// @route  GET /api/v1/actions/dashboard/customer/dev
+// @access Private
+const getAllCustomersBulkHandler = expressAsyncHandler(
+  async (
+    request: GetAllCustomersBulkRequest,
+    response: Response<ResourceRequestServerResponse<CustomerDocument>>
+  ) => {
+    const customers = await getAllCustomersService();
+
+    if (!customers.length) {
+      response.status(200).json({
+        message: 'Unable to find any customers. Please try again!',
+        resourceData: [],
+      });
+      return;
+    }
+
+    response.status(200).json({
+      message: 'Successfully found customers!',
+      resourceData: customers,
+    });
   }
 );
 
@@ -303,9 +400,11 @@ const updateCustomerPasswordHandler = expressAsyncHandler(
 export {
   addFieldToCustomersBulkHandler,
   createNewCustomerHandler,
+  createNewCustomersBulkHandler,
   deleteCustomerHandler,
-  getQueriedCustomersHandler,
+  getAllCustomersBulkHandler,
   getCustomerByIdHandler,
+  getQueriedCustomersHandler,
   updateCustomerByIdHandler,
   updateCustomerPasswordHandler,
 };

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { assignQueryDefaults, verifyJWTMiddleware, verifyRoles } from '../../../../middlewares';
+import { assignQueryDefaults, verifyJWTMiddleware, verifyRoles } from '../../middlewares';
 import {
   addFieldToCustomersBulkHandler,
   createNewCustomerHandler,
@@ -9,8 +9,10 @@ import {
   getCustomerByIdHandler,
   updateCustomerByIdHandler,
   updateCustomerPasswordHandler,
+  createNewCustomersBulkHandler,
+  getAllCustomersBulkHandler,
 } from './customer.controller';
-import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
+import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../constants';
 
 const customerRouter = Router();
 
@@ -32,6 +34,8 @@ customerRouter
   .route('/update-password')
   .put(verifyJWTMiddleware, verifyRoles(), updateCustomerPasswordHandler);
 
+// DEV ROUTES
+customerRouter.route('/dev').post(createNewCustomersBulkHandler).get(getAllCustomersBulkHandler);
 customerRouter.route('/dev/add-field').post(addFieldToCustomersBulkHandler);
 
 customerRouter

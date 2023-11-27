@@ -9,7 +9,7 @@ import {
   DatabaseResponseNullable,
   QueriedResourceGetRequestServiceInput,
   QueriedTotalResourceGetRequestServiceInput,
-} from '../../../../types';
+} from '../../types';
 
 type CheckUserExistsServiceInput = {
   email?: string | undefined;
