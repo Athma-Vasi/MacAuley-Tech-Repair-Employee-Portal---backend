@@ -39,3 +39,5 @@ purchaseInStoreRouter
   .route('/:purchaseInStoreId')
   .get(getPurchaseInStoreByIdHandler)
   .patch(updatePurchaseInStoreByIdHandler);
+
+export { purchaseInStoreRouter };
