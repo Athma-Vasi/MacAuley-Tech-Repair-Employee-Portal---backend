@@ -1,12 +1,11 @@
 import { Schema, Types, model } from 'mongoose';
 import { Currency } from '../../actions/company/expenseClaim';
-import { StoreLocation } from '../../user/user.model';
+import { Address, StoreLocation } from '../../user/user.model';
 import { PaymentInformation } from '../../customer/customer.model';
 
-type LocationKind = 'In-Store' | 'Online';
-type OrderStatus = 'Pending' | 'Shipped' | 'Delivered' | 'Returned' | 'Cancelled' | '';
+type OrderStatus = 'Pending' | 'Shipped' | 'Delivered' | 'Returned' | 'Cancelled';
 
-type PurchaseInStoreSchema = {
+type PurchaseOnlineSchema = {
   productId: Types.ObjectId;
   productSku: string;
   productBrand: string;
@@ -16,19 +15,21 @@ type PurchaseInStoreSchema = {
   purchaseAmount: number;
   purchaseCurrency: Currency;
   purchaseStoreLocation: StoreLocation;
+  orderStatus: OrderStatus;
+  shippingAddress: Address;
 
   customerId: Types.ObjectId;
   paymentInformation: PaymentInformation;
 };
 
-type PurchaseInStoreDocument = PurchaseInStoreSchema & {
+type PurchaseOnlineDocument = PurchaseOnlineSchema & {
   _id: Types.ObjectId;
   createdAt: NativeDate;
   updatedAt: NativeDate;
   __v: number;
 };
 
-const purchaseInStoreSchema = new Schema<PurchaseInStoreSchema>(
+const purchaseOnlineSchema = new Schema<PurchaseOnlineSchema>(
   {
     productId: {
       type: Schema.Types.ObjectId,
@@ -59,18 +60,50 @@ const purchaseInStoreSchema = new Schema<PurchaseInStoreSchema>(
     purchaseCurrency: {
       type: String,
       required: [true, 'Purchase Currency is required'],
-      index: true,
     },
     purchaseStoreLocation: {
       type: String,
       required: [true, 'Purchase Store Location is required'],
-      index: true,
+    },
+    orderStatus: {
+      type: String,
+      required: [true, 'Order Status is required'],
+    },
+
+    shippingAddress: {
+      addressLine: {
+        type: String,
+        required: [true, 'Address line is required'],
+      },
+      city: {
+        type: String,
+        required: [true, 'City is required'],
+      },
+      province: {
+        type: String,
+        required: false,
+        index: true,
+      },
+      state: {
+        type: String,
+        required: false,
+        index: true,
+      },
+      postalCode: {
+        type: String,
+        required: [true, 'Postal code is required'],
+      },
+      country: {
+        type: String,
+        required: [true, 'Country is required'],
+        index: true,
+      },
+      required: [true, 'Shipping Address is required'],
     },
 
     customerId: {
       type: Schema.Types.ObjectId,
       required: [true, 'Customer ID is required'],
-      ref: 'Customer',
     },
 
     paymentInformation: {
@@ -119,26 +152,27 @@ const purchaseInStoreSchema = new Schema<PurchaseInStoreSchema>(
           index: true,
         },
       },
+      required: [true, 'Payment Information is required'],
     },
   },
   { timestamps: true }
 );
 
 // text indexes for searching all user entered text input fields
-purchaseInStoreSchema.index({
+purchaseOnlineSchema.index({
   productSku: 'text',
   productBrand: 'text',
   productModel: 'text',
+  'shippingAddress.addressLine': 'text',
+  'shippingAddress.city': 'text',
+  'shippingAddress.postalCode': 'text',
   'paymentInformation.cardholderName': 'text',
   'paymentInformation.billingAddress.addressLine': 'text',
   'paymentInformation.billingAddress.city': 'text',
   'paymentInformation.billingAddress.postalCode': 'text',
 });
 
-const PurchaseInStoreModel = model<PurchaseInStoreDocument>(
-  'PurchaseInStore',
-  purchaseInStoreSchema
-);
+const PurchaseOnlineModel = model<PurchaseOnlineDocument>('PurchaseOnline', purchaseOnlineSchema);
 
-export { PurchaseInStoreModel };
-export type { PurchaseInStoreSchema, PurchaseInStoreDocument };
+export { PurchaseOnlineModel };
+export type { PurchaseOnlineDocument, PurchaseOnlineSchema, OrderStatus };

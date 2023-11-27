@@ -99,7 +99,7 @@ const customerSchema = new Schema<CustomerSchema>(
     address: {
       addressLine: {
         type: String,
-        required: [true, 'Address line 1 is required'],
+        required: [true, 'Address line is required'],
       },
       city: {
         type: String,

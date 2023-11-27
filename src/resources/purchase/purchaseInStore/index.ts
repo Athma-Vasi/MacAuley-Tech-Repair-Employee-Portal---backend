@@ -1,5 +1,5 @@
 /**
- * This barrel file is used to import/export customer model, router, types, handlers and services
+ * This barrel file is used to import/export purchase in-store: model, router, types, handlers and services
  */
 
 /**
