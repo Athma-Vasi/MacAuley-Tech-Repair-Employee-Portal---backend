@@ -4,6 +4,7 @@ import {
 	QueriedResourceGetRequestServiceInput,
 	DatabaseResponse,
 	DatabaseResponseNullable,
+	UpdateDocumentByIdServiceInput,
 } from "../../../types";
 import { SpeakerDocument, SpeakerModel, SpeakerSchema } from "./speaker.model";
 
@@ -29,7 +30,7 @@ async function getQueriedSpeakersService({
 			.exec();
 		return speakers;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedSpeakerService" });
+		throw new Error(error, { cause: "getQueriedSpeakersService" });
 	}
 }
 
@@ -37,12 +38,12 @@ async function getQueriedTotalSpeakersService({
 	filter = {},
 }: QueriedResourceGetRequestServiceInput<SpeakerDocument>): Promise<number> {
 	try {
-		const totalSpeaker = await SpeakerModel.countDocuments(filter)
+		const totalSpeakers = await SpeakerModel.countDocuments(filter)
 			.lean()
 			.exec();
-		return totalSpeaker;
+		return totalSpeakers;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedTotalSpeakerService" });
+		throw new Error(error, { cause: "getQueriedTotalSpeakersService" });
 	}
 }
 
@@ -61,21 +62,17 @@ async function getSpeakerByIdService(
 }
 
 async function updateSpeakerByIdService({
-	fieldsToUpdate,
-	speakerId,
-}: {
-	speakerId: Types.ObjectId | string;
-	fieldsToUpdate: Record<
-		keyof SpeakerDocument,
-		SpeakerDocument[keyof SpeakerDocument]
-	>;
-}): DatabaseResponseNullable<SpeakerDocument> {
+	_id,
+	fields,
+	updateOperator,
+}: UpdateDocumentByIdServiceInput<SpeakerDocument>): DatabaseResponseNullable<SpeakerDocument> {
+	const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
+	const updateObject = JSON.parse(updateString);
+
 	try {
-		const speaker = await SpeakerModel.findByIdAndUpdate(
-			speakerId,
-			{ $set: fieldsToUpdate },
-			{ new: true },
-		)
+		const speaker = await SpeakerModel.findByIdAndUpdate(_id, updateObject, {
+			new: true,
+		})
 
 			.lean()
 			.exec();
@@ -117,7 +114,9 @@ async function deleteASpeakerService(
 	speakerId: Types.ObjectId | string,
 ): Promise<DeleteResult> {
 	try {
-		const speaker = await SpeakerModel.deleteOne({ _id: speakerId })
+		const speaker = await SpeakerModel.deleteOne({
+			_id: speakerId,
+		})
 			.lean()
 			.exec();
 		return speaker;

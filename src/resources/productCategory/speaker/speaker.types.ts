@@ -1,9 +1,11 @@
 import type { Types } from "mongoose";
 import type { RequestAfterJWTVerification } from "../../auth";
 import { UserRoles } from "../../user";
-import { GetQueriedResourceRequest } from "../../../types";
+import {
+	DocumentUpdateOperation,
+	GetQueriedResourceRequest,
+} from "../../../types";
 
-import { FileUploadDocument } from "../../fileUpload";
 import { SpeakerDocument, SpeakerSchema } from "./speaker.model";
 
 interface CreateNewSpeakerRequest extends RequestAfterJWTVerification {
@@ -28,6 +30,22 @@ interface CreateNewSpeakerBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		speakerSchemas: SpeakerSchema[];
+	};
+}
+
+// DEV ROUTE
+interface UpdateSpeakersBulkRequest extends RequestAfterJWTVerification {
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
+		speakerFields: {
+			speakerId: Types.ObjectId;
+			documentUpdate: DocumentUpdateOperation<SpeakerDocument>;
+		}[];
 	};
 }
 
@@ -59,10 +77,7 @@ interface UpdateSpeakerByIdRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		speakerFields: Record<
-			keyof SpeakerSchema,
-			SpeakerSchema[keyof SpeakerSchema]
-		>;
+		documentUpdate: DocumentUpdateOperation<SpeakerDocument>;
 	};
 	params: { speakerId: string };
 }
@@ -75,4 +90,5 @@ export type {
 	GetSpeakerByIdRequest,
 	GetQueriedSpeakersRequest,
 	UpdateSpeakerByIdRequest,
+	UpdateSpeakersBulkRequest,
 };

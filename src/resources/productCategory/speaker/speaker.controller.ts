@@ -11,6 +11,7 @@ import type {
 	GetSpeakerByIdRequest,
 	GetQueriedSpeakersRequest,
 	UpdateSpeakerByIdRequest,
+	UpdateSpeakersBulkRequest,
 } from "./speaker.types";
 import type {
 	GetQueriedResourceRequestServerResponse,
@@ -34,10 +35,16 @@ import {
 	deleteFileUploadByIdService,
 	getFileUploadByIdService,
 } from "../../fileUpload";
-import { ProductServerResponse } from "../product.types";
+
+import {
+	ProductReviewDocument,
+	deleteAProductReviewService,
+	getProductReviewByIdService,
+} from "../../productReview";
+import { removeUndefinedAndNullValues } from "../../../utils";
 
 // @desc   Create new speaker
-// @route  POST /api/v1/actions/dashboard/product-category/speaker
+// @route  POST /api/v1/product-category/speaker
 // @access Private/Admin/Manager
 const createNewSpeakerHandler = expressAsyncHandler(
 	async (
@@ -75,7 +82,7 @@ const createNewSpeakerHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Create new speakers bulk
-// @route  POST /api/v1/actions/dashboard/product-category/speaker/dev
+// @route  POST /api/v1/product-category/speaker/dev
 // @access Private/Admin/Manager
 const createNewSpeakerBulkHandler = expressAsyncHandler(
 	async (
@@ -103,32 +110,98 @@ const createNewSpeakerBulkHandler = expressAsyncHandler(
 				resourceData: successfullyCreatedSpeakers,
 			});
 			return;
-		} else if (successfullyCreatedSpeakers.length === 0) {
+		}
+
+		if (successfullyCreatedSpeakers.length === 0) {
 			response.status(400).json({
 				message: "Could not create any speakers",
 				resourceData: [],
 			});
 			return;
-		} else {
+		}
+
+		response.status(201).json({
+			message: `Successfully created ${
+				speakerSchemas.length - successfullyCreatedSpeakers.length
+			} speakers`,
+			resourceData: successfullyCreatedSpeakers,
+		});
+		return;
+	},
+);
+
+// @desc   Update speakers bulk
+// @route  PATCH /api/v1/product-category/speaker/dev
+// @access Private/Admin/Manager
+const updateSpeakersBulkHandler = expressAsyncHandler(
+	async (
+		request: UpdateSpeakersBulkRequest,
+		response: Response<ResourceRequestServerResponse<SpeakerDocument>>,
+	) => {
+		const { speakerFields } = request.body;
+
+		const updatedSpeakers = await Promise.all(
+			speakerFields.map(async (speakerField) => {
+				const {
+					speakerId,
+					documentUpdate: { fields, updateOperator },
+				} = speakerField;
+
+				const updatedSpeaker = await updateSpeakerByIdService({
+					_id: speakerId,
+					fields,
+					updateOperator,
+				});
+
+				return updatedSpeaker;
+			}),
+		);
+
+		// filter out any speakers that were not updated
+		const successfullyUpdatedSpeakers = updatedSpeakers.filter(
+			removeUndefinedAndNullValues,
+		);
+
+		// check if any speakers were updated
+		if (successfullyUpdatedSpeakers.length === speakerFields.length) {
 			response.status(201).json({
-				message: `Successfully created ${
-					speakerSchemas.length - successfullyCreatedSpeakers.length
-				} speakers`,
-				resourceData: successfullyCreatedSpeakers,
+				message: `Successfully updated ${successfullyUpdatedSpeakers.length} speakers`,
+				resourceData: successfullyUpdatedSpeakers,
 			});
 			return;
 		}
+
+		if (successfullyUpdatedSpeakers.length === 0) {
+			response.status(400).json({
+				message: "Could not update any speakers",
+				resourceData: [],
+			});
+			return;
+		}
+
+		response.status(201).json({
+			message: `Successfully updated ${
+				speakerFields.length - successfullyUpdatedSpeakers.length
+			} speakers`,
+			resourceData: successfullyUpdatedSpeakers,
+		});
+		return;
 	},
 );
 
 // @desc   Get all speakers
-// @route  GET /api/v1/actions/dashboard/product-category/speaker
+// @route  GET /api/v1/product-category/speaker
 // @access Private/Admin/Manager
 const getQueriedSpeakersHandler = expressAsyncHandler(
 	async (
 		request: GetQueriedSpeakersRequest,
 		response: Response<
-			GetQueriedResourceRequestServerResponse<SpeakerDocument>
+			GetQueriedResourceRequestServerResponse<
+				SpeakerDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
 		>,
 	) => {
 		let { newQueryFlag, totalDocuments } = request.body;
@@ -159,7 +232,7 @@ const getQueriedSpeakersHandler = expressAsyncHandler(
 			return;
 		}
 
-		// find all fileUploads associated with the speakers (in parallel)
+		// find all fileUploads associated with the speakers
 		const fileUploadsArrArr = await Promise.all(
 			speakers.map(async (speaker) => {
 				const fileUploadPromises = speaker.uploadedFilesIds.map(
@@ -174,37 +247,61 @@ const getQueriedSpeakersHandler = expressAsyncHandler(
 				const fileUploads = await Promise.all(fileUploadPromises);
 
 				// Filter out any undefined values (in case fileUpload was not found)
-				return fileUploads.filter((fileUpload) => fileUpload);
+				return fileUploads.filter(removeUndefinedAndNullValues);
+			}),
+		);
+
+		// find all reviews associated with the speakers
+		const reviewsArrArr = await Promise.all(
+			speakers.map(async (speaker) => {
+				const reviewPromises = speaker.reviewsIds.map(async (reviewId) => {
+					const review = await getProductReviewByIdService(reviewId);
+
+					return review;
+				});
+
+				// Wait for all the promises to resolve before continuing to the next iteration
+				const reviews = await Promise.all(reviewPromises);
+
+				// Filter out any undefined values (in case review was not found)
+				return reviews.filter(removeUndefinedAndNullValues);
 			}),
 		);
 
 		// create speakerServerResponse array
-		const speakerServerResponseArray = speakers
-			.map((speaker, index) => {
-				const fileUploads = fileUploadsArrArr[index];
-				return {
-					...speaker,
-					fileUploads,
-				};
-			})
-			.filter((speaker) => speaker);
+		const speakerServerResponseArray = speakers.map((speaker, index) => {
+			const fileUploads = fileUploadsArrArr[index];
+			const productReviews = reviewsArrArr[index];
+			return {
+				...speaker,
+				fileUploads,
+				productReviews,
+			};
+		});
 
 		response.status(200).json({
 			message: "Successfully retrieved speakers",
 			pages: Math.ceil(totalDocuments / Number(options?.limit)),
 			totalDocuments,
-			resourceData: speakerServerResponseArray as SpeakerDocument[],
+			resourceData: speakerServerResponseArray,
 		});
 	},
 );
 
 // @desc   Get speaker by id
-// @route  GET /api/v1/actions/dashboard/product-category/speaker/:speakerId
+// @route  GET /api/v1/product-category/speaker/:speakerId
 // @access Private/Admin/Manager
 const getSpeakerByIdHandler = expressAsyncHandler(
 	async (
 		request: GetSpeakerByIdRequest,
-		response: Response<ResourceRequestServerResponse<SpeakerDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				SpeakerDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const speakerId = request.params.speakerId;
 
@@ -218,20 +315,28 @@ const getSpeakerByIdHandler = expressAsyncHandler(
 		}
 
 		// get all fileUploads associated with the speaker
-		const fileUploadsArr = await Promise.all(
+		const fileUploads = await Promise.all(
 			speaker.uploadedFilesIds.map(async (uploadedFileId) => {
 				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
-				return fileUpload as FileUploadDocument;
+				return fileUpload;
+			}),
+		);
+
+		// get all reviews associated with the speaker
+		const productReviews = await Promise.all(
+			speaker.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
+
+				return review;
 			}),
 		);
 
 		// create speakerServerResponse
-		const speakerServerResponse: ProductServerResponse<SpeakerDocument> = {
+		const speakerServerResponse = {
 			...speaker,
-			fileUploads: fileUploadsArr.filter(
-				(fileUpload) => fileUpload,
-			) as FileUploadDocument[],
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
 		};
 
 		response.status(200).json({
@@ -242,34 +347,30 @@ const getSpeakerByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Update a speaker by id
-// @route  PUT /api/v1/actions/dashboard/product-category/speaker/:speakerId
+// @route  PUT /api/v1/product-category/speaker/:speakerId
 // @access Private/Admin/Manager
 const updateSpeakerByIdHandler = expressAsyncHandler(
 	async (
 		request: UpdateSpeakerByIdRequest,
-		response: Response<ResourceRequestServerResponse<SpeakerDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				SpeakerDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const { speakerId } = request.params;
-		const { speakerFields } = request.body;
-
-		// check if speaker exists
-		const speakerExists = await getSpeakerByIdService(speakerId);
-		if (!speakerExists) {
-			response
-				.status(404)
-				.json({ message: "Speaker does not exist", resourceData: [] });
-			return;
-		}
-
-		const newSpeaker = {
-			...speakerExists,
-			...speakerFields,
-		};
+		const {
+			documentUpdate: { fields, updateOperator },
+		} = request.body;
 
 		// update speaker
 		const updatedSpeaker = await updateSpeakerByIdService({
-			speakerId,
-			fieldsToUpdate: newSpeaker,
+			_id: speakerId,
+			fields,
+			updateOperator,
 		});
 
 		if (!updatedSpeaker) {
@@ -280,58 +381,40 @@ const updateSpeakerByIdHandler = expressAsyncHandler(
 			return;
 		}
 
-		response.status(200).json({
-			message: "Speaker updated successfully",
-			resourceData: [updatedSpeaker],
-		});
-	},
-);
-
-// @desc   Return all associated file uploads
-// @route  GET /api/v1/actions/dashboard/product-category/speaker/fileUploads
-// @access Private/Admin/Manager
-const returnAllFileUploadsForSpeakersHandler = expressAsyncHandler(
-	async (
-		_request: GetSpeakerByIdRequest,
-		response: Response<ResourceRequestServerResponse<FileUploadDocument>>,
-	) => {
-		const fileUploadsIds = await returnAllSpeakersUploadedFileIdsService();
-
-		if (fileUploadsIds.length === 0) {
-			response
-				.status(404)
-				.json({ message: "No file uploads found", resourceData: [] });
-			return;
-		}
-
-		const fileUploads = (await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) => {
-				const fileUpload = await getFileUploadByIdService(fileUploadId);
+		// get all fileUploads associated with the speaker
+		const fileUploads = await Promise.all(
+			updatedSpeaker.uploadedFilesIds.map(async (uploadedFileId) => {
+				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
 				return fileUpload;
 			}),
-		)) as FileUploadDocument[];
+		);
 
-		// filter out any undefined values (in case fileUpload was not found)
-		const filteredFileUploads = fileUploads.filter((fileUpload) => fileUpload);
+		// get all reviews associated with the speaker
+		const productReviews = await Promise.all(
+			updatedSpeaker.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
 
-		if (filteredFileUploads.length !== fileUploadsIds.length) {
-			response.status(404).json({
-				message: "Some file uploads could not be found.",
-				resourceData: filteredFileUploads,
-			});
-			return;
-		}
+				return review;
+			}),
+		);
+
+		// create speakerServerResponse
+		const speakerServerResponse = {
+			...updatedSpeaker,
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
+		};
 
 		response.status(200).json({
-			message: "Successfully retrieved file uploads",
-			resourceData: filteredFileUploads,
+			message: "Speaker updated successfully",
+			resourceData: [speakerServerResponse],
 		});
 	},
 );
 
 // @desc   Delete all speakers
-// @route  DELETE /api/v1/actions/dashboard/product-category/speaker
+// @route  DELETE /api/v1/product-category/speaker
 // @access Private/Admin/Manager
 const deleteAllSpeakersHandler = expressAsyncHandler(
 	async (
@@ -339,17 +422,39 @@ const deleteAllSpeakersHandler = expressAsyncHandler(
 		response: Response<ResourceRequestServerResponse<SpeakerDocument>>,
 	) => {
 		// grab all speakers file upload ids
-		const fileUploadsIds = await returnAllSpeakersUploadedFileIdsService();
+		const uploadedFilesIds = await returnAllSpeakersUploadedFileIdsService();
 
 		// delete all file uploads associated with all speakers
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) =>
-				deleteFileUploadByIdService(fileUploadId),
+		const deletedFileUploads = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
-		if (!deleteFileUploadsResult.every((result) => result.deletedCount !== 0)) {
+
+		if (
+			deletedFileUploads.some(
+				(deletedFileUpload) => deletedFileUpload.deletedCount === 0,
+			)
+		) {
 			response.status(400).json({
-				message: "Some file uploads could not be deleted. Please try again.",
+				message: "Some File uploads could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
+
+		// delete all reviews associated with all speakers
+		const deletedReviews = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
+
+		if (
+			deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)
+		) {
+			response.status(400).json({
+				message: "Some reviews could not be deleted. Please try again.",
 				resourceData: [],
 			});
 			return;
@@ -373,7 +478,7 @@ const deleteAllSpeakersHandler = expressAsyncHandler(
 );
 
 // @desc   Delete a speaker by id
-// @route  DELETE /api/v1/actions/dashboard/product-category/speaker/:speakerId
+// @route  DELETE /api/v1/product-category/speaker/:speakerId
 // @access Private/Admin/Manager
 const deleteASpeakerHandler = expressAsyncHandler(
 	async (
@@ -395,17 +500,37 @@ const deleteASpeakerHandler = expressAsyncHandler(
 		// if it is not an array, it is made to be an array
 		const uploadedFilesIds = [...speakerExists.uploadedFilesIds];
 
-		// delete all file uploads associated with this speaker
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			uploadedFilesIds.map(async (uploadedFileId) =>
-				deleteFileUploadByIdService(uploadedFileId),
+		// delete all file uploads associated with all speakers
+		const deletedFileUploads = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
 
-		if (deleteFileUploadsResult.some((result) => result.deletedCount === 0)) {
+		if (
+			deletedFileUploads.some(
+				(deletedFileUpload) => deletedFileUpload.deletedCount === 0,
+			)
+		) {
 			response.status(400).json({
-				message:
-					"Some file uploads associated with this speaker could not be deleted. Speaker not deleted. Please try again.",
+				message: "Some File uploads could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
+
+		// delete all reviews associated with all speakers
+		const deletedReviews = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
+
+		if (
+			deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)
+		) {
+			response.status(400).json({
+				message: "Some reviews could not be deleted. Please try again.",
 				resourceData: [],
 			});
 			return;
@@ -434,6 +559,6 @@ export {
 	deleteAllSpeakersHandler,
 	getSpeakerByIdHandler,
 	getQueriedSpeakersHandler,
-	returnAllFileUploadsForSpeakersHandler,
 	updateSpeakerByIdHandler,
+	updateSpeakersBulkHandler,
 };

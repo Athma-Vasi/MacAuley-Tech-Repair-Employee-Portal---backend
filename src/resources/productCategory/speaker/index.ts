@@ -5,75 +5,77 @@
 /**
  * Imports
  */
-import { speakerRouter } from './speaker.routes';
-import { SpeakerModel } from './speaker.model';
+import { speakerRouter } from "./speaker.routes";
+import { SpeakerModel } from "./speaker.model";
 
 import {
-  createNewSpeakerBulkHandler,
-  createNewSpeakerHandler,
-  deleteASpeakerHandler,
-  deleteAllSpeakersHandler,
-  getSpeakerByIdHandler,
-  getQueriedSpeakersHandler,
-  returnAllFileUploadsForSpeakersHandler,
-  updateSpeakerByIdHandler,
-} from './speaker.controller';
+	createNewSpeakerBulkHandler,
+	createNewSpeakerHandler,
+	deleteASpeakerHandler,
+	deleteAllSpeakersHandler,
+	getSpeakerByIdHandler,
+	getQueriedSpeakersHandler,
+	updateSpeakerByIdHandler,
+	updateSpeakersBulkHandler,
+} from "./speaker.controller";
 
 import {
-  createNewSpeakerService,
-  deleteAllSpeakersService,
-  deleteASpeakerService,
-  getSpeakerByIdService,
-  getQueriedSpeakersService,
-  getQueriedTotalSpeakersService,
-  returnAllSpeakersUploadedFileIdsService,
-  updateSpeakerByIdService,
-} from './speaker.service';
+	createNewSpeakerService,
+	deleteASpeakerService,
+	deleteAllSpeakersService,
+	getSpeakerByIdService,
+	getQueriedSpeakersService,
+	getQueriedTotalSpeakersService,
+	returnAllSpeakersUploadedFileIdsService,
+	updateSpeakerByIdService,
+} from "./speaker.service";
 
-import type { SpeakerDocument, SpeakerSchema } from './speaker.model';
+import type { SpeakerDocument, SpeakerSchema } from "./speaker.model";
 import type {
-  CreateNewSpeakerBulkRequest,
-  CreateNewSpeakerRequest,
-  DeleteASpeakerRequest,
-  DeleteAllSpeakersRequest,
-  GetSpeakerByIdRequest,
-  GetQueriedSpeakersRequest,
-  UpdateSpeakerByIdRequest,
-} from './speaker.types';
+	CreateNewSpeakerBulkRequest,
+	CreateNewSpeakerRequest,
+	DeleteASpeakerRequest,
+	DeleteAllSpeakersRequest,
+	GetSpeakerByIdRequest,
+	GetQueriedSpeakersRequest,
+	UpdateSpeakerByIdRequest,
+	UpdateSpeakersBulkRequest,
+} from "./speaker.types";
 
 /**
  * Exports
  */
 
 export {
-  SpeakerModel,
-  speakerRouter,
-  createNewSpeakerBulkHandler,
-  createNewSpeakerHandler,
-  createNewSpeakerService,
-  deleteASpeakerHandler,
-  deleteAllSpeakersHandler,
-  deleteAllSpeakersService,
-  deleteASpeakerService,
-  getSpeakerByIdHandler,
-  getSpeakerByIdService,
-  getQueriedSpeakersHandler,
-  getQueriedSpeakersService,
-  getQueriedTotalSpeakersService,
-  returnAllSpeakersUploadedFileIdsService,
-  returnAllFileUploadsForSpeakersHandler,
-  updateSpeakerByIdHandler,
-  updateSpeakerByIdService,
+	SpeakerModel,
+	speakerRouter,
+	createNewSpeakerBulkHandler,
+	createNewSpeakerHandler,
+	createNewSpeakerService,
+	deleteASpeakerHandler,
+	deleteASpeakerService,
+	deleteAllSpeakersHandler,
+	deleteAllSpeakersService,
+	getSpeakerByIdHandler,
+	getSpeakerByIdService,
+	getQueriedSpeakersHandler,
+	getQueriedSpeakersService,
+	getQueriedTotalSpeakersService,
+	returnAllSpeakersUploadedFileIdsService,
+	updateSpeakerByIdHandler,
+	updateSpeakerByIdService,
+	updateSpeakersBulkHandler,
 };
 
 export type {
-  CreateNewSpeakerBulkRequest,
-  CreateNewSpeakerRequest,
-  DeleteASpeakerRequest,
-  DeleteAllSpeakersRequest,
-  GetSpeakerByIdRequest,
-  GetQueriedSpeakersRequest,
-  SpeakerDocument,
-  SpeakerSchema,
-  UpdateSpeakerByIdRequest,
+	SpeakerDocument,
+	SpeakerSchema,
+	CreateNewSpeakerBulkRequest,
+	CreateNewSpeakerRequest,
+	DeleteASpeakerRequest,
+	DeleteAllSpeakersRequest,
+	GetSpeakerByIdRequest,
+	GetQueriedSpeakersRequest,
+	UpdateSpeakerByIdRequest,
+	UpdateSpeakersBulkRequest,
 };
