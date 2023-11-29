@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { assignQueryDefaults, verifyRoles } from "../../../middlewares";
+import {
+	assignQueryDefaults,
+	verifyJWTMiddleware,
+	verifyRoles,
+} from "../../../middlewares";
 import {
 	createNewWebcamBulkHandler,
 	createNewWebcamHandler,
@@ -7,8 +11,8 @@ import {
 	deleteAllWebcamsHandler,
 	getWebcamByIdHandler,
 	getQueriedWebcamsHandler,
-	returnAllFileUploadsForWebcamsHandler,
 	updateWebcamByIdHandler,
+	updateWebcamsBulkHandler,
 } from "./webcam.controller";
 import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
@@ -19,21 +23,29 @@ webcamRouter.use(verifyRoles());
 webcamRouter
 	.route("/")
 	.get(
+		verifyJWTMiddleware,
+		verifyRoles(),
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedWebcamsHandler,
 	)
-	.post(createNewWebcamHandler)
-	.delete(deleteAllWebcamsHandler);
+	.post(createNewWebcamHandler);
+
+// separate route for safety reasons (as it deletes all documents in the collection)
+webcamRouter
+	.route("/delete-all")
+	.delete(verifyJWTMiddleware, verifyRoles(), deleteAllWebcamsHandler);
 
 // DEV ROUTE
-webcamRouter.route("/dev").post(createNewWebcamBulkHandler);
+webcamRouter
+	.route("/dev")
+	.post(createNewWebcamBulkHandler)
+	.patch(updateWebcamsBulkHandler);
 
-webcamRouter.route("/fileUploads").post(returnAllFileUploadsForWebcamsHandler);
-
+// single document routes
 webcamRouter
 	.route("/:webcamId")
-	.get(getWebcamByIdHandler)
-	.delete(deleteAWebcamHandler)
-	.put(updateWebcamByIdHandler);
+	.get(verifyJWTMiddleware, verifyRoles(), getWebcamByIdHandler)
+	.delete(verifyJWTMiddleware, verifyRoles(), deleteAWebcamHandler)
+	.patch(verifyJWTMiddleware, verifyRoles(), updateWebcamByIdHandler);
 
 export { webcamRouter };

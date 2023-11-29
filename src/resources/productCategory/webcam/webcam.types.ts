@@ -1,9 +1,11 @@
 import type { Types } from "mongoose";
 import type { RequestAfterJWTVerification } from "../../auth";
 import { UserRoles } from "../../user";
-import { GetQueriedResourceRequest } from "../../../types";
+import {
+	DocumentUpdateOperation,
+	GetQueriedResourceRequest,
+} from "../../../types";
 
-import { FileUploadDocument } from "../../fileUpload";
 import { WebcamDocument, WebcamSchema } from "./webcam.model";
 
 interface CreateNewWebcamRequest extends RequestAfterJWTVerification {
@@ -28,6 +30,22 @@ interface CreateNewWebcamBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		webcamSchemas: WebcamSchema[];
+	};
+}
+
+// DEV ROUTE
+interface UpdateWebcamsBulkRequest extends RequestAfterJWTVerification {
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
+		webcamFields: {
+			webcamId: Types.ObjectId;
+			documentUpdate: DocumentUpdateOperation<WebcamDocument>;
+		}[];
 	};
 }
 
@@ -59,7 +77,7 @@ interface UpdateWebcamByIdRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		webcamFields: Record<keyof WebcamSchema, WebcamSchema[keyof WebcamSchema]>;
+		documentUpdate: DocumentUpdateOperation<WebcamDocument>;
 	};
 	params: { webcamId: string };
 }
@@ -72,4 +90,5 @@ export type {
 	GetWebcamByIdRequest,
 	GetQueriedWebcamsRequest,
 	UpdateWebcamByIdRequest,
+	UpdateWebcamsBulkRequest,
 };

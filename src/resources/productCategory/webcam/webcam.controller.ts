@@ -11,6 +11,7 @@ import type {
 	GetWebcamByIdRequest,
 	GetQueriedWebcamsRequest,
 	UpdateWebcamByIdRequest,
+	UpdateWebcamsBulkRequest,
 } from "./webcam.types";
 import type {
 	GetQueriedResourceRequestServerResponse,
@@ -34,10 +35,16 @@ import {
 	deleteFileUploadByIdService,
 	getFileUploadByIdService,
 } from "../../fileUpload";
-import { ProductServerResponse } from "../product.types";
+
+import {
+	ProductReviewDocument,
+	deleteAProductReviewService,
+	getProductReviewByIdService,
+} from "../../productReview";
+import { removeUndefinedAndNullValues } from "../../../utils";
 
 // @desc   Create new webcam
-// @route  POST /api/v1/actions/dashboard/product-category/webcam
+// @route  POST /api/v1/product-category/webcam
 // @access Private/Admin/Manager
 const createNewWebcamHandler = expressAsyncHandler(
 	async (
@@ -75,7 +82,7 @@ const createNewWebcamHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Create new webcams bulk
-// @route  POST /api/v1/actions/dashboard/product-category/webcam/dev
+// @route  POST /api/v1/product-category/webcam/dev
 // @access Private/Admin/Manager
 const createNewWebcamBulkHandler = expressAsyncHandler(
 	async (
@@ -101,31 +108,99 @@ const createNewWebcamBulkHandler = expressAsyncHandler(
 				resourceData: successfullyCreatedWebcams,
 			});
 			return;
-		} else if (successfullyCreatedWebcams.length === 0) {
+		}
+
+		if (successfullyCreatedWebcams.length === 0) {
 			response.status(400).json({
 				message: "Could not create any webcams",
 				resourceData: [],
 			});
 			return;
-		} else {
+		}
+
+		response.status(201).json({
+			message: `Successfully created ${
+				webcamSchemas.length - successfullyCreatedWebcams.length
+			} webcams`,
+			resourceData: successfullyCreatedWebcams,
+		});
+		return;
+	},
+);
+
+// @desc   Update webcams bulk
+// @route  PATCH /api/v1/product-category/webcam/dev
+// @access Private/Admin/Manager
+const updateWebcamsBulkHandler = expressAsyncHandler(
+	async (
+		request: UpdateWebcamsBulkRequest,
+		response: Response<ResourceRequestServerResponse<WebcamDocument>>,
+	) => {
+		const { webcamFields } = request.body;
+
+		const updatedWebcams = await Promise.all(
+			webcamFields.map(async (webcamField) => {
+				const {
+					webcamId,
+					documentUpdate: { fields, updateOperator },
+				} = webcamField;
+
+				const updatedWebcam = await updateWebcamByIdService({
+					_id: webcamId,
+					fields,
+					updateOperator,
+				});
+
+				return updatedWebcam;
+			}),
+		);
+
+		// filter out any webcams that were not updated
+		const successfullyUpdatedWebcams = updatedWebcams.filter(
+			removeUndefinedAndNullValues,
+		);
+
+		// check if any webcams were updated
+		if (successfullyUpdatedWebcams.length === webcamFields.length) {
 			response.status(201).json({
-				message: `Successfully created ${
-					webcamSchemas.length - successfullyCreatedWebcams.length
-				} webcams`,
-				resourceData: successfullyCreatedWebcams,
+				message: `Successfully updated ${successfullyUpdatedWebcams.length} webcams`,
+				resourceData: successfullyUpdatedWebcams,
 			});
 			return;
 		}
+
+		if (successfullyUpdatedWebcams.length === 0) {
+			response.status(400).json({
+				message: "Could not update any webcams",
+				resourceData: [],
+			});
+			return;
+		}
+
+		response.status(201).json({
+			message: `Successfully updated ${
+				webcamFields.length - successfullyUpdatedWebcams.length
+			} webcams`,
+			resourceData: successfullyUpdatedWebcams,
+		});
+		return;
 	},
 );
 
 // @desc   Get all webcams
-// @route  GET /api/v1/actions/dashboard/product-category/webcam
+// @route  GET /api/v1/product-category/webcam
 // @access Private/Admin/Manager
 const getQueriedWebcamsHandler = expressAsyncHandler(
 	async (
 		request: GetQueriedWebcamsRequest,
-		response: Response<GetQueriedResourceRequestServerResponse<WebcamDocument>>,
+		response: Response<
+			GetQueriedResourceRequestServerResponse<
+				WebcamDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		let { newQueryFlag, totalDocuments } = request.body;
 
@@ -155,7 +230,7 @@ const getQueriedWebcamsHandler = expressAsyncHandler(
 			return;
 		}
 
-		// find all fileUploads associated with the webcams (in parallel)
+		// find all fileUploads associated with the webcams
 		const fileUploadsArrArr = await Promise.all(
 			webcams.map(async (webcam) => {
 				const fileUploadPromises = webcam.uploadedFilesIds.map(
@@ -170,37 +245,61 @@ const getQueriedWebcamsHandler = expressAsyncHandler(
 				const fileUploads = await Promise.all(fileUploadPromises);
 
 				// Filter out any undefined values (in case fileUpload was not found)
-				return fileUploads.filter((fileUpload) => fileUpload);
+				return fileUploads.filter(removeUndefinedAndNullValues);
+			}),
+		);
+
+		// find all reviews associated with the webcams
+		const reviewsArrArr = await Promise.all(
+			webcams.map(async (webcam) => {
+				const reviewPromises = webcam.reviewsIds.map(async (reviewId) => {
+					const review = await getProductReviewByIdService(reviewId);
+
+					return review;
+				});
+
+				// Wait for all the promises to resolve before continuing to the next iteration
+				const reviews = await Promise.all(reviewPromises);
+
+				// Filter out any undefined values (in case review was not found)
+				return reviews.filter(removeUndefinedAndNullValues);
 			}),
 		);
 
 		// create webcamServerResponse array
-		const webcamServerResponseArray = webcams
-			.map((webcam, index) => {
-				const fileUploads = fileUploadsArrArr[index];
-				return {
-					...webcam,
-					fileUploads,
-				};
-			})
-			.filter((webcam) => webcam);
+		const webcamServerResponseArray = webcams.map((webcam, index) => {
+			const fileUploads = fileUploadsArrArr[index];
+			const productReviews = reviewsArrArr[index];
+			return {
+				...webcam,
+				fileUploads,
+				productReviews,
+			};
+		});
 
 		response.status(200).json({
 			message: "Successfully retrieved webcams",
 			pages: Math.ceil(totalDocuments / Number(options?.limit)),
 			totalDocuments,
-			resourceData: webcamServerResponseArray as WebcamDocument[],
+			resourceData: webcamServerResponseArray,
 		});
 	},
 );
 
 // @desc   Get webcam by id
-// @route  GET /api/v1/actions/dashboard/product-category/webcam/:webcamId
+// @route  GET /api/v1/product-category/webcam/:webcamId
 // @access Private/Admin/Manager
 const getWebcamByIdHandler = expressAsyncHandler(
 	async (
 		request: GetWebcamByIdRequest,
-		response: Response<ResourceRequestServerResponse<WebcamDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				WebcamDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const webcamId = request.params.webcamId;
 
@@ -214,20 +313,28 @@ const getWebcamByIdHandler = expressAsyncHandler(
 		}
 
 		// get all fileUploads associated with the webcam
-		const fileUploadsArr = await Promise.all(
+		const fileUploads = await Promise.all(
 			webcam.uploadedFilesIds.map(async (uploadedFileId) => {
 				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
-				return fileUpload as FileUploadDocument;
+				return fileUpload;
+			}),
+		);
+
+		// get all reviews associated with the webcam
+		const productReviews = await Promise.all(
+			webcam.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
+
+				return review;
 			}),
 		);
 
 		// create webcamServerResponse
-		const webcamServerResponse: ProductServerResponse<WebcamDocument> = {
+		const webcamServerResponse = {
 			...webcam,
-			fileUploads: fileUploadsArr.filter(
-				(fileUpload) => fileUpload,
-			) as FileUploadDocument[],
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
 		};
 
 		response.status(200).json({
@@ -238,34 +345,30 @@ const getWebcamByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Update a webcam by id
-// @route  PUT /api/v1/actions/dashboard/product-category/webcam/:webcamId
+// @route  PUT /api/v1/product-category/webcam/:webcamId
 // @access Private/Admin/Manager
 const updateWebcamByIdHandler = expressAsyncHandler(
 	async (
 		request: UpdateWebcamByIdRequest,
-		response: Response<ResourceRequestServerResponse<WebcamDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				WebcamDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const { webcamId } = request.params;
-		const { webcamFields } = request.body;
-
-		// check if webcam exists
-		const webcamExists = await getWebcamByIdService(webcamId);
-		if (!webcamExists) {
-			response
-				.status(404)
-				.json({ message: "Webcam does not exist", resourceData: [] });
-			return;
-		}
-
-		const newWebcam = {
-			...webcamExists,
-			...webcamFields,
-		};
+		const {
+			documentUpdate: { fields, updateOperator },
+		} = request.body;
 
 		// update webcam
 		const updatedWebcam = await updateWebcamByIdService({
-			webcamId,
-			fieldsToUpdate: newWebcam,
+			_id: webcamId,
+			fields,
+			updateOperator,
 		});
 
 		if (!updatedWebcam) {
@@ -276,58 +379,40 @@ const updateWebcamByIdHandler = expressAsyncHandler(
 			return;
 		}
 
-		response.status(200).json({
-			message: "Webcam updated successfully",
-			resourceData: [updatedWebcam],
-		});
-	},
-);
-
-// @desc   Return all associated file uploads
-// @route  GET /api/v1/actions/dashboard/product-category/webcam/fileUploads
-// @access Private/Admin/Manager
-const returnAllFileUploadsForWebcamsHandler = expressAsyncHandler(
-	async (
-		_request: GetWebcamByIdRequest,
-		response: Response<ResourceRequestServerResponse<FileUploadDocument>>,
-	) => {
-		const fileUploadsIds = await returnAllWebcamsUploadedFileIdsService();
-
-		if (fileUploadsIds.length === 0) {
-			response
-				.status(404)
-				.json({ message: "No file uploads found", resourceData: [] });
-			return;
-		}
-
-		const fileUploads = (await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) => {
-				const fileUpload = await getFileUploadByIdService(fileUploadId);
+		// get all fileUploads associated with the webcam
+		const fileUploads = await Promise.all(
+			updatedWebcam.uploadedFilesIds.map(async (uploadedFileId) => {
+				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
 				return fileUpload;
 			}),
-		)) as FileUploadDocument[];
+		);
 
-		// filter out any undefined values (in case fileUpload was not found)
-		const filteredFileUploads = fileUploads.filter((fileUpload) => fileUpload);
+		// get all reviews associated with the webcam
+		const productReviews = await Promise.all(
+			updatedWebcam.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
 
-		if (filteredFileUploads.length !== fileUploadsIds.length) {
-			response.status(404).json({
-				message: "Some file uploads could not be found.",
-				resourceData: filteredFileUploads,
-			});
-			return;
-		}
+				return review;
+			}),
+		);
+
+		// create webcamServerResponse
+		const webcamServerResponse = {
+			...updatedWebcam,
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
+		};
 
 		response.status(200).json({
-			message: "Successfully retrieved file uploads",
-			resourceData: filteredFileUploads,
+			message: "Webcam updated successfully",
+			resourceData: [webcamServerResponse],
 		});
 	},
 );
 
 // @desc   Delete all webcams
-// @route  DELETE /api/v1/actions/dashboard/product-category/webcam
+// @route  DELETE /api/v1/product-category/webcam
 // @access Private/Admin/Manager
 const deleteAllWebcamsHandler = expressAsyncHandler(
 	async (
@@ -335,17 +420,39 @@ const deleteAllWebcamsHandler = expressAsyncHandler(
 		response: Response<ResourceRequestServerResponse<WebcamDocument>>,
 	) => {
 		// grab all webcams file upload ids
-		const fileUploadsIds = await returnAllWebcamsUploadedFileIdsService();
+		const uploadedFilesIds = await returnAllWebcamsUploadedFileIdsService();
 
 		// delete all file uploads associated with all webcams
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) =>
-				deleteFileUploadByIdService(fileUploadId),
+		const deletedFileUploads = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
-		if (!deleteFileUploadsResult.every((result) => result.deletedCount !== 0)) {
+
+		if (
+			deletedFileUploads.some(
+				(deletedFileUpload) => deletedFileUpload.deletedCount === 0,
+			)
+		) {
 			response.status(400).json({
-				message: "Some file uploads could not be deleted. Please try again.",
+				message: "Some File uploads could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
+
+		// delete all reviews associated with all webcams
+		const deletedReviews = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
+
+		if (
+			deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)
+		) {
+			response.status(400).json({
+				message: "Some reviews could not be deleted. Please try again.",
 				resourceData: [],
 			});
 			return;
@@ -369,7 +476,7 @@ const deleteAllWebcamsHandler = expressAsyncHandler(
 );
 
 // @desc   Delete a webcam by id
-// @route  DELETE /api/v1/actions/dashboard/product-category/webcam/:webcamId
+// @route  DELETE /api/v1/product-category/webcam/:webcamId
 // @access Private/Admin/Manager
 const deleteAWebcamHandler = expressAsyncHandler(
 	async (
@@ -391,17 +498,37 @@ const deleteAWebcamHandler = expressAsyncHandler(
 		// if it is not an array, it is made to be an array
 		const uploadedFilesIds = [...webcamExists.uploadedFilesIds];
 
-		// delete all file uploads associated with this webcam
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			uploadedFilesIds.map(async (uploadedFileId) =>
-				deleteFileUploadByIdService(uploadedFileId),
+		// delete all file uploads associated with all webcams
+		const deletedFileUploads = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
 
-		if (deleteFileUploadsResult.some((result) => result.deletedCount === 0)) {
+		if (
+			deletedFileUploads.some(
+				(deletedFileUpload) => deletedFileUpload.deletedCount === 0,
+			)
+		) {
 			response.status(400).json({
-				message:
-					"Some file uploads associated with this webcam could not be deleted. Webcam not deleted. Please try again.",
+				message: "Some File uploads could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
+
+		// delete all reviews associated with all webcams
+		const deletedReviews = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
+
+		if (
+			deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)
+		) {
+			response.status(400).json({
+				message: "Some reviews could not be deleted. Please try again.",
 				resourceData: [],
 			});
 			return;
@@ -430,6 +557,6 @@ export {
 	deleteAllWebcamsHandler,
 	getWebcamByIdHandler,
 	getQueriedWebcamsHandler,
-	returnAllFileUploadsForWebcamsHandler,
 	updateWebcamByIdHandler,
+	updateWebcamsBulkHandler,
 };

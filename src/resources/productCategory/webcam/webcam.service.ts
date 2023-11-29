@@ -4,6 +4,7 @@ import {
 	QueriedResourceGetRequestServiceInput,
 	DatabaseResponse,
 	DatabaseResponseNullable,
+	UpdateDocumentByIdServiceInput,
 } from "../../../types";
 import { WebcamDocument, WebcamModel, WebcamSchema } from "./webcam.model";
 
@@ -29,7 +30,7 @@ async function getQueriedWebcamsService({
 			.exec();
 		return webcams;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedWebcamService" });
+		throw new Error(error, { cause: "getQueriedWebcamsService" });
 	}
 }
 
@@ -37,10 +38,10 @@ async function getQueriedTotalWebcamsService({
 	filter = {},
 }: QueriedResourceGetRequestServiceInput<WebcamDocument>): Promise<number> {
 	try {
-		const totalWebcam = await WebcamModel.countDocuments(filter).lean().exec();
-		return totalWebcam;
+		const totalWebcams = await WebcamModel.countDocuments(filter).lean().exec();
+		return totalWebcams;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedTotalWebcamService" });
+		throw new Error(error, { cause: "getQueriedTotalWebcamsService" });
 	}
 }
 
@@ -59,21 +60,17 @@ async function getWebcamByIdService(
 }
 
 async function updateWebcamByIdService({
-	fieldsToUpdate,
-	webcamId,
-}: {
-	webcamId: Types.ObjectId | string;
-	fieldsToUpdate: Record<
-		keyof WebcamDocument,
-		WebcamDocument[keyof WebcamDocument]
-	>;
-}): DatabaseResponseNullable<WebcamDocument> {
+	_id,
+	fields,
+	updateOperator,
+}: UpdateDocumentByIdServiceInput<WebcamDocument>): DatabaseResponseNullable<WebcamDocument> {
+	const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
+	const updateObject = JSON.parse(updateString);
+
 	try {
-		const webcam = await WebcamModel.findByIdAndUpdate(
-			webcamId,
-			{ $set: fieldsToUpdate },
-			{ new: true },
-		)
+		const webcam = await WebcamModel.findByIdAndUpdate(_id, updateObject, {
+			new: true,
+		})
 
 			.lean()
 			.exec();
@@ -105,7 +102,9 @@ async function returnAllWebcamsUploadedFileIdsService(): Promise<
 		);
 		return uploadedFileIds;
 	} catch (error: any) {
-		throw new Error(error, { cause: "returnAllWebcamsUploadedFileIdsService" });
+		throw new Error(error, {
+			cause: "returnAllWebcamsUploadedFileIdsService",
+		});
 	}
 }
 
@@ -113,7 +112,11 @@ async function deleteAWebcamService(
 	webcamId: Types.ObjectId | string,
 ): Promise<DeleteResult> {
 	try {
-		const webcam = await WebcamModel.deleteOne({ _id: webcamId }).lean().exec();
+		const webcam = await WebcamModel.deleteOne({
+			_id: webcamId,
+		})
+			.lean()
+			.exec();
 		return webcam;
 	} catch (error: any) {
 		throw new Error(error, { cause: "deleteAWebcamService" });
