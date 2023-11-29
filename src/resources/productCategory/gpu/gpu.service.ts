@@ -4,6 +4,7 @@ import {
 	QueriedResourceGetRequestServiceInput,
 	DatabaseResponse,
 	DatabaseResponseNullable,
+	UpdateDocumentByIdServiceInput,
 } from "../../../types";
 import { GpuDocument, GpuModel, GpuSchema } from "./gpu.model";
 
@@ -25,7 +26,7 @@ async function getQueriedGpusService({
 		const gpus = await GpuModel.find(filter, projection, options).lean().exec();
 		return gpus;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedGpuService" });
+		throw new Error(error, { cause: "getQueriedGpusService" });
 	}
 }
 
@@ -33,10 +34,10 @@ async function getQueriedTotalGpusService({
 	filter = {},
 }: QueriedResourceGetRequestServiceInput<GpuDocument>): Promise<number> {
 	try {
-		const totalGpu = await GpuModel.countDocuments(filter).lean().exec();
-		return totalGpu;
+		const totalGpus = await GpuModel.countDocuments(filter).lean().exec();
+		return totalGpus;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedTotalGpuService" });
+		throw new Error(error, { cause: "getQueriedTotalGpusService" });
 	}
 }
 
@@ -44,7 +45,10 @@ async function getGpuByIdService(
 	gpuId: Types.ObjectId | string,
 ): DatabaseResponseNullable<GpuDocument> {
 	try {
-		const gpu = await GpuModel.findById(gpuId).lean().exec();
+		const gpu = await GpuModel.findById(gpuId)
+
+			.lean()
+			.exec();
 		return gpu;
 	} catch (error: any) {
 		throw new Error(error, { cause: "getGpuByIdService" });
@@ -52,18 +56,17 @@ async function getGpuByIdService(
 }
 
 async function updateGpuByIdService({
-	fieldsToUpdate,
-	gpuId,
-}: {
-	gpuId: Types.ObjectId | string;
-	fieldsToUpdate: Record<keyof GpuDocument, GpuDocument[keyof GpuDocument]>;
-}): DatabaseResponseNullable<GpuDocument> {
+	_id,
+	fields,
+	updateOperator,
+}: UpdateDocumentByIdServiceInput<GpuDocument>): DatabaseResponseNullable<GpuDocument> {
+	const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
+	const updateObject = JSON.parse(updateString);
+
 	try {
-		const gpu = await GpuModel.findByIdAndUpdate(
-			gpuId,
-			{ $set: fieldsToUpdate },
-			{ new: true },
-		)
+		const gpu = await GpuModel.findByIdAndUpdate(_id, updateObject, {
+			new: true,
+		})
 
 			.lean()
 			.exec();
@@ -93,7 +96,9 @@ async function returnAllGpusUploadedFileIdsService(): Promise<
 		const uploadedFileIds = gpus.flatMap((gpu) => gpu.uploadedFilesIds);
 		return uploadedFileIds;
 	} catch (error: any) {
-		throw new Error(error, { cause: "returnAllGpusUploadedFileIdsService" });
+		throw new Error(error, {
+			cause: "returnAllGpusUploadedFileIdsService",
+		});
 	}
 }
 
@@ -101,7 +106,11 @@ async function deleteAGpuService(
 	gpuId: Types.ObjectId | string,
 ): Promise<DeleteResult> {
 	try {
-		const gpu = await GpuModel.deleteOne({ _id: gpuId }).lean().exec();
+		const gpu = await GpuModel.deleteOne({
+			_id: gpuId,
+		})
+			.lean()
+			.exec();
 		return gpu;
 	} catch (error: any) {
 		throw new Error(error, { cause: "deleteAGpuService" });

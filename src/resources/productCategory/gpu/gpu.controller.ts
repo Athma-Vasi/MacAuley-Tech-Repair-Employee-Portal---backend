@@ -11,6 +11,7 @@ import type {
 	GetGpuByIdRequest,
 	GetQueriedGpusRequest,
 	UpdateGpuByIdRequest,
+	UpdateGpusBulkRequest,
 } from "./gpu.types";
 import type {
 	GetQueriedResourceRequestServerResponse,
@@ -34,10 +35,16 @@ import {
 	deleteFileUploadByIdService,
 	getFileUploadByIdService,
 } from "../../fileUpload";
-import { ProductServerResponse } from "../product.types";
+
+import {
+	ProductReviewDocument,
+	deleteAProductReviewService,
+	getProductReviewByIdService,
+} from "../../productReview";
+import { removeUndefinedAndNullValues } from "../../../utils";
 
 // @desc   Create new gpu
-// @route  POST /api/v1/actions/dashboard/product-category/gpu
+// @route  POST /api/v1/product-category/gpu
 // @access Private/Admin/Manager
 const createNewGpuHandler = expressAsyncHandler(
 	async (
@@ -74,7 +81,7 @@ const createNewGpuHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Create new gpus bulk
-// @route  POST /api/v1/actions/dashboard/product-category/gpu/dev
+// @route  POST /api/v1/product-category/gpu/dev
 // @access Private/Admin/Manager
 const createNewGpuBulkHandler = expressAsyncHandler(
 	async (
@@ -100,31 +107,99 @@ const createNewGpuBulkHandler = expressAsyncHandler(
 				resourceData: successfullyCreatedGpus,
 			});
 			return;
-		} else if (successfullyCreatedGpus.length === 0) {
+		}
+
+		if (successfullyCreatedGpus.length === 0) {
 			response.status(400).json({
 				message: "Could not create any gpus",
 				resourceData: [],
 			});
 			return;
-		} else {
+		}
+
+		response.status(201).json({
+			message: `Successfully created ${
+				gpuSchemas.length - successfullyCreatedGpus.length
+			} gpus`,
+			resourceData: successfullyCreatedGpus,
+		});
+		return;
+	},
+);
+
+// @desc   Update gpus bulk
+// @route  PATCH /api/v1/product-category/gpu/dev
+// @access Private/Admin/Manager
+const updateGpusBulkHandler = expressAsyncHandler(
+	async (
+		request: UpdateGpusBulkRequest,
+		response: Response<ResourceRequestServerResponse<GpuDocument>>,
+	) => {
+		const { gpuFields } = request.body;
+
+		const updatedGpus = await Promise.all(
+			gpuFields.map(async (gpuField) => {
+				const {
+					gpuId,
+					documentUpdate: { fields, updateOperator },
+				} = gpuField;
+
+				const updatedGpu = await updateGpuByIdService({
+					_id: gpuId,
+					fields,
+					updateOperator,
+				});
+
+				return updatedGpu;
+			}),
+		);
+
+		// filter out any gpus that were not updated
+		const successfullyUpdatedGpus = updatedGpus.filter(
+			removeUndefinedAndNullValues,
+		);
+
+		// check if any gpus were updated
+		if (successfullyUpdatedGpus.length === gpuFields.length) {
 			response.status(201).json({
-				message: `Successfully created ${
-					gpuSchemas.length - successfullyCreatedGpus.length
-				} gpus`,
-				resourceData: successfullyCreatedGpus,
+				message: `Successfully updated ${successfullyUpdatedGpus.length} gpus`,
+				resourceData: successfullyUpdatedGpus,
 			});
 			return;
 		}
+
+		if (successfullyUpdatedGpus.length === 0) {
+			response.status(400).json({
+				message: "Could not update any gpus",
+				resourceData: [],
+			});
+			return;
+		}
+
+		response.status(201).json({
+			message: `Successfully updated ${
+				gpuFields.length - successfullyUpdatedGpus.length
+			} gpus`,
+			resourceData: successfullyUpdatedGpus,
+		});
+		return;
 	},
 );
 
 // @desc   Get all gpus
-// @route  GET /api/v1/actions/dashboard/product-category/gpu
+// @route  GET /api/v1/product-category/gpu
 // @access Private/Admin/Manager
 const getQueriedGpusHandler = expressAsyncHandler(
 	async (
 		request: GetQueriedGpusRequest,
-		response: Response<GetQueriedResourceRequestServerResponse<GpuDocument>>,
+		response: Response<
+			GetQueriedResourceRequestServerResponse<
+				GpuDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		let { newQueryFlag, totalDocuments } = request.body;
 
@@ -154,7 +229,7 @@ const getQueriedGpusHandler = expressAsyncHandler(
 			return;
 		}
 
-		// find all fileUploads associated with the gpus (in parallel)
+		// find all fileUploads associated with the gpus
 		const fileUploadsArrArr = await Promise.all(
 			gpus.map(async (gpu) => {
 				const fileUploadPromises = gpu.uploadedFilesIds.map(
@@ -169,37 +244,61 @@ const getQueriedGpusHandler = expressAsyncHandler(
 				const fileUploads = await Promise.all(fileUploadPromises);
 
 				// Filter out any undefined values (in case fileUpload was not found)
-				return fileUploads.filter((fileUpload) => fileUpload);
+				return fileUploads.filter(removeUndefinedAndNullValues);
+			}),
+		);
+
+		// find all reviews associated with the gpus
+		const reviewsArrArr = await Promise.all(
+			gpus.map(async (gpu) => {
+				const reviewPromises = gpu.reviewsIds.map(async (reviewId) => {
+					const review = await getProductReviewByIdService(reviewId);
+
+					return review;
+				});
+
+				// Wait for all the promises to resolve before continuing to the next iteration
+				const reviews = await Promise.all(reviewPromises);
+
+				// Filter out any undefined values (in case review was not found)
+				return reviews.filter(removeUndefinedAndNullValues);
 			}),
 		);
 
 		// create gpuServerResponse array
-		const gpuServerResponseArray = gpus
-			.map((gpu, index) => {
-				const fileUploads = fileUploadsArrArr[index];
-				return {
-					...gpu,
-					fileUploads,
-				};
-			})
-			.filter((gpu) => gpu);
+		const gpuServerResponseArray = gpus.map((gpu, index) => {
+			const fileUploads = fileUploadsArrArr[index];
+			const productReviews = reviewsArrArr[index];
+			return {
+				...gpu,
+				fileUploads,
+				productReviews,
+			};
+		});
 
 		response.status(200).json({
 			message: "Successfully retrieved gpus",
 			pages: Math.ceil(totalDocuments / Number(options?.limit)),
 			totalDocuments,
-			resourceData: gpuServerResponseArray as GpuDocument[],
+			resourceData: gpuServerResponseArray,
 		});
 	},
 );
 
 // @desc   Get gpu by id
-// @route  GET /api/v1/actions/dashboard/product-category/gpu/:gpuId
+// @route  GET /api/v1/product-category/gpu/:gpuId
 // @access Private/Admin/Manager
 const getGpuByIdHandler = expressAsyncHandler(
 	async (
 		request: GetGpuByIdRequest,
-		response: Response<ResourceRequestServerResponse<GpuDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				GpuDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const gpuId = request.params.gpuId;
 
@@ -211,20 +310,28 @@ const getGpuByIdHandler = expressAsyncHandler(
 		}
 
 		// get all fileUploads associated with the gpu
-		const fileUploadsArr = await Promise.all(
+		const fileUploads = await Promise.all(
 			gpu.uploadedFilesIds.map(async (uploadedFileId) => {
 				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
-				return fileUpload as FileUploadDocument;
+				return fileUpload;
+			}),
+		);
+
+		// get all reviews associated with the gpu
+		const productReviews = await Promise.all(
+			gpu.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
+
+				return review;
 			}),
 		);
 
 		// create gpuServerResponse
-		const gpuServerResponse: ProductServerResponse<GpuDocument> = {
+		const gpuServerResponse = {
 			...gpu,
-			fileUploads: fileUploadsArr.filter(
-				(fileUpload) => fileUpload,
-			) as FileUploadDocument[],
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
 		};
 
 		response.status(200).json({
@@ -235,34 +342,30 @@ const getGpuByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Update a gpu by id
-// @route  PUT /api/v1/actions/dashboard/product-category/gpu/:gpuId
+// @route  PUT /api/v1/product-category/gpu/:gpuId
 // @access Private/Admin/Manager
 const updateGpuByIdHandler = expressAsyncHandler(
 	async (
 		request: UpdateGpuByIdRequest,
-		response: Response<ResourceRequestServerResponse<GpuDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				GpuDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const { gpuId } = request.params;
-		const { gpuFields } = request.body;
-
-		// check if gpu exists
-		const gpuExists = await getGpuByIdService(gpuId);
-		if (!gpuExists) {
-			response
-				.status(404)
-				.json({ message: "Gpu does not exist", resourceData: [] });
-			return;
-		}
-
-		const newGpu = {
-			...gpuExists,
-			...gpuFields,
-		};
+		const {
+			documentUpdate: { fields, updateOperator },
+		} = request.body;
 
 		// update gpu
 		const updatedGpu = await updateGpuByIdService({
-			gpuId,
-			fieldsToUpdate: newGpu,
+			_id: gpuId,
+			fields,
+			updateOperator,
 		});
 
 		if (!updatedGpu) {
@@ -273,58 +376,40 @@ const updateGpuByIdHandler = expressAsyncHandler(
 			return;
 		}
 
-		response.status(200).json({
-			message: "Gpu updated successfully",
-			resourceData: [updatedGpu],
-		});
-	},
-);
-
-// @desc   Return all associated file uploads
-// @route  GET /api/v1/actions/dashboard/product-category/gpu/fileUploads
-// @access Private/Admin/Manager
-const returnAllFileUploadsForGpusHandler = expressAsyncHandler(
-	async (
-		_request: GetGpuByIdRequest,
-		response: Response<ResourceRequestServerResponse<FileUploadDocument>>,
-	) => {
-		const fileUploadsIds = await returnAllGpusUploadedFileIdsService();
-
-		if (fileUploadsIds.length === 0) {
-			response
-				.status(404)
-				.json({ message: "No file uploads found", resourceData: [] });
-			return;
-		}
-
-		const fileUploads = (await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) => {
-				const fileUpload = await getFileUploadByIdService(fileUploadId);
+		// get all fileUploads associated with the gpu
+		const fileUploads = await Promise.all(
+			updatedGpu.uploadedFilesIds.map(async (uploadedFileId) => {
+				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
 				return fileUpload;
 			}),
-		)) as FileUploadDocument[];
+		);
 
-		// filter out any undefined values (in case fileUpload was not found)
-		const filteredFileUploads = fileUploads.filter((fileUpload) => fileUpload);
+		// get all reviews associated with the gpu
+		const productReviews = await Promise.all(
+			updatedGpu.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
 
-		if (filteredFileUploads.length !== fileUploadsIds.length) {
-			response.status(404).json({
-				message: "Some file uploads could not be found.",
-				resourceData: filteredFileUploads,
-			});
-			return;
-		}
+				return review;
+			}),
+		);
+
+		// create gpuServerResponse
+		const gpuServerResponse = {
+			...updatedGpu,
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
+		};
 
 		response.status(200).json({
-			message: "Successfully retrieved file uploads",
-			resourceData: filteredFileUploads,
+			message: "Gpu updated successfully",
+			resourceData: [gpuServerResponse],
 		});
 	},
 );
 
 // @desc   Delete all gpus
-// @route  DELETE /api/v1/actions/dashboard/product-category/gpu
+// @route  DELETE /api/v1/product-category/gpu
 // @access Private/Admin/Manager
 const deleteAllGpusHandler = expressAsyncHandler(
 	async (
@@ -332,21 +417,21 @@ const deleteAllGpusHandler = expressAsyncHandler(
 		response: Response<ResourceRequestServerResponse<GpuDocument>>,
 	) => {
 		// grab all gpus file upload ids
-		const fileUploadsIds = await returnAllGpusUploadedFileIdsService();
+		const uploadedFilesIds = await returnAllGpusUploadedFileIdsService();
 
 		// delete all file uploads associated with all gpus
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) =>
-				deleteFileUploadByIdService(fileUploadId),
+		await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
-		if (!deleteFileUploadsResult.every((result) => result.deletedCount !== 0)) {
-			response.status(400).json({
-				message: "Some file uploads could not be deleted. Please try again.",
-				resourceData: [],
-			});
-			return;
-		}
+
+		// delete all reviews associated with all gpus
+		await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
 
 		// delete all gpus
 		const deleteGpusResult: DeleteResult = await deleteAllGpusService();
@@ -366,7 +451,7 @@ const deleteAllGpusHandler = expressAsyncHandler(
 );
 
 // @desc   Delete a gpu by id
-// @route  DELETE /api/v1/actions/dashboard/product-category/gpu/:gpuId
+// @route  DELETE /api/v1/product-category/gpu/:gpuId
 // @access Private/Admin/Manager
 const deleteAGpuHandler = expressAsyncHandler(
 	async (
@@ -388,21 +473,19 @@ const deleteAGpuHandler = expressAsyncHandler(
 		// if it is not an array, it is made to be an array
 		const uploadedFilesIds = [...gpuExists.uploadedFilesIds];
 
-		// delete all file uploads associated with this gpu
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			uploadedFilesIds.map(async (uploadedFileId) =>
-				deleteFileUploadByIdService(uploadedFileId),
+		// delete all file uploads associated with all gpus
+		await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
 
-		if (deleteFileUploadsResult.some((result) => result.deletedCount === 0)) {
-			response.status(400).json({
-				message:
-					"Some file uploads associated with this gpu could not be deleted. Gpu not deleted. Please try again.",
-				resourceData: [],
-			});
-			return;
-		}
+		// delete all reviews associated with all gpus
+		await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
 
 		// delete gpu by id
 		const deleteGpuResult: DeleteResult = await deleteAGpuService(gpuId);
@@ -426,6 +509,6 @@ export {
 	deleteAllGpusHandler,
 	getGpuByIdHandler,
 	getQueriedGpusHandler,
-	returnAllFileUploadsForGpusHandler,
 	updateGpuByIdHandler,
+	updateGpusBulkHandler,
 };

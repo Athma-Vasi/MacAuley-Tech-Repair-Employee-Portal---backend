@@ -43,7 +43,7 @@ displayRouter
 
 // single document routes
 displayRouter
-	.route("/:caseId")
+	.route("/:displayId")
 	.get(verifyJWTMiddleware, verifyRoles(), getDisplayByIdHandler)
 	.delete(verifyJWTMiddleware, verifyRoles(), deleteADisplayHandler)
 	.patch(verifyJWTMiddleware, verifyRoles(), updateDisplayByIdHandler);

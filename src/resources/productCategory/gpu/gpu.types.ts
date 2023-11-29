@@ -1,9 +1,12 @@
 import type { Types } from "mongoose";
 import type { RequestAfterJWTVerification } from "../../auth";
 import { UserRoles } from "../../user";
-import { GetQueriedResourceRequest } from "../../../types";
+import {
+	DocumentUpdateOperation,
+	GetQueriedResourceRequest,
+} from "../../../types";
 
-import { GpuSchema } from "./gpu.model";
+import { GpuDocument, GpuSchema } from "./gpu.model";
 
 interface CreateNewGpuRequest extends RequestAfterJWTVerification {
 	body: {
@@ -27,6 +30,22 @@ interface CreateNewGpuBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		gpuSchemas: GpuSchema[];
+	};
+}
+
+// DEV ROUTE
+interface UpdateGpusBulkRequest extends RequestAfterJWTVerification {
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
+		gpuFields: {
+			gpuId: Types.ObjectId;
+			documentUpdate: DocumentUpdateOperation<GpuDocument>;
+		}[];
 	};
 }
 
@@ -58,7 +77,7 @@ interface UpdateGpuByIdRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		gpuFields: Record<keyof GpuSchema, GpuSchema[keyof GpuSchema]>;
+		documentUpdate: DocumentUpdateOperation<GpuDocument>;
 	};
 	params: { gpuId: string };
 }
@@ -71,4 +90,5 @@ export type {
 	GetGpuByIdRequest,
 	GetQueriedGpusRequest,
 	UpdateGpuByIdRequest,
+	UpdateGpusBulkRequest,
 };

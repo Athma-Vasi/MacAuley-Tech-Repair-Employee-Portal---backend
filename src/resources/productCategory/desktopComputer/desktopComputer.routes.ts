@@ -43,7 +43,7 @@ desktopComputerRouter
 
 // single document routes
 desktopComputerRouter
-	.route("/:caseId")
+	.route("/:desktopComputerId")
 	.get(verifyJWTMiddleware, verifyRoles(), getDesktopComputerByIdHandler)
 	.delete(verifyJWTMiddleware, verifyRoles(), deleteADesktopComputerHandler)
 	.patch(verifyJWTMiddleware, verifyRoles(), updateDesktopComputerByIdHandler);

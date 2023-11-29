@@ -43,7 +43,7 @@ cpuRouter
 
 // single document routes
 cpuRouter
-	.route("/:caseId")
+	.route("/:cpuId")
 	.get(verifyJWTMiddleware, verifyRoles(), getCpuByIdHandler)
 	.delete(verifyJWTMiddleware, verifyRoles(), deleteACpuHandler)
 	.patch(verifyJWTMiddleware, verifyRoles(), updateCpuByIdHandler);
