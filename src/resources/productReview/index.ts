@@ -6,84 +6,90 @@
  * Imports
  */
 
-import { ProductReviewModel } from './productReview.model';
-import { productReviewRouter } from './productReview.routes';
+import { ProductReviewModel } from "./productReview.model";
+import { productReviewRouter } from "./productReview.routes";
 import {
-  addFieldToProductReviewsBulkHandler,
-  createNewProductReviewHandler,
-  createNewProductReviewsBulkHandler,
-  deleteProductReviewHandler,
-  getAllProductReviewsBulkHandler,
-  getProductReviewByIdHandler,
-  getQueriedProductReviewsHandler,
-  getQueriedPurchasesOnlineByUserHandler,
-  updateProductReviewByIdHandler,
-  deleteAllProductReviewsHandler,
-} from './productReview.controller';
+	addFieldToProductReviewsBulkHandler,
+	createNewProductReviewHandler,
+	createNewProductReviewsBulkHandler,
+	deleteAllProductReviewsHandler,
+	deleteProductReviewHandler,
+	getAllProductReviewsBulkHandler,
+	getProductReviewByIdHandler,
+	getQueriedProductReviewsHandler,
+	getQueriedPurchasesOnlineByUserHandler,
+	updateProductReviewByIdHandler,
+} from "./productReview.controller";
 import {
-  createNewProductReviewService,
-  deleteAProductReviewService,
-  deleteAllProductReviewsService,
-  getAllProductReviewsService,
-  getProductReviewByIdService,
-  getQueriedProductReviewsByUserService,
-  getQueriedProductReviewsService,
-  getQueriedTotalProductReviewsService,
-  updateProductReviewByIdService,
-} from './productReview.service';
+	createNewProductReviewService,
+	deleteAProductReviewService,
+	deleteAllProductReviewsService,
+	getAllProductReviewsService,
+	getProductReviewByIdService,
+	getQueriedProductReviewsByUserService,
+	getQueriedProductReviewsService,
+	getQueriedTotalProductReviewsService,
+	updateProductReviewByIdService,
+} from "./productReview.service";
 
-import type { ProductReviewDocument, ProductReviewSchema } from './productReview.model';
 import type {
-  CreateNewProductReviewRequest,
-  CreateNewProductReviewsBulkRequest,
-  DeleteAProductReviewRequest,
-  DeleteAllProductReviewsRequest,
-  GetAllProductReviewsBulkRequest,
-  GetProductReviewByIdRequest,
-  GetQueriedProductReviewsByUserRequest,
-  GetQueriedProductReviewsRequest,
-  UpdateProductReviewByIdRequest,
-  UpdateProductReviewsFieldsBulkRequest,
-} from './productReview.types';
+	ProductReviewDocument,
+	RatingKind,
+	ProductReviewSchema,
+} from "./productReview.model";
+import type {
+	CreateNewProductReviewRequest,
+	CreateNewProductReviewsBulkRequest,
+	DeleteAProductReviewRequest,
+	DeleteAllProductReviewsRequest,
+	GetAllProductReviewsBulkRequest,
+	GetProductReviewByIdRequest,
+	GetQueriedProductReviewsByUserRequest,
+	GetQueriedProductReviewsRequest,
+	UpdateProductReviewByIdRequest,
+	UpdateProductReviewsFieldsBulkRequest,
+} from "./productReview.types";
 
 /**
  * Exports
  */
 
 export {
-  ProductReviewModel,
-  productReviewRouter,
-  addFieldToProductReviewsBulkHandler,
-  createNewProductReviewHandler,
-  createNewProductReviewsBulkHandler,
-  deleteProductReviewHandler,
-  getAllProductReviewsBulkHandler,
-  getProductReviewByIdHandler,
-  getQueriedProductReviewsHandler,
-  getQueriedPurchasesOnlineByUserHandler,
-  updateProductReviewByIdHandler,
-  createNewProductReviewService,
-  deleteAProductReviewService,
-  deleteAllProductReviewsService,
-  getProductReviewByIdService,
-  getQueriedProductReviewsByUserService,
-  getQueriedProductReviewsService,
-  getQueriedTotalProductReviewsService,
-  updateProductReviewByIdService,
-  deleteAllProductReviewsHandler,
+	ProductReviewModel,
+	addFieldToProductReviewsBulkHandler,
+	createNewProductReviewHandler,
+	createNewProductReviewService,
+	createNewProductReviewsBulkHandler,
+	deleteAProductReviewService,
+	deleteAllProductReviewsHandler,
+	deleteAllProductReviewsService,
+	deleteProductReviewHandler,
+	getAllProductReviewsBulkHandler,
+	getAllProductReviewsService,
+	getProductReviewByIdHandler,
+	getProductReviewByIdService,
+	getQueriedProductReviewsByUserService,
+	getQueriedProductReviewsHandler,
+	getQueriedProductReviewsService,
+	getQueriedPurchasesOnlineByUserHandler,
+	getQueriedTotalProductReviewsService,
+	productReviewRouter,
+	updateProductReviewByIdHandler,
+	updateProductReviewByIdService,
 };
 
 export type {
-  ProductReviewDocument,
-  ProductReviewSchema,
-  GetAllProductReviewsBulkRequest,
-  CreateNewProductReviewRequest,
-  GetQueriedProductReviewsByUserRequest,
-  CreateNewProductReviewsBulkRequest,
-  DeleteAProductReviewRequest,
-  DeleteAllProductReviewsRequest,
-  GetProductReviewByIdRequest,
-  GetQueriedProductReviewsRequest,
-  UpdateProductReviewByIdRequest,
-  UpdateProductReviewsFieldsBulkRequest,
+	CreateNewProductReviewRequest,
+	CreateNewProductReviewsBulkRequest,
+	DeleteAProductReviewRequest,
+	DeleteAllProductReviewsRequest,
+	GetAllProductReviewsBulkRequest,
+	GetProductReviewByIdRequest,
+	GetQueriedProductReviewsByUserRequest,
+	GetQueriedProductReviewsRequest,
+	RatingKind,
+	ProductReviewDocument,
+	ProductReviewSchema,
+	UpdateProductReviewByIdRequest,
+	UpdateProductReviewsFieldsBulkRequest,
 };
