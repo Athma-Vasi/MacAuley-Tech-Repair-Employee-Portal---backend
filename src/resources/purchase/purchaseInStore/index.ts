@@ -1,86 +1,93 @@
 /**
- * This barrel file is used to import/export purchase in-store: model, router, types, handlers and services
+ * This barrel file is used to import/export purchase online: model, router, types, handlers and services
  */
 
 /**
  * Imports
  */
 
-import { PurchaseInStoreModel } from './purchaseInStore.model';
-import { purchaseInStoreRouter } from './purchaseInStore.routes';
+import { PurchaseInStoreModel } from "./purchaseInStore.model";
+import { purchaseInStoreRouter } from "./purchaseInStore.routes";
 import {
-  addFieldToPurchaseInStoresBulkHandler,
-  createNewPurchaseInStoreHandler,
-  createNewPurchaseInStoresBulkHandler,
-  deletePurchaseInStoreHandler,
-  getAllPurchaseInStoresBulkHandler,
-  getPurchaseInStoreByIdHandler,
-  getQueriedPurchaseInStoresHandler,
-  getQueriedPurchasesInStoreByUserHandler,
-  updatePurchaseInStoreByIdHandler,
-} from './purchaseInStore.controller';
+	updatePurchaseInStoresBulkHandler,
+	createNewPurchaseInStoreHandler,
+	createNewPurchaseInStoresBulkHandler,
+	deleteAllPurchaseInStoresHandler,
+	deletePurchaseInStoreHandler,
+	getAllPurchaseInStoresBulkHandler,
+	getPurchaseInStoreByIdHandler,
+	getQueriedPurchaseInStoresHandler,
+	getQueriedPurchasesOnlineByUserHandler,
+	updatePurchaseInStoreByIdHandler,
+} from "./purchaseInStore.controller";
 import {
-  createNewPurchaseInStoreService,
-  deleteAPurchaseInStoreService,
-  deleteAllPurchaseInStoresService,
-  getAllPurchasesInStoreService,
-  getPurchaseInStoreByIdService,
-  getQueriedPurchaseInStoresByUserService,
-  getQueriedPurchaseInStoresService,
-  getQueriedTotalPurchaseInStoresService,
-  updatePurchaseInStoreByIdService,
-} from './purchaseInStore.service';
+	createNewPurchaseInStoreService,
+	deleteAPurchaseInStoreService,
+	deleteAllPurchaseInStoresService,
+	getAllPurchaseInStoresService,
+	getPurchaseInStoreByIdService,
+	getQueriedPurchaseInStoresByUserService,
+	getQueriedPurchaseInStoresService,
+	getQueriedTotalPurchaseInStoresService,
+	updatePurchaseInStoreByIdService,
+} from "./purchaseInStore.service";
 
-import type { PurchaseInStoreDocument, PurchaseInStoreSchema } from './purchaseInStore.model';
 import type {
-  AddFieldsToPurchaseInStoresBulkRequest,
-  CreateNewPurchaseInStoreRequest,
-  CreateNewPurchaseInStoresBulkRequest,
-  DeletePurchaseInStoreRequest,
-  GetAllPurchaseInStoresBulkRequest,
-  GetAllPurchaseInStoresRequest,
-  GetPurchaseInStoreByIdRequest,
-  GetQueriedPurchasesInStoreByUserRequest,
-  UpdatePurchaseInStoreRequest,
-} from './purchaseInStore.types';
+	PurchaseInStoreDocument,
+	PurchaseInStoreSchema,
+} from "./purchaseInStore.model";
+import type {
+	CreateNewPurchaseInStoreRequest,
+	CreateNewPurchaseInStoresBulkRequest,
+	DeleteAPurchaseInStoreRequest,
+	DeleteAllPurchaseInStoresRequest,
+	GetAllPurchaseInStoresBulkRequest,
+	GetPurchaseInStoreByIdRequest,
+	GetQueriedPurchaseInStoresByUserRequest,
+	GetQueriedPurchaseInStoresRequest,
+	UpdatePurchaseInStoreByIdRequest,
+	UpdatePurchaseInStoresBulkRequest,
+} from "./purchaseInStore.types";
 
 /**
  * Exports
  */
 
 export {
-  PurchaseInStoreModel,
-  purchaseInStoreRouter,
-  addFieldToPurchaseInStoresBulkHandler,
-  createNewPurchaseInStoreHandler,
-  createNewPurchaseInStoresBulkHandler,
-  deletePurchaseInStoreHandler,
-  getAllPurchaseInStoresBulkHandler,
-  getPurchaseInStoreByIdHandler,
-  getQueriedPurchaseInStoresHandler,
-  getQueriedPurchasesInStoreByUserHandler,
-  updatePurchaseInStoreByIdHandler,
-  createNewPurchaseInStoreService,
-  deleteAPurchaseInStoreService,
-  deleteAllPurchaseInStoresService,
-  getAllPurchasesInStoreService,
-  getPurchaseInStoreByIdService,
-  getQueriedPurchaseInStoresByUserService,
-  getQueriedPurchaseInStoresService,
-  getQueriedTotalPurchaseInStoresService,
-  updatePurchaseInStoreByIdService,
+	PurchaseInStoreModel,
+	updatePurchaseInStoresBulkHandler,
+	createNewPurchaseInStoreHandler,
+	createNewPurchaseInStoreService,
+	createNewPurchaseInStoresBulkHandler,
+	deleteAPurchaseInStoreService,
+	deleteAllPurchaseInStoresHandler,
+	deleteAllPurchaseInStoresService,
+	deletePurchaseInStoreHandler,
+	getAllPurchaseInStoresBulkHandler,
+	getAllPurchaseInStoresService,
+	getPurchaseInStoreByIdHandler,
+	getPurchaseInStoreByIdService,
+	getQueriedPurchaseInStoresByUserService,
+	getQueriedPurchaseInStoresHandler,
+	getQueriedPurchaseInStoresService,
+	getQueriedPurchasesOnlineByUserHandler,
+	getQueriedTotalPurchaseInStoresService,
+	purchaseInStoreRouter,
+	updatePurchaseInStoreByIdHandler,
+	updatePurchaseInStoreByIdService,
 };
 
 export type {
-  PurchaseInStoreDocument,
-  PurchaseInStoreSchema,
-  AddFieldsToPurchaseInStoresBulkRequest,
-  CreateNewPurchaseInStoreRequest,
-  CreateNewPurchaseInStoresBulkRequest,
-  DeletePurchaseInStoreRequest,
-  GetAllPurchaseInStoresBulkRequest,
-  GetAllPurchaseInStoresRequest,
-  GetPurchaseInStoreByIdRequest,
-  GetQueriedPurchasesInStoreByUserRequest,
-  UpdatePurchaseInStoreRequest,
+	CreateNewPurchaseInStoreRequest,
+	CreateNewPurchaseInStoresBulkRequest,
+	DeleteAPurchaseInStoreRequest,
+	DeleteAllPurchaseInStoresRequest,
+	GetAllPurchaseInStoresBulkRequest,
+	GetPurchaseInStoreByIdRequest,
+	GetQueriedPurchaseInStoresByUserRequest,
+	GetQueriedPurchaseInStoresRequest,
+	PurchaseInStoreDocument,
+	PurchaseInStoreSchema,
+	UpdatePurchaseInStoreByIdRequest,
+	UpdatePurchaseInStoresBulkRequest,
 };

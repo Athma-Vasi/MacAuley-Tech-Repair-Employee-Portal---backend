@@ -1,106 +1,114 @@
-import { Types } from 'mongoose';
+import type { Types } from "mongoose";
+import type { RequestAfterJWTVerification } from "../../auth";
+import type { UserRoles } from "../../user";
+import type {
+	GetQueriedResourceRequest,
+	GetQueriedResourceByUserRequest,
+	DocumentUpdateOperation,
+} from "../../../types";
+import type {
+	PurchaseInStoreDocument,
+	PurchaseInStoreSchema,
+} from "./purchaseInStore.model";
 
-import type { RequestAfterJWTVerification } from '../../auth';
-import type { PurchaseInStoreSchema } from './purchaseInStore.model';
-import { GetQueriedResourceByUserRequest, GetQueriedResourceRequest } from '../../../types';
-import { UserRoles } from '../../user';
-
-interface CreateNewPurchaseInStoreRequest {
-  body: {
-    purchaseInStoreSchema: PurchaseInStoreSchema;
-  };
+interface CreateNewPurchaseInStoreRequest extends RequestAfterJWTVerification {
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
+		purchaseInStoreFields: Omit<PurchaseInStoreSchema, "userId" | "username">;
+	};
 }
 
-interface DeletePurchaseInStoreRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-    sessionId: Types.ObjectId;
-    purchaseInStoreToBeDeletedId: string;
-  };
+// DEV ROUTE
+interface CreateNewPurchaseInStoresBulkRequest
+	extends RequestAfterJWTVerification {
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
+		purchaseInStoreSchemas: PurchaseInStoreSchema[];
+	};
 }
 
-type GetAllPurchaseInStoresRequest = GetQueriedResourceRequest;
+// DEV ROUTE
+interface UpdatePurchaseInStoresBulkRequest
+	extends RequestAfterJWTVerification {
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
+		purchaseInStoreFields: {
+			purchaseInStoreId: Types.ObjectId;
+			documentUpdate: DocumentUpdateOperation<PurchaseInStoreDocument>;
+		}[];
+	};
+}
 
-type GetQueriedPurchasesInStoreByUserRequest = GetQueriedResourceByUserRequest;
+interface GetAllPurchaseInStoresBulkRequest
+	extends RequestAfterJWTVerification {
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
+	};
+}
+
+interface DeleteAPurchaseInStoreRequest extends RequestAfterJWTVerification {
+	params: { purchaseInStoreId: string };
+}
+
+type DeleteAllPurchaseInStoresRequest = RequestAfterJWTVerification;
+
+type GetQueriedPurchaseInStoresRequest = GetQueriedResourceRequest;
+type GetQueriedPurchaseInStoresByUserRequest = GetQueriedResourceByUserRequest;
 
 interface GetPurchaseInStoreByIdRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-    sessionId: Types.ObjectId;
-  };
-  params: { purchaseInStoreId: string };
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
+	};
+	params: { purchaseInStoreId: string };
 }
 
-interface UpdatePurchaseInStoreRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-    sessionId: Types.ObjectId;
-    purchaseInStoreId: string;
-    purchaseInStoreFields: Partial<PurchaseInStoreSchema>;
-  };
-}
-
-// DEV ROUTE
-interface CreateNewPurchaseInStoresBulkRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-    sessionId: Types.ObjectId;
-    purchaseInStoreSchemas: PurchaseInStoreSchema[];
-  };
-}
-
-// DEV ROUTE
-interface AddFieldsToPurchaseInStoresBulkRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-    sessionId: Types.ObjectId;
-    purchaseInStoreFields: {
-      purchaseInStoreId: Types.ObjectId;
-      purchaseInStoreFields: Record<string, any>;
-    }[];
-  };
-}
-
-// DEV ROUTE
-interface GetAllPurchaseInStoresBulkRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-    sessionId: Types.ObjectId;
-  };
+interface UpdatePurchaseInStoreByIdRequest extends RequestAfterJWTVerification {
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
+		documentUpdate: DocumentUpdateOperation<PurchaseInStoreDocument>;
+	};
+	params: { purchaseInStoreId: string };
 }
 
 export type {
-  GetQueriedPurchasesInStoreByUserRequest,
-  AddFieldsToPurchaseInStoresBulkRequest,
-  CreateNewPurchaseInStoreRequest,
-  CreateNewPurchaseInStoresBulkRequest,
-  DeletePurchaseInStoreRequest,
-  GetAllPurchaseInStoresBulkRequest,
-  GetAllPurchaseInStoresRequest,
-  GetPurchaseInStoreByIdRequest,
-  UpdatePurchaseInStoreRequest,
+	CreateNewPurchaseInStoreRequest,
+	GetQueriedPurchaseInStoresByUserRequest,
+	CreateNewPurchaseInStoresBulkRequest,
+	DeleteAPurchaseInStoreRequest,
+	DeleteAllPurchaseInStoresRequest,
+	GetPurchaseInStoreByIdRequest,
+	GetQueriedPurchaseInStoresRequest,
+	UpdatePurchaseInStoreByIdRequest,
+	UpdatePurchaseInStoresBulkRequest,
+	GetAllPurchaseInStoresBulkRequest,
 };

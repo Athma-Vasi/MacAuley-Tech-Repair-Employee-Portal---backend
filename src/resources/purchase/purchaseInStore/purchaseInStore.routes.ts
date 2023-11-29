@@ -1,22 +1,27 @@
 import { Router } from "express";
-import { assignQueryDefaults, verifyRoles } from "../../../middlewares";
+import {
+	assignQueryDefaults,
+	verifyJWTMiddleware,
+	verifyRoles,
+} from "../../../middlewares";
 
 import {
-	addFieldToPurchaseInStoresBulkHandler,
+	updatePurchaseInStoresBulkHandler,
 	createNewPurchaseInStoreHandler,
 	createNewPurchaseInStoresBulkHandler,
+	deleteAllPurchaseInStoresHandler,
 	deletePurchaseInStoreHandler,
 	getAllPurchaseInStoresBulkHandler,
 	getPurchaseInStoreByIdHandler,
 	getQueriedPurchaseInStoresHandler,
-	getQueriedPurchasesInStoreByUserHandler,
+	getQueriedPurchasesOnlineByUserHandler,
 	updatePurchaseInStoreByIdHandler,
 } from "./purchaseInStore.controller";
 import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
 const purchaseInStoreRouter = Router();
 
-purchaseInStoreRouter.use(verifyRoles());
+purchaseInStoreRouter.use(verifyJWTMiddleware, verifyRoles());
 
 purchaseInStoreRouter
 	.route("/")
@@ -24,26 +29,30 @@ purchaseInStoreRouter
 	.get(
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedPurchaseInStoresHandler,
-	)
-	.delete(deletePurchaseInStoreHandler);
+	);
 
 purchaseInStoreRouter
 	.route("/user")
 	.get(
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
-		getQueriedPurchasesInStoreByUserHandler,
+		getQueriedPurchasesOnlineByUserHandler,
 	);
+
+purchaseInStoreRouter
+	.route("/delete-all")
+	.delete(deleteAllPurchaseInStoresHandler);
 
 // DEV ROUTES
 purchaseInStoreRouter
 	.route("/dev")
 	.post(createNewPurchaseInStoresBulkHandler)
 	.get(getAllPurchaseInStoresBulkHandler)
-	.patch(addFieldToPurchaseInStoresBulkHandler);
+	.patch(updatePurchaseInStoresBulkHandler);
 
 purchaseInStoreRouter
 	.route("/:purchaseInStoreId")
 	.get(getPurchaseInStoreByIdHandler)
-	.patch(updatePurchaseInStoreByIdHandler);
+	.patch(updatePurchaseInStoreByIdHandler)
+	.delete(deletePurchaseInStoreHandler);
 
 export { purchaseInStoreRouter };

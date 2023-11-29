@@ -23,28 +23,17 @@ const productReviewRouter = Router();
 
 productReviewRouter.use(verifyJWTMiddleware, verifyRoles());
 
-productReviewRouter
-	.route("/")
-	.post(createNewProductReviewHandler)
-	.get(
-		verifyJWTMiddleware,
-		verifyRoles(),
-		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
-		getQueriedProductReviewsHandler,
-	);
+productReviewRouter.route("/").post(createNewProductReviewHandler).get(
+	assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
+	getQueriedProductReviewsHandler,
+);
 
-productReviewRouter
-	.route("/user")
-	.get(
-		verifyJWTMiddleware,
-		verifyRoles(),
-		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
-		getQueriedPurchasesOnlineByUserHandler,
-	);
+productReviewRouter.route("/user").get(
+	assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
+	getQueriedPurchasesOnlineByUserHandler,
+);
 
-productReviewRouter
-	.route("/delete-all")
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteAllProductReviewsHandler);
+productReviewRouter.route("/delete-all").delete(deleteAllProductReviewsHandler);
 
 // DEV ROUTES
 productReviewRouter
@@ -55,8 +44,8 @@ productReviewRouter
 
 productReviewRouter
 	.route("/:productReviewId")
-	.get(verifyJWTMiddleware, verifyRoles(), getProductReviewByIdHandler)
-	.patch(verifyJWTMiddleware, verifyRoles(), updateProductReviewByIdHandler)
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteProductReviewHandler);
+	.get(getProductReviewByIdHandler)
+	.patch(updateProductReviewByIdHandler)
+	.delete(deleteProductReviewHandler);
 
 export { productReviewRouter };

@@ -2,13 +2,15 @@ import expressAsyncHandler from "express-async-handler";
 
 import type { Response } from "express";
 import type {
-	UpdatePurchaseInStoreRequest,
-	GetPurchaseInStoreByIdRequest,
-	GetAllPurchaseInStoresRequest,
-	DeletePurchaseInStoreRequest,
-	CreateNewPurchaseInStoreRequest,
-	AddFieldsToPurchaseInStoresBulkRequest,
 	CreateNewPurchaseInStoresBulkRequest,
+	CreateNewPurchaseInStoreRequest,
+	DeleteAPurchaseInStoreRequest,
+	DeleteAllPurchaseInStoresRequest,
+	GetPurchaseInStoreByIdRequest,
+	GetQueriedPurchaseInStoresByUserRequest,
+	GetQueriedPurchaseInStoresRequest,
+	UpdatePurchaseInStoreByIdRequest,
+	UpdatePurchaseInStoresBulkRequest,
 	GetAllPurchaseInStoresBulkRequest,
 } from "./purchaseInStore.types";
 
@@ -16,7 +18,7 @@ import {
 	createNewPurchaseInStoreService,
 	deleteAPurchaseInStoreService,
 	deleteAllPurchaseInStoresService,
-	getAllPurchasesInStoreService,
+	getAllPurchaseInStoresService,
 	getPurchaseInStoreByIdService,
 	getQueriedPurchaseInStoresByUserService,
 	getQueriedPurchaseInStoresService,
@@ -27,44 +29,51 @@ import {
 	PurchaseInStoreDocument,
 	PurchaseInStoreSchema,
 } from "./purchaseInStore.model";
-import {
+import type {
 	GetQueriedResourceRequestServerResponse,
 	QueryObjectParsedWithDefaults,
 	ResourceRequestServerResponse,
 } from "../../../types";
-import { FilterQuery, QueryOptions } from "mongoose";
+import type { FilterQuery, QueryOptions } from "mongoose";
 import { removeUndefinedAndNullValues } from "../../../utils";
-import { GetQueriedPurchasesInStoreByUserRequest } from "./purchaseInStore.types";
 
 // @desc   Create new user
-// @route  POST /api/v1/purchase
+// @route  POST /api/v1/purchase/in-store
 // @access Private
 const createNewPurchaseInStoreHandler = expressAsyncHandler(
 	async (
 		request: CreateNewPurchaseInStoreRequest,
 		response: Response<ResourceRequestServerResponse<PurchaseInStoreDocument>>,
 	) => {
-		const { purchaseInStoreSchema } = request.body;
+		const {
+			userInfo: { userId },
+			purchaseInStoreFields,
+		} = request.body;
 
-		// create new user if all checks pass successfully
+		const purchaseInStoreSchema: PurchaseInStoreSchema = {
+			...purchaseInStoreFields,
+			userId,
+		};
+
 		const purchaseInStoreDocument: PurchaseInStoreDocument =
 			await createNewPurchaseInStoreService(purchaseInStoreSchema);
 		if (!purchaseInStoreDocument) {
-			response
-				.status(400)
-				.json({ message: "PurchaseInStore creation failed", resourceData: [] });
+			response.status(400).json({
+				message: "Purchase In-Store creation failed",
+				resourceData: [],
+			});
 			return;
 		}
 
 		response.status(201).json({
-			message: "PurchaseInStore created successfully",
+			message: "Purchase In-Store created successfully",
 			resourceData: [purchaseInStoreDocument],
 		});
 	},
 );
 
 // DEV ROUTE
-// @desc   create new purchases in bulk
+// @desc   create new purchaseInStores in bulk
 // @route  POST /api/v1/purchase/in-store/dev
 // @access Private
 const createNewPurchaseInStoresBulkHandler = expressAsyncHandler(
@@ -74,92 +83,116 @@ const createNewPurchaseInStoresBulkHandler = expressAsyncHandler(
 	) => {
 		const { purchaseInStoreSchemas } = request.body;
 
-		const purchaseDocuments = await Promise.all(
+		const purchaseInStoreDocuments = await Promise.all(
 			purchaseInStoreSchemas.map(async (purchaseInStoreSchema) => {
-				const purchaseDocument: PurchaseInStoreDocument =
+				const purchaseInStoreDocument: PurchaseInStoreDocument =
 					await createNewPurchaseInStoreService(purchaseInStoreSchema);
-				return purchaseDocument;
+				return purchaseInStoreDocument;
 			}),
 		);
 
-		// filter out undefined values
-		const purchaseDocumentsFiltered = purchaseDocuments.filter(
+		// filter out any purchaseInStores that were not created
+		const successfullyCreatedPurchaseInStores = purchaseInStoreDocuments.filter(
 			removeUndefinedAndNullValues,
 		);
 
-		// check if any purchases were created
-		if (purchaseDocumentsFiltered.length === purchaseInStoreSchemas.length) {
+		// check if any purchaseInStores were created
+		if (
+			successfullyCreatedPurchaseInStores.length ===
+			purchaseInStoreSchemas.length
+		) {
 			response.status(201).json({
-				message: `Successfully created ${purchaseDocumentsFiltered.length} purchases`,
-				resourceData: purchaseDocumentsFiltered,
+				message: `Successfully created ${successfullyCreatedPurchaseInStores.length} Product Reviews`,
+				resourceData: successfullyCreatedPurchaseInStores,
 			});
-		} else {
-			response.status(400).json({
-				message: `Successfully created ${
-					purchaseDocumentsFiltered.length
-				} purchase(s), but failed to create ${
-					purchaseInStoreSchemas.length - purchaseDocumentsFiltered.length
-				} purchase(s)`,
-				resourceData: purchaseDocumentsFiltered,
-			});
+			return;
 		}
+
+		if (successfullyCreatedPurchaseInStores.length === 0) {
+			response.status(400).json({
+				message: "Could not create any Product Reviews",
+				resourceData: [],
+			});
+			return;
+		}
+
+		response.status(201).json({
+			message: `Successfully created ${
+				purchaseInStoreSchemas.length -
+				successfullyCreatedPurchaseInStores.length
+			} Product Reviews`,
+			resourceData: successfullyCreatedPurchaseInStores,
+		});
+		return;
 	},
 );
 
 // DEV ROUTE
-// @desc   Add field to all purchases
+// @desc   Add field to all purchaseInStores
 // @route  PATCH /api/v1/purchase/in-store/dev
 // @access Private
-const addFieldToPurchaseInStoresBulkHandler = expressAsyncHandler(
+const updatePurchaseInStoresBulkHandler = expressAsyncHandler(
 	async (
-		request: AddFieldsToPurchaseInStoresBulkRequest,
+		request: UpdatePurchaseInStoresBulkRequest,
 		response: Response<ResourceRequestServerResponse<PurchaseInStoreDocument>>,
 	) => {
 		const { purchaseInStoreFields } = request.body;
 
 		const updatedPurchaseInStores = await Promise.all(
-			purchaseInStoreFields.map(
-				async ({ purchaseInStoreFields, purchaseInStoreId }) => {
-					const updatedPurchaseInStore = await updatePurchaseInStoreByIdService(
-						{
-							purchaseInStoreFields,
-							purchaseInStoreId,
-						},
-					);
+			purchaseInStoreFields.map(async (purchaseInStoreField) => {
+				const {
+					documentUpdate: { fields, updateOperator },
+					purchaseInStoreId,
+				} = purchaseInStoreField;
 
-					return updatedPurchaseInStore;
-				},
-			),
+				const updatedPurchaseInStore = await updatePurchaseInStoreByIdService({
+					_id: purchaseInStoreId,
+					fields,
+					updateOperator,
+				});
+
+				return updatedPurchaseInStore;
+			}),
 		);
 
-		// filter out undefined values
-		const updatedPurchaseInStoresFiltered = updatedPurchaseInStores.filter(
+		// filter out any purchaseInStores that were not created
+		const successfullyCreatedPurchaseInStores = updatedPurchaseInStores.filter(
 			removeUndefinedAndNullValues,
 		);
 
-		// check if any purchases were updated
+		// check if any purchaseInStores were created
 		if (
-			updatedPurchaseInStoresFiltered.length === purchaseInStoreFields.length
+			successfullyCreatedPurchaseInStores.length ===
+			purchaseInStoreFields.length
 		) {
 			response.status(201).json({
-				message: `Successfully updated ${updatedPurchaseInStoresFiltered.length} purchases`,
-				resourceData: updatedPurchaseInStoresFiltered,
+				message: `Successfully created ${successfullyCreatedPurchaseInStores.length} Product Reviews`,
+				resourceData: successfullyCreatedPurchaseInStores,
 			});
-		} else {
-			response.status(400).json({
-				message: `Successfully updated ${
-					updatedPurchaseInStoresFiltered.length
-				} purchase(s), but failed to update ${
-					purchaseInStoreFields.length - updatedPurchaseInStoresFiltered.length
-				} purchase(s)`,
-				resourceData: updatedPurchaseInStoresFiltered,
-			});
+			return;
 		}
+
+		if (successfullyCreatedPurchaseInStores.length === 0) {
+			response.status(400).json({
+				message: "Could not create any Product Reviews",
+				resourceData: [],
+			});
+			return;
+		}
+
+		response.status(201).json({
+			message: `Successfully created ${
+				purchaseInStoreFields.length -
+				successfullyCreatedPurchaseInStores.length
+			} Product Reviews`,
+			resourceData: successfullyCreatedPurchaseInStores,
+		});
+		return;
 	},
 );
 
 // DEV ROUTE
-// @desc   get all purchases bulk (no filter, projection or options)
+// @desc   get all purchaseInStores bulk (no filter, projection or options)
 // @route  GET /api/v1/purchase/in-store/dev
 // @access Private
 const getAllPurchaseInStoresBulkHandler = expressAsyncHandler(
@@ -167,29 +200,29 @@ const getAllPurchaseInStoresBulkHandler = expressAsyncHandler(
 		request: GetAllPurchaseInStoresBulkRequest,
 		response: Response<ResourceRequestServerResponse<PurchaseInStoreDocument>>,
 	) => {
-		const purchases = await getAllPurchasesInStoreService();
+		const purchaseInStores = await getAllPurchaseInStoresService();
 
-		if (!purchases.length) {
+		if (!purchaseInStores.length) {
 			response.status(200).json({
-				message: "Unable to find any purchases. Please try again!",
+				message: "Unable to find any purchase in stores. Please try again!",
 				resourceData: [],
 			});
 			return;
 		}
 
 		response.status(200).json({
-			message: "Successfully found purchases!",
-			resourceData: purchases,
+			message: "Successfully found purchase in stores!",
+			resourceData: purchaseInStores,
 		});
 	},
 );
 
-// @desc   Get all purchases queried
+// @desc   Get all purchaseInStores queried
 // @route  GET /api/v1/purchase/in-store
 // @access Private
 const getQueriedPurchaseInStoresHandler = expressAsyncHandler(
 	async (
-		request: GetAllPurchaseInStoresRequest,
+		request: GetQueriedPurchaseInStoresRequest,
 		response: Response<
 			GetQueriedResourceRequestServerResponse<PurchaseInStoreDocument>
 		>,
@@ -206,15 +239,15 @@ const getQueriedPurchaseInStoresHandler = expressAsyncHandler(
 			});
 		}
 
-		// get all purchases
-		const purchases = await getQueriedPurchaseInStoresService({
+		// get all purchaseInStores
+		const purchaseInStores = await getQueriedPurchaseInStoresService({
 			filter: filter as FilterQuery<PurchaseInStoreDocument> | undefined,
 			projection: projection as QueryOptions<PurchaseInStoreDocument>,
 			options: options as QueryOptions<PurchaseInStoreDocument>,
 		});
-		if (!purchases.length) {
+		if (!purchaseInStores.length) {
 			response.status(200).json({
-				message: "No purchases that match query parameters were found",
+				message: "No purchase in stores that match query parameters were found",
 				pages: 0,
 				totalDocuments: 0,
 				resourceData: [],
@@ -223,20 +256,20 @@ const getQueriedPurchaseInStoresHandler = expressAsyncHandler(
 		}
 
 		response.status(200).json({
-			message: "Successfully found purchases",
+			message: "Successfully found purchase in stores",
 			pages: Math.ceil(totalDocuments / Number(options?.limit)),
 			totalDocuments,
-			resourceData: purchases,
+			resourceData: purchaseInStores,
 		});
 	},
 );
 
-// @desc   Get all purchases queried by a user
+// @desc   Get all purchaseInStores queried by a user
 // @route  GET /api/v1/purchase/in-store/user
 // @access Private
-const getQueriedPurchasesInStoreByUserHandler = expressAsyncHandler(
+const getQueriedPurchasesOnlineByUserHandler = expressAsyncHandler(
 	async (
-		request: GetQueriedPurchasesInStoreByUserRequest,
+		request: GetQueriedPurchaseInStoresByUserRequest,
 		response: Response<
 			GetQueriedResourceRequestServerResponse<PurchaseInStoreDocument>
 		>,
@@ -247,7 +280,7 @@ const getQueriedPurchasesInStoreByUserHandler = expressAsyncHandler(
 			request.query as QueryObjectParsedWithDefaults;
 
 		// assign userToBeQueriedId to filter
-		filter = { ...filter, customerId: userToBeQueriedId };
+		filter = { ...filter, userId: userToBeQueriedId };
 
 		// only perform a countDocuments scan if a new query is being made
 		if (newQueryFlag) {
@@ -256,15 +289,15 @@ const getQueriedPurchasesInStoreByUserHandler = expressAsyncHandler(
 			});
 		}
 
-		// get all purchases
-		const purchases = await getQueriedPurchaseInStoresService({
+		// get all purchaseInStores
+		const purchaseInStores = await getQueriedPurchaseInStoresService({
 			filter: filter as FilterQuery<PurchaseInStoreDocument> | undefined,
 			projection: projection as QueryOptions<PurchaseInStoreDocument>,
 			options: options as QueryOptions<PurchaseInStoreDocument>,
 		});
-		if (!purchases.length) {
+		if (!purchaseInStores.length) {
 			response.status(200).json({
-				message: "No purchases that match query parameters were found",
+				message: "No purchase in stores that match query parameters were found",
 				pages: 0,
 				totalDocuments: 0,
 				resourceData: [],
@@ -273,15 +306,15 @@ const getQueriedPurchasesInStoreByUserHandler = expressAsyncHandler(
 		}
 
 		response.status(200).json({
-			message: "Successfully found purchases",
+			message: "Successfully found purchase in stores",
 			pages: Math.ceil(totalDocuments / Number(options?.limit)),
 			totalDocuments,
-			resourceData: purchases,
+			resourceData: purchaseInStores,
 		});
 	},
 );
 
-// @desc   Get a purchase by id
+// @desc   Get a purchaseInStore by id
 // @route  GET /api/v1/purchase/in-store/:id
 // @access Private
 const getPurchaseInStoreByIdHandler = expressAsyncHandler(
@@ -291,10 +324,10 @@ const getPurchaseInStoreByIdHandler = expressAsyncHandler(
 	) => {
 		const { purchaseInStoreId } = request.params;
 
-		const purchaseDocument =
+		const purchaseInStoreDocument =
 			await getPurchaseInStoreByIdService(purchaseInStoreId);
 
-		if (!purchaseDocument) {
+		if (!purchaseInStoreDocument) {
 			response
 				.status(404)
 				.json({ message: "Purchase In-Store not found.", resourceData: [] });
@@ -302,64 +335,57 @@ const getPurchaseInStoreByIdHandler = expressAsyncHandler(
 		}
 
 		response.status(200).json({
-			message: "Successfully found purchase data!",
-			resourceData: [purchaseDocument],
+			message: "Successfully found purchase in stores data!",
+			resourceData: [purchaseInStoreDocument],
 		});
 	},
 );
 
-// @desc   Delete a purchase
+// @desc   Delete a purchaseInStore
 // @route  DELETE /api/v1/purchase/in-store
 // @access Private
 const deletePurchaseInStoreHandler = expressAsyncHandler(
 	async (
-		request: DeletePurchaseInStoreRequest,
+		request: DeleteAPurchaseInStoreRequest,
 		response: Response<ResourceRequestServerResponse<PurchaseInStoreDocument>>,
 	) => {
-		// only managers/admin are allowed to delete purchases
-		const { purchaseInStoreToBeDeletedId } = request.body;
+		const { purchaseInStoreId } = request.params;
 
-		if (!purchaseInStoreToBeDeletedId) {
-			response.status(400).json({
-				message: "purchaseToBeDeletedId is required",
-				resourceData: [],
-			});
-			return;
-		}
-
-		// delete purchase if all checks pass successfully
-		const deletedPurchaseInStore = await deleteAPurchaseInStoreService(
-			purchaseInStoreToBeDeletedId,
-		);
+		const deletedPurchaseInStore =
+			await deleteAPurchaseInStoreService(purchaseInStoreId);
 
 		if (!deletedPurchaseInStore.acknowledged) {
 			response.status(400).json({
-				message: "Failed to delete purchase. Please try again!",
+				message: "Failed to delete product review. Please try again!",
 				resourceData: [],
 			});
 			return;
 		}
 
-		response
-			.status(200)
-			.json({ message: "Successfully deleted purchase!", resourceData: [] });
+		response.status(200).json({
+			message: "Successfully deleted product review!",
+			resourceData: [],
+		});
 	},
 );
 
-// @desc   Update a purchase in-store
+// @desc   Update a purchaseInStore
 // @route  PATCH /api/v1/purchase/in-store
 // @access Private
 const updatePurchaseInStoreByIdHandler = expressAsyncHandler(
 	async (
-		request: UpdatePurchaseInStoreRequest,
+		request: UpdatePurchaseInStoreByIdRequest,
 		response: Response<ResourceRequestServerResponse<PurchaseInStoreDocument>>,
 	) => {
-		const { purchaseInStoreFields, purchaseInStoreId } = request.body;
+		const { purchaseInStoreId } = request.params;
+		const {
+			documentUpdate: { fields, updateOperator },
+		} = request.body;
 
-		// update user if all checks pass successfully
 		const updatedPurchaseInStore = await updatePurchaseInStoreByIdService({
-			purchaseInStoreFields,
-			purchaseInStoreId,
+			_id: purchaseInStoreId,
+			fields,
+			updateOperator,
 		});
 
 		if (!updatedPurchaseInStore) {
@@ -376,14 +402,40 @@ const updatePurchaseInStoreByIdHandler = expressAsyncHandler(
 	},
 );
 
+// @desc   Delete all purchaseInStores
+// @route  DELETE /api/v1/purchase/in-store/delete-all
+// @access Private
+const deleteAllPurchaseInStoresHandler = expressAsyncHandler(
+	async (
+		request: DeleteAllPurchaseInStoresRequest,
+		response: Response<ResourceRequestServerResponse<PurchaseInStoreDocument>>,
+	) => {
+		const deletedPurchaseInStores = await deleteAllPurchaseInStoresService();
+
+		if (!deletedPurchaseInStores.acknowledged) {
+			response.status(400).json({
+				message: "Failed to delete purchase in stores. Please try again!",
+				resourceData: [],
+			});
+			return;
+		}
+
+		response.status(200).json({
+			message: "Successfully deleted purchase in stores!",
+			resourceData: [],
+		});
+	},
+);
+
 export {
-	addFieldToPurchaseInStoresBulkHandler,
+	updatePurchaseInStoresBulkHandler,
 	createNewPurchaseInStoreHandler,
 	createNewPurchaseInStoresBulkHandler,
+	deleteAllPurchaseInStoresHandler,
 	deletePurchaseInStoreHandler,
 	getAllPurchaseInStoresBulkHandler,
 	getPurchaseInStoreByIdHandler,
 	getQueriedPurchaseInStoresHandler,
+	getQueriedPurchasesOnlineByUserHandler,
 	updatePurchaseInStoreByIdHandler,
-	getQueriedPurchasesInStoreByUserHandler,
 };
