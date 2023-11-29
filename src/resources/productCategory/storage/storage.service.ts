@@ -4,6 +4,7 @@ import {
 	QueriedResourceGetRequestServiceInput,
 	DatabaseResponse,
 	DatabaseResponseNullable,
+	UpdateDocumentByIdServiceInput,
 } from "../../../types";
 import { StorageDocument, StorageModel, StorageSchema } from "./storage.model";
 
@@ -29,7 +30,7 @@ async function getQueriedStoragesService({
 			.exec();
 		return storages;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedStorageService" });
+		throw new Error(error, { cause: "getQueriedStoragesService" });
 	}
 }
 
@@ -37,12 +38,12 @@ async function getQueriedTotalStoragesService({
 	filter = {},
 }: QueriedResourceGetRequestServiceInput<StorageDocument>): Promise<number> {
 	try {
-		const totalStorage = await StorageModel.countDocuments(filter)
+		const totalStorages = await StorageModel.countDocuments(filter)
 			.lean()
 			.exec();
-		return totalStorage;
+		return totalStorages;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedTotalStorageService" });
+		throw new Error(error, { cause: "getQueriedTotalStoragesService" });
 	}
 }
 
@@ -61,21 +62,17 @@ async function getStorageByIdService(
 }
 
 async function updateStorageByIdService({
-	fieldsToUpdate,
-	storageId,
-}: {
-	storageId: Types.ObjectId | string;
-	fieldsToUpdate: Record<
-		keyof StorageDocument,
-		StorageDocument[keyof StorageDocument]
-	>;
-}): DatabaseResponseNullable<StorageDocument> {
+	_id,
+	fields,
+	updateOperator,
+}: UpdateDocumentByIdServiceInput<StorageDocument>): DatabaseResponseNullable<StorageDocument> {
+	const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
+	const updateObject = JSON.parse(updateString);
+
 	try {
-		const storage = await StorageModel.findByIdAndUpdate(
-			storageId,
-			{ $set: fieldsToUpdate },
-			{ new: true },
-		)
+		const storage = await StorageModel.findByIdAndUpdate(_id, updateObject, {
+			new: true,
+		})
 
 			.lean()
 			.exec();
@@ -117,7 +114,9 @@ async function deleteAStorageService(
 	storageId: Types.ObjectId | string,
 ): Promise<DeleteResult> {
 	try {
-		const storage = await StorageModel.deleteOne({ _id: storageId })
+		const storage = await StorageModel.deleteOne({
+			_id: storageId,
+		})
 			.lean()
 			.exec();
 		return storage;

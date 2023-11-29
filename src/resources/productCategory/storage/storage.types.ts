@@ -1,9 +1,12 @@
 import type { Types } from "mongoose";
 import type { RequestAfterJWTVerification } from "../../auth";
 import { UserRoles } from "../../user";
-import { GetQueriedResourceRequest } from "../../../types";
+import {
+	DocumentUpdateOperation,
+	GetQueriedResourceRequest,
+} from "../../../types";
 
-import { StorageSchema } from "./storage.model";
+import { StorageDocument, StorageSchema } from "./storage.model";
 
 interface CreateNewStorageRequest extends RequestAfterJWTVerification {
 	body: {
@@ -27,6 +30,22 @@ interface CreateNewStorageBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		storageSchemas: StorageSchema[];
+	};
+}
+
+// DEV ROUTE
+interface UpdateStoragesBulkRequest extends RequestAfterJWTVerification {
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
+		storageFields: {
+			storageId: Types.ObjectId;
+			documentUpdate: DocumentUpdateOperation<StorageDocument>;
+		}[];
 	};
 }
 
@@ -58,10 +77,7 @@ interface UpdateStorageByIdRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		storageFields: Record<
-			keyof StorageSchema,
-			StorageSchema[keyof StorageSchema]
-		>;
+		documentUpdate: DocumentUpdateOperation<StorageDocument>;
 	};
 	params: { storageId: string };
 }
@@ -74,4 +90,5 @@ export type {
 	GetStorageByIdRequest,
 	GetQueriedStoragesRequest,
 	UpdateStorageByIdRequest,
+	UpdateStoragesBulkRequest,
 };

@@ -5,75 +5,77 @@
 /**
  * Imports
  */
-import { storageRouter } from './storage.routes';
-import { StorageModel } from './storage.model';
+import { storageRouter } from "./storage.routes";
+import { StorageModel } from "./storage.model";
 
 import {
-  createNewStorageBulkHandler,
-  createNewStorageHandler,
-  deleteAStorageHandler,
-  deleteAllStoragesHandler,
-  getStorageByIdHandler,
-  getQueriedStoragesHandler,
-  returnAllFileUploadsForStoragesHandler,
-  updateStorageByIdHandler,
-} from './storage.controller';
+	createNewStorageBulkHandler,
+	createNewStorageHandler,
+	deleteAStorageHandler,
+	deleteAllStoragesHandler,
+	getStorageByIdHandler,
+	getQueriedStoragesHandler,
+	updateStorageByIdHandler,
+	updateStoragesBulkHandler,
+} from "./storage.controller";
 
 import {
-  createNewStorageService,
-  deleteAllStoragesService,
-  deleteAStorageService,
-  getStorageByIdService,
-  getQueriedStoragesService,
-  getQueriedTotalStoragesService,
-  returnAllStoragesUploadedFileIdsService,
-  updateStorageByIdService,
-} from './storage.service';
+	createNewStorageService,
+	deleteAStorageService,
+	deleteAllStoragesService,
+	getStorageByIdService,
+	getQueriedStoragesService,
+	getQueriedTotalStoragesService,
+	returnAllStoragesUploadedFileIdsService,
+	updateStorageByIdService,
+} from "./storage.service";
 
-import type { StorageDocument, StorageSchema } from './storage.model';
+import type { StorageDocument, StorageSchema } from "./storage.model";
 import type {
-  CreateNewStorageBulkRequest,
-  CreateNewStorageRequest,
-  DeleteAStorageRequest,
-  DeleteAllStoragesRequest,
-  GetStorageByIdRequest,
-  GetQueriedStoragesRequest,
-  UpdateStorageByIdRequest,
-} from './storage.types';
+	CreateNewStorageBulkRequest,
+	CreateNewStorageRequest,
+	DeleteAStorageRequest,
+	DeleteAllStoragesRequest,
+	GetStorageByIdRequest,
+	GetQueriedStoragesRequest,
+	UpdateStorageByIdRequest,
+	UpdateStoragesBulkRequest,
+} from "./storage.types";
 
 /**
  * Exports
  */
 
 export {
-  StorageModel,
-  storageRouter,
-  createNewStorageBulkHandler,
-  createNewStorageHandler,
-  createNewStorageService,
-  deleteAStorageHandler,
-  deleteAllStoragesHandler,
-  deleteAllStoragesService,
-  deleteAStorageService,
-  getStorageByIdHandler,
-  getStorageByIdService,
-  getQueriedStoragesHandler,
-  getQueriedStoragesService,
-  getQueriedTotalStoragesService,
-  returnAllStoragesUploadedFileIdsService,
-  returnAllFileUploadsForStoragesHandler,
-  updateStorageByIdHandler,
-  updateStorageByIdService,
+	StorageModel,
+	storageRouter,
+	createNewStorageBulkHandler,
+	createNewStorageHandler,
+	createNewStorageService,
+	deleteAStorageHandler,
+	deleteAStorageService,
+	deleteAllStoragesHandler,
+	deleteAllStoragesService,
+	getStorageByIdHandler,
+	getStorageByIdService,
+	getQueriedStoragesHandler,
+	getQueriedStoragesService,
+	getQueriedTotalStoragesService,
+	returnAllStoragesUploadedFileIdsService,
+	updateStorageByIdHandler,
+	updateStorageByIdService,
+	updateStoragesBulkHandler,
 };
 
 export type {
-  CreateNewStorageBulkRequest,
-  CreateNewStorageRequest,
-  DeleteAStorageRequest,
-  DeleteAllStoragesRequest,
-  GetStorageByIdRequest,
-  GetQueriedStoragesRequest,
-  StorageDocument,
-  StorageSchema,
-  UpdateStorageByIdRequest,
+	StorageDocument,
+	StorageSchema,
+	CreateNewStorageBulkRequest,
+	CreateNewStorageRequest,
+	DeleteAStorageRequest,
+	DeleteAllStoragesRequest,
+	GetStorageByIdRequest,
+	GetQueriedStoragesRequest,
+	UpdateStorageByIdRequest,
+	UpdateStoragesBulkRequest,
 };

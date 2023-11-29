@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { assignQueryDefaults, verifyRoles } from "../../../middlewares";
+import {
+	assignQueryDefaults,
+	verifyJWTMiddleware,
+	verifyRoles,
+} from "../../../middlewares";
 import {
 	createNewStorageBulkHandler,
 	createNewStorageHandler,
@@ -7,8 +11,8 @@ import {
 	deleteAllStoragesHandler,
 	getStorageByIdHandler,
 	getQueriedStoragesHandler,
-	returnAllFileUploadsForStoragesHandler,
 	updateStorageByIdHandler,
+	updateStoragesBulkHandler,
 } from "./storage.controller";
 import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
@@ -19,23 +23,29 @@ storageRouter.use(verifyRoles());
 storageRouter
 	.route("/")
 	.get(
+		verifyJWTMiddleware,
+		verifyRoles(),
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedStoragesHandler,
 	)
-	.post(createNewStorageHandler)
-	.delete(deleteAllStoragesHandler);
+	.post(createNewStorageHandler);
+
+// separate route for safety reasons (as it deletes all documents in the collection)
+storageRouter
+	.route("/delete-all")
+	.delete(verifyJWTMiddleware, verifyRoles(), deleteAllStoragesHandler);
 
 // DEV ROUTE
-storageRouter.route("/dev").post(createNewStorageBulkHandler);
-
 storageRouter
-	.route("/fileUploads")
-	.post(returnAllFileUploadsForStoragesHandler);
+	.route("/dev")
+	.post(createNewStorageBulkHandler)
+	.patch(updateStoragesBulkHandler);
 
+// single document routes
 storageRouter
 	.route("/:storageId")
-	.get(getStorageByIdHandler)
-	.delete(deleteAStorageHandler)
-	.put(updateStorageByIdHandler);
+	.get(verifyJWTMiddleware, verifyRoles(), getStorageByIdHandler)
+	.delete(verifyJWTMiddleware, verifyRoles(), deleteAStorageHandler)
+	.patch(verifyJWTMiddleware, verifyRoles(), updateStorageByIdHandler);
 
 export { storageRouter };

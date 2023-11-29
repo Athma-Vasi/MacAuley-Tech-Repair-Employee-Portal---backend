@@ -11,6 +11,7 @@ import type {
 	GetStorageByIdRequest,
 	GetQueriedStoragesRequest,
 	UpdateStorageByIdRequest,
+	UpdateStoragesBulkRequest,
 } from "./storage.types";
 import type {
 	GetQueriedResourceRequestServerResponse,
@@ -34,10 +35,16 @@ import {
 	deleteFileUploadByIdService,
 	getFileUploadByIdService,
 } from "../../fileUpload";
-import { ProductServerResponse } from "../product.types";
+
+import {
+	ProductReviewDocument,
+	deleteAProductReviewService,
+	getProductReviewByIdService,
+} from "../../productReview";
+import { removeUndefinedAndNullValues } from "../../../utils";
 
 // @desc   Create new storage
-// @route  POST /api/v1/actions/dashboard/product-category/storage
+// @route  POST /api/v1/product-category/storage
 // @access Private/Admin/Manager
 const createNewStorageHandler = expressAsyncHandler(
 	async (
@@ -75,7 +82,7 @@ const createNewStorageHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Create new storages bulk
-// @route  POST /api/v1/actions/dashboard/product-category/storage/dev
+// @route  POST /api/v1/product-category/storage/dev
 // @access Private/Admin/Manager
 const createNewStorageBulkHandler = expressAsyncHandler(
 	async (
@@ -103,32 +110,98 @@ const createNewStorageBulkHandler = expressAsyncHandler(
 				resourceData: successfullyCreatedStorages,
 			});
 			return;
-		} else if (successfullyCreatedStorages.length === 0) {
+		}
+
+		if (successfullyCreatedStorages.length === 0) {
 			response.status(400).json({
 				message: "Could not create any storages",
 				resourceData: [],
 			});
 			return;
-		} else {
+		}
+
+		response.status(201).json({
+			message: `Successfully created ${
+				storageSchemas.length - successfullyCreatedStorages.length
+			} storages`,
+			resourceData: successfullyCreatedStorages,
+		});
+		return;
+	},
+);
+
+// @desc   Update storages bulk
+// @route  PATCH /api/v1/product-category/storage/dev
+// @access Private/Admin/Manager
+const updateStoragesBulkHandler = expressAsyncHandler(
+	async (
+		request: UpdateStoragesBulkRequest,
+		response: Response<ResourceRequestServerResponse<StorageDocument>>,
+	) => {
+		const { storageFields } = request.body;
+
+		const updatedStorages = await Promise.all(
+			storageFields.map(async (storageField) => {
+				const {
+					storageId,
+					documentUpdate: { fields, updateOperator },
+				} = storageField;
+
+				const updatedStorage = await updateStorageByIdService({
+					_id: storageId,
+					fields,
+					updateOperator,
+				});
+
+				return updatedStorage;
+			}),
+		);
+
+		// filter out any storages that were not updated
+		const successfullyUpdatedStorages = updatedStorages.filter(
+			removeUndefinedAndNullValues,
+		);
+
+		// check if any storages were updated
+		if (successfullyUpdatedStorages.length === storageFields.length) {
 			response.status(201).json({
-				message: `Successfully created ${
-					storageSchemas.length - successfullyCreatedStorages.length
-				} storages`,
-				resourceData: successfullyCreatedStorages,
+				message: `Successfully updated ${successfullyUpdatedStorages.length} storages`,
+				resourceData: successfullyUpdatedStorages,
 			});
 			return;
 		}
+
+		if (successfullyUpdatedStorages.length === 0) {
+			response.status(400).json({
+				message: "Could not update any storages",
+				resourceData: [],
+			});
+			return;
+		}
+
+		response.status(201).json({
+			message: `Successfully updated ${
+				storageFields.length - successfullyUpdatedStorages.length
+			} storages`,
+			resourceData: successfullyUpdatedStorages,
+		});
+		return;
 	},
 );
 
 // @desc   Get all storages
-// @route  GET /api/v1/actions/dashboard/product-category/storage
+// @route  GET /api/v1/product-category/storage
 // @access Private/Admin/Manager
 const getQueriedStoragesHandler = expressAsyncHandler(
 	async (
 		request: GetQueriedStoragesRequest,
 		response: Response<
-			GetQueriedResourceRequestServerResponse<StorageDocument>
+			GetQueriedResourceRequestServerResponse<
+				StorageDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
 		>,
 	) => {
 		let { newQueryFlag, totalDocuments } = request.body;
@@ -159,7 +232,7 @@ const getQueriedStoragesHandler = expressAsyncHandler(
 			return;
 		}
 
-		// find all fileUploads associated with the storages (in parallel)
+		// find all fileUploads associated with the storages
 		const fileUploadsArrArr = await Promise.all(
 			storages.map(async (storage) => {
 				const fileUploadPromises = storage.uploadedFilesIds.map(
@@ -174,37 +247,61 @@ const getQueriedStoragesHandler = expressAsyncHandler(
 				const fileUploads = await Promise.all(fileUploadPromises);
 
 				// Filter out any undefined values (in case fileUpload was not found)
-				return fileUploads.filter((fileUpload) => fileUpload);
+				return fileUploads.filter(removeUndefinedAndNullValues);
+			}),
+		);
+
+		// find all reviews associated with the storages
+		const reviewsArrArr = await Promise.all(
+			storages.map(async (storage) => {
+				const reviewPromises = storage.reviewsIds.map(async (reviewId) => {
+					const review = await getProductReviewByIdService(reviewId);
+
+					return review;
+				});
+
+				// Wait for all the promises to resolve before continuing to the next iteration
+				const reviews = await Promise.all(reviewPromises);
+
+				// Filter out any undefined values (in case review was not found)
+				return reviews.filter(removeUndefinedAndNullValues);
 			}),
 		);
 
 		// create storageServerResponse array
-		const storageServerResponseArray = storages
-			.map((storage, index) => {
-				const fileUploads = fileUploadsArrArr[index];
-				return {
-					...storage,
-					fileUploads,
-				};
-			})
-			.filter((storage) => storage);
+		const storageServerResponseArray = storages.map((storage, index) => {
+			const fileUploads = fileUploadsArrArr[index];
+			const productReviews = reviewsArrArr[index];
+			return {
+				...storage,
+				fileUploads,
+				productReviews,
+			};
+		});
 
 		response.status(200).json({
 			message: "Successfully retrieved storages",
 			pages: Math.ceil(totalDocuments / Number(options?.limit)),
 			totalDocuments,
-			resourceData: storageServerResponseArray as StorageDocument[],
+			resourceData: storageServerResponseArray,
 		});
 	},
 );
 
 // @desc   Get storage by id
-// @route  GET /api/v1/actions/dashboard/product-category/storage/:storageId
+// @route  GET /api/v1/product-category/storage/:storageId
 // @access Private/Admin/Manager
 const getStorageByIdHandler = expressAsyncHandler(
 	async (
 		request: GetStorageByIdRequest,
-		response: Response<ResourceRequestServerResponse<StorageDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				StorageDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const storageId = request.params.storageId;
 
@@ -218,20 +315,28 @@ const getStorageByIdHandler = expressAsyncHandler(
 		}
 
 		// get all fileUploads associated with the storage
-		const fileUploadsArr = await Promise.all(
+		const fileUploads = await Promise.all(
 			storage.uploadedFilesIds.map(async (uploadedFileId) => {
 				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
-				return fileUpload as FileUploadDocument;
+				return fileUpload;
+			}),
+		);
+
+		// get all reviews associated with the storage
+		const productReviews = await Promise.all(
+			storage.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
+
+				return review;
 			}),
 		);
 
 		// create storageServerResponse
-		const storageServerResponse: ProductServerResponse<StorageDocument> = {
+		const storageServerResponse = {
 			...storage,
-			fileUploads: fileUploadsArr.filter(
-				(fileUpload) => fileUpload,
-			) as FileUploadDocument[],
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
 		};
 
 		response.status(200).json({
@@ -242,34 +347,30 @@ const getStorageByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Update a storage by id
-// @route  PUT /api/v1/actions/dashboard/product-category/storage/:storageId
+// @route  PUT /api/v1/product-category/storage/:storageId
 // @access Private/Admin/Manager
 const updateStorageByIdHandler = expressAsyncHandler(
 	async (
 		request: UpdateStorageByIdRequest,
-		response: Response<ResourceRequestServerResponse<StorageDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				StorageDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const { storageId } = request.params;
-		const { storageFields } = request.body;
-
-		// check if storage exists
-		const storageExists = await getStorageByIdService(storageId);
-		if (!storageExists) {
-			response
-				.status(404)
-				.json({ message: "Storage does not exist", resourceData: [] });
-			return;
-		}
-
-		const newStorage = {
-			...storageExists,
-			...storageFields,
-		};
+		const {
+			documentUpdate: { fields, updateOperator },
+		} = request.body;
 
 		// update storage
 		const updatedStorage = await updateStorageByIdService({
-			storageId,
-			fieldsToUpdate: newStorage,
+			_id: storageId,
+			fields,
+			updateOperator,
 		});
 
 		if (!updatedStorage) {
@@ -280,58 +381,40 @@ const updateStorageByIdHandler = expressAsyncHandler(
 			return;
 		}
 
-		response.status(200).json({
-			message: "Storage updated successfully",
-			resourceData: [updatedStorage],
-		});
-	},
-);
-
-// @desc   Return all associated file uploads
-// @route  GET /api/v1/actions/dashboard/product-category/storage/fileUploads
-// @access Private/Admin/Manager
-const returnAllFileUploadsForStoragesHandler = expressAsyncHandler(
-	async (
-		_request: GetStorageByIdRequest,
-		response: Response<ResourceRequestServerResponse<FileUploadDocument>>,
-	) => {
-		const fileUploadsIds = await returnAllStoragesUploadedFileIdsService();
-
-		if (fileUploadsIds.length === 0) {
-			response
-				.status(404)
-				.json({ message: "No file uploads found", resourceData: [] });
-			return;
-		}
-
-		const fileUploads = (await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) => {
-				const fileUpload = await getFileUploadByIdService(fileUploadId);
+		// get all fileUploads associated with the storage
+		const fileUploads = await Promise.all(
+			updatedStorage.uploadedFilesIds.map(async (uploadedFileId) => {
+				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
 				return fileUpload;
 			}),
-		)) as FileUploadDocument[];
+		);
 
-		// filter out any undefined values (in case fileUpload was not found)
-		const filteredFileUploads = fileUploads.filter((fileUpload) => fileUpload);
+		// get all reviews associated with the storage
+		const productReviews = await Promise.all(
+			updatedStorage.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
 
-		if (filteredFileUploads.length !== fileUploadsIds.length) {
-			response.status(404).json({
-				message: "Some file uploads could not be found.",
-				resourceData: filteredFileUploads,
-			});
-			return;
-		}
+				return review;
+			}),
+		);
+
+		// create storageServerResponse
+		const storageServerResponse = {
+			...updatedStorage,
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
+		};
 
 		response.status(200).json({
-			message: "Successfully retrieved file uploads",
-			resourceData: filteredFileUploads,
+			message: "Storage updated successfully",
+			resourceData: [storageServerResponse],
 		});
 	},
 );
 
 // @desc   Delete all storages
-// @route  DELETE /api/v1/actions/dashboard/product-category/storage
+// @route  DELETE /api/v1/product-category/storage
 // @access Private/Admin/Manager
 const deleteAllStoragesHandler = expressAsyncHandler(
 	async (
@@ -339,17 +422,39 @@ const deleteAllStoragesHandler = expressAsyncHandler(
 		response: Response<ResourceRequestServerResponse<StorageDocument>>,
 	) => {
 		// grab all storages file upload ids
-		const fileUploadsIds = await returnAllStoragesUploadedFileIdsService();
+		const uploadedFilesIds = await returnAllStoragesUploadedFileIdsService();
 
 		// delete all file uploads associated with all storages
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) =>
-				deleteFileUploadByIdService(fileUploadId),
+		const deletedFileUploads = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
-		if (!deleteFileUploadsResult.every((result) => result.deletedCount !== 0)) {
+
+		if (
+			deletedFileUploads.some(
+				(deletedFileUpload) => deletedFileUpload.deletedCount === 0,
+			)
+		) {
 			response.status(400).json({
-				message: "Some file uploads could not be deleted. Please try again.",
+				message: "Some File uploads could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
+
+		// delete all reviews associated with all storages
+		const deletedReviews = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
+
+		if (
+			deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)
+		) {
+			response.status(400).json({
+				message: "Some reviews could not be deleted. Please try again.",
 				resourceData: [],
 			});
 			return;
@@ -373,7 +478,7 @@ const deleteAllStoragesHandler = expressAsyncHandler(
 );
 
 // @desc   Delete a storage by id
-// @route  DELETE /api/v1/actions/dashboard/product-category/storage/:storageId
+// @route  DELETE /api/v1/product-category/storage/:storageId
 // @access Private/Admin/Manager
 const deleteAStorageHandler = expressAsyncHandler(
 	async (
@@ -395,17 +500,37 @@ const deleteAStorageHandler = expressAsyncHandler(
 		// if it is not an array, it is made to be an array
 		const uploadedFilesIds = [...storageExists.uploadedFilesIds];
 
-		// delete all file uploads associated with this storage
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			uploadedFilesIds.map(async (uploadedFileId) =>
-				deleteFileUploadByIdService(uploadedFileId),
+		// delete all file uploads associated with all storages
+		const deletedFileUploads = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
 
-		if (deleteFileUploadsResult.some((result) => result.deletedCount === 0)) {
+		if (
+			deletedFileUploads.some(
+				(deletedFileUpload) => deletedFileUpload.deletedCount === 0,
+			)
+		) {
 			response.status(400).json({
-				message:
-					"Some file uploads associated with this storage could not be deleted. Storage not deleted. Please try again.",
+				message: "Some File uploads could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
+
+		// delete all reviews associated with all storages
+		const deletedReviews = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
+
+		if (
+			deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)
+		) {
+			response.status(400).json({
+				message: "Some reviews could not be deleted. Please try again.",
 				resourceData: [],
 			});
 			return;
@@ -434,6 +559,6 @@ export {
 	deleteAllStoragesHandler,
 	getStorageByIdHandler,
 	getQueriedStoragesHandler,
-	returnAllFileUploadsForStoragesHandler,
 	updateStorageByIdHandler,
+	updateStoragesBulkHandler,
 };
