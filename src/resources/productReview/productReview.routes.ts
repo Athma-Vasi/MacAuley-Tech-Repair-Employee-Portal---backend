@@ -27,6 +27,8 @@ productReviewRouter
 	.route("/")
 	.post(createNewProductReviewHandler)
 	.get(
+		verifyJWTMiddleware,
+		verifyRoles(),
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedProductReviewsHandler,
 	);
@@ -34,6 +36,8 @@ productReviewRouter
 productReviewRouter
 	.route("/user")
 	.get(
+		verifyJWTMiddleware,
+		verifyRoles(),
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedPurchasesOnlineByUserHandler,
 	);
@@ -51,8 +55,8 @@ productReviewRouter
 
 productReviewRouter
 	.route("/:productReviewId")
-	.get(getProductReviewByIdHandler)
-	.patch(updateProductReviewByIdHandler)
-	.delete(deleteProductReviewHandler);
+	.get(verifyJWTMiddleware, verifyRoles(), getProductReviewByIdHandler)
+	.patch(verifyJWTMiddleware, verifyRoles(), updateProductReviewByIdHandler)
+	.delete(verifyJWTMiddleware, verifyRoles(), deleteProductReviewHandler);
 
 export { productReviewRouter };

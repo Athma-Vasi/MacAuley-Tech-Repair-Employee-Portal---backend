@@ -24,8 +24,7 @@ purchaseOnlineRouter
 	.get(
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedPurchaseOnlinesHandler,
-	)
-	.delete(deletePurchaseOnlineHandler);
+	);
 
 purchaseOnlineRouter
 	.route("/user")
@@ -44,6 +43,7 @@ purchaseOnlineRouter
 purchaseOnlineRouter
 	.route("/:purchaseOnlineId")
 	.get(getPurchaseOnlineByIdHandler)
-	.patch(updatePurchaseOnlineByIdHandler);
+	.patch(updatePurchaseOnlineByIdHandler)
+	.delete(deletePurchaseOnlineHandler);
 
 export { purchaseOnlineRouter };
