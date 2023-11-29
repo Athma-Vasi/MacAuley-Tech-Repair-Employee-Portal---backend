@@ -11,6 +11,7 @@ import type {
 	GetMicrophoneByIdRequest,
 	GetQueriedMicrophonesRequest,
 	UpdateMicrophoneByIdRequest,
+	UpdateMicrophonesBulkRequest,
 } from "./microphone.types";
 import type {
 	GetQueriedResourceRequestServerResponse,
@@ -34,10 +35,16 @@ import {
 	deleteFileUploadByIdService,
 	getFileUploadByIdService,
 } from "../../fileUpload";
-import { ProductServerResponse } from "../product.types";
+
+import {
+	ProductReviewDocument,
+	deleteAProductReviewService,
+	getProductReviewByIdService,
+} from "../../productReview";
+import { removeUndefinedAndNullValues } from "../../../utils";
 
 // @desc   Create new microphone
-// @route  POST /api/v1/actions/dashboard/product-category/microphone
+// @route  POST /api/v1/product-category/microphone
 // @access Private/Admin/Manager
 const createNewMicrophoneHandler = expressAsyncHandler(
 	async (
@@ -75,7 +82,7 @@ const createNewMicrophoneHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Create new microphones bulk
-// @route  POST /api/v1/actions/dashboard/product-category/microphone/dev
+// @route  POST /api/v1/product-category/microphone/dev
 // @access Private/Admin/Manager
 const createNewMicrophoneBulkHandler = expressAsyncHandler(
 	async (
@@ -104,32 +111,98 @@ const createNewMicrophoneBulkHandler = expressAsyncHandler(
 				resourceData: successfullyCreatedMicrophones,
 			});
 			return;
-		} else if (successfullyCreatedMicrophones.length === 0) {
+		}
+
+		if (successfullyCreatedMicrophones.length === 0) {
 			response.status(400).json({
 				message: "Could not create any microphones",
 				resourceData: [],
 			});
 			return;
-		} else {
+		}
+
+		response.status(201).json({
+			message: `Successfully created ${
+				microphoneSchemas.length - successfullyCreatedMicrophones.length
+			} microphones`,
+			resourceData: successfullyCreatedMicrophones,
+		});
+		return;
+	},
+);
+
+// @desc   Update microphones bulk
+// @route  PATCH /api/v1/product-category/microphone/dev
+// @access Private/Admin/Manager
+const updateMicrophonesBulkHandler = expressAsyncHandler(
+	async (
+		request: UpdateMicrophonesBulkRequest,
+		response: Response<ResourceRequestServerResponse<MicrophoneDocument>>,
+	) => {
+		const { microphoneFields } = request.body;
+
+		const updatedMicrophones = await Promise.all(
+			microphoneFields.map(async (microphoneField) => {
+				const {
+					microphoneId,
+					documentUpdate: { fields, updateOperator },
+				} = microphoneField;
+
+				const updatedMicrophone = await updateMicrophoneByIdService({
+					_id: microphoneId,
+					fields,
+					updateOperator,
+				});
+
+				return updatedMicrophone;
+			}),
+		);
+
+		// filter out any microphones that were not updated
+		const successfullyUpdatedMicrophones = updatedMicrophones.filter(
+			removeUndefinedAndNullValues,
+		);
+
+		// check if any microphones were updated
+		if (successfullyUpdatedMicrophones.length === microphoneFields.length) {
 			response.status(201).json({
-				message: `Successfully created ${
-					microphoneSchemas.length - successfullyCreatedMicrophones.length
-				} microphones`,
-				resourceData: successfullyCreatedMicrophones,
+				message: `Successfully updated ${successfullyUpdatedMicrophones.length} microphones`,
+				resourceData: successfullyUpdatedMicrophones,
 			});
 			return;
 		}
+
+		if (successfullyUpdatedMicrophones.length === 0) {
+			response.status(400).json({
+				message: "Could not update any microphones",
+				resourceData: [],
+			});
+			return;
+		}
+
+		response.status(201).json({
+			message: `Successfully updated ${
+				microphoneFields.length - successfullyUpdatedMicrophones.length
+			} microphones`,
+			resourceData: successfullyUpdatedMicrophones,
+		});
+		return;
 	},
 );
 
 // @desc   Get all microphones
-// @route  GET /api/v1/actions/dashboard/product-category/microphone
+// @route  GET /api/v1/product-category/microphone
 // @access Private/Admin/Manager
 const getQueriedMicrophonesHandler = expressAsyncHandler(
 	async (
 		request: GetQueriedMicrophonesRequest,
 		response: Response<
-			GetQueriedResourceRequestServerResponse<MicrophoneDocument>
+			GetQueriedResourceRequestServerResponse<
+				MicrophoneDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
 		>,
 	) => {
 		let { newQueryFlag, totalDocuments } = request.body;
@@ -160,7 +233,7 @@ const getQueriedMicrophonesHandler = expressAsyncHandler(
 			return;
 		}
 
-		// find all fileUploads associated with the microphones (in parallel)
+		// find all fileUploads associated with the microphones
 		const fileUploadsArrArr = await Promise.all(
 			microphones.map(async (microphone) => {
 				const fileUploadPromises = microphone.uploadedFilesIds.map(
@@ -175,37 +248,63 @@ const getQueriedMicrophonesHandler = expressAsyncHandler(
 				const fileUploads = await Promise.all(fileUploadPromises);
 
 				// Filter out any undefined values (in case fileUpload was not found)
-				return fileUploads.filter((fileUpload) => fileUpload);
+				return fileUploads.filter(removeUndefinedAndNullValues);
+			}),
+		);
+
+		// find all reviews associated with the microphones
+		const reviewsArrArr = await Promise.all(
+			microphones.map(async (microphone) => {
+				const reviewPromises = microphone.reviewsIds.map(async (reviewId) => {
+					const review = await getProductReviewByIdService(reviewId);
+
+					return review;
+				});
+
+				// Wait for all the promises to resolve before continuing to the next iteration
+				const reviews = await Promise.all(reviewPromises);
+
+				// Filter out any undefined values (in case review was not found)
+				return reviews.filter(removeUndefinedAndNullValues);
 			}),
 		);
 
 		// create microphoneServerResponse array
-		const microphoneServerResponseArray = microphones
-			.map((microphone, index) => {
+		const microphoneServerResponseArray = microphones.map(
+			(microphone, index) => {
 				const fileUploads = fileUploadsArrArr[index];
+				const productReviews = reviewsArrArr[index];
 				return {
 					...microphone,
 					fileUploads,
+					productReviews,
 				};
-			})
-			.filter((microphone) => microphone);
+			},
+		);
 
 		response.status(200).json({
 			message: "Successfully retrieved microphones",
 			pages: Math.ceil(totalDocuments / Number(options?.limit)),
 			totalDocuments,
-			resourceData: microphoneServerResponseArray as MicrophoneDocument[],
+			resourceData: microphoneServerResponseArray,
 		});
 	},
 );
 
 // @desc   Get microphone by id
-// @route  GET /api/v1/actions/dashboard/product-category/microphone/:microphoneId
+// @route  GET /api/v1/product-category/microphone/:microphoneId
 // @access Private/Admin/Manager
 const getMicrophoneByIdHandler = expressAsyncHandler(
 	async (
 		request: GetMicrophoneByIdRequest,
-		response: Response<ResourceRequestServerResponse<MicrophoneDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				MicrophoneDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const microphoneId = request.params.microphoneId;
 
@@ -219,22 +318,29 @@ const getMicrophoneByIdHandler = expressAsyncHandler(
 		}
 
 		// get all fileUploads associated with the microphone
-		const fileUploadsArr = await Promise.all(
+		const fileUploads = await Promise.all(
 			microphone.uploadedFilesIds.map(async (uploadedFileId) => {
 				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
-				return fileUpload as FileUploadDocument;
+				return fileUpload;
+			}),
+		);
+
+		// get all reviews associated with the microphone
+		const productReviews = await Promise.all(
+			microphone.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
+
+				return review;
 			}),
 		);
 
 		// create microphoneServerResponse
-		const microphoneServerResponse: ProductServerResponse<MicrophoneDocument> =
-			{
-				...microphone,
-				fileUploads: fileUploadsArr.filter(
-					(fileUpload) => fileUpload,
-				) as FileUploadDocument[],
-			};
+		const microphoneServerResponse = {
+			...microphone,
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
+		};
 
 		response.status(200).json({
 			message: "Successfully retrieved microphone",
@@ -244,34 +350,30 @@ const getMicrophoneByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Update a microphone by id
-// @route  PUT /api/v1/actions/dashboard/product-category/microphone/:microphoneId
+// @route  PUT /api/v1/product-category/microphone/:microphoneId
 // @access Private/Admin/Manager
 const updateMicrophoneByIdHandler = expressAsyncHandler(
 	async (
 		request: UpdateMicrophoneByIdRequest,
-		response: Response<ResourceRequestServerResponse<MicrophoneDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				MicrophoneDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const { microphoneId } = request.params;
-		const { microphoneFields } = request.body;
-
-		// check if microphone exists
-		const microphoneExists = await getMicrophoneByIdService(microphoneId);
-		if (!microphoneExists) {
-			response
-				.status(404)
-				.json({ message: "Microphone does not exist", resourceData: [] });
-			return;
-		}
-
-		const newMicrophone = {
-			...microphoneExists,
-			...microphoneFields,
-		};
+		const {
+			documentUpdate: { fields, updateOperator },
+		} = request.body;
 
 		// update microphone
 		const updatedMicrophone = await updateMicrophoneByIdService({
-			microphoneId,
-			fieldsToUpdate: newMicrophone,
+			_id: microphoneId,
+			fields,
+			updateOperator,
 		});
 
 		if (!updatedMicrophone) {
@@ -282,58 +384,40 @@ const updateMicrophoneByIdHandler = expressAsyncHandler(
 			return;
 		}
 
-		response.status(200).json({
-			message: "Microphone updated successfully",
-			resourceData: [updatedMicrophone],
-		});
-	},
-);
-
-// @desc   Return all associated file uploads
-// @route  GET /api/v1/actions/dashboard/product-category/microphone/fileUploads
-// @access Private/Admin/Manager
-const returnAllFileUploadsForMicrophonesHandler = expressAsyncHandler(
-	async (
-		_request: GetMicrophoneByIdRequest,
-		response: Response<ResourceRequestServerResponse<FileUploadDocument>>,
-	) => {
-		const fileUploadsIds = await returnAllMicrophonesUploadedFileIdsService();
-
-		if (fileUploadsIds.length === 0) {
-			response
-				.status(404)
-				.json({ message: "No file uploads found", resourceData: [] });
-			return;
-		}
-
-		const fileUploads = (await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) => {
-				const fileUpload = await getFileUploadByIdService(fileUploadId);
+		// get all fileUploads associated with the microphone
+		const fileUploads = await Promise.all(
+			updatedMicrophone.uploadedFilesIds.map(async (uploadedFileId) => {
+				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
 				return fileUpload;
 			}),
-		)) as FileUploadDocument[];
+		);
 
-		// filter out any undefined values (in case fileUpload was not found)
-		const filteredFileUploads = fileUploads.filter((fileUpload) => fileUpload);
+		// get all reviews associated with the microphone
+		const productReviews = await Promise.all(
+			updatedMicrophone.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
 
-		if (filteredFileUploads.length !== fileUploadsIds.length) {
-			response.status(404).json({
-				message: "Some file uploads could not be found.",
-				resourceData: filteredFileUploads,
-			});
-			return;
-		}
+				return review;
+			}),
+		);
+
+		// create microphoneServerResponse
+		const microphoneServerResponse = {
+			...updatedMicrophone,
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
+		};
 
 		response.status(200).json({
-			message: "Successfully retrieved file uploads",
-			resourceData: filteredFileUploads,
+			message: "Microphone updated successfully",
+			resourceData: [microphoneServerResponse],
 		});
 	},
 );
 
 // @desc   Delete all microphones
-// @route  DELETE /api/v1/actions/dashboard/product-category/microphone
+// @route  DELETE /api/v1/product-category/microphone
 // @access Private/Admin/Manager
 const deleteAllMicrophonesHandler = expressAsyncHandler(
 	async (
@@ -341,17 +425,39 @@ const deleteAllMicrophonesHandler = expressAsyncHandler(
 		response: Response<ResourceRequestServerResponse<MicrophoneDocument>>,
 	) => {
 		// grab all microphones file upload ids
-		const fileUploadsIds = await returnAllMicrophonesUploadedFileIdsService();
+		const uploadedFilesIds = await returnAllMicrophonesUploadedFileIdsService();
 
 		// delete all file uploads associated with all microphones
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) =>
-				deleteFileUploadByIdService(fileUploadId),
+		const deletedFileUploads = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
-		if (!deleteFileUploadsResult.every((result) => result.deletedCount !== 0)) {
+
+		if (
+			deletedFileUploads.some(
+				(deletedFileUpload) => deletedFileUpload.deletedCount === 0,
+			)
+		) {
 			response.status(400).json({
-				message: "Some file uploads could not be deleted. Please try again.",
+				message: "Some File uploads could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
+
+		// delete all reviews associated with all microphones
+		const deletedReviews = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
+
+		if (
+			deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)
+		) {
+			response.status(400).json({
+				message: "Some reviews could not be deleted. Please try again.",
 				resourceData: [],
 			});
 			return;
@@ -376,7 +482,7 @@ const deleteAllMicrophonesHandler = expressAsyncHandler(
 );
 
 // @desc   Delete a microphone by id
-// @route  DELETE /api/v1/actions/dashboard/product-category/microphone/:microphoneId
+// @route  DELETE /api/v1/product-category/microphone/:microphoneId
 // @access Private/Admin/Manager
 const deleteAMicrophoneHandler = expressAsyncHandler(
 	async (
@@ -398,17 +504,37 @@ const deleteAMicrophoneHandler = expressAsyncHandler(
 		// if it is not an array, it is made to be an array
 		const uploadedFilesIds = [...microphoneExists.uploadedFilesIds];
 
-		// delete all file uploads associated with this microphone
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			uploadedFilesIds.map(async (uploadedFileId) =>
-				deleteFileUploadByIdService(uploadedFileId),
+		// delete all file uploads associated with all microphones
+		const deletedFileUploads = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
 
-		if (deleteFileUploadsResult.some((result) => result.deletedCount === 0)) {
+		if (
+			deletedFileUploads.some(
+				(deletedFileUpload) => deletedFileUpload.deletedCount === 0,
+			)
+		) {
 			response.status(400).json({
-				message:
-					"Some file uploads associated with this microphone could not be deleted. Microphone not deleted. Please try again.",
+				message: "Some File uploads could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
+
+		// delete all reviews associated with all microphones
+		const deletedReviews = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
+
+		if (
+			deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)
+		) {
+			response.status(400).json({
+				message: "Some reviews could not be deleted. Please try again.",
 				resourceData: [],
 			});
 			return;
@@ -439,6 +565,6 @@ export {
 	deleteAllMicrophonesHandler,
 	getMicrophoneByIdHandler,
 	getQueriedMicrophonesHandler,
-	returnAllFileUploadsForMicrophonesHandler,
 	updateMicrophoneByIdHandler,
+	updateMicrophonesBulkHandler,
 };

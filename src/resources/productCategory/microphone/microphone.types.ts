@@ -1,9 +1,12 @@
 import type { Types } from "mongoose";
 import type { RequestAfterJWTVerification } from "../../auth";
 import { UserRoles } from "../../user";
-import { GetQueriedResourceRequest } from "../../../types";
+import {
+	DocumentUpdateOperation,
+	GetQueriedResourceRequest,
+} from "../../../types";
 
-import { MicrophoneSchema } from "./microphone.model";
+import { MicrophoneDocument, MicrophoneSchema } from "./microphone.model";
 
 interface CreateNewMicrophoneRequest extends RequestAfterJWTVerification {
 	body: {
@@ -27,6 +30,22 @@ interface CreateNewMicrophoneBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		microphoneSchemas: MicrophoneSchema[];
+	};
+}
+
+// DEV ROUTE
+interface UpdateMicrophonesBulkRequest extends RequestAfterJWTVerification {
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
+		microphoneFields: {
+			microphoneId: Types.ObjectId;
+			documentUpdate: DocumentUpdateOperation<MicrophoneDocument>;
+		}[];
 	};
 }
 
@@ -58,10 +77,7 @@ interface UpdateMicrophoneByIdRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		microphoneFields: Record<
-			keyof MicrophoneSchema,
-			MicrophoneSchema[keyof MicrophoneSchema]
-		>;
+		documentUpdate: DocumentUpdateOperation<MicrophoneDocument>;
 	};
 	params: { microphoneId: string };
 }
@@ -74,4 +90,5 @@ export type {
 	GetMicrophoneByIdRequest,
 	GetQueriedMicrophonesRequest,
 	UpdateMicrophoneByIdRequest,
+	UpdateMicrophonesBulkRequest,
 };

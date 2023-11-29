@@ -4,6 +4,7 @@ import {
 	QueriedResourceGetRequestServiceInput,
 	DatabaseResponse,
 	DatabaseResponseNullable,
+	UpdateDocumentByIdServiceInput,
 } from "../../../types";
 import {
 	MicrophoneDocument,
@@ -33,7 +34,7 @@ async function getQueriedMicrophonesService({
 			.exec();
 		return microphones;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedMicrophoneService" });
+		throw new Error(error, { cause: "getQueriedMicrophonesService" });
 	}
 }
 
@@ -41,12 +42,12 @@ async function getQueriedTotalMicrophonesService({
 	filter = {},
 }: QueriedResourceGetRequestServiceInput<MicrophoneDocument>): Promise<number> {
 	try {
-		const totalMicrophone = await MicrophoneModel.countDocuments(filter)
+		const totalMicrophones = await MicrophoneModel.countDocuments(filter)
 			.lean()
 			.exec();
-		return totalMicrophone;
+		return totalMicrophones;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedTotalMicrophoneService" });
+		throw new Error(error, { cause: "getQueriedTotalMicrophonesService" });
 	}
 }
 
@@ -65,20 +66,20 @@ async function getMicrophoneByIdService(
 }
 
 async function updateMicrophoneByIdService({
-	fieldsToUpdate,
-	microphoneId,
-}: {
-	microphoneId: Types.ObjectId | string;
-	fieldsToUpdate: Record<
-		keyof MicrophoneDocument,
-		MicrophoneDocument[keyof MicrophoneDocument]
-	>;
-}): DatabaseResponseNullable<MicrophoneDocument> {
+	_id,
+	fields,
+	updateOperator,
+}: UpdateDocumentByIdServiceInput<MicrophoneDocument>): DatabaseResponseNullable<MicrophoneDocument> {
+	const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
+	const updateObject = JSON.parse(updateString);
+
 	try {
 		const microphone = await MicrophoneModel.findByIdAndUpdate(
-			microphoneId,
-			{ $set: fieldsToUpdate },
-			{ new: true },
+			_id,
+			updateObject,
+			{
+				new: true,
+			},
 		)
 
 			.lean()
@@ -121,7 +122,9 @@ async function deleteAMicrophoneService(
 	microphoneId: Types.ObjectId | string,
 ): Promise<DeleteResult> {
 	try {
-		const microphone = await MicrophoneModel.deleteOne({ _id: microphoneId })
+		const microphone = await MicrophoneModel.deleteOne({
+			_id: microphoneId,
+		})
 			.lean()
 			.exec();
 		return microphone;

@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { assignQueryDefaults, verifyRoles } from "../../../middlewares";
+import {
+	assignQueryDefaults,
+	verifyJWTMiddleware,
+	verifyRoles,
+} from "../../../middlewares";
 import {
 	createNewMicrophoneBulkHandler,
 	createNewMicrophoneHandler,
@@ -7,8 +11,8 @@ import {
 	deleteAllMicrophonesHandler,
 	getMicrophoneByIdHandler,
 	getQueriedMicrophonesHandler,
-	returnAllFileUploadsForMicrophonesHandler,
 	updateMicrophoneByIdHandler,
+	updateMicrophonesBulkHandler,
 } from "./microphone.controller";
 import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
@@ -19,23 +23,29 @@ microphoneRouter.use(verifyRoles());
 microphoneRouter
 	.route("/")
 	.get(
+		verifyJWTMiddleware,
+		verifyRoles(),
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedMicrophonesHandler,
 	)
-	.post(createNewMicrophoneHandler)
-	.delete(deleteAllMicrophonesHandler);
+	.post(createNewMicrophoneHandler);
+
+// separate route for safety reasons (as it deletes all documents in the collection)
+microphoneRouter
+	.route("/delete-all")
+	.delete(verifyJWTMiddleware, verifyRoles(), deleteAllMicrophonesHandler);
 
 // DEV ROUTE
-microphoneRouter.route("/dev").post(createNewMicrophoneBulkHandler);
-
 microphoneRouter
-	.route("/fileUploads")
-	.post(returnAllFileUploadsForMicrophonesHandler);
+	.route("/dev")
+	.post(createNewMicrophoneBulkHandler)
+	.patch(updateMicrophonesBulkHandler);
 
+// single document routes
 microphoneRouter
 	.route("/:microphoneId")
-	.get(getMicrophoneByIdHandler)
-	.delete(deleteAMicrophoneHandler)
-	.put(updateMicrophoneByIdHandler);
+	.get(verifyJWTMiddleware, verifyRoles(), getMicrophoneByIdHandler)
+	.delete(verifyJWTMiddleware, verifyRoles(), deleteAMicrophoneHandler)
+	.patch(verifyJWTMiddleware, verifyRoles(), updateMicrophoneByIdHandler);
 
 export { microphoneRouter };
