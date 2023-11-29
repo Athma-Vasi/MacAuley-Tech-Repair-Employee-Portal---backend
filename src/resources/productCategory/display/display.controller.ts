@@ -11,6 +11,7 @@ import type {
 	GetDisplayByIdRequest,
 	GetQueriedDisplaysRequest,
 	UpdateDisplayByIdRequest,
+	UpdateDisplaysBulkRequest,
 } from "./display.types";
 import type {
 	GetQueriedResourceRequestServerResponse,
@@ -34,10 +35,16 @@ import {
 	deleteFileUploadByIdService,
 	getFileUploadByIdService,
 } from "../../fileUpload";
-import { ProductServerResponse } from "../product.types";
+
+import {
+	ProductReviewDocument,
+	deleteAProductReviewService,
+	getProductReviewByIdService,
+} from "../../productReview";
+import { removeUndefinedAndNullValues } from "../../../utils";
 
 // @desc   Create new display
-// @route  POST /api/v1/actions/dashboard/product-category/display
+// @route  POST /api/v1/product-category/display
 // @access Private/Admin/Manager
 const createNewDisplayHandler = expressAsyncHandler(
 	async (
@@ -75,7 +82,7 @@ const createNewDisplayHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Create new displays bulk
-// @route  POST /api/v1/actions/dashboard/product-category/display/dev
+// @route  POST /api/v1/product-category/display/dev
 // @access Private/Admin/Manager
 const createNewDisplayBulkHandler = expressAsyncHandler(
 	async (
@@ -103,32 +110,98 @@ const createNewDisplayBulkHandler = expressAsyncHandler(
 				resourceData: successfullyCreatedDisplays,
 			});
 			return;
-		} else if (successfullyCreatedDisplays.length === 0) {
+		}
+
+		if (successfullyCreatedDisplays.length === 0) {
 			response.status(400).json({
 				message: "Could not create any displays",
 				resourceData: [],
 			});
 			return;
-		} else {
+		}
+
+		response.status(201).json({
+			message: `Successfully created ${
+				displaySchemas.length - successfullyCreatedDisplays.length
+			} displays`,
+			resourceData: successfullyCreatedDisplays,
+		});
+		return;
+	},
+);
+
+// @desc   Update displays bulk
+// @route  PATCH /api/v1/product-category/display/dev
+// @access Private/Admin/Manager
+const updateDisplaysBulkHandler = expressAsyncHandler(
+	async (
+		request: UpdateDisplaysBulkRequest,
+		response: Response<ResourceRequestServerResponse<DisplayDocument>>,
+	) => {
+		const { displayFields } = request.body;
+
+		const updatedDisplays = await Promise.all(
+			displayFields.map(async (displayField) => {
+				const {
+					displayId,
+					documentUpdate: { fields, updateOperator },
+				} = displayField;
+
+				const updatedDisplay = await updateDisplayByIdService({
+					_id: displayId,
+					fields,
+					updateOperator,
+				});
+
+				return updatedDisplay;
+			}),
+		);
+
+		// filter out any displays that were not updated
+		const successfullyUpdatedDisplays = updatedDisplays.filter(
+			removeUndefinedAndNullValues,
+		);
+
+		// check if any displays were updated
+		if (successfullyUpdatedDisplays.length === displayFields.length) {
 			response.status(201).json({
-				message: `Successfully created ${
-					displaySchemas.length - successfullyCreatedDisplays.length
-				} displays`,
-				resourceData: successfullyCreatedDisplays,
+				message: `Successfully updated ${successfullyUpdatedDisplays.length} displays`,
+				resourceData: successfullyUpdatedDisplays,
 			});
 			return;
 		}
+
+		if (successfullyUpdatedDisplays.length === 0) {
+			response.status(400).json({
+				message: "Could not update any displays",
+				resourceData: [],
+			});
+			return;
+		}
+
+		response.status(201).json({
+			message: `Successfully updated ${
+				displayFields.length - successfullyUpdatedDisplays.length
+			} displays`,
+			resourceData: successfullyUpdatedDisplays,
+		});
+		return;
 	},
 );
 
 // @desc   Get all displays
-// @route  GET /api/v1/actions/dashboard/product-category/display
+// @route  GET /api/v1/product-category/display
 // @access Private/Admin/Manager
 const getQueriedDisplaysHandler = expressAsyncHandler(
 	async (
 		request: GetQueriedDisplaysRequest,
 		response: Response<
-			GetQueriedResourceRequestServerResponse<DisplayDocument>
+			GetQueriedResourceRequestServerResponse<
+				DisplayDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
 		>,
 	) => {
 		let { newQueryFlag, totalDocuments } = request.body;
@@ -159,7 +232,7 @@ const getQueriedDisplaysHandler = expressAsyncHandler(
 			return;
 		}
 
-		// find all fileUploads associated with the displays (in parallel)
+		// find all fileUploads associated with the displays
 		const fileUploadsArrArr = await Promise.all(
 			displays.map(async (display) => {
 				const fileUploadPromises = display.uploadedFilesIds.map(
@@ -174,37 +247,61 @@ const getQueriedDisplaysHandler = expressAsyncHandler(
 				const fileUploads = await Promise.all(fileUploadPromises);
 
 				// Filter out any undefined values (in case fileUpload was not found)
-				return fileUploads.filter((fileUpload) => fileUpload);
+				return fileUploads.filter(removeUndefinedAndNullValues);
+			}),
+		);
+
+		// find all reviews associated with the displays
+		const reviewsArrArr = await Promise.all(
+			displays.map(async (display) => {
+				const reviewPromises = display.reviewsIds.map(async (reviewId) => {
+					const review = await getProductReviewByIdService(reviewId);
+
+					return review;
+				});
+
+				// Wait for all the promises to resolve before continuing to the next iteration
+				const reviews = await Promise.all(reviewPromises);
+
+				// Filter out any undefined values (in case review was not found)
+				return reviews.filter(removeUndefinedAndNullValues);
 			}),
 		);
 
 		// create displayServerResponse array
-		const displayServerResponseArray = displays
-			.map((display, index) => {
-				const fileUploads = fileUploadsArrArr[index];
-				return {
-					...display,
-					fileUploads,
-				};
-			})
-			.filter((display) => display);
+		const displayServerResponseArray = displays.map((display, index) => {
+			const fileUploads = fileUploadsArrArr[index];
+			const productReviews = reviewsArrArr[index];
+			return {
+				...display,
+				fileUploads,
+				productReviews,
+			};
+		});
 
 		response.status(200).json({
 			message: "Successfully retrieved displays",
 			pages: Math.ceil(totalDocuments / Number(options?.limit)),
 			totalDocuments,
-			resourceData: displayServerResponseArray as DisplayDocument[],
+			resourceData: displayServerResponseArray,
 		});
 	},
 );
 
 // @desc   Get display by id
-// @route  GET /api/v1/actions/dashboard/product-category/display/:displayId
+// @route  GET /api/v1/product-category/display/:displayId
 // @access Private/Admin/Manager
 const getDisplayByIdHandler = expressAsyncHandler(
 	async (
 		request: GetDisplayByIdRequest,
-		response: Response<ResourceRequestServerResponse<DisplayDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				DisplayDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const displayId = request.params.displayId;
 
@@ -218,20 +315,28 @@ const getDisplayByIdHandler = expressAsyncHandler(
 		}
 
 		// get all fileUploads associated with the display
-		const fileUploadsArr = await Promise.all(
+		const fileUploads = await Promise.all(
 			display.uploadedFilesIds.map(async (uploadedFileId) => {
 				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
-				return fileUpload as FileUploadDocument;
+				return fileUpload;
+			}),
+		);
+
+		// get all reviews associated with the display
+		const productReviews = await Promise.all(
+			display.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
+
+				return review;
 			}),
 		);
 
 		// create displayServerResponse
-		const displayServerResponse: ProductServerResponse<DisplayDocument> = {
+		const displayServerResponse = {
 			...display,
-			fileUploads: fileUploadsArr.filter(
-				(fileUpload) => fileUpload,
-			) as FileUploadDocument[],
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
 		};
 
 		response.status(200).json({
@@ -242,34 +347,30 @@ const getDisplayByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Update a display by id
-// @route  PUT /api/v1/actions/dashboard/product-category/display/:displayId
+// @route  PUT /api/v1/product-category/display/:displayId
 // @access Private/Admin/Manager
 const updateDisplayByIdHandler = expressAsyncHandler(
 	async (
 		request: UpdateDisplayByIdRequest,
-		response: Response<ResourceRequestServerResponse<DisplayDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				DisplayDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const { displayId } = request.params;
-		const { displayFields } = request.body;
-
-		// check if display exists
-		const displayExists = await getDisplayByIdService(displayId);
-		if (!displayExists) {
-			response
-				.status(404)
-				.json({ message: "Display does not exist", resourceData: [] });
-			return;
-		}
-
-		const newDisplay = {
-			...displayExists,
-			...displayFields,
-		};
+		const {
+			documentUpdate: { fields, updateOperator },
+		} = request.body;
 
 		// update display
 		const updatedDisplay = await updateDisplayByIdService({
-			displayId,
-			fieldsToUpdate: newDisplay,
+			_id: displayId,
+			fields,
+			updateOperator,
 		});
 
 		if (!updatedDisplay) {
@@ -280,58 +381,40 @@ const updateDisplayByIdHandler = expressAsyncHandler(
 			return;
 		}
 
-		response.status(200).json({
-			message: "Display updated successfully",
-			resourceData: [updatedDisplay],
-		});
-	},
-);
-
-// @desc   Return all associated file uploads
-// @route  GET /api/v1/actions/dashboard/product-category/display/fileUploads
-// @access Private/Admin/Manager
-const returnAllFileUploadsForDisplaysHandler = expressAsyncHandler(
-	async (
-		_request: GetDisplayByIdRequest,
-		response: Response<ResourceRequestServerResponse<FileUploadDocument>>,
-	) => {
-		const fileUploadsIds = await returnAllDisplaysUploadedFileIdsService();
-
-		if (fileUploadsIds.length === 0) {
-			response
-				.status(404)
-				.json({ message: "No file uploads found", resourceData: [] });
-			return;
-		}
-
-		const fileUploads = (await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) => {
-				const fileUpload = await getFileUploadByIdService(fileUploadId);
+		// get all fileUploads associated with the display
+		const fileUploads = await Promise.all(
+			updatedDisplay.uploadedFilesIds.map(async (uploadedFileId) => {
+				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
 				return fileUpload;
 			}),
-		)) as FileUploadDocument[];
+		);
 
-		// filter out any undefined values (in case fileUpload was not found)
-		const filteredFileUploads = fileUploads.filter((fileUpload) => fileUpload);
+		// get all reviews associated with the display
+		const productReviews = await Promise.all(
+			updatedDisplay.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
 
-		if (filteredFileUploads.length !== fileUploadsIds.length) {
-			response.status(404).json({
-				message: "Some file uploads could not be found.",
-				resourceData: filteredFileUploads,
-			});
-			return;
-		}
+				return review;
+			}),
+		);
+
+		// create displayServerResponse
+		const displayServerResponse = {
+			...updatedDisplay,
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
+		};
 
 		response.status(200).json({
-			message: "Successfully retrieved file uploads",
-			resourceData: filteredFileUploads,
+			message: "Display updated successfully",
+			resourceData: [displayServerResponse],
 		});
 	},
 );
 
 // @desc   Delete all displays
-// @route  DELETE /api/v1/actions/dashboard/product-category/display
+// @route  DELETE /api/v1/product-category/display
 // @access Private/Admin/Manager
 const deleteAllDisplaysHandler = expressAsyncHandler(
 	async (
@@ -339,21 +422,21 @@ const deleteAllDisplaysHandler = expressAsyncHandler(
 		response: Response<ResourceRequestServerResponse<DisplayDocument>>,
 	) => {
 		// grab all displays file upload ids
-		const fileUploadsIds = await returnAllDisplaysUploadedFileIdsService();
+		const uploadedFilesIds = await returnAllDisplaysUploadedFileIdsService();
 
 		// delete all file uploads associated with all displays
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) =>
-				deleteFileUploadByIdService(fileUploadId),
+		await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
-		if (!deleteFileUploadsResult.every((result) => result.deletedCount !== 0)) {
-			response.status(400).json({
-				message: "Some file uploads could not be deleted. Please try again.",
-				resourceData: [],
-			});
-			return;
-		}
+
+		// delete all reviews associated with all displays
+		await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
 
 		// delete all displays
 		const deleteDisplaysResult: DeleteResult = await deleteAllDisplaysService();
@@ -373,7 +456,7 @@ const deleteAllDisplaysHandler = expressAsyncHandler(
 );
 
 // @desc   Delete a display by id
-// @route  DELETE /api/v1/actions/dashboard/product-category/display/:displayId
+// @route  DELETE /api/v1/product-category/display/:displayId
 // @access Private/Admin/Manager
 const deleteADisplayHandler = expressAsyncHandler(
 	async (
@@ -395,21 +478,19 @@ const deleteADisplayHandler = expressAsyncHandler(
 		// if it is not an array, it is made to be an array
 		const uploadedFilesIds = [...displayExists.uploadedFilesIds];
 
-		// delete all file uploads associated with this display
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			uploadedFilesIds.map(async (uploadedFileId) =>
-				deleteFileUploadByIdService(uploadedFileId),
+		// delete all file uploads associated with all displays
+		await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
 
-		if (deleteFileUploadsResult.some((result) => result.deletedCount === 0)) {
-			response.status(400).json({
-				message:
-					"Some file uploads associated with this display could not be deleted. Display not deleted. Please try again.",
-				resourceData: [],
-			});
-			return;
-		}
+		// delete all reviews associated with all displays
+		await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
 
 		// delete display by id
 		const deleteDisplayResult: DeleteResult =
@@ -434,6 +515,6 @@ export {
 	deleteAllDisplaysHandler,
 	getDisplayByIdHandler,
 	getQueriedDisplaysHandler,
-	returnAllFileUploadsForDisplaysHandler,
 	updateDisplayByIdHandler,
+	updateDisplaysBulkHandler,
 };

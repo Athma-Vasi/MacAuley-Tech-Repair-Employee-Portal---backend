@@ -5,75 +5,77 @@
 /**
  * Imports
  */
-import { displayRouter } from './display.routes';
-import { DisplayModel } from './display.model';
+import { displayRouter } from "./display.routes";
+import { DisplayModel } from "./display.model";
 
 import {
-  createNewDisplayBulkHandler,
-  createNewDisplayHandler,
-  deleteADisplayHandler,
-  deleteAllDisplaysHandler,
-  getDisplayByIdHandler,
-  getQueriedDisplaysHandler,
-  returnAllFileUploadsForDisplaysHandler,
-  updateDisplayByIdHandler,
-} from './display.controller';
+	createNewDisplayBulkHandler,
+	createNewDisplayHandler,
+	deleteADisplayHandler,
+	deleteAllDisplaysHandler,
+	getDisplayByIdHandler,
+	getQueriedDisplaysHandler,
+	updateDisplayByIdHandler,
+	updateDisplaysBulkHandler,
+} from "./display.controller";
 
 import {
-  createNewDisplayService,
-  deleteAllDisplaysService,
-  deleteADisplayService,
-  getDisplayByIdService,
-  getQueriedDisplaysService,
-  getQueriedTotalDisplaysService,
-  returnAllDisplaysUploadedFileIdsService,
-  updateDisplayByIdService,
-} from './display.service';
+	createNewDisplayService,
+	deleteADisplayService,
+	deleteAllDisplaysService,
+	getDisplayByIdService,
+	getQueriedDisplaysService,
+	getQueriedTotalDisplaysService,
+	returnAllDisplaysUploadedFileIdsService,
+	updateDisplayByIdService,
+} from "./display.service";
 
-import type { DisplayDocument, DisplaySchema } from './display.model';
+import type { DisplayDocument, DisplaySchema } from "./display.model";
 import type {
-  CreateNewDisplayBulkRequest,
-  CreateNewDisplayRequest,
-  DeleteADisplayRequest,
-  DeleteAllDisplaysRequest,
-  GetDisplayByIdRequest,
-  GetQueriedDisplaysRequest,
-  UpdateDisplayByIdRequest,
-} from './display.types';
+	CreateNewDisplayBulkRequest,
+	CreateNewDisplayRequest,
+	DeleteADisplayRequest,
+	DeleteAllDisplaysRequest,
+	GetDisplayByIdRequest,
+	GetQueriedDisplaysRequest,
+	UpdateDisplayByIdRequest,
+	UpdateDisplaysBulkRequest,
+} from "./display.types";
 
 /**
  * Exports
  */
 
 export {
-  DisplayModel,
-  displayRouter,
-  createNewDisplayBulkHandler,
-  createNewDisplayHandler,
-  createNewDisplayService,
-  deleteADisplayHandler,
-  deleteAllDisplaysHandler,
-  deleteAllDisplaysService,
-  deleteADisplayService,
-  getDisplayByIdHandler,
-  getDisplayByIdService,
-  getQueriedDisplaysHandler,
-  getQueriedDisplaysService,
-  getQueriedTotalDisplaysService,
-  returnAllDisplaysUploadedFileIdsService,
-  returnAllFileUploadsForDisplaysHandler,
-  updateDisplayByIdHandler,
-  updateDisplayByIdService,
+	DisplayModel,
+	displayRouter,
+	createNewDisplayBulkHandler,
+	createNewDisplayHandler,
+	createNewDisplayService,
+	deleteADisplayHandler,
+	deleteADisplayService,
+	deleteAllDisplaysHandler,
+	deleteAllDisplaysService,
+	getDisplayByIdHandler,
+	getDisplayByIdService,
+	getQueriedDisplaysHandler,
+	getQueriedDisplaysService,
+	getQueriedTotalDisplaysService,
+	returnAllDisplaysUploadedFileIdsService,
+	updateDisplayByIdHandler,
+	updateDisplayByIdService,
+	updateDisplaysBulkHandler,
 };
 
 export type {
-  CreateNewDisplayBulkRequest,
-  CreateNewDisplayRequest,
-  DeleteADisplayRequest,
-  DeleteAllDisplaysRequest,
-  GetDisplayByIdRequest,
-  GetQueriedDisplaysRequest,
-  DisplayDocument,
-  DisplaySchema,
-  UpdateDisplayByIdRequest,
+	DisplayDocument,
+	DisplaySchema,
+	CreateNewDisplayBulkRequest,
+	CreateNewDisplayRequest,
+	DeleteADisplayRequest,
+	DeleteAllDisplaysRequest,
+	GetDisplayByIdRequest,
+	GetQueriedDisplaysRequest,
+	UpdateDisplayByIdRequest,
+	UpdateDisplaysBulkRequest,
 };

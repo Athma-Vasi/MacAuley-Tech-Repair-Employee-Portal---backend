@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { assignQueryDefaults, verifyRoles } from "../../../middlewares";
+import {
+	assignQueryDefaults,
+	verifyJWTMiddleware,
+	verifyRoles,
+} from "../../../middlewares";
 import {
 	createNewDisplayBulkHandler,
 	createNewDisplayHandler,
@@ -7,8 +11,8 @@ import {
 	deleteAllDisplaysHandler,
 	getDisplayByIdHandler,
 	getQueriedDisplaysHandler,
-	returnAllFileUploadsForDisplaysHandler,
 	updateDisplayByIdHandler,
+	updateDisplaysBulkHandler,
 } from "./display.controller";
 import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
@@ -19,23 +23,29 @@ displayRouter.use(verifyRoles());
 displayRouter
 	.route("/")
 	.get(
+		verifyJWTMiddleware,
+		verifyRoles(),
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedDisplaysHandler,
 	)
-	.post(createNewDisplayHandler)
-	.delete(deleteAllDisplaysHandler);
+	.post(createNewDisplayHandler);
+
+// separate route for safety reasons (as it deletes all documents in the collection)
+displayRouter
+	.route("/delete-all")
+	.delete(verifyJWTMiddleware, verifyRoles(), deleteAllDisplaysHandler);
 
 // DEV ROUTE
-displayRouter.route("/dev").post(createNewDisplayBulkHandler);
-
 displayRouter
-	.route("/fileUploads")
-	.post(returnAllFileUploadsForDisplaysHandler);
+	.route("/dev")
+	.post(createNewDisplayBulkHandler)
+	.patch(updateDisplaysBulkHandler);
 
+// single document routes
 displayRouter
-	.route("/:displayId")
-	.get(getDisplayByIdHandler)
-	.delete(deleteADisplayHandler)
-	.put(updateDisplayByIdHandler);
+	.route("/:caseId")
+	.get(verifyJWTMiddleware, verifyRoles(), getDisplayByIdHandler)
+	.delete(verifyJWTMiddleware, verifyRoles(), deleteADisplayHandler)
+	.patch(verifyJWTMiddleware, verifyRoles(), updateDisplayByIdHandler);
 
 export { displayRouter };

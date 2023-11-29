@@ -4,6 +4,7 @@ import {
 	QueriedResourceGetRequestServiceInput,
 	DatabaseResponse,
 	DatabaseResponseNullable,
+	UpdateDocumentByIdServiceInput,
 } from "../../../types";
 import { DisplayDocument, DisplayModel, DisplaySchema } from "./display.model";
 
@@ -29,7 +30,7 @@ async function getQueriedDisplaysService({
 			.exec();
 		return displays;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedDisplayService" });
+		throw new Error(error, { cause: "getQueriedDisplaysService" });
 	}
 }
 
@@ -37,12 +38,12 @@ async function getQueriedTotalDisplaysService({
 	filter = {},
 }: QueriedResourceGetRequestServiceInput<DisplayDocument>): Promise<number> {
 	try {
-		const totalDisplay = await DisplayModel.countDocuments(filter)
+		const totalDisplays = await DisplayModel.countDocuments(filter)
 			.lean()
 			.exec();
-		return totalDisplay;
+		return totalDisplays;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedTotalDisplayService" });
+		throw new Error(error, { cause: "getQueriedTotalDisplaysService" });
 	}
 }
 
@@ -61,21 +62,17 @@ async function getDisplayByIdService(
 }
 
 async function updateDisplayByIdService({
-	fieldsToUpdate,
-	displayId,
-}: {
-	displayId: Types.ObjectId | string;
-	fieldsToUpdate: Record<
-		keyof DisplayDocument,
-		DisplayDocument[keyof DisplayDocument]
-	>;
-}): DatabaseResponseNullable<DisplayDocument> {
+	_id,
+	fields,
+	updateOperator,
+}: UpdateDocumentByIdServiceInput<DisplayDocument>): DatabaseResponseNullable<DisplayDocument> {
+	const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
+	const updateObject = JSON.parse(updateString);
+
 	try {
-		const display = await DisplayModel.findByIdAndUpdate(
-			displayId,
-			{ $set: fieldsToUpdate },
-			{ new: true },
-		)
+		const display = await DisplayModel.findByIdAndUpdate(_id, updateObject, {
+			new: true,
+		})
 
 			.lean()
 			.exec();
@@ -117,7 +114,9 @@ async function deleteADisplayService(
 	displayId: Types.ObjectId | string,
 ): Promise<DeleteResult> {
 	try {
-		const display = await DisplayModel.deleteOne({ _id: displayId })
+		const display = await DisplayModel.deleteOne({
+			_id: displayId,
+		})
 			.lean()
 			.exec();
 		return display;

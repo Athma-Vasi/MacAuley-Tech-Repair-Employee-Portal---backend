@@ -5,7 +5,7 @@ import { gpuRouter } from "./gpu";
 import { motherboardRouter } from "./motherboard";
 import { ramRouter } from "./ram";
 import { storageRouter } from "./storage";
-import { caseRouter } from "./computerCase";
+import { computerCaseRouter } from "./computerCase";
 import { desktopComputerRouter } from "./desktopComputer";
 import { headphoneRouter } from "./headphone";
 import { keyboardRouter } from "./keyboard";
@@ -23,7 +23,7 @@ const productCategoryRouter = Router();
 
 productCategoryRouter.use("/accessory", accessoryRouter);
 productCategoryRouter.use("/cpu", cpuRouter);
-productCategoryRouter.use("/computer-case", caseRouter);
+productCategoryRouter.use("/computer-case", computerCaseRouter);
 productCategoryRouter.use("/desktop-computer", desktopComputerRouter);
 productCategoryRouter.use("/gpu", gpuRouter);
 productCategoryRouter.use("/headphone", headphoneRouter);

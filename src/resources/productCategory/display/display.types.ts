@@ -1,9 +1,12 @@
 import type { Types } from "mongoose";
 import type { RequestAfterJWTVerification } from "../../auth";
 import { UserRoles } from "../../user";
-import { GetQueriedResourceRequest } from "../../../types";
+import {
+	DocumentUpdateOperation,
+	GetQueriedResourceRequest,
+} from "../../../types";
 
-import { DisplaySchema } from "./display.model";
+import { DisplayDocument, DisplaySchema } from "./display.model";
 
 interface CreateNewDisplayRequest extends RequestAfterJWTVerification {
 	body: {
@@ -27,6 +30,22 @@ interface CreateNewDisplayBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		displaySchemas: DisplaySchema[];
+	};
+}
+
+// DEV ROUTE
+interface UpdateDisplaysBulkRequest extends RequestAfterJWTVerification {
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
+		displayFields: {
+			displayId: Types.ObjectId;
+			documentUpdate: DocumentUpdateOperation<DisplayDocument>;
+		}[];
 	};
 }
 
@@ -58,10 +77,7 @@ interface UpdateDisplayByIdRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		displayFields: Record<
-			keyof DisplaySchema,
-			DisplaySchema[keyof DisplaySchema]
-		>;
+		documentUpdate: DocumentUpdateOperation<DisplayDocument>;
 	};
 	params: { displayId: string };
 }
@@ -74,4 +90,5 @@ export type {
 	GetDisplayByIdRequest,
 	GetQueriedDisplaysRequest,
 	UpdateDisplayByIdRequest,
+	UpdateDisplaysBulkRequest,
 };
