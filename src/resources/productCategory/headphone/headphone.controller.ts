@@ -11,6 +11,7 @@ import type {
 	GetHeadphoneByIdRequest,
 	GetQueriedHeadphonesRequest,
 	UpdateHeadphoneByIdRequest,
+	UpdateHeadphonesBulkRequest,
 } from "./headphone.types";
 import type {
 	GetQueriedResourceRequestServerResponse,
@@ -34,10 +35,16 @@ import {
 	deleteFileUploadByIdService,
 	getFileUploadByIdService,
 } from "../../fileUpload";
-import { ProductServerResponse } from "../product.types";
+
+import {
+	ProductReviewDocument,
+	deleteAProductReviewService,
+	getProductReviewByIdService,
+} from "../../productReview";
+import { removeUndefinedAndNullValues } from "../../../utils";
 
 // @desc   Create new headphone
-// @route  POST /api/v1/actions/dashboard/product-category/headphone
+// @route  POST /api/v1/product-category/headphone
 // @access Private/Admin/Manager
 const createNewHeadphoneHandler = expressAsyncHandler(
 	async (
@@ -75,7 +82,7 @@ const createNewHeadphoneHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Create new headphones bulk
-// @route  POST /api/v1/actions/dashboard/product-category/headphone/dev
+// @route  POST /api/v1/product-category/headphone/dev
 // @access Private/Admin/Manager
 const createNewHeadphoneBulkHandler = expressAsyncHandler(
 	async (
@@ -103,32 +110,98 @@ const createNewHeadphoneBulkHandler = expressAsyncHandler(
 				resourceData: successfullyCreatedHeadphones,
 			});
 			return;
-		} else if (successfullyCreatedHeadphones.length === 0) {
+		}
+
+		if (successfullyCreatedHeadphones.length === 0) {
 			response.status(400).json({
 				message: "Could not create any headphones",
 				resourceData: [],
 			});
 			return;
-		} else {
+		}
+
+		response.status(201).json({
+			message: `Successfully created ${
+				headphoneSchemas.length - successfullyCreatedHeadphones.length
+			} headphones`,
+			resourceData: successfullyCreatedHeadphones,
+		});
+		return;
+	},
+);
+
+// @desc   Update headphones bulk
+// @route  PATCH /api/v1/product-category/headphone/dev
+// @access Private/Admin/Manager
+const updateHeadphonesBulkHandler = expressAsyncHandler(
+	async (
+		request: UpdateHeadphonesBulkRequest,
+		response: Response<ResourceRequestServerResponse<HeadphoneDocument>>,
+	) => {
+		const { headphoneFields } = request.body;
+
+		const updatedHeadphones = await Promise.all(
+			headphoneFields.map(async (headphoneField) => {
+				const {
+					headphoneId,
+					documentUpdate: { fields, updateOperator },
+				} = headphoneField;
+
+				const updatedHeadphone = await updateHeadphoneByIdService({
+					_id: headphoneId,
+					fields,
+					updateOperator,
+				});
+
+				return updatedHeadphone;
+			}),
+		);
+
+		// filter out any headphones that were not updated
+		const successfullyUpdatedHeadphones = updatedHeadphones.filter(
+			removeUndefinedAndNullValues,
+		);
+
+		// check if any headphones were updated
+		if (successfullyUpdatedHeadphones.length === headphoneFields.length) {
 			response.status(201).json({
-				message: `Successfully created ${
-					headphoneSchemas.length - successfullyCreatedHeadphones.length
-				} headphones`,
-				resourceData: successfullyCreatedHeadphones,
+				message: `Successfully updated ${successfullyUpdatedHeadphones.length} headphones`,
+				resourceData: successfullyUpdatedHeadphones,
 			});
 			return;
 		}
+
+		if (successfullyUpdatedHeadphones.length === 0) {
+			response.status(400).json({
+				message: "Could not update any headphones",
+				resourceData: [],
+			});
+			return;
+		}
+
+		response.status(201).json({
+			message: `Successfully updated ${
+				headphoneFields.length - successfullyUpdatedHeadphones.length
+			} headphones`,
+			resourceData: successfullyUpdatedHeadphones,
+		});
+		return;
 	},
 );
 
 // @desc   Get all headphones
-// @route  GET /api/v1/actions/dashboard/product-category/headphone
+// @route  GET /api/v1/product-category/headphone
 // @access Private/Admin/Manager
 const getQueriedHeadphonesHandler = expressAsyncHandler(
 	async (
 		request: GetQueriedHeadphonesRequest,
 		response: Response<
-			GetQueriedResourceRequestServerResponse<HeadphoneDocument>
+			GetQueriedResourceRequestServerResponse<
+				HeadphoneDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
 		>,
 	) => {
 		let { newQueryFlag, totalDocuments } = request.body;
@@ -159,7 +232,7 @@ const getQueriedHeadphonesHandler = expressAsyncHandler(
 			return;
 		}
 
-		// find all fileUploads associated with the headphones (in parallel)
+		// find all fileUploads associated with the headphones
 		const fileUploadsArrArr = await Promise.all(
 			headphones.map(async (headphone) => {
 				const fileUploadPromises = headphone.uploadedFilesIds.map(
@@ -174,37 +247,61 @@ const getQueriedHeadphonesHandler = expressAsyncHandler(
 				const fileUploads = await Promise.all(fileUploadPromises);
 
 				// Filter out any undefined values (in case fileUpload was not found)
-				return fileUploads.filter((fileUpload) => fileUpload);
+				return fileUploads.filter(removeUndefinedAndNullValues);
+			}),
+		);
+
+		// find all reviews associated with the headphones
+		const reviewsArrArr = await Promise.all(
+			headphones.map(async (headphone) => {
+				const reviewPromises = headphone.reviewsIds.map(async (reviewId) => {
+					const review = await getProductReviewByIdService(reviewId);
+
+					return review;
+				});
+
+				// Wait for all the promises to resolve before continuing to the next iteration
+				const reviews = await Promise.all(reviewPromises);
+
+				// Filter out any undefined values (in case review was not found)
+				return reviews.filter(removeUndefinedAndNullValues);
 			}),
 		);
 
 		// create headphoneServerResponse array
-		const headphoneServerResponseArray = headphones
-			.map((headphone, index) => {
-				const fileUploads = fileUploadsArrArr[index];
-				return {
-					...headphone,
-					fileUploads,
-				};
-			})
-			.filter((headphone) => headphone);
+		const headphoneServerResponseArray = headphones.map((headphone, index) => {
+			const fileUploads = fileUploadsArrArr[index];
+			const productReviews = reviewsArrArr[index];
+			return {
+				...headphone,
+				fileUploads,
+				productReviews,
+			};
+		});
 
 		response.status(200).json({
 			message: "Successfully retrieved headphones",
 			pages: Math.ceil(totalDocuments / Number(options?.limit)),
 			totalDocuments,
-			resourceData: headphoneServerResponseArray as HeadphoneDocument[],
+			resourceData: headphoneServerResponseArray,
 		});
 	},
 );
 
 // @desc   Get headphone by id
-// @route  GET /api/v1/actions/dashboard/product-category/headphone/:headphoneId
+// @route  GET /api/v1/product-category/headphone/:headphoneId
 // @access Private/Admin/Manager
 const getHeadphoneByIdHandler = expressAsyncHandler(
 	async (
 		request: GetHeadphoneByIdRequest,
-		response: Response<ResourceRequestServerResponse<HeadphoneDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				HeadphoneDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const headphoneId = request.params.headphoneId;
 
@@ -218,20 +315,28 @@ const getHeadphoneByIdHandler = expressAsyncHandler(
 		}
 
 		// get all fileUploads associated with the headphone
-		const fileUploadsArr = await Promise.all(
+		const fileUploads = await Promise.all(
 			headphone.uploadedFilesIds.map(async (uploadedFileId) => {
 				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
-				return fileUpload as FileUploadDocument;
+				return fileUpload;
+			}),
+		);
+
+		// get all reviews associated with the headphone
+		const productReviews = await Promise.all(
+			headphone.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
+
+				return review;
 			}),
 		);
 
 		// create headphoneServerResponse
-		const headphoneServerResponse: ProductServerResponse<HeadphoneDocument> = {
+		const headphoneServerResponse = {
 			...headphone,
-			fileUploads: fileUploadsArr.filter(
-				(fileUpload) => fileUpload,
-			) as FileUploadDocument[],
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
 		};
 
 		response.status(200).json({
@@ -242,34 +347,30 @@ const getHeadphoneByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Update a headphone by id
-// @route  PUT /api/v1/actions/dashboard/product-category/headphone/:headphoneId
+// @route  PUT /api/v1/product-category/headphone/:headphoneId
 // @access Private/Admin/Manager
 const updateHeadphoneByIdHandler = expressAsyncHandler(
 	async (
 		request: UpdateHeadphoneByIdRequest,
-		response: Response<ResourceRequestServerResponse<HeadphoneDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				HeadphoneDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const { headphoneId } = request.params;
-		const { headphoneFields } = request.body;
-
-		// check if headphone exists
-		const headphoneExists = await getHeadphoneByIdService(headphoneId);
-		if (!headphoneExists) {
-			response
-				.status(404)
-				.json({ message: "Headphone does not exist", resourceData: [] });
-			return;
-		}
-
-		const newHeadphone = {
-			...headphoneExists,
-			...headphoneFields,
-		};
+		const {
+			documentUpdate: { fields, updateOperator },
+		} = request.body;
 
 		// update headphone
 		const updatedHeadphone = await updateHeadphoneByIdService({
-			headphoneId,
-			fieldsToUpdate: newHeadphone,
+			_id: headphoneId,
+			fields,
+			updateOperator,
 		});
 
 		if (!updatedHeadphone) {
@@ -280,58 +381,40 @@ const updateHeadphoneByIdHandler = expressAsyncHandler(
 			return;
 		}
 
-		response.status(200).json({
-			message: "Headphone updated successfully",
-			resourceData: [updatedHeadphone],
-		});
-	},
-);
-
-// @desc   Return all associated file uploads
-// @route  GET /api/v1/actions/dashboard/product-category/headphone/fileUploads
-// @access Private/Admin/Manager
-const returnAllFileUploadsForHeadphonesHandler = expressAsyncHandler(
-	async (
-		_request: GetHeadphoneByIdRequest,
-		response: Response<ResourceRequestServerResponse<FileUploadDocument>>,
-	) => {
-		const fileUploadsIds = await returnAllHeadphonesUploadedFileIdsService();
-
-		if (fileUploadsIds.length === 0) {
-			response
-				.status(404)
-				.json({ message: "No file uploads found", resourceData: [] });
-			return;
-		}
-
-		const fileUploads = (await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) => {
-				const fileUpload = await getFileUploadByIdService(fileUploadId);
+		// get all fileUploads associated with the headphone
+		const fileUploads = await Promise.all(
+			updatedHeadphone.uploadedFilesIds.map(async (uploadedFileId) => {
+				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
 				return fileUpload;
 			}),
-		)) as FileUploadDocument[];
+		);
 
-		// filter out any undefined values (in case fileUpload was not found)
-		const filteredFileUploads = fileUploads.filter((fileUpload) => fileUpload);
+		// get all reviews associated with the headphone
+		const productReviews = await Promise.all(
+			updatedHeadphone.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
 
-		if (filteredFileUploads.length !== fileUploadsIds.length) {
-			response.status(404).json({
-				message: "Some file uploads could not be found.",
-				resourceData: filteredFileUploads,
-			});
-			return;
-		}
+				return review;
+			}),
+		);
+
+		// create headphoneServerResponse
+		const headphoneServerResponse = {
+			...updatedHeadphone,
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
+		};
 
 		response.status(200).json({
-			message: "Successfully retrieved file uploads",
-			resourceData: filteredFileUploads,
+			message: "Headphone updated successfully",
+			resourceData: [headphoneServerResponse],
 		});
 	},
 );
 
 // @desc   Delete all headphones
-// @route  DELETE /api/v1/actions/dashboard/product-category/headphone
+// @route  DELETE /api/v1/product-category/headphone
 // @access Private/Admin/Manager
 const deleteAllHeadphonesHandler = expressAsyncHandler(
 	async (
@@ -339,21 +422,21 @@ const deleteAllHeadphonesHandler = expressAsyncHandler(
 		response: Response<ResourceRequestServerResponse<HeadphoneDocument>>,
 	) => {
 		// grab all headphones file upload ids
-		const fileUploadsIds = await returnAllHeadphonesUploadedFileIdsService();
+		const uploadedFilesIds = await returnAllHeadphonesUploadedFileIdsService();
 
 		// delete all file uploads associated with all headphones
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) =>
-				deleteFileUploadByIdService(fileUploadId),
+		await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
-		if (!deleteFileUploadsResult.every((result) => result.deletedCount !== 0)) {
-			response.status(400).json({
-				message: "Some file uploads could not be deleted. Please try again.",
-				resourceData: [],
-			});
-			return;
-		}
+
+		// delete all reviews associated with all headphones
+		await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
 
 		// delete all headphones
 		const deleteHeadphonesResult: DeleteResult =
@@ -374,7 +457,7 @@ const deleteAllHeadphonesHandler = expressAsyncHandler(
 );
 
 // @desc   Delete a headphone by id
-// @route  DELETE /api/v1/actions/dashboard/product-category/headphone/:headphoneId
+// @route  DELETE /api/v1/product-category/headphone/:headphoneId
 // @access Private/Admin/Manager
 const deleteAHeadphoneHandler = expressAsyncHandler(
 	async (
@@ -396,21 +479,19 @@ const deleteAHeadphoneHandler = expressAsyncHandler(
 		// if it is not an array, it is made to be an array
 		const uploadedFilesIds = [...headphoneExists.uploadedFilesIds];
 
-		// delete all file uploads associated with this headphone
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			uploadedFilesIds.map(async (uploadedFileId) =>
-				deleteFileUploadByIdService(uploadedFileId),
+		// delete all file uploads associated with all headphones
+		await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
 
-		if (deleteFileUploadsResult.some((result) => result.deletedCount === 0)) {
-			response.status(400).json({
-				message:
-					"Some file uploads associated with this headphone could not be deleted. Headphone not deleted. Please try again.",
-				resourceData: [],
-			});
-			return;
-		}
+		// delete all reviews associated with all headphones
+		await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
 
 		// delete headphone by id
 		const deleteHeadphoneResult: DeleteResult =
@@ -437,6 +518,6 @@ export {
 	deleteAllHeadphonesHandler,
 	getHeadphoneByIdHandler,
 	getQueriedHeadphonesHandler,
-	returnAllFileUploadsForHeadphonesHandler,
 	updateHeadphoneByIdHandler,
+	updateHeadphonesBulkHandler,
 };

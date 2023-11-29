@@ -4,6 +4,7 @@ import {
 	QueriedResourceGetRequestServiceInput,
 	DatabaseResponse,
 	DatabaseResponseNullable,
+	UpdateDocumentByIdServiceInput,
 } from "../../../types";
 import {
 	HeadphoneDocument,
@@ -33,7 +34,7 @@ async function getQueriedHeadphonesService({
 			.exec();
 		return headphones;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedHeadphoneService" });
+		throw new Error(error, { cause: "getQueriedHeadphonesService" });
 	}
 }
 
@@ -41,12 +42,12 @@ async function getQueriedTotalHeadphonesService({
 	filter = {},
 }: QueriedResourceGetRequestServiceInput<HeadphoneDocument>): Promise<number> {
 	try {
-		const totalHeadphone = await HeadphoneModel.countDocuments(filter)
+		const totalHeadphones = await HeadphoneModel.countDocuments(filter)
 			.lean()
 			.exec();
-		return totalHeadphone;
+		return totalHeadphones;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedTotalHeadphoneService" });
+		throw new Error(error, { cause: "getQueriedTotalHeadphonesService" });
 	}
 }
 
@@ -65,20 +66,20 @@ async function getHeadphoneByIdService(
 }
 
 async function updateHeadphoneByIdService({
-	fieldsToUpdate,
-	headphoneId,
-}: {
-	headphoneId: Types.ObjectId | string;
-	fieldsToUpdate: Record<
-		keyof HeadphoneDocument,
-		HeadphoneDocument[keyof HeadphoneDocument]
-	>;
-}): DatabaseResponseNullable<HeadphoneDocument> {
+	_id,
+	fields,
+	updateOperator,
+}: UpdateDocumentByIdServiceInput<HeadphoneDocument>): DatabaseResponseNullable<HeadphoneDocument> {
+	const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
+	const updateObject = JSON.parse(updateString);
+
 	try {
 		const headphone = await HeadphoneModel.findByIdAndUpdate(
-			headphoneId,
-			{ $set: fieldsToUpdate },
-			{ new: true },
+			_id,
+			updateObject,
+			{
+				new: true,
+			},
 		)
 
 			.lean()
@@ -121,7 +122,9 @@ async function deleteAHeadphoneService(
 	headphoneId: Types.ObjectId | string,
 ): Promise<DeleteResult> {
 	try {
-		const headphone = await HeadphoneModel.deleteOne({ _id: headphoneId })
+		const headphone = await HeadphoneModel.deleteOne({
+			_id: headphoneId,
+		})
 			.lean()
 			.exec();
 		return headphone;

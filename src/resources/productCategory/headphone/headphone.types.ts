@@ -1,9 +1,12 @@
 import type { Types } from "mongoose";
 import type { RequestAfterJWTVerification } from "../../auth";
 import { UserRoles } from "../../user";
-import { GetQueriedResourceRequest } from "../../../types";
+import {
+	DocumentUpdateOperation,
+	GetQueriedResourceRequest,
+} from "../../../types";
 
-import { HeadphoneSchema } from "./headphone.model";
+import { HeadphoneDocument, HeadphoneSchema } from "./headphone.model";
 
 interface CreateNewHeadphoneRequest extends RequestAfterJWTVerification {
 	body: {
@@ -27,6 +30,22 @@ interface CreateNewHeadphoneBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		headphoneSchemas: HeadphoneSchema[];
+	};
+}
+
+// DEV ROUTE
+interface UpdateHeadphonesBulkRequest extends RequestAfterJWTVerification {
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
+		headphoneFields: {
+			headphoneId: Types.ObjectId;
+			documentUpdate: DocumentUpdateOperation<HeadphoneDocument>;
+		}[];
 	};
 }
 
@@ -58,10 +77,7 @@ interface UpdateHeadphoneByIdRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		headphoneFields: Record<
-			keyof HeadphoneSchema,
-			HeadphoneSchema[keyof HeadphoneSchema]
-		>;
+		documentUpdate: DocumentUpdateOperation<HeadphoneDocument>;
 	};
 	params: { headphoneId: string };
 }
@@ -74,4 +90,5 @@ export type {
 	GetHeadphoneByIdRequest,
 	GetQueriedHeadphonesRequest,
 	UpdateHeadphoneByIdRequest,
+	UpdateHeadphonesBulkRequest,
 };

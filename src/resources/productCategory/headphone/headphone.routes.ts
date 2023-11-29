@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { assignQueryDefaults, verifyRoles } from "../../../middlewares";
+import {
+	assignQueryDefaults,
+	verifyJWTMiddleware,
+	verifyRoles,
+} from "../../../middlewares";
 import {
 	createNewHeadphoneBulkHandler,
 	createNewHeadphoneHandler,
@@ -7,8 +11,8 @@ import {
 	deleteAllHeadphonesHandler,
 	getHeadphoneByIdHandler,
 	getQueriedHeadphonesHandler,
-	returnAllFileUploadsForHeadphonesHandler,
 	updateHeadphoneByIdHandler,
+	updateHeadphonesBulkHandler,
 } from "./headphone.controller";
 import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
@@ -19,23 +23,29 @@ headphoneRouter.use(verifyRoles());
 headphoneRouter
 	.route("/")
 	.get(
+		verifyJWTMiddleware,
+		verifyRoles(),
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedHeadphonesHandler,
 	)
-	.post(createNewHeadphoneHandler)
-	.delete(deleteAllHeadphonesHandler);
+	.post(createNewHeadphoneHandler);
+
+// separate route for safety reasons (as it deletes all documents in the collection)
+headphoneRouter
+	.route("/delete-all")
+	.delete(verifyJWTMiddleware, verifyRoles(), deleteAllHeadphonesHandler);
 
 // DEV ROUTE
-headphoneRouter.route("/dev").post(createNewHeadphoneBulkHandler);
-
 headphoneRouter
-	.route("/fileUploads")
-	.post(returnAllFileUploadsForHeadphonesHandler);
+	.route("/dev")
+	.post(createNewHeadphoneBulkHandler)
+	.patch(updateHeadphonesBulkHandler);
 
+// single document routes
 headphoneRouter
 	.route("/:headphoneId")
-	.get(getHeadphoneByIdHandler)
-	.delete(deleteAHeadphoneHandler)
-	.put(updateHeadphoneByIdHandler);
+	.get(verifyJWTMiddleware, verifyRoles(), getHeadphoneByIdHandler)
+	.delete(verifyJWTMiddleware, verifyRoles(), deleteAHeadphoneHandler)
+	.patch(verifyJWTMiddleware, verifyRoles(), updateHeadphoneByIdHandler);
 
 export { headphoneRouter };
