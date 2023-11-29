@@ -425,18 +425,40 @@ const deleteAllKeyboardsHandler = expressAsyncHandler(
 		const uploadedFilesIds = await returnAllKeyboardsUploadedFileIdsService();
 
 		// delete all file uploads associated with all keyboards
-		await Promise.all(
+		const deletedFileUploads = await Promise.all(
 			uploadedFilesIds.map(
 				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
 
+		if (
+			deletedFileUploads.some(
+				(deletedFileUpload) => deletedFileUpload.deletedCount === 0,
+			)
+		) {
+			response.status(400).json({
+				message: "Some File uploads could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
+
 		// delete all reviews associated with all keyboards
-		await Promise.all(
+		const deletedReviews = await Promise.all(
 			uploadedFilesIds.map(
 				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
 			),
 		);
+
+		if (
+			deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)
+		) {
+			response.status(400).json({
+				message: "Some reviews could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
 
 		// delete all keyboards
 		const deleteKeyboardsResult: DeleteResult =
@@ -480,18 +502,40 @@ const deleteAKeyboardHandler = expressAsyncHandler(
 		const uploadedFilesIds = [...keyboardExists.uploadedFilesIds];
 
 		// delete all file uploads associated with all keyboards
-		await Promise.all(
+		const deletedFileUploads = await Promise.all(
 			uploadedFilesIds.map(
 				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
 
+		if (
+			deletedFileUploads.some(
+				(deletedFileUpload) => deletedFileUpload.deletedCount === 0,
+			)
+		) {
+			response.status(400).json({
+				message: "Some File uploads could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
+
 		// delete all reviews associated with all keyboards
-		await Promise.all(
+		const deletedReviews = await Promise.all(
 			uploadedFilesIds.map(
 				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
 			),
 		);
+
+		if (
+			deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)
+		) {
+			response.status(400).json({
+				message: "Some reviews could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
 
 		// delete keyboard by id
 		const deleteKeyboardResult: DeleteResult =

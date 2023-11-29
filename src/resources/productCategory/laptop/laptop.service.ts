@@ -4,6 +4,7 @@ import {
 	QueriedResourceGetRequestServiceInput,
 	DatabaseResponse,
 	DatabaseResponseNullable,
+	UpdateDocumentByIdServiceInput,
 } from "../../../types";
 import { LaptopDocument, LaptopModel, LaptopSchema } from "./laptop.model";
 
@@ -29,7 +30,7 @@ async function getQueriedLaptopsService({
 			.exec();
 		return laptops;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedLaptopService" });
+		throw new Error(error, { cause: "getQueriedLaptopsService" });
 	}
 }
 
@@ -37,10 +38,10 @@ async function getQueriedTotalLaptopsService({
 	filter = {},
 }: QueriedResourceGetRequestServiceInput<LaptopDocument>): Promise<number> {
 	try {
-		const totalLaptop = await LaptopModel.countDocuments(filter).lean().exec();
-		return totalLaptop;
+		const totalLaptops = await LaptopModel.countDocuments(filter).lean().exec();
+		return totalLaptops;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedTotalLaptopService" });
+		throw new Error(error, { cause: "getQueriedTotalLaptopsService" });
 	}
 }
 
@@ -59,21 +60,17 @@ async function getLaptopByIdService(
 }
 
 async function updateLaptopByIdService({
-	fieldsToUpdate,
-	laptopId,
-}: {
-	laptopId: Types.ObjectId | string;
-	fieldsToUpdate: Record<
-		keyof LaptopDocument,
-		LaptopDocument[keyof LaptopDocument]
-	>;
-}): DatabaseResponseNullable<LaptopDocument> {
+	_id,
+	fields,
+	updateOperator,
+}: UpdateDocumentByIdServiceInput<LaptopDocument>): DatabaseResponseNullable<LaptopDocument> {
+	const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
+	const updateObject = JSON.parse(updateString);
+
 	try {
-		const laptop = await LaptopModel.findByIdAndUpdate(
-			laptopId,
-			{ $set: fieldsToUpdate },
-			{ new: true },
-		)
+		const laptop = await LaptopModel.findByIdAndUpdate(_id, updateObject, {
+			new: true,
+		})
 
 			.lean()
 			.exec();
@@ -105,7 +102,9 @@ async function returnAllLaptopsUploadedFileIdsService(): Promise<
 		);
 		return uploadedFileIds;
 	} catch (error: any) {
-		throw new Error(error, { cause: "returnAllLaptopsUploadedFileIdsService" });
+		throw new Error(error, {
+			cause: "returnAllLaptopsUploadedFileIdsService",
+		});
 	}
 }
 
@@ -113,7 +112,11 @@ async function deleteALaptopService(
 	laptopId: Types.ObjectId | string,
 ): Promise<DeleteResult> {
 	try {
-		const laptop = await LaptopModel.deleteOne({ _id: laptopId }).lean().exec();
+		const laptop = await LaptopModel.deleteOne({
+			_id: laptopId,
+		})
+			.lean()
+			.exec();
 		return laptop;
 	} catch (error: any) {
 		throw new Error(error, { cause: "deleteALaptopService" });

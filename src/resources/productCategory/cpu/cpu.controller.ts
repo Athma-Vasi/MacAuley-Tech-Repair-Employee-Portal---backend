@@ -420,18 +420,40 @@ const deleteAllCpusHandler = expressAsyncHandler(
 		const uploadedFilesIds = await returnAllCpusUploadedFileIdsService();
 
 		// delete all file uploads associated with all cpus
-		await Promise.all(
+		const deletedFileUploads = await Promise.all(
 			uploadedFilesIds.map(
 				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
 
+		if (
+			deletedFileUploads.some(
+				(deletedFileUpload) => deletedFileUpload.deletedCount === 0,
+			)
+		) {
+			response.status(400).json({
+				message: "Some File uploads could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
+
 		// delete all reviews associated with all cpus
-		await Promise.all(
+		const deletedReviews = await Promise.all(
 			uploadedFilesIds.map(
 				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
 			),
 		);
+
+		if (
+			deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)
+		) {
+			response.status(400).json({
+				message: "Some reviews could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
 
 		// delete all cpus
 		const deleteCpusResult: DeleteResult = await deleteAllCpusService();
@@ -474,18 +496,40 @@ const deleteACpuHandler = expressAsyncHandler(
 		const uploadedFilesIds = [...cpuExists.uploadedFilesIds];
 
 		// delete all file uploads associated with all cpus
-		await Promise.all(
+		const deletedFileUploads = await Promise.all(
 			uploadedFilesIds.map(
 				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
 
+		if (
+			deletedFileUploads.some(
+				(deletedFileUpload) => deletedFileUpload.deletedCount === 0,
+			)
+		) {
+			response.status(400).json({
+				message: "Some File uploads could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
+
 		// delete all reviews associated with all cpus
-		await Promise.all(
+		const deletedReviews = await Promise.all(
 			uploadedFilesIds.map(
 				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
 			),
 		);
+
+		if (
+			deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)
+		) {
+			response.status(400).json({
+				message: "Some reviews could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
 
 		// delete cpu by id
 		const deleteCpuResult: DeleteResult = await deleteACpuService(cpuId);

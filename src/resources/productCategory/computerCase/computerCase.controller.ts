@@ -434,18 +434,40 @@ const deleteAllComputerCasesHandler = expressAsyncHandler(
 			await returnAllComputerCasesUploadedFileIdsService();
 
 		// delete all file uploads associated with all computerCases
-		await Promise.all(
+		const deletedFileUploads = await Promise.all(
 			uploadedFilesIds.map(
 				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
 
+		if (
+			deletedFileUploads.some(
+				(deletedFileUpload) => deletedFileUpload.deletedCount === 0,
+			)
+		) {
+			response.status(400).json({
+				message: "Some File uploads could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
+
 		// delete all reviews associated with all computerCases
-		await Promise.all(
+		const deletedReviews = await Promise.all(
 			uploadedFilesIds.map(
 				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
 			),
 		);
+
+		if (
+			deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)
+		) {
+			response.status(400).json({
+				message: "Some reviews could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
 
 		// delete all computerCases
 		const deleteComputerCasesResult: DeleteResult =
@@ -489,18 +511,40 @@ const deleteAComputerCaseHandler = expressAsyncHandler(
 		const uploadedFilesIds = [...computerCaseExists.uploadedFilesIds];
 
 		// delete all file uploads associated with all computerCases
-		await Promise.all(
+		const deletedFileUploads = await Promise.all(
 			uploadedFilesIds.map(
 				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
 
+		if (
+			deletedFileUploads.some(
+				(deletedFileUpload) => deletedFileUpload.deletedCount === 0,
+			)
+		) {
+			response.status(400).json({
+				message: "Some File uploads could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
+
 		// delete all reviews associated with all computerCases
-		await Promise.all(
+		const deletedReviews = await Promise.all(
 			uploadedFilesIds.map(
 				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
 			),
 		);
+
+		if (
+			deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)
+		) {
+			response.status(400).json({
+				message: "Some reviews could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
 
 		// delete computerCase by id
 		const deleteComputerCaseResult: DeleteResult =

@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { assignQueryDefaults, verifyRoles } from "../../../middlewares";
+import {
+	assignQueryDefaults,
+	verifyJWTMiddleware,
+	verifyRoles,
+} from "../../../middlewares";
 import {
 	createNewLaptopBulkHandler,
 	createNewLaptopHandler,
@@ -7,8 +11,8 @@ import {
 	deleteAllLaptopsHandler,
 	getLaptopByIdHandler,
 	getQueriedLaptopsHandler,
-	returnAllFileUploadsForLaptopsHandler,
 	updateLaptopByIdHandler,
+	updateLaptopsBulkHandler,
 } from "./laptop.controller";
 import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
@@ -19,21 +23,29 @@ laptopRouter.use(verifyRoles());
 laptopRouter
 	.route("/")
 	.get(
+		verifyJWTMiddleware,
+		verifyRoles(),
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedLaptopsHandler,
 	)
-	.post(createNewLaptopHandler)
-	.delete(deleteAllLaptopsHandler);
+	.post(createNewLaptopHandler);
+
+// separate route for safety reasons (as it deletes all documents in the collection)
+laptopRouter
+	.route("/delete-all")
+	.delete(verifyJWTMiddleware, verifyRoles(), deleteAllLaptopsHandler);
 
 // DEV ROUTE
-laptopRouter.route("/dev").post(createNewLaptopBulkHandler);
+laptopRouter
+	.route("/dev")
+	.post(createNewLaptopBulkHandler)
+	.patch(updateLaptopsBulkHandler);
 
-laptopRouter.route("/fileUploads").post(returnAllFileUploadsForLaptopsHandler);
-
+// single document routes
 laptopRouter
 	.route("/:laptopId")
-	.get(getLaptopByIdHandler)
-	.delete(deleteALaptopHandler)
-	.put(updateLaptopByIdHandler);
+	.get(verifyJWTMiddleware, verifyRoles(), getLaptopByIdHandler)
+	.delete(verifyJWTMiddleware, verifyRoles(), deleteALaptopHandler)
+	.patch(verifyJWTMiddleware, verifyRoles(), updateLaptopByIdHandler);
 
 export { laptopRouter };

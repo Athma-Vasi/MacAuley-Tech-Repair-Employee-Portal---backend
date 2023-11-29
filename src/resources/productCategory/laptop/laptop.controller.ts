@@ -11,6 +11,7 @@ import type {
 	GetLaptopByIdRequest,
 	GetQueriedLaptopsRequest,
 	UpdateLaptopByIdRequest,
+	UpdateLaptopsBulkRequest,
 } from "./laptop.types";
 import type {
 	GetQueriedResourceRequestServerResponse,
@@ -34,10 +35,16 @@ import {
 	deleteFileUploadByIdService,
 	getFileUploadByIdService,
 } from "../../fileUpload";
-import { ProductServerResponse } from "../product.types";
+
+import {
+	ProductReviewDocument,
+	deleteAProductReviewService,
+	getProductReviewByIdService,
+} from "../../productReview";
+import { removeUndefinedAndNullValues } from "../../../utils";
 
 // @desc   Create new laptop
-// @route  POST /api/v1/actions/dashboard/product-category/laptop
+// @route  POST /api/v1/product-category/laptop
 // @access Private/Admin/Manager
 const createNewLaptopHandler = expressAsyncHandler(
 	async (
@@ -75,7 +82,7 @@ const createNewLaptopHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Create new laptops bulk
-// @route  POST /api/v1/actions/dashboard/product-category/laptop/dev
+// @route  POST /api/v1/product-category/laptop/dev
 // @access Private/Admin/Manager
 const createNewLaptopBulkHandler = expressAsyncHandler(
 	async (
@@ -101,31 +108,99 @@ const createNewLaptopBulkHandler = expressAsyncHandler(
 				resourceData: successfullyCreatedLaptops,
 			});
 			return;
-		} else if (successfullyCreatedLaptops.length === 0) {
+		}
+
+		if (successfullyCreatedLaptops.length === 0) {
 			response.status(400).json({
 				message: "Could not create any laptops",
 				resourceData: [],
 			});
 			return;
-		} else {
+		}
+
+		response.status(201).json({
+			message: `Successfully created ${
+				laptopSchemas.length - successfullyCreatedLaptops.length
+			} laptops`,
+			resourceData: successfullyCreatedLaptops,
+		});
+		return;
+	},
+);
+
+// @desc   Update laptops bulk
+// @route  PATCH /api/v1/product-category/laptop/dev
+// @access Private/Admin/Manager
+const updateLaptopsBulkHandler = expressAsyncHandler(
+	async (
+		request: UpdateLaptopsBulkRequest,
+		response: Response<ResourceRequestServerResponse<LaptopDocument>>,
+	) => {
+		const { laptopFields } = request.body;
+
+		const updatedLaptops = await Promise.all(
+			laptopFields.map(async (laptopField) => {
+				const {
+					laptopId,
+					documentUpdate: { fields, updateOperator },
+				} = laptopField;
+
+				const updatedLaptop = await updateLaptopByIdService({
+					_id: laptopId,
+					fields,
+					updateOperator,
+				});
+
+				return updatedLaptop;
+			}),
+		);
+
+		// filter out any laptops that were not updated
+		const successfullyUpdatedLaptops = updatedLaptops.filter(
+			removeUndefinedAndNullValues,
+		);
+
+		// check if any laptops were updated
+		if (successfullyUpdatedLaptops.length === laptopFields.length) {
 			response.status(201).json({
-				message: `Successfully created ${
-					laptopSchemas.length - successfullyCreatedLaptops.length
-				} laptops`,
-				resourceData: successfullyCreatedLaptops,
+				message: `Successfully updated ${successfullyUpdatedLaptops.length} laptops`,
+				resourceData: successfullyUpdatedLaptops,
 			});
 			return;
 		}
+
+		if (successfullyUpdatedLaptops.length === 0) {
+			response.status(400).json({
+				message: "Could not update any laptops",
+				resourceData: [],
+			});
+			return;
+		}
+
+		response.status(201).json({
+			message: `Successfully updated ${
+				laptopFields.length - successfullyUpdatedLaptops.length
+			} laptops`,
+			resourceData: successfullyUpdatedLaptops,
+		});
+		return;
 	},
 );
 
 // @desc   Get all laptops
-// @route  GET /api/v1/actions/dashboard/product-category/laptop
+// @route  GET /api/v1/product-category/laptop
 // @access Private/Admin/Manager
 const getQueriedLaptopsHandler = expressAsyncHandler(
 	async (
 		request: GetQueriedLaptopsRequest,
-		response: Response<GetQueriedResourceRequestServerResponse<LaptopDocument>>,
+		response: Response<
+			GetQueriedResourceRequestServerResponse<
+				LaptopDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		let { newQueryFlag, totalDocuments } = request.body;
 
@@ -155,7 +230,7 @@ const getQueriedLaptopsHandler = expressAsyncHandler(
 			return;
 		}
 
-		// find all fileUploads associated with the laptops (in parallel)
+		// find all fileUploads associated with the laptops
 		const fileUploadsArrArr = await Promise.all(
 			laptops.map(async (laptop) => {
 				const fileUploadPromises = laptop.uploadedFilesIds.map(
@@ -170,37 +245,61 @@ const getQueriedLaptopsHandler = expressAsyncHandler(
 				const fileUploads = await Promise.all(fileUploadPromises);
 
 				// Filter out any undefined values (in case fileUpload was not found)
-				return fileUploads.filter((fileUpload) => fileUpload);
+				return fileUploads.filter(removeUndefinedAndNullValues);
+			}),
+		);
+
+		// find all reviews associated with the laptops
+		const reviewsArrArr = await Promise.all(
+			laptops.map(async (laptop) => {
+				const reviewPromises = laptop.reviewsIds.map(async (reviewId) => {
+					const review = await getProductReviewByIdService(reviewId);
+
+					return review;
+				});
+
+				// Wait for all the promises to resolve before continuing to the next iteration
+				const reviews = await Promise.all(reviewPromises);
+
+				// Filter out any undefined values (in case review was not found)
+				return reviews.filter(removeUndefinedAndNullValues);
 			}),
 		);
 
 		// create laptopServerResponse array
-		const laptopServerResponseArray = laptops
-			.map((laptop, index) => {
-				const fileUploads = fileUploadsArrArr[index];
-				return {
-					...laptop,
-					fileUploads,
-				};
-			})
-			.filter((laptop) => laptop);
+		const laptopServerResponseArray = laptops.map((laptop, index) => {
+			const fileUploads = fileUploadsArrArr[index];
+			const productReviews = reviewsArrArr[index];
+			return {
+				...laptop,
+				fileUploads,
+				productReviews,
+			};
+		});
 
 		response.status(200).json({
 			message: "Successfully retrieved laptops",
 			pages: Math.ceil(totalDocuments / Number(options?.limit)),
 			totalDocuments,
-			resourceData: laptopServerResponseArray as LaptopDocument[],
+			resourceData: laptopServerResponseArray,
 		});
 	},
 );
 
 // @desc   Get laptop by id
-// @route  GET /api/v1/actions/dashboard/product-category/laptop/:laptopId
+// @route  GET /api/v1/product-category/laptop/:laptopId
 // @access Private/Admin/Manager
 const getLaptopByIdHandler = expressAsyncHandler(
 	async (
 		request: GetLaptopByIdRequest,
-		response: Response<ResourceRequestServerResponse<LaptopDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				LaptopDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const laptopId = request.params.laptopId;
 
@@ -214,20 +313,28 @@ const getLaptopByIdHandler = expressAsyncHandler(
 		}
 
 		// get all fileUploads associated with the laptop
-		const fileUploadsArr = await Promise.all(
+		const fileUploads = await Promise.all(
 			laptop.uploadedFilesIds.map(async (uploadedFileId) => {
 				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
-				return fileUpload as FileUploadDocument;
+				return fileUpload;
+			}),
+		);
+
+		// get all reviews associated with the laptop
+		const productReviews = await Promise.all(
+			laptop.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
+
+				return review;
 			}),
 		);
 
 		// create laptopServerResponse
-		const laptopServerResponse: ProductServerResponse<LaptopDocument> = {
+		const laptopServerResponse = {
 			...laptop,
-			fileUploads: fileUploadsArr.filter(
-				(fileUpload) => fileUpload,
-			) as FileUploadDocument[],
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
 		};
 
 		response.status(200).json({
@@ -238,34 +345,30 @@ const getLaptopByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Update a laptop by id
-// @route  PUT /api/v1/actions/dashboard/product-category/laptop/:laptopId
+// @route  PUT /api/v1/product-category/laptop/:laptopId
 // @access Private/Admin/Manager
 const updateLaptopByIdHandler = expressAsyncHandler(
 	async (
 		request: UpdateLaptopByIdRequest,
-		response: Response<ResourceRequestServerResponse<LaptopDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				LaptopDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const { laptopId } = request.params;
-		const { laptopFields } = request.body;
-
-		// check if laptop exists
-		const laptopExists = await getLaptopByIdService(laptopId);
-		if (!laptopExists) {
-			response
-				.status(404)
-				.json({ message: "Laptop does not exist", resourceData: [] });
-			return;
-		}
-
-		const newLaptop = {
-			...laptopExists,
-			...laptopFields,
-		};
+		const {
+			documentUpdate: { fields, updateOperator },
+		} = request.body;
 
 		// update laptop
 		const updatedLaptop = await updateLaptopByIdService({
-			laptopId,
-			fieldsToUpdate: newLaptop,
+			_id: laptopId,
+			fields,
+			updateOperator,
 		});
 
 		if (!updatedLaptop) {
@@ -276,58 +379,40 @@ const updateLaptopByIdHandler = expressAsyncHandler(
 			return;
 		}
 
-		response.status(200).json({
-			message: "Laptop updated successfully",
-			resourceData: [updatedLaptop],
-		});
-	},
-);
-
-// @desc   Return all associated file uploads
-// @route  GET /api/v1/actions/dashboard/product-category/laptop/fileUploads
-// @access Private/Admin/Manager
-const returnAllFileUploadsForLaptopsHandler = expressAsyncHandler(
-	async (
-		_request: GetLaptopByIdRequest,
-		response: Response<ResourceRequestServerResponse<FileUploadDocument>>,
-	) => {
-		const fileUploadsIds = await returnAllLaptopsUploadedFileIdsService();
-
-		if (fileUploadsIds.length === 0) {
-			response
-				.status(404)
-				.json({ message: "No file uploads found", resourceData: [] });
-			return;
-		}
-
-		const fileUploads = (await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) => {
-				const fileUpload = await getFileUploadByIdService(fileUploadId);
+		// get all fileUploads associated with the laptop
+		const fileUploads = await Promise.all(
+			updatedLaptop.uploadedFilesIds.map(async (uploadedFileId) => {
+				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
 				return fileUpload;
 			}),
-		)) as FileUploadDocument[];
+		);
 
-		// filter out any undefined values (in case fileUpload was not found)
-		const filteredFileUploads = fileUploads.filter((fileUpload) => fileUpload);
+		// get all reviews associated with the laptop
+		const productReviews = await Promise.all(
+			updatedLaptop.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
 
-		if (filteredFileUploads.length !== fileUploadsIds.length) {
-			response.status(404).json({
-				message: "Some file uploads could not be found.",
-				resourceData: filteredFileUploads,
-			});
-			return;
-		}
+				return review;
+			}),
+		);
+
+		// create laptopServerResponse
+		const laptopServerResponse = {
+			...updatedLaptop,
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
+		};
 
 		response.status(200).json({
-			message: "Successfully retrieved file uploads",
-			resourceData: filteredFileUploads,
+			message: "Laptop updated successfully",
+			resourceData: [laptopServerResponse],
 		});
 	},
 );
 
 // @desc   Delete all laptops
-// @route  DELETE /api/v1/actions/dashboard/product-category/laptop
+// @route  DELETE /api/v1/product-category/laptop
 // @access Private/Admin/Manager
 const deleteAllLaptopsHandler = expressAsyncHandler(
 	async (
@@ -335,17 +420,39 @@ const deleteAllLaptopsHandler = expressAsyncHandler(
 		response: Response<ResourceRequestServerResponse<LaptopDocument>>,
 	) => {
 		// grab all laptops file upload ids
-		const fileUploadsIds = await returnAllLaptopsUploadedFileIdsService();
+		const uploadedFilesIds = await returnAllLaptopsUploadedFileIdsService();
 
 		// delete all file uploads associated with all laptops
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) =>
-				deleteFileUploadByIdService(fileUploadId),
+		const deletedFileUploads = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
-		if (!deleteFileUploadsResult.every((result) => result.deletedCount !== 0)) {
+
+		if (
+			deletedFileUploads.some(
+				(deletedFileUpload) => deletedFileUpload.deletedCount === 0,
+			)
+		) {
 			response.status(400).json({
-				message: "Some file uploads could not be deleted. Please try again.",
+				message: "Some File uploads could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
+
+		// delete all reviews associated with all laptops
+		const deletedReviews = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
+
+		if (
+			deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)
+		) {
+			response.status(400).json({
+				message: "Some reviews could not be deleted. Please try again.",
 				resourceData: [],
 			});
 			return;
@@ -369,7 +476,7 @@ const deleteAllLaptopsHandler = expressAsyncHandler(
 );
 
 // @desc   Delete a laptop by id
-// @route  DELETE /api/v1/actions/dashboard/product-category/laptop/:laptopId
+// @route  DELETE /api/v1/product-category/laptop/:laptopId
 // @access Private/Admin/Manager
 const deleteALaptopHandler = expressAsyncHandler(
 	async (
@@ -391,17 +498,37 @@ const deleteALaptopHandler = expressAsyncHandler(
 		// if it is not an array, it is made to be an array
 		const uploadedFilesIds = [...laptopExists.uploadedFilesIds];
 
-		// delete all file uploads associated with this laptop
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			uploadedFilesIds.map(async (uploadedFileId) =>
-				deleteFileUploadByIdService(uploadedFileId),
+		// delete all file uploads associated with all laptops
+		const deletedFileUploads = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
 
-		if (deleteFileUploadsResult.some((result) => result.deletedCount === 0)) {
+		if (
+			deletedFileUploads.some(
+				(deletedFileUpload) => deletedFileUpload.deletedCount === 0,
+			)
+		) {
 			response.status(400).json({
-				message:
-					"Some file uploads associated with this laptop could not be deleted. Laptop not deleted. Please try again.",
+				message: "Some File uploads could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
+
+		// delete all reviews associated with all laptops
+		const deletedReviews = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
+
+		if (
+			deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)
+		) {
+			response.status(400).json({
+				message: "Some reviews could not be deleted. Please try again.",
 				resourceData: [],
 			});
 			return;
@@ -430,6 +557,6 @@ export {
 	deleteAllLaptopsHandler,
 	getLaptopByIdHandler,
 	getQueriedLaptopsHandler,
-	returnAllFileUploadsForLaptopsHandler,
 	updateLaptopByIdHandler,
+	updateLaptopsBulkHandler,
 };

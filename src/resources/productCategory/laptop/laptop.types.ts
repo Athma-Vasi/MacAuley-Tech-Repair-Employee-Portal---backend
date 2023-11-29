@@ -1,9 +1,12 @@
 import type { Types } from "mongoose";
 import type { RequestAfterJWTVerification } from "../../auth";
 import { UserRoles } from "../../user";
-import { GetQueriedResourceRequest } from "../../../types";
+import {
+	DocumentUpdateOperation,
+	GetQueriedResourceRequest,
+} from "../../../types";
 
-import { LaptopSchema } from "./laptop.model";
+import { LaptopDocument, LaptopSchema } from "./laptop.model";
 
 interface CreateNewLaptopRequest extends RequestAfterJWTVerification {
 	body: {
@@ -27,6 +30,22 @@ interface CreateNewLaptopBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		laptopSchemas: LaptopSchema[];
+	};
+}
+
+// DEV ROUTE
+interface UpdateLaptopsBulkRequest extends RequestAfterJWTVerification {
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
+		laptopFields: {
+			laptopId: Types.ObjectId;
+			documentUpdate: DocumentUpdateOperation<LaptopDocument>;
+		}[];
 	};
 }
 
@@ -58,7 +77,7 @@ interface UpdateLaptopByIdRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		laptopFields: Record<keyof LaptopSchema, LaptopSchema[keyof LaptopSchema]>;
+		documentUpdate: DocumentUpdateOperation<LaptopDocument>;
 	};
 	params: { laptopId: string };
 }
@@ -71,4 +90,5 @@ export type {
 	GetLaptopByIdRequest,
 	GetQueriedLaptopsRequest,
 	UpdateLaptopByIdRequest,
+	UpdateLaptopsBulkRequest,
 };

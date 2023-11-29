@@ -425,18 +425,40 @@ const deleteAllDisplaysHandler = expressAsyncHandler(
 		const uploadedFilesIds = await returnAllDisplaysUploadedFileIdsService();
 
 		// delete all file uploads associated with all displays
-		await Promise.all(
+		const deletedFileUploads = await Promise.all(
 			uploadedFilesIds.map(
 				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
 
+		if (
+			deletedFileUploads.some(
+				(deletedFileUpload) => deletedFileUpload.deletedCount === 0,
+			)
+		) {
+			response.status(400).json({
+				message: "Some File uploads could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
+
 		// delete all reviews associated with all displays
-		await Promise.all(
+		const deletedReviews = await Promise.all(
 			uploadedFilesIds.map(
 				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
 			),
 		);
+
+		if (
+			deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)
+		) {
+			response.status(400).json({
+				message: "Some reviews could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
 
 		// delete all displays
 		const deleteDisplaysResult: DeleteResult = await deleteAllDisplaysService();
@@ -479,18 +501,40 @@ const deleteADisplayHandler = expressAsyncHandler(
 		const uploadedFilesIds = [...displayExists.uploadedFilesIds];
 
 		// delete all file uploads associated with all displays
-		await Promise.all(
+		const deletedFileUploads = await Promise.all(
 			uploadedFilesIds.map(
 				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
 
+		if (
+			deletedFileUploads.some(
+				(deletedFileUpload) => deletedFileUpload.deletedCount === 0,
+			)
+		) {
+			response.status(400).json({
+				message: "Some File uploads could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
+
 		// delete all reviews associated with all displays
-		await Promise.all(
+		const deletedReviews = await Promise.all(
 			uploadedFilesIds.map(
 				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
 			),
 		);
+
+		if (
+			deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)
+		) {
+			response.status(400).json({
+				message: "Some reviews could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
 
 		// delete display by id
 		const deleteDisplayResult: DeleteResult =
