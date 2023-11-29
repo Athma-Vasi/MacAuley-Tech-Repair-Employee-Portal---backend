@@ -11,6 +11,7 @@ import type {
 	GetSmartphoneByIdRequest,
 	GetQueriedSmartphonesRequest,
 	UpdateSmartphoneByIdRequest,
+	UpdateSmartphonesBulkRequest,
 } from "./smartphone.types";
 import type {
 	GetQueriedResourceRequestServerResponse,
@@ -34,10 +35,16 @@ import {
 	deleteFileUploadByIdService,
 	getFileUploadByIdService,
 } from "../../fileUpload";
-import { ProductServerResponse } from "../product.types";
+
+import {
+	ProductReviewDocument,
+	deleteAProductReviewService,
+	getProductReviewByIdService,
+} from "../../productReview";
+import { removeUndefinedAndNullValues } from "../../../utils";
 
 // @desc   Create new smartphone
-// @route  POST /api/v1/actions/dashboard/product-category/smartphone
+// @route  POST /api/v1/product-category/smartphone
 // @access Private/Admin/Manager
 const createNewSmartphoneHandler = expressAsyncHandler(
 	async (
@@ -75,7 +82,7 @@ const createNewSmartphoneHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Create new smartphones bulk
-// @route  POST /api/v1/actions/dashboard/product-category/smartphone/dev
+// @route  POST /api/v1/product-category/smartphone/dev
 // @access Private/Admin/Manager
 const createNewSmartphoneBulkHandler = expressAsyncHandler(
 	async (
@@ -104,32 +111,98 @@ const createNewSmartphoneBulkHandler = expressAsyncHandler(
 				resourceData: successfullyCreatedSmartphones,
 			});
 			return;
-		} else if (successfullyCreatedSmartphones.length === 0) {
+		}
+
+		if (successfullyCreatedSmartphones.length === 0) {
 			response.status(400).json({
 				message: "Could not create any smartphones",
 				resourceData: [],
 			});
 			return;
-		} else {
+		}
+
+		response.status(201).json({
+			message: `Successfully created ${
+				smartphoneSchemas.length - successfullyCreatedSmartphones.length
+			} smartphones`,
+			resourceData: successfullyCreatedSmartphones,
+		});
+		return;
+	},
+);
+
+// @desc   Update smartphones bulk
+// @route  PATCH /api/v1/product-category/smartphone/dev
+// @access Private/Admin/Manager
+const updateSmartphonesBulkHandler = expressAsyncHandler(
+	async (
+		request: UpdateSmartphonesBulkRequest,
+		response: Response<ResourceRequestServerResponse<SmartphoneDocument>>,
+	) => {
+		const { smartphoneFields } = request.body;
+
+		const updatedSmartphones = await Promise.all(
+			smartphoneFields.map(async (smartphoneField) => {
+				const {
+					smartphoneId,
+					documentUpdate: { fields, updateOperator },
+				} = smartphoneField;
+
+				const updatedSmartphone = await updateSmartphoneByIdService({
+					_id: smartphoneId,
+					fields,
+					updateOperator,
+				});
+
+				return updatedSmartphone;
+			}),
+		);
+
+		// filter out any smartphones that were not updated
+		const successfullyUpdatedSmartphones = updatedSmartphones.filter(
+			removeUndefinedAndNullValues,
+		);
+
+		// check if any smartphones were updated
+		if (successfullyUpdatedSmartphones.length === smartphoneFields.length) {
 			response.status(201).json({
-				message: `Successfully created ${
-					smartphoneSchemas.length - successfullyCreatedSmartphones.length
-				} smartphones`,
-				resourceData: successfullyCreatedSmartphones,
+				message: `Successfully updated ${successfullyUpdatedSmartphones.length} smartphones`,
+				resourceData: successfullyUpdatedSmartphones,
 			});
 			return;
 		}
+
+		if (successfullyUpdatedSmartphones.length === 0) {
+			response.status(400).json({
+				message: "Could not update any smartphones",
+				resourceData: [],
+			});
+			return;
+		}
+
+		response.status(201).json({
+			message: `Successfully updated ${
+				smartphoneFields.length - successfullyUpdatedSmartphones.length
+			} smartphones`,
+			resourceData: successfullyUpdatedSmartphones,
+		});
+		return;
 	},
 );
 
 // @desc   Get all smartphones
-// @route  GET /api/v1/actions/dashboard/product-category/smartphone
+// @route  GET /api/v1/product-category/smartphone
 // @access Private/Admin/Manager
 const getQueriedSmartphonesHandler = expressAsyncHandler(
 	async (
 		request: GetQueriedSmartphonesRequest,
 		response: Response<
-			GetQueriedResourceRequestServerResponse<SmartphoneDocument>
+			GetQueriedResourceRequestServerResponse<
+				SmartphoneDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
 		>,
 	) => {
 		let { newQueryFlag, totalDocuments } = request.body;
@@ -160,7 +233,7 @@ const getQueriedSmartphonesHandler = expressAsyncHandler(
 			return;
 		}
 
-		// find all fileUploads associated with the smartphones (in parallel)
+		// find all fileUploads associated with the smartphones
 		const fileUploadsArrArr = await Promise.all(
 			smartphones.map(async (smartphone) => {
 				const fileUploadPromises = smartphone.uploadedFilesIds.map(
@@ -175,37 +248,63 @@ const getQueriedSmartphonesHandler = expressAsyncHandler(
 				const fileUploads = await Promise.all(fileUploadPromises);
 
 				// Filter out any undefined values (in case fileUpload was not found)
-				return fileUploads.filter((fileUpload) => fileUpload);
+				return fileUploads.filter(removeUndefinedAndNullValues);
+			}),
+		);
+
+		// find all reviews associated with the smartphones
+		const reviewsArrArr = await Promise.all(
+			smartphones.map(async (smartphone) => {
+				const reviewPromises = smartphone.reviewsIds.map(async (reviewId) => {
+					const review = await getProductReviewByIdService(reviewId);
+
+					return review;
+				});
+
+				// Wait for all the promises to resolve before continuing to the next iteration
+				const reviews = await Promise.all(reviewPromises);
+
+				// Filter out any undefined values (in case review was not found)
+				return reviews.filter(removeUndefinedAndNullValues);
 			}),
 		);
 
 		// create smartphoneServerResponse array
-		const smartphoneServerResponseArray = smartphones
-			.map((smartphone, index) => {
+		const smartphoneServerResponseArray = smartphones.map(
+			(smartphone, index) => {
 				const fileUploads = fileUploadsArrArr[index];
+				const productReviews = reviewsArrArr[index];
 				return {
 					...smartphone,
 					fileUploads,
+					productReviews,
 				};
-			})
-			.filter((smartphone) => smartphone);
+			},
+		);
 
 		response.status(200).json({
 			message: "Successfully retrieved smartphones",
 			pages: Math.ceil(totalDocuments / Number(options?.limit)),
 			totalDocuments,
-			resourceData: smartphoneServerResponseArray as SmartphoneDocument[],
+			resourceData: smartphoneServerResponseArray,
 		});
 	},
 );
 
 // @desc   Get smartphone by id
-// @route  GET /api/v1/actions/dashboard/product-category/smartphone/:smartphoneId
+// @route  GET /api/v1/product-category/smartphone/:smartphoneId
 // @access Private/Admin/Manager
 const getSmartphoneByIdHandler = expressAsyncHandler(
 	async (
 		request: GetSmartphoneByIdRequest,
-		response: Response<ResourceRequestServerResponse<SmartphoneDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				SmartphoneDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const smartphoneId = request.params.smartphoneId;
 
@@ -219,22 +318,29 @@ const getSmartphoneByIdHandler = expressAsyncHandler(
 		}
 
 		// get all fileUploads associated with the smartphone
-		const fileUploadsArr = await Promise.all(
+		const fileUploads = await Promise.all(
 			smartphone.uploadedFilesIds.map(async (uploadedFileId) => {
 				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
-				return fileUpload as FileUploadDocument;
+				return fileUpload;
+			}),
+		);
+
+		// get all reviews associated with the smartphone
+		const productReviews = await Promise.all(
+			smartphone.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
+
+				return review;
 			}),
 		);
 
 		// create smartphoneServerResponse
-		const smartphoneServerResponse: ProductServerResponse<SmartphoneDocument> =
-			{
-				...smartphone,
-				fileUploads: fileUploadsArr.filter(
-					(fileUpload) => fileUpload,
-				) as FileUploadDocument[],
-			};
+		const smartphoneServerResponse = {
+			...smartphone,
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
+		};
 
 		response.status(200).json({
 			message: "Successfully retrieved smartphone",
@@ -244,34 +350,30 @@ const getSmartphoneByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Update a smartphone by id
-// @route  PUT /api/v1/actions/dashboard/product-category/smartphone/:smartphoneId
+// @route  PUT /api/v1/product-category/smartphone/:smartphoneId
 // @access Private/Admin/Manager
 const updateSmartphoneByIdHandler = expressAsyncHandler(
 	async (
 		request: UpdateSmartphoneByIdRequest,
-		response: Response<ResourceRequestServerResponse<SmartphoneDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				SmartphoneDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const { smartphoneId } = request.params;
-		const { smartphoneFields } = request.body;
-
-		// check if smartphone exists
-		const smartphoneExists = await getSmartphoneByIdService(smartphoneId);
-		if (!smartphoneExists) {
-			response
-				.status(404)
-				.json({ message: "Smartphone does not exist", resourceData: [] });
-			return;
-		}
-
-		const newSmartphone = {
-			...smartphoneExists,
-			...smartphoneFields,
-		};
+		const {
+			documentUpdate: { fields, updateOperator },
+		} = request.body;
 
 		// update smartphone
 		const updatedSmartphone = await updateSmartphoneByIdService({
-			smartphoneId,
-			fieldsToUpdate: newSmartphone,
+			_id: smartphoneId,
+			fields,
+			updateOperator,
 		});
 
 		if (!updatedSmartphone) {
@@ -282,58 +384,40 @@ const updateSmartphoneByIdHandler = expressAsyncHandler(
 			return;
 		}
 
-		response.status(200).json({
-			message: "Smartphone updated successfully",
-			resourceData: [updatedSmartphone],
-		});
-	},
-);
-
-// @desc   Return all associated file uploads
-// @route  GET /api/v1/actions/dashboard/product-category/smartphone/fileUploads
-// @access Private/Admin/Manager
-const returnAllFileUploadsForSmartphonesHandler = expressAsyncHandler(
-	async (
-		_request: GetSmartphoneByIdRequest,
-		response: Response<ResourceRequestServerResponse<FileUploadDocument>>,
-	) => {
-		const fileUploadsIds = await returnAllSmartphonesUploadedFileIdsService();
-
-		if (fileUploadsIds.length === 0) {
-			response
-				.status(404)
-				.json({ message: "No file uploads found", resourceData: [] });
-			return;
-		}
-
-		const fileUploads = (await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) => {
-				const fileUpload = await getFileUploadByIdService(fileUploadId);
+		// get all fileUploads associated with the smartphone
+		const fileUploads = await Promise.all(
+			updatedSmartphone.uploadedFilesIds.map(async (uploadedFileId) => {
+				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
 				return fileUpload;
 			}),
-		)) as FileUploadDocument[];
+		);
 
-		// filter out any undefined values (in case fileUpload was not found)
-		const filteredFileUploads = fileUploads.filter((fileUpload) => fileUpload);
+		// get all reviews associated with the smartphone
+		const productReviews = await Promise.all(
+			updatedSmartphone.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
 
-		if (filteredFileUploads.length !== fileUploadsIds.length) {
-			response.status(404).json({
-				message: "Some file uploads could not be found.",
-				resourceData: filteredFileUploads,
-			});
-			return;
-		}
+				return review;
+			}),
+		);
+
+		// create smartphoneServerResponse
+		const smartphoneServerResponse = {
+			...updatedSmartphone,
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
+		};
 
 		response.status(200).json({
-			message: "Successfully retrieved file uploads",
-			resourceData: filteredFileUploads,
+			message: "Smartphone updated successfully",
+			resourceData: [smartphoneServerResponse],
 		});
 	},
 );
 
 // @desc   Delete all smartphones
-// @route  DELETE /api/v1/actions/dashboard/product-category/smartphone
+// @route  DELETE /api/v1/product-category/smartphone
 // @access Private/Admin/Manager
 const deleteAllSmartphonesHandler = expressAsyncHandler(
 	async (
@@ -341,17 +425,39 @@ const deleteAllSmartphonesHandler = expressAsyncHandler(
 		response: Response<ResourceRequestServerResponse<SmartphoneDocument>>,
 	) => {
 		// grab all smartphones file upload ids
-		const fileUploadsIds = await returnAllSmartphonesUploadedFileIdsService();
+		const uploadedFilesIds = await returnAllSmartphonesUploadedFileIdsService();
 
 		// delete all file uploads associated with all smartphones
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) =>
-				deleteFileUploadByIdService(fileUploadId),
+		const deletedFileUploads = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
-		if (!deleteFileUploadsResult.every((result) => result.deletedCount !== 0)) {
+
+		if (
+			deletedFileUploads.some(
+				(deletedFileUpload) => deletedFileUpload.deletedCount === 0,
+			)
+		) {
 			response.status(400).json({
-				message: "Some file uploads could not be deleted. Please try again.",
+				message: "Some File uploads could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
+
+		// delete all reviews associated with all smartphones
+		const deletedReviews = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
+
+		if (
+			deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)
+		) {
+			response.status(400).json({
+				message: "Some reviews could not be deleted. Please try again.",
 				resourceData: [],
 			});
 			return;
@@ -376,7 +482,7 @@ const deleteAllSmartphonesHandler = expressAsyncHandler(
 );
 
 // @desc   Delete a smartphone by id
-// @route  DELETE /api/v1/actions/dashboard/product-category/smartphone/:smartphoneId
+// @route  DELETE /api/v1/product-category/smartphone/:smartphoneId
 // @access Private/Admin/Manager
 const deleteASmartphoneHandler = expressAsyncHandler(
 	async (
@@ -398,17 +504,37 @@ const deleteASmartphoneHandler = expressAsyncHandler(
 		// if it is not an array, it is made to be an array
 		const uploadedFilesIds = [...smartphoneExists.uploadedFilesIds];
 
-		// delete all file uploads associated with this smartphone
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			uploadedFilesIds.map(async (uploadedFileId) =>
-				deleteFileUploadByIdService(uploadedFileId),
+		// delete all file uploads associated with all smartphones
+		const deletedFileUploads = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
 
-		if (deleteFileUploadsResult.some((result) => result.deletedCount === 0)) {
+		if (
+			deletedFileUploads.some(
+				(deletedFileUpload) => deletedFileUpload.deletedCount === 0,
+			)
+		) {
 			response.status(400).json({
-				message:
-					"Some file uploads associated with this smartphone could not be deleted. Smartphone not deleted. Please try again.",
+				message: "Some File uploads could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
+
+		// delete all reviews associated with all smartphones
+		const deletedReviews = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
+
+		if (
+			deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)
+		) {
+			response.status(400).json({
+				message: "Some reviews could not be deleted. Please try again.",
 				resourceData: [],
 			});
 			return;
@@ -439,6 +565,6 @@ export {
 	deleteAllSmartphonesHandler,
 	getSmartphoneByIdHandler,
 	getQueriedSmartphonesHandler,
-	returnAllFileUploadsForSmartphonesHandler,
 	updateSmartphoneByIdHandler,
+	updateSmartphonesBulkHandler,
 };

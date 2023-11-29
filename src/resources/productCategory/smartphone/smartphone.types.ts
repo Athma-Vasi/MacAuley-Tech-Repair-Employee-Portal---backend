@@ -1,9 +1,12 @@
 import type { Types } from "mongoose";
 import type { RequestAfterJWTVerification } from "../../auth";
 import { UserRoles } from "../../user";
-import { GetQueriedResourceRequest } from "../../../types";
+import {
+	DocumentUpdateOperation,
+	GetQueriedResourceRequest,
+} from "../../../types";
 
-import { SmartphoneSchema } from "./smartphone.model";
+import { SmartphoneDocument, SmartphoneSchema } from "./smartphone.model";
 
 interface CreateNewSmartphoneRequest extends RequestAfterJWTVerification {
 	body: {
@@ -27,6 +30,22 @@ interface CreateNewSmartphoneBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		smartphoneSchemas: SmartphoneSchema[];
+	};
+}
+
+// DEV ROUTE
+interface UpdateSmartphonesBulkRequest extends RequestAfterJWTVerification {
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
+		smartphoneFields: {
+			smartphoneId: Types.ObjectId;
+			documentUpdate: DocumentUpdateOperation<SmartphoneDocument>;
+		}[];
 	};
 }
 
@@ -58,10 +77,7 @@ interface UpdateSmartphoneByIdRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		smartphoneFields: Record<
-			keyof SmartphoneSchema,
-			SmartphoneSchema[keyof SmartphoneSchema]
-		>;
+		documentUpdate: DocumentUpdateOperation<SmartphoneDocument>;
 	};
 	params: { smartphoneId: string };
 }
@@ -74,4 +90,5 @@ export type {
 	GetSmartphoneByIdRequest,
 	GetQueriedSmartphonesRequest,
 	UpdateSmartphoneByIdRequest,
+	UpdateSmartphonesBulkRequest,
 };

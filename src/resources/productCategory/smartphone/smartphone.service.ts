@@ -4,6 +4,7 @@ import {
 	QueriedResourceGetRequestServiceInput,
 	DatabaseResponse,
 	DatabaseResponseNullable,
+	UpdateDocumentByIdServiceInput,
 } from "../../../types";
 import {
 	SmartphoneDocument,
@@ -33,7 +34,7 @@ async function getQueriedSmartphonesService({
 			.exec();
 		return smartphones;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedSmartphoneService" });
+		throw new Error(error, { cause: "getQueriedSmartphonesService" });
 	}
 }
 
@@ -41,12 +42,12 @@ async function getQueriedTotalSmartphonesService({
 	filter = {},
 }: QueriedResourceGetRequestServiceInput<SmartphoneDocument>): Promise<number> {
 	try {
-		const totalSmartphone = await SmartphoneModel.countDocuments(filter)
+		const totalSmartphones = await SmartphoneModel.countDocuments(filter)
 			.lean()
 			.exec();
-		return totalSmartphone;
+		return totalSmartphones;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedTotalSmartphoneService" });
+		throw new Error(error, { cause: "getQueriedTotalSmartphonesService" });
 	}
 }
 
@@ -65,20 +66,20 @@ async function getSmartphoneByIdService(
 }
 
 async function updateSmartphoneByIdService({
-	fieldsToUpdate,
-	smartphoneId,
-}: {
-	smartphoneId: Types.ObjectId | string;
-	fieldsToUpdate: Record<
-		keyof SmartphoneDocument,
-		SmartphoneDocument[keyof SmartphoneDocument]
-	>;
-}): DatabaseResponseNullable<SmartphoneDocument> {
+	_id,
+	fields,
+	updateOperator,
+}: UpdateDocumentByIdServiceInput<SmartphoneDocument>): DatabaseResponseNullable<SmartphoneDocument> {
+	const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
+	const updateObject = JSON.parse(updateString);
+
 	try {
 		const smartphone = await SmartphoneModel.findByIdAndUpdate(
-			smartphoneId,
-			{ $set: fieldsToUpdate },
-			{ new: true },
+			_id,
+			updateObject,
+			{
+				new: true,
+			},
 		)
 
 			.lean()
@@ -121,7 +122,9 @@ async function deleteASmartphoneService(
 	smartphoneId: Types.ObjectId | string,
 ): Promise<DeleteResult> {
 	try {
-		const smartphone = await SmartphoneModel.deleteOne({ _id: smartphoneId })
+		const smartphone = await SmartphoneModel.deleteOne({
+			_id: smartphoneId,
+		})
 			.lean()
 			.exec();
 		return smartphone;
