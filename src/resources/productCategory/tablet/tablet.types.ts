@@ -1,9 +1,11 @@
 import type { Types } from "mongoose";
 import type { RequestAfterJWTVerification } from "../../auth";
 import { UserRoles } from "../../user";
-import { GetQueriedResourceRequest } from "../../../types";
+import {
+	DocumentUpdateOperation,
+	GetQueriedResourceRequest,
+} from "../../../types";
 
-import { FileUploadDocument } from "../../fileUpload";
 import { TabletDocument, TabletSchema } from "./tablet.model";
 
 interface CreateNewTabletRequest extends RequestAfterJWTVerification {
@@ -28,6 +30,22 @@ interface CreateNewTabletBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		tabletSchemas: TabletSchema[];
+	};
+}
+
+// DEV ROUTE
+interface UpdateTabletsBulkRequest extends RequestAfterJWTVerification {
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
+		tabletFields: {
+			tabletId: Types.ObjectId;
+			documentUpdate: DocumentUpdateOperation<TabletDocument>;
+		}[];
 	};
 }
 
@@ -59,7 +77,7 @@ interface UpdateTabletByIdRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		tabletFields: Record<keyof TabletSchema, TabletSchema[keyof TabletSchema]>;
+		documentUpdate: DocumentUpdateOperation<TabletDocument>;
 	};
 	params: { tabletId: string };
 }
@@ -72,4 +90,5 @@ export type {
 	GetTabletByIdRequest,
 	GetQueriedTabletsRequest,
 	UpdateTabletByIdRequest,
+	UpdateTabletsBulkRequest,
 };

@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { assignQueryDefaults, verifyRoles } from "../../../middlewares";
+import {
+	assignQueryDefaults,
+	verifyJWTMiddleware,
+	verifyRoles,
+} from "../../../middlewares";
 import {
 	createNewTabletBulkHandler,
 	createNewTabletHandler,
@@ -7,8 +11,8 @@ import {
 	deleteAllTabletsHandler,
 	getTabletByIdHandler,
 	getQueriedTabletsHandler,
-	returnAllFileUploadsForTabletsHandler,
 	updateTabletByIdHandler,
+	updateTabletsBulkHandler,
 } from "./tablet.controller";
 import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
@@ -19,21 +23,29 @@ tabletRouter.use(verifyRoles());
 tabletRouter
 	.route("/")
 	.get(
+		verifyJWTMiddleware,
+		verifyRoles(),
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedTabletsHandler,
 	)
-	.post(createNewTabletHandler)
-	.delete(deleteAllTabletsHandler);
+	.post(createNewTabletHandler);
+
+// separate route for safety reasons (as it deletes all documents in the collection)
+tabletRouter
+	.route("/delete-all")
+	.delete(verifyJWTMiddleware, verifyRoles(), deleteAllTabletsHandler);
 
 // DEV ROUTE
-tabletRouter.route("/dev").post(createNewTabletBulkHandler);
+tabletRouter
+	.route("/dev")
+	.post(createNewTabletBulkHandler)
+	.patch(updateTabletsBulkHandler);
 
-tabletRouter.route("/fileUploads").post(returnAllFileUploadsForTabletsHandler);
-
+// single document routes
 tabletRouter
 	.route("/:tabletId")
-	.get(getTabletByIdHandler)
-	.delete(deleteATabletHandler)
-	.put(updateTabletByIdHandler);
+	.get(verifyJWTMiddleware, verifyRoles(), getTabletByIdHandler)
+	.delete(verifyJWTMiddleware, verifyRoles(), deleteATabletHandler)
+	.patch(verifyJWTMiddleware, verifyRoles(), updateTabletByIdHandler);
 
 export { tabletRouter };

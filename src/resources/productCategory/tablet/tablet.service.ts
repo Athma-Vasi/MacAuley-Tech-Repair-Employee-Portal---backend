@@ -4,6 +4,7 @@ import {
 	QueriedResourceGetRequestServiceInput,
 	DatabaseResponse,
 	DatabaseResponseNullable,
+	UpdateDocumentByIdServiceInput,
 } from "../../../types";
 import { TabletDocument, TabletModel, TabletSchema } from "./tablet.model";
 
@@ -29,7 +30,7 @@ async function getQueriedTabletsService({
 			.exec();
 		return tablets;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedTabletService" });
+		throw new Error(error, { cause: "getQueriedTabletsService" });
 	}
 }
 
@@ -37,10 +38,10 @@ async function getQueriedTotalTabletsService({
 	filter = {},
 }: QueriedResourceGetRequestServiceInput<TabletDocument>): Promise<number> {
 	try {
-		const totalTablet = await TabletModel.countDocuments(filter).lean().exec();
-		return totalTablet;
+		const totalTablets = await TabletModel.countDocuments(filter).lean().exec();
+		return totalTablets;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedTotalTabletService" });
+		throw new Error(error, { cause: "getQueriedTotalTabletsService" });
 	}
 }
 
@@ -59,21 +60,17 @@ async function getTabletByIdService(
 }
 
 async function updateTabletByIdService({
-	fieldsToUpdate,
-	tabletId,
-}: {
-	tabletId: Types.ObjectId | string;
-	fieldsToUpdate: Record<
-		keyof TabletDocument,
-		TabletDocument[keyof TabletDocument]
-	>;
-}): DatabaseResponseNullable<TabletDocument> {
+	_id,
+	fields,
+	updateOperator,
+}: UpdateDocumentByIdServiceInput<TabletDocument>): DatabaseResponseNullable<TabletDocument> {
+	const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
+	const updateObject = JSON.parse(updateString);
+
 	try {
-		const tablet = await TabletModel.findByIdAndUpdate(
-			tabletId,
-			{ $set: fieldsToUpdate },
-			{ new: true },
-		)
+		const tablet = await TabletModel.findByIdAndUpdate(_id, updateObject, {
+			new: true,
+		})
 
 			.lean()
 			.exec();
@@ -105,7 +102,9 @@ async function returnAllTabletsUploadedFileIdsService(): Promise<
 		);
 		return uploadedFileIds;
 	} catch (error: any) {
-		throw new Error(error, { cause: "returnAllTabletsUploadedFileIdsService" });
+		throw new Error(error, {
+			cause: "returnAllTabletsUploadedFileIdsService",
+		});
 	}
 }
 
@@ -113,7 +112,11 @@ async function deleteATabletService(
 	tabletId: Types.ObjectId | string,
 ): Promise<DeleteResult> {
 	try {
-		const tablet = await TabletModel.deleteOne({ _id: tabletId }).lean().exec();
+		const tablet = await TabletModel.deleteOne({
+			_id: tabletId,
+		})
+			.lean()
+			.exec();
 		return tablet;
 	} catch (error: any) {
 		throw new Error(error, { cause: "deleteATabletService" });

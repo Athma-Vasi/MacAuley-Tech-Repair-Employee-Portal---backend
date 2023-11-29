@@ -11,6 +11,7 @@ import type {
 	GetTabletByIdRequest,
 	GetQueriedTabletsRequest,
 	UpdateTabletByIdRequest,
+	UpdateTabletsBulkRequest,
 } from "./tablet.types";
 import type {
 	GetQueriedResourceRequestServerResponse,
@@ -34,10 +35,16 @@ import {
 	deleteFileUploadByIdService,
 	getFileUploadByIdService,
 } from "../../fileUpload";
-import { ProductServerResponse } from "../product.types";
+
+import {
+	ProductReviewDocument,
+	deleteAProductReviewService,
+	getProductReviewByIdService,
+} from "../../productReview";
+import { removeUndefinedAndNullValues } from "../../../utils";
 
 // @desc   Create new tablet
-// @route  POST /api/v1/actions/dashboard/product-category/tablet
+// @route  POST /api/v1/product-category/tablet
 // @access Private/Admin/Manager
 const createNewTabletHandler = expressAsyncHandler(
 	async (
@@ -75,7 +82,7 @@ const createNewTabletHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Create new tablets bulk
-// @route  POST /api/v1/actions/dashboard/product-category/tablet/dev
+// @route  POST /api/v1/product-category/tablet/dev
 // @access Private/Admin/Manager
 const createNewTabletBulkHandler = expressAsyncHandler(
 	async (
@@ -101,31 +108,99 @@ const createNewTabletBulkHandler = expressAsyncHandler(
 				resourceData: successfullyCreatedTablets,
 			});
 			return;
-		} else if (successfullyCreatedTablets.length === 0) {
+		}
+
+		if (successfullyCreatedTablets.length === 0) {
 			response.status(400).json({
 				message: "Could not create any tablets",
 				resourceData: [],
 			});
 			return;
-		} else {
+		}
+
+		response.status(201).json({
+			message: `Successfully created ${
+				tabletSchemas.length - successfullyCreatedTablets.length
+			} tablets`,
+			resourceData: successfullyCreatedTablets,
+		});
+		return;
+	},
+);
+
+// @desc   Update tablets bulk
+// @route  PATCH /api/v1/product-category/tablet/dev
+// @access Private/Admin/Manager
+const updateTabletsBulkHandler = expressAsyncHandler(
+	async (
+		request: UpdateTabletsBulkRequest,
+		response: Response<ResourceRequestServerResponse<TabletDocument>>,
+	) => {
+		const { tabletFields } = request.body;
+
+		const updatedTablets = await Promise.all(
+			tabletFields.map(async (tabletField) => {
+				const {
+					tabletId,
+					documentUpdate: { fields, updateOperator },
+				} = tabletField;
+
+				const updatedTablet = await updateTabletByIdService({
+					_id: tabletId,
+					fields,
+					updateOperator,
+				});
+
+				return updatedTablet;
+			}),
+		);
+
+		// filter out any tablets that were not updated
+		const successfullyUpdatedTablets = updatedTablets.filter(
+			removeUndefinedAndNullValues,
+		);
+
+		// check if any tablets were updated
+		if (successfullyUpdatedTablets.length === tabletFields.length) {
 			response.status(201).json({
-				message: `Successfully created ${
-					tabletSchemas.length - successfullyCreatedTablets.length
-				} tablets`,
-				resourceData: successfullyCreatedTablets,
+				message: `Successfully updated ${successfullyUpdatedTablets.length} tablets`,
+				resourceData: successfullyUpdatedTablets,
 			});
 			return;
 		}
+
+		if (successfullyUpdatedTablets.length === 0) {
+			response.status(400).json({
+				message: "Could not update any tablets",
+				resourceData: [],
+			});
+			return;
+		}
+
+		response.status(201).json({
+			message: `Successfully updated ${
+				tabletFields.length - successfullyUpdatedTablets.length
+			} tablets`,
+			resourceData: successfullyUpdatedTablets,
+		});
+		return;
 	},
 );
 
 // @desc   Get all tablets
-// @route  GET /api/v1/actions/dashboard/product-category/tablet
+// @route  GET /api/v1/product-category/tablet
 // @access Private/Admin/Manager
 const getQueriedTabletsHandler = expressAsyncHandler(
 	async (
 		request: GetQueriedTabletsRequest,
-		response: Response<GetQueriedResourceRequestServerResponse<TabletDocument>>,
+		response: Response<
+			GetQueriedResourceRequestServerResponse<
+				TabletDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		let { newQueryFlag, totalDocuments } = request.body;
 
@@ -155,7 +230,7 @@ const getQueriedTabletsHandler = expressAsyncHandler(
 			return;
 		}
 
-		// find all fileUploads associated with the tablets (in parallel)
+		// find all fileUploads associated with the tablets
 		const fileUploadsArrArr = await Promise.all(
 			tablets.map(async (tablet) => {
 				const fileUploadPromises = tablet.uploadedFilesIds.map(
@@ -170,37 +245,61 @@ const getQueriedTabletsHandler = expressAsyncHandler(
 				const fileUploads = await Promise.all(fileUploadPromises);
 
 				// Filter out any undefined values (in case fileUpload was not found)
-				return fileUploads.filter((fileUpload) => fileUpload);
+				return fileUploads.filter(removeUndefinedAndNullValues);
+			}),
+		);
+
+		// find all reviews associated with the tablets
+		const reviewsArrArr = await Promise.all(
+			tablets.map(async (tablet) => {
+				const reviewPromises = tablet.reviewsIds.map(async (reviewId) => {
+					const review = await getProductReviewByIdService(reviewId);
+
+					return review;
+				});
+
+				// Wait for all the promises to resolve before continuing to the next iteration
+				const reviews = await Promise.all(reviewPromises);
+
+				// Filter out any undefined values (in case review was not found)
+				return reviews.filter(removeUndefinedAndNullValues);
 			}),
 		);
 
 		// create tabletServerResponse array
-		const tabletServerResponseArray = tablets
-			.map((tablet, index) => {
-				const fileUploads = fileUploadsArrArr[index];
-				return {
-					...tablet,
-					fileUploads,
-				};
-			})
-			.filter((tablet) => tablet);
+		const tabletServerResponseArray = tablets.map((tablet, index) => {
+			const fileUploads = fileUploadsArrArr[index];
+			const productReviews = reviewsArrArr[index];
+			return {
+				...tablet,
+				fileUploads,
+				productReviews,
+			};
+		});
 
 		response.status(200).json({
 			message: "Successfully retrieved tablets",
 			pages: Math.ceil(totalDocuments / Number(options?.limit)),
 			totalDocuments,
-			resourceData: tabletServerResponseArray as TabletDocument[],
+			resourceData: tabletServerResponseArray,
 		});
 	},
 );
 
 // @desc   Get tablet by id
-// @route  GET /api/v1/actions/dashboard/product-category/tablet/:tabletId
+// @route  GET /api/v1/product-category/tablet/:tabletId
 // @access Private/Admin/Manager
 const getTabletByIdHandler = expressAsyncHandler(
 	async (
 		request: GetTabletByIdRequest,
-		response: Response<ResourceRequestServerResponse<TabletDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				TabletDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const tabletId = request.params.tabletId;
 
@@ -214,20 +313,28 @@ const getTabletByIdHandler = expressAsyncHandler(
 		}
 
 		// get all fileUploads associated with the tablet
-		const fileUploadsArr = await Promise.all(
+		const fileUploads = await Promise.all(
 			tablet.uploadedFilesIds.map(async (uploadedFileId) => {
 				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
-				return fileUpload as FileUploadDocument;
+				return fileUpload;
+			}),
+		);
+
+		// get all reviews associated with the tablet
+		const productReviews = await Promise.all(
+			tablet.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
+
+				return review;
 			}),
 		);
 
 		// create tabletServerResponse
-		const tabletServerResponse: ProductServerResponse<TabletDocument> = {
+		const tabletServerResponse = {
 			...tablet,
-			fileUploads: fileUploadsArr.filter(
-				(fileUpload) => fileUpload,
-			) as FileUploadDocument[],
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
 		};
 
 		response.status(200).json({
@@ -238,34 +345,30 @@ const getTabletByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Update a tablet by id
-// @route  PUT /api/v1/actions/dashboard/product-category/tablet/:tabletId
+// @route  PUT /api/v1/product-category/tablet/:tabletId
 // @access Private/Admin/Manager
 const updateTabletByIdHandler = expressAsyncHandler(
 	async (
 		request: UpdateTabletByIdRequest,
-		response: Response<ResourceRequestServerResponse<TabletDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				TabletDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const { tabletId } = request.params;
-		const { tabletFields } = request.body;
-
-		// check if tablet exists
-		const tabletExists = await getTabletByIdService(tabletId);
-		if (!tabletExists) {
-			response
-				.status(404)
-				.json({ message: "Tablet does not exist", resourceData: [] });
-			return;
-		}
-
-		const newTablet = {
-			...tabletExists,
-			...tabletFields,
-		};
+		const {
+			documentUpdate: { fields, updateOperator },
+		} = request.body;
 
 		// update tablet
 		const updatedTablet = await updateTabletByIdService({
-			tabletId,
-			fieldsToUpdate: newTablet,
+			_id: tabletId,
+			fields,
+			updateOperator,
 		});
 
 		if (!updatedTablet) {
@@ -276,58 +379,40 @@ const updateTabletByIdHandler = expressAsyncHandler(
 			return;
 		}
 
-		response.status(200).json({
-			message: "Tablet updated successfully",
-			resourceData: [updatedTablet],
-		});
-	},
-);
-
-// @desc   Return all associated file uploads
-// @route  GET /api/v1/actions/dashboard/product-category/tablet/fileUploads
-// @access Private/Admin/Manager
-const returnAllFileUploadsForTabletsHandler = expressAsyncHandler(
-	async (
-		_request: GetTabletByIdRequest,
-		response: Response<ResourceRequestServerResponse<FileUploadDocument>>,
-	) => {
-		const fileUploadsIds = await returnAllTabletsUploadedFileIdsService();
-
-		if (fileUploadsIds.length === 0) {
-			response
-				.status(404)
-				.json({ message: "No file uploads found", resourceData: [] });
-			return;
-		}
-
-		const fileUploads = (await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) => {
-				const fileUpload = await getFileUploadByIdService(fileUploadId);
+		// get all fileUploads associated with the tablet
+		const fileUploads = await Promise.all(
+			updatedTablet.uploadedFilesIds.map(async (uploadedFileId) => {
+				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
 				return fileUpload;
 			}),
-		)) as FileUploadDocument[];
+		);
 
-		// filter out any undefined values (in case fileUpload was not found)
-		const filteredFileUploads = fileUploads.filter((fileUpload) => fileUpload);
+		// get all reviews associated with the tablet
+		const productReviews = await Promise.all(
+			updatedTablet.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
 
-		if (filteredFileUploads.length !== fileUploadsIds.length) {
-			response.status(404).json({
-				message: "Some file uploads could not be found.",
-				resourceData: filteredFileUploads,
-			});
-			return;
-		}
+				return review;
+			}),
+		);
+
+		// create tabletServerResponse
+		const tabletServerResponse = {
+			...updatedTablet,
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
+		};
 
 		response.status(200).json({
-			message: "Successfully retrieved file uploads",
-			resourceData: filteredFileUploads,
+			message: "Tablet updated successfully",
+			resourceData: [tabletServerResponse],
 		});
 	},
 );
 
 // @desc   Delete all tablets
-// @route  DELETE /api/v1/actions/dashboard/product-category/tablet
+// @route  DELETE /api/v1/product-category/tablet
 // @access Private/Admin/Manager
 const deleteAllTabletsHandler = expressAsyncHandler(
 	async (
@@ -335,17 +420,39 @@ const deleteAllTabletsHandler = expressAsyncHandler(
 		response: Response<ResourceRequestServerResponse<TabletDocument>>,
 	) => {
 		// grab all tablets file upload ids
-		const fileUploadsIds = await returnAllTabletsUploadedFileIdsService();
+		const uploadedFilesIds = await returnAllTabletsUploadedFileIdsService();
 
 		// delete all file uploads associated with all tablets
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) =>
-				deleteFileUploadByIdService(fileUploadId),
+		const deletedFileUploads = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
-		if (!deleteFileUploadsResult.every((result) => result.deletedCount !== 0)) {
+
+		if (
+			deletedFileUploads.some(
+				(deletedFileUpload) => deletedFileUpload.deletedCount === 0,
+			)
+		) {
 			response.status(400).json({
-				message: "Some file uploads could not be deleted. Please try again.",
+				message: "Some File uploads could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
+
+		// delete all reviews associated with all tablets
+		const deletedReviews = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
+
+		if (
+			deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)
+		) {
+			response.status(400).json({
+				message: "Some reviews could not be deleted. Please try again.",
 				resourceData: [],
 			});
 			return;
@@ -369,7 +476,7 @@ const deleteAllTabletsHandler = expressAsyncHandler(
 );
 
 // @desc   Delete a tablet by id
-// @route  DELETE /api/v1/actions/dashboard/product-category/tablet/:tabletId
+// @route  DELETE /api/v1/product-category/tablet/:tabletId
 // @access Private/Admin/Manager
 const deleteATabletHandler = expressAsyncHandler(
 	async (
@@ -391,17 +498,37 @@ const deleteATabletHandler = expressAsyncHandler(
 		// if it is not an array, it is made to be an array
 		const uploadedFilesIds = [...tabletExists.uploadedFilesIds];
 
-		// delete all file uploads associated with this tablet
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			uploadedFilesIds.map(async (uploadedFileId) =>
-				deleteFileUploadByIdService(uploadedFileId),
+		// delete all file uploads associated with all tablets
+		const deletedFileUploads = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
 
-		if (deleteFileUploadsResult.some((result) => result.deletedCount === 0)) {
+		if (
+			deletedFileUploads.some(
+				(deletedFileUpload) => deletedFileUpload.deletedCount === 0,
+			)
+		) {
 			response.status(400).json({
-				message:
-					"Some file uploads associated with this tablet could not be deleted. Tablet not deleted. Please try again.",
+				message: "Some File uploads could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
+
+		// delete all reviews associated with all tablets
+		const deletedReviews = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
+
+		if (
+			deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)
+		) {
+			response.status(400).json({
+				message: "Some reviews could not be deleted. Please try again.",
 				resourceData: [],
 			});
 			return;
@@ -430,6 +557,6 @@ export {
 	deleteAllTabletsHandler,
 	getTabletByIdHandler,
 	getQueriedTabletsHandler,
-	returnAllFileUploadsForTabletsHandler,
 	updateTabletByIdHandler,
+	updateTabletsBulkHandler,
 };
