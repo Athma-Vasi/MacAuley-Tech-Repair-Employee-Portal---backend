@@ -11,6 +11,7 @@ import type {
 	GetCpuByIdRequest,
 	GetQueriedCpusRequest,
 	UpdateCpuByIdRequest,
+	UpdateCpusBulkRequest,
 } from "./cpu.types";
 import type {
 	GetQueriedResourceRequestServerResponse,
@@ -34,10 +35,16 @@ import {
 	deleteFileUploadByIdService,
 	getFileUploadByIdService,
 } from "../../fileUpload";
-import { ProductServerResponse } from "../product.types";
+
+import {
+	ProductReviewDocument,
+	deleteAProductReviewService,
+	getProductReviewByIdService,
+} from "../../productReview";
+import { removeUndefinedAndNullValues } from "../../../utils";
 
 // @desc   Create new cpu
-// @route  POST /api/v1/actions/dashboard/product-category/cpu
+// @route  POST /api/v1/product-category/cpu
 // @access Private/Admin/Manager
 const createNewCpuHandler = expressAsyncHandler(
 	async (
@@ -74,7 +81,7 @@ const createNewCpuHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Create new cpus bulk
-// @route  POST /api/v1/actions/dashboard/product-category/cpu/dev
+// @route  POST /api/v1/product-category/cpu/dev
 // @access Private/Admin/Manager
 const createNewCpuBulkHandler = expressAsyncHandler(
 	async (
@@ -100,31 +107,99 @@ const createNewCpuBulkHandler = expressAsyncHandler(
 				resourceData: successfullyCreatedCpus,
 			});
 			return;
-		} else if (successfullyCreatedCpus.length === 0) {
+		}
+
+		if (successfullyCreatedCpus.length === 0) {
 			response.status(400).json({
 				message: "Could not create any cpus",
 				resourceData: [],
 			});
 			return;
-		} else {
+		}
+
+		response.status(201).json({
+			message: `Successfully created ${
+				cpuSchemas.length - successfullyCreatedCpus.length
+			} cpus`,
+			resourceData: successfullyCreatedCpus,
+		});
+		return;
+	},
+);
+
+// @desc   Update cpus bulk
+// @route  PATCH /api/v1/product-category/cpu/dev
+// @access Private/Admin/Manager
+const updateCpusBulkHandler = expressAsyncHandler(
+	async (
+		request: UpdateCpusBulkRequest,
+		response: Response<ResourceRequestServerResponse<CpuDocument>>,
+	) => {
+		const { cpuFields } = request.body;
+
+		const updatedCpus = await Promise.all(
+			cpuFields.map(async (cpuField) => {
+				const {
+					cpuId,
+					documentUpdate: { fields, updateOperator },
+				} = cpuField;
+
+				const updatedCpu = await updateCpuByIdService({
+					_id: cpuId,
+					fields,
+					updateOperator,
+				});
+
+				return updatedCpu;
+			}),
+		);
+
+		// filter out any cpus that were not updated
+		const successfullyUpdatedCpus = updatedCpus.filter(
+			removeUndefinedAndNullValues,
+		);
+
+		// check if any cpus were updated
+		if (successfullyUpdatedCpus.length === cpuFields.length) {
 			response.status(201).json({
-				message: `Successfully created ${
-					cpuSchemas.length - successfullyCreatedCpus.length
-				} cpus`,
-				resourceData: successfullyCreatedCpus,
+				message: `Successfully updated ${successfullyUpdatedCpus.length} cpus`,
+				resourceData: successfullyUpdatedCpus,
 			});
 			return;
 		}
+
+		if (successfullyUpdatedCpus.length === 0) {
+			response.status(400).json({
+				message: "Could not update any cpus",
+				resourceData: [],
+			});
+			return;
+		}
+
+		response.status(201).json({
+			message: `Successfully updated ${
+				cpuFields.length - successfullyUpdatedCpus.length
+			} cpus`,
+			resourceData: successfullyUpdatedCpus,
+		});
+		return;
 	},
 );
 
 // @desc   Get all cpus
-// @route  GET /api/v1/actions/dashboard/product-category/cpu
+// @route  GET /api/v1/product-category/cpu
 // @access Private/Admin/Manager
 const getQueriedCpusHandler = expressAsyncHandler(
 	async (
 		request: GetQueriedCpusRequest,
-		response: Response<GetQueriedResourceRequestServerResponse<CpuDocument>>,
+		response: Response<
+			GetQueriedResourceRequestServerResponse<
+				CpuDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		let { newQueryFlag, totalDocuments } = request.body;
 
@@ -154,7 +229,7 @@ const getQueriedCpusHandler = expressAsyncHandler(
 			return;
 		}
 
-		// find all fileUploads associated with the cpus (in parallel)
+		// find all fileUploads associated with the cpus
 		const fileUploadsArrArr = await Promise.all(
 			cpus.map(async (cpu) => {
 				const fileUploadPromises = cpu.uploadedFilesIds.map(
@@ -169,37 +244,61 @@ const getQueriedCpusHandler = expressAsyncHandler(
 				const fileUploads = await Promise.all(fileUploadPromises);
 
 				// Filter out any undefined values (in case fileUpload was not found)
-				return fileUploads.filter((fileUpload) => fileUpload);
+				return fileUploads.filter(removeUndefinedAndNullValues);
+			}),
+		);
+
+		// find all reviews associated with the cpus
+		const reviewsArrArr = await Promise.all(
+			cpus.map(async (cpu) => {
+				const reviewPromises = cpu.reviewsIds.map(async (reviewId) => {
+					const review = await getProductReviewByIdService(reviewId);
+
+					return review;
+				});
+
+				// Wait for all the promises to resolve before continuing to the next iteration
+				const reviews = await Promise.all(reviewPromises);
+
+				// Filter out any undefined values (in case review was not found)
+				return reviews.filter(removeUndefinedAndNullValues);
 			}),
 		);
 
 		// create cpuServerResponse array
-		const cpuServerResponseArray = cpus
-			.map((cpu, index) => {
-				const fileUploads = fileUploadsArrArr[index];
-				return {
-					...cpu,
-					fileUploads,
-				};
-			})
-			.filter((cpu) => cpu);
+		const cpuServerResponseArray = cpus.map((cpu, index) => {
+			const fileUploads = fileUploadsArrArr[index];
+			const productReviews = reviewsArrArr[index];
+			return {
+				...cpu,
+				fileUploads,
+				productReviews,
+			};
+		});
 
 		response.status(200).json({
 			message: "Successfully retrieved cpus",
 			pages: Math.ceil(totalDocuments / Number(options?.limit)),
 			totalDocuments,
-			resourceData: cpuServerResponseArray as CpuDocument[],
+			resourceData: cpuServerResponseArray,
 		});
 	},
 );
 
 // @desc   Get cpu by id
-// @route  GET /api/v1/actions/dashboard/product-category/cpu/:cpuId
+// @route  GET /api/v1/product-category/cpu/:cpuId
 // @access Private/Admin/Manager
 const getCpuByIdHandler = expressAsyncHandler(
 	async (
 		request: GetCpuByIdRequest,
-		response: Response<ResourceRequestServerResponse<CpuDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				CpuDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const cpuId = request.params.cpuId;
 
@@ -211,20 +310,28 @@ const getCpuByIdHandler = expressAsyncHandler(
 		}
 
 		// get all fileUploads associated with the cpu
-		const fileUploadsArr = await Promise.all(
+		const fileUploads = await Promise.all(
 			cpu.uploadedFilesIds.map(async (uploadedFileId) => {
 				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
-				return fileUpload as FileUploadDocument;
+				return fileUpload;
+			}),
+		);
+
+		// get all reviews associated with the cpu
+		const productReviews = await Promise.all(
+			cpu.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
+
+				return review;
 			}),
 		);
 
 		// create cpuServerResponse
-		const cpuServerResponse: ProductServerResponse<CpuDocument> = {
+		const cpuServerResponse = {
 			...cpu,
-			fileUploads: fileUploadsArr.filter(
-				(fileUpload) => fileUpload,
-			) as FileUploadDocument[],
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
 		};
 
 		response.status(200).json({
@@ -235,34 +342,30 @@ const getCpuByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Update a cpu by id
-// @route  PUT /api/v1/actions/dashboard/product-category/cpu/:cpuId
+// @route  PUT /api/v1/product-category/cpu/:cpuId
 // @access Private/Admin/Manager
 const updateCpuByIdHandler = expressAsyncHandler(
 	async (
 		request: UpdateCpuByIdRequest,
-		response: Response<ResourceRequestServerResponse<CpuDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				CpuDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const { cpuId } = request.params;
-		const { cpuFields } = request.body;
-
-		// check if cpu exists
-		const cpuExists = await getCpuByIdService(cpuId);
-		if (!cpuExists) {
-			response
-				.status(404)
-				.json({ message: "Cpu does not exist", resourceData: [] });
-			return;
-		}
-
-		const newCpu = {
-			...cpuExists,
-			...cpuFields,
-		};
+		const {
+			documentUpdate: { fields, updateOperator },
+		} = request.body;
 
 		// update cpu
 		const updatedCpu = await updateCpuByIdService({
-			cpuId,
-			fieldsToUpdate: newCpu,
+			_id: cpuId,
+			fields,
+			updateOperator,
 		});
 
 		if (!updatedCpu) {
@@ -273,58 +376,40 @@ const updateCpuByIdHandler = expressAsyncHandler(
 			return;
 		}
 
-		response.status(200).json({
-			message: "Cpu updated successfully",
-			resourceData: [updatedCpu],
-		});
-	},
-);
-
-// @desc   Return all associated file uploads
-// @route  GET /api/v1/actions/dashboard/product-category/cpu/fileUploads
-// @access Private/Admin/Manager
-const returnAllFileUploadsForCpusHandler = expressAsyncHandler(
-	async (
-		_request: GetCpuByIdRequest,
-		response: Response<ResourceRequestServerResponse<FileUploadDocument>>,
-	) => {
-		const fileUploadsIds = await returnAllCpusUploadedFileIdsService();
-
-		if (fileUploadsIds.length === 0) {
-			response
-				.status(404)
-				.json({ message: "No file uploads found", resourceData: [] });
-			return;
-		}
-
-		const fileUploads = (await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) => {
-				const fileUpload = await getFileUploadByIdService(fileUploadId);
+		// get all fileUploads associated with the cpu
+		const fileUploads = await Promise.all(
+			updatedCpu.uploadedFilesIds.map(async (uploadedFileId) => {
+				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
 				return fileUpload;
 			}),
-		)) as FileUploadDocument[];
+		);
 
-		// filter out any undefined values (in case fileUpload was not found)
-		const filteredFileUploads = fileUploads.filter((fileUpload) => fileUpload);
+		// get all reviews associated with the cpu
+		const productReviews = await Promise.all(
+			updatedCpu.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
 
-		if (filteredFileUploads.length !== fileUploadsIds.length) {
-			response.status(404).json({
-				message: "Some file uploads could not be found.",
-				resourceData: filteredFileUploads,
-			});
-			return;
-		}
+				return review;
+			}),
+		);
+
+		// create cpuServerResponse
+		const cpuServerResponse = {
+			...updatedCpu,
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
+		};
 
 		response.status(200).json({
-			message: "Successfully retrieved file uploads",
-			resourceData: filteredFileUploads,
+			message: "Cpu updated successfully",
+			resourceData: [cpuServerResponse],
 		});
 	},
 );
 
 // @desc   Delete all cpus
-// @route  DELETE /api/v1/actions/dashboard/product-category/cpu
+// @route  DELETE /api/v1/product-category/cpu
 // @access Private/Admin/Manager
 const deleteAllCpusHandler = expressAsyncHandler(
 	async (
@@ -332,21 +417,21 @@ const deleteAllCpusHandler = expressAsyncHandler(
 		response: Response<ResourceRequestServerResponse<CpuDocument>>,
 	) => {
 		// grab all cpus file upload ids
-		const fileUploadsIds = await returnAllCpusUploadedFileIdsService();
+		const uploadedFilesIds = await returnAllCpusUploadedFileIdsService();
 
 		// delete all file uploads associated with all cpus
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) =>
-				deleteFileUploadByIdService(fileUploadId),
+		await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
-		if (!deleteFileUploadsResult.every((result) => result.deletedCount !== 0)) {
-			response.status(400).json({
-				message: "Some file uploads could not be deleted. Please try again.",
-				resourceData: [],
-			});
-			return;
-		}
+
+		// delete all reviews associated with all cpus
+		await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
 
 		// delete all cpus
 		const deleteCpusResult: DeleteResult = await deleteAllCpusService();
@@ -366,7 +451,7 @@ const deleteAllCpusHandler = expressAsyncHandler(
 );
 
 // @desc   Delete a cpu by id
-// @route  DELETE /api/v1/actions/dashboard/product-category/cpu/:cpuId
+// @route  DELETE /api/v1/product-category/cpu/:cpuId
 // @access Private/Admin/Manager
 const deleteACpuHandler = expressAsyncHandler(
 	async (
@@ -388,21 +473,19 @@ const deleteACpuHandler = expressAsyncHandler(
 		// if it is not an array, it is made to be an array
 		const uploadedFilesIds = [...cpuExists.uploadedFilesIds];
 
-		// delete all file uploads associated with this cpu
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			uploadedFilesIds.map(async (uploadedFileId) =>
-				deleteFileUploadByIdService(uploadedFileId),
+		// delete all file uploads associated with all cpus
+		await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
 
-		if (deleteFileUploadsResult.some((result) => result.deletedCount === 0)) {
-			response.status(400).json({
-				message:
-					"Some file uploads associated with this cpu could not be deleted. Cpu not deleted. Please try again.",
-				resourceData: [],
-			});
-			return;
-		}
+		// delete all reviews associated with all cpus
+		await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
 
 		// delete cpu by id
 		const deleteCpuResult: DeleteResult = await deleteACpuService(cpuId);
@@ -426,6 +509,6 @@ export {
 	deleteAllCpusHandler,
 	getCpuByIdHandler,
 	getQueriedCpusHandler,
-	returnAllFileUploadsForCpusHandler,
 	updateCpuByIdHandler,
+	updateCpusBulkHandler,
 };

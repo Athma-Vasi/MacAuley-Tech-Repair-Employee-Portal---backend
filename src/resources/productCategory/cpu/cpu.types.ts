@@ -1,9 +1,12 @@
 import type { Types } from "mongoose";
 import type { RequestAfterJWTVerification } from "../../auth";
 import { UserRoles } from "../../user";
-import { GetQueriedResourceRequest } from "../../../types";
+import {
+	DocumentUpdateOperation,
+	GetQueriedResourceRequest,
+} from "../../../types";
 
-import { CpuSchema } from "./cpu.model";
+import { CpuDocument, CpuSchema } from "./cpu.model";
 
 interface CreateNewCpuRequest extends RequestAfterJWTVerification {
 	body: {
@@ -27,6 +30,22 @@ interface CreateNewCpuBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		cpuSchemas: CpuSchema[];
+	};
+}
+
+// DEV ROUTE
+interface UpdateCpusBulkRequest extends RequestAfterJWTVerification {
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
+		cpuFields: {
+			cpuId: Types.ObjectId;
+			documentUpdate: DocumentUpdateOperation<CpuDocument>;
+		}[];
 	};
 }
 
@@ -58,7 +77,7 @@ interface UpdateCpuByIdRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		cpuFields: Record<keyof CpuSchema, CpuSchema[keyof CpuSchema]>;
+		documentUpdate: DocumentUpdateOperation<CpuDocument>;
 	};
 	params: { cpuId: string };
 }
@@ -71,4 +90,5 @@ export type {
 	GetCpuByIdRequest,
 	GetQueriedCpusRequest,
 	UpdateCpuByIdRequest,
+	UpdateCpusBulkRequest,
 };

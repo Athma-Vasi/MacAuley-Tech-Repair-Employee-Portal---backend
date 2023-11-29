@@ -4,6 +4,7 @@ import {
 	QueriedResourceGetRequestServiceInput,
 	DatabaseResponse,
 	DatabaseResponseNullable,
+	UpdateDocumentByIdServiceInput,
 } from "../../../types";
 import { CpuDocument, CpuModel, CpuSchema } from "./cpu.model";
 
@@ -22,10 +23,12 @@ async function getQueriedCpusService({
 	options = {},
 }: QueriedResourceGetRequestServiceInput<CpuDocument>): DatabaseResponse<CpuDocument> {
 	try {
-		const cpus = await CpuModel.find(filter, projection, options).lean().exec();
-		return cpus;
+		const accessories = await CpuModel.find(filter, projection, options)
+			.lean()
+			.exec();
+		return accessories;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedCpuService" });
+		throw new Error(error, { cause: "getQueriedCpusService" });
 	}
 }
 
@@ -33,10 +36,10 @@ async function getQueriedTotalCpusService({
 	filter = {},
 }: QueriedResourceGetRequestServiceInput<CpuDocument>): Promise<number> {
 	try {
-		const totalCpu = await CpuModel.countDocuments(filter).lean().exec();
-		return totalCpu;
+		const totalCpus = await CpuModel.countDocuments(filter).lean().exec();
+		return totalCpus;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedTotalCpuService" });
+		throw new Error(error, { cause: "getQueriedTotalCpusService" });
 	}
 }
 
@@ -44,7 +47,10 @@ async function getCpuByIdService(
 	cpuId: Types.ObjectId | string,
 ): DatabaseResponseNullable<CpuDocument> {
 	try {
-		const cpu = await CpuModel.findById(cpuId).lean().exec();
+		const cpu = await CpuModel.findById(cpuId)
+
+			.lean()
+			.exec();
 		return cpu;
 	} catch (error: any) {
 		throw new Error(error, { cause: "getCpuByIdService" });
@@ -52,18 +58,17 @@ async function getCpuByIdService(
 }
 
 async function updateCpuByIdService({
-	fieldsToUpdate,
-	cpuId,
-}: {
-	cpuId: Types.ObjectId | string;
-	fieldsToUpdate: Record<keyof CpuDocument, CpuDocument[keyof CpuDocument]>;
-}): DatabaseResponseNullable<CpuDocument> {
+	_id,
+	fields,
+	updateOperator,
+}: UpdateDocumentByIdServiceInput<CpuDocument>): DatabaseResponseNullable<CpuDocument> {
+	const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
+	const updateObject = JSON.parse(updateString);
+
 	try {
-		const cpu = await CpuModel.findByIdAndUpdate(
-			cpuId,
-			{ $set: fieldsToUpdate },
-			{ new: true },
-		)
+		const cpu = await CpuModel.findByIdAndUpdate(_id, updateObject, {
+			new: true,
+		})
 
 			.lean()
 			.exec();
@@ -75,8 +80,8 @@ async function updateCpuByIdService({
 
 async function deleteAllCpusService(): Promise<DeleteResult> {
 	try {
-		const cpus = await CpuModel.deleteMany({}).lean().exec();
-		return cpus;
+		const accessories = await CpuModel.deleteMany({}).lean().exec();
+		return accessories;
 	} catch (error: any) {
 		throw new Error(error, { cause: "deleteAllCpusService" });
 	}
@@ -86,14 +91,16 @@ async function returnAllCpusUploadedFileIdsService(): Promise<
 	Types.ObjectId[]
 > {
 	try {
-		const cpus = await CpuModel.find({})
+		const accessories = await CpuModel.find({})
 			.select("uploadedFilesIds")
 			.lean()
 			.exec();
-		const uploadedFileIds = cpus.flatMap((cpu) => cpu.uploadedFilesIds);
+		const uploadedFileIds = accessories.flatMap((cpu) => cpu.uploadedFilesIds);
 		return uploadedFileIds;
 	} catch (error: any) {
-		throw new Error(error, { cause: "returnAllCpusUploadedFileIdsService" });
+		throw new Error(error, {
+			cause: "returnAllCpusUploadedFileIdsService",
+		});
 	}
 }
 
@@ -101,7 +108,11 @@ async function deleteACpuService(
 	cpuId: Types.ObjectId | string,
 ): Promise<DeleteResult> {
 	try {
-		const cpu = await CpuModel.deleteOne({ _id: cpuId }).lean().exec();
+		const cpu = await CpuModel.deleteOne({
+			_id: cpuId,
+		})
+			.lean()
+			.exec();
 		return cpu;
 	} catch (error: any) {
 		throw new Error(error, { cause: "deleteACpuService" });

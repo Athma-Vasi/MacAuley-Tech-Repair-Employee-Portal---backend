@@ -5,75 +5,77 @@
 /**
  * Imports
  */
-import { cpuRouter } from './cpu.routes';
-import { CpuModel } from './cpu.model';
+import { cpuRouter } from "./cpu.routes";
+import { CpuModel } from "./cpu.model";
 
 import {
-  createNewCpuBulkHandler,
-  createNewCpuHandler,
-  deleteACpuHandler,
-  deleteAllCpusHandler,
-  getCpuByIdHandler,
-  getQueriedCpusHandler,
-  returnAllFileUploadsForCpusHandler,
-  updateCpuByIdHandler,
-} from './cpu.controller';
+	createNewCpuBulkHandler,
+	createNewCpuHandler,
+	deleteACpuHandler,
+	deleteAllCpusHandler,
+	getCpuByIdHandler,
+	getQueriedCpusHandler,
+	updateCpuByIdHandler,
+	updateCpusBulkHandler,
+} from "./cpu.controller";
 
 import {
-  createNewCpuService,
-  deleteAllCpusService,
-  deleteACpuService,
-  getCpuByIdService,
-  getQueriedCpusService,
-  getQueriedTotalCpusService,
-  returnAllCpusUploadedFileIdsService,
-  updateCpuByIdService,
-} from './cpu.service';
+	createNewCpuService,
+	deleteACpuService,
+	deleteAllCpusService,
+	getCpuByIdService,
+	getQueriedCpusService,
+	getQueriedTotalCpusService,
+	returnAllCpusUploadedFileIdsService,
+	updateCpuByIdService,
+} from "./cpu.service";
 
-import type { CpuDocument, CpuSchema } from './cpu.model';
+import type { CpuDocument, CpuSchema } from "./cpu.model";
 import type {
-  CreateNewCpuBulkRequest,
-  CreateNewCpuRequest,
-  DeleteACpuRequest,
-  DeleteAllCpusRequest,
-  GetCpuByIdRequest,
-  GetQueriedCpusRequest,
-  UpdateCpuByIdRequest,
-} from './cpu.types';
+	CreateNewCpuBulkRequest,
+	CreateNewCpuRequest,
+	DeleteACpuRequest,
+	DeleteAllCpusRequest,
+	GetCpuByIdRequest,
+	GetQueriedCpusRequest,
+	UpdateCpuByIdRequest,
+	UpdateCpusBulkRequest,
+} from "./cpu.types";
 
 /**
  * Exports
  */
 
 export {
-  CpuModel,
-  cpuRouter,
-  createNewCpuBulkHandler,
-  createNewCpuHandler,
-  createNewCpuService,
-  deleteACpuHandler,
-  deleteAllCpusHandler,
-  deleteAllCpusService,
-  deleteACpuService,
-  getCpuByIdHandler,
-  getCpuByIdService,
-  getQueriedCpusHandler,
-  getQueriedCpusService,
-  getQueriedTotalCpusService,
-  returnAllCpusUploadedFileIdsService,
-  returnAllFileUploadsForCpusHandler,
-  updateCpuByIdHandler,
-  updateCpuByIdService,
+	CpuModel,
+	cpuRouter,
+	createNewCpuBulkHandler,
+	createNewCpuHandler,
+	createNewCpuService,
+	deleteACpuHandler,
+	deleteACpuService,
+	deleteAllCpusHandler,
+	deleteAllCpusService,
+	getCpuByIdHandler,
+	getCpuByIdService,
+	getQueriedCpusHandler,
+	getQueriedCpusService,
+	getQueriedTotalCpusService,
+	returnAllCpusUploadedFileIdsService,
+	updateCpuByIdHandler,
+	updateCpuByIdService,
+	updateCpusBulkHandler,
 };
 
 export type {
-  CpuDocument,
-  CpuSchema,
-  CreateNewCpuBulkRequest,
-  CreateNewCpuRequest,
-  DeleteACpuRequest,
-  DeleteAllCpusRequest,
-  GetCpuByIdRequest,
-  GetQueriedCpusRequest,
-  UpdateCpuByIdRequest,
+	CpuDocument,
+	CpuSchema,
+	CreateNewCpuBulkRequest,
+	CreateNewCpuRequest,
+	DeleteACpuRequest,
+	DeleteAllCpusRequest,
+	GetCpuByIdRequest,
+	GetQueriedCpusRequest,
+	UpdateCpuByIdRequest,
+	UpdateCpusBulkRequest,
 };
