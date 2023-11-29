@@ -1,9 +1,5 @@
 import { Router } from "express";
-import {
-	assignQueryDefaults,
-	verifyJWTMiddleware,
-	verifyRoles,
-} from "../../../middlewares";
+import { assignQueryDefaults } from "../../../middlewares";
 import {
 	createNewMotherboardBulkHandler,
 	createNewMotherboardHandler,
@@ -18,22 +14,16 @@ import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
 const motherboardRouter = Router();
 
-motherboardRouter.use(verifyRoles());
-
 motherboardRouter
 	.route("/")
 	.get(
-		verifyJWTMiddleware,
-		verifyRoles(),
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedMotherboardsHandler,
 	)
 	.post(createNewMotherboardHandler);
 
 // separate route for safety reasons (as it deletes all documents in the collection)
-motherboardRouter
-	.route("/delete-all")
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteAllMotherboardsHandler);
+motherboardRouter.route("/delete-all").delete(deleteAllMotherboardsHandler);
 
 // DEV ROUTE
 motherboardRouter
@@ -44,8 +34,8 @@ motherboardRouter
 // single document routes
 motherboardRouter
 	.route("/:motherboardId")
-	.get(verifyJWTMiddleware, verifyRoles(), getMotherboardByIdHandler)
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteAMotherboardHandler)
-	.patch(verifyJWTMiddleware, verifyRoles(), updateMotherboardByIdHandler);
+	.get(getMotherboardByIdHandler)
+	.delete(deleteAMotherboardHandler)
+	.patch(updateMotherboardByIdHandler);
 
 export { motherboardRouter };

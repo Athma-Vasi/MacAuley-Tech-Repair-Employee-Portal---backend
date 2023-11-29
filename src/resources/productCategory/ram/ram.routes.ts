@@ -1,9 +1,5 @@
 import { Router } from "express";
-import {
-	assignQueryDefaults,
-	verifyJWTMiddleware,
-	verifyRoles,
-} from "../../../middlewares";
+import { assignQueryDefaults } from "../../../middlewares";
 import {
 	createNewRamBulkHandler,
 	createNewRamHandler,
@@ -18,22 +14,13 @@ import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
 const ramRouter = Router();
 
-ramRouter.use(verifyRoles());
-
 ramRouter
 	.route("/")
-	.get(
-		verifyJWTMiddleware,
-		verifyRoles(),
-		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
-		getQueriedRamsHandler,
-	)
+	.get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedRamsHandler)
 	.post(createNewRamHandler);
 
 // separate route for safety reasons (as it deletes all documents in the collection)
-ramRouter
-	.route("/delete-all")
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteAllRamsHandler);
+ramRouter.route("/delete-all").delete(deleteAllRamsHandler);
 
 // DEV ROUTE
 ramRouter
@@ -44,8 +31,8 @@ ramRouter
 // single document routes
 ramRouter
 	.route("/:ramId")
-	.get(verifyJWTMiddleware, verifyRoles(), getRamByIdHandler)
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteARamHandler)
-	.patch(verifyJWTMiddleware, verifyRoles(), updateRamByIdHandler);
+	.get(getRamByIdHandler)
+	.delete(deleteARamHandler)
+	.patch(updateRamByIdHandler);
 
 export { ramRouter };

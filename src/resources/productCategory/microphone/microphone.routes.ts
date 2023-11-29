@@ -1,9 +1,5 @@
 import { Router } from "express";
-import {
-	assignQueryDefaults,
-	verifyJWTMiddleware,
-	verifyRoles,
-} from "../../../middlewares";
+import { assignQueryDefaults } from "../../../middlewares";
 import {
 	createNewMicrophoneBulkHandler,
 	createNewMicrophoneHandler,
@@ -18,22 +14,16 @@ import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
 const microphoneRouter = Router();
 
-microphoneRouter.use(verifyRoles());
-
 microphoneRouter
 	.route("/")
 	.get(
-		verifyJWTMiddleware,
-		verifyRoles(),
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedMicrophonesHandler,
 	)
 	.post(createNewMicrophoneHandler);
 
 // separate route for safety reasons (as it deletes all documents in the collection)
-microphoneRouter
-	.route("/delete-all")
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteAllMicrophonesHandler);
+microphoneRouter.route("/delete-all").delete(deleteAllMicrophonesHandler);
 
 // DEV ROUTE
 microphoneRouter
@@ -44,8 +34,8 @@ microphoneRouter
 // single document routes
 microphoneRouter
 	.route("/:microphoneId")
-	.get(verifyJWTMiddleware, verifyRoles(), getMicrophoneByIdHandler)
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteAMicrophoneHandler)
-	.patch(verifyJWTMiddleware, verifyRoles(), updateMicrophoneByIdHandler);
+	.get(getMicrophoneByIdHandler)
+	.delete(deleteAMicrophoneHandler)
+	.patch(updateMicrophoneByIdHandler);
 
 export { microphoneRouter };

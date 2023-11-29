@@ -1,9 +1,5 @@
 import { Router } from "express";
-import {
-	assignQueryDefaults,
-	verifyJWTMiddleware,
-	verifyRoles,
-} from "../../../middlewares";
+import { assignQueryDefaults } from "../../../middlewares";
 import {
 	createNewStorageBulkHandler,
 	createNewStorageHandler,
@@ -18,22 +14,16 @@ import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
 const storageRouter = Router();
 
-storageRouter.use(verifyRoles());
-
 storageRouter
 	.route("/")
 	.get(
-		verifyJWTMiddleware,
-		verifyRoles(),
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedStoragesHandler,
 	)
 	.post(createNewStorageHandler);
 
 // separate route for safety reasons (as it deletes all documents in the collection)
-storageRouter
-	.route("/delete-all")
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteAllStoragesHandler);
+storageRouter.route("/delete-all").delete(deleteAllStoragesHandler);
 
 // DEV ROUTE
 storageRouter
@@ -44,8 +34,8 @@ storageRouter
 // single document routes
 storageRouter
 	.route("/:storageId")
-	.get(verifyJWTMiddleware, verifyRoles(), getStorageByIdHandler)
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteAStorageHandler)
-	.patch(verifyJWTMiddleware, verifyRoles(), updateStorageByIdHandler);
+	.get(getStorageByIdHandler)
+	.delete(deleteAStorageHandler)
+	.patch(updateStorageByIdHandler);
 
 export { storageRouter };

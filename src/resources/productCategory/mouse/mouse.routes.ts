@@ -1,9 +1,5 @@
 import { Router } from "express";
-import {
-	assignQueryDefaults,
-	verifyJWTMiddleware,
-	verifyRoles,
-} from "../../../middlewares";
+import { assignQueryDefaults } from "../../../middlewares";
 import {
 	createNewMouseBulkHandler,
 	createNewMouseHandler,
@@ -18,22 +14,13 @@ import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
 const mouseRouter = Router();
 
-mouseRouter.use(verifyRoles());
-
 mouseRouter
 	.route("/")
-	.get(
-		verifyJWTMiddleware,
-		verifyRoles(),
-		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
-		getQueriedMiceHandler,
-	)
+	.get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedMiceHandler)
 	.post(createNewMouseHandler);
 
 // separate route for safety reasons (as it deletes all documents in the collection)
-mouseRouter
-	.route("/delete-all")
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteAllMiceHandler);
+mouseRouter.route("/delete-all").delete(deleteAllMiceHandler);
 
 // DEV ROUTE
 mouseRouter
@@ -44,8 +31,8 @@ mouseRouter
 // single document routes
 mouseRouter
 	.route("/:mouseId")
-	.get(verifyJWTMiddleware, verifyRoles(), getMouseByIdHandler)
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteAMouseHandler)
-	.patch(verifyJWTMiddleware, verifyRoles(), updateMouseByIdHandler);
+	.get(getMouseByIdHandler)
+	.delete(deleteAMouseHandler)
+	.patch(updateMouseByIdHandler);
 
 export { mouseRouter };

@@ -1,9 +1,5 @@
 import { Router } from "express";
-import {
-	assignQueryDefaults,
-	verifyJWTMiddleware,
-	verifyRoles,
-} from "../../../middlewares";
+import { assignQueryDefaults } from "../../../middlewares";
 import {
 	createNewGpuBulkHandler,
 	createNewGpuHandler,
@@ -18,22 +14,13 @@ import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
 const gpuRouter = Router();
 
-gpuRouter.use(verifyRoles());
-
 gpuRouter
 	.route("/")
-	.get(
-		verifyJWTMiddleware,
-		verifyRoles(),
-		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
-		getQueriedGpusHandler,
-	)
+	.get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedGpusHandler)
 	.post(createNewGpuHandler);
 
 // separate route for safety reasons (as it deletes all documents in the collection)
-gpuRouter
-	.route("/delete-all")
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteAllGpusHandler);
+gpuRouter.route("/delete-all").delete(deleteAllGpusHandler);
 
 // DEV ROUTE
 gpuRouter
@@ -44,8 +31,8 @@ gpuRouter
 // single document routes
 gpuRouter
 	.route("/:gpuId")
-	.get(verifyJWTMiddleware, verifyRoles(), getGpuByIdHandler)
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteAGpuHandler)
-	.patch(verifyJWTMiddleware, verifyRoles(), updateGpuByIdHandler);
+	.get(getGpuByIdHandler)
+	.delete(deleteAGpuHandler)
+	.patch(updateGpuByIdHandler);
 
 export { gpuRouter };

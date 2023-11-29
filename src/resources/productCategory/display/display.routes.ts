@@ -1,9 +1,5 @@
 import { Router } from "express";
-import {
-	assignQueryDefaults,
-	verifyJWTMiddleware,
-	verifyRoles,
-} from "../../../middlewares";
+import { assignQueryDefaults } from "../../../middlewares";
 import {
 	createNewDisplayBulkHandler,
 	createNewDisplayHandler,
@@ -18,22 +14,16 @@ import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
 const displayRouter = Router();
 
-displayRouter.use(verifyRoles());
-
 displayRouter
 	.route("/")
 	.get(
-		verifyJWTMiddleware,
-		verifyRoles(),
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedDisplaysHandler,
 	)
 	.post(createNewDisplayHandler);
 
 // separate route for safety reasons (as it deletes all documents in the collection)
-displayRouter
-	.route("/delete-all")
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteAllDisplaysHandler);
+displayRouter.route("/delete-all").delete(deleteAllDisplaysHandler);
 
 // DEV ROUTE
 displayRouter
@@ -44,8 +34,8 @@ displayRouter
 // single document routes
 displayRouter
 	.route("/:displayId")
-	.get(verifyJWTMiddleware, verifyRoles(), getDisplayByIdHandler)
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteADisplayHandler)
-	.patch(verifyJWTMiddleware, verifyRoles(), updateDisplayByIdHandler);
+	.get(getDisplayByIdHandler)
+	.delete(deleteADisplayHandler)
+	.patch(updateDisplayByIdHandler);
 
 export { displayRouter };

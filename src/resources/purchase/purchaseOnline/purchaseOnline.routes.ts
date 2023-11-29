@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { assignQueryDefaults, verifyRoles } from "../../../middlewares";
+import {
+	assignQueryDefaults,
+	verifyJWTMiddleware,
+	verifyRoles,
+} from "../../../middlewares";
 
 import {
 	addFieldToPurchaseOnlinesBulkHandler,
@@ -22,6 +26,8 @@ purchaseOnlineRouter
 	.route("/")
 	.post(createNewPurchaseOnlineHandler)
 	.get(
+		verifyJWTMiddleware,
+		verifyRoles(),
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedPurchaseOnlinesHandler,
 	);
@@ -29,6 +35,8 @@ purchaseOnlineRouter
 purchaseOnlineRouter
 	.route("/user")
 	.get(
+		verifyJWTMiddleware,
+		verifyRoles(),
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedPurchasesOnlineByUserHandler,
 	);
@@ -42,8 +50,8 @@ purchaseOnlineRouter
 
 purchaseOnlineRouter
 	.route("/:purchaseOnlineId")
-	.get(getPurchaseOnlineByIdHandler)
-	.patch(updatePurchaseOnlineByIdHandler)
-	.delete(deletePurchaseOnlineHandler);
+	.get(verifyJWTMiddleware, verifyRoles(), getPurchaseOnlineByIdHandler)
+	.patch(verifyJWTMiddleware, verifyRoles(), updatePurchaseOnlineByIdHandler)
+	.delete(verifyJWTMiddleware, verifyRoles(), deletePurchaseOnlineHandler);
 
 export { purchaseOnlineRouter };

@@ -1,9 +1,5 @@
 import { Router } from "express";
-import {
-	assignQueryDefaults,
-	verifyJWTMiddleware,
-	verifyRoles,
-} from "../../../middlewares";
+import { assignQueryDefaults } from "../../../middlewares";
 import {
 	createNewDesktopComputerBulkHandler,
 	createNewDesktopComputerHandler,
@@ -18,13 +14,9 @@ import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
 const desktopComputerRouter = Router();
 
-desktopComputerRouter.use(verifyRoles());
-
 desktopComputerRouter
 	.route("/")
 	.get(
-		verifyJWTMiddleware,
-		verifyRoles(),
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedDesktopComputersHandler,
 	)
@@ -33,7 +25,7 @@ desktopComputerRouter
 // separate route for safety reasons (as it deletes all documents in the collection)
 desktopComputerRouter
 	.route("/delete-all")
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteAllDesktopComputersHandler);
+	.delete(deleteAllDesktopComputersHandler);
 
 // DEV ROUTE
 desktopComputerRouter
@@ -44,8 +36,8 @@ desktopComputerRouter
 // single document routes
 desktopComputerRouter
 	.route("/:desktopComputerId")
-	.get(verifyJWTMiddleware, verifyRoles(), getDesktopComputerByIdHandler)
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteADesktopComputerHandler)
-	.patch(verifyJWTMiddleware, verifyRoles(), updateDesktopComputerByIdHandler);
+	.get(getDesktopComputerByIdHandler)
+	.delete(deleteADesktopComputerHandler)
+	.patch(updateDesktopComputerByIdHandler);
 
 export { desktopComputerRouter };

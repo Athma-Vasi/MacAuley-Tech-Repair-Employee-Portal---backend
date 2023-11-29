@@ -1,9 +1,5 @@
 import { Router } from "express";
-import {
-	assignQueryDefaults,
-	verifyJWTMiddleware,
-	verifyRoles,
-} from "../../../middlewares";
+import { assignQueryDefaults } from "../../../middlewares";
 import {
 	createNewSpeakerBulkHandler,
 	createNewSpeakerHandler,
@@ -18,22 +14,16 @@ import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
 const speakerRouter = Router();
 
-speakerRouter.use(verifyRoles());
-
 speakerRouter
 	.route("/")
 	.get(
-		verifyJWTMiddleware,
-		verifyRoles(),
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedSpeakersHandler,
 	)
 	.post(createNewSpeakerHandler);
 
 // separate route for safety reasons (as it deletes all documents in the collection)
-speakerRouter
-	.route("/delete-all")
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteAllSpeakersHandler);
+speakerRouter.route("/delete-all").delete(deleteAllSpeakersHandler);
 
 // DEV ROUTE
 speakerRouter
@@ -44,8 +34,8 @@ speakerRouter
 // single document routes
 speakerRouter
 	.route("/:speakerId")
-	.get(verifyJWTMiddleware, verifyRoles(), getSpeakerByIdHandler)
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteASpeakerHandler)
-	.patch(verifyJWTMiddleware, verifyRoles(), updateSpeakerByIdHandler);
+	.get(getSpeakerByIdHandler)
+	.delete(deleteASpeakerHandler)
+	.patch(updateSpeakerByIdHandler);
 
 export { speakerRouter };

@@ -1,9 +1,5 @@
 import { Router } from "express";
-import {
-	assignQueryDefaults,
-	verifyJWTMiddleware,
-	verifyRoles,
-} from "../../../middlewares";
+import { assignQueryDefaults } from "../../../middlewares";
 import {
 	createNewKeyboardBulkHandler,
 	createNewKeyboardHandler,
@@ -18,22 +14,16 @@ import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
 const keyboardRouter = Router();
 
-keyboardRouter.use(verifyRoles());
-
 keyboardRouter
 	.route("/")
 	.get(
-		verifyJWTMiddleware,
-		verifyRoles(),
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedKeyboardsHandler,
 	)
 	.post(createNewKeyboardHandler);
 
 // separate route for safety reasons (as it deletes all documents in the collection)
-keyboardRouter
-	.route("/delete-all")
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteAllKeyboardsHandler);
+keyboardRouter.route("/delete-all").delete(deleteAllKeyboardsHandler);
 
 // DEV ROUTE
 keyboardRouter
@@ -44,8 +34,8 @@ keyboardRouter
 // single document routes
 keyboardRouter
 	.route("/:keyboardId")
-	.get(verifyJWTMiddleware, verifyRoles(), getKeyboardByIdHandler)
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteAKeyboardHandler)
-	.patch(verifyJWTMiddleware, verifyRoles(), updateKeyboardByIdHandler);
+	.get(getKeyboardByIdHandler)
+	.delete(deleteAKeyboardHandler)
+	.patch(updateKeyboardByIdHandler);
 
 export { keyboardRouter };

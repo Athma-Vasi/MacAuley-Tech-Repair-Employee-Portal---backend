@@ -1,9 +1,5 @@
 import { Router } from "express";
-import {
-	assignQueryDefaults,
-	verifyJWTMiddleware,
-	verifyRoles,
-} from "../../../middlewares";
+import { assignQueryDefaults } from "../../../middlewares";
 import {
 	createNewWebcamBulkHandler,
 	createNewWebcamHandler,
@@ -18,22 +14,16 @@ import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
 const webcamRouter = Router();
 
-webcamRouter.use(verifyRoles());
-
 webcamRouter
 	.route("/")
 	.get(
-		verifyJWTMiddleware,
-		verifyRoles(),
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedWebcamsHandler,
 	)
 	.post(createNewWebcamHandler);
 
 // separate route for safety reasons (as it deletes all documents in the collection)
-webcamRouter
-	.route("/delete-all")
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteAllWebcamsHandler);
+webcamRouter.route("/delete-all").delete(deleteAllWebcamsHandler);
 
 // DEV ROUTE
 webcamRouter
@@ -44,8 +34,8 @@ webcamRouter
 // single document routes
 webcamRouter
 	.route("/:webcamId")
-	.get(verifyJWTMiddleware, verifyRoles(), getWebcamByIdHandler)
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteAWebcamHandler)
-	.patch(verifyJWTMiddleware, verifyRoles(), updateWebcamByIdHandler);
+	.get(getWebcamByIdHandler)
+	.delete(deleteAWebcamHandler)
+	.patch(updateWebcamByIdHandler);
 
 export { webcamRouter };

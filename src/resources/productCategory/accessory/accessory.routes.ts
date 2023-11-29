@@ -1,9 +1,5 @@
 import { Router } from "express";
-import {
-	assignQueryDefaults,
-	verifyJWTMiddleware,
-	verifyRoles,
-} from "../../../middlewares";
+import { assignQueryDefaults } from "../../../middlewares";
 import {
 	createNewAccessoryBulkHandler,
 	createNewAccessoryHandler,
@@ -18,22 +14,16 @@ import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
 const accessoryRouter = Router();
 
-accessoryRouter.use(verifyRoles());
-
 accessoryRouter
 	.route("/")
 	.get(
-		verifyJWTMiddleware,
-		verifyRoles(),
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedAccessoriesHandler,
 	)
 	.post(createNewAccessoryHandler);
 
 // separate route for safety reasons (as it deletes all documents in the collection)
-accessoryRouter
-	.route("/delete-all")
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteAllAccessoriesHandler);
+accessoryRouter.route("/delete-all").delete(deleteAllAccessoriesHandler);
 
 // DEV ROUTE
 accessoryRouter
@@ -44,8 +34,8 @@ accessoryRouter
 // single document routes
 accessoryRouter
 	.route("/:accessoryId")
-	.get(verifyJWTMiddleware, verifyRoles(), getAccessoryByIdHandler)
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteAAccessoryHandler)
-	.patch(verifyJWTMiddleware, verifyRoles(), updateAccessoryByIdHandler);
+	.get(getAccessoryByIdHandler)
+	.delete(deleteAAccessoryHandler)
+	.patch(updateAccessoryByIdHandler);
 
 export { accessoryRouter };

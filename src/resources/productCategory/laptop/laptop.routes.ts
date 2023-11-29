@@ -1,9 +1,5 @@
 import { Router } from "express";
-import {
-	assignQueryDefaults,
-	verifyJWTMiddleware,
-	verifyRoles,
-} from "../../../middlewares";
+import { assignQueryDefaults } from "../../../middlewares";
 import {
 	createNewLaptopBulkHandler,
 	createNewLaptopHandler,
@@ -18,22 +14,16 @@ import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
 const laptopRouter = Router();
 
-laptopRouter.use(verifyRoles());
-
 laptopRouter
 	.route("/")
 	.get(
-		verifyJWTMiddleware,
-		verifyRoles(),
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedLaptopsHandler,
 	)
 	.post(createNewLaptopHandler);
 
 // separate route for safety reasons (as it deletes all documents in the collection)
-laptopRouter
-	.route("/delete-all")
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteAllLaptopsHandler);
+laptopRouter.route("/delete-all").delete(deleteAllLaptopsHandler);
 
 // DEV ROUTE
 laptopRouter
@@ -44,8 +34,8 @@ laptopRouter
 // single document routes
 laptopRouter
 	.route("/:laptopId")
-	.get(verifyJWTMiddleware, verifyRoles(), getLaptopByIdHandler)
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteALaptopHandler)
-	.patch(verifyJWTMiddleware, verifyRoles(), updateLaptopByIdHandler);
+	.get(getLaptopByIdHandler)
+	.delete(deleteALaptopHandler)
+	.patch(updateLaptopByIdHandler);
 
 export { laptopRouter };

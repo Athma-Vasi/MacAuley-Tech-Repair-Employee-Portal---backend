@@ -1,9 +1,5 @@
 import { Router } from "express";
-import {
-	assignQueryDefaults,
-	verifyJWTMiddleware,
-	verifyRoles,
-} from "../../../middlewares";
+import { assignQueryDefaults } from "../../../middlewares";
 import {
 	createNewHeadphoneBulkHandler,
 	createNewHeadphoneHandler,
@@ -18,22 +14,16 @@ import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
 const headphoneRouter = Router();
 
-headphoneRouter.use(verifyRoles());
-
 headphoneRouter
 	.route("/")
 	.get(
-		verifyJWTMiddleware,
-		verifyRoles(),
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedHeadphonesHandler,
 	)
 	.post(createNewHeadphoneHandler);
 
 // separate route for safety reasons (as it deletes all documents in the collection)
-headphoneRouter
-	.route("/delete-all")
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteAllHeadphonesHandler);
+headphoneRouter.route("/delete-all").delete(deleteAllHeadphonesHandler);
 
 // DEV ROUTE
 headphoneRouter
@@ -44,8 +34,8 @@ headphoneRouter
 // single document routes
 headphoneRouter
 	.route("/:headphoneId")
-	.get(verifyJWTMiddleware, verifyRoles(), getHeadphoneByIdHandler)
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteAHeadphoneHandler)
-	.patch(verifyJWTMiddleware, verifyRoles(), updateHeadphoneByIdHandler);
+	.get(getHeadphoneByIdHandler)
+	.delete(deleteAHeadphoneHandler)
+	.patch(updateHeadphoneByIdHandler);
 
 export { headphoneRouter };

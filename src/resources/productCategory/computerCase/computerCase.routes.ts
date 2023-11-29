@@ -1,9 +1,5 @@
 import { Router } from "express";
-import {
-	assignQueryDefaults,
-	verifyJWTMiddleware,
-	verifyRoles,
-} from "../../../middlewares";
+import { assignQueryDefaults } from "../../../middlewares";
 import {
 	createNewComputerCaseBulkHandler,
 	createNewComputerCaseHandler,
@@ -18,22 +14,16 @@ import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
 const computerCaseRouter = Router();
 
-computerCaseRouter.use(verifyRoles());
-
 computerCaseRouter
 	.route("/")
 	.get(
-		verifyJWTMiddleware,
-		verifyRoles(),
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedComputerCasesHandler,
 	)
 	.post(createNewComputerCaseHandler);
 
 // separate route for safety reasons (as it deletes all documents in the collection)
-computerCaseRouter
-	.route("/delete-all")
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteAllComputerCasesHandler);
+computerCaseRouter.route("/delete-all").delete(deleteAllComputerCasesHandler);
 
 // DEV ROUTE
 computerCaseRouter
@@ -43,9 +33,9 @@ computerCaseRouter
 
 // single document routes
 computerCaseRouter
-	.route("/:caseId")
-	.get(verifyJWTMiddleware, verifyRoles(), getComputerCaseByIdHandler)
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteAComputerCaseHandler)
-	.patch(verifyJWTMiddleware, verifyRoles(), updateComputerCaseByIdHandler);
+	.route("/:computerCaseId")
+	.get(getComputerCaseByIdHandler)
+	.delete(deleteAComputerCaseHandler)
+	.patch(updateComputerCaseByIdHandler);
 
 export { computerCaseRouter };

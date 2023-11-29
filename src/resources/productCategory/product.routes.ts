@@ -18,8 +18,11 @@ import { smartphoneRouter } from "./smartphone";
 import { speakerRouter } from "./speaker";
 import { tabletRouter } from "./tablet";
 import { webcamRouter } from "./webcam";
+import { verifyJWTMiddleware, verifyRoles } from "../../middlewares";
 
 const productCategoryRouter = Router();
+
+productCategoryRouter.use(verifyJWTMiddleware, verifyRoles());
 
 productCategoryRouter.use("/accessory", accessoryRouter);
 productCategoryRouter.use("/cpu", cpuRouter);
