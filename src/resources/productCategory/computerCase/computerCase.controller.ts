@@ -11,6 +11,7 @@ import type {
 	GetComputerCaseByIdRequest,
 	GetQueriedComputerCasesRequest,
 	UpdateComputerCaseByIdRequest,
+	UpdateComputerCasesBulkRequest,
 } from "./computerCase.types";
 import type {
 	GetQueriedResourceRequestServerResponse,
@@ -37,10 +38,16 @@ import {
 	deleteFileUploadByIdService,
 	getFileUploadByIdService,
 } from "../../fileUpload";
-import { ProductServerResponse } from "../product.types";
+
+import {
+	ProductReviewDocument,
+	deleteAProductReviewService,
+	getProductReviewByIdService,
+} from "../../productReview";
+import { removeUndefinedAndNullValues } from "../../../utils";
 
 // @desc   Create new computerCase
-// @route  POST /api/v1/actions/dashboard/product-category/computerCase
+// @route  POST /api/v1/product-category/computerCase
 // @access Private/Admin/Manager
 const createNewComputerCaseHandler = expressAsyncHandler(
 	async (
@@ -78,7 +85,7 @@ const createNewComputerCaseHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Create new computerCases bulk
-// @route  POST /api/v1/actions/dashboard/product-category/computerCase/dev
+// @route  POST /api/v1/product-category/computerCase/dev
 // @access Private/Admin/Manager
 const createNewComputerCaseBulkHandler = expressAsyncHandler(
 	async (
@@ -109,32 +116,98 @@ const createNewComputerCaseBulkHandler = expressAsyncHandler(
 				resourceData: successfullyCreatedComputerCases,
 			});
 			return;
-		} else if (successfullyCreatedComputerCases.length === 0) {
+		}
+
+		if (successfullyCreatedComputerCases.length === 0) {
 			response.status(400).json({
 				message: "Could not create any computerCases",
 				resourceData: [],
 			});
 			return;
-		} else {
+		}
+
+		response.status(201).json({
+			message: `Successfully created ${
+				computerCaseSchemas.length - successfullyCreatedComputerCases.length
+			} computerCases`,
+			resourceData: successfullyCreatedComputerCases,
+		});
+		return;
+	},
+);
+
+// @desc   Update computerCases bulk
+// @route  PATCH /api/v1/product-category/computerCase/dev
+// @access Private/Admin/Manager
+const updateComputerCasesBulkHandler = expressAsyncHandler(
+	async (
+		request: UpdateComputerCasesBulkRequest,
+		response: Response<ResourceRequestServerResponse<ComputerCaseDocument>>,
+	) => {
+		const { computerCaseFields } = request.body;
+
+		const updatedComputerCases = await Promise.all(
+			computerCaseFields.map(async (computerCaseField) => {
+				const {
+					computerCaseId,
+					documentUpdate: { fields, updateOperator },
+				} = computerCaseField;
+
+				const updatedComputerCase = await updateComputerCaseByIdService({
+					_id: computerCaseId,
+					fields,
+					updateOperator,
+				});
+
+				return updatedComputerCase;
+			}),
+		);
+
+		// filter out any computerCases that were not updated
+		const successfullyUpdatedComputerCases = updatedComputerCases.filter(
+			removeUndefinedAndNullValues,
+		);
+
+		// check if any computerCases were updated
+		if (successfullyUpdatedComputerCases.length === computerCaseFields.length) {
 			response.status(201).json({
-				message: `Successfully created ${
-					computerCaseSchemas.length - successfullyCreatedComputerCases.length
-				} computerCases`,
-				resourceData: successfullyCreatedComputerCases,
+				message: `Successfully updated ${successfullyUpdatedComputerCases.length} computerCases`,
+				resourceData: successfullyUpdatedComputerCases,
 			});
 			return;
 		}
+
+		if (successfullyUpdatedComputerCases.length === 0) {
+			response.status(400).json({
+				message: "Could not update any computerCases",
+				resourceData: [],
+			});
+			return;
+		}
+
+		response.status(201).json({
+			message: `Successfully updated ${
+				computerCaseFields.length - successfullyUpdatedComputerCases.length
+			} computerCases`,
+			resourceData: successfullyUpdatedComputerCases,
+		});
+		return;
 	},
 );
 
 // @desc   Get all computerCases
-// @route  GET /api/v1/actions/dashboard/product-category/computerCase
+// @route  GET /api/v1/product-category/computerCase
 // @access Private/Admin/Manager
 const getQueriedComputerCasesHandler = expressAsyncHandler(
 	async (
 		request: GetQueriedComputerCasesRequest,
 		response: Response<
-			GetQueriedResourceRequestServerResponse<ComputerCaseDocument>
+			GetQueriedResourceRequestServerResponse<
+				ComputerCaseDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
 		>,
 	) => {
 		let { newQueryFlag, totalDocuments } = request.body;
@@ -165,7 +238,7 @@ const getQueriedComputerCasesHandler = expressAsyncHandler(
 			return;
 		}
 
-		// find all fileUploads associated with the computerCases (in parallel)
+		// find all fileUploads associated with the computerCases
 		const fileUploadsArrArr = await Promise.all(
 			computerCases.map(async (computerCase) => {
 				const fileUploadPromises = computerCase.uploadedFilesIds.map(
@@ -180,37 +253,63 @@ const getQueriedComputerCasesHandler = expressAsyncHandler(
 				const fileUploads = await Promise.all(fileUploadPromises);
 
 				// Filter out any undefined values (in case fileUpload was not found)
-				return fileUploads.filter((fileUpload) => fileUpload);
+				return fileUploads.filter(removeUndefinedAndNullValues);
+			}),
+		);
+
+		// find all reviews associated with the computerCases
+		const reviewsArrArr = await Promise.all(
+			computerCases.map(async (computerCase) => {
+				const reviewPromises = computerCase.reviewsIds.map(async (reviewId) => {
+					const review = await getProductReviewByIdService(reviewId);
+
+					return review;
+				});
+
+				// Wait for all the promises to resolve before continuing to the next iteration
+				const reviews = await Promise.all(reviewPromises);
+
+				// Filter out any undefined values (in case review was not found)
+				return reviews.filter(removeUndefinedAndNullValues);
 			}),
 		);
 
 		// create computerCaseServerResponse array
-		const computerCaseServerResponseArray = computerCases
-			.map((computerCase, index) => {
+		const computerCaseServerResponseArray = computerCases.map(
+			(computerCase, index) => {
 				const fileUploads = fileUploadsArrArr[index];
+				const productReviews = reviewsArrArr[index];
 				return {
 					...computerCase,
 					fileUploads,
+					productReviews,
 				};
-			})
-			.filter((computerCase) => computerCase);
+			},
+		);
 
 		response.status(200).json({
 			message: "Successfully retrieved computerCases",
 			pages: Math.ceil(totalDocuments / Number(options?.limit)),
 			totalDocuments,
-			resourceData: computerCaseServerResponseArray as ComputerCaseDocument[],
+			resourceData: computerCaseServerResponseArray,
 		});
 	},
 );
 
 // @desc   Get computerCase by id
-// @route  GET /api/v1/actions/dashboard/product-category/computerCase/:computerCaseId
+// @route  GET /api/v1/product-category/computerCase/:computerCaseId
 // @access Private/Admin/Manager
 const getComputerCaseByIdHandler = expressAsyncHandler(
 	async (
 		request: GetComputerCaseByIdRequest,
-		response: Response<ResourceRequestServerResponse<ComputerCaseDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				ComputerCaseDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const computerCaseId = request.params.computerCaseId;
 
@@ -224,22 +323,29 @@ const getComputerCaseByIdHandler = expressAsyncHandler(
 		}
 
 		// get all fileUploads associated with the computerCase
-		const fileUploadsArr = await Promise.all(
+		const fileUploads = await Promise.all(
 			computerCase.uploadedFilesIds.map(async (uploadedFileId) => {
 				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
-				return fileUpload as FileUploadDocument;
+				return fileUpload;
+			}),
+		);
+
+		// get all reviews associated with the computerCase
+		const productReviews = await Promise.all(
+			computerCase.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
+
+				return review;
 			}),
 		);
 
 		// create computerCaseServerResponse
-		const computerCaseServerResponse: ProductServerResponse<ComputerCaseDocument> =
-			{
-				...computerCase,
-				fileUploads: fileUploadsArr.filter(
-					(fileUpload) => fileUpload,
-				) as FileUploadDocument[],
-			};
+		const computerCaseServerResponse = {
+			...computerCase,
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
+		};
 
 		response.status(200).json({
 			message: "Successfully retrieved computerCase",
@@ -249,34 +355,30 @@ const getComputerCaseByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Update a computerCase by id
-// @route  PUT /api/v1/actions/dashboard/product-category/computerCase/:computerCaseId
+// @route  PUT /api/v1/product-category/computerCase/:computerCaseId
 // @access Private/Admin/Manager
 const updateComputerCaseByIdHandler = expressAsyncHandler(
 	async (
 		request: UpdateComputerCaseByIdRequest,
-		response: Response<ResourceRequestServerResponse<ComputerCaseDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				ComputerCaseDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const { computerCaseId } = request.params;
-		const { computerCaseFields } = request.body;
-
-		// check if computerCase exists
-		const computerCaseExists = await getComputerCaseByIdService(computerCaseId);
-		if (!computerCaseExists) {
-			response
-				.status(404)
-				.json({ message: "ComputerCase does not exist", resourceData: [] });
-			return;
-		}
-
-		const newComputerCase = {
-			...computerCaseExists,
-			...computerCaseFields,
-		};
+		const {
+			documentUpdate: { fields, updateOperator },
+		} = request.body;
 
 		// update computerCase
 		const updatedComputerCase = await updateComputerCaseByIdService({
-			computerCaseId,
-			fieldsToUpdate: newComputerCase,
+			_id: computerCaseId,
+			fields,
+			updateOperator,
 		});
 
 		if (!updatedComputerCase) {
@@ -287,58 +389,40 @@ const updateComputerCaseByIdHandler = expressAsyncHandler(
 			return;
 		}
 
-		response.status(200).json({
-			message: "ComputerCase updated successfully",
-			resourceData: [updatedComputerCase],
-		});
-	},
-);
-
-// @desc   Return all associated file uploads
-// @route  GET /api/v1/actions/dashboard/product-category/computerCase/fileUploads
-// @access Private/Admin/Manager
-const returnAllFileUploadsForComputerCasesHandler = expressAsyncHandler(
-	async (
-		_request: GetComputerCaseByIdRequest,
-		response: Response<ResourceRequestServerResponse<FileUploadDocument>>,
-	) => {
-		const fileUploadsIds = await returnAllComputerCasesUploadedFileIdsService();
-
-		if (fileUploadsIds.length === 0) {
-			response
-				.status(404)
-				.json({ message: "No file uploads found", resourceData: [] });
-			return;
-		}
-
-		const fileUploads = (await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) => {
-				const fileUpload = await getFileUploadByIdService(fileUploadId);
+		// get all fileUploads associated with the computerCase
+		const fileUploads = await Promise.all(
+			updatedComputerCase.uploadedFilesIds.map(async (uploadedFileId) => {
+				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
 				return fileUpload;
 			}),
-		)) as FileUploadDocument[];
+		);
 
-		// filter out any undefined values (in case fileUpload was not found)
-		const filteredFileUploads = fileUploads.filter((fileUpload) => fileUpload);
+		// get all reviews associated with the computerCase
+		const productReviews = await Promise.all(
+			updatedComputerCase.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
 
-		if (filteredFileUploads.length !== fileUploadsIds.length) {
-			response.status(404).json({
-				message: "Some file uploads could not be found.",
-				resourceData: filteredFileUploads,
-			});
-			return;
-		}
+				return review;
+			}),
+		);
+
+		// create computerCaseServerResponse
+		const computerCaseServerResponse = {
+			...updatedComputerCase,
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
+		};
 
 		response.status(200).json({
-			message: "Successfully retrieved file uploads",
-			resourceData: filteredFileUploads,
+			message: "ComputerCase updated successfully",
+			resourceData: [computerCaseServerResponse],
 		});
 	},
 );
 
 // @desc   Delete all computerCases
-// @route  DELETE /api/v1/actions/dashboard/product-category/computerCase
+// @route  DELETE /api/v1/product-category/computerCase
 // @access Private/Admin/Manager
 const deleteAllComputerCasesHandler = expressAsyncHandler(
 	async (
@@ -346,21 +430,22 @@ const deleteAllComputerCasesHandler = expressAsyncHandler(
 		response: Response<ResourceRequestServerResponse<ComputerCaseDocument>>,
 	) => {
 		// grab all computerCases file upload ids
-		const fileUploadsIds = await returnAllComputerCasesUploadedFileIdsService();
+		const uploadedFilesIds =
+			await returnAllComputerCasesUploadedFileIdsService();
 
 		// delete all file uploads associated with all computerCases
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) =>
-				deleteFileUploadByIdService(fileUploadId),
+		await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
-		if (!deleteFileUploadsResult.every((result) => result.deletedCount !== 0)) {
-			response.status(400).json({
-				message: "Some file uploads could not be deleted. Please try again.",
-				resourceData: [],
-			});
-			return;
-		}
+
+		// delete all reviews associated with all computerCases
+		await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
 
 		// delete all computerCases
 		const deleteComputerCasesResult: DeleteResult =
@@ -381,7 +466,7 @@ const deleteAllComputerCasesHandler = expressAsyncHandler(
 );
 
 // @desc   Delete a computerCase by id
-// @route  DELETE /api/v1/actions/dashboard/product-category/computerCase/:computerCaseId
+// @route  DELETE /api/v1/product-category/computerCase/:computerCaseId
 // @access Private/Admin/Manager
 const deleteAComputerCaseHandler = expressAsyncHandler(
 	async (
@@ -395,7 +480,7 @@ const deleteAComputerCaseHandler = expressAsyncHandler(
 		if (!computerCaseExists) {
 			response
 				.status(404)
-				.json({ message: "ComputerCase does not exist", resourceData: [] });
+				.json({ message: "Computer Case does not exist", resourceData: [] });
 			return;
 		}
 
@@ -403,21 +488,19 @@ const deleteAComputerCaseHandler = expressAsyncHandler(
 		// if it is not an array, it is made to be an array
 		const uploadedFilesIds = [...computerCaseExists.uploadedFilesIds];
 
-		// delete all file uploads associated with this computerCase
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			uploadedFilesIds.map(async (uploadedFileId) =>
-				deleteFileUploadByIdService(uploadedFileId),
+		// delete all file uploads associated with all computerCases
+		await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
 
-		if (deleteFileUploadsResult.some((result) => result.deletedCount === 0)) {
-			response.status(400).json({
-				message:
-					"Some file uploads associated with this computerCase could not be deleted. ComputerCase not deleted. Please try again.",
-				resourceData: [],
-			});
-			return;
-		}
+		// delete all reviews associated with all computerCases
+		await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
 
 		// delete computerCase by id
 		const deleteComputerCaseResult: DeleteResult =
@@ -425,7 +508,7 @@ const deleteAComputerCaseHandler = expressAsyncHandler(
 
 		if (deleteComputerCaseResult.deletedCount === 0) {
 			response.status(400).json({
-				message: "ComputerCase could not be deleted. Please try again.",
+				message: "Computer Case could not be deleted. Please try again.",
 				resourceData: [],
 			});
 			return;
@@ -433,7 +516,7 @@ const deleteAComputerCaseHandler = expressAsyncHandler(
 
 		response
 			.status(200)
-			.json({ message: "ComputerCase deleted", resourceData: [] });
+			.json({ message: "Computer Case deleted", resourceData: [] });
 	},
 );
 
@@ -444,6 +527,6 @@ export {
 	deleteAllComputerCasesHandler,
 	getComputerCaseByIdHandler,
 	getQueriedComputerCasesHandler,
-	returnAllFileUploadsForComputerCasesHandler,
 	updateComputerCaseByIdHandler,
+	updateComputerCasesBulkHandler,
 };

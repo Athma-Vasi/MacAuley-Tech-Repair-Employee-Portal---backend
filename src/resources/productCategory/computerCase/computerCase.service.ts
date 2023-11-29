@@ -4,6 +4,7 @@ import {
 	QueriedResourceGetRequestServiceInput,
 	DatabaseResponse,
 	DatabaseResponseNullable,
+	UpdateDocumentByIdServiceInput,
 } from "../../../types";
 import {
 	ComputerCaseDocument,
@@ -28,16 +29,16 @@ async function getQueriedComputerCasesService({
 	options = {},
 }: QueriedResourceGetRequestServiceInput<ComputerCaseDocument>): DatabaseResponse<ComputerCaseDocument> {
 	try {
-		const computerCases = await ComputerCaseModel.find(
+		const accessories = await ComputerCaseModel.find(
 			filter,
 			projection,
 			options,
 		)
 			.lean()
 			.exec();
-		return computerCases;
+		return accessories;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedComputerCaseService" });
+		throw new Error(error, { cause: "getQueriedComputerCasesService" });
 	}
 }
 
@@ -45,12 +46,12 @@ async function getQueriedTotalComputerCasesService({
 	filter = {},
 }: QueriedResourceGetRequestServiceInput<ComputerCaseDocument>): Promise<number> {
 	try {
-		const totalComputerCase = await ComputerCaseModel.countDocuments(filter)
+		const totalComputerCases = await ComputerCaseModel.countDocuments(filter)
 			.lean()
 			.exec();
-		return totalComputerCase;
+		return totalComputerCases;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedTotalComputerCaseService" });
+		throw new Error(error, { cause: "getQueriedTotalComputerCasesService" });
 	}
 }
 
@@ -69,19 +70,17 @@ async function getComputerCaseByIdService(
 }
 
 async function updateComputerCaseByIdService({
-	fieldsToUpdate,
-	computerCaseId,
-}: {
-	computerCaseId: Types.ObjectId | string;
-	fieldsToUpdate: Record<
-		keyof ComputerCaseDocument,
-		ComputerCaseDocument[keyof ComputerCaseDocument]
-	>;
-}): DatabaseResponseNullable<ComputerCaseDocument> {
+	_id,
+	fields,
+	updateOperator,
+}: UpdateDocumentByIdServiceInput<ComputerCaseDocument>): DatabaseResponseNullable<ComputerCaseDocument> {
+	const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
+	const updateObject = JSON.parse(updateString);
+
 	try {
 		const computerCase = await ComputerCaseModel.findByIdAndUpdate(
-			computerCaseId,
-			{ $set: fieldsToUpdate },
+			_id,
+			updateObject,
 			{ new: true },
 		)
 
@@ -95,8 +94,8 @@ async function updateComputerCaseByIdService({
 
 async function deleteAllComputerCasesService(): Promise<DeleteResult> {
 	try {
-		const computerCases = await ComputerCaseModel.deleteMany({}).lean().exec();
-		return computerCases;
+		const accessories = await ComputerCaseModel.deleteMany({}).lean().exec();
+		return accessories;
 	} catch (error: any) {
 		throw new Error(error, { cause: "deleteAllComputerCasesService" });
 	}
@@ -106,11 +105,11 @@ async function returnAllComputerCasesUploadedFileIdsService(): Promise<
 	Types.ObjectId[]
 > {
 	try {
-		const computerCases = await ComputerCaseModel.find({})
+		const accessories = await ComputerCaseModel.find({})
 			.select("uploadedFilesIds")
 			.lean()
 			.exec();
-		const uploadedFileIds = computerCases.flatMap(
+		const uploadedFileIds = accessories.flatMap(
 			(computerCase) => computerCase.uploadedFilesIds,
 		);
 		return uploadedFileIds;

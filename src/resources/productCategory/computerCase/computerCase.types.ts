@@ -1,9 +1,12 @@
 import type { Types } from "mongoose";
 import type { RequestAfterJWTVerification } from "../../auth";
 import { UserRoles } from "../../user";
-import { GetQueriedResourceRequest } from "../../../types";
+import {
+	DocumentUpdateOperation,
+	GetQueriedResourceRequest,
+} from "../../../types";
 
-import { ComputerCaseSchema } from "./computerCase.model";
+import { ComputerCaseDocument, ComputerCaseSchema } from "./computerCase.model";
 
 interface CreateNewComputerCaseRequest extends RequestAfterJWTVerification {
 	body: {
@@ -27,6 +30,22 @@ interface CreateNewComputerCaseBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		computerCaseSchemas: ComputerCaseSchema[];
+	};
+}
+
+// DEV ROUTE
+interface UpdateComputerCasesBulkRequest extends RequestAfterJWTVerification {
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
+		computerCaseFields: {
+			computerCaseId: Types.ObjectId;
+			documentUpdate: DocumentUpdateOperation<ComputerCaseDocument>;
+		}[];
 	};
 }
 
@@ -58,10 +77,7 @@ interface UpdateComputerCaseByIdRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		computerCaseFields: Record<
-			keyof ComputerCaseSchema,
-			ComputerCaseSchema[keyof ComputerCaseSchema]
-		>;
+		documentUpdate: DocumentUpdateOperation<ComputerCaseDocument>;
 	};
 	params: { computerCaseId: string };
 }
@@ -74,4 +90,5 @@ export type {
 	GetComputerCaseByIdRequest,
 	GetQueriedComputerCasesRequest,
 	UpdateComputerCaseByIdRequest,
+	UpdateComputerCasesBulkRequest,
 };
