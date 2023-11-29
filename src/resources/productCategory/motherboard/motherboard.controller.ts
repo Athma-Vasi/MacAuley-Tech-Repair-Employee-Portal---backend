@@ -11,6 +11,7 @@ import type {
 	GetMotherboardByIdRequest,
 	GetQueriedMotherboardsRequest,
 	UpdateMotherboardByIdRequest,
+	UpdateMotherboardsBulkRequest,
 } from "./motherboard.types";
 import type {
 	GetQueriedResourceRequestServerResponse,
@@ -37,10 +38,16 @@ import {
 	deleteFileUploadByIdService,
 	getFileUploadByIdService,
 } from "../../fileUpload";
-import { ProductServerResponse } from "../product.types";
+
+import {
+	ProductReviewDocument,
+	deleteAProductReviewService,
+	getProductReviewByIdService,
+} from "../../productReview";
+import { removeUndefinedAndNullValues } from "../../../utils";
 
 // @desc   Create new motherboard
-// @route  POST /api/v1/actions/dashboard/product-category/motherboard
+// @route  POST /api/v1/product-category/motherboard
 // @access Private/Admin/Manager
 const createNewMotherboardHandler = expressAsyncHandler(
 	async (
@@ -78,7 +85,7 @@ const createNewMotherboardHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Create new motherboards bulk
-// @route  POST /api/v1/actions/dashboard/product-category/motherboard/dev
+// @route  POST /api/v1/product-category/motherboard/dev
 // @access Private/Admin/Manager
 const createNewMotherboardBulkHandler = expressAsyncHandler(
 	async (
@@ -107,32 +114,98 @@ const createNewMotherboardBulkHandler = expressAsyncHandler(
 				resourceData: successfullyCreatedMotherboards,
 			});
 			return;
-		} else if (successfullyCreatedMotherboards.length === 0) {
+		}
+
+		if (successfullyCreatedMotherboards.length === 0) {
 			response.status(400).json({
 				message: "Could not create any motherboards",
 				resourceData: [],
 			});
 			return;
-		} else {
+		}
+
+		response.status(201).json({
+			message: `Successfully created ${
+				motherboardSchemas.length - successfullyCreatedMotherboards.length
+			} motherboards`,
+			resourceData: successfullyCreatedMotherboards,
+		});
+		return;
+	},
+);
+
+// @desc   Update motherboards bulk
+// @route  PATCH /api/v1/product-category/motherboard/dev
+// @access Private/Admin/Manager
+const updateMotherboardsBulkHandler = expressAsyncHandler(
+	async (
+		request: UpdateMotherboardsBulkRequest,
+		response: Response<ResourceRequestServerResponse<MotherboardDocument>>,
+	) => {
+		const { motherboardFields } = request.body;
+
+		const updatedMotherboards = await Promise.all(
+			motherboardFields.map(async (motherboardField) => {
+				const {
+					motherboardId,
+					documentUpdate: { fields, updateOperator },
+				} = motherboardField;
+
+				const updatedMotherboard = await updateMotherboardByIdService({
+					_id: motherboardId,
+					fields,
+					updateOperator,
+				});
+
+				return updatedMotherboard;
+			}),
+		);
+
+		// filter out any motherboards that were not updated
+		const successfullyUpdatedMotherboards = updatedMotherboards.filter(
+			removeUndefinedAndNullValues,
+		);
+
+		// check if any motherboards were updated
+		if (successfullyUpdatedMotherboards.length === motherboardFields.length) {
 			response.status(201).json({
-				message: `Successfully created ${
-					motherboardSchemas.length - successfullyCreatedMotherboards.length
-				} motherboards`,
-				resourceData: successfullyCreatedMotherboards,
+				message: `Successfully updated ${successfullyUpdatedMotherboards.length} motherboards`,
+				resourceData: successfullyUpdatedMotherboards,
 			});
 			return;
 		}
+
+		if (successfullyUpdatedMotherboards.length === 0) {
+			response.status(400).json({
+				message: "Could not update any motherboards",
+				resourceData: [],
+			});
+			return;
+		}
+
+		response.status(201).json({
+			message: `Successfully updated ${
+				motherboardFields.length - successfullyUpdatedMotherboards.length
+			} motherboards`,
+			resourceData: successfullyUpdatedMotherboards,
+		});
+		return;
 	},
 );
 
 // @desc   Get all motherboards
-// @route  GET /api/v1/actions/dashboard/product-category/motherboard
+// @route  GET /api/v1/product-category/motherboard
 // @access Private/Admin/Manager
 const getQueriedMotherboardsHandler = expressAsyncHandler(
 	async (
 		request: GetQueriedMotherboardsRequest,
 		response: Response<
-			GetQueriedResourceRequestServerResponse<MotherboardDocument>
+			GetQueriedResourceRequestServerResponse<
+				MotherboardDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
 		>,
 	) => {
 		let { newQueryFlag, totalDocuments } = request.body;
@@ -163,7 +236,7 @@ const getQueriedMotherboardsHandler = expressAsyncHandler(
 			return;
 		}
 
-		// find all fileUploads associated with the motherboards (in parallel)
+		// find all fileUploads associated with the motherboards
 		const fileUploadsArrArr = await Promise.all(
 			motherboards.map(async (motherboard) => {
 				const fileUploadPromises = motherboard.uploadedFilesIds.map(
@@ -178,37 +251,63 @@ const getQueriedMotherboardsHandler = expressAsyncHandler(
 				const fileUploads = await Promise.all(fileUploadPromises);
 
 				// Filter out any undefined values (in case fileUpload was not found)
-				return fileUploads.filter((fileUpload) => fileUpload);
+				return fileUploads.filter(removeUndefinedAndNullValues);
+			}),
+		);
+
+		// find all reviews associated with the motherboards
+		const reviewsArrArr = await Promise.all(
+			motherboards.map(async (motherboard) => {
+				const reviewPromises = motherboard.reviewsIds.map(async (reviewId) => {
+					const review = await getProductReviewByIdService(reviewId);
+
+					return review;
+				});
+
+				// Wait for all the promises to resolve before continuing to the next iteration
+				const reviews = await Promise.all(reviewPromises);
+
+				// Filter out any undefined values (in case review was not found)
+				return reviews.filter(removeUndefinedAndNullValues);
 			}),
 		);
 
 		// create motherboardServerResponse array
-		const motherboardServerResponseArray = motherboards
-			.map((motherboard, index) => {
+		const motherboardServerResponseArray = motherboards.map(
+			(motherboard, index) => {
 				const fileUploads = fileUploadsArrArr[index];
+				const productReviews = reviewsArrArr[index];
 				return {
 					...motherboard,
 					fileUploads,
+					productReviews,
 				};
-			})
-			.filter((motherboard) => motherboard);
+			},
+		);
 
 		response.status(200).json({
 			message: "Successfully retrieved motherboards",
 			pages: Math.ceil(totalDocuments / Number(options?.limit)),
 			totalDocuments,
-			resourceData: motherboardServerResponseArray as MotherboardDocument[],
+			resourceData: motherboardServerResponseArray,
 		});
 	},
 );
 
 // @desc   Get motherboard by id
-// @route  GET /api/v1/actions/dashboard/product-category/motherboard/:motherboardId
+// @route  GET /api/v1/product-category/motherboard/:motherboardId
 // @access Private/Admin/Manager
 const getMotherboardByIdHandler = expressAsyncHandler(
 	async (
 		request: GetMotherboardByIdRequest,
-		response: Response<ResourceRequestServerResponse<MotherboardDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				MotherboardDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const motherboardId = request.params.motherboardId;
 
@@ -222,22 +321,29 @@ const getMotherboardByIdHandler = expressAsyncHandler(
 		}
 
 		// get all fileUploads associated with the motherboard
-		const fileUploadsArr = await Promise.all(
+		const fileUploads = await Promise.all(
 			motherboard.uploadedFilesIds.map(async (uploadedFileId) => {
 				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
-				return fileUpload as FileUploadDocument;
+				return fileUpload;
+			}),
+		);
+
+		// get all reviews associated with the motherboard
+		const productReviews = await Promise.all(
+			motherboard.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
+
+				return review;
 			}),
 		);
 
 		// create motherboardServerResponse
-		const motherboardServerResponse: ProductServerResponse<MotherboardDocument> =
-			{
-				...motherboard,
-				fileUploads: fileUploadsArr.filter(
-					(fileUpload) => fileUpload,
-				) as FileUploadDocument[],
-			};
+		const motherboardServerResponse = {
+			...motherboard,
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
+		};
 
 		response.status(200).json({
 			message: "Successfully retrieved motherboard",
@@ -247,34 +353,30 @@ const getMotherboardByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Update a motherboard by id
-// @route  PUT /api/v1/actions/dashboard/product-category/motherboard/:motherboardId
+// @route  PUT /api/v1/product-category/motherboard/:motherboardId
 // @access Private/Admin/Manager
 const updateMotherboardByIdHandler = expressAsyncHandler(
 	async (
 		request: UpdateMotherboardByIdRequest,
-		response: Response<ResourceRequestServerResponse<MotherboardDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				MotherboardDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const { motherboardId } = request.params;
-		const { motherboardFields } = request.body;
-
-		// check if motherboard exists
-		const motherboardExists = await getMotherboardByIdService(motherboardId);
-		if (!motherboardExists) {
-			response
-				.status(404)
-				.json({ message: "Motherboard does not exist", resourceData: [] });
-			return;
-		}
-
-		const newMotherboard = {
-			...motherboardExists,
-			...motherboardFields,
-		};
+		const {
+			documentUpdate: { fields, updateOperator },
+		} = request.body;
 
 		// update motherboard
 		const updatedMotherboard = await updateMotherboardByIdService({
-			motherboardId,
-			fieldsToUpdate: newMotherboard,
+			_id: motherboardId,
+			fields,
+			updateOperator,
 		});
 
 		if (!updatedMotherboard) {
@@ -285,58 +387,40 @@ const updateMotherboardByIdHandler = expressAsyncHandler(
 			return;
 		}
 
-		response.status(200).json({
-			message: "Motherboard updated successfully",
-			resourceData: [updatedMotherboard],
-		});
-	},
-);
-
-// @desc   Return all associated file uploads
-// @route  GET /api/v1/actions/dashboard/product-category/motherboard/fileUploads
-// @access Private/Admin/Manager
-const returnAllFileUploadsForMotherboardsHandler = expressAsyncHandler(
-	async (
-		_request: GetMotherboardByIdRequest,
-		response: Response<ResourceRequestServerResponse<FileUploadDocument>>,
-	) => {
-		const fileUploadsIds = await returnAllMotherboardsUploadedFileIdsService();
-
-		if (fileUploadsIds.length === 0) {
-			response
-				.status(404)
-				.json({ message: "No file uploads found", resourceData: [] });
-			return;
-		}
-
-		const fileUploads = (await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) => {
-				const fileUpload = await getFileUploadByIdService(fileUploadId);
+		// get all fileUploads associated with the motherboard
+		const fileUploads = await Promise.all(
+			updatedMotherboard.uploadedFilesIds.map(async (uploadedFileId) => {
+				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
 				return fileUpload;
 			}),
-		)) as FileUploadDocument[];
+		);
 
-		// filter out any undefined values (in case fileUpload was not found)
-		const filteredFileUploads = fileUploads.filter((fileUpload) => fileUpload);
+		// get all reviews associated with the motherboard
+		const productReviews = await Promise.all(
+			updatedMotherboard.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
 
-		if (filteredFileUploads.length !== fileUploadsIds.length) {
-			response.status(404).json({
-				message: "Some file uploads could not be found.",
-				resourceData: filteredFileUploads,
-			});
-			return;
-		}
+				return review;
+			}),
+		);
+
+		// create motherboardServerResponse
+		const motherboardServerResponse = {
+			...updatedMotherboard,
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
+		};
 
 		response.status(200).json({
-			message: "Successfully retrieved file uploads",
-			resourceData: filteredFileUploads,
+			message: "Motherboard updated successfully",
+			resourceData: [motherboardServerResponse],
 		});
 	},
 );
 
 // @desc   Delete all motherboards
-// @route  DELETE /api/v1/actions/dashboard/product-category/motherboard
+// @route  DELETE /api/v1/product-category/motherboard
 // @access Private/Admin/Manager
 const deleteAllMotherboardsHandler = expressAsyncHandler(
 	async (
@@ -344,17 +428,40 @@ const deleteAllMotherboardsHandler = expressAsyncHandler(
 		response: Response<ResourceRequestServerResponse<MotherboardDocument>>,
 	) => {
 		// grab all motherboards file upload ids
-		const fileUploadsIds = await returnAllMotherboardsUploadedFileIdsService();
+		const uploadedFilesIds =
+			await returnAllMotherboardsUploadedFileIdsService();
 
 		// delete all file uploads associated with all motherboards
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) =>
-				deleteFileUploadByIdService(fileUploadId),
+		const deletedFileUploads = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
-		if (!deleteFileUploadsResult.every((result) => result.deletedCount !== 0)) {
+
+		if (
+			deletedFileUploads.some(
+				(deletedFileUpload) => deletedFileUpload.deletedCount === 0,
+			)
+		) {
 			response.status(400).json({
-				message: "Some file uploads could not be deleted. Please try again.",
+				message: "Some File uploads could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
+
+		// delete all reviews associated with all motherboards
+		const deletedReviews = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
+
+		if (
+			deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)
+		) {
+			response.status(400).json({
+				message: "Some reviews could not be deleted. Please try again.",
 				resourceData: [],
 			});
 			return;
@@ -379,7 +486,7 @@ const deleteAllMotherboardsHandler = expressAsyncHandler(
 );
 
 // @desc   Delete a motherboard by id
-// @route  DELETE /api/v1/actions/dashboard/product-category/motherboard/:motherboardId
+// @route  DELETE /api/v1/product-category/motherboard/:motherboardId
 // @access Private/Admin/Manager
 const deleteAMotherboardHandler = expressAsyncHandler(
 	async (
@@ -401,17 +508,37 @@ const deleteAMotherboardHandler = expressAsyncHandler(
 		// if it is not an array, it is made to be an array
 		const uploadedFilesIds = [...motherboardExists.uploadedFilesIds];
 
-		// delete all file uploads associated with this motherboard
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			uploadedFilesIds.map(async (uploadedFileId) =>
-				deleteFileUploadByIdService(uploadedFileId),
+		// delete all file uploads associated with all motherboards
+		const deletedFileUploads = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
 
-		if (deleteFileUploadsResult.some((result) => result.deletedCount === 0)) {
+		if (
+			deletedFileUploads.some(
+				(deletedFileUpload) => deletedFileUpload.deletedCount === 0,
+			)
+		) {
 			response.status(400).json({
-				message:
-					"Some file uploads associated with this motherboard could not be deleted. Motherboard not deleted. Please try again.",
+				message: "Some File uploads could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
+
+		// delete all reviews associated with all motherboards
+		const deletedReviews = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
+
+		if (
+			deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)
+		) {
+			response.status(400).json({
+				message: "Some reviews could not be deleted. Please try again.",
 				resourceData: [],
 			});
 			return;
@@ -442,6 +569,6 @@ export {
 	deleteAllMotherboardsHandler,
 	getMotherboardByIdHandler,
 	getQueriedMotherboardsHandler,
-	returnAllFileUploadsForMotherboardsHandler,
 	updateMotherboardByIdHandler,
+	updateMotherboardsBulkHandler,
 };

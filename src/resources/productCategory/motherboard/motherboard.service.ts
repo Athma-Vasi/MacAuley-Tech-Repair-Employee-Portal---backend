@@ -4,6 +4,7 @@ import {
 	QueriedResourceGetRequestServiceInput,
 	DatabaseResponse,
 	DatabaseResponseNullable,
+	UpdateDocumentByIdServiceInput,
 } from "../../../types";
 import {
 	MotherboardDocument,
@@ -37,7 +38,7 @@ async function getQueriedMotherboardsService({
 			.exec();
 		return motherboards;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedMotherboardService" });
+		throw new Error(error, { cause: "getQueriedMotherboardsService" });
 	}
 }
 
@@ -45,12 +46,12 @@ async function getQueriedTotalMotherboardsService({
 	filter = {},
 }: QueriedResourceGetRequestServiceInput<MotherboardDocument>): Promise<number> {
 	try {
-		const totalMotherboard = await MotherboardModel.countDocuments(filter)
+		const totalMotherboards = await MotherboardModel.countDocuments(filter)
 			.lean()
 			.exec();
-		return totalMotherboard;
+		return totalMotherboards;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedTotalMotherboardService" });
+		throw new Error(error, { cause: "getQueriedTotalMotherboardsService" });
 	}
 }
 
@@ -69,20 +70,20 @@ async function getMotherboardByIdService(
 }
 
 async function updateMotherboardByIdService({
-	fieldsToUpdate,
-	motherboardId,
-}: {
-	motherboardId: Types.ObjectId | string;
-	fieldsToUpdate: Record<
-		keyof MotherboardDocument,
-		MotherboardDocument[keyof MotherboardDocument]
-	>;
-}): DatabaseResponseNullable<MotherboardDocument> {
+	_id,
+	fields,
+	updateOperator,
+}: UpdateDocumentByIdServiceInput<MotherboardDocument>): DatabaseResponseNullable<MotherboardDocument> {
+	const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
+	const updateObject = JSON.parse(updateString);
+
 	try {
 		const motherboard = await MotherboardModel.findByIdAndUpdate(
-			motherboardId,
-			{ $set: fieldsToUpdate },
-			{ new: true },
+			_id,
+			updateObject,
+			{
+				new: true,
+			},
 		)
 
 			.lean()
@@ -125,7 +126,9 @@ async function deleteAMotherboardService(
 	motherboardId: Types.ObjectId | string,
 ): Promise<DeleteResult> {
 	try {
-		const motherboard = await MotherboardModel.deleteOne({ _id: motherboardId })
+		const motherboard = await MotherboardModel.deleteOne({
+			_id: motherboardId,
+		})
 			.lean()
 			.exec();
 		return motherboard;

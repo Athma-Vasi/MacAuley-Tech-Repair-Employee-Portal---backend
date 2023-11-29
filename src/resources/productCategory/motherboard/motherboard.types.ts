@@ -1,9 +1,12 @@
 import type { Types } from "mongoose";
 import type { RequestAfterJWTVerification } from "../../auth";
 import { UserRoles } from "../../user";
-import { GetQueriedResourceRequest } from "../../../types";
+import {
+	DocumentUpdateOperation,
+	GetQueriedResourceRequest,
+} from "../../../types";
 
-import { MotherboardSchema } from "./motherboard.model";
+import { MotherboardDocument, MotherboardSchema } from "./motherboard.model";
 
 interface CreateNewMotherboardRequest extends RequestAfterJWTVerification {
 	body: {
@@ -27,6 +30,22 @@ interface CreateNewMotherboardBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		motherboardSchemas: MotherboardSchema[];
+	};
+}
+
+// DEV ROUTE
+interface UpdateMotherboardsBulkRequest extends RequestAfterJWTVerification {
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
+		motherboardFields: {
+			motherboardId: Types.ObjectId;
+			documentUpdate: DocumentUpdateOperation<MotherboardDocument>;
+		}[];
 	};
 }
 
@@ -58,10 +77,7 @@ interface UpdateMotherboardByIdRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		motherboardFields: Record<
-			keyof MotherboardSchema,
-			MotherboardSchema[keyof MotherboardSchema]
-		>;
+		documentUpdate: DocumentUpdateOperation<MotherboardDocument>;
 	};
 	params: { motherboardId: string };
 }
@@ -74,4 +90,5 @@ export type {
 	GetMotherboardByIdRequest,
 	GetQueriedMotherboardsRequest,
 	UpdateMotherboardByIdRequest,
+	UpdateMotherboardsBulkRequest,
 };

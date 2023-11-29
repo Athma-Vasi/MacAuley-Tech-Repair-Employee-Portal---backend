@@ -5,75 +5,80 @@
 /**
  * Imports
  */
-import { motherboardRouter } from './motherboard.routes';
-import { MotherboardModel } from './motherboard.model';
+import { motherboardRouter } from "./motherboard.routes";
+import { MotherboardModel } from "./motherboard.model";
 
 import {
-  createNewMotherboardBulkHandler,
-  createNewMotherboardHandler,
-  deleteAMotherboardHandler,
-  deleteAllMotherboardsHandler,
-  getMotherboardByIdHandler,
-  getQueriedMotherboardsHandler,
-  returnAllFileUploadsForMotherboardsHandler,
-  updateMotherboardByIdHandler,
-} from './motherboard.controller';
+	createNewMotherboardBulkHandler,
+	createNewMotherboardHandler,
+	deleteAMotherboardHandler,
+	deleteAllMotherboardsHandler,
+	getMotherboardByIdHandler,
+	getQueriedMotherboardsHandler,
+	updateMotherboardByIdHandler,
+	updateMotherboardsBulkHandler,
+} from "./motherboard.controller";
 
 import {
-  createNewMotherboardService,
-  deleteAllMotherboardsService,
-  deleteAMotherboardService,
-  getMotherboardByIdService,
-  getQueriedMotherboardsService,
-  getQueriedTotalMotherboardsService,
-  returnAllMotherboardsUploadedFileIdsService,
-  updateMotherboardByIdService,
-} from './motherboard.service';
+	createNewMotherboardService,
+	deleteAMotherboardService,
+	deleteAllMotherboardsService,
+	getMotherboardByIdService,
+	getQueriedMotherboardsService,
+	getQueriedTotalMotherboardsService,
+	returnAllMotherboardsUploadedFileIdsService,
+	updateMotherboardByIdService,
+} from "./motherboard.service";
 
-import type { MotherboardDocument, MotherboardSchema } from './motherboard.model';
 import type {
-  CreateNewMotherboardBulkRequest,
-  CreateNewMotherboardRequest,
-  DeleteAMotherboardRequest,
-  DeleteAllMotherboardsRequest,
-  GetMotherboardByIdRequest,
-  GetQueriedMotherboardsRequest,
-  UpdateMotherboardByIdRequest,
-} from './motherboard.types';
+	MotherboardDocument,
+	MotherboardSchema,
+} from "./motherboard.model";
+import type {
+	CreateNewMotherboardBulkRequest,
+	CreateNewMotherboardRequest,
+	DeleteAMotherboardRequest,
+	DeleteAllMotherboardsRequest,
+	GetMotherboardByIdRequest,
+	GetQueriedMotherboardsRequest,
+	UpdateMotherboardByIdRequest,
+	UpdateMotherboardsBulkRequest,
+} from "./motherboard.types";
 
 /**
  * Exports
  */
 
 export {
-  MotherboardModel,
-  motherboardRouter,
-  createNewMotherboardBulkHandler,
-  createNewMotherboardHandler,
-  createNewMotherboardService,
-  deleteAMotherboardHandler,
-  deleteAllMotherboardsHandler,
-  deleteAllMotherboardsService,
-  deleteAMotherboardService,
-  getMotherboardByIdHandler,
-  getMotherboardByIdService,
-  getQueriedMotherboardsHandler,
-  getQueriedMotherboardsService,
-  getQueriedTotalMotherboardsService,
-  returnAllMotherboardsUploadedFileIdsService,
-  returnAllFileUploadsForMotherboardsHandler,
-  updateMotherboardByIdHandler,
-  updateMotherboardByIdService,
+	MotherboardModel,
+	motherboardRouter,
+	createNewMotherboardBulkHandler,
+	createNewMotherboardHandler,
+	createNewMotherboardService,
+	deleteAMotherboardHandler,
+	deleteAMotherboardService,
+	deleteAllMotherboardsHandler,
+	deleteAllMotherboardsService,
+	getMotherboardByIdHandler,
+	getMotherboardByIdService,
+	getQueriedMotherboardsHandler,
+	getQueriedMotherboardsService,
+	getQueriedTotalMotherboardsService,
+	returnAllMotherboardsUploadedFileIdsService,
+	updateMotherboardByIdHandler,
+	updateMotherboardByIdService,
+	updateMotherboardsBulkHandler,
 };
 
 export type {
-  CreateNewMotherboardBulkRequest,
-  CreateNewMotherboardRequest,
-  DeleteAMotherboardRequest,
-  DeleteAllMotherboardsRequest,
-  GetMotherboardByIdRequest,
-  GetQueriedMotherboardsRequest,
-  MotherboardDocument,
-  MotherboardSchema,
-  UpdateMotherboardByIdRequest,
+	MotherboardDocument,
+	MotherboardSchema,
+	CreateNewMotherboardBulkRequest,
+	CreateNewMotherboardRequest,
+	DeleteAMotherboardRequest,
+	DeleteAllMotherboardsRequest,
+	GetMotherboardByIdRequest,
+	GetQueriedMotherboardsRequest,
+	UpdateMotherboardByIdRequest,
+	UpdateMotherboardsBulkRequest,
 };
