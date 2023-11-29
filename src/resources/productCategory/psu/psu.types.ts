@@ -1,9 +1,12 @@
 import type { Types } from "mongoose";
 import type { RequestAfterJWTVerification } from "../../auth";
 import { UserRoles } from "../../user";
-import { GetQueriedResourceRequest } from "../../../types";
+import {
+	DocumentUpdateOperation,
+	GetQueriedResourceRequest,
+} from "../../../types";
 
-import { PsuSchema } from "./psu.model";
+import { PsuDocument, PsuSchema } from "./psu.model";
 
 interface CreateNewPsuRequest extends RequestAfterJWTVerification {
 	body: {
@@ -27,6 +30,22 @@ interface CreateNewPsuBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		psuSchemas: PsuSchema[];
+	};
+}
+
+// DEV ROUTE
+interface UpdatePsusBulkRequest extends RequestAfterJWTVerification {
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
+		psuFields: {
+			psuId: Types.ObjectId;
+			documentUpdate: DocumentUpdateOperation<PsuDocument>;
+		}[];
 	};
 }
 
@@ -58,7 +77,7 @@ interface UpdatePsuByIdRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		psuFields: Record<keyof PsuSchema, PsuSchema[keyof PsuSchema]>;
+		documentUpdate: DocumentUpdateOperation<PsuDocument>;
 	};
 	params: { psuId: string };
 }
@@ -71,4 +90,5 @@ export type {
 	GetPsuByIdRequest,
 	GetQueriedPsusRequest,
 	UpdatePsuByIdRequest,
+	UpdatePsusBulkRequest,
 };

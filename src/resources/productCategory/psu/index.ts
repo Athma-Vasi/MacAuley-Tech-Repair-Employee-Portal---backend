@@ -5,75 +5,77 @@
 /**
  * Imports
  */
-import { psuRouter } from './psu.routes';
-import { PsuModel } from './psu.model';
+import { psuRouter } from "./psu.routes";
+import { PsuModel } from "./psu.model";
 
 import {
-  createNewPsuBulkHandler,
-  createNewPsuHandler,
-  deleteAPsuHandler,
-  deleteAllPsusHandler,
-  getPsuByIdHandler,
-  getQueriedPsusHandler,
-  returnAllFileUploadsForPsusHandler,
-  updatePsuByIdHandler,
-} from './psu.controller';
+	createNewPsuBulkHandler,
+	createNewPsuHandler,
+	deleteAPsuHandler,
+	deleteAllPsusHandler,
+	getPsuByIdHandler,
+	getQueriedPsusHandler,
+	updatePsuByIdHandler,
+	updatePsusBulkHandler,
+} from "./psu.controller";
 
 import {
-  createNewPsuService,
-  deleteAllPsusService,
-  deleteAPsuService,
-  getPsuByIdService,
-  getQueriedPsusService,
-  getQueriedTotalPsusService,
-  returnAllPsusUploadedFileIdsService,
-  updatePsuByIdService,
-} from './psu.service';
+	createNewPsuService,
+	deleteAPsuService,
+	deleteAllPsusService,
+	getPsuByIdService,
+	getQueriedPsusService,
+	getQueriedTotalPsusService,
+	returnAllPsusUploadedFileIdsService,
+	updatePsuByIdService,
+} from "./psu.service";
 
-import type { PsuDocument, PsuSchema } from './psu.model';
+import type { PsuDocument, PsuSchema } from "./psu.model";
 import type {
-  CreateNewPsuBulkRequest,
-  CreateNewPsuRequest,
-  DeleteAPsuRequest,
-  DeleteAllPsusRequest,
-  GetPsuByIdRequest,
-  GetQueriedPsusRequest,
-  UpdatePsuByIdRequest,
-} from './psu.types';
+	CreateNewPsuBulkRequest,
+	CreateNewPsuRequest,
+	DeleteAPsuRequest,
+	DeleteAllPsusRequest,
+	GetPsuByIdRequest,
+	GetQueriedPsusRequest,
+	UpdatePsuByIdRequest,
+	UpdatePsusBulkRequest,
+} from "./psu.types";
 
 /**
  * Exports
  */
 
 export {
-  PsuModel,
-  psuRouter,
-  createNewPsuBulkHandler,
-  createNewPsuHandler,
-  createNewPsuService,
-  deleteAPsuHandler,
-  deleteAllPsusHandler,
-  deleteAllPsusService,
-  deleteAPsuService,
-  getPsuByIdHandler,
-  getPsuByIdService,
-  getQueriedPsusHandler,
-  getQueriedPsusService,
-  getQueriedTotalPsusService,
-  returnAllPsusUploadedFileIdsService,
-  returnAllFileUploadsForPsusHandler,
-  updatePsuByIdHandler,
-  updatePsuByIdService,
+	PsuModel,
+	psuRouter,
+	createNewPsuBulkHandler,
+	createNewPsuHandler,
+	createNewPsuService,
+	deleteAPsuHandler,
+	deleteAPsuService,
+	deleteAllPsusHandler,
+	deleteAllPsusService,
+	getPsuByIdHandler,
+	getPsuByIdService,
+	getQueriedPsusHandler,
+	getQueriedPsusService,
+	getQueriedTotalPsusService,
+	returnAllPsusUploadedFileIdsService,
+	updatePsuByIdHandler,
+	updatePsuByIdService,
+	updatePsusBulkHandler,
 };
 
 export type {
-  CreateNewPsuBulkRequest,
-  CreateNewPsuRequest,
-  DeleteAPsuRequest,
-  DeleteAllPsusRequest,
-  GetPsuByIdRequest,
-  GetQueriedPsusRequest,
-  PsuDocument,
-  PsuSchema,
-  UpdatePsuByIdRequest,
+	PsuDocument,
+	PsuSchema,
+	CreateNewPsuBulkRequest,
+	CreateNewPsuRequest,
+	DeleteAPsuRequest,
+	DeleteAllPsusRequest,
+	GetPsuByIdRequest,
+	GetQueriedPsusRequest,
+	UpdatePsuByIdRequest,
+	UpdatePsusBulkRequest,
 };

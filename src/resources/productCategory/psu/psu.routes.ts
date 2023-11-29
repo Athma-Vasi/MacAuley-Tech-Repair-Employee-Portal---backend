@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { assignQueryDefaults, verifyRoles } from "../../../middlewares";
+import {
+	assignQueryDefaults,
+	verifyJWTMiddleware,
+	verifyRoles,
+} from "../../../middlewares";
 import {
 	createNewPsuBulkHandler,
 	createNewPsuHandler,
@@ -7,8 +11,8 @@ import {
 	deleteAllPsusHandler,
 	getPsuByIdHandler,
 	getQueriedPsusHandler,
-	returnAllFileUploadsForPsusHandler,
 	updatePsuByIdHandler,
+	updatePsusBulkHandler,
 } from "./psu.controller";
 import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
@@ -18,19 +22,30 @@ psuRouter.use(verifyRoles());
 
 psuRouter
 	.route("/")
-	.get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedPsusHandler)
-	.post(createNewPsuHandler)
-	.delete(deleteAllPsusHandler);
+	.get(
+		verifyJWTMiddleware,
+		verifyRoles(),
+		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
+		getQueriedPsusHandler,
+	)
+	.post(createNewPsuHandler);
+
+// separate route for safety reasons (as it deletes all documents in the collection)
+psuRouter
+	.route("/delete-all")
+	.delete(verifyJWTMiddleware, verifyRoles(), deleteAllPsusHandler);
 
 // DEV ROUTE
-psuRouter.route("/dev").post(createNewPsuBulkHandler);
+psuRouter
+	.route("/dev")
+	.post(createNewPsuBulkHandler)
+	.patch(updatePsusBulkHandler);
 
-psuRouter.route("/fileUploads").post(returnAllFileUploadsForPsusHandler);
-
+// single document routes
 psuRouter
 	.route("/:psuId")
-	.get(getPsuByIdHandler)
-	.delete(deleteAPsuHandler)
-	.put(updatePsuByIdHandler);
+	.get(verifyJWTMiddleware, verifyRoles(), getPsuByIdHandler)
+	.delete(verifyJWTMiddleware, verifyRoles(), deleteAPsuHandler)
+	.patch(verifyJWTMiddleware, verifyRoles(), updatePsuByIdHandler);
 
 export { psuRouter };

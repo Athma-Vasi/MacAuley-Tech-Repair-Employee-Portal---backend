@@ -4,6 +4,7 @@ import {
 	QueriedResourceGetRequestServiceInput,
 	DatabaseResponse,
 	DatabaseResponseNullable,
+	UpdateDocumentByIdServiceInput,
 } from "../../../types";
 import { PsuDocument, PsuModel, PsuSchema } from "./psu.model";
 
@@ -25,7 +26,7 @@ async function getQueriedPsusService({
 		const psus = await PsuModel.find(filter, projection, options).lean().exec();
 		return psus;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedPsuService" });
+		throw new Error(error, { cause: "getQueriedPsusService" });
 	}
 }
 
@@ -33,10 +34,10 @@ async function getQueriedTotalPsusService({
 	filter = {},
 }: QueriedResourceGetRequestServiceInput<PsuDocument>): Promise<number> {
 	try {
-		const totalPsu = await PsuModel.countDocuments(filter).lean().exec();
-		return totalPsu;
+		const totalPsus = await PsuModel.countDocuments(filter).lean().exec();
+		return totalPsus;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedTotalPsuService" });
+		throw new Error(error, { cause: "getQueriedTotalPsusService" });
 	}
 }
 
@@ -44,7 +45,10 @@ async function getPsuByIdService(
 	psuId: Types.ObjectId | string,
 ): DatabaseResponseNullable<PsuDocument> {
 	try {
-		const psu = await PsuModel.findById(psuId).lean().exec();
+		const psu = await PsuModel.findById(psuId)
+
+			.lean()
+			.exec();
 		return psu;
 	} catch (error: any) {
 		throw new Error(error, { cause: "getPsuByIdService" });
@@ -52,18 +56,17 @@ async function getPsuByIdService(
 }
 
 async function updatePsuByIdService({
-	fieldsToUpdate,
-	psuId,
-}: {
-	psuId: Types.ObjectId | string;
-	fieldsToUpdate: Record<keyof PsuDocument, PsuDocument[keyof PsuDocument]>;
-}): DatabaseResponseNullable<PsuDocument> {
+	_id,
+	fields,
+	updateOperator,
+}: UpdateDocumentByIdServiceInput<PsuDocument>): DatabaseResponseNullable<PsuDocument> {
+	const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
+	const updateObject = JSON.parse(updateString);
+
 	try {
-		const psu = await PsuModel.findByIdAndUpdate(
-			psuId,
-			{ $set: fieldsToUpdate },
-			{ new: true },
-		)
+		const psu = await PsuModel.findByIdAndUpdate(_id, updateObject, {
+			new: true,
+		})
 
 			.lean()
 			.exec();
@@ -93,7 +96,9 @@ async function returnAllPsusUploadedFileIdsService(): Promise<
 		const uploadedFileIds = psus.flatMap((psu) => psu.uploadedFilesIds);
 		return uploadedFileIds;
 	} catch (error: any) {
-		throw new Error(error, { cause: "returnAllPsusUploadedFileIdsService" });
+		throw new Error(error, {
+			cause: "returnAllPsusUploadedFileIdsService",
+		});
 	}
 }
 
@@ -101,7 +106,11 @@ async function deleteAPsuService(
 	psuId: Types.ObjectId | string,
 ): Promise<DeleteResult> {
 	try {
-		const psu = await PsuModel.deleteOne({ _id: psuId }).lean().exec();
+		const psu = await PsuModel.deleteOne({
+			_id: psuId,
+		})
+			.lean()
+			.exec();
 		return psu;
 	} catch (error: any) {
 		throw new Error(error, { cause: "deleteAPsuService" });

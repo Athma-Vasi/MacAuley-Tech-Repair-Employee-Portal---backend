@@ -11,6 +11,7 @@ import type {
 	GetPsuByIdRequest,
 	GetQueriedPsusRequest,
 	UpdatePsuByIdRequest,
+	UpdatePsusBulkRequest,
 } from "./psu.types";
 import type {
 	GetQueriedResourceRequestServerResponse,
@@ -34,10 +35,16 @@ import {
 	deleteFileUploadByIdService,
 	getFileUploadByIdService,
 } from "../../fileUpload";
-import { ProductServerResponse } from "../product.types";
+
+import {
+	ProductReviewDocument,
+	deleteAProductReviewService,
+	getProductReviewByIdService,
+} from "../../productReview";
+import { removeUndefinedAndNullValues } from "../../../utils";
 
 // @desc   Create new psu
-// @route  POST /api/v1/actions/dashboard/product-category/psu
+// @route  POST /api/v1/product-category/psu
 // @access Private/Admin/Manager
 const createNewPsuHandler = expressAsyncHandler(
 	async (
@@ -74,7 +81,7 @@ const createNewPsuHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Create new psus bulk
-// @route  POST /api/v1/actions/dashboard/product-category/psu/dev
+// @route  POST /api/v1/product-category/psu/dev
 // @access Private/Admin/Manager
 const createNewPsuBulkHandler = expressAsyncHandler(
 	async (
@@ -100,31 +107,99 @@ const createNewPsuBulkHandler = expressAsyncHandler(
 				resourceData: successfullyCreatedPsus,
 			});
 			return;
-		} else if (successfullyCreatedPsus.length === 0) {
+		}
+
+		if (successfullyCreatedPsus.length === 0) {
 			response.status(400).json({
 				message: "Could not create any psus",
 				resourceData: [],
 			});
 			return;
-		} else {
+		}
+
+		response.status(201).json({
+			message: `Successfully created ${
+				psuSchemas.length - successfullyCreatedPsus.length
+			} psus`,
+			resourceData: successfullyCreatedPsus,
+		});
+		return;
+	},
+);
+
+// @desc   Update psus bulk
+// @route  PATCH /api/v1/product-category/psu/dev
+// @access Private/Admin/Manager
+const updatePsusBulkHandler = expressAsyncHandler(
+	async (
+		request: UpdatePsusBulkRequest,
+		response: Response<ResourceRequestServerResponse<PsuDocument>>,
+	) => {
+		const { psuFields } = request.body;
+
+		const updatedPsus = await Promise.all(
+			psuFields.map(async (psuField) => {
+				const {
+					psuId,
+					documentUpdate: { fields, updateOperator },
+				} = psuField;
+
+				const updatedPsu = await updatePsuByIdService({
+					_id: psuId,
+					fields,
+					updateOperator,
+				});
+
+				return updatedPsu;
+			}),
+		);
+
+		// filter out any psus that were not updated
+		const successfullyUpdatedPsus = updatedPsus.filter(
+			removeUndefinedAndNullValues,
+		);
+
+		// check if any psus were updated
+		if (successfullyUpdatedPsus.length === psuFields.length) {
 			response.status(201).json({
-				message: `Successfully created ${
-					psuSchemas.length - successfullyCreatedPsus.length
-				} psus`,
-				resourceData: successfullyCreatedPsus,
+				message: `Successfully updated ${successfullyUpdatedPsus.length} psus`,
+				resourceData: successfullyUpdatedPsus,
 			});
 			return;
 		}
+
+		if (successfullyUpdatedPsus.length === 0) {
+			response.status(400).json({
+				message: "Could not update any psus",
+				resourceData: [],
+			});
+			return;
+		}
+
+		response.status(201).json({
+			message: `Successfully updated ${
+				psuFields.length - successfullyUpdatedPsus.length
+			} psus`,
+			resourceData: successfullyUpdatedPsus,
+		});
+		return;
 	},
 );
 
 // @desc   Get all psus
-// @route  GET /api/v1/actions/dashboard/product-category/psu
+// @route  GET /api/v1/product-category/psu
 // @access Private/Admin/Manager
 const getQueriedPsusHandler = expressAsyncHandler(
 	async (
 		request: GetQueriedPsusRequest,
-		response: Response<GetQueriedResourceRequestServerResponse<PsuDocument>>,
+		response: Response<
+			GetQueriedResourceRequestServerResponse<
+				PsuDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		let { newQueryFlag, totalDocuments } = request.body;
 
@@ -154,7 +229,7 @@ const getQueriedPsusHandler = expressAsyncHandler(
 			return;
 		}
 
-		// find all fileUploads associated with the psus (in parallel)
+		// find all fileUploads associated with the psus
 		const fileUploadsArrArr = await Promise.all(
 			psus.map(async (psu) => {
 				const fileUploadPromises = psu.uploadedFilesIds.map(
@@ -169,37 +244,61 @@ const getQueriedPsusHandler = expressAsyncHandler(
 				const fileUploads = await Promise.all(fileUploadPromises);
 
 				// Filter out any undefined values (in case fileUpload was not found)
-				return fileUploads.filter((fileUpload) => fileUpload);
+				return fileUploads.filter(removeUndefinedAndNullValues);
+			}),
+		);
+
+		// find all reviews associated with the psus
+		const reviewsArrArr = await Promise.all(
+			psus.map(async (psu) => {
+				const reviewPromises = psu.reviewsIds.map(async (reviewId) => {
+					const review = await getProductReviewByIdService(reviewId);
+
+					return review;
+				});
+
+				// Wait for all the promises to resolve before continuing to the next iteration
+				const reviews = await Promise.all(reviewPromises);
+
+				// Filter out any undefined values (in case review was not found)
+				return reviews.filter(removeUndefinedAndNullValues);
 			}),
 		);
 
 		// create psuServerResponse array
-		const psuServerResponseArray = psus
-			.map((psu, index) => {
-				const fileUploads = fileUploadsArrArr[index];
-				return {
-					...psu,
-					fileUploads,
-				};
-			})
-			.filter((psu) => psu);
+		const psuServerResponseArray = psus.map((psu, index) => {
+			const fileUploads = fileUploadsArrArr[index];
+			const productReviews = reviewsArrArr[index];
+			return {
+				...psu,
+				fileUploads,
+				productReviews,
+			};
+		});
 
 		response.status(200).json({
 			message: "Successfully retrieved psus",
 			pages: Math.ceil(totalDocuments / Number(options?.limit)),
 			totalDocuments,
-			resourceData: psuServerResponseArray as PsuDocument[],
+			resourceData: psuServerResponseArray,
 		});
 	},
 );
 
 // @desc   Get psu by id
-// @route  GET /api/v1/actions/dashboard/product-category/psu/:psuId
+// @route  GET /api/v1/product-category/psu/:psuId
 // @access Private/Admin/Manager
 const getPsuByIdHandler = expressAsyncHandler(
 	async (
 		request: GetPsuByIdRequest,
-		response: Response<ResourceRequestServerResponse<PsuDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				PsuDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const psuId = request.params.psuId;
 
@@ -211,20 +310,28 @@ const getPsuByIdHandler = expressAsyncHandler(
 		}
 
 		// get all fileUploads associated with the psu
-		const fileUploadsArr = await Promise.all(
+		const fileUploads = await Promise.all(
 			psu.uploadedFilesIds.map(async (uploadedFileId) => {
 				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
-				return fileUpload as FileUploadDocument;
+				return fileUpload;
+			}),
+		);
+
+		// get all reviews associated with the psu
+		const productReviews = await Promise.all(
+			psu.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
+
+				return review;
 			}),
 		);
 
 		// create psuServerResponse
-		const psuServerResponse: ProductServerResponse<PsuDocument> = {
+		const psuServerResponse = {
 			...psu,
-			fileUploads: fileUploadsArr.filter(
-				(fileUpload) => fileUpload,
-			) as FileUploadDocument[],
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
 		};
 
 		response.status(200).json({
@@ -235,34 +342,30 @@ const getPsuByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Update a psu by id
-// @route  PUT /api/v1/actions/dashboard/product-category/psu/:psuId
+// @route  PUT /api/v1/product-category/psu/:psuId
 // @access Private/Admin/Manager
 const updatePsuByIdHandler = expressAsyncHandler(
 	async (
 		request: UpdatePsuByIdRequest,
-		response: Response<ResourceRequestServerResponse<PsuDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				PsuDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const { psuId } = request.params;
-		const { psuFields } = request.body;
-
-		// check if psu exists
-		const psuExists = await getPsuByIdService(psuId);
-		if (!psuExists) {
-			response
-				.status(404)
-				.json({ message: "Psu does not exist", resourceData: [] });
-			return;
-		}
-
-		const newPsu = {
-			...psuExists,
-			...psuFields,
-		};
+		const {
+			documentUpdate: { fields, updateOperator },
+		} = request.body;
 
 		// update psu
 		const updatedPsu = await updatePsuByIdService({
-			psuId,
-			fieldsToUpdate: newPsu,
+			_id: psuId,
+			fields,
+			updateOperator,
 		});
 
 		if (!updatedPsu) {
@@ -273,58 +376,40 @@ const updatePsuByIdHandler = expressAsyncHandler(
 			return;
 		}
 
-		response.status(200).json({
-			message: "Psu updated successfully",
-			resourceData: [updatedPsu],
-		});
-	},
-);
-
-// @desc   Return all associated file uploads
-// @route  GET /api/v1/actions/dashboard/product-category/psu/fileUploads
-// @access Private/Admin/Manager
-const returnAllFileUploadsForPsusHandler = expressAsyncHandler(
-	async (
-		_request: GetPsuByIdRequest,
-		response: Response<ResourceRequestServerResponse<FileUploadDocument>>,
-	) => {
-		const fileUploadsIds = await returnAllPsusUploadedFileIdsService();
-
-		if (fileUploadsIds.length === 0) {
-			response
-				.status(404)
-				.json({ message: "No file uploads found", resourceData: [] });
-			return;
-		}
-
-		const fileUploads = (await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) => {
-				const fileUpload = await getFileUploadByIdService(fileUploadId);
+		// get all fileUploads associated with the psu
+		const fileUploads = await Promise.all(
+			updatedPsu.uploadedFilesIds.map(async (uploadedFileId) => {
+				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
 				return fileUpload;
 			}),
-		)) as FileUploadDocument[];
+		);
 
-		// filter out any undefined values (in case fileUpload was not found)
-		const filteredFileUploads = fileUploads.filter((fileUpload) => fileUpload);
+		// get all reviews associated with the psu
+		const productReviews = await Promise.all(
+			updatedPsu.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
 
-		if (filteredFileUploads.length !== fileUploadsIds.length) {
-			response.status(404).json({
-				message: "Some file uploads could not be found.",
-				resourceData: filteredFileUploads,
-			});
-			return;
-		}
+				return review;
+			}),
+		);
+
+		// create psuServerResponse
+		const psuServerResponse = {
+			...updatedPsu,
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
+		};
 
 		response.status(200).json({
-			message: "Successfully retrieved file uploads",
-			resourceData: filteredFileUploads,
+			message: "Psu updated successfully",
+			resourceData: [psuServerResponse],
 		});
 	},
 );
 
 // @desc   Delete all psus
-// @route  DELETE /api/v1/actions/dashboard/product-category/psu
+// @route  DELETE /api/v1/product-category/psu
 // @access Private/Admin/Manager
 const deleteAllPsusHandler = expressAsyncHandler(
 	async (
@@ -332,17 +417,39 @@ const deleteAllPsusHandler = expressAsyncHandler(
 		response: Response<ResourceRequestServerResponse<PsuDocument>>,
 	) => {
 		// grab all psus file upload ids
-		const fileUploadsIds = await returnAllPsusUploadedFileIdsService();
+		const uploadedFilesIds = await returnAllPsusUploadedFileIdsService();
 
 		// delete all file uploads associated with all psus
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) =>
-				deleteFileUploadByIdService(fileUploadId),
+		const deletedFileUploads = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
-		if (!deleteFileUploadsResult.every((result) => result.deletedCount !== 0)) {
+
+		if (
+			deletedFileUploads.some(
+				(deletedFileUpload) => deletedFileUpload.deletedCount === 0,
+			)
+		) {
 			response.status(400).json({
-				message: "Some file uploads could not be deleted. Please try again.",
+				message: "Some File uploads could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
+
+		// delete all reviews associated with all psus
+		const deletedReviews = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
+
+		if (
+			deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)
+		) {
+			response.status(400).json({
+				message: "Some reviews could not be deleted. Please try again.",
 				resourceData: [],
 			});
 			return;
@@ -366,7 +473,7 @@ const deleteAllPsusHandler = expressAsyncHandler(
 );
 
 // @desc   Delete a psu by id
-// @route  DELETE /api/v1/actions/dashboard/product-category/psu/:psuId
+// @route  DELETE /api/v1/product-category/psu/:psuId
 // @access Private/Admin/Manager
 const deleteAPsuHandler = expressAsyncHandler(
 	async (
@@ -388,17 +495,37 @@ const deleteAPsuHandler = expressAsyncHandler(
 		// if it is not an array, it is made to be an array
 		const uploadedFilesIds = [...psuExists.uploadedFilesIds];
 
-		// delete all file uploads associated with this psu
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			uploadedFilesIds.map(async (uploadedFileId) =>
-				deleteFileUploadByIdService(uploadedFileId),
+		// delete all file uploads associated with all psus
+		const deletedFileUploads = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
 
-		if (deleteFileUploadsResult.some((result) => result.deletedCount === 0)) {
+		if (
+			deletedFileUploads.some(
+				(deletedFileUpload) => deletedFileUpload.deletedCount === 0,
+			)
+		) {
 			response.status(400).json({
-				message:
-					"Some file uploads associated with this psu could not be deleted. Psu not deleted. Please try again.",
+				message: "Some File uploads could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
+
+		// delete all reviews associated with all psus
+		const deletedReviews = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
+
+		if (
+			deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)
+		) {
+			response.status(400).json({
+				message: "Some reviews could not be deleted. Please try again.",
 				resourceData: [],
 			});
 			return;
@@ -426,6 +553,6 @@ export {
 	deleteAllPsusHandler,
 	getPsuByIdHandler,
 	getQueriedPsusHandler,
-	returnAllFileUploadsForPsusHandler,
 	updatePsuByIdHandler,
+	updatePsusBulkHandler,
 };
