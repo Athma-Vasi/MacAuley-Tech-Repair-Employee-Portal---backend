@@ -1,9 +1,12 @@
 import type { Types } from "mongoose";
 import type { RequestAfterJWTVerification } from "../../auth";
 import { UserRoles } from "../../user";
-import { GetQueriedResourceRequest } from "../../../types";
+import {
+	DocumentUpdateOperation,
+	GetQueriedResourceRequest,
+} from "../../../types";
 
-import { RamSchema } from "./ram.model";
+import { RamDocument, RamSchema } from "./ram.model";
 
 interface CreateNewRamRequest extends RequestAfterJWTVerification {
 	body: {
@@ -27,6 +30,22 @@ interface CreateNewRamBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		ramSchemas: RamSchema[];
+	};
+}
+
+// DEV ROUTE
+interface UpdateRamsBulkRequest extends RequestAfterJWTVerification {
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
+		ramFields: {
+			ramId: Types.ObjectId;
+			documentUpdate: DocumentUpdateOperation<RamDocument>;
+		}[];
 	};
 }
 
@@ -58,7 +77,7 @@ interface UpdateRamByIdRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		ramFields: Record<keyof RamSchema, RamSchema[keyof RamSchema]>;
+		documentUpdate: DocumentUpdateOperation<RamDocument>;
 	};
 	params: { ramId: string };
 }
@@ -71,4 +90,5 @@ export type {
 	GetRamByIdRequest,
 	GetQueriedRamsRequest,
 	UpdateRamByIdRequest,
+	UpdateRamsBulkRequest,
 };

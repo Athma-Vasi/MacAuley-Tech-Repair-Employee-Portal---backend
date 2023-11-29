@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { assignQueryDefaults, verifyRoles } from "../../../middlewares";
+import {
+	assignQueryDefaults,
+	verifyJWTMiddleware,
+	verifyRoles,
+} from "../../../middlewares";
 import {
 	createNewRamBulkHandler,
 	createNewRamHandler,
@@ -7,8 +11,8 @@ import {
 	deleteAllRamsHandler,
 	getRamByIdHandler,
 	getQueriedRamsHandler,
-	returnAllFileUploadsForRamsHandler,
 	updateRamByIdHandler,
+	updateRamsBulkHandler,
 } from "./ram.controller";
 import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
@@ -18,19 +22,30 @@ ramRouter.use(verifyRoles());
 
 ramRouter
 	.route("/")
-	.get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedRamsHandler)
-	.post(createNewRamHandler)
-	.delete(deleteAllRamsHandler);
+	.get(
+		verifyJWTMiddleware,
+		verifyRoles(),
+		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
+		getQueriedRamsHandler,
+	)
+	.post(createNewRamHandler);
+
+// separate route for safety reasons (as it deletes all documents in the collection)
+ramRouter
+	.route("/delete-all")
+	.delete(verifyJWTMiddleware, verifyRoles(), deleteAllRamsHandler);
 
 // DEV ROUTE
-ramRouter.route("/dev").post(createNewRamBulkHandler);
+ramRouter
+	.route("/dev")
+	.post(createNewRamBulkHandler)
+	.patch(updateRamsBulkHandler);
 
-ramRouter.route("/fileUploads").post(returnAllFileUploadsForRamsHandler);
-
+// single document routes
 ramRouter
 	.route("/:ramId")
-	.get(getRamByIdHandler)
-	.delete(deleteARamHandler)
-	.put(updateRamByIdHandler);
+	.get(verifyJWTMiddleware, verifyRoles(), getRamByIdHandler)
+	.delete(verifyJWTMiddleware, verifyRoles(), deleteARamHandler)
+	.patch(verifyJWTMiddleware, verifyRoles(), updateRamByIdHandler);
 
 export { ramRouter };

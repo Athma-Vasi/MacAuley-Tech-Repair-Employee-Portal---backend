@@ -11,6 +11,7 @@ import type {
 	GetRamByIdRequest,
 	GetQueriedRamsRequest,
 	UpdateRamByIdRequest,
+	UpdateRamsBulkRequest,
 } from "./ram.types";
 import type {
 	GetQueriedResourceRequestServerResponse,
@@ -34,10 +35,16 @@ import {
 	deleteFileUploadByIdService,
 	getFileUploadByIdService,
 } from "../../fileUpload";
-import { ProductServerResponse } from "../product.types";
+
+import {
+	ProductReviewDocument,
+	deleteAProductReviewService,
+	getProductReviewByIdService,
+} from "../../productReview";
+import { removeUndefinedAndNullValues } from "../../../utils";
 
 // @desc   Create new ram
-// @route  POST /api/v1/actions/dashboard/product-category/ram
+// @route  POST /api/v1/product-category/ram
 // @access Private/Admin/Manager
 const createNewRamHandler = expressAsyncHandler(
 	async (
@@ -59,14 +66,14 @@ const createNewRamHandler = expressAsyncHandler(
 
 		if (!ramDocument) {
 			response.status(400).json({
-				message: "Could not create new RAM",
+				message: "Could not create new ram",
 				resourceData: [],
 			});
 			return;
 		}
 
 		response.status(201).json({
-			message: `Successfully created new ${ramDocument.model} RAM`,
+			message: `Successfully created new ${ramDocument.model} ram`,
 			resourceData: [ramDocument],
 		});
 	},
@@ -74,7 +81,7 @@ const createNewRamHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Create new rams bulk
-// @route  POST /api/v1/actions/dashboard/product-category/ram/dev
+// @route  POST /api/v1/product-category/ram/dev
 // @access Private/Admin/Manager
 const createNewRamBulkHandler = expressAsyncHandler(
 	async (
@@ -100,31 +107,99 @@ const createNewRamBulkHandler = expressAsyncHandler(
 				resourceData: successfullyCreatedRams,
 			});
 			return;
-		} else if (successfullyCreatedRams.length === 0) {
+		}
+
+		if (successfullyCreatedRams.length === 0) {
 			response.status(400).json({
-				message: "Could not create any RAMs",
+				message: "Could not create any rams",
 				resourceData: [],
 			});
 			return;
-		} else {
+		}
+
+		response.status(201).json({
+			message: `Successfully created ${
+				ramSchemas.length - successfullyCreatedRams.length
+			} rams`,
+			resourceData: successfullyCreatedRams,
+		});
+		return;
+	},
+);
+
+// @desc   Update rams bulk
+// @route  PATCH /api/v1/product-category/ram/dev
+// @access Private/Admin/Manager
+const updateRamsBulkHandler = expressAsyncHandler(
+	async (
+		request: UpdateRamsBulkRequest,
+		response: Response<ResourceRequestServerResponse<RamDocument>>,
+	) => {
+		const { ramFields } = request.body;
+
+		const updatedRams = await Promise.all(
+			ramFields.map(async (ramField) => {
+				const {
+					ramId,
+					documentUpdate: { fields, updateOperator },
+				} = ramField;
+
+				const updatedRam = await updateRamByIdService({
+					_id: ramId,
+					fields,
+					updateOperator,
+				});
+
+				return updatedRam;
+			}),
+		);
+
+		// filter out any rams that were not updated
+		const successfullyUpdatedRams = updatedRams.filter(
+			removeUndefinedAndNullValues,
+		);
+
+		// check if any rams were updated
+		if (successfullyUpdatedRams.length === ramFields.length) {
 			response.status(201).json({
-				message: `Successfully created ${
-					ramSchemas.length - successfullyCreatedRams.length
-				} rams`,
-				resourceData: successfullyCreatedRams,
+				message: `Successfully updated ${successfullyUpdatedRams.length} rams`,
+				resourceData: successfullyUpdatedRams,
 			});
 			return;
 		}
+
+		if (successfullyUpdatedRams.length === 0) {
+			response.status(400).json({
+				message: "Could not update any rams",
+				resourceData: [],
+			});
+			return;
+		}
+
+		response.status(201).json({
+			message: `Successfully updated ${
+				ramFields.length - successfullyUpdatedRams.length
+			} rams`,
+			resourceData: successfullyUpdatedRams,
+		});
+		return;
 	},
 );
 
 // @desc   Get all rams
-// @route  GET /api/v1/actions/dashboard/product-category/ram
+// @route  GET /api/v1/product-category/ram
 // @access Private/Admin/Manager
 const getQueriedRamsHandler = expressAsyncHandler(
 	async (
 		request: GetQueriedRamsRequest,
-		response: Response<GetQueriedResourceRequestServerResponse<RamDocument>>,
+		response: Response<
+			GetQueriedResourceRequestServerResponse<
+				RamDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		let { newQueryFlag, totalDocuments } = request.body;
 
@@ -146,7 +221,7 @@ const getQueriedRamsHandler = expressAsyncHandler(
 		});
 		if (rams.length === 0) {
 			response.status(200).json({
-				message: "No RAMs that match query parameters were found",
+				message: "No rams that match query parameters were found",
 				pages: 0,
 				totalDocuments: 0,
 				resourceData: [],
@@ -154,7 +229,7 @@ const getQueriedRamsHandler = expressAsyncHandler(
 			return;
 		}
 
-		// find all fileUploads associated with the rams (in parallel)
+		// find all fileUploads associated with the rams
 		const fileUploadsArrArr = await Promise.all(
 			rams.map(async (ram) => {
 				const fileUploadPromises = ram.uploadedFilesIds.map(
@@ -169,162 +244,172 @@ const getQueriedRamsHandler = expressAsyncHandler(
 				const fileUploads = await Promise.all(fileUploadPromises);
 
 				// Filter out any undefined values (in case fileUpload was not found)
-				return fileUploads.filter((fileUpload) => fileUpload);
+				return fileUploads.filter(removeUndefinedAndNullValues);
+			}),
+		);
+
+		// find all reviews associated with the rams
+		const reviewsArrArr = await Promise.all(
+			rams.map(async (ram) => {
+				const reviewPromises = ram.reviewsIds.map(async (reviewId) => {
+					const review = await getProductReviewByIdService(reviewId);
+
+					return review;
+				});
+
+				// Wait for all the promises to resolve before continuing to the next iteration
+				const reviews = await Promise.all(reviewPromises);
+
+				// Filter out any undefined values (in case review was not found)
+				return reviews.filter(removeUndefinedAndNullValues);
 			}),
 		);
 
 		// create ramServerResponse array
-		const ramServerResponseArray = rams
-			.map((ram, index) => {
-				const fileUploads = fileUploadsArrArr[index];
-				return {
-					...ram,
-					fileUploads,
-				};
-			})
-			.filter((ram) => ram);
+		const ramServerResponseArray = rams.map((ram, index) => {
+			const fileUploads = fileUploadsArrArr[index];
+			const productReviews = reviewsArrArr[index];
+			return {
+				...ram,
+				fileUploads,
+				productReviews,
+			};
+		});
 
 		response.status(200).json({
-			message: "Successfully retrieved RAMs",
+			message: "Successfully retrieved rams",
 			pages: Math.ceil(totalDocuments / Number(options?.limit)),
 			totalDocuments,
-			resourceData: ramServerResponseArray as RamDocument[],
+			resourceData: ramServerResponseArray,
 		});
 	},
 );
 
 // @desc   Get ram by id
-// @route  GET /api/v1/actions/dashboard/product-category/ram/:ramId
+// @route  GET /api/v1/product-category/ram/:ramId
 // @access Private/Admin/Manager
 const getRamByIdHandler = expressAsyncHandler(
 	async (
 		request: GetRamByIdRequest,
-		response: Response<ResourceRequestServerResponse<RamDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				RamDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const ramId = request.params.ramId;
 
 		// get ram by id
 		const ram = await getRamByIdService(ramId);
 		if (!ram) {
-			response.status(404).json({ message: "RAM not found", resourceData: [] });
+			response.status(404).json({ message: "Ram not found", resourceData: [] });
 			return;
 		}
 
 		// get all fileUploads associated with the ram
-		const fileUploadsArr = await Promise.all(
+		const fileUploads = await Promise.all(
 			ram.uploadedFilesIds.map(async (uploadedFileId) => {
 				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
-				return fileUpload as FileUploadDocument;
+				return fileUpload;
+			}),
+		);
+
+		// get all reviews associated with the ram
+		const productReviews = await Promise.all(
+			ram.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
+
+				return review;
 			}),
 		);
 
 		// create ramServerResponse
-		const ramServerResponse: ProductServerResponse<RamDocument> = {
+		const ramServerResponse = {
 			...ram,
-			fileUploads: fileUploadsArr.filter(
-				(fileUpload) => fileUpload,
-			) as FileUploadDocument[],
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
 		};
 
 		response.status(200).json({
-			message: "Successfully retrieved RAM",
+			message: "Successfully retrieved ram",
 			resourceData: [ramServerResponse],
 		});
 	},
 );
 
 // @desc   Update a ram by id
-// @route  PUT /api/v1/actions/dashboard/product-category/ram/:ramId
+// @route  PUT /api/v1/product-category/ram/:ramId
 // @access Private/Admin/Manager
 const updateRamByIdHandler = expressAsyncHandler(
 	async (
 		request: UpdateRamByIdRequest,
-		response: Response<ResourceRequestServerResponse<RamDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				RamDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const { ramId } = request.params;
-		const { ramFields } = request.body;
-
-		// check if ram exists
-		const ramExists = await getRamByIdService(ramId);
-		if (!ramExists) {
-			response
-				.status(404)
-				.json({ message: "RAM does not exist", resourceData: [] });
-			return;
-		}
-
-		const newRam = {
-			...ramExists,
-			...ramFields,
-		};
+		const {
+			documentUpdate: { fields, updateOperator },
+		} = request.body;
 
 		// update ram
 		const updatedRam = await updateRamByIdService({
-			ramId,
-			fieldsToUpdate: newRam,
+			_id: ramId,
+			fields,
+			updateOperator,
 		});
 
 		if (!updatedRam) {
 			response.status(400).json({
-				message: "RAM could not be updated",
+				message: "Ram could not be updated",
 				resourceData: [],
 			});
 			return;
 		}
 
-		response.status(200).json({
-			message: "RAM updated successfully",
-			resourceData: [updatedRam],
-		});
-	},
-);
-
-// @desc   Return all associated file uploads
-// @route  GET /api/v1/actions/dashboard/product-category/ram/fileUploads
-// @access Private/Admin/Manager
-const returnAllFileUploadsForRamsHandler = expressAsyncHandler(
-	async (
-		_request: GetRamByIdRequest,
-		response: Response<ResourceRequestServerResponse<FileUploadDocument>>,
-	) => {
-		const fileUploadsIds = await returnAllRamsUploadedFileIdsService();
-
-		if (fileUploadsIds.length === 0) {
-			response
-				.status(404)
-				.json({ message: "No file uploads found", resourceData: [] });
-			return;
-		}
-
-		const fileUploads = (await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) => {
-				const fileUpload = await getFileUploadByIdService(fileUploadId);
+		// get all fileUploads associated with the ram
+		const fileUploads = await Promise.all(
+			updatedRam.uploadedFilesIds.map(async (uploadedFileId) => {
+				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
 				return fileUpload;
 			}),
-		)) as FileUploadDocument[];
+		);
 
-		// filter out any undefined values (in case fileUpload was not found)
-		const filteredFileUploads = fileUploads.filter((fileUpload) => fileUpload);
+		// get all reviews associated with the ram
+		const productReviews = await Promise.all(
+			updatedRam.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
 
-		if (filteredFileUploads.length !== fileUploadsIds.length) {
-			response.status(404).json({
-				message: "Some file uploads could not be found.",
-				resourceData: filteredFileUploads,
-			});
-			return;
-		}
+				return review;
+			}),
+		);
+
+		// create ramServerResponse
+		const ramServerResponse = {
+			...updatedRam,
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
+		};
 
 		response.status(200).json({
-			message: "Successfully retrieved file uploads",
-			resourceData: filteredFileUploads,
+			message: "Ram updated successfully",
+			resourceData: [ramServerResponse],
 		});
 	},
 );
 
 // @desc   Delete all rams
-// @route  DELETE /api/v1/actions/dashboard/product-category/ram
+// @route  DELETE /api/v1/product-category/ram
 // @access Private/Admin/Manager
 const deleteAllRamsHandler = expressAsyncHandler(
 	async (
@@ -332,17 +417,39 @@ const deleteAllRamsHandler = expressAsyncHandler(
 		response: Response<ResourceRequestServerResponse<RamDocument>>,
 	) => {
 		// grab all rams file upload ids
-		const fileUploadsIds = await returnAllRamsUploadedFileIdsService();
+		const uploadedFilesIds = await returnAllRamsUploadedFileIdsService();
 
 		// delete all file uploads associated with all rams
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) =>
-				deleteFileUploadByIdService(fileUploadId),
+		const deletedFileUploads = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
-		if (!deleteFileUploadsResult.every((result) => result.deletedCount !== 0)) {
+
+		if (
+			deletedFileUploads.some(
+				(deletedFileUpload) => deletedFileUpload.deletedCount === 0,
+			)
+		) {
 			response.status(400).json({
-				message: "Some file uploads could not be deleted. Please try again.",
+				message: "Some File uploads could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
+
+		// delete all reviews associated with all rams
+		const deletedReviews = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
+
+		if (
+			deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)
+		) {
+			response.status(400).json({
+				message: "Some reviews could not be deleted. Please try again.",
 				resourceData: [],
 			});
 			return;
@@ -353,7 +460,7 @@ const deleteAllRamsHandler = expressAsyncHandler(
 
 		if (deleteRamsResult.deletedCount === 0) {
 			response.status(400).json({
-				message: "All RAMs could not be deleted. Please try again.",
+				message: "All rams could not be deleted. Please try again.",
 				resourceData: [],
 			});
 			return;
@@ -361,12 +468,12 @@ const deleteAllRamsHandler = expressAsyncHandler(
 
 		response
 			.status(200)
-			.json({ message: "All RAMs deleted", resourceData: [] });
+			.json({ message: "All rams deleted", resourceData: [] });
 	},
 );
 
 // @desc   Delete a ram by id
-// @route  DELETE /api/v1/actions/dashboard/product-category/ram/:ramId
+// @route  DELETE /api/v1/product-category/ram/:ramId
 // @access Private/Admin/Manager
 const deleteARamHandler = expressAsyncHandler(
 	async (
@@ -380,7 +487,7 @@ const deleteARamHandler = expressAsyncHandler(
 		if (!ramExists) {
 			response
 				.status(404)
-				.json({ message: "RAM does not exist", resourceData: [] });
+				.json({ message: "Ram does not exist", resourceData: [] });
 			return;
 		}
 
@@ -388,17 +495,37 @@ const deleteARamHandler = expressAsyncHandler(
 		// if it is not an array, it is made to be an array
 		const uploadedFilesIds = [...ramExists.uploadedFilesIds];
 
-		// delete all file uploads associated with this ram
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			uploadedFilesIds.map(async (uploadedFileId) =>
-				deleteFileUploadByIdService(uploadedFileId),
+		// delete all file uploads associated with all rams
+		const deletedFileUploads = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
 
-		if (deleteFileUploadsResult.some((result) => result.deletedCount === 0)) {
+		if (
+			deletedFileUploads.some(
+				(deletedFileUpload) => deletedFileUpload.deletedCount === 0,
+			)
+		) {
 			response.status(400).json({
-				message:
-					"Some file uploads associated with this ram could not be deleted. RAM not deleted. Please try again.",
+				message: "Some File uploads could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
+
+		// delete all reviews associated with all rams
+		const deletedReviews = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
+
+		if (
+			deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)
+		) {
+			response.status(400).json({
+				message: "Some reviews could not be deleted. Please try again.",
 				resourceData: [],
 			});
 			return;
@@ -409,13 +536,13 @@ const deleteARamHandler = expressAsyncHandler(
 
 		if (deleteRamResult.deletedCount === 0) {
 			response.status(400).json({
-				message: "RAM could not be deleted. Please try again.",
+				message: "Ram could not be deleted. Please try again.",
 				resourceData: [],
 			});
 			return;
 		}
 
-		response.status(200).json({ message: "RAM deleted", resourceData: [] });
+		response.status(200).json({ message: "Ram deleted", resourceData: [] });
 	},
 );
 
@@ -426,6 +553,6 @@ export {
 	deleteAllRamsHandler,
 	getRamByIdHandler,
 	getQueriedRamsHandler,
-	returnAllFileUploadsForRamsHandler,
 	updateRamByIdHandler,
+	updateRamsBulkHandler,
 };

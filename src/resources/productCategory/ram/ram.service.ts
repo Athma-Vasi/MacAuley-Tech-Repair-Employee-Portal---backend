@@ -4,6 +4,7 @@ import {
 	QueriedResourceGetRequestServiceInput,
 	DatabaseResponse,
 	DatabaseResponseNullable,
+	UpdateDocumentByIdServiceInput,
 } from "../../../types";
 import { RamDocument, RamModel, RamSchema } from "./ram.model";
 
@@ -25,7 +26,7 @@ async function getQueriedRamsService({
 		const rams = await RamModel.find(filter, projection, options).lean().exec();
 		return rams;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedRamService" });
+		throw new Error(error, { cause: "getQueriedRamsService" });
 	}
 }
 
@@ -33,10 +34,10 @@ async function getQueriedTotalRamsService({
 	filter = {},
 }: QueriedResourceGetRequestServiceInput<RamDocument>): Promise<number> {
 	try {
-		const totalRam = await RamModel.countDocuments(filter).lean().exec();
-		return totalRam;
+		const totalRams = await RamModel.countDocuments(filter).lean().exec();
+		return totalRams;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedTotalRamService" });
+		throw new Error(error, { cause: "getQueriedTotalRamsService" });
 	}
 }
 
@@ -44,7 +45,10 @@ async function getRamByIdService(
 	ramId: Types.ObjectId | string,
 ): DatabaseResponseNullable<RamDocument> {
 	try {
-		const ram = await RamModel.findById(ramId).lean().exec();
+		const ram = await RamModel.findById(ramId)
+
+			.lean()
+			.exec();
 		return ram;
 	} catch (error: any) {
 		throw new Error(error, { cause: "getRamByIdService" });
@@ -52,18 +56,17 @@ async function getRamByIdService(
 }
 
 async function updateRamByIdService({
-	fieldsToUpdate,
-	ramId,
-}: {
-	ramId: Types.ObjectId | string;
-	fieldsToUpdate: Record<keyof RamDocument, RamDocument[keyof RamDocument]>;
-}): DatabaseResponseNullable<RamDocument> {
+	_id,
+	fields,
+	updateOperator,
+}: UpdateDocumentByIdServiceInput<RamDocument>): DatabaseResponseNullable<RamDocument> {
+	const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
+	const updateObject = JSON.parse(updateString);
+
 	try {
-		const ram = await RamModel.findByIdAndUpdate(
-			ramId,
-			{ $set: fieldsToUpdate },
-			{ new: true },
-		)
+		const ram = await RamModel.findByIdAndUpdate(_id, updateObject, {
+			new: true,
+		})
 
 			.lean()
 			.exec();
@@ -93,7 +96,9 @@ async function returnAllRamsUploadedFileIdsService(): Promise<
 		const uploadedFileIds = rams.flatMap((ram) => ram.uploadedFilesIds);
 		return uploadedFileIds;
 	} catch (error: any) {
-		throw new Error(error, { cause: "returnAllRamsUploadedFileIdsService" });
+		throw new Error(error, {
+			cause: "returnAllRamsUploadedFileIdsService",
+		});
 	}
 }
 
@@ -101,7 +106,11 @@ async function deleteARamService(
 	ramId: Types.ObjectId | string,
 ): Promise<DeleteResult> {
 	try {
-		const ram = await RamModel.deleteOne({ _id: ramId }).lean().exec();
+		const ram = await RamModel.deleteOne({
+			_id: ramId,
+		})
+			.lean()
+			.exec();
 		return ram;
 	} catch (error: any) {
 		throw new Error(error, { cause: "deleteARamService" });
