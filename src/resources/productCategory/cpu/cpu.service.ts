@@ -23,10 +23,8 @@ async function getQueriedCpusService({
 	options = {},
 }: QueriedResourceGetRequestServiceInput<CpuDocument>): DatabaseResponse<CpuDocument> {
 	try {
-		const accessories = await CpuModel.find(filter, projection, options)
-			.lean()
-			.exec();
-		return accessories;
+		const cpus = await CpuModel.find(filter, projection, options).lean().exec();
+		return cpus;
 	} catch (error: any) {
 		throw new Error(error, { cause: "getQueriedCpusService" });
 	}
@@ -80,8 +78,8 @@ async function updateCpuByIdService({
 
 async function deleteAllCpusService(): Promise<DeleteResult> {
 	try {
-		const accessories = await CpuModel.deleteMany({}).lean().exec();
-		return accessories;
+		const cpus = await CpuModel.deleteMany({}).lean().exec();
+		return cpus;
 	} catch (error: any) {
 		throw new Error(error, { cause: "deleteAllCpusService" });
 	}
@@ -91,11 +89,11 @@ async function returnAllCpusUploadedFileIdsService(): Promise<
 	Types.ObjectId[]
 > {
 	try {
-		const accessories = await CpuModel.find({})
+		const cpus = await CpuModel.find({})
 			.select("uploadedFilesIds")
 			.lean()
 			.exec();
-		const uploadedFileIds = accessories.flatMap((cpu) => cpu.uploadedFilesIds);
+		const uploadedFileIds = cpus.flatMap((cpu) => cpu.uploadedFilesIds);
 		return uploadedFileIds;
 	} catch (error: any) {
 		throw new Error(error, {

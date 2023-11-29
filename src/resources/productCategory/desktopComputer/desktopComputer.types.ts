@@ -1,9 +1,15 @@
 import type { Types } from "mongoose";
 import type { RequestAfterJWTVerification } from "../../auth";
 import { UserRoles } from "../../user";
-import { GetQueriedResourceRequest } from "../../../types";
+import {
+	DocumentUpdateOperation,
+	GetQueriedResourceRequest,
+} from "../../../types";
 
-import { DesktopComputerSchema } from "./desktopComputer.model";
+import {
+	DesktopComputerDocument,
+	DesktopComputerSchema,
+} from "./desktopComputer.model";
 
 interface CreateNewDesktopComputerRequest extends RequestAfterJWTVerification {
 	body: {
@@ -28,6 +34,23 @@ interface CreateNewDesktopComputerBulkRequest
 		};
 		sessionId: Types.ObjectId;
 		desktopComputerSchemas: DesktopComputerSchema[];
+	};
+}
+
+// DEV ROUTE
+interface UpdateDesktopComputersBulkRequest
+	extends RequestAfterJWTVerification {
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
+		desktopComputerFields: {
+			desktopComputerId: Types.ObjectId;
+			documentUpdate: DocumentUpdateOperation<DesktopComputerDocument>;
+		}[];
 	};
 }
 
@@ -59,10 +82,7 @@ interface UpdateDesktopComputerByIdRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		desktopComputerFields: Record<
-			keyof DesktopComputerSchema,
-			DesktopComputerSchema[keyof DesktopComputerSchema]
-		>;
+		documentUpdate: DocumentUpdateOperation<DesktopComputerDocument>;
 	};
 	params: { desktopComputerId: string };
 }
@@ -75,4 +95,5 @@ export type {
 	GetDesktopComputerByIdRequest,
 	GetQueriedDesktopComputersRequest,
 	UpdateDesktopComputerByIdRequest,
+	UpdateDesktopComputersBulkRequest,
 };

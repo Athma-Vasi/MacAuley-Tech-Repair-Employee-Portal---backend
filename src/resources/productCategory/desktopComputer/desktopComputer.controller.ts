@@ -11,6 +11,7 @@ import type {
 	GetDesktopComputerByIdRequest,
 	GetQueriedDesktopComputersRequest,
 	UpdateDesktopComputerByIdRequest,
+	UpdateDesktopComputersBulkRequest,
 } from "./desktopComputer.types";
 import type {
 	GetQueriedResourceRequestServerResponse,
@@ -37,10 +38,16 @@ import {
 	deleteFileUploadByIdService,
 	getFileUploadByIdService,
 } from "../../fileUpload";
-import { ProductServerResponse } from "../product.types";
+
+import {
+	ProductReviewDocument,
+	deleteAProductReviewService,
+	getProductReviewByIdService,
+} from "../../productReview";
+import { removeUndefinedAndNullValues } from "../../../utils";
 
 // @desc   Create new desktopComputer
-// @route  POST /api/v1/actions/dashboard/product-category/desktop-computer
+// @route  POST /api/v1/product-category/desktopComputer
 // @access Private/Admin/Manager
 const createNewDesktopComputerHandler = expressAsyncHandler(
 	async (
@@ -78,7 +85,7 @@ const createNewDesktopComputerHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Create new desktopComputers bulk
-// @route  POST /api/v1/actions/dashboard/product-category/desktop-computer/dev
+// @route  POST /api/v1/product-category/desktopComputer/dev
 // @access Private/Admin/Manager
 const createNewDesktopComputerBulkHandler = expressAsyncHandler(
 	async (
@@ -132,14 +139,82 @@ const createNewDesktopComputerBulkHandler = expressAsyncHandler(
 	},
 );
 
+// @desc   Update desktopComputers bulk
+// @route  PATCH /api/v1/product-category/desktopComputer/dev
+// @access Private/Admin/Manager
+const updateDesktopComputersBulkHandler = expressAsyncHandler(
+	async (
+		request: UpdateDesktopComputersBulkRequest,
+		response: Response<ResourceRequestServerResponse<DesktopComputerDocument>>,
+	) => {
+		const { desktopComputerFields } = request.body;
+
+		const updatedDesktopComputers = await Promise.all(
+			desktopComputerFields.map(async (desktopComputerField) => {
+				const {
+					desktopComputerId,
+					documentUpdate: { fields, updateOperator },
+				} = desktopComputerField;
+
+				const updatedDesktopComputer = await updateDesktopComputerByIdService({
+					_id: desktopComputerId,
+					fields,
+					updateOperator,
+				});
+
+				return updatedDesktopComputer;
+			}),
+		);
+
+		// filter out any desktopComputers that were not updated
+		const successfullyUpdatedDesktopComputers = updatedDesktopComputers.filter(
+			removeUndefinedAndNullValues,
+		);
+
+		// check if any desktopComputers were updated
+		if (
+			successfullyUpdatedDesktopComputers.length ===
+			desktopComputerFields.length
+		) {
+			response.status(201).json({
+				message: `Successfully updated ${successfullyUpdatedDesktopComputers.length} Desktop Computers`,
+				resourceData: successfullyUpdatedDesktopComputers,
+			});
+			return;
+		}
+
+		if (successfullyUpdatedDesktopComputers.length === 0) {
+			response.status(400).json({
+				message: "Could not update any Desktop Computers",
+				resourceData: [],
+			});
+			return;
+		}
+
+		response.status(201).json({
+			message: `Successfully updated ${
+				desktopComputerFields.length -
+				successfullyUpdatedDesktopComputers.length
+			} Desktop Computers`,
+			resourceData: successfullyUpdatedDesktopComputers,
+		});
+		return;
+	},
+);
+
 // @desc   Get all desktopComputers
-// @route  GET /api/v1/actions/dashboard/product-category/desktop-computer
+// @route  GET /api/v1/product-category/desktopComputer
 // @access Private/Admin/Manager
 const getQueriedDesktopComputersHandler = expressAsyncHandler(
 	async (
 		request: GetQueriedDesktopComputersRequest,
 		response: Response<
-			GetQueriedResourceRequestServerResponse<DesktopComputerDocument>
+			GetQueriedResourceRequestServerResponse<
+				DesktopComputerDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
 		>,
 	) => {
 		let { newQueryFlag, totalDocuments } = request.body;
@@ -162,7 +237,7 @@ const getQueriedDesktopComputersHandler = expressAsyncHandler(
 		});
 		if (desktopComputers.length === 0) {
 			response.status(200).json({
-				message: "No Desktop Computer that match query parameters were found",
+				message: "No Desktop Computers that match query parameters were found",
 				pages: 0,
 				totalDocuments: 0,
 				resourceData: [],
@@ -170,7 +245,7 @@ const getQueriedDesktopComputersHandler = expressAsyncHandler(
 			return;
 		}
 
-		// find all fileUploads associated with the desktopComputers (in parallel)
+		// find all fileUploads associated with the desktopComputers
 		const fileUploadsArrArr = await Promise.all(
 			desktopComputers.map(async (desktopComputer) => {
 				const fileUploadPromises = desktopComputer.uploadedFilesIds.map(
@@ -185,38 +260,65 @@ const getQueriedDesktopComputersHandler = expressAsyncHandler(
 				const fileUploads = await Promise.all(fileUploadPromises);
 
 				// Filter out any undefined values (in case fileUpload was not found)
-				return fileUploads.filter((fileUpload) => fileUpload);
+				return fileUploads.filter(removeUndefinedAndNullValues);
+			}),
+		);
+
+		// find all reviews associated with the desktopComputers
+		const reviewsArrArr = await Promise.all(
+			desktopComputers.map(async (desktopComputer) => {
+				const reviewPromises = desktopComputer.reviewsIds.map(
+					async (reviewId) => {
+						const review = await getProductReviewByIdService(reviewId);
+
+						return review;
+					},
+				);
+
+				// Wait for all the promises to resolve before continuing to the next iteration
+				const reviews = await Promise.all(reviewPromises);
+
+				// Filter out any undefined values (in case review was not found)
+				return reviews.filter(removeUndefinedAndNullValues);
 			}),
 		);
 
 		// create desktopComputerServerResponse array
-		const desktopComputerServerResponseArray = desktopComputers
-			.map((desktopComputer, index) => {
+		const desktopComputerServerResponseArray = desktopComputers.map(
+			(desktopComputer, index) => {
 				const fileUploads = fileUploadsArrArr[index];
+				const productReviews = reviewsArrArr[index];
 				return {
 					...desktopComputer,
 					fileUploads,
+					productReviews,
 				};
-			})
-			.filter((desktopComputer) => desktopComputer);
+			},
+		);
 
 		response.status(200).json({
 			message: "Successfully retrieved Desktop Computers",
 			pages: Math.ceil(totalDocuments / Number(options?.limit)),
 			totalDocuments,
-			resourceData:
-				desktopComputerServerResponseArray as DesktopComputerDocument[],
+			resourceData: desktopComputerServerResponseArray,
 		});
 	},
 );
 
 // @desc   Get desktopComputer by id
-// @route  GET /api/v1/actions/dashboard/product-category/desktop-computer/:desktopComputerId
+// @route  GET /api/v1/product-category/desktopComputer/:desktopComputerId
 // @access Private/Admin/Manager
 const getDesktopComputerByIdHandler = expressAsyncHandler(
 	async (
 		request: GetDesktopComputerByIdRequest,
-		response: Response<ResourceRequestServerResponse<DesktopComputerDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				DesktopComputerDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const desktopComputerId = request.params.desktopComputerId;
 
@@ -231,22 +333,29 @@ const getDesktopComputerByIdHandler = expressAsyncHandler(
 		}
 
 		// get all fileUploads associated with the desktopComputer
-		const fileUploadsArr = await Promise.all(
+		const fileUploads = await Promise.all(
 			desktopComputer.uploadedFilesIds.map(async (uploadedFileId) => {
 				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
-				return fileUpload as FileUploadDocument;
+				return fileUpload;
+			}),
+		);
+
+		// get all reviews associated with the desktopComputer
+		const productReviews = await Promise.all(
+			desktopComputer.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
+
+				return review;
 			}),
 		);
 
 		// create desktopComputerServerResponse
-		const desktopComputerServerResponse: ProductServerResponse<DesktopComputerDocument> =
-			{
-				...desktopComputer,
-				fileUploads: fileUploadsArr.filter(
-					(fileUpload) => fileUpload,
-				) as FileUploadDocument[],
-			};
+		const desktopComputerServerResponse = {
+			...desktopComputer,
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
+		};
 
 		response.status(200).json({
 			message: "Successfully retrieved Desktop Computer",
@@ -256,35 +365,30 @@ const getDesktopComputerByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Update a desktopComputer by id
-// @route  PUT /api/v1/actions/dashboard/product-category/desktop-computer/:desktopComputerId
+// @route  PUT /api/v1/product-category/desktopComputer/:desktopComputerId
 // @access Private/Admin/Manager
 const updateDesktopComputerByIdHandler = expressAsyncHandler(
 	async (
 		request: UpdateDesktopComputerByIdRequest,
-		response: Response<ResourceRequestServerResponse<DesktopComputerDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				DesktopComputerDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const { desktopComputerId } = request.params;
-		const { desktopComputerFields } = request.body;
-
-		// check if desktopComputer exists
-		const desktopComputerExists =
-			await getDesktopComputerByIdService(desktopComputerId);
-		if (!desktopComputerExists) {
-			response
-				.status(404)
-				.json({ message: "Desktop Computer does not exist", resourceData: [] });
-			return;
-		}
-
-		const newDesktopComputer = {
-			...desktopComputerExists,
-			...desktopComputerFields,
-		};
+		const {
+			documentUpdate: { fields, updateOperator },
+		} = request.body;
 
 		// update desktopComputer
 		const updatedDesktopComputer = await updateDesktopComputerByIdService({
-			desktopComputerId,
-			fieldsToUpdate: newDesktopComputer,
+			_id: desktopComputerId,
+			fields,
+			updateOperator,
 		});
 
 		if (!updatedDesktopComputer) {
@@ -295,59 +399,40 @@ const updateDesktopComputerByIdHandler = expressAsyncHandler(
 			return;
 		}
 
-		response.status(200).json({
-			message: "Desktop Computer updated successfully",
-			resourceData: [updatedDesktopComputer],
-		});
-	},
-);
-
-// @desc   Return all associated file uploads
-// @route  GET /api/v1/actions/dashboard/product-category/desktop-computer/fileUploads
-// @access Private/Admin/Manager
-const returnAllFileUploadsForDesktopComputersHandler = expressAsyncHandler(
-	async (
-		_request: GetDesktopComputerByIdRequest,
-		response: Response<ResourceRequestServerResponse<FileUploadDocument>>,
-	) => {
-		const fileUploadsIds =
-			await returnAllDesktopComputersUploadedFileIdsService();
-
-		if (fileUploadsIds.length === 0) {
-			response
-				.status(404)
-				.json({ message: "No file uploads found", resourceData: [] });
-			return;
-		}
-
-		const fileUploads = (await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) => {
-				const fileUpload = await getFileUploadByIdService(fileUploadId);
+		// get all fileUploads associated with the desktopComputer
+		const fileUploads = await Promise.all(
+			updatedDesktopComputer.uploadedFilesIds.map(async (uploadedFileId) => {
+				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
 				return fileUpload;
 			}),
-		)) as FileUploadDocument[];
+		);
 
-		// filter out any undefined values (in case fileUpload was not found)
-		const filteredFileUploads = fileUploads.filter((fileUpload) => fileUpload);
+		// get all reviews associated with the desktopComputer
+		const productReviews = await Promise.all(
+			updatedDesktopComputer.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
 
-		if (filteredFileUploads.length !== fileUploadsIds.length) {
-			response.status(404).json({
-				message: "Some file uploads could not be found.",
-				resourceData: filteredFileUploads,
-			});
-			return;
-		}
+				return review;
+			}),
+		);
+
+		// create desktopComputerServerResponse
+		const desktopComputerServerResponse = {
+			...updatedDesktopComputer,
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
+		};
 
 		response.status(200).json({
-			message: "Successfully retrieved file uploads",
-			resourceData: filteredFileUploads,
+			message: "Desktop Computer updated successfully",
+			resourceData: [desktopComputerServerResponse],
 		});
 	},
 );
 
 // @desc   Delete all desktopComputers
-// @route  DELETE /api/v1/actions/dashboard/product-category/desktop-computer
+// @route  DELETE /api/v1/product-category/desktopComputer
 // @access Private/Admin/Manager
 const deleteAllDesktopComputersHandler = expressAsyncHandler(
 	async (
@@ -355,22 +440,22 @@ const deleteAllDesktopComputersHandler = expressAsyncHandler(
 		response: Response<ResourceRequestServerResponse<DesktopComputerDocument>>,
 	) => {
 		// grab all desktopComputers file upload ids
-		const fileUploadsIds =
+		const uploadedFilesIds =
 			await returnAllDesktopComputersUploadedFileIdsService();
 
 		// delete all file uploads associated with all desktopComputers
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) =>
-				deleteFileUploadByIdService(fileUploadId),
+		await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
-		if (!deleteFileUploadsResult.every((result) => result.deletedCount !== 0)) {
-			response.status(400).json({
-				message: "Some file uploads could not be deleted. Please try again.",
-				resourceData: [],
-			});
-			return;
-		}
+
+		// delete all reviews associated with all desktopComputers
+		await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
 
 		// delete all desktopComputers
 		const deleteDesktopComputersResult: DeleteResult =
@@ -378,7 +463,8 @@ const deleteAllDesktopComputersHandler = expressAsyncHandler(
 
 		if (deleteDesktopComputersResult.deletedCount === 0) {
 			response.status(400).json({
-				message: "All Desktop Computer could not be deleted. Please try again.",
+				message:
+					"All Desktop Computers could not be deleted. Please try again.",
 				resourceData: [],
 			});
 			return;
@@ -386,12 +472,12 @@ const deleteAllDesktopComputersHandler = expressAsyncHandler(
 
 		response
 			.status(200)
-			.json({ message: "All Desktop Computer deleted", resourceData: [] });
+			.json({ message: "All Desktop Computers deleted", resourceData: [] });
 	},
 );
 
 // @desc   Delete a desktopComputer by id
-// @route  DELETE /api/v1/actions/dashboard/product-category/desktop-computer/:desktopComputerId
+// @route  DELETE /api/v1/product-category/desktopComputer/:desktopComputerId
 // @access Private/Admin/Manager
 const deleteADesktopComputerHandler = expressAsyncHandler(
 	async (
@@ -414,21 +500,19 @@ const deleteADesktopComputerHandler = expressAsyncHandler(
 		// if it is not an array, it is made to be an array
 		const uploadedFilesIds = [...desktopComputerExists.uploadedFilesIds];
 
-		// delete all file uploads associated with this desktopComputer
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			uploadedFilesIds.map(async (uploadedFileId) =>
-				deleteFileUploadByIdService(uploadedFileId),
+		// delete all file uploads associated with all desktopComputers
+		await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
 
-		if (deleteFileUploadsResult.some((result) => result.deletedCount === 0)) {
-			response.status(400).json({
-				message:
-					"Some file uploads associated with this desktopComputer could not be deleted. Desktop Computer not deleted. Please try again.",
-				resourceData: [],
-			});
-			return;
-		}
+		// delete all reviews associated with all desktopComputers
+		await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
 
 		// delete desktopComputer by id
 		const deleteDesktopComputerResult: DeleteResult =
@@ -455,6 +539,6 @@ export {
 	deleteAllDesktopComputersHandler,
 	getDesktopComputerByIdHandler,
 	getQueriedDesktopComputersHandler,
-	returnAllFileUploadsForDesktopComputersHandler,
 	updateDesktopComputerByIdHandler,
+	updateDesktopComputersBulkHandler,
 };

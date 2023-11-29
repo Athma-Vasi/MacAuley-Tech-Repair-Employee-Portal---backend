@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { assignQueryDefaults, verifyRoles } from "../../../middlewares";
+import {
+	assignQueryDefaults,
+	verifyJWTMiddleware,
+	verifyRoles,
+} from "../../../middlewares";
 import {
 	createNewDesktopComputerBulkHandler,
 	createNewDesktopComputerHandler,
@@ -7,8 +11,8 @@ import {
 	deleteAllDesktopComputersHandler,
 	getDesktopComputerByIdHandler,
 	getQueriedDesktopComputersHandler,
-	returnAllFileUploadsForDesktopComputersHandler,
 	updateDesktopComputerByIdHandler,
+	updateDesktopComputersBulkHandler,
 } from "./desktopComputer.controller";
 import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
@@ -19,23 +23,29 @@ desktopComputerRouter.use(verifyRoles());
 desktopComputerRouter
 	.route("/")
 	.get(
+		verifyJWTMiddleware,
+		verifyRoles(),
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedDesktopComputersHandler,
 	)
-	.post(createNewDesktopComputerHandler)
-	.delete(deleteAllDesktopComputersHandler);
+	.post(createNewDesktopComputerHandler);
+
+// separate route for safety reasons (as it deletes all documents in the collection)
+desktopComputerRouter
+	.route("/delete-all")
+	.delete(verifyJWTMiddleware, verifyRoles(), deleteAllDesktopComputersHandler);
 
 // DEV ROUTE
-desktopComputerRouter.route("/dev").post(createNewDesktopComputerBulkHandler);
-
 desktopComputerRouter
-	.route("/fileUploads")
-	.post(returnAllFileUploadsForDesktopComputersHandler);
+	.route("/dev")
+	.post(createNewDesktopComputerBulkHandler)
+	.patch(updateDesktopComputersBulkHandler);
 
+// single document routes
 desktopComputerRouter
-	.route("/:desktopComputerId")
-	.get(getDesktopComputerByIdHandler)
-	.delete(deleteADesktopComputerHandler)
-	.put(updateDesktopComputerByIdHandler);
+	.route("/:caseId")
+	.get(verifyJWTMiddleware, verifyRoles(), getDesktopComputerByIdHandler)
+	.delete(verifyJWTMiddleware, verifyRoles(), deleteADesktopComputerHandler)
+	.patch(verifyJWTMiddleware, verifyRoles(), updateDesktopComputerByIdHandler);
 
 export { desktopComputerRouter };

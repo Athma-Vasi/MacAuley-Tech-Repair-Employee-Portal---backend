@@ -4,6 +4,7 @@ import {
 	QueriedResourceGetRequestServiceInput,
 	DatabaseResponse,
 	DatabaseResponseNullable,
+	UpdateDocumentByIdServiceInput,
 } from "../../../types";
 import {
 	DesktopComputerDocument,
@@ -39,7 +40,7 @@ async function getQueriedDesktopComputersService({
 			.exec();
 		return desktopComputers;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedDesktopComputerService" });
+		throw new Error(error, { cause: "getQueriedDesktopComputersService" });
 	}
 }
 
@@ -47,14 +48,14 @@ async function getQueriedTotalDesktopComputersService({
 	filter = {},
 }: QueriedResourceGetRequestServiceInput<DesktopComputerDocument>): Promise<number> {
 	try {
-		const totalDesktopComputer = await DesktopComputerModel.countDocuments(
+		const totalDesktopComputers = await DesktopComputerModel.countDocuments(
 			filter,
 		)
 			.lean()
 			.exec();
-		return totalDesktopComputer;
+		return totalDesktopComputers;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedTotalDesktopComputerService" });
+		throw new Error(error, { cause: "getQueriedTotalDesktopComputersService" });
 	}
 }
 
@@ -75,20 +76,20 @@ async function getDesktopComputerByIdService(
 }
 
 async function updateDesktopComputerByIdService({
-	fieldsToUpdate,
-	desktopComputerId,
-}: {
-	desktopComputerId: Types.ObjectId | string;
-	fieldsToUpdate: Record<
-		keyof DesktopComputerDocument,
-		DesktopComputerDocument[keyof DesktopComputerDocument]
-	>;
-}): DatabaseResponseNullable<DesktopComputerDocument> {
+	_id,
+	fields,
+	updateOperator,
+}: UpdateDocumentByIdServiceInput<DesktopComputerDocument>): DatabaseResponseNullable<DesktopComputerDocument> {
+	const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
+	const updateObject = JSON.parse(updateString);
+
 	try {
 		const desktopComputer = await DesktopComputerModel.findByIdAndUpdate(
-			desktopComputerId,
-			{ $set: fieldsToUpdate },
-			{ new: true },
+			_id,
+			updateObject,
+			{
+				new: true,
+			},
 		)
 
 			.lean()
