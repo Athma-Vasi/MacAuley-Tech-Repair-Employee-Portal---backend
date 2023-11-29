@@ -133,10 +133,14 @@ type QueriedTotalResourceGetRequestServiceInput<
  */
 type ResourceRequestServerResponse<
 	Document extends Record<string, any> = Record<string, any>,
-	Keys extends keyof Document = keyof Document,
+	Key extends keyof Document = keyof Document,
 > = {
 	message: string;
-	resourceData: Array<Omit<Document, "password" | Keys>>;
+	// resourceData: Array<Omit<Document, Key>>;
+	resourceData: (FlattenMaps<Omit<Document, Key>> &
+		Required<{
+			_id: Types.ObjectId;
+		}>)[];
 };
 
 /**
@@ -144,11 +148,12 @@ type ResourceRequestServerResponse<
  */
 type GetQueriedResourceRequestServerResponse<
 	Document extends Record<string, any> = Record<string, any>,
+	Key extends keyof Document = keyof Document,
 > = {
 	message: string;
 	pages: number;
 	totalDocuments: number;
-	resourceData: Array<Partial<Document>>;
+	resourceData: Array<Omit<Document, Key>>;
 };
 
 type RequestStatus = "pending" | "approved" | "rejected";
@@ -157,7 +162,7 @@ type RequestStatus = "pending" | "approved" | "rejected";
  * Used in the update${resource}ByIdService default PATCH request service functions for all resources.
  */
 type DocumentUpdateOperation<
-	Document extends Record<string, any> = Record<string, any>,
+	Document extends Record<Key, Value>,
 	Key extends keyof Document = keyof Document,
 	Value extends Document[Key] = Document[Key],
 > =
@@ -176,7 +181,7 @@ type FieldOperators =
 	| "$unset";
 
 type DocumentFieldUpdateOperation<
-	Document extends Record<string, any> = Record<string, any>,
+	Document extends Record<Key, Value>,
 	Key extends keyof Document = keyof Document,
 	Value extends Document[Key] = Document[Key],
 > = {
@@ -188,7 +193,7 @@ type DocumentFieldUpdateOperation<
 type ArrayOperators = "$addToSet" | "$pop" | "$pull" | "$push" | "$pullAll";
 
 type DocumentArrayUpdateOperation<
-	Document extends Record<string, any> = Record<string, any>,
+	Document extends Record<Key, Value>,
 	Key extends keyof Document = keyof Document,
 	Value extends Document[Key] = Document[Key],
 > = {
@@ -197,21 +202,35 @@ type DocumentArrayUpdateOperation<
 	fields: Record<Key, Value>;
 };
 
+/**
+ * Used in the update${resource}ByIdService default PATCH request service functions for all resources.
+ */
+type UpdateDocumentByIdServiceInput<
+	Document extends Record<Key, Value>,
+	Key extends keyof Document = keyof Document,
+	Value extends Document[Key] = Document[Key],
+> = {
+	_id: Types.ObjectId | string;
+	fields: Record<Key, Value>;
+	updateOperator: FieldOperators | ArrayOperators;
+};
+
 export type {
-	FieldOperators,
 	ArrayOperators,
 	DatabaseResponse,
 	DatabaseResponseNullable,
+	DocumentUpdateOperation,
+	FieldOperators,
 	FileInfoObject,
 	FileUploadObject,
 	GetQueriedResourceByUserRequest,
 	GetQueriedResourceRequest,
 	GetQueriedResourceRequestServerResponse,
-	DocumentUpdateOperation,
 	QueriedResourceGetRequestServiceInput,
 	QueriedTotalResourceGetRequestServiceInput,
 	QueryObjectParsed,
 	QueryObjectParsedWithDefaults,
 	RequestStatus,
 	ResourceRequestServerResponse,
+	UpdateDocumentByIdServiceInput,
 };

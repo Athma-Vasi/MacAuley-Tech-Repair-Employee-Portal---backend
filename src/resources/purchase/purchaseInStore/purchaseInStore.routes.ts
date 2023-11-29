@@ -1,43 +1,49 @@
-import { Router } from 'express';
-import { assignQueryDefaults, verifyRoles } from '../../../middlewares';
+import { Router } from "express";
+import { assignQueryDefaults, verifyRoles } from "../../../middlewares";
 
 import {
-  addFieldToPurchaseInStoresBulkHandler,
-  createNewPurchaseInStoreHandler,
-  createNewPurchaseInStoresBulkHandler,
-  deletePurchaseInStoreHandler,
-  getAllPurchaseInStoresBulkHandler,
-  getPurchaseInStoreByIdHandler,
-  getQueriedPurchaseInStoresHandler,
-  getQueriedPurchasesInStoreByUserHandler,
-  updatePurchaseInStoreByIdHandler,
-} from './purchaseInStore.controller';
-import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../constants';
+	addFieldToPurchaseInStoresBulkHandler,
+	createNewPurchaseInStoreHandler,
+	createNewPurchaseInStoresBulkHandler,
+	deletePurchaseInStoreHandler,
+	getAllPurchaseInStoresBulkHandler,
+	getPurchaseInStoreByIdHandler,
+	getQueriedPurchaseInStoresHandler,
+	getQueriedPurchasesInStoreByUserHandler,
+	updatePurchaseInStoreByIdHandler,
+} from "./purchaseInStore.controller";
+import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
 const purchaseInStoreRouter = Router();
 
 purchaseInStoreRouter.use(verifyRoles());
 
 purchaseInStoreRouter
-  .route('/')
-  .post(createNewPurchaseInStoreHandler)
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedPurchaseInStoresHandler)
-  .delete(deletePurchaseInStoreHandler);
+	.route("/")
+	.post(createNewPurchaseInStoreHandler)
+	.get(
+		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
+		getQueriedPurchaseInStoresHandler,
+	)
+	.delete(deletePurchaseInStoreHandler);
 
 purchaseInStoreRouter
-  .route('/user')
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedPurchasesInStoreByUserHandler);
+	.route("/user")
+	.get(
+		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
+		getQueriedPurchasesInStoreByUserHandler,
+	);
 
 // DEV ROUTES
 purchaseInStoreRouter
-  .route('/dev')
-  .post(createNewPurchaseInStoresBulkHandler)
-  .get(getAllPurchaseInStoresBulkHandler);
-purchaseInStoreRouter.route('/dev/add-field').post(addFieldToPurchaseInStoresBulkHandler);
+	.route("/dev")
+	.post(createNewPurchaseInStoresBulkHandler)
+	.get(getAllPurchaseInStoresBulkHandler)
+	.patch(addFieldToPurchaseInStoresBulkHandler);
 
 purchaseInStoreRouter
-  .route('/:purchaseInStoreId')
-  .get(getPurchaseInStoreByIdHandler)
-  .patch(updatePurchaseInStoreByIdHandler);
+	.route("/:purchaseInStoreId")
+	.get(getPurchaseInStoreByIdHandler)
+	.patch(updatePurchaseInStoreByIdHandler);
 
 export { purchaseInStoreRouter };

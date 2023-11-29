@@ -117,7 +117,7 @@ const createNewProductReviewsBulkHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Add field to all productReviews
-// @route  PATCH /api/v1/product-review/dev/add-field
+// @route  PATCH /api/v1/product-review/dev
 // @access Private
 const addFieldToProductReviewsBulkHandler = expressAsyncHandler(
 	async (

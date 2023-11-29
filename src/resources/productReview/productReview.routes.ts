@@ -32,10 +32,12 @@ productReviewRouter
 	)
 	.delete(deleteProductReviewHandler);
 
-productReviewRouter.route("/user").get(
-	assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
-	getQueriedPurchasesOnlineByUserHandler,
-);
+productReviewRouter
+	.route("/user")
+	.get(
+		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
+		getQueriedPurchasesOnlineByUserHandler,
+	);
 
 productReviewRouter
 	.route("/delete-all")
@@ -45,10 +47,8 @@ productReviewRouter
 productReviewRouter
 	.route("/dev")
 	.post(createNewProductReviewsBulkHandler)
-	.get(getAllProductReviewsBulkHandler);
-productReviewRouter
-	.route("/dev/add-field")
-	.post(addFieldToProductReviewsBulkHandler);
+	.get(getAllProductReviewsBulkHandler)
+	.patch(addFieldToProductReviewsBulkHandler);
 
 productReviewRouter
 	.route("/:productReviewId")

@@ -25,6 +25,7 @@ import {
 	getAllCustomersService,
 	updateCustomerDocumentByIdService,
 	getCustomerDocWithPaymentInfoService,
+	deleteAllCustomersService,
 } from "./customer.service";
 import { CustomerDocument, CustomerSchema } from "./customer.model";
 import {
@@ -186,7 +187,7 @@ const createNewCustomersBulkHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Update customer fields in bulk
-// @route  PATCH /api/v1/customer/dev/add-field
+// @route  PATCH /api/v1/customer/dev
 // @access Private
 const updateCustomerFieldsBulkHandler = expressAsyncHandler(
 	async (
@@ -336,7 +337,7 @@ const getCustomerByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Delete a customer
-// @route  DELETE /api/v1/customer
+// @route  DELETE /api/v1/customer/:id
 // @access Private
 const deleteCustomerHandler = expressAsyncHandler(
 	async (
@@ -344,18 +345,33 @@ const deleteCustomerHandler = expressAsyncHandler(
 		response: Response<ResourceRequestServerResponse<CustomerDocument>>,
 	) => {
 		// only managers/admin are allowed to delete customers
-		const { customerToBeDeletedId } = request.body;
+		const { customerId } = request.params;
 
-		if (!customerToBeDeletedId) {
+		const deletedCustomer = await deleteCustomerService(customerId);
+
+		if (!deletedCustomer.acknowledged) {
 			response.status(400).json({
-				message: "customerToBeDeletedId is required",
+				message: "Failed to delete customer. Please try again!",
 				resourceData: [],
 			});
 			return;
 		}
 
-		// delete customer if all checks pass successfully
-		const deletedCustomer = await deleteCustomerService(customerToBeDeletedId);
+		response
+			.status(200)
+			.json({ message: "Successfully deleted customer!", resourceData: [] });
+	},
+);
+
+// @desc   Delete all customers
+// @route  DELETE /api/v1/customer/delete-all
+// @access Private
+const deleteAllCustomersHandler = expressAsyncHandler(
+	async (
+		request: DeleteCustomerRequest,
+		response: Response<ResourceRequestServerResponse<CustomerDocument>>,
+	) => {
+		const deletedCustomer = await deleteAllCustomersService();
 
 		if (!deletedCustomer.acknowledged) {
 			response.status(400).json({
@@ -372,7 +388,7 @@ const deleteCustomerHandler = expressAsyncHandler(
 );
 
 // @desc   Update a customer
-// @route  PATCH /api/v1/customer
+// @route  PATCH /api/v1/customer/:id
 // @access Private
 const updateCustomerByIdHandler = expressAsyncHandler(
 	async (
@@ -380,9 +396,9 @@ const updateCustomerByIdHandler = expressAsyncHandler(
 		response: Response<ResourceRequestServerResponse<CustomerDocument>>,
 	) => {
 		const {
-			customerId,
 			documentUpdate: { fields, updateOperator },
 		} = request.body;
+		const { customerId } = request.params;
 
 		const updatedCustomer = await updateCustomerDocumentByIdService({
 			fields,
@@ -487,14 +503,15 @@ const updateCustomerPasswordHandler = expressAsyncHandler(
 );
 
 export {
-	updateCustomerFieldsBulkHandler,
 	createNewCustomerHandler,
 	createNewCustomersBulkHandler,
+	deleteAllCustomersHandler,
 	deleteCustomerHandler,
 	getAllCustomersBulkHandler,
 	getCustomerByIdHandler,
+	getCustomerDocWithPaymentInfoHandler,
 	getQueriedCustomersHandler,
 	updateCustomerByIdHandler,
+	updateCustomerFieldsBulkHandler,
 	updateCustomerPasswordHandler,
-	getCustomerDocWithPaymentInfoHandler,
 };

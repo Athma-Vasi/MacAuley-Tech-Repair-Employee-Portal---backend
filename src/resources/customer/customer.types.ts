@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 
 import type { RequestAfterJWTVerification } from "../auth";
-import type { CustomerSchema } from "./customer.model";
+import type { CustomerDocument, CustomerSchema } from "./customer.model";
 import {
 	DocumentUpdateOperation,
 	GetQueriedResourceRequest,
@@ -22,7 +22,18 @@ interface DeleteCustomerRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		customerToBeDeletedId: string;
+	};
+	params: { customerId: string };
+}
+
+interface DeleteAllCustomersRequest extends RequestAfterJWTVerification {
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
 	};
 }
 
@@ -48,9 +59,9 @@ interface UpdateCustomerRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		customerId: Types.ObjectId;
-		documentUpdate: DocumentUpdateOperation<CustomerSchema>;
+		documentUpdate: DocumentUpdateOperation<CustomerDocument>;
 	};
+	params: { customerId: string };
 }
 
 interface UpdateCustomerPasswordRequest extends RequestAfterJWTVerification {
@@ -64,6 +75,7 @@ interface UpdateCustomerPasswordRequest extends RequestAfterJWTVerification {
 		currentPassword: string;
 		newPassword: string;
 	};
+	params: { customerId: string };
 }
 
 // DEV ROUTE
@@ -90,7 +102,7 @@ interface UpdateCustomerFieldsBulkRequest extends RequestAfterJWTVerification {
 		sessionId: Types.ObjectId;
 		customerFields: {
 			customerId: Types.ObjectId;
-			documentUpdate: DocumentUpdateOperation<CustomerSchema>;
+			documentUpdate: DocumentUpdateOperation<CustomerDocument>;
 		}[];
 	};
 }
@@ -112,6 +124,7 @@ export type {
 	CreateNewCustomerRequest,
 	CreateNewCustomersBulkRequest,
 	DeleteCustomerRequest,
+	DeleteAllCustomersRequest,
 	GetAllCustomersBulkRequest,
 	GetAllCustomersRequest,
 	GetCustomerByIdRequest,

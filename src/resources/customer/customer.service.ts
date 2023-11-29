@@ -11,6 +11,7 @@ import {
 	FieldOperators,
 	QueriedResourceGetRequestServiceInput,
 	QueriedTotalResourceGetRequestServiceInput,
+	UpdateDocumentByIdServiceInput,
 } from "../../types";
 
 type CheckUserExistsServiceInput = {
@@ -109,6 +110,15 @@ async function deleteCustomerService(
 	}
 }
 
+async function deleteAllCustomersService(): Promise<DeleteResult> {
+	try {
+		const customers = await CustomerModel.deleteMany({}).lean().exec();
+		return customers;
+	} catch (error: any) {
+		throw new Error(error, { cause: "deleteAllCustomersService" });
+	}
+}
+
 async function getCustomerByIdService(
 	userId: string | Types.ObjectId,
 ): DatabaseResponseNullable<CustomerDocument> {
@@ -191,17 +201,11 @@ async function getQueriedTotalCustomersService({
 	}
 }
 
-type UpdateCustomerDocumentByIdServiceInput = {
-	fields: Record<keyof CustomerSchema, CustomerSchema[keyof CustomerSchema]>;
-	updateOperator: FieldOperators | ArrayOperators;
-	_id: Types.ObjectId;
-};
-
 async function updateCustomerDocumentByIdService({
 	fields,
 	updateOperator,
 	_id,
-}: UpdateCustomerDocumentByIdServiceInput): DatabaseResponseNullable<CustomerDocument> {
+}: UpdateDocumentByIdServiceInput<CustomerDocument>): DatabaseResponseNullable<CustomerDocument> {
 	const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
 	const updateObject = JSON.parse(updateString);
 
@@ -298,4 +302,5 @@ export {
 	getCustomerWithPasswordService,
 	getAllCustomersService,
 	getCustomerDocWithPaymentInfoService,
+	deleteAllCustomersService,
 };

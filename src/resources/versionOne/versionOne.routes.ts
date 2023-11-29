@@ -6,6 +6,7 @@ import { userRouter } from "../user";
 import { repairNoteRouter } from "../repairNote";
 import { customerRouter } from "../customer";
 import { productReviewRouter } from "../productReview";
+import { productCategoryRouter } from "../productCategory";
 
 const versionOneRouter = Router();
 // route: /api/v1
@@ -15,6 +16,7 @@ versionOneRouter.use("/repair-note", repairNoteRouter);
 versionOneRouter.use("/file-upload", fileUploadRouter);
 versionOneRouter.use("/comment", commentRouter);
 versionOneRouter.use("/customer", customerRouter);
+versionOneRouter.use("/product-category", productCategoryRouter);
 versionOneRouter.use("/product-review", productReviewRouter);
 
 export { versionOneRouter };

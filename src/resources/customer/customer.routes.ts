@@ -16,6 +16,7 @@ import {
 	createNewCustomersBulkHandler,
 	getAllCustomersBulkHandler,
 	getCustomerDocWithPaymentInfoHandler,
+	deleteAllCustomersHandler,
 } from "./customer.controller";
 import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../constants";
 
@@ -31,9 +32,7 @@ customerRouter
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedCustomersHandler,
 	)
-	.post(createNewCustomerHandler)
-	.patch(verifyJWTMiddleware, verifyRoles(), updateCustomerByIdHandler)
-	.delete(verifyJWTMiddleware, verifyRoles(), deleteCustomerHandler);
+	.post(createNewCustomerHandler);
 
 customerRouter
 	.route("/payment-info")
@@ -45,17 +44,23 @@ customerRouter
 
 customerRouter
 	.route("/update-password")
-	.put(verifyJWTMiddleware, verifyRoles(), updateCustomerPasswordHandler);
+	.patch(verifyJWTMiddleware, verifyRoles(), updateCustomerPasswordHandler);
+
+customerRouter
+	.route("/delete-all")
+	.delete(verifyJWTMiddleware, verifyRoles(), deleteAllCustomersHandler);
 
 // DEV ROUTES
 customerRouter
 	.route("/dev")
 	.post(createNewCustomersBulkHandler)
-	.get(getAllCustomersBulkHandler);
-customerRouter.route("/dev/add-field").post(updateCustomerFieldsBulkHandler);
+	.get(getAllCustomersBulkHandler)
+	.patch(updateCustomerFieldsBulkHandler);
 
 customerRouter
 	.route("/:customerId")
-	.get(verifyJWTMiddleware, verifyRoles(), getCustomerByIdHandler);
+	.get(verifyJWTMiddleware, verifyRoles(), getCustomerByIdHandler)
+	.patch(verifyJWTMiddleware, verifyRoles(), updateCustomerByIdHandler)
+	.delete(verifyJWTMiddleware, verifyRoles(), deleteCustomerHandler);
 
 export { customerRouter };

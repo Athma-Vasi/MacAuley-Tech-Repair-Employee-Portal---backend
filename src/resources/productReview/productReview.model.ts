@@ -1,5 +1,5 @@
 import { Types, Schema, model } from "mongoose";
-import { ProductCategory } from "../actions/dashboard/productCategory";
+import { ProductCategory } from "../productCategory";
 
 type RatingKind =
 	| "0.5"

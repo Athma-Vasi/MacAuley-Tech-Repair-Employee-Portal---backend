@@ -27,7 +27,7 @@ async function createNewProductReviewService(
 async function getAllProductReviewsService(): DatabaseResponse<ProductReviewDocument> {
 	try {
 		const productReviews = await ProductReviewModel.find({})
-			.select(["-__v"])
+
 			.lean()
 			.exec();
 		return productReviews;
@@ -47,7 +47,7 @@ async function getQueriedProductReviewsService({
 			projection,
 			options,
 		)
-			.select(["-__v"])
+
 			.lean()
 			.exec();
 		return productReviews;
@@ -80,7 +80,7 @@ async function getQueriedProductReviewsByUserService({
 			projection,
 			options,
 		)
-			.select(["-__v"])
+
 			.lean()
 			.exec();
 		return productReviews;
@@ -94,7 +94,7 @@ async function getProductReviewByIdService(
 ): DatabaseResponseNullable<ProductReviewDocument> {
 	try {
 		const productReview = await ProductReviewModel.findById(productReviewId)
-			.select(["-__v"])
+
 			.lean()
 			.exec();
 		return productReview;
@@ -116,7 +116,7 @@ async function updateProductReviewByIdService({
 			{ ...productReviewFields },
 			{ new: true },
 		)
-			.select("-__v")
+
 			.lean()
 			.exec();
 		return productReview;
@@ -126,7 +126,7 @@ async function updateProductReviewByIdService({
 }
 
 async function deleteAProductReviewService(
-	productReviewId: string,
+	productReviewId: string | Types.ObjectId,
 ): Promise<DeleteResult> {
 	try {
 		const productReview = await ProductReviewModel.deleteOne({
