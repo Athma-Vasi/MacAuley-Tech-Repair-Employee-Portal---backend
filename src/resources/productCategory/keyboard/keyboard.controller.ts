@@ -11,6 +11,7 @@ import type {
 	GetKeyboardByIdRequest,
 	GetQueriedKeyboardsRequest,
 	UpdateKeyboardByIdRequest,
+	UpdateKeyboardsBulkRequest,
 } from "./keyboard.types";
 import type {
 	GetQueriedResourceRequestServerResponse,
@@ -34,10 +35,16 @@ import {
 	deleteFileUploadByIdService,
 	getFileUploadByIdService,
 } from "../../fileUpload";
-import { ProductServerResponse } from "../product.types";
+
+import {
+	ProductReviewDocument,
+	deleteAProductReviewService,
+	getProductReviewByIdService,
+} from "../../productReview";
+import { removeUndefinedAndNullValues } from "../../../utils";
 
 // @desc   Create new keyboard
-// @route  POST /api/v1/actions/dashboard/product-category/keyboard
+// @route  POST /api/v1/product-category/keyboard
 // @access Private/Admin/Manager
 const createNewKeyboardHandler = expressAsyncHandler(
 	async (
@@ -75,7 +82,7 @@ const createNewKeyboardHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Create new keyboards bulk
-// @route  POST /api/v1/actions/dashboard/product-category/keyboard/dev
+// @route  POST /api/v1/product-category/keyboard/dev
 // @access Private/Admin/Manager
 const createNewKeyboardBulkHandler = expressAsyncHandler(
 	async (
@@ -103,32 +110,98 @@ const createNewKeyboardBulkHandler = expressAsyncHandler(
 				resourceData: successfullyCreatedKeyboards,
 			});
 			return;
-		} else if (successfullyCreatedKeyboards.length === 0) {
+		}
+
+		if (successfullyCreatedKeyboards.length === 0) {
 			response.status(400).json({
 				message: "Could not create any keyboards",
 				resourceData: [],
 			});
 			return;
-		} else {
+		}
+
+		response.status(201).json({
+			message: `Successfully created ${
+				keyboardSchemas.length - successfullyCreatedKeyboards.length
+			} keyboards`,
+			resourceData: successfullyCreatedKeyboards,
+		});
+		return;
+	},
+);
+
+// @desc   Update keyboards bulk
+// @route  PATCH /api/v1/product-category/keyboard/dev
+// @access Private/Admin/Manager
+const updateKeyboardsBulkHandler = expressAsyncHandler(
+	async (
+		request: UpdateKeyboardsBulkRequest,
+		response: Response<ResourceRequestServerResponse<KeyboardDocument>>,
+	) => {
+		const { keyboardFields } = request.body;
+
+		const updatedKeyboards = await Promise.all(
+			keyboardFields.map(async (keyboardField) => {
+				const {
+					keyboardId,
+					documentUpdate: { fields, updateOperator },
+				} = keyboardField;
+
+				const updatedKeyboard = await updateKeyboardByIdService({
+					_id: keyboardId,
+					fields,
+					updateOperator,
+				});
+
+				return updatedKeyboard;
+			}),
+		);
+
+		// filter out any keyboards that were not updated
+		const successfullyUpdatedKeyboards = updatedKeyboards.filter(
+			removeUndefinedAndNullValues,
+		);
+
+		// check if any keyboards were updated
+		if (successfullyUpdatedKeyboards.length === keyboardFields.length) {
 			response.status(201).json({
-				message: `Successfully created ${
-					keyboardSchemas.length - successfullyCreatedKeyboards.length
-				} keyboards`,
-				resourceData: successfullyCreatedKeyboards,
+				message: `Successfully updated ${successfullyUpdatedKeyboards.length} keyboards`,
+				resourceData: successfullyUpdatedKeyboards,
 			});
 			return;
 		}
+
+		if (successfullyUpdatedKeyboards.length === 0) {
+			response.status(400).json({
+				message: "Could not update any keyboards",
+				resourceData: [],
+			});
+			return;
+		}
+
+		response.status(201).json({
+			message: `Successfully updated ${
+				keyboardFields.length - successfullyUpdatedKeyboards.length
+			} keyboards`,
+			resourceData: successfullyUpdatedKeyboards,
+		});
+		return;
 	},
 );
 
 // @desc   Get all keyboards
-// @route  GET /api/v1/actions/dashboard/product-category/keyboard
+// @route  GET /api/v1/product-category/keyboard
 // @access Private/Admin/Manager
 const getQueriedKeyboardsHandler = expressAsyncHandler(
 	async (
 		request: GetQueriedKeyboardsRequest,
 		response: Response<
-			GetQueriedResourceRequestServerResponse<KeyboardDocument>
+			GetQueriedResourceRequestServerResponse<
+				KeyboardDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
 		>,
 	) => {
 		let { newQueryFlag, totalDocuments } = request.body;
@@ -159,7 +232,7 @@ const getQueriedKeyboardsHandler = expressAsyncHandler(
 			return;
 		}
 
-		// find all fileUploads associated with the keyboards (in parallel)
+		// find all fileUploads associated with the keyboards
 		const fileUploadsArrArr = await Promise.all(
 			keyboards.map(async (keyboard) => {
 				const fileUploadPromises = keyboard.uploadedFilesIds.map(
@@ -174,37 +247,61 @@ const getQueriedKeyboardsHandler = expressAsyncHandler(
 				const fileUploads = await Promise.all(fileUploadPromises);
 
 				// Filter out any undefined values (in case fileUpload was not found)
-				return fileUploads.filter((fileUpload) => fileUpload);
+				return fileUploads.filter(removeUndefinedAndNullValues);
+			}),
+		);
+
+		// find all reviews associated with the keyboards
+		const reviewsArrArr = await Promise.all(
+			keyboards.map(async (keyboard) => {
+				const reviewPromises = keyboard.reviewsIds.map(async (reviewId) => {
+					const review = await getProductReviewByIdService(reviewId);
+
+					return review;
+				});
+
+				// Wait for all the promises to resolve before continuing to the next iteration
+				const reviews = await Promise.all(reviewPromises);
+
+				// Filter out any undefined values (in case review was not found)
+				return reviews.filter(removeUndefinedAndNullValues);
 			}),
 		);
 
 		// create keyboardServerResponse array
-		const keyboardServerResponseArray = keyboards
-			.map((keyboard, index) => {
-				const fileUploads = fileUploadsArrArr[index];
-				return {
-					...keyboard,
-					fileUploads,
-				};
-			})
-			.filter((keyboard) => keyboard);
+		const keyboardServerResponseArray = keyboards.map((keyboard, index) => {
+			const fileUploads = fileUploadsArrArr[index];
+			const productReviews = reviewsArrArr[index];
+			return {
+				...keyboard,
+				fileUploads,
+				productReviews,
+			};
+		});
 
 		response.status(200).json({
 			message: "Successfully retrieved keyboards",
 			pages: Math.ceil(totalDocuments / Number(options?.limit)),
 			totalDocuments,
-			resourceData: keyboardServerResponseArray as KeyboardDocument[],
+			resourceData: keyboardServerResponseArray,
 		});
 	},
 );
 
 // @desc   Get keyboard by id
-// @route  GET /api/v1/actions/dashboard/product-category/keyboard/:keyboardId
+// @route  GET /api/v1/product-category/keyboard/:keyboardId
 // @access Private/Admin/Manager
 const getKeyboardByIdHandler = expressAsyncHandler(
 	async (
 		request: GetKeyboardByIdRequest,
-		response: Response<ResourceRequestServerResponse<KeyboardDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				KeyboardDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const keyboardId = request.params.keyboardId;
 
@@ -218,20 +315,28 @@ const getKeyboardByIdHandler = expressAsyncHandler(
 		}
 
 		// get all fileUploads associated with the keyboard
-		const fileUploadsArr = await Promise.all(
+		const fileUploads = await Promise.all(
 			keyboard.uploadedFilesIds.map(async (uploadedFileId) => {
 				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
-				return fileUpload as FileUploadDocument;
+				return fileUpload;
+			}),
+		);
+
+		// get all reviews associated with the keyboard
+		const productReviews = await Promise.all(
+			keyboard.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
+
+				return review;
 			}),
 		);
 
 		// create keyboardServerResponse
-		const keyboardServerResponse: ProductServerResponse<KeyboardDocument> = {
+		const keyboardServerResponse = {
 			...keyboard,
-			fileUploads: fileUploadsArr.filter(
-				(fileUpload) => fileUpload,
-			) as FileUploadDocument[],
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
 		};
 
 		response.status(200).json({
@@ -242,34 +347,30 @@ const getKeyboardByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Update a keyboard by id
-// @route  PUT /api/v1/actions/dashboard/product-category/keyboard/:keyboardId
+// @route  PUT /api/v1/product-category/keyboard/:keyboardId
 // @access Private/Admin/Manager
 const updateKeyboardByIdHandler = expressAsyncHandler(
 	async (
 		request: UpdateKeyboardByIdRequest,
-		response: Response<ResourceRequestServerResponse<KeyboardDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				KeyboardDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const { keyboardId } = request.params;
-		const { keyboardFields } = request.body;
-
-		// check if keyboard exists
-		const keyboardExists = await getKeyboardByIdService(keyboardId);
-		if (!keyboardExists) {
-			response
-				.status(404)
-				.json({ message: "Keyboard does not exist", resourceData: [] });
-			return;
-		}
-
-		const newKeyboard = {
-			...keyboardExists,
-			...keyboardFields,
-		};
+		const {
+			documentUpdate: { fields, updateOperator },
+		} = request.body;
 
 		// update keyboard
 		const updatedKeyboard = await updateKeyboardByIdService({
-			keyboardId,
-			fieldsToUpdate: newKeyboard,
+			_id: keyboardId,
+			fields,
+			updateOperator,
 		});
 
 		if (!updatedKeyboard) {
@@ -280,58 +381,40 @@ const updateKeyboardByIdHandler = expressAsyncHandler(
 			return;
 		}
 
-		response.status(200).json({
-			message: "Keyboard updated successfully",
-			resourceData: [updatedKeyboard],
-		});
-	},
-);
-
-// @desc   Return all associated file uploads
-// @route  GET /api/v1/actions/dashboard/product-category/keyboard/fileUploads
-// @access Private/Admin/Manager
-const returnAllFileUploadsForKeyboardsHandler = expressAsyncHandler(
-	async (
-		_request: GetKeyboardByIdRequest,
-		response: Response<ResourceRequestServerResponse<FileUploadDocument>>,
-	) => {
-		const fileUploadsIds = await returnAllKeyboardsUploadedFileIdsService();
-
-		if (fileUploadsIds.length === 0) {
-			response
-				.status(404)
-				.json({ message: "No file uploads found", resourceData: [] });
-			return;
-		}
-
-		const fileUploads = (await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) => {
-				const fileUpload = await getFileUploadByIdService(fileUploadId);
+		// get all fileUploads associated with the keyboard
+		const fileUploads = await Promise.all(
+			updatedKeyboard.uploadedFilesIds.map(async (uploadedFileId) => {
+				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
 				return fileUpload;
 			}),
-		)) as FileUploadDocument[];
+		);
 
-		// filter out any undefined values (in case fileUpload was not found)
-		const filteredFileUploads = fileUploads.filter((fileUpload) => fileUpload);
+		// get all reviews associated with the keyboard
+		const productReviews = await Promise.all(
+			updatedKeyboard.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
 
-		if (filteredFileUploads.length !== fileUploadsIds.length) {
-			response.status(404).json({
-				message: "Some file uploads could not be found.",
-				resourceData: filteredFileUploads,
-			});
-			return;
-		}
+				return review;
+			}),
+		);
+
+		// create keyboardServerResponse
+		const keyboardServerResponse = {
+			...updatedKeyboard,
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
+		};
 
 		response.status(200).json({
-			message: "Successfully retrieved file uploads",
-			resourceData: filteredFileUploads,
+			message: "Keyboard updated successfully",
+			resourceData: [keyboardServerResponse],
 		});
 	},
 );
 
 // @desc   Delete all keyboards
-// @route  DELETE /api/v1/actions/dashboard/product-category/keyboard
+// @route  DELETE /api/v1/product-category/keyboard
 // @access Private/Admin/Manager
 const deleteAllKeyboardsHandler = expressAsyncHandler(
 	async (
@@ -339,21 +422,21 @@ const deleteAllKeyboardsHandler = expressAsyncHandler(
 		response: Response<ResourceRequestServerResponse<KeyboardDocument>>,
 	) => {
 		// grab all keyboards file upload ids
-		const fileUploadsIds = await returnAllKeyboardsUploadedFileIdsService();
+		const uploadedFilesIds = await returnAllKeyboardsUploadedFileIdsService();
 
 		// delete all file uploads associated with all keyboards
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) =>
-				deleteFileUploadByIdService(fileUploadId),
+		await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
-		if (!deleteFileUploadsResult.every((result) => result.deletedCount !== 0)) {
-			response.status(400).json({
-				message: "Some file uploads could not be deleted. Please try again.",
-				resourceData: [],
-			});
-			return;
-		}
+
+		// delete all reviews associated with all keyboards
+		await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
 
 		// delete all keyboards
 		const deleteKeyboardsResult: DeleteResult =
@@ -374,7 +457,7 @@ const deleteAllKeyboardsHandler = expressAsyncHandler(
 );
 
 // @desc   Delete a keyboard by id
-// @route  DELETE /api/v1/actions/dashboard/product-category/keyboard/:keyboardId
+// @route  DELETE /api/v1/product-category/keyboard/:keyboardId
 // @access Private/Admin/Manager
 const deleteAKeyboardHandler = expressAsyncHandler(
 	async (
@@ -396,21 +479,19 @@ const deleteAKeyboardHandler = expressAsyncHandler(
 		// if it is not an array, it is made to be an array
 		const uploadedFilesIds = [...keyboardExists.uploadedFilesIds];
 
-		// delete all file uploads associated with this keyboard
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			uploadedFilesIds.map(async (uploadedFileId) =>
-				deleteFileUploadByIdService(uploadedFileId),
+		// delete all file uploads associated with all keyboards
+		await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
 
-		if (deleteFileUploadsResult.some((result) => result.deletedCount === 0)) {
-			response.status(400).json({
-				message:
-					"Some file uploads associated with this keyboard could not be deleted. Keyboard not deleted. Please try again.",
-				resourceData: [],
-			});
-			return;
-		}
+		// delete all reviews associated with all keyboards
+		await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
 
 		// delete keyboard by id
 		const deleteKeyboardResult: DeleteResult =
@@ -437,6 +518,6 @@ export {
 	deleteAllKeyboardsHandler,
 	getKeyboardByIdHandler,
 	getQueriedKeyboardsHandler,
-	returnAllFileUploadsForKeyboardsHandler,
 	updateKeyboardByIdHandler,
+	updateKeyboardsBulkHandler,
 };

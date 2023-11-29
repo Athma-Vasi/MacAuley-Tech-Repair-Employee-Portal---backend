@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { assignQueryDefaults, verifyRoles } from "../../../middlewares";
+import {
+	assignQueryDefaults,
+	verifyJWTMiddleware,
+	verifyRoles,
+} from "../../../middlewares";
 import {
 	createNewKeyboardBulkHandler,
 	createNewKeyboardHandler,
@@ -7,8 +11,8 @@ import {
 	deleteAllKeyboardsHandler,
 	getKeyboardByIdHandler,
 	getQueriedKeyboardsHandler,
-	returnAllFileUploadsForKeyboardsHandler,
 	updateKeyboardByIdHandler,
+	updateKeyboardsBulkHandler,
 } from "./keyboard.controller";
 import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
@@ -19,23 +23,29 @@ keyboardRouter.use(verifyRoles());
 keyboardRouter
 	.route("/")
 	.get(
+		verifyJWTMiddleware,
+		verifyRoles(),
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedKeyboardsHandler,
 	)
-	.post(createNewKeyboardHandler)
-	.delete(deleteAllKeyboardsHandler);
+	.post(createNewKeyboardHandler);
+
+// separate route for safety reasons (as it deletes all documents in the collection)
+keyboardRouter
+	.route("/delete-all")
+	.delete(verifyJWTMiddleware, verifyRoles(), deleteAllKeyboardsHandler);
 
 // DEV ROUTE
-keyboardRouter.route("/dev").post(createNewKeyboardBulkHandler);
-
 keyboardRouter
-	.route("/fileUploads")
-	.post(returnAllFileUploadsForKeyboardsHandler);
+	.route("/dev")
+	.post(createNewKeyboardBulkHandler)
+	.patch(updateKeyboardsBulkHandler);
 
+// single document routes
 keyboardRouter
 	.route("/:keyboardId")
-	.get(getKeyboardByIdHandler)
-	.delete(deleteAKeyboardHandler)
-	.put(updateKeyboardByIdHandler);
+	.get(verifyJWTMiddleware, verifyRoles(), getKeyboardByIdHandler)
+	.delete(verifyJWTMiddleware, verifyRoles(), deleteAKeyboardHandler)
+	.patch(verifyJWTMiddleware, verifyRoles(), updateKeyboardByIdHandler);
 
 export { keyboardRouter };

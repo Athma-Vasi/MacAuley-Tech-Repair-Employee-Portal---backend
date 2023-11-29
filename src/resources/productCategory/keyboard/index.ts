@@ -5,75 +5,77 @@
 /**
  * Imports
  */
-import { keyboardRouter } from './keyboard.routes';
-import { KeyboardModel } from './keyboard.model';
+import { keyboardRouter } from "./keyboard.routes";
+import { KeyboardModel } from "./keyboard.model";
 
 import {
-  createNewKeyboardBulkHandler,
-  createNewKeyboardHandler,
-  deleteAKeyboardHandler,
-  deleteAllKeyboardsHandler,
-  getKeyboardByIdHandler,
-  getQueriedKeyboardsHandler,
-  returnAllFileUploadsForKeyboardsHandler,
-  updateKeyboardByIdHandler,
-} from './keyboard.controller';
+	createNewKeyboardBulkHandler,
+	createNewKeyboardHandler,
+	deleteAKeyboardHandler,
+	deleteAllKeyboardsHandler,
+	getKeyboardByIdHandler,
+	getQueriedKeyboardsHandler,
+	updateKeyboardByIdHandler,
+	updateKeyboardsBulkHandler,
+} from "./keyboard.controller";
 
 import {
-  createNewKeyboardService,
-  deleteAllKeyboardsService,
-  deleteAKeyboardService,
-  getKeyboardByIdService,
-  getQueriedKeyboardsService,
-  getQueriedTotalKeyboardsService,
-  returnAllKeyboardsUploadedFileIdsService,
-  updateKeyboardByIdService,
-} from './keyboard.service';
+	createNewKeyboardService,
+	deleteAKeyboardService,
+	deleteAllKeyboardsService,
+	getKeyboardByIdService,
+	getQueriedKeyboardsService,
+	getQueriedTotalKeyboardsService,
+	returnAllKeyboardsUploadedFileIdsService,
+	updateKeyboardByIdService,
+} from "./keyboard.service";
 
-import type { KeyboardDocument, KeyboardSchema } from './keyboard.model';
+import type { KeyboardDocument, KeyboardSchema } from "./keyboard.model";
 import type {
-  CreateNewKeyboardBulkRequest,
-  CreateNewKeyboardRequest,
-  DeleteAKeyboardRequest,
-  DeleteAllKeyboardsRequest,
-  GetKeyboardByIdRequest,
-  GetQueriedKeyboardsRequest,
-  UpdateKeyboardByIdRequest,
-} from './keyboard.types';
+	CreateNewKeyboardBulkRequest,
+	CreateNewKeyboardRequest,
+	DeleteAKeyboardRequest,
+	DeleteAllKeyboardsRequest,
+	GetKeyboardByIdRequest,
+	GetQueriedKeyboardsRequest,
+	UpdateKeyboardByIdRequest,
+	UpdateKeyboardsBulkRequest,
+} from "./keyboard.types";
 
 /**
  * Exports
  */
 
 export {
-  KeyboardModel,
-  keyboardRouter,
-  createNewKeyboardBulkHandler,
-  createNewKeyboardHandler,
-  createNewKeyboardService,
-  deleteAKeyboardHandler,
-  deleteAllKeyboardsHandler,
-  deleteAllKeyboardsService,
-  deleteAKeyboardService,
-  getKeyboardByIdHandler,
-  getKeyboardByIdService,
-  getQueriedKeyboardsHandler,
-  getQueriedKeyboardsService,
-  getQueriedTotalKeyboardsService,
-  returnAllKeyboardsUploadedFileIdsService,
-  returnAllFileUploadsForKeyboardsHandler,
-  updateKeyboardByIdHandler,
-  updateKeyboardByIdService,
+	KeyboardModel,
+	keyboardRouter,
+	createNewKeyboardBulkHandler,
+	createNewKeyboardHandler,
+	createNewKeyboardService,
+	deleteAKeyboardHandler,
+	deleteAKeyboardService,
+	deleteAllKeyboardsHandler,
+	deleteAllKeyboardsService,
+	getKeyboardByIdHandler,
+	getKeyboardByIdService,
+	getQueriedKeyboardsHandler,
+	getQueriedKeyboardsService,
+	getQueriedTotalKeyboardsService,
+	returnAllKeyboardsUploadedFileIdsService,
+	updateKeyboardByIdHandler,
+	updateKeyboardByIdService,
+	updateKeyboardsBulkHandler,
 };
 
 export type {
-  CreateNewKeyboardBulkRequest,
-  CreateNewKeyboardRequest,
-  DeleteAKeyboardRequest,
-  DeleteAllKeyboardsRequest,
-  GetKeyboardByIdRequest,
-  GetQueriedKeyboardsRequest,
-  KeyboardDocument,
-  KeyboardSchema,
-  UpdateKeyboardByIdRequest,
+	KeyboardDocument,
+	KeyboardSchema,
+	CreateNewKeyboardBulkRequest,
+	CreateNewKeyboardRequest,
+	DeleteAKeyboardRequest,
+	DeleteAllKeyboardsRequest,
+	GetKeyboardByIdRequest,
+	GetQueriedKeyboardsRequest,
+	UpdateKeyboardByIdRequest,
+	UpdateKeyboardsBulkRequest,
 };

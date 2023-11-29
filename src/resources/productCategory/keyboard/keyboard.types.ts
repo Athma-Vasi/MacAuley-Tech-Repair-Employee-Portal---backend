@@ -1,9 +1,12 @@
 import type { Types } from "mongoose";
 import type { RequestAfterJWTVerification } from "../../auth";
 import { UserRoles } from "../../user";
-import { GetQueriedResourceRequest } from "../../../types";
+import {
+	DocumentUpdateOperation,
+	GetQueriedResourceRequest,
+} from "../../../types";
 
-import { KeyboardSchema } from "./keyboard.model";
+import { KeyboardDocument, KeyboardSchema } from "./keyboard.model";
 
 interface CreateNewKeyboardRequest extends RequestAfterJWTVerification {
 	body: {
@@ -27,6 +30,22 @@ interface CreateNewKeyboardBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		keyboardSchemas: KeyboardSchema[];
+	};
+}
+
+// DEV ROUTE
+interface UpdateKeyboardsBulkRequest extends RequestAfterJWTVerification {
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
+		keyboardFields: {
+			keyboardId: Types.ObjectId;
+			documentUpdate: DocumentUpdateOperation<KeyboardDocument>;
+		}[];
 	};
 }
 
@@ -58,10 +77,7 @@ interface UpdateKeyboardByIdRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		keyboardFields: Record<
-			keyof KeyboardSchema,
-			KeyboardSchema[keyof KeyboardSchema]
-		>;
+		documentUpdate: DocumentUpdateOperation<KeyboardDocument>;
 	};
 	params: { keyboardId: string };
 }
@@ -74,4 +90,5 @@ export type {
 	GetKeyboardByIdRequest,
 	GetQueriedKeyboardsRequest,
 	UpdateKeyboardByIdRequest,
+	UpdateKeyboardsBulkRequest,
 };

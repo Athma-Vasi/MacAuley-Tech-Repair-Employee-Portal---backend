@@ -4,6 +4,7 @@ import {
 	QueriedResourceGetRequestServiceInput,
 	DatabaseResponse,
 	DatabaseResponseNullable,
+	UpdateDocumentByIdServiceInput,
 } from "../../../types";
 import {
 	KeyboardDocument,
@@ -33,7 +34,7 @@ async function getQueriedKeyboardsService({
 			.exec();
 		return keyboards;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedKeyboardService" });
+		throw new Error(error, { cause: "getQueriedKeyboardsService" });
 	}
 }
 
@@ -41,12 +42,12 @@ async function getQueriedTotalKeyboardsService({
 	filter = {},
 }: QueriedResourceGetRequestServiceInput<KeyboardDocument>): Promise<number> {
 	try {
-		const totalKeyboard = await KeyboardModel.countDocuments(filter)
+		const totalKeyboards = await KeyboardModel.countDocuments(filter)
 			.lean()
 			.exec();
-		return totalKeyboard;
+		return totalKeyboards;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedTotalKeyboardService" });
+		throw new Error(error, { cause: "getQueriedTotalKeyboardsService" });
 	}
 }
 
@@ -65,21 +66,17 @@ async function getKeyboardByIdService(
 }
 
 async function updateKeyboardByIdService({
-	fieldsToUpdate,
-	keyboardId,
-}: {
-	keyboardId: Types.ObjectId | string;
-	fieldsToUpdate: Record<
-		keyof KeyboardDocument,
-		KeyboardDocument[keyof KeyboardDocument]
-	>;
-}): DatabaseResponseNullable<KeyboardDocument> {
+	_id,
+	fields,
+	updateOperator,
+}: UpdateDocumentByIdServiceInput<KeyboardDocument>): DatabaseResponseNullable<KeyboardDocument> {
+	const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
+	const updateObject = JSON.parse(updateString);
+
 	try {
-		const keyboard = await KeyboardModel.findByIdAndUpdate(
-			keyboardId,
-			{ $set: fieldsToUpdate },
-			{ new: true },
-		)
+		const keyboard = await KeyboardModel.findByIdAndUpdate(_id, updateObject, {
+			new: true,
+		})
 
 			.lean()
 			.exec();
@@ -121,7 +118,9 @@ async function deleteAKeyboardService(
 	keyboardId: Types.ObjectId | string,
 ): Promise<DeleteResult> {
 	try {
-		const keyboard = await KeyboardModel.deleteOne({ _id: keyboardId })
+		const keyboard = await KeyboardModel.deleteOne({
+			_id: keyboardId,
+		})
 			.lean()
 			.exec();
 		return keyboard;
