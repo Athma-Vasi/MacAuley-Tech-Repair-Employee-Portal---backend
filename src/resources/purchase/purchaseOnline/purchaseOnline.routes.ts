@@ -6,9 +6,10 @@ import {
 } from "../../../middlewares";
 
 import {
-	addFieldToPurchaseOnlinesBulkHandler,
+	updatePurchaseOnlinesBulkHandler,
 	createNewPurchaseOnlineHandler,
 	createNewPurchaseOnlinesBulkHandler,
+	deleteAllPurchaseOnlinesHandler,
 	deletePurchaseOnlineHandler,
 	getAllPurchaseOnlinesBulkHandler,
 	getPurchaseOnlineByIdHandler,
@@ -20,14 +21,12 @@ import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
 const purchaseOnlineRouter = Router();
 
-purchaseOnlineRouter.use(verifyRoles());
+purchaseOnlineRouter.use(verifyJWTMiddleware, verifyRoles());
 
 purchaseOnlineRouter
 	.route("/")
 	.post(createNewPurchaseOnlineHandler)
 	.get(
-		verifyJWTMiddleware,
-		verifyRoles(),
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedPurchaseOnlinesHandler,
 	);
@@ -35,23 +34,25 @@ purchaseOnlineRouter
 purchaseOnlineRouter
 	.route("/user")
 	.get(
-		verifyJWTMiddleware,
-		verifyRoles(),
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedPurchasesOnlineByUserHandler,
 	);
+
+purchaseOnlineRouter
+	.route("/delete-all")
+	.delete(deleteAllPurchaseOnlinesHandler);
 
 // DEV ROUTES
 purchaseOnlineRouter
 	.route("/dev")
 	.post(createNewPurchaseOnlinesBulkHandler)
 	.get(getAllPurchaseOnlinesBulkHandler)
-	.patch(addFieldToPurchaseOnlinesBulkHandler);
+	.patch(updatePurchaseOnlinesBulkHandler);
 
 purchaseOnlineRouter
 	.route("/:purchaseOnlineId")
-	.get(verifyJWTMiddleware, verifyRoles(), getPurchaseOnlineByIdHandler)
-	.patch(verifyJWTMiddleware, verifyRoles(), updatePurchaseOnlineByIdHandler)
-	.delete(verifyJWTMiddleware, verifyRoles(), deletePurchaseOnlineHandler);
+	.get(getPurchaseOnlineByIdHandler)
+	.patch(updatePurchaseOnlineByIdHandler)
+	.delete(deletePurchaseOnlineHandler);
 
 export { purchaseOnlineRouter };

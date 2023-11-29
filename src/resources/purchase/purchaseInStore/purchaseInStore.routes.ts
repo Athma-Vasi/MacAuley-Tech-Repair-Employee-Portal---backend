@@ -14,7 +14,7 @@ import {
 	getAllPurchaseInStoresBulkHandler,
 	getPurchaseInStoreByIdHandler,
 	getQueriedPurchaseInStoresHandler,
-	getQueriedPurchasesOnlineByUserHandler,
+	getQueriedPurchasesInStoreByUserHandler,
 	updatePurchaseInStoreByIdHandler,
 } from "./purchaseInStore.controller";
 import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
@@ -35,7 +35,7 @@ purchaseInStoreRouter
 	.route("/user")
 	.get(
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
-		getQueriedPurchasesOnlineByUserHandler,
+		getQueriedPurchasesInStoreByUserHandler,
 	);
 
 purchaseInStoreRouter

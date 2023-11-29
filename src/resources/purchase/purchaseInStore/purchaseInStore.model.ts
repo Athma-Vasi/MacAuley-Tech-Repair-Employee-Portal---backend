@@ -18,7 +18,7 @@ type PurchaseInStoreSchema = {
 	purchaseCurrency: Currency;
 	purchaseStoreLocation: StoreLocation;
 
-	userId: Types.ObjectId;
+	customerId: Types.ObjectId;
 	paymentInformation: PaymentInformation;
 };
 
@@ -77,7 +77,7 @@ const purchaseInStoreSchema = new Schema<PurchaseInStoreSchema>(
 			index: true,
 		},
 
-		userId: {
+		customerId: {
 			type: Schema.Types.ObjectId,
 			required: [true, "Customer ID is required"],
 			ref: "Customer",

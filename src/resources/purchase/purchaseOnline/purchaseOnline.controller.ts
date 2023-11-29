@@ -2,13 +2,15 @@ import expressAsyncHandler from "express-async-handler";
 
 import type { Response } from "express";
 import type {
-	UpdatePurchaseOnlineRequest,
-	GetPurchaseOnlineByIdRequest,
-	GetAllPurchaseOnlinesRequest,
-	DeletePurchaseOnlineRequest,
-	CreateNewPurchaseOnlineRequest,
-	AddFieldsToPurchaseOnlinesBulkRequest,
 	CreateNewPurchaseOnlinesBulkRequest,
+	CreateNewPurchaseOnlineRequest,
+	DeleteAPurchaseOnlineRequest,
+	DeleteAllPurchaseOnlinesRequest,
+	GetPurchaseOnlineByIdRequest,
+	GetQueriedPurchaseOnlinesByUserRequest,
+	GetQueriedPurchaseOnlinesRequest,
+	UpdatePurchaseOnlineByIdRequest,
+	UpdatePurchaseOnlinesBulkRequest,
 	GetAllPurchaseOnlinesBulkRequest,
 } from "./purchaseOnline.types";
 
@@ -16,7 +18,7 @@ import {
 	createNewPurchaseOnlineService,
 	deleteAPurchaseOnlineService,
 	deleteAllPurchaseOnlinesService,
-	getAllPurchasesOnlineService,
+	getAllPurchaseOnlinesService,
 	getPurchaseOnlineByIdService,
 	getQueriedPurchaseOnlinesByUserService,
 	getQueriedPurchaseOnlinesService,
@@ -27,14 +29,13 @@ import {
 	PurchaseOnlineDocument,
 	PurchaseOnlineSchema,
 } from "./purchaseOnline.model";
-import {
+import type {
 	GetQueriedResourceRequestServerResponse,
 	QueryObjectParsedWithDefaults,
 	ResourceRequestServerResponse,
 } from "../../../types";
-import { FilterQuery, QueryOptions } from "mongoose";
+import type { FilterQuery, QueryOptions } from "mongoose";
 import { removeUndefinedAndNullValues } from "../../../utils";
-import { GetQueriedPurchasesOnlineByUserRequest } from "./purchaseOnline.types";
 
 // @desc   Create new user
 // @route  POST /api/v1/purchase/online
@@ -44,26 +45,35 @@ const createNewPurchaseOnlineHandler = expressAsyncHandler(
 		request: CreateNewPurchaseOnlineRequest,
 		response: Response<ResourceRequestServerResponse<PurchaseOnlineDocument>>,
 	) => {
-		const { purchaseOnlineSchema } = request.body;
+		const {
+			userInfo: { userId },
+			purchaseOnlineFields,
+		} = request.body;
+
+		const purchaseOnlineSchema: PurchaseOnlineSchema = {
+			...purchaseOnlineFields,
+			customerId: userId,
+		};
 
 		const purchaseOnlineDocument: PurchaseOnlineDocument =
 			await createNewPurchaseOnlineService(purchaseOnlineSchema);
 		if (!purchaseOnlineDocument) {
-			response
-				.status(400)
-				.json({ message: "PurchaseOnline creation failed", resourceData: [] });
+			response.status(400).json({
+				message: "Purchase Online creation failed",
+				resourceData: [],
+			});
 			return;
 		}
 
 		response.status(201).json({
-			message: "PurchaseOnline created successfully",
+			message: "Purchase Online created successfully",
 			resourceData: [purchaseOnlineDocument],
 		});
 	},
 );
 
 // DEV ROUTE
-// @desc   create new purchases in bulk
+// @desc   create new purchaseOnlines in bulk
 // @route  POST /api/v1/purchase/online/dev
 // @access Private
 const createNewPurchaseOnlinesBulkHandler = expressAsyncHandler(
@@ -73,88 +83,112 @@ const createNewPurchaseOnlinesBulkHandler = expressAsyncHandler(
 	) => {
 		const { purchaseOnlineSchemas } = request.body;
 
-		const purchaseDocuments = await Promise.all(
+		const purchaseOnlineDocuments = await Promise.all(
 			purchaseOnlineSchemas.map(async (purchaseOnlineSchema) => {
-				const purchaseDocument: PurchaseOnlineDocument =
+				const purchaseOnlineDocument: PurchaseOnlineDocument =
 					await createNewPurchaseOnlineService(purchaseOnlineSchema);
-				return purchaseDocument;
+				return purchaseOnlineDocument;
 			}),
 		);
 
-		// filter out undefined values
-		const purchaseDocumentsFiltered = purchaseDocuments.filter(
+		// filter out any purchaseOnlines that were not created
+		const successfullyCreatedPurchaseOnlines = purchaseOnlineDocuments.filter(
 			removeUndefinedAndNullValues,
 		);
 
-		// check if any purchases were created
-		if (purchaseDocumentsFiltered.length === purchaseOnlineSchemas.length) {
+		// check if any purchaseOnlines were created
+		if (
+			successfullyCreatedPurchaseOnlines.length === purchaseOnlineSchemas.length
+		) {
 			response.status(201).json({
-				message: `Successfully created ${purchaseDocumentsFiltered.length} purchases`,
-				resourceData: purchaseDocumentsFiltered,
+				message: `Successfully created ${successfullyCreatedPurchaseOnlines.length} Product Reviews`,
+				resourceData: successfullyCreatedPurchaseOnlines,
 			});
-		} else {
-			response.status(400).json({
-				message: `Successfully created ${
-					purchaseDocumentsFiltered.length
-				} purchase(s), but failed to create ${
-					purchaseOnlineSchemas.length - purchaseDocumentsFiltered.length
-				} purchase(s)`,
-				resourceData: purchaseDocumentsFiltered,
-			});
+			return;
 		}
+
+		if (successfullyCreatedPurchaseOnlines.length === 0) {
+			response.status(400).json({
+				message: "Could not create any Product Reviews",
+				resourceData: [],
+			});
+			return;
+		}
+
+		response.status(201).json({
+			message: `Successfully created ${
+				purchaseOnlineSchemas.length - successfullyCreatedPurchaseOnlines.length
+			} Product Reviews`,
+			resourceData: successfullyCreatedPurchaseOnlines,
+		});
+		return;
 	},
 );
 
 // DEV ROUTE
-// @desc   Add field to all purchases
+// @desc   Add field to all purchaseOnlines
 // @route  PATCH /api/v1/purchase/online/dev
 // @access Private
-const addFieldToPurchaseOnlinesBulkHandler = expressAsyncHandler(
+const updatePurchaseOnlinesBulkHandler = expressAsyncHandler(
 	async (
-		request: AddFieldsToPurchaseOnlinesBulkRequest,
+		request: UpdatePurchaseOnlinesBulkRequest,
 		response: Response<ResourceRequestServerResponse<PurchaseOnlineDocument>>,
 	) => {
-		const { purchaseOnlineObjs } = request.body;
+		const { purchaseOnlineFields } = request.body;
 
 		const updatedPurchaseOnlines = await Promise.all(
-			purchaseOnlineObjs.map(
-				async ({ purchaseOnlineFields, purchaseOnlineId }) => {
-					const updatedPurchaseOnline = await updatePurchaseOnlineByIdService({
-						purchaseOnlineFields,
-						purchaseOnlineId,
-					});
+			purchaseOnlineFields.map(async (purchaseOnlineField) => {
+				const {
+					documentUpdate: { fields, updateOperator },
+					purchaseOnlineId,
+				} = purchaseOnlineField;
 
-					return updatedPurchaseOnline;
-				},
-			),
+				const updatedPurchaseOnline = await updatePurchaseOnlineByIdService({
+					_id: purchaseOnlineId,
+					fields,
+					updateOperator,
+				});
+
+				return updatedPurchaseOnline;
+			}),
 		);
 
-		// filter out undefined values
-		const updatedPurchaseOnlinesFiltered = updatedPurchaseOnlines.filter(
+		// filter out any purchaseOnlines that were not created
+		const successfullyCreatedPurchaseOnlines = updatedPurchaseOnlines.filter(
 			removeUndefinedAndNullValues,
 		);
 
-		// check if any purchases were updated
-		if (updatedPurchaseOnlinesFiltered.length === purchaseOnlineObjs.length) {
+		// check if any purchaseOnlines were created
+		if (
+			successfullyCreatedPurchaseOnlines.length === purchaseOnlineFields.length
+		) {
 			response.status(201).json({
-				message: `Successfully updated ${updatedPurchaseOnlinesFiltered.length} purchases`,
-				resourceData: updatedPurchaseOnlinesFiltered,
+				message: `Successfully created ${successfullyCreatedPurchaseOnlines.length} Product Reviews`,
+				resourceData: successfullyCreatedPurchaseOnlines,
 			});
-		} else {
-			response.status(400).json({
-				message: `Successfully updated ${
-					updatedPurchaseOnlinesFiltered.length
-				} purchase(s), but failed to update ${
-					purchaseOnlineObjs.length - updatedPurchaseOnlinesFiltered.length
-				} purchase(s)`,
-				resourceData: updatedPurchaseOnlinesFiltered,
-			});
+			return;
 		}
+
+		if (successfullyCreatedPurchaseOnlines.length === 0) {
+			response.status(400).json({
+				message: "Could not create any Product Reviews",
+				resourceData: [],
+			});
+			return;
+		}
+
+		response.status(201).json({
+			message: `Successfully created ${
+				purchaseOnlineFields.length - successfullyCreatedPurchaseOnlines.length
+			} Product Reviews`,
+			resourceData: successfullyCreatedPurchaseOnlines,
+		});
+		return;
 	},
 );
 
 // DEV ROUTE
-// @desc   get all purchases bulk (no filter, projection or options)
+// @desc   get all purchaseOnlines bulk (no filter, projection or options)
 // @route  GET /api/v1/purchase/online/dev
 // @access Private
 const getAllPurchaseOnlinesBulkHandler = expressAsyncHandler(
@@ -162,29 +196,29 @@ const getAllPurchaseOnlinesBulkHandler = expressAsyncHandler(
 		request: GetAllPurchaseOnlinesBulkRequest,
 		response: Response<ResourceRequestServerResponse<PurchaseOnlineDocument>>,
 	) => {
-		const purchases = await getAllPurchasesOnlineService();
+		const purchaseOnlines = await getAllPurchaseOnlinesService();
 
-		if (!purchases.length) {
+		if (!purchaseOnlines.length) {
 			response.status(200).json({
-				message: "Unable to find any purchases. Please try again!",
+				message: "Unable to find any purchase onlines. Please try again!",
 				resourceData: [],
 			});
 			return;
 		}
 
 		response.status(200).json({
-			message: "Successfully found purchases!",
-			resourceData: purchases,
+			message: "Successfully found purchase onlines!",
+			resourceData: purchaseOnlines,
 		});
 	},
 );
 
-// @desc   Get all purchases queried
+// @desc   Get all purchaseOnlines queried
 // @route  GET /api/v1/purchase/online
 // @access Private
 const getQueriedPurchaseOnlinesHandler = expressAsyncHandler(
 	async (
-		request: GetAllPurchaseOnlinesRequest,
+		request: GetQueriedPurchaseOnlinesRequest,
 		response: Response<
 			GetQueriedResourceRequestServerResponse<PurchaseOnlineDocument>
 		>,
@@ -201,15 +235,15 @@ const getQueriedPurchaseOnlinesHandler = expressAsyncHandler(
 			});
 		}
 
-		// get all purchases
-		const purchases = await getQueriedPurchaseOnlinesService({
+		// get all purchaseOnlines
+		const purchaseOnlines = await getQueriedPurchaseOnlinesService({
 			filter: filter as FilterQuery<PurchaseOnlineDocument> | undefined,
 			projection: projection as QueryOptions<PurchaseOnlineDocument>,
 			options: options as QueryOptions<PurchaseOnlineDocument>,
 		});
-		if (!purchases.length) {
+		if (!purchaseOnlines.length) {
 			response.status(200).json({
-				message: "No purchases that match query parameters were found",
+				message: "No purchase onlines that match query parameters were found",
 				pages: 0,
 				totalDocuments: 0,
 				resourceData: [],
@@ -218,20 +252,20 @@ const getQueriedPurchaseOnlinesHandler = expressAsyncHandler(
 		}
 
 		response.status(200).json({
-			message: "Successfully found purchases",
+			message: "Successfully found purchase onlines",
 			pages: Math.ceil(totalDocuments / Number(options?.limit)),
 			totalDocuments,
-			resourceData: purchases,
+			resourceData: purchaseOnlines,
 		});
 	},
 );
 
-// @desc   Get all purchases queried by a user
+// @desc   Get all purchaseOnlines queried by a user
 // @route  GET /api/v1/purchase/online/user
 // @access Private
 const getQueriedPurchasesOnlineByUserHandler = expressAsyncHandler(
 	async (
-		request: GetQueriedPurchasesOnlineByUserRequest,
+		request: GetQueriedPurchaseOnlinesByUserRequest,
 		response: Response<
 			GetQueriedResourceRequestServerResponse<PurchaseOnlineDocument>
 		>,
@@ -242,7 +276,7 @@ const getQueriedPurchasesOnlineByUserHandler = expressAsyncHandler(
 			request.query as QueryObjectParsedWithDefaults;
 
 		// assign userToBeQueriedId to filter
-		filter = { ...filter, customerId: userToBeQueriedId };
+		filter = { ...filter, userId: userToBeQueriedId };
 
 		// only perform a countDocuments scan if a new query is being made
 		if (newQueryFlag) {
@@ -251,15 +285,15 @@ const getQueriedPurchasesOnlineByUserHandler = expressAsyncHandler(
 			});
 		}
 
-		// get all purchases
-		const purchases = await getQueriedPurchaseOnlinesService({
+		// get all purchaseOnlines
+		const purchaseOnlines = await getQueriedPurchaseOnlinesService({
 			filter: filter as FilterQuery<PurchaseOnlineDocument> | undefined,
 			projection: projection as QueryOptions<PurchaseOnlineDocument>,
 			options: options as QueryOptions<PurchaseOnlineDocument>,
 		});
-		if (!purchases.length) {
+		if (!purchaseOnlines.length) {
 			response.status(200).json({
-				message: "No purchases that match query parameters were found",
+				message: "No purchase onlines that match query parameters were found",
 				pages: 0,
 				totalDocuments: 0,
 				resourceData: [],
@@ -268,15 +302,15 @@ const getQueriedPurchasesOnlineByUserHandler = expressAsyncHandler(
 		}
 
 		response.status(200).json({
-			message: "Successfully found purchases",
+			message: "Successfully found purchase onlines",
 			pages: Math.ceil(totalDocuments / Number(options?.limit)),
 			totalDocuments,
-			resourceData: purchases,
+			resourceData: purchaseOnlines,
 		});
 	},
 );
 
-// @desc   Get a purchase by id
+// @desc   Get a purchaseOnline by id
 // @route  GET /api/v1/purchase/online/:id
 // @access Private
 const getPurchaseOnlineByIdHandler = expressAsyncHandler(
@@ -286,99 +320,118 @@ const getPurchaseOnlineByIdHandler = expressAsyncHandler(
 	) => {
 		const { purchaseOnlineId } = request.params;
 
-		const purchaseDocument =
+		const purchaseOnlineDocument =
 			await getPurchaseOnlineByIdService(purchaseOnlineId);
 
-		if (!purchaseDocument) {
+		if (!purchaseOnlineDocument) {
 			response
 				.status(404)
-				.json({ message: "Purchase In-Store not found.", resourceData: [] });
+				.json({ message: "Purchase Online not found.", resourceData: [] });
 			return;
 		}
 
 		response.status(200).json({
-			message: "Successfully found purchase data!",
-			resourceData: [purchaseDocument],
+			message: "Successfully found purchase onlines data!",
+			resourceData: [purchaseOnlineDocument],
 		});
 	},
 );
 
-// @desc   Delete a purchase
+// @desc   Delete a purchaseOnline
 // @route  DELETE /api/v1/purchase/online
 // @access Private
 const deletePurchaseOnlineHandler = expressAsyncHandler(
 	async (
-		request: DeletePurchaseOnlineRequest,
+		request: DeleteAPurchaseOnlineRequest,
 		response: Response<ResourceRequestServerResponse<PurchaseOnlineDocument>>,
 	) => {
-		// only managers/admin are allowed to delete purchases
-		const { purchaseOnlineToBeDeletedId } = request.body;
+		const { purchaseOnlineId } = request.params;
 
-		if (!purchaseOnlineToBeDeletedId) {
-			response.status(400).json({
-				message: "purchaseToBeDeletedId is required",
-				resourceData: [],
-			});
-			return;
-		}
-
-		// delete purchase if all checks pass successfully
-		const deletedPurchaseOnline = await deleteAPurchaseOnlineService(
-			purchaseOnlineToBeDeletedId,
-		);
+		const deletedPurchaseOnline =
+			await deleteAPurchaseOnlineService(purchaseOnlineId);
 
 		if (!deletedPurchaseOnline.acknowledged) {
 			response.status(400).json({
-				message: "Failed to delete purchase. Please try again!",
+				message: "Failed to delete product review. Please try again!",
 				resourceData: [],
 			});
 			return;
 		}
 
-		response
-			.status(200)
-			.json({ message: "Successfully deleted purchase!", resourceData: [] });
+		response.status(200).json({
+			message: "Successfully deleted product review!",
+			resourceData: [],
+		});
 	},
 );
 
-// @desc   Update a purchase online
+// @desc   Update a purchaseOnline
 // @route  PATCH /api/v1/purchase/online
 // @access Private
 const updatePurchaseOnlineByIdHandler = expressAsyncHandler(
 	async (
-		request: UpdatePurchaseOnlineRequest,
+		request: UpdatePurchaseOnlineByIdRequest,
 		response: Response<ResourceRequestServerResponse<PurchaseOnlineDocument>>,
 	) => {
-		const { purchaseOnlineFields, purchaseOnlineId } = request.body;
+		const { purchaseOnlineId } = request.params;
+		const {
+			documentUpdate: { fields, updateOperator },
+		} = request.body;
 
-		// update user if all checks pass successfully
 		const updatedPurchaseOnline = await updatePurchaseOnlineByIdService({
-			purchaseOnlineFields,
-			purchaseOnlineId,
+			_id: purchaseOnlineId,
+			fields,
+			updateOperator,
 		});
 
 		if (!updatedPurchaseOnline) {
 			response
 				.status(400)
-				.json({ message: "Purchase In-Store update failed", resourceData: [] });
+				.json({ message: "Purchase Online update failed", resourceData: [] });
 			return;
 		}
 
 		response.status(200).json({
-			message: "Purchase In-Store updated successfully",
+			message: "Purchase Online updated successfully",
 			resourceData: [updatedPurchaseOnline],
 		});
 	},
 );
 
+// @desc   Delete all purchaseOnlines
+// @route  DELETE /api/v1/purchase/online/delete-all
+// @access Private
+const deleteAllPurchaseOnlinesHandler = expressAsyncHandler(
+	async (
+		request: DeleteAllPurchaseOnlinesRequest,
+		response: Response<ResourceRequestServerResponse<PurchaseOnlineDocument>>,
+	) => {
+		const deletedPurchaseOnlines = await deleteAllPurchaseOnlinesService();
+
+		if (!deletedPurchaseOnlines.acknowledged) {
+			response.status(400).json({
+				message: "Failed to delete purchase onlines. Please try again!",
+				resourceData: [],
+			});
+			return;
+		}
+
+		response.status(200).json({
+			message: "Successfully deleted purchase onlines!",
+			resourceData: [],
+		});
+	},
+);
+
 export {
-	addFieldToPurchaseOnlinesBulkHandler,
+	updatePurchaseOnlinesBulkHandler,
 	createNewPurchaseOnlineHandler,
 	createNewPurchaseOnlinesBulkHandler,
+	deleteAllPurchaseOnlinesHandler,
 	deletePurchaseOnlineHandler,
 	getAllPurchaseOnlinesBulkHandler,
 	getPurchaseOnlineByIdHandler,
 	getQueriedPurchaseOnlinesHandler,
-	updatePurchaseOnlineByIdHandler,
 	getQueriedPurchasesOnlineByUserHandler,
+	updatePurchaseOnlineByIdHandler,
 };

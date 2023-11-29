@@ -52,7 +52,7 @@ const createNewPurchaseInStoreHandler = expressAsyncHandler(
 
 		const purchaseInStoreSchema: PurchaseInStoreSchema = {
 			...purchaseInStoreFields,
-			userId,
+			customerId: userId,
 		};
 
 		const purchaseInStoreDocument: PurchaseInStoreDocument =
@@ -267,7 +267,7 @@ const getQueriedPurchaseInStoresHandler = expressAsyncHandler(
 // @desc   Get all purchaseInStores queried by a user
 // @route  GET /api/v1/purchase/in-store/user
 // @access Private
-const getQueriedPurchasesOnlineByUserHandler = expressAsyncHandler(
+const getQueriedPurchasesInStoreByUserHandler = expressAsyncHandler(
 	async (
 		request: GetQueriedPurchaseInStoresByUserRequest,
 		response: Response<
@@ -436,6 +436,6 @@ export {
 	getAllPurchaseInStoresBulkHandler,
 	getPurchaseInStoreByIdHandler,
 	getQueriedPurchaseInStoresHandler,
-	getQueriedPurchasesOnlineByUserHandler,
+	getQueriedPurchasesInStoreByUserHandler,
 	updatePurchaseInStoreByIdHandler,
 };

@@ -1,106 +1,112 @@
-import { Types } from 'mongoose';
+import type { Types } from "mongoose";
+import type { RequestAfterJWTVerification } from "../../auth";
+import type { UserRoles } from "../../user";
+import type {
+	GetQueriedResourceRequest,
+	GetQueriedResourceByUserRequest,
+	DocumentUpdateOperation,
+} from "../../../types";
+import type {
+	PurchaseOnlineDocument,
+	PurchaseOnlineSchema,
+} from "./purchaseOnline.model";
 
-import type { RequestAfterJWTVerification } from '../../auth';
-import type { PurchaseOnlineSchema } from './purchaseOnline.model';
-import { GetQueriedResourceByUserRequest, GetQueriedResourceRequest } from '../../../types';
-import { UserRoles } from '../../user';
-
-interface CreateNewPurchaseOnlineRequest {
-  body: {
-    purchaseOnlineSchema: PurchaseOnlineSchema;
-  };
+interface CreateNewPurchaseOnlineRequest extends RequestAfterJWTVerification {
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
+		purchaseOnlineFields: Omit<PurchaseOnlineSchema, "userId" | "username">;
+	};
 }
 
-interface DeletePurchaseOnlineRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-    sessionId: Types.ObjectId;
-    purchaseOnlineToBeDeletedId: string;
-  };
+// DEV ROUTE
+interface CreateNewPurchaseOnlinesBulkRequest
+	extends RequestAfterJWTVerification {
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
+		purchaseOnlineSchemas: PurchaseOnlineSchema[];
+	};
 }
 
-type GetAllPurchaseOnlinesRequest = GetQueriedResourceRequest;
+// DEV ROUTE
+interface UpdatePurchaseOnlinesBulkRequest extends RequestAfterJWTVerification {
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
+		purchaseOnlineFields: {
+			purchaseOnlineId: Types.ObjectId;
+			documentUpdate: DocumentUpdateOperation<PurchaseOnlineDocument>;
+		}[];
+	};
+}
 
-type GetQueriedPurchasesOnlineByUserRequest = GetQueriedResourceByUserRequest;
+interface GetAllPurchaseOnlinesBulkRequest extends RequestAfterJWTVerification {
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
+	};
+}
+
+interface DeleteAPurchaseOnlineRequest extends RequestAfterJWTVerification {
+	params: { purchaseOnlineId: string };
+}
+
+type DeleteAllPurchaseOnlinesRequest = RequestAfterJWTVerification;
+
+type GetQueriedPurchaseOnlinesRequest = GetQueriedResourceRequest;
+type GetQueriedPurchaseOnlinesByUserRequest = GetQueriedResourceByUserRequest;
 
 interface GetPurchaseOnlineByIdRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-    sessionId: Types.ObjectId;
-  };
-  params: { purchaseOnlineId: string };
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
+	};
+	params: { purchaseOnlineId: string };
 }
 
-interface UpdatePurchaseOnlineRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-    sessionId: Types.ObjectId;
-    purchaseOnlineId: string;
-    purchaseOnlineFields: Partial<PurchaseOnlineSchema>;
-  };
-}
-
-// DEV ROUTE
-interface CreateNewPurchaseOnlinesBulkRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-    sessionId: Types.ObjectId;
-    purchaseOnlineSchemas: PurchaseOnlineSchema[];
-  };
-}
-
-// DEV ROUTE
-interface AddFieldsToPurchaseOnlinesBulkRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-    sessionId: Types.ObjectId;
-    purchaseOnlineObjs: {
-      purchaseOnlineId: Types.ObjectId;
-      purchaseOnlineFields: Record<string, any>;
-    }[];
-  };
-}
-
-// DEV ROUTE
-interface GetAllPurchaseOnlinesBulkRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-    sessionId: Types.ObjectId;
-  };
+interface UpdatePurchaseOnlineByIdRequest extends RequestAfterJWTVerification {
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
+		documentUpdate: DocumentUpdateOperation<PurchaseOnlineDocument>;
+	};
+	params: { purchaseOnlineId: string };
 }
 
 export type {
-  GetQueriedPurchasesOnlineByUserRequest,
-  AddFieldsToPurchaseOnlinesBulkRequest,
-  CreateNewPurchaseOnlineRequest,
-  CreateNewPurchaseOnlinesBulkRequest,
-  DeletePurchaseOnlineRequest,
-  GetAllPurchaseOnlinesBulkRequest,
-  GetAllPurchaseOnlinesRequest,
-  GetPurchaseOnlineByIdRequest,
-  UpdatePurchaseOnlineRequest,
+	CreateNewPurchaseOnlineRequest,
+	GetQueriedPurchaseOnlinesByUserRequest,
+	CreateNewPurchaseOnlinesBulkRequest,
+	DeleteAPurchaseOnlineRequest,
+	DeleteAllPurchaseOnlinesRequest,
+	GetPurchaseOnlineByIdRequest,
+	GetQueriedPurchaseOnlinesRequest,
+	UpdatePurchaseOnlineByIdRequest,
+	UpdatePurchaseOnlinesBulkRequest,
+	GetAllPurchaseOnlinesBulkRequest,
 };

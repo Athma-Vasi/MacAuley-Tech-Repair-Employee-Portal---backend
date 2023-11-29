@@ -6,81 +6,88 @@
  * Imports
  */
 
-import { PurchaseOnlineModel } from './purchaseOnline.model';
-import { purchaseOnlineRouter } from './purchaseOnline.routes';
+import { PurchaseOnlineModel } from "./purchaseOnline.model";
+import { purchaseOnlineRouter } from "./purchaseOnline.routes";
 import {
-  addFieldToPurchaseOnlinesBulkHandler,
-  createNewPurchaseOnlineHandler,
-  createNewPurchaseOnlinesBulkHandler,
-  deletePurchaseOnlineHandler,
-  getAllPurchaseOnlinesBulkHandler,
-  getPurchaseOnlineByIdHandler,
-  getQueriedPurchaseOnlinesHandler,
-  getQueriedPurchasesOnlineByUserHandler,
-  updatePurchaseOnlineByIdHandler,
-} from './purchaseOnline.controller';
+	updatePurchaseOnlinesBulkHandler,
+	createNewPurchaseOnlineHandler,
+	createNewPurchaseOnlinesBulkHandler,
+	deleteAllPurchaseOnlinesHandler,
+	deletePurchaseOnlineHandler,
+	getAllPurchaseOnlinesBulkHandler,
+	getPurchaseOnlineByIdHandler,
+	getQueriedPurchaseOnlinesHandler,
+	getQueriedPurchasesOnlineByUserHandler,
+	updatePurchaseOnlineByIdHandler,
+} from "./purchaseOnline.controller";
 import {
-  createNewPurchaseOnlineService,
-  deleteAPurchaseOnlineService,
-  deleteAllPurchaseOnlinesService,
-  getAllPurchasesOnlineService,
-  getPurchaseOnlineByIdService,
-  getQueriedPurchaseOnlinesByUserService,
-  getQueriedPurchaseOnlinesService,
-  getQueriedTotalPurchaseOnlinesService,
-  updatePurchaseOnlineByIdService,
-} from './purchaseOnline.service';
+	createNewPurchaseOnlineService,
+	deleteAPurchaseOnlineService,
+	deleteAllPurchaseOnlinesService,
+	getAllPurchaseOnlinesService,
+	getPurchaseOnlineByIdService,
+	getQueriedPurchaseOnlinesByUserService,
+	getQueriedPurchaseOnlinesService,
+	getQueriedTotalPurchaseOnlinesService,
+	updatePurchaseOnlineByIdService,
+} from "./purchaseOnline.service";
 
-import type { PurchaseOnlineDocument, PurchaseOnlineSchema } from './purchaseOnline.model';
 import type {
-  AddFieldsToPurchaseOnlinesBulkRequest,
-  CreateNewPurchaseOnlineRequest,
-  CreateNewPurchaseOnlinesBulkRequest,
-  DeletePurchaseOnlineRequest,
-  GetAllPurchaseOnlinesBulkRequest,
-  GetAllPurchaseOnlinesRequest,
-  GetPurchaseOnlineByIdRequest,
-  GetQueriedPurchasesOnlineByUserRequest,
-  UpdatePurchaseOnlineRequest,
-} from './purchaseOnline.types';
+	PurchaseOnlineDocument,
+	PurchaseOnlineSchema,
+} from "./purchaseOnline.model";
+import type {
+	CreateNewPurchaseOnlineRequest,
+	CreateNewPurchaseOnlinesBulkRequest,
+	DeleteAPurchaseOnlineRequest,
+	DeleteAllPurchaseOnlinesRequest,
+	GetAllPurchaseOnlinesBulkRequest,
+	GetPurchaseOnlineByIdRequest,
+	GetQueriedPurchaseOnlinesByUserRequest,
+	GetQueriedPurchaseOnlinesRequest,
+	UpdatePurchaseOnlineByIdRequest,
+	UpdatePurchaseOnlinesBulkRequest,
+} from "./purchaseOnline.types";
 
 /**
  * Exports
  */
 
 export {
-  PurchaseOnlineModel,
-  purchaseOnlineRouter,
-  addFieldToPurchaseOnlinesBulkHandler,
-  createNewPurchaseOnlineHandler,
-  createNewPurchaseOnlinesBulkHandler,
-  deletePurchaseOnlineHandler,
-  getAllPurchaseOnlinesBulkHandler,
-  getPurchaseOnlineByIdHandler,
-  getQueriedPurchaseOnlinesHandler,
-  getQueriedPurchasesOnlineByUserHandler,
-  updatePurchaseOnlineByIdHandler,
-  createNewPurchaseOnlineService,
-  deleteAPurchaseOnlineService,
-  deleteAllPurchaseOnlinesService,
-  getAllPurchasesOnlineService,
-  getPurchaseOnlineByIdService,
-  getQueriedPurchaseOnlinesByUserService,
-  getQueriedPurchaseOnlinesService,
-  getQueriedTotalPurchaseOnlinesService,
-  updatePurchaseOnlineByIdService,
+	PurchaseOnlineModel,
+	updatePurchaseOnlinesBulkHandler,
+	createNewPurchaseOnlineHandler,
+	createNewPurchaseOnlineService,
+	createNewPurchaseOnlinesBulkHandler,
+	deleteAPurchaseOnlineService,
+	deleteAllPurchaseOnlinesHandler,
+	deleteAllPurchaseOnlinesService,
+	deletePurchaseOnlineHandler,
+	getAllPurchaseOnlinesBulkHandler,
+	getAllPurchaseOnlinesService,
+	getPurchaseOnlineByIdHandler,
+	getPurchaseOnlineByIdService,
+	getQueriedPurchaseOnlinesByUserService,
+	getQueriedPurchaseOnlinesHandler,
+	getQueriedPurchaseOnlinesService,
+	getQueriedPurchasesOnlineByUserHandler,
+	getQueriedTotalPurchaseOnlinesService,
+	purchaseOnlineRouter,
+	updatePurchaseOnlineByIdHandler,
+	updatePurchaseOnlineByIdService,
 };
 
 export type {
-  PurchaseOnlineDocument,
-  PurchaseOnlineSchema,
-  AddFieldsToPurchaseOnlinesBulkRequest,
-  CreateNewPurchaseOnlineRequest,
-  CreateNewPurchaseOnlinesBulkRequest,
-  DeletePurchaseOnlineRequest,
-  GetAllPurchaseOnlinesBulkRequest,
-  GetAllPurchaseOnlinesRequest,
-  GetPurchaseOnlineByIdRequest,
-  GetQueriedPurchasesOnlineByUserRequest,
-  UpdatePurchaseOnlineRequest,
+	CreateNewPurchaseOnlineRequest,
+	CreateNewPurchaseOnlinesBulkRequest,
+	DeleteAPurchaseOnlineRequest,
+	DeleteAllPurchaseOnlinesRequest,
+	GetAllPurchaseOnlinesBulkRequest,
+	GetPurchaseOnlineByIdRequest,
+	GetQueriedPurchaseOnlinesByUserRequest,
+	GetQueriedPurchaseOnlinesRequest,
+	PurchaseOnlineDocument,
+	PurchaseOnlineSchema,
+	UpdatePurchaseOnlineByIdRequest,
+	UpdatePurchaseOnlinesBulkRequest,
 };

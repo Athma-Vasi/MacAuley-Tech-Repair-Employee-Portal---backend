@@ -17,7 +17,7 @@ import {
 	getAllPurchaseInStoresBulkHandler,
 	getPurchaseInStoreByIdHandler,
 	getQueriedPurchaseInStoresHandler,
-	getQueriedPurchasesOnlineByUserHandler,
+	getQueriedPurchasesInStoreByUserHandler,
 	updatePurchaseInStoreByIdHandler,
 } from "./purchaseInStore.controller";
 import {
@@ -70,7 +70,7 @@ export {
 	getQueriedPurchaseInStoresByUserService,
 	getQueriedPurchaseInStoresHandler,
 	getQueriedPurchaseInStoresService,
-	getQueriedPurchasesOnlineByUserHandler,
+	getQueriedPurchasesInStoreByUserHandler,
 	getQueriedTotalPurchaseInStoresService,
 	purchaseInStoreRouter,
 	updatePurchaseInStoreByIdHandler,
