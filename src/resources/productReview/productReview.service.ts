@@ -9,6 +9,7 @@ import type {
 	DatabaseResponseNullable,
 	QueriedResourceGetRequestServiceInput,
 	QueriedTotalResourceGetRequestServiceInput,
+	UpdateDocumentByIdServiceInput,
 } from "../../types";
 
 import { ProductReviewModel } from "./productReview.model";
@@ -104,17 +105,20 @@ async function getProductReviewByIdService(
 }
 
 async function updateProductReviewByIdService({
-	productReviewId,
-	productReviewFields,
-}: {
-	productReviewId: Types.ObjectId | string;
-	productReviewFields: Partial<ProductReviewSchema>;
-}): DatabaseResponseNullable<ProductReviewDocument> {
+	_id,
+	fields,
+	updateOperator,
+}: UpdateDocumentByIdServiceInput<ProductReviewDocument>): DatabaseResponseNullable<ProductReviewDocument> {
+	const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
+	const updateObject = JSON.parse(updateString);
+
 	try {
 		const productReview = await ProductReviewModel.findByIdAndUpdate(
-			productReviewId,
-			{ ...productReviewFields },
-			{ new: true },
+			_id,
+			updateObject,
+			{
+				new: true,
+			},
 		)
 
 			.lean()

@@ -10,7 +10,7 @@ import type {
 	GetQueriedProductReviewsByUserRequest,
 	GetQueriedProductReviewsRequest,
 	UpdateProductReviewByIdRequest,
-	UpdateProductReviewsFieldsBulkRequest,
+	UpdateProductReviewsBulkRequest,
 	GetAllProductReviewsBulkRequest,
 } from "./productReview.types";
 
@@ -91,27 +91,37 @@ const createNewProductReviewsBulkHandler = expressAsyncHandler(
 			}),
 		);
 
-		// filter out undefined values
-		const productReviewDocumentsFiltered = productReviewDocuments.filter(
+		// filter out any productReviews that were not created
+		const successfullyCreatedProductReviews = productReviewDocuments.filter(
 			removeUndefinedAndNullValues,
 		);
 
 		// check if any productReviews were created
-		if (productReviewDocumentsFiltered.length === productReviewSchemas.length) {
+		if (
+			successfullyCreatedProductReviews.length === productReviewSchemas.length
+		) {
 			response.status(201).json({
-				message: `Successfully created ${productReviewDocumentsFiltered.length} product review(s)`,
-				resourceData: productReviewDocumentsFiltered,
+				message: `Successfully created ${successfullyCreatedProductReviews.length} Product Reviews`,
+				resourceData: successfullyCreatedProductReviews,
 			});
-		} else {
-			response.status(400).json({
-				message: `Successfully created ${
-					productReviewDocumentsFiltered.length
-				} product review(s), but failed to create ${
-					productReviewSchemas.length - productReviewDocumentsFiltered.length
-				} product review(s)`,
-				resourceData: productReviewDocumentsFiltered,
-			});
+			return;
 		}
+
+		if (successfullyCreatedProductReviews.length === 0) {
+			response.status(400).json({
+				message: "Could not create any Product Reviews",
+				resourceData: [],
+			});
+			return;
+		}
+
+		response.status(201).json({
+			message: `Successfully created ${
+				productReviewSchemas.length - successfullyCreatedProductReviews.length
+			} Product Reviews`,
+			resourceData: successfullyCreatedProductReviews,
+		});
+		return;
 	},
 );
 
@@ -119,47 +129,61 @@ const createNewProductReviewsBulkHandler = expressAsyncHandler(
 // @desc   Add field to all productReviews
 // @route  PATCH /api/v1/product-review/dev
 // @access Private
-const addFieldToProductReviewsBulkHandler = expressAsyncHandler(
+const updateProductReviewsBulkHandler = expressAsyncHandler(
 	async (
-		request: UpdateProductReviewsFieldsBulkRequest,
+		request: UpdateProductReviewsBulkRequest,
 		response: Response<ResourceRequestServerResponse<ProductReviewDocument>>,
 	) => {
-		const { productReviewObjs } = request.body;
+		const { productReviewFields } = request.body;
 
 		const updatedProductReviews = await Promise.all(
-			productReviewObjs.map(
-				async ({ productReviewFields, productReviewId }) => {
-					const updatedProductReview = await updateProductReviewByIdService({
-						productReviewFields,
-						productReviewId,
-					});
+			productReviewFields.map(async (productReviewField) => {
+				const {
+					documentUpdate: { fields, updateOperator },
+					productReviewId,
+				} = productReviewField;
 
-					return updatedProductReview;
-				},
-			),
+				const updatedProductReview = await updateProductReviewByIdService({
+					_id: productReviewId,
+					fields,
+					updateOperator,
+				});
+
+				return updatedProductReview;
+			}),
 		);
 
-		// filter out undefined values
-		const updatedProductReviewsFiltered = updatedProductReviews.filter(
+		// filter out any productReviews that were not created
+		const successfullyCreatedProductReviews = updatedProductReviews.filter(
 			removeUndefinedAndNullValues,
 		);
 
-		// check if any productReviews were updated
-		if (updatedProductReviewsFiltered.length === productReviewObjs.length) {
+		// check if any productReviews were created
+		if (
+			successfullyCreatedProductReviews.length === productReviewFields.length
+		) {
 			response.status(201).json({
-				message: `Successfully updated ${updatedProductReviewsFiltered.length} product reviews`,
-				resourceData: updatedProductReviewsFiltered,
+				message: `Successfully created ${successfullyCreatedProductReviews.length} Product Reviews`,
+				resourceData: successfullyCreatedProductReviews,
 			});
-		} else {
-			response.status(400).json({
-				message: `Successfully updated ${
-					updatedProductReviewsFiltered.length
-				} product reviews(s), but failed to update ${
-					productReviewObjs.length - updatedProductReviewsFiltered.length
-				} product reviews(s)`,
-				resourceData: updatedProductReviewsFiltered,
-			});
+			return;
 		}
+
+		if (successfullyCreatedProductReviews.length === 0) {
+			response.status(400).json({
+				message: "Could not create any Product Reviews",
+				resourceData: [],
+			});
+			return;
+		}
+
+		response.status(201).json({
+			message: `Successfully created ${
+				productReviewFields.length - successfullyCreatedProductReviews.length
+			} Product Reviews`,
+			resourceData: successfullyCreatedProductReviews,
+		});
+		return;
 	},
 );
 
@@ -252,7 +276,7 @@ const getQueriedPurchasesOnlineByUserHandler = expressAsyncHandler(
 			request.query as QueryObjectParsedWithDefaults;
 
 		// assign userToBeQueriedId to filter
-		filter = { ...filter, customerId: userToBeQueriedId };
+		filter = { ...filter, userId: userToBeQueriedId };
 
 		// only perform a countDocuments scan if a new query is being made
 		if (newQueryFlag) {
@@ -341,7 +365,7 @@ const deleteProductReviewHandler = expressAsyncHandler(
 	},
 );
 
-// @desc   Update a productReview in-store
+// @desc   Update a productReview
 // @route  PATCH /api/v1/product-review
 // @access Private
 const updateProductReviewByIdHandler = expressAsyncHandler(
@@ -350,27 +374,14 @@ const updateProductReviewByIdHandler = expressAsyncHandler(
 		response: Response<ResourceRequestServerResponse<ProductReviewDocument>>,
 	) => {
 		const { productReviewId } = request.params;
-		const { productReviewFields } = request.body;
-
-		// check if product review exists
-		const productReviewDocument =
-			await getProductReviewByIdService(productReviewId);
-		if (!productReviewDocument) {
-			response.status(404).json({
-				message: "Product review not found.",
-				resourceData: [],
-			});
-			return;
-		}
-
-		const newProductReview = {
-			...productReviewDocument,
-			...productReviewFields,
-		};
+		const {
+			documentUpdate: { fields, updateOperator },
+		} = request.body;
 
 		const updatedProductReview = await updateProductReviewByIdService({
-			productReviewFields: newProductReview,
-			productReviewId,
+			_id: productReviewId,
+			fields,
+			updateOperator,
 		});
 
 		if (!updatedProductReview) {
@@ -413,7 +424,7 @@ const deleteAllProductReviewsHandler = expressAsyncHandler(
 );
 
 export {
-	addFieldToProductReviewsBulkHandler,
+	updateProductReviewsBulkHandler,
 	createNewProductReviewHandler,
 	createNewProductReviewsBulkHandler,
 	deleteAllProductReviewsHandler,

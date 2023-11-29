@@ -4,8 +4,12 @@ import type { UserRoles } from "../user";
 import type {
 	GetQueriedResourceRequest,
 	GetQueriedResourceByUserRequest,
+	DocumentUpdateOperation,
 } from "../../types";
-import type { ProductReviewSchema } from "./productReview.model";
+import type {
+	ProductReviewDocument,
+	ProductReviewSchema,
+} from "./productReview.model";
 
 interface CreateNewProductReviewRequest extends RequestAfterJWTVerification {
 	body: {
@@ -34,8 +38,7 @@ interface CreateNewProductReviewsBulkRequest
 }
 
 // DEV ROUTE
-interface UpdateProductReviewsFieldsBulkRequest
-	extends RequestAfterJWTVerification {
+interface UpdateProductReviewsBulkRequest extends RequestAfterJWTVerification {
 	body: {
 		userInfo: {
 			userId: Types.ObjectId;
@@ -43,9 +46,9 @@ interface UpdateProductReviewsFieldsBulkRequest
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		productReviewObjs: {
-			productReviewId: string;
-			productReviewFields: Partial<ProductReviewSchema>;
+		productReviewFields: {
+			productReviewId: Types.ObjectId;
+			documentUpdate: DocumentUpdateOperation<ProductReviewDocument>;
 		}[];
 	};
 }
@@ -90,7 +93,7 @@ interface UpdateProductReviewByIdRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		productReviewFields: Partial<ProductReviewSchema>;
+		documentUpdate: DocumentUpdateOperation<ProductReviewDocument>;
 	};
 	params: { productReviewId: string };
 }
@@ -104,6 +107,6 @@ export type {
 	GetProductReviewByIdRequest,
 	GetQueriedProductReviewsRequest,
 	UpdateProductReviewByIdRequest,
-	UpdateProductReviewsFieldsBulkRequest,
+	UpdateProductReviewsBulkRequest,
 	GetAllProductReviewsBulkRequest,
 };

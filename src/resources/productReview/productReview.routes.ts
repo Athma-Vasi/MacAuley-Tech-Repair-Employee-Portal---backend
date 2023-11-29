@@ -6,7 +6,7 @@ import {
 } from "../../middlewares";
 
 import {
-	addFieldToProductReviewsBulkHandler,
+	updateProductReviewsBulkHandler,
 	createNewProductReviewHandler,
 	createNewProductReviewsBulkHandler,
 	deleteAllProductReviewsHandler,
@@ -29,8 +29,7 @@ productReviewRouter
 	.get(
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
 		getQueriedProductReviewsHandler,
-	)
-	.delete(deleteProductReviewHandler);
+	);
 
 productReviewRouter
 	.route("/user")
@@ -48,11 +47,12 @@ productReviewRouter
 	.route("/dev")
 	.post(createNewProductReviewsBulkHandler)
 	.get(getAllProductReviewsBulkHandler)
-	.patch(addFieldToProductReviewsBulkHandler);
+	.patch(updateProductReviewsBulkHandler);
 
 productReviewRouter
 	.route("/:productReviewId")
 	.get(getProductReviewByIdHandler)
-	.patch(updateProductReviewByIdHandler);
+	.patch(updateProductReviewByIdHandler)
+	.delete(deleteProductReviewHandler);
 
 export { productReviewRouter };

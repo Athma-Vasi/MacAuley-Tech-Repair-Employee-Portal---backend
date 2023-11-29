@@ -9,7 +9,7 @@
 import { ProductReviewModel } from "./productReview.model";
 import { productReviewRouter } from "./productReview.routes";
 import {
-	addFieldToProductReviewsBulkHandler,
+	updateProductReviewsBulkHandler,
 	createNewProductReviewHandler,
 	createNewProductReviewsBulkHandler,
 	deleteAllProductReviewsHandler,
@@ -47,7 +47,7 @@ import type {
 	GetQueriedProductReviewsByUserRequest,
 	GetQueriedProductReviewsRequest,
 	UpdateProductReviewByIdRequest,
-	UpdateProductReviewsFieldsBulkRequest,
+	UpdateProductReviewsBulkRequest,
 } from "./productReview.types";
 
 /**
@@ -56,7 +56,7 @@ import type {
 
 export {
 	ProductReviewModel,
-	addFieldToProductReviewsBulkHandler,
+	updateProductReviewsBulkHandler,
 	createNewProductReviewHandler,
 	createNewProductReviewService,
 	createNewProductReviewsBulkHandler,
@@ -91,5 +91,5 @@ export type {
 	ProductReviewDocument,
 	ProductReviewSchema,
 	UpdateProductReviewByIdRequest,
-	UpdateProductReviewsFieldsBulkRequest,
+	UpdateProductReviewsBulkRequest,
 };
