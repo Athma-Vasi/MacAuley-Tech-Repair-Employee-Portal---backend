@@ -1,9 +1,11 @@
 import type { Types } from "mongoose";
 import type { RequestAfterJWTVerification } from "../../auth";
 import { UserRoles } from "../../user";
-import { GetQueriedResourceRequest } from "../../../types";
+import {
+	DocumentUpdateOperation,
+	GetQueriedResourceRequest,
+} from "../../../types";
 
-import { FileUploadDocument } from "../../fileUpload";
 import { MouseDocument, MouseSchema } from "./mouse.model";
 
 interface CreateNewMouseRequest extends RequestAfterJWTVerification {
@@ -31,13 +33,29 @@ interface CreateNewMouseBulkRequest extends RequestAfterJWTVerification {
 	};
 }
 
+// DEV ROUTE
+interface UpdateMiceBulkRequest extends RequestAfterJWTVerification {
+	body: {
+		userInfo: {
+			userId: Types.ObjectId;
+			username: string;
+			roles: UserRoles;
+		};
+		sessionId: Types.ObjectId;
+		mouseFields: {
+			mouseId: Types.ObjectId;
+			documentUpdate: DocumentUpdateOperation<MouseDocument>;
+		}[];
+	};
+}
+
 interface DeleteAMouseRequest extends RequestAfterJWTVerification {
 	params: { mouseId: string };
 }
 
-type DeleteAllMousesRequest = RequestAfterJWTVerification;
+type DeleteAllMiceRequest = RequestAfterJWTVerification;
 
-type GetQueriedMousesRequest = GetQueriedResourceRequest;
+type GetQueriedMiceRequest = GetQueriedResourceRequest;
 
 interface GetMouseByIdRequest extends RequestAfterJWTVerification {
 	body: {
@@ -59,7 +77,7 @@ interface UpdateMouseByIdRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		mouseFields: Record<keyof MouseSchema, MouseSchema[keyof MouseSchema]>;
+		documentUpdate: DocumentUpdateOperation<MouseDocument>;
 	};
 	params: { mouseId: string };
 }
@@ -68,8 +86,9 @@ export type {
 	CreateNewMouseRequest,
 	CreateNewMouseBulkRequest,
 	DeleteAMouseRequest,
-	DeleteAllMousesRequest,
+	DeleteAllMiceRequest,
 	GetMouseByIdRequest,
-	GetQueriedMousesRequest,
+	GetQueriedMiceRequest,
 	UpdateMouseByIdRequest,
+	UpdateMiceBulkRequest,
 };

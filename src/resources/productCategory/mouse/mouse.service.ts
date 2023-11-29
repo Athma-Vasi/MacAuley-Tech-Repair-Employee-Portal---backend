@@ -4,6 +4,7 @@ import {
 	QueriedResourceGetRequestServiceInput,
 	DatabaseResponse,
 	DatabaseResponseNullable,
+	UpdateDocumentByIdServiceInput,
 } from "../../../types";
 import { MouseDocument, MouseModel, MouseSchema } from "./mouse.model";
 
@@ -18,7 +19,7 @@ async function createNewMouseService(
 	}
 }
 
-async function getQueriedMousesService({
+async function getQueriedMiceService({
 	filter = {},
 	projection = null,
 	options = {},
@@ -29,18 +30,18 @@ async function getQueriedMousesService({
 			.exec();
 		return mouses;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedMouseService" });
+		throw new Error(error, { cause: "getQueriedMiceService" });
 	}
 }
 
-async function getQueriedTotalMousesService({
+async function getQueriedTotalMiceService({
 	filter = {},
 }: QueriedResourceGetRequestServiceInput<MouseDocument>): Promise<number> {
 	try {
-		const totalMouse = await MouseModel.countDocuments(filter).lean().exec();
-		return totalMouse;
+		const totalMice = await MouseModel.countDocuments(filter).lean().exec();
+		return totalMice;
 	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedTotalMouseService" });
+		throw new Error(error, { cause: "getQueriedTotalMiceService" });
 	}
 }
 
@@ -59,21 +60,17 @@ async function getMouseByIdService(
 }
 
 async function updateMouseByIdService({
-	fieldsToUpdate,
-	mouseId,
-}: {
-	mouseId: Types.ObjectId | string;
-	fieldsToUpdate: Record<
-		keyof MouseDocument,
-		MouseDocument[keyof MouseDocument]
-	>;
-}): DatabaseResponseNullable<MouseDocument> {
+	_id,
+	fields,
+	updateOperator,
+}: UpdateDocumentByIdServiceInput<MouseDocument>): DatabaseResponseNullable<MouseDocument> {
+	const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
+	const updateObject = JSON.parse(updateString);
+
 	try {
-		const mouse = await MouseModel.findByIdAndUpdate(
-			mouseId,
-			{ $set: fieldsToUpdate },
-			{ new: true },
-		)
+		const mouse = await MouseModel.findByIdAndUpdate(_id, updateObject, {
+			new: true,
+		})
 
 			.lean()
 			.exec();
@@ -83,16 +80,16 @@ async function updateMouseByIdService({
 	}
 }
 
-async function deleteAllMousesService(): Promise<DeleteResult> {
+async function deleteAllMiceService(): Promise<DeleteResult> {
 	try {
 		const mouses = await MouseModel.deleteMany({}).lean().exec();
 		return mouses;
 	} catch (error: any) {
-		throw new Error(error, { cause: "deleteAllMousesService" });
+		throw new Error(error, { cause: "deleteAllMiceService" });
 	}
 }
 
-async function returnAllMouseUploadedFileIdsService(): Promise<
+async function returnAllMiceUploadedFileIdsService(): Promise<
 	Types.ObjectId[]
 > {
 	try {
@@ -103,7 +100,9 @@ async function returnAllMouseUploadedFileIdsService(): Promise<
 		const uploadedFileIds = mouses.flatMap((mouse) => mouse.uploadedFilesIds);
 		return uploadedFileIds;
 	} catch (error: any) {
-		throw new Error(error, { cause: "returnAllMouseUploadedFileIdsService" });
+		throw new Error(error, {
+			cause: "returnAllMiceUploadedFileIdsService",
+		});
 	}
 }
 
@@ -111,7 +110,11 @@ async function deleteAMouseService(
 	mouseId: Types.ObjectId | string,
 ): Promise<DeleteResult> {
 	try {
-		const mouse = await MouseModel.deleteOne({ _id: mouseId }).lean().exec();
+		const mouse = await MouseModel.deleteOne({
+			_id: mouseId,
+		})
+			.lean()
+			.exec();
 		return mouse;
 	} catch (error: any) {
 		throw new Error(error, { cause: "deleteAMouseService" });
@@ -120,11 +123,11 @@ async function deleteAMouseService(
 
 export {
 	createNewMouseService,
-	getQueriedMousesService,
-	getQueriedTotalMousesService,
+	getQueriedMiceService,
+	getQueriedTotalMiceService,
 	getMouseByIdService,
 	updateMouseByIdService,
-	deleteAllMousesService,
-	returnAllMouseUploadedFileIdsService,
+	deleteAllMiceService,
+	returnAllMiceUploadedFileIdsService,
 	deleteAMouseService,
 };

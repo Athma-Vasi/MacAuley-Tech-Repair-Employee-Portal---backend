@@ -7,6 +7,7 @@ import type {
 	WeightUnit,
 	PeripheralsInterface,
 	MouseSensor,
+	StarRatingsCount,
 } from "../product.types";
 import type { Currency } from "../../actions/company/expenseClaim";
 
@@ -42,7 +43,7 @@ type MouseSchema = {
 		[key: string]: string;
 	};
 
-	// page 3
+	starRatingsCount: StarRatingsCount;
 	reviewsIds: Types.ObjectId[];
 	uploadedFilesIds: Types.ObjectId[];
 };
@@ -169,6 +170,22 @@ const mouseSchema = new Schema<MouseSchema>(
 			default: {},
 		},
 
+		starRatingsCount: {
+			type: Object,
+			required: false,
+			default: {
+				halfStarRatings: 0,
+				oneStarRatings: 0,
+				oneHalfStarRatings: 0,
+				twoStarRatings: 0,
+				twoHalfStarRatings: 0,
+				threeStarRatings: 0,
+				threeHalfStarRatings: 0,
+				fourStarRatings: 0,
+				fourHalfStarRatings: 0,
+				fiveStarRatings: 0,
+			},
+		},
 		reviewsIds: {
 			type: [Schema.Types.ObjectId],
 			required: false,

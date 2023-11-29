@@ -7,10 +7,11 @@ import type {
 	CreateNewMouseBulkRequest,
 	CreateNewMouseRequest,
 	DeleteAMouseRequest,
-	DeleteAllMousesRequest,
+	DeleteAllMiceRequest,
 	GetMouseByIdRequest,
-	GetQueriedMousesRequest,
+	GetQueriedMiceRequest,
 	UpdateMouseByIdRequest,
+	UpdateMiceBulkRequest,
 } from "./mouse.types";
 import type {
 	GetQueriedResourceRequestServerResponse,
@@ -22,11 +23,11 @@ import type { MouseDocument, MouseSchema } from "./mouse.model";
 import {
 	createNewMouseService,
 	deleteAMouseService,
-	deleteAllMousesService,
+	deleteAllMiceService,
 	getMouseByIdService,
-	getQueriedMousesService,
-	getQueriedTotalMousesService,
-	returnAllMouseUploadedFileIdsService,
+	getQueriedMiceService,
+	getQueriedTotalMiceService,
+	returnAllMiceUploadedFileIdsService,
 	updateMouseByIdService,
 } from "./mouse.service";
 import {
@@ -34,10 +35,16 @@ import {
 	deleteFileUploadByIdService,
 	getFileUploadByIdService,
 } from "../../fileUpload";
-import { ProductServerResponse } from "../product.types";
+
+import {
+	ProductReviewDocument,
+	deleteAProductReviewService,
+	getProductReviewByIdService,
+} from "../../productReview";
+import { removeUndefinedAndNullValues } from "../../../utils";
 
 // @desc   Create new mouse
-// @route  POST /api/v1/actions/dashboard/product-category/mouse
+// @route  POST /api/v1/product-category/mouse
 // @access Private/Admin/Manager
 const createNewMouseHandler = expressAsyncHandler(
 	async (
@@ -75,7 +82,7 @@ const createNewMouseHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Create new mouses bulk
-// @route  POST /api/v1/actions/dashboard/product-category/mouse/dev
+// @route  POST /api/v1/product-category/mouse/dev
 // @access Private/Admin/Manager
 const createNewMouseBulkHandler = expressAsyncHandler(
 	async (
@@ -84,7 +91,7 @@ const createNewMouseBulkHandler = expressAsyncHandler(
 	) => {
 		const { mouseSchemas } = request.body;
 
-		const newMouses = await Promise.all(
+		const newMice = await Promise.all(
 			mouseSchemas.map(async (mouseSchema) => {
 				const newMouse = await createNewMouseService(mouseSchema);
 				return newMouse;
@@ -92,40 +99,108 @@ const createNewMouseBulkHandler = expressAsyncHandler(
 		);
 
 		// filter out any mouses that were not created
-		const successfullyCreatedMouses = newMouses.filter((mouse) => mouse);
+		const successfullyCreatedMice = newMice.filter((mouse) => mouse);
 
 		// check if any mouses were created
-		if (successfullyCreatedMouses.length === mouseSchemas.length) {
+		if (successfullyCreatedMice.length === mouseSchemas.length) {
 			response.status(201).json({
-				message: `Successfully created ${successfullyCreatedMouses.length} mouses`,
-				resourceData: successfullyCreatedMouses,
+				message: `Successfully created ${successfullyCreatedMice.length} mouses`,
+				resourceData: successfullyCreatedMice,
 			});
 			return;
-		} else if (successfullyCreatedMouses.length === 0) {
+		}
+
+		if (successfullyCreatedMice.length === 0) {
 			response.status(400).json({
 				message: "Could not create any mouses",
 				resourceData: [],
 			});
 			return;
-		} else {
+		}
+
+		response.status(201).json({
+			message: `Successfully created ${
+				mouseSchemas.length - successfullyCreatedMice.length
+			} mouses`,
+			resourceData: successfullyCreatedMice,
+		});
+		return;
+	},
+);
+
+// @desc   Update mouses bulk
+// @route  PATCH /api/v1/product-category/mouse/dev
+// @access Private/Admin/Manager
+const updateMiceBulkHandler = expressAsyncHandler(
+	async (
+		request: UpdateMiceBulkRequest,
+		response: Response<ResourceRequestServerResponse<MouseDocument>>,
+	) => {
+		const { mouseFields } = request.body;
+
+		const updatedMice = await Promise.all(
+			mouseFields.map(async (mouseField) => {
+				const {
+					mouseId,
+					documentUpdate: { fields, updateOperator },
+				} = mouseField;
+
+				const updatedMouse = await updateMouseByIdService({
+					_id: mouseId,
+					fields,
+					updateOperator,
+				});
+
+				return updatedMouse;
+			}),
+		);
+
+		// filter out any mouses that were not updated
+		const successfullyUpdatedMice = updatedMice.filter(
+			removeUndefinedAndNullValues,
+		);
+
+		// check if any mouses were updated
+		if (successfullyUpdatedMice.length === mouseFields.length) {
 			response.status(201).json({
-				message: `Successfully created ${
-					mouseSchemas.length - successfullyCreatedMouses.length
-				} mouses`,
-				resourceData: successfullyCreatedMouses,
+				message: `Successfully updated ${successfullyUpdatedMice.length} mouses`,
+				resourceData: successfullyUpdatedMice,
 			});
 			return;
 		}
+
+		if (successfullyUpdatedMice.length === 0) {
+			response.status(400).json({
+				message: "Could not update any mouses",
+				resourceData: [],
+			});
+			return;
+		}
+
+		response.status(201).json({
+			message: `Successfully updated ${
+				mouseFields.length - successfullyUpdatedMice.length
+			} mouses`,
+			resourceData: successfullyUpdatedMice,
+		});
+		return;
 	},
 );
 
 // @desc   Get all mouses
-// @route  GET /api/v1/actions/dashboard/product-category/mouse
+// @route  GET /api/v1/product-category/mouse
 // @access Private/Admin/Manager
-const getQueriedMousesHandler = expressAsyncHandler(
+const getQueriedMiceHandler = expressAsyncHandler(
 	async (
-		request: GetQueriedMousesRequest,
-		response: Response<GetQueriedResourceRequestServerResponse<MouseDocument>>,
+		request: GetQueriedMiceRequest,
+		response: Response<
+			GetQueriedResourceRequestServerResponse<
+				MouseDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		let { newQueryFlag, totalDocuments } = request.body;
 
@@ -134,13 +209,13 @@ const getQueriedMousesHandler = expressAsyncHandler(
 
 		// only perform a countDocuments scan if a new query is being made
 		if (newQueryFlag) {
-			totalDocuments = await getQueriedTotalMousesService({
+			totalDocuments = await getQueriedTotalMiceService({
 				filter: filter as FilterQuery<MouseDocument> | undefined,
 			});
 		}
 
 		// get all mouses
-		const mouses = await getQueriedMousesService({
+		const mouses = await getQueriedMiceService({
 			filter: filter as FilterQuery<MouseDocument> | undefined,
 			projection: projection as QueryOptions<MouseDocument>,
 			options: options as QueryOptions<MouseDocument>,
@@ -155,7 +230,7 @@ const getQueriedMousesHandler = expressAsyncHandler(
 			return;
 		}
 
-		// find all fileUploads associated with the mouses (in parallel)
+		// find all fileUploads associated with the mouses
 		const fileUploadsArrArr = await Promise.all(
 			mouses.map(async (mouse) => {
 				const fileUploadPromises = mouse.uploadedFilesIds.map(
@@ -170,37 +245,61 @@ const getQueriedMousesHandler = expressAsyncHandler(
 				const fileUploads = await Promise.all(fileUploadPromises);
 
 				// Filter out any undefined values (in case fileUpload was not found)
-				return fileUploads.filter((fileUpload) => fileUpload);
+				return fileUploads.filter(removeUndefinedAndNullValues);
+			}),
+		);
+
+		// find all reviews associated with the mouses
+		const reviewsArrArr = await Promise.all(
+			mouses.map(async (mouse) => {
+				const reviewPromises = mouse.reviewsIds.map(async (reviewId) => {
+					const review = await getProductReviewByIdService(reviewId);
+
+					return review;
+				});
+
+				// Wait for all the promises to resolve before continuing to the next iteration
+				const reviews = await Promise.all(reviewPromises);
+
+				// Filter out any undefined values (in case review was not found)
+				return reviews.filter(removeUndefinedAndNullValues);
 			}),
 		);
 
 		// create mouseServerResponse array
-		const mouseServerResponseArray = mouses
-			.map((mouse, index) => {
-				const fileUploads = fileUploadsArrArr[index];
-				return {
-					...mouse,
-					fileUploads,
-				};
-			})
-			.filter((mouse) => mouse);
+		const mouseServerResponseArray = mouses.map((mouse, index) => {
+			const fileUploads = fileUploadsArrArr[index];
+			const productReviews = reviewsArrArr[index];
+			return {
+				...mouse,
+				fileUploads,
+				productReviews,
+			};
+		});
 
 		response.status(200).json({
 			message: "Successfully retrieved mouses",
 			pages: Math.ceil(totalDocuments / Number(options?.limit)),
 			totalDocuments,
-			resourceData: mouseServerResponseArray as MouseDocument[],
+			resourceData: mouseServerResponseArray,
 		});
 	},
 );
 
 // @desc   Get mouse by id
-// @route  GET /api/v1/actions/dashboard/product-category/mouse/:mouseId
+// @route  GET /api/v1/product-category/mouse/:mouseId
 // @access Private/Admin/Manager
 const getMouseByIdHandler = expressAsyncHandler(
 	async (
 		request: GetMouseByIdRequest,
-		response: Response<ResourceRequestServerResponse<MouseDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				MouseDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const mouseId = request.params.mouseId;
 
@@ -214,20 +313,28 @@ const getMouseByIdHandler = expressAsyncHandler(
 		}
 
 		// get all fileUploads associated with the mouse
-		const fileUploadsArr = await Promise.all(
+		const fileUploads = await Promise.all(
 			mouse.uploadedFilesIds.map(async (uploadedFileId) => {
 				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
-				return fileUpload as FileUploadDocument;
+				return fileUpload;
+			}),
+		);
+
+		// get all reviews associated with the mouse
+		const productReviews = await Promise.all(
+			mouse.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
+
+				return review;
 			}),
 		);
 
 		// create mouseServerResponse
-		const mouseServerResponse: ProductServerResponse<MouseDocument> = {
+		const mouseServerResponse = {
 			...mouse,
-			fileUploads: fileUploadsArr.filter(
-				(fileUpload) => fileUpload,
-			) as FileUploadDocument[],
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
 		};
 
 		response.status(200).json({
@@ -238,34 +345,30 @@ const getMouseByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Update a mouse by id
-// @route  PUT /api/v1/actions/dashboard/product-category/mouse/:mouseId
+// @route  PUT /api/v1/product-category/mouse/:mouseId
 // @access Private/Admin/Manager
 const updateMouseByIdHandler = expressAsyncHandler(
 	async (
 		request: UpdateMouseByIdRequest,
-		response: Response<ResourceRequestServerResponse<MouseDocument>>,
+		response: Response<
+			ResourceRequestServerResponse<
+				MouseDocument & {
+					fileUploads: FileUploadDocument[];
+					productReviews: ProductReviewDocument[];
+				}
+			>
+		>,
 	) => {
 		const { mouseId } = request.params;
-		const { mouseFields } = request.body;
-
-		// check if mouse exists
-		const mouseExists = await getMouseByIdService(mouseId);
-		if (!mouseExists) {
-			response
-				.status(404)
-				.json({ message: "Mouse does not exist", resourceData: [] });
-			return;
-		}
-
-		const newMouse = {
-			...mouseExists,
-			...mouseFields,
-		};
+		const {
+			documentUpdate: { fields, updateOperator },
+		} = request.body;
 
 		// update mouse
 		const updatedMouse = await updateMouseByIdService({
-			mouseId,
-			fieldsToUpdate: newMouse,
+			_id: mouseId,
+			fields,
+			updateOperator,
 		});
 
 		if (!updatedMouse) {
@@ -276,85 +379,89 @@ const updateMouseByIdHandler = expressAsyncHandler(
 			return;
 		}
 
-		response.status(200).json({
-			message: "Mouse updated successfully",
-			resourceData: [updatedMouse],
-		});
-	},
-);
-
-// @desc   Return all associated file uploads
-// @route  GET /api/v1/actions/dashboard/product-category/mouse/fileUploads
-// @access Private/Admin/Manager
-const returnAllFileUploadsForMousesHandler = expressAsyncHandler(
-	async (
-		_request: GetMouseByIdRequest,
-		response: Response<ResourceRequestServerResponse<FileUploadDocument>>,
-	) => {
-		const fileUploadsIds = await returnAllMouseUploadedFileIdsService();
-
-		if (fileUploadsIds.length === 0) {
-			response
-				.status(404)
-				.json({ message: "No file uploads found", resourceData: [] });
-			return;
-		}
-
-		const fileUploads = (await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) => {
-				const fileUpload = await getFileUploadByIdService(fileUploadId);
+		// get all fileUploads associated with the mouse
+		const fileUploads = await Promise.all(
+			updatedMouse.uploadedFilesIds.map(async (uploadedFileId) => {
+				const fileUpload = await getFileUploadByIdService(uploadedFileId);
 
 				return fileUpload;
 			}),
-		)) as FileUploadDocument[];
+		);
 
-		// filter out any undefined values (in case fileUpload was not found)
-		const filteredFileUploads = fileUploads.filter((fileUpload) => fileUpload);
+		// get all reviews associated with the mouse
+		const productReviews = await Promise.all(
+			updatedMouse.reviewsIds.map(async (reviewId) => {
+				const review = await getProductReviewByIdService(reviewId);
 
-		if (filteredFileUploads.length !== fileUploadsIds.length) {
-			response.status(404).json({
-				message: "Some file uploads could not be found.",
-				resourceData: filteredFileUploads,
-			});
-			return;
-		}
+				return review;
+			}),
+		);
+
+		// create mouseServerResponse
+		const mouseServerResponse = {
+			...updatedMouse,
+			fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
+			productReviews: productReviews.filter(removeUndefinedAndNullValues),
+		};
 
 		response.status(200).json({
-			message: "Successfully retrieved file uploads",
-			resourceData: filteredFileUploads,
+			message: "Mouse updated successfully",
+			resourceData: [mouseServerResponse],
 		});
 	},
 );
 
 // @desc   Delete all mouses
-// @route  DELETE /api/v1/actions/dashboard/product-category/mouse
+// @route  DELETE /api/v1/product-category/mouse
 // @access Private/Admin/Manager
-const deleteAllMousesHandler = expressAsyncHandler(
+const deleteAllMiceHandler = expressAsyncHandler(
 	async (
-		_request: DeleteAllMousesRequest,
+		_request: DeleteAllMiceRequest,
 		response: Response<ResourceRequestServerResponse<MouseDocument>>,
 	) => {
 		// grab all mouses file upload ids
-		const fileUploadsIds = await returnAllMouseUploadedFileIdsService();
+		const uploadedFilesIds = await returnAllMiceUploadedFileIdsService();
 
 		// delete all file uploads associated with all mouses
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			fileUploadsIds.map(async (fileUploadId) =>
-				deleteFileUploadByIdService(fileUploadId),
+		const deletedFileUploads = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
-		if (!deleteFileUploadsResult.every((result) => result.deletedCount !== 0)) {
+
+		if (
+			deletedFileUploads.some(
+				(deletedFileUpload) => deletedFileUpload.deletedCount === 0,
+			)
+		) {
 			response.status(400).json({
-				message: "Some file uploads could not be deleted. Please try again.",
+				message: "Some File uploads could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
+
+		// delete all reviews associated with all mouses
+		const deletedReviews = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
+
+		if (
+			deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)
+		) {
+			response.status(400).json({
+				message: "Some reviews could not be deleted. Please try again.",
 				resourceData: [],
 			});
 			return;
 		}
 
 		// delete all mouses
-		const deleteMousesResult: DeleteResult = await deleteAllMousesService();
+		const deleteMiceResult: DeleteResult = await deleteAllMiceService();
 
-		if (deleteMousesResult.deletedCount === 0) {
+		if (deleteMiceResult.deletedCount === 0) {
 			response.status(400).json({
 				message: "All mouses could not be deleted. Please try again.",
 				resourceData: [],
@@ -369,7 +476,7 @@ const deleteAllMousesHandler = expressAsyncHandler(
 );
 
 // @desc   Delete a mouse by id
-// @route  DELETE /api/v1/actions/dashboard/product-category/mouse/:mouseId
+// @route  DELETE /api/v1/product-category/mouse/:mouseId
 // @access Private/Admin/Manager
 const deleteAMouseHandler = expressAsyncHandler(
 	async (
@@ -391,17 +498,37 @@ const deleteAMouseHandler = expressAsyncHandler(
 		// if it is not an array, it is made to be an array
 		const uploadedFilesIds = [...mouseExists.uploadedFilesIds];
 
-		// delete all file uploads associated with this mouse
-		const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
-			uploadedFilesIds.map(async (uploadedFileId) =>
-				deleteFileUploadByIdService(uploadedFileId),
+		// delete all file uploads associated with all mouses
+		const deletedFileUploads = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId),
 			),
 		);
 
-		if (deleteFileUploadsResult.some((result) => result.deletedCount === 0)) {
+		if (
+			deletedFileUploads.some(
+				(deletedFileUpload) => deletedFileUpload.deletedCount === 0,
+			)
+		) {
 			response.status(400).json({
-				message:
-					"Some file uploads associated with this mouse could not be deleted. Mouse not deleted. Please try again.",
+				message: "Some File uploads could not be deleted. Please try again.",
+				resourceData: [],
+			});
+			return;
+		}
+
+		// delete all reviews associated with all mouses
+		const deletedReviews = await Promise.all(
+			uploadedFilesIds.map(
+				async (fileUploadId) => await deleteAProductReviewService(fileUploadId),
+			),
+		);
+
+		if (
+			deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)
+		) {
+			response.status(400).json({
+				message: "Some reviews could not be deleted. Please try again.",
 				resourceData: [],
 			});
 			return;
@@ -426,9 +553,9 @@ export {
 	createNewMouseBulkHandler,
 	createNewMouseHandler,
 	deleteAMouseHandler,
-	deleteAllMousesHandler,
+	deleteAllMiceHandler,
 	getMouseByIdHandler,
-	getQueriedMousesHandler,
-	returnAllFileUploadsForMousesHandler,
+	getQueriedMiceHandler,
 	updateMouseByIdHandler,
+	updateMiceBulkHandler,
 };

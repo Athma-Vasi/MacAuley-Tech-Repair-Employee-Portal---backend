@@ -1,14 +1,18 @@
 import { Router } from "express";
-import { assignQueryDefaults, verifyRoles } from "../../../middlewares";
+import {
+	assignQueryDefaults,
+	verifyJWTMiddleware,
+	verifyRoles,
+} from "../../../middlewares";
 import {
 	createNewMouseBulkHandler,
 	createNewMouseHandler,
 	deleteAMouseHandler,
-	deleteAllMousesHandler,
+	deleteAllMiceHandler,
 	getMouseByIdHandler,
-	getQueriedMousesHandler,
-	returnAllFileUploadsForMousesHandler,
+	getQueriedMiceHandler,
 	updateMouseByIdHandler,
+	updateMiceBulkHandler,
 } from "./mouse.controller";
 import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
@@ -19,21 +23,29 @@ mouseRouter.use(verifyRoles());
 mouseRouter
 	.route("/")
 	.get(
+		verifyJWTMiddleware,
+		verifyRoles(),
 		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
-		getQueriedMousesHandler,
+		getQueriedMiceHandler,
 	)
-	.post(createNewMouseHandler)
-	.delete(deleteAllMousesHandler);
+	.post(createNewMouseHandler);
+
+// separate route for safety reasons (as it deletes all documents in the collection)
+mouseRouter
+	.route("/delete-all")
+	.delete(verifyJWTMiddleware, verifyRoles(), deleteAllMiceHandler);
 
 // DEV ROUTE
-mouseRouter.route("/dev").post(createNewMouseBulkHandler);
+mouseRouter
+	.route("/dev")
+	.post(createNewMouseBulkHandler)
+	.patch(updateMiceBulkHandler);
 
-mouseRouter.route("/fileUploads").post(returnAllFileUploadsForMousesHandler);
-
+// single document routes
 mouseRouter
 	.route("/:mouseId")
-	.get(getMouseByIdHandler)
-	.delete(deleteAMouseHandler)
-	.put(updateMouseByIdHandler);
+	.get(verifyJWTMiddleware, verifyRoles(), getMouseByIdHandler)
+	.delete(verifyJWTMiddleware, verifyRoles(), deleteAMouseHandler)
+	.patch(verifyJWTMiddleware, verifyRoles(), updateMouseByIdHandler);
 
 export { mouseRouter };

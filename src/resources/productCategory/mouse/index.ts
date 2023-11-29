@@ -5,75 +5,77 @@
 /**
  * Imports
  */
-import { mouseRouter } from './mouse.routes';
-import { MouseModel } from './mouse.model';
+import { mouseRouter } from "./mouse.routes";
+import { MouseModel } from "./mouse.model";
 
 import {
-  createNewMouseBulkHandler,
-  createNewMouseHandler,
-  deleteAMouseHandler,
-  deleteAllMousesHandler,
-  getMouseByIdHandler,
-  getQueriedMousesHandler,
-  returnAllFileUploadsForMousesHandler,
-  updateMouseByIdHandler,
-} from './mouse.controller';
+	createNewMouseBulkHandler,
+	createNewMouseHandler,
+	deleteAMouseHandler,
+	deleteAllMiceHandler,
+	getMouseByIdHandler,
+	getQueriedMiceHandler,
+	updateMouseByIdHandler,
+	updateMiceBulkHandler,
+} from "./mouse.controller";
 
 import {
-  createNewMouseService,
-  deleteAllMousesService,
-  deleteAMouseService,
-  getMouseByIdService,
-  getQueriedMousesService,
-  getQueriedTotalMousesService,
-  returnAllMouseUploadedFileIdsService,
-  updateMouseByIdService,
-} from './mouse.service';
+	createNewMouseService,
+	deleteAMouseService,
+	deleteAllMiceService,
+	getMouseByIdService,
+	getQueriedMiceService,
+	getQueriedTotalMiceService,
+	returnAllMiceUploadedFileIdsService,
+	updateMouseByIdService,
+} from "./mouse.service";
 
-import type { MouseDocument, MouseSchema } from './mouse.model';
+import type { MouseDocument, MouseSchema } from "./mouse.model";
 import type {
-  CreateNewMouseBulkRequest,
-  CreateNewMouseRequest,
-  DeleteAMouseRequest,
-  DeleteAllMousesRequest,
-  GetMouseByIdRequest,
-  GetQueriedMousesRequest,
-  UpdateMouseByIdRequest,
-} from './mouse.types';
+	CreateNewMouseBulkRequest,
+	CreateNewMouseRequest,
+	DeleteAMouseRequest,
+	DeleteAllMiceRequest,
+	GetMouseByIdRequest,
+	GetQueriedMiceRequest,
+	UpdateMouseByIdRequest,
+	UpdateMiceBulkRequest,
+} from "./mouse.types";
 
 /**
  * Exports
  */
 
 export {
-  MouseModel,
-  mouseRouter,
-  createNewMouseBulkHandler,
-  createNewMouseHandler,
-  createNewMouseService,
-  deleteAMouseHandler,
-  deleteAllMousesHandler,
-  deleteAllMousesService,
-  deleteAMouseService,
-  getMouseByIdHandler,
-  getMouseByIdService,
-  getQueriedMousesHandler,
-  getQueriedMousesService,
-  getQueriedTotalMousesService,
-  returnAllMouseUploadedFileIdsService,
-  returnAllFileUploadsForMousesHandler,
-  updateMouseByIdHandler,
-  updateMouseByIdService,
+	MouseModel,
+	mouseRouter,
+	createNewMouseBulkHandler,
+	createNewMouseHandler,
+	createNewMouseService,
+	deleteAMouseHandler,
+	deleteAMouseService,
+	deleteAllMiceHandler,
+	deleteAllMiceService,
+	getMouseByIdHandler,
+	getMouseByIdService,
+	getQueriedMiceHandler,
+	getQueriedMiceService,
+	getQueriedTotalMiceService,
+	returnAllMiceUploadedFileIdsService,
+	updateMouseByIdHandler,
+	updateMouseByIdService,
+	updateMiceBulkHandler,
 };
 
 export type {
-  CreateNewMouseBulkRequest,
-  CreateNewMouseRequest,
-  DeleteAMouseRequest,
-  DeleteAllMousesRequest,
-  GetMouseByIdRequest,
-  GetQueriedMousesRequest,
-  MouseDocument,
-  MouseSchema,
-  UpdateMouseByIdRequest,
+	MouseDocument,
+	MouseSchema,
+	CreateNewMouseBulkRequest,
+	CreateNewMouseRequest,
+	DeleteAMouseRequest,
+	DeleteAllMiceRequest,
+	GetMouseByIdRequest,
+	GetQueriedMiceRequest,
+	UpdateMouseByIdRequest,
+	UpdateMiceBulkRequest,
 };
