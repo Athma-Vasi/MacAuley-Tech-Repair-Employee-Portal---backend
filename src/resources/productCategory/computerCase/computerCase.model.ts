@@ -155,19 +155,65 @@ const computerCaseSchema = new Schema<ComputerCaseSchema>(
 		},
 
 		starRatingsCount: {
-			type: Object,
-			required: false,
-			default: {
-				"0.5": 0,
-				"1.0": 0,
-				"1.5": 0,
-				"2.0": 0,
-				"2.5": 0,
-				"3.0": 0,
-				"3.5": 0,
-				"4.0": 0,
-				"4.5": 0,
-				"5.0": 0,
+			"0.5": {
+				type: Number,
+				required: false,
+				default: 0,
+				index: true,
+			},
+			"1": {
+				type: Number,
+				required: false,
+				default: 0,
+				index: true,
+			},
+			"1.5": {
+				type: Number,
+				required: false,
+				default: 0,
+				index: true,
+			},
+			"2": {
+				type: Number,
+				required: false,
+				default: 0,
+				index: true,
+			},
+			"2.5": {
+				type: Number,
+				required: false,
+				default: 0,
+				index: true,
+			},
+			"3": {
+				type: Number,
+				required: false,
+				default: 0,
+				index: true,
+			},
+			"3.5": {
+				type: Number,
+				required: false,
+				default: 0,
+				index: true,
+			},
+			"4": {
+				type: Number,
+				required: false,
+				default: 0,
+				index: true,
+			},
+			"4.5": {
+				type: Number,
+				required: false,
+				default: 0,
+				index: true,
+			},
+			"5": {
+				type: Number,
+				required: false,
+				default: 0,
+				index: true,
 			},
 		},
 		reviewsIds: {
