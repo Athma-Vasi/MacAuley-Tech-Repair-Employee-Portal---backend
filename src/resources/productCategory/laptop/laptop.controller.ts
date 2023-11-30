@@ -51,16 +51,7 @@ const createNewLaptopHandler = expressAsyncHandler(
 		request: CreateNewLaptopRequest,
 		response: Response<ResourceRequestServerResponse<LaptopDocument>>,
 	) => {
-		const {
-			userInfo: { userId, username },
-			laptopFields,
-		} = request.body;
-
-		const laptopSchema: LaptopSchema = {
-			userId,
-			username,
-			...laptopFields,
-		};
+		const { laptopSchema } = request.body;
 
 		const laptopDocument: LaptopDocument =
 			await createNewLaptopService(laptopSchema);
@@ -141,12 +132,12 @@ const updateLaptopsBulkHandler = expressAsyncHandler(
 		const updatedLaptops = await Promise.all(
 			laptopFields.map(async (laptopField) => {
 				const {
-					laptopId,
+					documentId,
 					documentUpdate: { fields, updateOperator },
 				} = laptopField;
 
 				const updatedLaptop = await updateLaptopByIdService({
-					_id: laptopId,
+					_id: documentId,
 					fields,
 					updateOperator,
 				});

@@ -51,16 +51,7 @@ const createNewDisplayHandler = expressAsyncHandler(
 		request: CreateNewDisplayRequest,
 		response: Response<ResourceRequestServerResponse<DisplayDocument>>,
 	) => {
-		const {
-			userInfo: { userId, username },
-			displayFields,
-		} = request.body;
-
-		const displaySchema: DisplaySchema = {
-			userId,
-			username,
-			...displayFields,
-		};
+		const { displaySchema } = request.body;
 
 		const displayDocument: DisplayDocument =
 			await createNewDisplayService(displaySchema);
@@ -143,12 +134,12 @@ const updateDisplaysBulkHandler = expressAsyncHandler(
 		const updatedDisplays = await Promise.all(
 			displayFields.map(async (displayField) => {
 				const {
-					displayId,
+					documentId,
 					documentUpdate: { fields, updateOperator },
 				} = displayField;
 
 				const updatedDisplay = await updateDisplayByIdService({
-					_id: displayId,
+					_id: documentId,
 					fields,
 					updateOperator,
 				});

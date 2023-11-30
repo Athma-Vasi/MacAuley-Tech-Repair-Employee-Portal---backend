@@ -16,7 +16,7 @@ interface CreateNewWebcamRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		webcamFields: Omit<WebcamSchema, "userId" | "username">;
+		webcamSchema: WebcamSchema;
 	};
 }
 
@@ -43,7 +43,7 @@ interface UpdateWebcamsBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		webcamFields: {
-			webcamId: Types.ObjectId;
+			documentId: Types.ObjectId;
 			documentUpdate: DocumentUpdateOperation<WebcamDocument>;
 		}[];
 	};

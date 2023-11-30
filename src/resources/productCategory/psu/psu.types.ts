@@ -16,7 +16,7 @@ interface CreateNewPsuRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		psuFields: Omit<PsuSchema, "userId" | "username">;
+		psuSchema: PsuSchema;
 	};
 }
 
@@ -43,7 +43,7 @@ interface UpdatePsusBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		psuFields: {
-			psuId: Types.ObjectId;
+			documentId: Types.ObjectId;
 			documentUpdate: DocumentUpdateOperation<PsuDocument>;
 		}[];
 	};

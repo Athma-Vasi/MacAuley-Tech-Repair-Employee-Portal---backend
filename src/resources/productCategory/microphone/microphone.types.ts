@@ -16,7 +16,7 @@ interface CreateNewMicrophoneRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		microphoneFields: Omit<MicrophoneSchema, "userId" | "username">;
+		microphoneSchema: MicrophoneSchema;
 	};
 }
 
@@ -43,7 +43,7 @@ interface UpdateMicrophonesBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		microphoneFields: {
-			microphoneId: Types.ObjectId;
+			documentId: Types.ObjectId;
 			documentUpdate: DocumentUpdateOperation<MicrophoneDocument>;
 		}[];
 	};

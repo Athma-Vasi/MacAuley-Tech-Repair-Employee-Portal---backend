@@ -16,7 +16,7 @@ interface CreateNewGpuRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		gpuFields: Omit<GpuSchema, "userId" | "username">;
+		gpuSchema: GpuSchema;
 	};
 }
 
@@ -43,7 +43,7 @@ interface UpdateGpusBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		gpuFields: {
-			gpuId: Types.ObjectId;
+			documentId: Types.ObjectId;
 			documentUpdate: DocumentUpdateOperation<GpuDocument>;
 		}[];
 	};

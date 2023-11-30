@@ -13,10 +13,8 @@ import type {
 import type { Currency } from "../../actions/company/expenseClaim";
 
 type PsuSchema = {
-	userId: Types.ObjectId;
-	username: string;
-
 	// page 1
+	sku: string;
 	brand: string;
 	model: string;
 	description: string;
@@ -57,18 +55,13 @@ type PsuDocument = PsuSchema & {
 
 const psuSchema = new Schema<PsuSchema>(
 	{
-		userId: {
-			type: Schema.Types.ObjectId,
-			required: [true, "User ID is required"],
-			ref: "User",
+		// page 1
+		sku: {
+			type: String,
+			required: [true, "SKU is required"],
+			unique: true,
 			index: true,
 		},
-		username: {
-			type: String,
-			required: [true, "Username is required"],
-		},
-
-		// page 1
 		brand: {
 			type: String,
 			required: [true, "Brand is required"],
@@ -172,16 +165,16 @@ const psuSchema = new Schema<PsuSchema>(
 			type: Object,
 			required: false,
 			default: {
-				halfStarRatings: 0,
-				oneStarRatings: 0,
-				oneHalfStarRatings: 0,
-				twoStarRatings: 0,
-				twoHalfStarRatings: 0,
-				threeStarRatings: 0,
-				threeHalfStarRatings: 0,
-				fourStarRatings: 0,
-				fourHalfStarRatings: 0,
-				fiveStarRatings: 0,
+				"0.5": 0,
+				"1.0": 0,
+				"1.5": 0,
+				"2.0": 0,
+				"2.5": 0,
+				"3.0": 0,
+				"3.5": 0,
+				"4.0": 0,
+				"4.5": 0,
+				"5.0": 0,
 			},
 		},
 		reviewsIds: {

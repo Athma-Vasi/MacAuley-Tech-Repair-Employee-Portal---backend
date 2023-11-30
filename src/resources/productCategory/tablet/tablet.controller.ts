@@ -51,16 +51,7 @@ const createNewTabletHandler = expressAsyncHandler(
 		request: CreateNewTabletRequest,
 		response: Response<ResourceRequestServerResponse<TabletDocument>>,
 	) => {
-		const {
-			userInfo: { userId, username },
-			tabletFields,
-		} = request.body;
-
-		const tabletSchema: TabletSchema = {
-			userId,
-			username,
-			...tabletFields,
-		};
+		const { tabletSchema } = request.body;
 
 		const tabletDocument: TabletDocument =
 			await createNewTabletService(tabletSchema);
@@ -141,12 +132,12 @@ const updateTabletsBulkHandler = expressAsyncHandler(
 		const updatedTablets = await Promise.all(
 			tabletFields.map(async (tabletField) => {
 				const {
-					tabletId,
+					documentId,
 					documentUpdate: { fields, updateOperator },
 				} = tabletField;
 
 				const updatedTablet = await updateTabletByIdService({
-					_id: tabletId,
+					_id: documentId,
 					fields,
 					updateOperator,
 				});

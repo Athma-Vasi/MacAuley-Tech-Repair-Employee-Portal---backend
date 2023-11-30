@@ -16,7 +16,7 @@ interface CreateNewMouseRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		mouseFields: Omit<MouseSchema, "userId" | "username">;
+		mouseSchema: MouseSchema;
 	};
 }
 
@@ -43,7 +43,7 @@ interface UpdateMiceBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		mouseFields: {
-			mouseId: Types.ObjectId;
+			documentId: Types.ObjectId;
 			documentUpdate: DocumentUpdateOperation<MouseDocument>;
 		}[];
 	};

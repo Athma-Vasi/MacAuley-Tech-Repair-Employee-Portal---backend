@@ -51,16 +51,7 @@ const createNewMouseHandler = expressAsyncHandler(
 		request: CreateNewMouseRequest,
 		response: Response<ResourceRequestServerResponse<MouseDocument>>,
 	) => {
-		const {
-			userInfo: { userId, username },
-			mouseFields,
-		} = request.body;
-
-		const mouseSchema: MouseSchema = {
-			userId,
-			username,
-			...mouseFields,
-		};
+		const { mouseSchema } = request.body;
 
 		const mouseDocument: MouseDocument =
 			await createNewMouseService(mouseSchema);
@@ -141,12 +132,12 @@ const updateMiceBulkHandler = expressAsyncHandler(
 		const updatedMice = await Promise.all(
 			mouseFields.map(async (mouseField) => {
 				const {
-					mouseId,
+					documentId,
 					documentUpdate: { fields, updateOperator },
 				} = mouseField;
 
 				const updatedMouse = await updateMouseByIdService({
-					_id: mouseId,
+					_id: documentId,
 					fields,
 					updateOperator,
 				});

@@ -16,7 +16,7 @@ interface CreateNewStorageRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		storageFields: Omit<StorageSchema, "userId" | "username">;
+		storageSchema: StorageSchema;
 	};
 }
 
@@ -43,7 +43,7 @@ interface UpdateStoragesBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		storageFields: {
-			storageId: Types.ObjectId;
+			documentId: Types.ObjectId;
 			documentUpdate: DocumentUpdateOperation<StorageDocument>;
 		}[];
 	};

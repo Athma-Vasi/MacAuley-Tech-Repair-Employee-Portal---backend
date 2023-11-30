@@ -16,7 +16,7 @@ interface CreateNewMotherboardRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		motherboardFields: Omit<MotherboardSchema, "userId" | "username">;
+		motherboardSchema: MotherboardSchema;
 	};
 }
 
@@ -43,7 +43,7 @@ interface UpdateMotherboardsBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		motherboardFields: {
-			motherboardId: Types.ObjectId;
+			documentId: Types.ObjectId;
 			documentUpdate: DocumentUpdateOperation<MotherboardDocument>;
 		}[];
 	};

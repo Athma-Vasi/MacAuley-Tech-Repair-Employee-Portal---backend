@@ -54,16 +54,7 @@ const createNewDesktopComputerHandler = expressAsyncHandler(
 		request: CreateNewDesktopComputerRequest,
 		response: Response<ResourceRequestServerResponse<DesktopComputerDocument>>,
 	) => {
-		const {
-			userInfo: { userId, username },
-			desktopComputerFields,
-		} = request.body;
-
-		const desktopComputerSchema: DesktopComputerSchema = {
-			userId,
-			username,
-			...desktopComputerFields,
-		};
+		const { desktopComputerSchema } = request.body;
 
 		const desktopComputerDocument: DesktopComputerDocument =
 			await createNewDesktopComputerService(desktopComputerSchema);
@@ -152,12 +143,12 @@ const updateDesktopComputersBulkHandler = expressAsyncHandler(
 		const updatedDesktopComputers = await Promise.all(
 			desktopComputerFields.map(async (desktopComputerField) => {
 				const {
-					desktopComputerId,
+					documentId,
 					documentUpdate: { fields, updateOperator },
 				} = desktopComputerField;
 
 				const updatedDesktopComputer = await updateDesktopComputerByIdService({
-					_id: desktopComputerId,
+					_id: documentId,
 					fields,
 					updateOperator,
 				});

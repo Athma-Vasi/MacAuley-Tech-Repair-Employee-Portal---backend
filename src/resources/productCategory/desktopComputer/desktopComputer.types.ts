@@ -19,7 +19,7 @@ interface CreateNewDesktopComputerRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		desktopComputerFields: Omit<DesktopComputerSchema, "userId" | "username">;
+		desktopComputerSchema: DesktopComputerSchema;
 	};
 }
 
@@ -48,7 +48,7 @@ interface UpdateDesktopComputersBulkRequest
 		};
 		sessionId: Types.ObjectId;
 		desktopComputerFields: {
-			desktopComputerId: Types.ObjectId;
+			documentId: Types.ObjectId;
 			documentUpdate: DocumentUpdateOperation<DesktopComputerDocument>;
 		}[];
 	};

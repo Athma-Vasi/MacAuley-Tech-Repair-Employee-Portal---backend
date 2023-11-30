@@ -51,16 +51,7 @@ const createNewAccessoryHandler = expressAsyncHandler(
 		request: CreateNewAccessoryRequest,
 		response: Response<ResourceRequestServerResponse<AccessoryDocument>>,
 	) => {
-		const {
-			userInfo: { userId, username },
-			accessoryFields,
-		} = request.body;
-
-		const accessorySchema: AccessorySchema = {
-			userId,
-			username,
-			...accessoryFields,
-		};
+		const { accessorySchema } = request.body;
 
 		const accessoryDocument: AccessoryDocument =
 			await createNewAccessoryService(accessorySchema);
@@ -143,12 +134,12 @@ const updateAccessoriesBulkHandler = expressAsyncHandler(
 		const updatedAccessories = await Promise.all(
 			accessoryFields.map(async (accessoryField) => {
 				const {
-					accessoryId,
+					documentId,
 					documentUpdate: { fields, updateOperator },
 				} = accessoryField;
 
 				const updatedAccessory = await updateAccessoryByIdService({
-					_id: accessoryId,
+					_id: documentId,
 					fields,
 					updateOperator,
 				});

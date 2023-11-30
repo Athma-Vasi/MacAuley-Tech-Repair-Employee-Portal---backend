@@ -51,16 +51,7 @@ const createNewHeadphoneHandler = expressAsyncHandler(
 		request: CreateNewHeadphoneRequest,
 		response: Response<ResourceRequestServerResponse<HeadphoneDocument>>,
 	) => {
-		const {
-			userInfo: { userId, username },
-			headphoneFields,
-		} = request.body;
-
-		const headphoneSchema: HeadphoneSchema = {
-			userId,
-			username,
-			...headphoneFields,
-		};
+		const { headphoneSchema } = request.body;
 
 		const headphoneDocument: HeadphoneDocument =
 			await createNewHeadphoneService(headphoneSchema);
@@ -143,12 +134,12 @@ const updateHeadphonesBulkHandler = expressAsyncHandler(
 		const updatedHeadphones = await Promise.all(
 			headphoneFields.map(async (headphoneField) => {
 				const {
-					headphoneId,
+					documentId,
 					documentUpdate: { fields, updateOperator },
 				} = headphoneField;
 
 				const updatedHeadphone = await updateHeadphoneByIdService({
-					_id: headphoneId,
+					_id: documentId,
 					fields,
 					updateOperator,
 				});

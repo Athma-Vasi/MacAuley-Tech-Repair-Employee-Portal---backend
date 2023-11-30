@@ -16,7 +16,7 @@ interface CreateNewHeadphoneRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		headphoneFields: Omit<HeadphoneSchema, "userId" | "username">;
+		headphoneSchema: HeadphoneSchema;
 	};
 }
 
@@ -43,7 +43,7 @@ interface UpdateHeadphonesBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		headphoneFields: {
-			headphoneId: Types.ObjectId;
+			documentId: Types.ObjectId;
 			documentUpdate: DocumentUpdateOperation<HeadphoneDocument>;
 		}[];
 	};

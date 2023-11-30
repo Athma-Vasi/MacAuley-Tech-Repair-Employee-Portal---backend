@@ -54,16 +54,7 @@ const createNewMotherboardHandler = expressAsyncHandler(
 		request: CreateNewMotherboardRequest,
 		response: Response<ResourceRequestServerResponse<MotherboardDocument>>,
 	) => {
-		const {
-			userInfo: { userId, username },
-			motherboardFields,
-		} = request.body;
-
-		const motherboardSchema: MotherboardSchema = {
-			userId,
-			username,
-			...motherboardFields,
-		};
+		const { motherboardSchema } = request.body;
 
 		const motherboardDocument: MotherboardDocument =
 			await createNewMotherboardService(motherboardSchema);
@@ -147,12 +138,12 @@ const updateMotherboardsBulkHandler = expressAsyncHandler(
 		const updatedMotherboards = await Promise.all(
 			motherboardFields.map(async (motherboardField) => {
 				const {
-					motherboardId,
+					documentId,
 					documentUpdate: { fields, updateOperator },
 				} = motherboardField;
 
 				const updatedMotherboard = await updateMotherboardByIdService({
-					_id: motherboardId,
+					_id: documentId,
 					fields,
 					updateOperator,
 				});

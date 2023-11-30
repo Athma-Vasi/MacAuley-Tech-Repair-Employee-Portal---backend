@@ -16,7 +16,7 @@ interface CreateNewSmartphoneRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		smartphoneFields: Omit<SmartphoneSchema, "userId" | "username">;
+		smartphoneSchema: SmartphoneSchema;
 	};
 }
 
@@ -43,7 +43,7 @@ interface UpdateSmartphonesBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		smartphoneFields: {
-			smartphoneId: Types.ObjectId;
+			documentId: Types.ObjectId;
 			documentUpdate: DocumentUpdateOperation<SmartphoneDocument>;
 		}[];
 	};

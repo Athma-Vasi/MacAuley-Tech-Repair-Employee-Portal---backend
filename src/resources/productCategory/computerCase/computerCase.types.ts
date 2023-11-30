@@ -16,7 +16,7 @@ interface CreateNewComputerCaseRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		computerCaseFields: Omit<ComputerCaseSchema, "userId" | "username">;
+		computerCaseSchema: ComputerCaseSchema;
 	};
 }
 
@@ -43,7 +43,7 @@ interface UpdateComputerCasesBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		computerCaseFields: {
-			computerCaseId: Types.ObjectId;
+			documentId: Types.ObjectId;
 			documentUpdate: DocumentUpdateOperation<ComputerCaseDocument>;
 		}[];
 	};

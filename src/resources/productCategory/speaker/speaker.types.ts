@@ -16,7 +16,7 @@ interface CreateNewSpeakerRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		speakerFields: Omit<SpeakerSchema, "userId" | "username">;
+		speakerSchema: SpeakerSchema;
 	};
 }
 
@@ -43,7 +43,7 @@ interface UpdateSpeakersBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		speakerFields: {
-			speakerId: Types.ObjectId;
+			documentId: Types.ObjectId;
 			documentUpdate: DocumentUpdateOperation<SpeakerDocument>;
 		}[];
 	};

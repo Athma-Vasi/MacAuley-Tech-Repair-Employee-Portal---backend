@@ -51,16 +51,7 @@ const createNewKeyboardHandler = expressAsyncHandler(
 		request: CreateNewKeyboardRequest,
 		response: Response<ResourceRequestServerResponse<KeyboardDocument>>,
 	) => {
-		const {
-			userInfo: { userId, username },
-			keyboardFields,
-		} = request.body;
-
-		const keyboardSchema: KeyboardSchema = {
-			userId,
-			username,
-			...keyboardFields,
-		};
+		const { keyboardSchema } = request.body;
 
 		const keyboardDocument: KeyboardDocument =
 			await createNewKeyboardService(keyboardSchema);
@@ -143,12 +134,12 @@ const updateKeyboardsBulkHandler = expressAsyncHandler(
 		const updatedKeyboards = await Promise.all(
 			keyboardFields.map(async (keyboardField) => {
 				const {
-					keyboardId,
+					documentId,
 					documentUpdate: { fields, updateOperator },
 				} = keyboardField;
 
 				const updatedKeyboard = await updateKeyboardByIdService({
-					_id: keyboardId,
+					_id: documentId,
 					fields,
 					updateOperator,
 				});

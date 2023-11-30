@@ -51,16 +51,7 @@ const createNewSpeakerHandler = expressAsyncHandler(
 		request: CreateNewSpeakerRequest,
 		response: Response<ResourceRequestServerResponse<SpeakerDocument>>,
 	) => {
-		const {
-			userInfo: { userId, username },
-			speakerFields,
-		} = request.body;
-
-		const speakerSchema: SpeakerSchema = {
-			userId,
-			username,
-			...speakerFields,
-		};
+		const { speakerSchema } = request.body;
 
 		const speakerDocument: SpeakerDocument =
 			await createNewSpeakerService(speakerSchema);
@@ -143,12 +134,12 @@ const updateSpeakersBulkHandler = expressAsyncHandler(
 		const updatedSpeakers = await Promise.all(
 			speakerFields.map(async (speakerField) => {
 				const {
-					speakerId,
+					documentId,
 					documentUpdate: { fields, updateOperator },
 				} = speakerField;
 
 				const updatedSpeaker = await updateSpeakerByIdService({
-					_id: speakerId,
+					_id: documentId,
 					fields,
 					updateOperator,
 				});

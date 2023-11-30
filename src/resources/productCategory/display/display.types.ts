@@ -16,7 +16,7 @@ interface CreateNewDisplayRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		displayFields: Omit<DisplaySchema, "userId" | "username">;
+		displaySchema: DisplaySchema;
 	};
 }
 
@@ -43,7 +43,7 @@ interface UpdateDisplaysBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		displayFields: {
-			displayId: Types.ObjectId;
+			documentId: Types.ObjectId;
 			documentUpdate: DocumentUpdateOperation<DisplayDocument>;
 		}[];
 	};

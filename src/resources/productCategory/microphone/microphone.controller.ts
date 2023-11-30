@@ -51,16 +51,7 @@ const createNewMicrophoneHandler = expressAsyncHandler(
 		request: CreateNewMicrophoneRequest,
 		response: Response<ResourceRequestServerResponse<MicrophoneDocument>>,
 	) => {
-		const {
-			userInfo: { userId, username },
-			microphoneFields,
-		} = request.body;
-
-		const microphoneSchema: MicrophoneSchema = {
-			userId,
-			username,
-			...microphoneFields,
-		};
+		const { microphoneSchema } = request.body;
 
 		const microphoneDocument: MicrophoneDocument =
 			await createNewMicrophoneService(microphoneSchema);
@@ -144,12 +135,12 @@ const updateMicrophonesBulkHandler = expressAsyncHandler(
 		const updatedMicrophones = await Promise.all(
 			microphoneFields.map(async (microphoneField) => {
 				const {
-					microphoneId,
+					documentId,
 					documentUpdate: { fields, updateOperator },
 				} = microphoneField;
 
 				const updatedMicrophone = await updateMicrophoneByIdService({
-					_id: microphoneId,
+					_id: documentId,
 					fields,
 					updateOperator,
 				});

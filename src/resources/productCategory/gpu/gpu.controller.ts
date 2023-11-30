@@ -51,16 +51,7 @@ const createNewGpuHandler = expressAsyncHandler(
 		request: CreateNewGpuRequest,
 		response: Response<ResourceRequestServerResponse<GpuDocument>>,
 	) => {
-		const {
-			userInfo: { userId, username },
-			gpuFields,
-		} = request.body;
-
-		const gpuSchema: GpuSchema = {
-			userId,
-			username,
-			...gpuFields,
-		};
+		const { gpuSchema } = request.body;
 
 		const gpuDocument: GpuDocument = await createNewGpuService(gpuSchema);
 
@@ -140,12 +131,12 @@ const updateGpusBulkHandler = expressAsyncHandler(
 		const updatedGpus = await Promise.all(
 			gpuFields.map(async (gpuField) => {
 				const {
-					gpuId,
+					documentId,
 					documentUpdate: { fields, updateOperator },
 				} = gpuField;
 
 				const updatedGpu = await updateGpuByIdService({
-					_id: gpuId,
+					_id: documentId,
 					fields,
 					updateOperator,
 				});

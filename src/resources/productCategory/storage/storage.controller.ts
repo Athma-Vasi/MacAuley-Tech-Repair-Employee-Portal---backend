@@ -51,16 +51,7 @@ const createNewStorageHandler = expressAsyncHandler(
 		request: CreateNewStorageRequest,
 		response: Response<ResourceRequestServerResponse<StorageDocument>>,
 	) => {
-		const {
-			userInfo: { userId, username },
-			storageFields,
-		} = request.body;
-
-		const storageSchema: StorageSchema = {
-			userId,
-			username,
-			...storageFields,
-		};
+		const { storageSchema } = request.body;
 
 		const storageDocument: StorageDocument =
 			await createNewStorageService(storageSchema);
@@ -143,12 +134,12 @@ const updateStoragesBulkHandler = expressAsyncHandler(
 		const updatedStorages = await Promise.all(
 			storageFields.map(async (storageField) => {
 				const {
-					storageId,
+					documentId,
 					documentUpdate: { fields, updateOperator },
 				} = storageField;
 
 				const updatedStorage = await updateStorageByIdService({
-					_id: storageId,
+					_id: documentId,
 					fields,
 					updateOperator,
 				});

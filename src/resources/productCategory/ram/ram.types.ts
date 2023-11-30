@@ -16,7 +16,7 @@ interface CreateNewRamRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		ramFields: Omit<RamSchema, "userId" | "username">;
+		ramSchema: RamSchema;
 	};
 }
 
@@ -43,7 +43,7 @@ interface UpdateRamsBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		ramFields: {
-			ramId: Types.ObjectId;
+			documentId: Types.ObjectId;
 			documentUpdate: DocumentUpdateOperation<RamDocument>;
 		}[];
 	};

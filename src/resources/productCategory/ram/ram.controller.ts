@@ -51,16 +51,7 @@ const createNewRamHandler = expressAsyncHandler(
 		request: CreateNewRamRequest,
 		response: Response<ResourceRequestServerResponse<RamDocument>>,
 	) => {
-		const {
-			userInfo: { userId, username },
-			ramFields,
-		} = request.body;
-
-		const ramSchema: RamSchema = {
-			userId,
-			username,
-			...ramFields,
-		};
+		const { ramSchema } = request.body;
 
 		const ramDocument: RamDocument = await createNewRamService(ramSchema);
 
@@ -140,12 +131,12 @@ const updateRamsBulkHandler = expressAsyncHandler(
 		const updatedRams = await Promise.all(
 			ramFields.map(async (ramField) => {
 				const {
-					ramId,
+					documentId,
 					documentUpdate: { fields, updateOperator },
 				} = ramField;
 
 				const updatedRam = await updateRamByIdService({
-					_id: ramId,
+					_id: documentId,
 					fields,
 					updateOperator,
 				});

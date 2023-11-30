@@ -54,16 +54,7 @@ const createNewComputerCaseHandler = expressAsyncHandler(
 		request: CreateNewComputerCaseRequest,
 		response: Response<ResourceRequestServerResponse<ComputerCaseDocument>>,
 	) => {
-		const {
-			userInfo: { userId, username },
-			computerCaseFields,
-		} = request.body;
-
-		const computerCaseSchema: ComputerCaseSchema = {
-			userId,
-			username,
-			...computerCaseFields,
-		};
+		const { computerCaseSchema } = request.body;
 
 		const computerCaseDocument: ComputerCaseDocument =
 			await createNewComputerCaseService(computerCaseSchema);
@@ -149,12 +140,12 @@ const updateComputerCasesBulkHandler = expressAsyncHandler(
 		const updatedComputerCases = await Promise.all(
 			computerCaseFields.map(async (computerCaseField) => {
 				const {
-					computerCaseId,
+					documentId,
 					documentUpdate: { fields, updateOperator },
 				} = computerCaseField;
 
 				const updatedComputerCase = await updateComputerCaseByIdService({
-					_id: computerCaseId,
+					_id: documentId,
 					fields,
 					updateOperator,
 				});

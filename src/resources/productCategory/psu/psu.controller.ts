@@ -51,16 +51,7 @@ const createNewPsuHandler = expressAsyncHandler(
 		request: CreateNewPsuRequest,
 		response: Response<ResourceRequestServerResponse<PsuDocument>>,
 	) => {
-		const {
-			userInfo: { userId, username },
-			psuFields,
-		} = request.body;
-
-		const psuSchema: PsuSchema = {
-			userId,
-			username,
-			...psuFields,
-		};
+		const { psuSchema } = request.body;
 
 		const psuDocument: PsuDocument = await createNewPsuService(psuSchema);
 
@@ -140,12 +131,12 @@ const updatePsusBulkHandler = expressAsyncHandler(
 		const updatedPsus = await Promise.all(
 			psuFields.map(async (psuField) => {
 				const {
-					psuId,
+					documentId,
 					documentUpdate: { fields, updateOperator },
 				} = psuField;
 
 				const updatedPsu = await updatePsuByIdService({
-					_id: psuId,
+					_id: documentId,
 					fields,
 					updateOperator,
 				});

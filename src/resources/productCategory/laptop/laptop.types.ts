@@ -16,7 +16,7 @@ interface CreateNewLaptopRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		laptopFields: Omit<LaptopSchema, "userId" | "username">;
+		laptopSchema: LaptopSchema;
 	};
 }
 
@@ -43,7 +43,7 @@ interface UpdateLaptopsBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		laptopFields: {
-			laptopId: Types.ObjectId;
+			documentId: Types.ObjectId;
 			documentUpdate: DocumentUpdateOperation<LaptopDocument>;
 		}[];
 	};

@@ -51,16 +51,7 @@ const createNewWebcamHandler = expressAsyncHandler(
 		request: CreateNewWebcamRequest,
 		response: Response<ResourceRequestServerResponse<WebcamDocument>>,
 	) => {
-		const {
-			userInfo: { userId, username },
-			webcamFields,
-		} = request.body;
-
-		const webcamSchema: WebcamSchema = {
-			userId,
-			username,
-			...webcamFields,
-		};
+		const { webcamSchema } = request.body;
 
 		const webcamDocument: WebcamDocument =
 			await createNewWebcamService(webcamSchema);
@@ -141,12 +132,12 @@ const updateWebcamsBulkHandler = expressAsyncHandler(
 		const updatedWebcams = await Promise.all(
 			webcamFields.map(async (webcamField) => {
 				const {
-					webcamId,
+					documentId,
 					documentUpdate: { fields, updateOperator },
 				} = webcamField;
 
 				const updatedWebcam = await updateWebcamByIdService({
-					_id: webcamId,
+					_id: documentId,
 					fields,
 					updateOperator,
 				});

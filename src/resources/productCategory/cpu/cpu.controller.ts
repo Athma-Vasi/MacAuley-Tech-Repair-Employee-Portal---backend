@@ -51,16 +51,7 @@ const createNewCpuHandler = expressAsyncHandler(
 		request: CreateNewCpuRequest,
 		response: Response<ResourceRequestServerResponse<CpuDocument>>,
 	) => {
-		const {
-			userInfo: { userId, username },
-			cpuFields,
-		} = request.body;
-
-		const cpuSchema: CpuSchema = {
-			userId,
-			username,
-			...cpuFields,
-		};
+		const { cpuSchema } = request.body;
 
 		const cpuDocument: CpuDocument = await createNewCpuService(cpuSchema);
 
@@ -140,12 +131,12 @@ const updateCpusBulkHandler = expressAsyncHandler(
 		const updatedCpus = await Promise.all(
 			cpuFields.map(async (cpuField) => {
 				const {
-					cpuId,
+					documentId,
 					documentUpdate: { fields, updateOperator },
 				} = cpuField;
 
 				const updatedCpu = await updateCpuByIdService({
-					_id: cpuId,
+					_id: documentId,
 					fields,
 					updateOperator,
 				});

@@ -8,7 +8,8 @@ type OrderStatus =
 	| "Shipped"
 	| "Delivered"
 	| "Returned"
-	| "Cancelled";
+	| "Cancelled"
+	| "Received";
 
 type PurchaseOnlineSchema = {
 	productId: Types.ObjectId;

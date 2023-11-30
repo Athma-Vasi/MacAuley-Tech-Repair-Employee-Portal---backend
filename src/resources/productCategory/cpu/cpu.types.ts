@@ -16,7 +16,7 @@ interface CreateNewCpuRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		cpuFields: Omit<CpuSchema, "userId" | "username">;
+		cpuSchema: CpuSchema;
 	};
 }
 
@@ -43,7 +43,7 @@ interface UpdateCpusBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		cpuFields: {
-			cpuId: Types.ObjectId;
+			documentId: Types.ObjectId;
 			documentUpdate: DocumentUpdateOperation<CpuDocument>;
 		}[];
 	};

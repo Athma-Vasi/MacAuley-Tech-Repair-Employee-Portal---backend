@@ -16,7 +16,7 @@ interface CreateNewAccessoryRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		accessoryFields: Omit<AccessorySchema, "userId" | "username">;
+		accessorySchema: AccessorySchema;
 	};
 }
 
@@ -43,7 +43,7 @@ interface UpdateAccessoriesBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		accessoryFields: {
-			accessoryId: Types.ObjectId;
+			documentId: Types.ObjectId;
 			documentUpdate: DocumentUpdateOperation<AccessoryDocument>;
 		}[];
 	};

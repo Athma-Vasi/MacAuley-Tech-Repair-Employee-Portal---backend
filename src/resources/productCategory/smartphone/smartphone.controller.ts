@@ -51,16 +51,7 @@ const createNewSmartphoneHandler = expressAsyncHandler(
 		request: CreateNewSmartphoneRequest,
 		response: Response<ResourceRequestServerResponse<SmartphoneDocument>>,
 	) => {
-		const {
-			userInfo: { userId, username },
-			smartphoneFields,
-		} = request.body;
-
-		const smartphoneSchema: SmartphoneSchema = {
-			userId,
-			username,
-			...smartphoneFields,
-		};
+		const { smartphoneSchema } = request.body;
 
 		const smartphoneDocument: SmartphoneDocument =
 			await createNewSmartphoneService(smartphoneSchema);
@@ -144,12 +135,12 @@ const updateSmartphonesBulkHandler = expressAsyncHandler(
 		const updatedSmartphones = await Promise.all(
 			smartphoneFields.map(async (smartphoneField) => {
 				const {
-					smartphoneId,
+					documentId,
 					documentUpdate: { fields, updateOperator },
 				} = smartphoneField;
 
 				const updatedSmartphone = await updateSmartphoneByIdService({
-					_id: smartphoneId,
+					_id: documentId,
 					fields,
 					updateOperator,
 				});

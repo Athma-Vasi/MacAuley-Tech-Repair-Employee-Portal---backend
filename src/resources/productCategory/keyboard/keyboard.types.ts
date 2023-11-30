@@ -16,7 +16,7 @@ interface CreateNewKeyboardRequest extends RequestAfterJWTVerification {
 			roles: UserRoles;
 		};
 		sessionId: Types.ObjectId;
-		keyboardFields: Omit<KeyboardSchema, "userId" | "username">;
+		keyboardSchema: KeyboardSchema;
 	};
 }
 
@@ -43,7 +43,7 @@ interface UpdateKeyboardsBulkRequest extends RequestAfterJWTVerification {
 		};
 		sessionId: Types.ObjectId;
 		keyboardFields: {
-			keyboardId: Types.ObjectId;
+			documentId: Types.ObjectId;
 			documentUpdate: DocumentUpdateOperation<KeyboardDocument>;
 		}[];
 	};
