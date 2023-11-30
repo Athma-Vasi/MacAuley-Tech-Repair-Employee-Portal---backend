@@ -195,65 +195,19 @@ const tabletSchema = new Schema<TabletSchema>(
 		},
 
 		starRatingsCount: {
-			"0.5": {
-				type: Number,
-				required: false,
-				default: 0,
-				index: true,
-			},
-			"1": {
-				type: Number,
-				required: false,
-				default: 0,
-				index: true,
-			},
-			"1.5": {
-				type: Number,
-				required: false,
-				default: 0,
-				index: true,
-			},
-			"2": {
-				type: Number,
-				required: false,
-				default: 0,
-				index: true,
-			},
-			"2.5": {
-				type: Number,
-				required: false,
-				default: 0,
-				index: true,
-			},
-			"3": {
-				type: Number,
-				required: false,
-				default: 0,
-				index: true,
-			},
-			"3.5": {
-				type: Number,
-				required: false,
-				default: 0,
-				index: true,
-			},
-			"4": {
-				type: Number,
-				required: false,
-				default: 0,
-				index: true,
-			},
-			"4.5": {
-				type: Number,
-				required: false,
-				default: 0,
-				index: true,
-			},
-			"5": {
-				type: Number,
-				required: false,
-				default: 0,
-				index: true,
+			type: Object,
+			required: false,
+			default: {
+				halfStar: 0,
+				oneStar: 0,
+				oneAndHalfStars: 0,
+				twoStars: 0,
+				twoAndHalfStars: 0,
+				threeStars: 0,
+				threeAndHalfStars: 0,
+				fourStars: 0,
+				fourAndHalfStars: 0,
+				fiveStars: 0,
 			},
 		},
 		productReviewsIds: {

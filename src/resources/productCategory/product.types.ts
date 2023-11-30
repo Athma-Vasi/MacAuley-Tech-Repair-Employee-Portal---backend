@@ -160,16 +160,16 @@ type MicrophonePolarPattern =
 type MicrophoneInterface = "XLR" | "USB" | "3.5mm" | "Wireless" | "Other";
 
 type StarRatingsCount = {
-	"0.5": 0;
-	"1": 0;
-	"1.5": 0;
-	"2": 0;
-	"2.5": 0;
-	"3": 0;
-	"3.5": 0;
-	"4": 0;
-	"4.5": 0;
-	"5": 0;
+	halfStar: number;
+	oneStar: number;
+	oneAndHalfStars: number;
+	twoStars: number;
+	twoAndHalfStars: number;
+	threeStars: number;
+	threeAndHalfStars: number;
+	fourStars: number;
+	fourAndHalfStars: number;
+	fiveStars: number;
 };
 
 type ProductServerResponse<
