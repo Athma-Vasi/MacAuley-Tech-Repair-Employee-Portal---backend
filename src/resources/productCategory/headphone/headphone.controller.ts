@@ -245,11 +245,13 @@ const getQueriedHeadphonesHandler = expressAsyncHandler(
 		// find all reviews associated with the headphones
 		const reviewsArrArr = await Promise.all(
 			headphones.map(async (headphone) => {
-				const reviewPromises = headphone.reviewsIds.map(async (reviewId) => {
-					const review = await getProductReviewByIdService(reviewId);
+				const reviewPromises = headphone.productReviewsIds.map(
+					async (reviewId) => {
+						const review = await getProductReviewByIdService(reviewId);
 
-					return review;
-				});
+						return review;
+					},
+				);
 
 				// Wait for all the promises to resolve before continuing to the next iteration
 				const reviews = await Promise.all(reviewPromises);
@@ -316,7 +318,7 @@ const getHeadphoneByIdHandler = expressAsyncHandler(
 
 		// get all reviews associated with the headphone
 		const productReviews = await Promise.all(
-			headphone.reviewsIds.map(async (reviewId) => {
+			headphone.productReviewsIds.map(async (reviewId) => {
 				const review = await getProductReviewByIdService(reviewId);
 
 				return review;
@@ -383,7 +385,7 @@ const updateHeadphoneByIdHandler = expressAsyncHandler(
 
 		// get all reviews associated with the headphone
 		const productReviews = await Promise.all(
-			updatedHeadphone.reviewsIds.map(async (reviewId) => {
+			updatedHeadphone.productReviewsIds.map(async (reviewId) => {
 				const review = await getProductReviewByIdService(reviewId);
 
 				return review;

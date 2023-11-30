@@ -245,11 +245,13 @@ const getQueriedSpeakersHandler = expressAsyncHandler(
 		// find all reviews associated with the speakers
 		const reviewsArrArr = await Promise.all(
 			speakers.map(async (speaker) => {
-				const reviewPromises = speaker.reviewsIds.map(async (reviewId) => {
-					const review = await getProductReviewByIdService(reviewId);
+				const reviewPromises = speaker.productReviewsIds.map(
+					async (reviewId) => {
+						const review = await getProductReviewByIdService(reviewId);
 
-					return review;
-				});
+						return review;
+					},
+				);
 
 				// Wait for all the promises to resolve before continuing to the next iteration
 				const reviews = await Promise.all(reviewPromises);
@@ -316,7 +318,7 @@ const getSpeakerByIdHandler = expressAsyncHandler(
 
 		// get all reviews associated with the speaker
 		const productReviews = await Promise.all(
-			speaker.reviewsIds.map(async (reviewId) => {
+			speaker.productReviewsIds.map(async (reviewId) => {
 				const review = await getProductReviewByIdService(reviewId);
 
 				return review;
@@ -383,7 +385,7 @@ const updateSpeakerByIdHandler = expressAsyncHandler(
 
 		// get all reviews associated with the speaker
 		const productReviews = await Promise.all(
-			updatedSpeaker.reviewsIds.map(async (reviewId) => {
+			updatedSpeaker.productReviewsIds.map(async (reviewId) => {
 				const review = await getProductReviewByIdService(reviewId);
 
 				return review;

@@ -245,11 +245,13 @@ const getQueriedKeyboardsHandler = expressAsyncHandler(
 		// find all reviews associated with the keyboards
 		const reviewsArrArr = await Promise.all(
 			keyboards.map(async (keyboard) => {
-				const reviewPromises = keyboard.reviewsIds.map(async (reviewId) => {
-					const review = await getProductReviewByIdService(reviewId);
+				const reviewPromises = keyboard.productReviewsIds.map(
+					async (reviewId) => {
+						const review = await getProductReviewByIdService(reviewId);
 
-					return review;
-				});
+						return review;
+					},
+				);
 
 				// Wait for all the promises to resolve before continuing to the next iteration
 				const reviews = await Promise.all(reviewPromises);
@@ -316,7 +318,7 @@ const getKeyboardByIdHandler = expressAsyncHandler(
 
 		// get all reviews associated with the keyboard
 		const productReviews = await Promise.all(
-			keyboard.reviewsIds.map(async (reviewId) => {
+			keyboard.productReviewsIds.map(async (reviewId) => {
 				const review = await getProductReviewByIdService(reviewId);
 
 				return review;
@@ -383,7 +385,7 @@ const updateKeyboardByIdHandler = expressAsyncHandler(
 
 		// get all reviews associated with the keyboard
 		const productReviews = await Promise.all(
-			updatedKeyboard.reviewsIds.map(async (reviewId) => {
+			updatedKeyboard.productReviewsIds.map(async (reviewId) => {
 				const review = await getProductReviewByIdService(reviewId);
 
 				return review;

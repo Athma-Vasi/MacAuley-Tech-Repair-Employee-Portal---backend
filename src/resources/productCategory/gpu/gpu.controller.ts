@@ -242,7 +242,7 @@ const getQueriedGpusHandler = expressAsyncHandler(
 		// find all reviews associated with the gpus
 		const reviewsArrArr = await Promise.all(
 			gpus.map(async (gpu) => {
-				const reviewPromises = gpu.reviewsIds.map(async (reviewId) => {
+				const reviewPromises = gpu.productReviewsIds.map(async (reviewId) => {
 					const review = await getProductReviewByIdService(reviewId);
 
 					return review;
@@ -311,7 +311,7 @@ const getGpuByIdHandler = expressAsyncHandler(
 
 		// get all reviews associated with the gpu
 		const productReviews = await Promise.all(
-			gpu.reviewsIds.map(async (reviewId) => {
+			gpu.productReviewsIds.map(async (reviewId) => {
 				const review = await getProductReviewByIdService(reviewId);
 
 				return review;
@@ -378,7 +378,7 @@ const updateGpuByIdHandler = expressAsyncHandler(
 
 		// get all reviews associated with the gpu
 		const productReviews = await Promise.all(
-			updatedGpu.reviewsIds.map(async (reviewId) => {
+			updatedGpu.productReviewsIds.map(async (reviewId) => {
 				const review = await getProductReviewByIdService(reviewId);
 
 				return review;

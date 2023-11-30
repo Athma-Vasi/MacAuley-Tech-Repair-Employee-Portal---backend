@@ -243,7 +243,7 @@ const getQueriedMiceHandler = expressAsyncHandler(
 		// find all reviews associated with the mouses
 		const reviewsArrArr = await Promise.all(
 			mouses.map(async (mouse) => {
-				const reviewPromises = mouse.reviewsIds.map(async (reviewId) => {
+				const reviewPromises = mouse.productReviewsIds.map(async (reviewId) => {
 					const review = await getProductReviewByIdService(reviewId);
 
 					return review;
@@ -314,7 +314,7 @@ const getMouseByIdHandler = expressAsyncHandler(
 
 		// get all reviews associated with the mouse
 		const productReviews = await Promise.all(
-			mouse.reviewsIds.map(async (reviewId) => {
+			mouse.productReviewsIds.map(async (reviewId) => {
 				const review = await getProductReviewByIdService(reviewId);
 
 				return review;
@@ -381,7 +381,7 @@ const updateMouseByIdHandler = expressAsyncHandler(
 
 		// get all reviews associated with the mouse
 		const productReviews = await Promise.all(
-			updatedMouse.reviewsIds.map(async (reviewId) => {
+			updatedMouse.productReviewsIds.map(async (reviewId) => {
 				const review = await getProductReviewByIdService(reviewId);
 
 				return review;

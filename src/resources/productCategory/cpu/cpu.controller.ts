@@ -242,7 +242,7 @@ const getQueriedCpusHandler = expressAsyncHandler(
 		// find all reviews associated with the cpus
 		const reviewsArrArr = await Promise.all(
 			cpus.map(async (cpu) => {
-				const reviewPromises = cpu.reviewsIds.map(async (reviewId) => {
+				const reviewPromises = cpu.productReviewsIds.map(async (reviewId) => {
 					const review = await getProductReviewByIdService(reviewId);
 
 					return review;
@@ -311,7 +311,7 @@ const getCpuByIdHandler = expressAsyncHandler(
 
 		// get all reviews associated with the cpu
 		const productReviews = await Promise.all(
-			cpu.reviewsIds.map(async (reviewId) => {
+			cpu.productReviewsIds.map(async (reviewId) => {
 				const review = await getProductReviewByIdService(reviewId);
 
 				return review;
@@ -378,7 +378,7 @@ const updateCpuByIdHandler = expressAsyncHandler(
 
 		// get all reviews associated with the cpu
 		const productReviews = await Promise.all(
-			updatedCpu.reviewsIds.map(async (reviewId) => {
+			updatedCpu.productReviewsIds.map(async (reviewId) => {
 				const review = await getProductReviewByIdService(reviewId);
 
 				return review;

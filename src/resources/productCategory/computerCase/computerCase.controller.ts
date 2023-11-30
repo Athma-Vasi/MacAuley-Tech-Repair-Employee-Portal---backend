@@ -251,11 +251,13 @@ const getQueriedComputerCasesHandler = expressAsyncHandler(
 		// find all reviews associated with the computerCases
 		const reviewsArrArr = await Promise.all(
 			computerCases.map(async (computerCase) => {
-				const reviewPromises = computerCase.reviewsIds.map(async (reviewId) => {
-					const review = await getProductReviewByIdService(reviewId);
+				const reviewPromises = computerCase.productReviewsIds.map(
+					async (reviewId) => {
+						const review = await getProductReviewByIdService(reviewId);
 
-					return review;
-				});
+						return review;
+					},
+				);
 
 				// Wait for all the promises to resolve before continuing to the next iteration
 				const reviews = await Promise.all(reviewPromises);
@@ -324,7 +326,7 @@ const getComputerCaseByIdHandler = expressAsyncHandler(
 
 		// get all reviews associated with the computerCase
 		const productReviews = await Promise.all(
-			computerCase.reviewsIds.map(async (reviewId) => {
+			computerCase.productReviewsIds.map(async (reviewId) => {
 				const review = await getProductReviewByIdService(reviewId);
 
 				return review;
@@ -391,7 +393,7 @@ const updateComputerCaseByIdHandler = expressAsyncHandler(
 
 		// get all reviews associated with the computerCase
 		const productReviews = await Promise.all(
-			updatedComputerCase.reviewsIds.map(async (reviewId) => {
+			updatedComputerCase.productReviewsIds.map(async (reviewId) => {
 				const review = await getProductReviewByIdService(reviewId);
 
 				return review;

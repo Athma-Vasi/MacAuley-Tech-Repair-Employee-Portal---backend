@@ -258,7 +258,7 @@ const getQueriedDesktopComputersHandler = expressAsyncHandler(
 		// find all reviews associated with the desktopComputers
 		const reviewsArrArr = await Promise.all(
 			desktopComputers.map(async (desktopComputer) => {
-				const reviewPromises = desktopComputer.reviewsIds.map(
+				const reviewPromises = desktopComputer.productReviewsIds.map(
 					async (reviewId) => {
 						const review = await getProductReviewByIdService(reviewId);
 
@@ -334,7 +334,7 @@ const getDesktopComputerByIdHandler = expressAsyncHandler(
 
 		// get all reviews associated with the desktopComputer
 		const productReviews = await Promise.all(
-			desktopComputer.reviewsIds.map(async (reviewId) => {
+			desktopComputer.productReviewsIds.map(async (reviewId) => {
 				const review = await getProductReviewByIdService(reviewId);
 
 				return review;
@@ -401,7 +401,7 @@ const updateDesktopComputerByIdHandler = expressAsyncHandler(
 
 		// get all reviews associated with the desktopComputer
 		const productReviews = await Promise.all(
-			updatedDesktopComputer.reviewsIds.map(async (reviewId) => {
+			updatedDesktopComputer.productReviewsIds.map(async (reviewId) => {
 				const review = await getProductReviewByIdService(reviewId);
 
 				return review;

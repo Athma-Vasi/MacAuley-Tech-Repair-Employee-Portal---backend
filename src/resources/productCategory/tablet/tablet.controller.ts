@@ -243,11 +243,13 @@ const getQueriedTabletsHandler = expressAsyncHandler(
 		// find all reviews associated with the tablets
 		const reviewsArrArr = await Promise.all(
 			tablets.map(async (tablet) => {
-				const reviewPromises = tablet.reviewsIds.map(async (reviewId) => {
-					const review = await getProductReviewByIdService(reviewId);
+				const reviewPromises = tablet.productReviewsIds.map(
+					async (reviewId) => {
+						const review = await getProductReviewByIdService(reviewId);
 
-					return review;
-				});
+						return review;
+					},
+				);
 
 				// Wait for all the promises to resolve before continuing to the next iteration
 				const reviews = await Promise.all(reviewPromises);
@@ -314,7 +316,7 @@ const getTabletByIdHandler = expressAsyncHandler(
 
 		// get all reviews associated with the tablet
 		const productReviews = await Promise.all(
-			tablet.reviewsIds.map(async (reviewId) => {
+			tablet.productReviewsIds.map(async (reviewId) => {
 				const review = await getProductReviewByIdService(reviewId);
 
 				return review;
@@ -381,7 +383,7 @@ const updateTabletByIdHandler = expressAsyncHandler(
 
 		// get all reviews associated with the tablet
 		const productReviews = await Promise.all(
-			updatedTablet.reviewsIds.map(async (reviewId) => {
+			updatedTablet.productReviewsIds.map(async (reviewId) => {
 				const review = await getProductReviewByIdService(reviewId);
 
 				return review;

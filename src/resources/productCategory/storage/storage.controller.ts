@@ -245,11 +245,13 @@ const getQueriedStoragesHandler = expressAsyncHandler(
 		// find all reviews associated with the storages
 		const reviewsArrArr = await Promise.all(
 			storages.map(async (storage) => {
-				const reviewPromises = storage.reviewsIds.map(async (reviewId) => {
-					const review = await getProductReviewByIdService(reviewId);
+				const reviewPromises = storage.productReviewsIds.map(
+					async (reviewId) => {
+						const review = await getProductReviewByIdService(reviewId);
 
-					return review;
-				});
+						return review;
+					},
+				);
 
 				// Wait for all the promises to resolve before continuing to the next iteration
 				const reviews = await Promise.all(reviewPromises);
@@ -316,7 +318,7 @@ const getStorageByIdHandler = expressAsyncHandler(
 
 		// get all reviews associated with the storage
 		const productReviews = await Promise.all(
-			storage.reviewsIds.map(async (reviewId) => {
+			storage.productReviewsIds.map(async (reviewId) => {
 				const review = await getProductReviewByIdService(reviewId);
 
 				return review;
@@ -383,7 +385,7 @@ const updateStorageByIdHandler = expressAsyncHandler(
 
 		// get all reviews associated with the storage
 		const productReviews = await Promise.all(
-			updatedStorage.reviewsIds.map(async (reviewId) => {
+			updatedStorage.productReviewsIds.map(async (reviewId) => {
 				const review = await getProductReviewByIdService(reviewId);
 
 				return review;

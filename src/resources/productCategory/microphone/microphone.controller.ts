@@ -246,11 +246,13 @@ const getQueriedMicrophonesHandler = expressAsyncHandler(
 		// find all reviews associated with the microphones
 		const reviewsArrArr = await Promise.all(
 			microphones.map(async (microphone) => {
-				const reviewPromises = microphone.reviewsIds.map(async (reviewId) => {
-					const review = await getProductReviewByIdService(reviewId);
+				const reviewPromises = microphone.productReviewsIds.map(
+					async (reviewId) => {
+						const review = await getProductReviewByIdService(reviewId);
 
-					return review;
-				});
+						return review;
+					},
+				);
 
 				// Wait for all the promises to resolve before continuing to the next iteration
 				const reviews = await Promise.all(reviewPromises);
@@ -319,7 +321,7 @@ const getMicrophoneByIdHandler = expressAsyncHandler(
 
 		// get all reviews associated with the microphone
 		const productReviews = await Promise.all(
-			microphone.reviewsIds.map(async (reviewId) => {
+			microphone.productReviewsIds.map(async (reviewId) => {
 				const review = await getProductReviewByIdService(reviewId);
 
 				return review;
@@ -386,7 +388,7 @@ const updateMicrophoneByIdHandler = expressAsyncHandler(
 
 		// get all reviews associated with the microphone
 		const productReviews = await Promise.all(
-			updatedMicrophone.reviewsIds.map(async (reviewId) => {
+			updatedMicrophone.productReviewsIds.map(async (reviewId) => {
 				const review = await getProductReviewByIdService(reviewId);
 
 				return review;

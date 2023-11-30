@@ -249,11 +249,13 @@ const getQueriedMotherboardsHandler = expressAsyncHandler(
 		// find all reviews associated with the motherboards
 		const reviewsArrArr = await Promise.all(
 			motherboards.map(async (motherboard) => {
-				const reviewPromises = motherboard.reviewsIds.map(async (reviewId) => {
-					const review = await getProductReviewByIdService(reviewId);
+				const reviewPromises = motherboard.productReviewsIds.map(
+					async (reviewId) => {
+						const review = await getProductReviewByIdService(reviewId);
 
-					return review;
-				});
+						return review;
+					},
+				);
 
 				// Wait for all the promises to resolve before continuing to the next iteration
 				const reviews = await Promise.all(reviewPromises);
@@ -322,7 +324,7 @@ const getMotherboardByIdHandler = expressAsyncHandler(
 
 		// get all reviews associated with the motherboard
 		const productReviews = await Promise.all(
-			motherboard.reviewsIds.map(async (reviewId) => {
+			motherboard.productReviewsIds.map(async (reviewId) => {
 				const review = await getProductReviewByIdService(reviewId);
 
 				return review;
@@ -389,7 +391,7 @@ const updateMotherboardByIdHandler = expressAsyncHandler(
 
 		// get all reviews associated with the motherboard
 		const productReviews = await Promise.all(
-			updatedMotherboard.reviewsIds.map(async (reviewId) => {
+			updatedMotherboard.productReviewsIds.map(async (reviewId) => {
 				const review = await getProductReviewByIdService(reviewId);
 
 				return review;

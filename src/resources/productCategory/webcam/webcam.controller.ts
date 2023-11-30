@@ -243,11 +243,13 @@ const getQueriedWebcamsHandler = expressAsyncHandler(
 		// find all reviews associated with the webcams
 		const reviewsArrArr = await Promise.all(
 			webcams.map(async (webcam) => {
-				const reviewPromises = webcam.reviewsIds.map(async (reviewId) => {
-					const review = await getProductReviewByIdService(reviewId);
+				const reviewPromises = webcam.productReviewsIds.map(
+					async (reviewId) => {
+						const review = await getProductReviewByIdService(reviewId);
 
-					return review;
-				});
+						return review;
+					},
+				);
 
 				// Wait for all the promises to resolve before continuing to the next iteration
 				const reviews = await Promise.all(reviewPromises);
@@ -314,7 +316,7 @@ const getWebcamByIdHandler = expressAsyncHandler(
 
 		// get all reviews associated with the webcam
 		const productReviews = await Promise.all(
-			webcam.reviewsIds.map(async (reviewId) => {
+			webcam.productReviewsIds.map(async (reviewId) => {
 				const review = await getProductReviewByIdService(reviewId);
 
 				return review;
@@ -381,7 +383,7 @@ const updateWebcamByIdHandler = expressAsyncHandler(
 
 		// get all reviews associated with the webcam
 		const productReviews = await Promise.all(
-			updatedWebcam.reviewsIds.map(async (reviewId) => {
+			updatedWebcam.productReviewsIds.map(async (reviewId) => {
 				const review = await getProductReviewByIdService(reviewId);
 
 				return review;

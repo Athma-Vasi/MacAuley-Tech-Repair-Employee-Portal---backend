@@ -242,7 +242,7 @@ const getQueriedRamsHandler = expressAsyncHandler(
 		// find all reviews associated with the rams
 		const reviewsArrArr = await Promise.all(
 			rams.map(async (ram) => {
-				const reviewPromises = ram.reviewsIds.map(async (reviewId) => {
+				const reviewPromises = ram.productReviewsIds.map(async (reviewId) => {
 					const review = await getProductReviewByIdService(reviewId);
 
 					return review;
@@ -311,7 +311,7 @@ const getRamByIdHandler = expressAsyncHandler(
 
 		// get all reviews associated with the ram
 		const productReviews = await Promise.all(
-			ram.reviewsIds.map(async (reviewId) => {
+			ram.productReviewsIds.map(async (reviewId) => {
 				const review = await getProductReviewByIdService(reviewId);
 
 				return review;
@@ -378,7 +378,7 @@ const updateRamByIdHandler = expressAsyncHandler(
 
 		// get all reviews associated with the ram
 		const productReviews = await Promise.all(
-			updatedRam.reviewsIds.map(async (reviewId) => {
+			updatedRam.productReviewsIds.map(async (reviewId) => {
 				const review = await getProductReviewByIdService(reviewId);
 
 				return review;

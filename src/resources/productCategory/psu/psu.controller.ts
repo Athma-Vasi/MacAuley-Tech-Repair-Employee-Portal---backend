@@ -242,7 +242,7 @@ const getQueriedPsusHandler = expressAsyncHandler(
 		// find all reviews associated with the psus
 		const reviewsArrArr = await Promise.all(
 			psus.map(async (psu) => {
-				const reviewPromises = psu.reviewsIds.map(async (reviewId) => {
+				const reviewPromises = psu.productReviewsIds.map(async (reviewId) => {
 					const review = await getProductReviewByIdService(reviewId);
 
 					return review;
@@ -311,7 +311,7 @@ const getPsuByIdHandler = expressAsyncHandler(
 
 		// get all reviews associated with the psu
 		const productReviews = await Promise.all(
-			psu.reviewsIds.map(async (reviewId) => {
+			psu.productReviewsIds.map(async (reviewId) => {
 				const review = await getProductReviewByIdService(reviewId);
 
 				return review;
@@ -378,7 +378,7 @@ const updatePsuByIdHandler = expressAsyncHandler(
 
 		// get all reviews associated with the psu
 		const productReviews = await Promise.all(
-			updatedPsu.reviewsIds.map(async (reviewId) => {
+			updatedPsu.productReviewsIds.map(async (reviewId) => {
 				const review = await getProductReviewByIdService(reviewId);
 
 				return review;
