@@ -48,7 +48,7 @@ type TabletSchema = {
 	};
 
 	starRatingsCount: StarRatingsCount;
-	reviewsIds: Types.ObjectId[];
+	productReviewsIds: Types.ObjectId[];
 	uploadedFilesIds: Types.ObjectId[];
 };
 
@@ -256,7 +256,7 @@ const tabletSchema = new Schema<TabletSchema>(
 				index: true,
 			},
 		},
-		reviewsIds: {
+		productReviewsIds: {
 			type: [Schema.Types.ObjectId],
 			required: false,
 			default: [],

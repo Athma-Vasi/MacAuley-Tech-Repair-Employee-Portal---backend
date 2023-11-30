@@ -40,7 +40,7 @@ type ComputerCaseSchema = {
 	};
 
 	starRatingsCount: StarRatingsCount;
-	reviewsIds: Types.ObjectId[];
+	productReviewsIds: Types.ObjectId[];
 	uploadedFilesIds: Types.ObjectId[];
 };
 
@@ -216,7 +216,7 @@ const computerCaseSchema = new Schema<ComputerCaseSchema>(
 				index: true,
 			},
 		},
-		reviewsIds: {
+		productReviewsIds: {
 			type: [Schema.Types.ObjectId],
 			required: false,
 			default: [],

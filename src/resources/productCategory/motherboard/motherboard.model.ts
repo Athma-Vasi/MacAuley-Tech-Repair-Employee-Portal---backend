@@ -50,7 +50,7 @@ type MotherboardSchema = {
 	};
 
 	starRatingsCount: StarRatingsCount;
-	reviewsIds: Types.ObjectId[];
+	productReviewsIds: Types.ObjectId[];
 	uploadedFilesIds: Types.ObjectId[];
 };
 
@@ -263,7 +263,7 @@ const motherboardSchema = new Schema<MotherboardSchema>(
 				index: true,
 			},
 		},
-		reviewsIds: {
+		productReviewsIds: {
 			type: [Schema.Types.ObjectId],
 			required: false,
 			default: [],

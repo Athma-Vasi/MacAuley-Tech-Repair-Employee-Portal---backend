@@ -46,7 +46,7 @@ type StorageSchema = {
 	};
 
 	starRatingsCount: StarRatingsCount;
-	reviewsIds: Types.ObjectId[];
+	productReviewsIds: Types.ObjectId[];
 	uploadedFilesIds: Types.ObjectId[];
 };
 
@@ -240,7 +240,7 @@ const storageSchema = new Schema<StorageSchema>(
 				index: true,
 			},
 		},
-		reviewsIds: {
+		productReviewsIds: {
 			type: [Schema.Types.ObjectId],
 			required: false,
 			default: [],

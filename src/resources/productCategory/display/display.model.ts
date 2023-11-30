@@ -43,7 +43,7 @@ type DisplaySchema = {
 	};
 
 	starRatingsCount: StarRatingsCount;
-	reviewsIds: Types.ObjectId[];
+	productReviewsIds: Types.ObjectId[];
 	uploadedFilesIds: Types.ObjectId[];
 };
 
@@ -234,7 +234,7 @@ const displaySchema = new Schema<DisplaySchema>(
 				index: true,
 			},
 		},
-		reviewsIds: {
+		productReviewsIds: {
 			type: [Schema.Types.ObjectId],
 			required: false,
 			default: [],
