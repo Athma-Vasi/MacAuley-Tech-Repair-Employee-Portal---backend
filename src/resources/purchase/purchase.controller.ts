@@ -33,6 +33,7 @@ import type {
 } from "../../types";
 import type { FilterQuery, QueryOptions } from "mongoose";
 import { removeUndefinedAndNullValues } from "../../utils";
+import { PRODUCT_CATEGORY_SERVICE_MAP } from "../../constants";
 
 // @desc   Create new user
 // @route  POST /api/v1/purchase
@@ -214,7 +215,13 @@ const getAllPurchasesBulkHandler = expressAsyncHandler(
 const getQueriedPurchasesHandler = expressAsyncHandler(
   async (
     request: GetQueriedPurchasesRequest,
-    response: Response<GetQueriedResourceRequestServerResponse<PurchaseDocument>>
+    response: Response<
+      GetQueriedResourceRequestServerResponse<
+        PurchaseDocument & {
+          productCategoryDocs: Array<Record<string, unknown>>;
+        }
+      >
+    >
   ) => {
     let { newQueryFlag, totalDocuments } = request.body;
 
@@ -229,12 +236,12 @@ const getQueriedPurchasesHandler = expressAsyncHandler(
     }
 
     // get all purchase
-    const purchase = await getQueriedPurchasesService({
+    const purchases = await getQueriedPurchasesService({
       filter: filter as FilterQuery<PurchaseDocument> | undefined,
       projection: projection as QueryOptions<PurchaseDocument>,
       options: options as QueryOptions<PurchaseDocument>,
     });
-    if (!purchase.length) {
+    if (!purchases.length) {
       response.status(200).json({
         message: "No purchases that match query parameters were found",
         pages: 0,
@@ -244,11 +251,42 @@ const getQueriedPurchasesHandler = expressAsyncHandler(
       return;
     }
 
+    const purchasedProducts = await Promise.all(
+      purchases.map(async (purchase) => {
+        const { products } = purchase;
+
+        const productCategoryDocs = await Promise.all(
+          products.map(async (product) => {
+            const { productCategory, productId } = product;
+            const productCategoryDoc = await PRODUCT_CATEGORY_SERVICE_MAP[
+              productCategory
+            ](productId);
+
+            return productCategoryDoc;
+          })
+        );
+
+        // wait for all productCategoryDocs to resolve
+        const productCategoryDocsResolved = await Promise.all(productCategoryDocs);
+
+        return productCategoryDocsResolved.filter(removeUndefinedAndNullValues);
+      })
+    );
+
+    const purchaseResponseArray = purchases.map((purchase, index) => {
+      const products = purchasedProducts[index];
+
+      return {
+        ...purchase,
+        productCategoryDocs: products,
+      };
+    });
+
     response.status(200).json({
       message: "Successfully found purchases",
       pages: Math.ceil(totalDocuments / Number(options?.limit)),
       totalDocuments,
-      resourceData: purchase,
+      resourceData: purchaseResponseArray,
     });
   }
 );
@@ -276,12 +314,12 @@ const getQueriedPurchasesByUserHandler = expressAsyncHandler(
     }
 
     // get all purchase
-    const purchase = await getQueriedPurchasesService({
+    const purchases = await getQueriedPurchasesService({
       filter: filter as FilterQuery<PurchaseDocument> | undefined,
       projection: projection as QueryOptions<PurchaseDocument>,
       options: options as QueryOptions<PurchaseDocument>,
     });
-    if (!purchase.length) {
+    if (!purchases.length) {
       response.status(200).json({
         message: "No purchases that match query parameters were found",
         pages: 0,
@@ -291,11 +329,42 @@ const getQueriedPurchasesByUserHandler = expressAsyncHandler(
       return;
     }
 
+    const purchasedProducts = await Promise.all(
+      purchases.map(async (purchase) => {
+        const { products } = purchase;
+
+        const productCategoryDocs = await Promise.all(
+          products.map(async (product) => {
+            const { productCategory, productId } = product;
+            const productCategoryDoc = await PRODUCT_CATEGORY_SERVICE_MAP[
+              productCategory
+            ](productId);
+
+            return productCategoryDoc;
+          })
+        );
+
+        // wait for all productCategoryDocs to resolve
+        const productCategoryDocsResolved = await Promise.all(productCategoryDocs);
+
+        return productCategoryDocsResolved.filter(removeUndefinedAndNullValues);
+      })
+    );
+
+    const purchaseResponseArray = purchases.map((purchase, index) => {
+      const products = purchasedProducts[index];
+
+      return {
+        ...purchase,
+        productCategoryDocs: products,
+      };
+    });
+
     response.status(200).json({
       message: "Successfully found purchases",
       pages: Math.ceil(totalDocuments / Number(options?.limit)),
       totalDocuments,
-      resourceData: purchase,
+      resourceData: purchaseResponseArray,
     });
   }
 );
@@ -317,9 +386,25 @@ const getPurchaseByIdHandler = expressAsyncHandler(
       return;
     }
 
+    const productCategoryDocs = await Promise.all(
+      purchaseDocument.products.map(async (product) => {
+        const { productCategory, productId } = product;
+        const productCategoryDoc = await PRODUCT_CATEGORY_SERVICE_MAP[productCategory](
+          productId
+        );
+
+        return productCategoryDoc;
+      })
+    );
+
+    const purchaseResponseDoc = {
+      ...purchaseDocument,
+      productCategoryDocs: productCategoryDocs.filter(removeUndefinedAndNullValues),
+    };
+
     response.status(200).json({
       message: "Successfully found purchases data!",
-      resourceData: [purchaseDocument],
+      resourceData: [purchaseResponseDoc],
     });
   }
 );
@@ -375,9 +460,25 @@ const updatePurchaseByIdHandler = expressAsyncHandler(
       return;
     }
 
+    const productCategoryDocs = await Promise.all(
+      updatedPurchase.products.map(async (product) => {
+        const { productCategory, productId } = product;
+        const productCategoryDoc = await PRODUCT_CATEGORY_SERVICE_MAP[productCategory](
+          productId
+        );
+
+        return productCategoryDoc;
+      })
+    );
+
+    const purchaseResponseDoc = {
+      ...updatedPurchase,
+      productCategoryDocs: productCategoryDocs.filter(removeUndefinedAndNullValues),
+    };
+
     response.status(200).json({
       message: "Purchase updated successfully",
-      resourceData: [updatedPurchase],
+      resourceData: [purchaseResponseDoc],
     });
   }
 );

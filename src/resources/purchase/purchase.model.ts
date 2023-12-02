@@ -2,6 +2,7 @@ import { Types, Schema, model } from "mongoose";
 import { Currency } from "../actions/company/expenseClaim";
 import { PaymentInformation } from "../customer/customer.model";
 import { Address, StoreLocation } from "../user/user.model";
+import { ProductCategory } from "../productCategory";
 
 type OrderStatus =
   | "Pending"
@@ -17,6 +18,7 @@ type ProductsPurchased = {
   quantity: number;
   price: number;
   currency: Currency;
+  productCategory: ProductCategory;
 };
 
 type PurchaseSchema = {
@@ -27,7 +29,7 @@ type PurchaseSchema = {
   purchaseCurrency: Currency; // assume that 3rd party API will convert to CAD
   purchaseStoreLocation: StoreLocation;
   orderStatus: OrderStatus;
-  shippingAddress: Address;
+  shippingAddress: Address | null;
   paymentInformation: PaymentInformation;
 };
 
@@ -64,6 +66,12 @@ const purchaseSchema = new Schema<PurchaseSchema>(
           required: [true, "Product currency is required"],
           index: true,
         },
+        productCategory: {
+          type: String,
+          required: [true, "Product category is required"],
+          index: true,
+        },
+        _id: false,
       },
     ],
 

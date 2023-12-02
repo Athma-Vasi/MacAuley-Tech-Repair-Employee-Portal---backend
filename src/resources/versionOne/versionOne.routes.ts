@@ -7,6 +7,9 @@ import { repairNoteRouter } from "../repairNote";
 import { customerRouter } from "../customer";
 import { productReviewRouter } from "../productReview";
 import { productCategoryRouter } from "../productCategory";
+import { version } from "os";
+import { purchaseRouter } from "../purchase";
+import { rmaRouter } from "../rma";
 
 const versionOneRouter = Router();
 // route: /api/v1
@@ -18,5 +21,7 @@ versionOneRouter.use("/comment", commentRouter);
 versionOneRouter.use("/customer", customerRouter);
 versionOneRouter.use("/product-category", productCategoryRouter);
 versionOneRouter.use("/product-review", productReviewRouter);
+versionOneRouter.use("/purchase", purchaseRouter);
+versionOneRouter.use("/rma", rmaRouter);
 
 export { versionOneRouter };

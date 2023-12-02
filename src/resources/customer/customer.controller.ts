@@ -245,7 +245,7 @@ const getAllCustomersBulkHandler = expressAsyncHandler(
     request: GetAllCustomersBulkRequest,
     response: Response<ResourceRequestServerResponse<CustomerDocument>>
   ) => {
-    const customers = await getAllCustomersService();
+    const customers = await getAllCustomersService(["-password"]);
 
     if (!customers.length) {
       response.status(200).json({
