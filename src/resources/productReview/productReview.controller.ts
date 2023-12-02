@@ -429,7 +429,13 @@ const deleteProductReviewHandler = expressAsyncHandler(
 const updateProductReviewByIdHandler = expressAsyncHandler(
   async (
     request: UpdateProductReviewByIdRequest,
-    response: Response<ResourceRequestServerResponse<ProductReviewDocument>>
+    response: Response<
+      ResourceRequestServerResponse<
+        ProductReviewDocument & {
+          productCategoryDocuments: Record<string, any>[];
+        }
+      >
+    >
   ) => {
     const { productReviewId } = request.params;
     const {
@@ -449,9 +455,20 @@ const updateProductReviewByIdHandler = expressAsyncHandler(
       return;
     }
 
+    // grab product category document
+    const { productCategory, productId } = updatedProductReview;
+    const productCategoryDocument = await PRODUCT_CATEGORY_SERVICE_MAP[productCategory](
+      productId
+    );
+
+    const productReviewDocumentWithProductCategoryDocument = {
+      ...updatedProductReview,
+      productCategoryDocuments: [productCategoryDocument],
+    };
+
     response.status(200).json({
       message: "Product review updated successfully",
-      resourceData: [updatedProductReview],
+      resourceData: [productReviewDocumentWithProductCategoryDocument],
     });
   }
 );

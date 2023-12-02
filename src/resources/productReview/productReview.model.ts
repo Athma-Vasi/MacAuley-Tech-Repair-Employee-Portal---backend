@@ -18,7 +18,6 @@ type ProductReviewSchema = {
   username: string; // customer username
   productId: Types.ObjectId;
   productCategory: ProductCategory;
-  productSku: string;
   productBrand: string;
   productModel: string;
   productReview: string;
@@ -58,11 +57,7 @@ const productReviewSchema = new Schema<ProductReviewSchema>(
       required: [true, "Product Category is required"],
       index: true,
     },
-    productSku: {
-      type: String,
-      required: [true, "Product SKU is required"],
-      index: true,
-    },
+
     productBrand: {
       type: String,
       required: [true, "Product Brand is required"],
