@@ -19,7 +19,10 @@ type ProductsPurchased = {
   price: number;
   currency: Currency;
   productCategory: ProductCategory;
+  orderStatus: OrderStatus;
 };
+
+type PurchaseKind = "Online" | "In-Store";
 
 type PurchaseSchema = {
   products: ProductsPurchased[];
@@ -28,7 +31,7 @@ type PurchaseSchema = {
   purchaseAmount: number;
   purchaseCurrency: Currency; // assume that 3rd party API will convert to CAD
   purchaseStoreLocation: StoreLocation;
-  orderStatus: OrderStatus;
+  purchaseKind: PurchaseKind;
   shippingAddress: Address | null;
   paymentInformation: PaymentInformation;
 };
@@ -71,6 +74,11 @@ const purchaseSchema = new Schema<PurchaseSchema>(
           required: [true, "Product category is required"],
           index: true,
         },
+        orderStatus: {
+          type: String,
+          required: [true, "Order status is required"],
+          index: true,
+        },
         _id: false,
       },
     ],
@@ -100,9 +108,9 @@ const purchaseSchema = new Schema<PurchaseSchema>(
       required: [true, "Purchase store location is required"],
       index: true,
     },
-    orderStatus: {
+    purchaseKind: {
       type: String,
-      required: [true, "Order status is required"],
+      required: [true, "Purchase kind is required"],
       index: true,
     },
     shippingAddress: {

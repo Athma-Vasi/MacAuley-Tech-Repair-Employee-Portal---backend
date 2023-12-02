@@ -11,6 +11,7 @@ import type {
   UpdateCustomerFieldsBulkRequest,
   CreateNewCustomersBulkRequest,
   GetAllCustomersBulkRequest,
+  CustomerServerResponseDocument,
 } from "./customer.types";
 
 import {
@@ -37,6 +38,8 @@ import { FilterQuery, QueryOptions } from "mongoose";
 import { filterFieldsFromObject, removeUndefinedAndNullValues } from "../../utils";
 import { getProductReviewByIdService } from "../productReview";
 import { getSurveyByIdService } from "../actions/outreach/survey";
+import { getPurchaseByIdService } from "../purchase";
+import { getRMAByIdService } from "../rma";
 
 // @desc   Create new user
 // @route  POST /api/v1/customer
@@ -268,7 +271,11 @@ const getAllCustomersBulkHandler = expressAsyncHandler(
 const getQueriedCustomersHandler = expressAsyncHandler(
   async (
     request: GetAllCustomersRequest,
-    response: Response<GetQueriedResourceRequestServerResponse<CustomerDocument>>
+    response: Response<
+      GetQueriedResourceRequestServerResponse<
+        CustomerServerResponseDocument<"paymentInformation">
+      >
+    >
   ) => {
     let { newQueryFlag, totalDocuments } = request.body;
 
@@ -315,47 +322,41 @@ const getQueriedCustomersHandler = expressAsyncHandler(
       })
     );
 
-    // // find all purchaseHistory documents associated with the customers
-    // const purchaseHistoryArrArr = await Promise.all(
-    //   customers.map(async (customer) => {
-    //     const purchaseHistoryPromises = customer.purchaseHistoryIds.map(
-    //       async (purchaseHistoryId) => {
-    //         const purchaseHistory = await getPurchaseHistoryByIdService(
-    //           purchaseHistoryId
-    //         );
+    // find all purchaseHistory documents associated with the customers
+    const purchaseHistoryArrArr = await Promise.all(
+      customers.map(async (customer) => {
+        const purchaseHistoryPromises = customer.purchaseHistoryIds.map(
+          async (purchaseHistoryId) => {
+            const purchaseHistory = await getPurchaseByIdService(purchaseHistoryId);
 
-    //         return purchaseHistory;
-    //       }
-    //     );
+            return purchaseHistory;
+          }
+        );
 
-    //     // Wait for all the promises to resolve before continuing to the next iteration
-    //     const purchaseHistory = await Promise.all(purchaseHistoryPromises);
+        // Wait for all the promises to resolve before continuing to the next iteration
+        const purchaseHistory = await Promise.all(purchaseHistoryPromises);
 
-    //     // Filter out any undefined values (in case purchaseHistory was not found)
-    //     return purchaseHistory.filter(removeUndefinedAndNullValues);
-    //   })
-    // );
+        // Filter out any undefined values (in case purchaseHistory was not found)
+        return purchaseHistory.filter(removeUndefinedAndNullValues);
+      })
+    );
 
     // find all rmaHistory documents associated with the customers
-    // const rmaHistoryArrArr = await Promise.all(
-    // 	customers.map(async (customer) => {
-    // 		const rmaHistoryPromises = customer.rmaHistoryIds.map(
-    // 			async (rmaHistoryId) => {
-    // 				const rmaHistory = await getRmaHistoryByIdService(
-    // 					rmaHistoryId
-    // 				);
-    //
-    // 				return rmaHistory;
-    // 			}
-    // 		);
-    //
-    // 		// Wait for all the promises to resolve before continuing to the next iteration
-    // 		const rmaHistory = await Promise.all(rmaHistoryPromises);
-    //
-    // 		// Filter out any undefined values (in case rmaHistory was not found)
-    // 		return rmaHistory.filter(removeUndefinedAndNullValues);
-    // 	})
-    // );
+    const rmaHistoryArrArr = await Promise.all(
+      customers.map(async (customer) => {
+        const rmaHistoryPromises = customer.rmaHistoryIds.map(async (rmaHistoryId) => {
+          const rmaHistory = await getRMAByIdService(rmaHistoryId);
+
+          return rmaHistory;
+        });
+
+        // Wait for all the promises to resolve before continuing to the next iteration
+        const rmaHistory = await Promise.all(rmaHistoryPromises);
+
+        // Filter out any undefined values (in case rmaHistory was not found)
+        return rmaHistory.filter(removeUndefinedAndNullValues);
+      })
+    );
 
     // find all completedSurveys documents associated with the customers
     const completedSurveysArrArr = await Promise.all(
@@ -380,8 +381,8 @@ const getQueriedCustomersHandler = expressAsyncHandler(
       return {
         ...customer,
         productReviews: reviewsArrArr[index],
-        // purchaseHistory: purchaseHistoryArrArr[index],
-        // rmaHistory: rmaHistoryArrArr[index],
+        purchaseHistory: purchaseHistoryArrArr[index],
+        rmaHistory: rmaHistoryArrArr[index],
         completedSurveys: completedSurveysArrArr[index],
       };
     });
@@ -401,7 +402,9 @@ const getQueriedCustomersHandler = expressAsyncHandler(
 const getCustomerByIdHandler = expressAsyncHandler(
   async (
     request: GetCustomerByIdRequest,
-    response: Response<ResourceRequestServerResponse<CustomerDocument>>
+    response: Response<
+      ResourceRequestServerResponse<CustomerServerResponseDocument<"paymentInformation">>
+    >
   ) => {
     const { customerId } = request.params;
 
@@ -412,9 +415,49 @@ const getCustomerByIdHandler = expressAsyncHandler(
       return;
     }
 
+    const reviewsArr = await Promise.all(
+      customer.productReviewsIds.map(async (reviewId) => {
+        const review = await getProductReviewByIdService(reviewId);
+
+        return review;
+      })
+    );
+
+    const purchaseHistoryArr = await Promise.all(
+      customer.purchaseHistoryIds.map(async (purchaseHistoryId) => {
+        const purchaseHistory = await getPurchaseByIdService(purchaseHistoryId);
+
+        return purchaseHistory;
+      })
+    );
+
+    const rmaHistoryArr = await Promise.all(
+      customer.rmaHistoryIds.map(async (rmaHistoryId) => {
+        const rmaHistory = await getRMAByIdService(rmaHistoryId);
+
+        return rmaHistory;
+      })
+    );
+
+    const completedSurveysArr = await Promise.all(
+      customer.completedSurveys.map(async (completedSurveysId) => {
+        const completedSurveys = await getSurveyByIdService(completedSurveysId);
+
+        return completedSurveys;
+      })
+    );
+
+    const customerWithAddedFields = {
+      ...customer,
+      productReviews: reviewsArr,
+      purchaseHistory: purchaseHistoryArr,
+      rmaHistory: rmaHistoryArr,
+      completedSurveys: completedSurveysArr,
+    };
+
     response.status(200).json({
       message: "Successfully found customer data!",
-      resourceData: [customer],
+      resourceData: [customerWithAddedFields],
     });
   }
 );
@@ -476,7 +519,9 @@ const deleteAllCustomersHandler = expressAsyncHandler(
 const updateCustomerByIdHandler = expressAsyncHandler(
   async (
     request: UpdateCustomerRequest,
-    response: Response<ResourceRequestServerResponse<CustomerDocument>>
+    response: Response<
+      ResourceRequestServerResponse<CustomerServerResponseDocument<"paymentInformation">>
+    >
   ) => {
     const {
       documentUpdate: { fields, updateOperator },
@@ -494,9 +539,49 @@ const updateCustomerByIdHandler = expressAsyncHandler(
       return;
     }
 
+    const reviewsArr = await Promise.all(
+      updatedCustomer.productReviewsIds.map(async (reviewId) => {
+        const review = await getProductReviewByIdService(reviewId);
+
+        return review;
+      })
+    );
+
+    const purchaseHistoryArr = await Promise.all(
+      updatedCustomer.purchaseHistoryIds.map(async (purchaseHistoryId) => {
+        const purchaseHistory = await getPurchaseByIdService(purchaseHistoryId);
+
+        return purchaseHistory;
+      })
+    );
+
+    const rmaHistoryArr = await Promise.all(
+      updatedCustomer.rmaHistoryIds.map(async (rmaHistoryId) => {
+        const rmaHistory = await getRMAByIdService(rmaHistoryId);
+
+        return rmaHistory;
+      })
+    );
+
+    const completedSurveysArr = await Promise.all(
+      updatedCustomer.completedSurveys.map(async (completedSurveysId) => {
+        const completedSurveys = await getSurveyByIdService(completedSurveysId);
+
+        return completedSurveys;
+      })
+    );
+
+    const customerWithAddedFields = {
+      ...updatedCustomer,
+      productReviews: reviewsArr,
+      purchaseHistory: purchaseHistoryArr,
+      rmaHistory: rmaHistoryArr,
+      completedSurveys: completedSurveysArr,
+    };
+
     response.status(200).json({
       message: `Customer ${updatedCustomer.username} updated successfully`,
-      resourceData: [updatedCustomer],
+      resourceData: [customerWithAddedFields],
     });
   }
 );
@@ -518,9 +603,49 @@ const getCustomerDocWithPaymentInfoHandler = expressAsyncHandler(
       return;
     }
 
+    const reviewsArr = await Promise.all(
+      customerDocument.productReviewsIds.map(async (reviewId) => {
+        const review = await getProductReviewByIdService(reviewId);
+
+        return review;
+      })
+    );
+
+    const purchaseHistoryArr = await Promise.all(
+      customerDocument.purchaseHistoryIds.map(async (purchaseHistoryId) => {
+        const purchaseHistory = await getPurchaseByIdService(purchaseHistoryId);
+
+        return purchaseHistory;
+      })
+    );
+
+    const rmaHistoryArr = await Promise.all(
+      customerDocument.rmaHistoryIds.map(async (rmaHistoryId) => {
+        const rmaHistory = await getRMAByIdService(rmaHistoryId);
+
+        return rmaHistory;
+      })
+    );
+
+    const completedSurveysArr = await Promise.all(
+      customerDocument.completedSurveys.map(async (completedSurveysId) => {
+        const completedSurveys = await getSurveyByIdService(completedSurveysId);
+
+        return completedSurveys;
+      })
+    );
+
+    const customerWithAddedFields = {
+      ...customerDocument,
+      productReviews: reviewsArr,
+      purchaseHistory: purchaseHistoryArr,
+      rmaHistory: rmaHistoryArr,
+      completedSurveys: completedSurveysArr,
+    };
+
     response.status(200).json({
       message: "Successfully found customer payment information data!",
-      resourceData: [customerDocument],
+      resourceData: [customerWithAddedFields],
     });
   }
 );
@@ -531,7 +656,9 @@ const getCustomerDocWithPaymentInfoHandler = expressAsyncHandler(
 const updateCustomerPasswordHandler = expressAsyncHandler(
   async (
     request: UpdateCustomerPasswordRequest,
-    response: Response<ResourceRequestServerResponse<CustomerDocument>>
+    response: Response<
+      ResourceRequestServerResponse<CustomerServerResponseDocument<"paymentInformation">>
+    >
   ) => {
     const {
       userInfo: { userId },
@@ -571,9 +698,49 @@ const updateCustomerPasswordHandler = expressAsyncHandler(
       return;
     }
 
+    const reviewsArr = await Promise.all(
+      updatedCustomer.productReviewsIds.map(async (reviewId) => {
+        const review = await getProductReviewByIdService(reviewId);
+
+        return review;
+      })
+    );
+
+    const purchaseHistoryArr = await Promise.all(
+      updatedCustomer.purchaseHistoryIds.map(async (purchaseHistoryId) => {
+        const purchaseHistory = await getPurchaseByIdService(purchaseHistoryId);
+
+        return purchaseHistory;
+      })
+    );
+
+    const rmaHistoryArr = await Promise.all(
+      updatedCustomer.rmaHistoryIds.map(async (rmaHistoryId) => {
+        const rmaHistory = await getRMAByIdService(rmaHistoryId);
+
+        return rmaHistory;
+      })
+    );
+
+    const completedSurveysArr = await Promise.all(
+      updatedCustomer.completedSurveys.map(async (completedSurveysId) => {
+        const completedSurveys = await getSurveyByIdService(completedSurveysId);
+
+        return completedSurveys;
+      })
+    );
+
+    const customerWithAddedFields = {
+      ...updatedCustomer,
+      productReviews: reviewsArr,
+      purchaseHistory: purchaseHistoryArr,
+      rmaHistory: rmaHistoryArr,
+      completedSurveys: completedSurveysArr,
+    };
+
     response.status(200).json({
       message: "Password updated successfully",
-      resourceData: [updatedCustomer],
+      resourceData: [customerWithAddedFields],
     });
   }
 );

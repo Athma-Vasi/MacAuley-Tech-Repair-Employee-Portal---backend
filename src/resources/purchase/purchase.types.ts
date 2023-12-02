@@ -7,6 +7,7 @@ import type {
   DocumentUpdateOperation,
 } from "../../types";
 import { PurchaseSchema, PurchaseDocument } from "./purchase.model";
+import { ProductCategoryDocument } from "../productCategory/product.types";
 
 interface CreateNewPurchaseRequest extends RequestAfterJWTVerification {
   body: {
@@ -94,6 +95,13 @@ interface UpdatePurchaseByIdRequest extends RequestAfterJWTVerification {
   params: { purchaseId: string };
 }
 
+/**
+ * type signature of response object sent by the server for GET, PATCH, requests
+ */
+type PurchaseServerResponseDocument = PurchaseDocument & {
+  productCategoryDocs: ProductCategoryDocument[];
+};
+
 export type {
   CreateNewPurchaseRequest,
   GetQueriedPurchasesByUserRequest,
@@ -105,4 +113,5 @@ export type {
   UpdatePurchaseByIdRequest,
   UpdatePurchasesBulkRequest,
   GetAllPurchasesBulkRequest,
+  PurchaseServerResponseDocument,
 };

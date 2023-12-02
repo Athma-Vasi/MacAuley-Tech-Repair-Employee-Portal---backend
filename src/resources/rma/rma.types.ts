@@ -7,6 +7,7 @@ import type {
   DocumentUpdateOperation,
 } from "../../types";
 import { RMASchema, RMADocument } from "./rma.model";
+import { ProductCategoryDocument } from "../productCategory/product.types";
 
 interface CreateNewRMARequest extends RequestAfterJWTVerification {
   body: {
@@ -94,15 +95,23 @@ interface UpdateRMAByIdRequest extends RequestAfterJWTVerification {
   params: { rmaId: string };
 }
 
+/**
+ * type signature of response object sent by the server for GET, PATCH, requests
+ */
+type RMAServerResponseDocument = RMADocument & {
+  productCategoryDocs: ProductCategoryDocument[];
+};
+
 export type {
   CreateNewRMARequest,
-  GetQueriedRMAsByUserRequest,
   CreateNewRMAsBulkRequest,
   DeleteARMARequest,
   DeleteAllRMAsRequest,
-  GetRMAByIdRequest,
+  GetAllRMAsBulkRequest,
+  GetQueriedRMAsByUserRequest,
   GetQueriedRMAsRequest,
+  GetRMAByIdRequest,
+  RMAServerResponseDocument,
   UpdateRMAByIdRequest,
   UpdateRMAsBulkRequest,
-  GetAllRMAsBulkRequest,
 };

@@ -2,21 +2,16 @@ import { Schema, Types, model } from "mongoose";
 import { Currency } from "../actions/company/expenseClaim";
 import { ProductCategory } from "../productCategory";
 
-type ProductsReturned = {
-  productId: Types.ObjectId;
-  sku: string;
-  quantity: number;
-  price: number;
-  currency: Currency;
-  productCategory: ProductCategory;
-};
-
 type RMAStatus = "Pending" | "Received" | "Cancelled";
 
 type RMASchema = {
   purchaseDocumentId: Types.ObjectId;
   customerId: Types.ObjectId;
-  productsReturned: ProductsReturned[];
+  productId: Types.ObjectId;
+  productSku: string;
+  purchasePrice: number;
+  purchaseCurrency: Currency;
+  productCategory: ProductCategory;
   rmaCode: string;
   rmaDate: NativeDate;
   rmaAmount: number;
@@ -37,42 +32,35 @@ const rmaSchema = new Schema<RMASchema>(
     purchaseDocumentId: {
       type: Schema.Types.ObjectId,
       required: [true, "Purchase Document ID is required"],
+      ref: "Purchase",
     },
     customerId: {
       type: Schema.Types.ObjectId,
       required: [true, "Customer ID is required"],
     },
-    productsReturned: [
-      {
-        productId: {
-          type: Schema.Types.ObjectId,
-          required: [true, "Product ID is required"],
-        },
-        sku: {
-          type: String,
-          required: [true, "Product SKU is required"],
-          index: true,
-        },
-        quantity: {
-          type: Number,
-          required: [true, "Product quantity is required"],
-        },
-        price: {
-          type: Number,
-          required: [true, "Product price is required"],
-        },
-        currency: {
-          type: String,
-          required: [true, "Product currency is required"],
-          index: true,
-        },
-        productCategory: {
-          type: String,
-          required: [true, "Product category is required"],
-          index: true,
-        },
-      },
-    ],
+    productId: {
+      type: Schema.Types.ObjectId,
+      required: [true, "Product ID is required"],
+    },
+    productSku: {
+      type: String,
+      required: [true, "Product SKU is required"],
+      index: true,
+    },
+    purchasePrice: {
+      type: Number,
+      required: [true, "Product price is required"],
+    },
+    purchaseCurrency: {
+      type: String,
+      required: [true, "Product currency is required"],
+      index: true,
+    },
+    productCategory: {
+      type: String,
+      required: [true, "Product category is required"],
+      index: true,
+    },
     rmaCode: {
       type: String,
       required: [true, "RMA code is required"],
@@ -110,4 +98,4 @@ rmaSchema.index({ rmaReason: "text" });
 const RMAModel = model<RMADocument>("RMA", rmaSchema);
 
 export { RMAModel };
-export type { RMASchema, RMADocument, RMAStatus, ProductsReturned };
+export type { RMASchema, RMADocument, RMAStatus };

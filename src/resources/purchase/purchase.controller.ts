@@ -12,6 +12,7 @@ import type {
   UpdatePurchaseByIdRequest,
   UpdatePurchasesBulkRequest,
   GetAllPurchasesBulkRequest,
+  PurchaseServerResponseDocument,
 } from "./purchase.types";
 
 import {
@@ -99,7 +100,7 @@ const createNewPurchasesBulkHandler = expressAsyncHandler(
     // check if any purchase were created
     if (successfullyCreatedPurchases.length === purchaseSchemas.length) {
       response.status(201).json({
-        message: `Successfully created ${successfullyCreatedPurchases.length} Product Reviews`,
+        message: `Successfully created ${successfullyCreatedPurchases.length} Purchases`,
         resourceData: successfullyCreatedPurchases,
       });
       return;
@@ -107,7 +108,7 @@ const createNewPurchasesBulkHandler = expressAsyncHandler(
 
     if (successfullyCreatedPurchases.length === 0) {
       response.status(400).json({
-        message: "Could not create any Product Reviews",
+        message: "Could not create any Purchases",
         resourceData: [],
       });
       return;
@@ -116,7 +117,7 @@ const createNewPurchasesBulkHandler = expressAsyncHandler(
     response.status(201).json({
       message: `Successfully created ${
         purchaseSchemas.length - successfullyCreatedPurchases.length
-      } Product Reviews`,
+      } Purchases`,
       resourceData: successfullyCreatedPurchases,
     });
     return;
@@ -159,7 +160,7 @@ const updatePurchasesBulkHandler = expressAsyncHandler(
     // check if any purchase were created
     if (successfullyCreatedPurchases.length === purchaseFields.length) {
       response.status(201).json({
-        message: `Successfully created ${successfullyCreatedPurchases.length} Product Reviews`,
+        message: `Successfully created ${successfullyCreatedPurchases.length} Purchases`,
         resourceData: successfullyCreatedPurchases,
       });
       return;
@@ -167,7 +168,7 @@ const updatePurchasesBulkHandler = expressAsyncHandler(
 
     if (successfullyCreatedPurchases.length === 0) {
       response.status(400).json({
-        message: "Could not create any Product Reviews",
+        message: "Could not create any Purchases",
         resourceData: [],
       });
       return;
@@ -176,7 +177,7 @@ const updatePurchasesBulkHandler = expressAsyncHandler(
     response.status(201).json({
       message: `Successfully created ${
         purchaseFields.length - successfullyCreatedPurchases.length
-      } Product Reviews`,
+      } Purchases`,
       resourceData: successfullyCreatedPurchases,
     });
     return;
@@ -192,9 +193,9 @@ const getAllPurchasesBulkHandler = expressAsyncHandler(
     request: GetAllPurchasesBulkRequest,
     response: Response<ResourceRequestServerResponse<PurchaseDocument>>
   ) => {
-    const purchase = await getAllPurchasesService();
+    const purchases = await getAllPurchasesService();
 
-    if (!purchase.length) {
+    if (!purchases.length) {
       response.status(200).json({
         message: "Unable to find any purchases. Please try again!",
         resourceData: [],
@@ -204,7 +205,7 @@ const getAllPurchasesBulkHandler = expressAsyncHandler(
 
     response.status(200).json({
       message: "Successfully found purchases!",
-      resourceData: purchase,
+      resourceData: purchases,
     });
   }
 );
@@ -216,11 +217,7 @@ const getQueriedPurchasesHandler = expressAsyncHandler(
   async (
     request: GetQueriedPurchasesRequest,
     response: Response<
-      GetQueriedResourceRequestServerResponse<
-        PurchaseDocument & {
-          productCategoryDocs: Array<Record<string, unknown>>;
-        }
-      >
+      GetQueriedResourceRequestServerResponse<PurchaseServerResponseDocument>
     >
   ) => {
     let { newQueryFlag, totalDocuments } = request.body;
@@ -297,7 +294,9 @@ const getQueriedPurchasesHandler = expressAsyncHandler(
 const getQueriedPurchasesByUserHandler = expressAsyncHandler(
   async (
     request: GetQueriedPurchasesByUserRequest,
-    response: Response<GetQueriedResourceRequestServerResponse<PurchaseDocument>>
+    response: Response<
+      GetQueriedResourceRequestServerResponse<PurchaseServerResponseDocument>
+    >
   ) => {
     let { newQueryFlag, totalDocuments, userToBeQueriedId } = request.body;
 
@@ -375,7 +374,7 @@ const getQueriedPurchasesByUserHandler = expressAsyncHandler(
 const getPurchaseByIdHandler = expressAsyncHandler(
   async (
     request: GetPurchaseByIdRequest,
-    response: Response<ResourceRequestServerResponse<PurchaseDocument>>
+    response: Response<ResourceRequestServerResponse<PurchaseServerResponseDocument>>
   ) => {
     const { purchaseId } = request.params;
 
@@ -442,7 +441,7 @@ const deletePurchaseHandler = expressAsyncHandler(
 const updatePurchaseByIdHandler = expressAsyncHandler(
   async (
     request: UpdatePurchaseByIdRequest,
-    response: Response<ResourceRequestServerResponse<PurchaseDocument>>
+    response: Response<ResourceRequestServerResponse<PurchaseServerResponseDocument>>
   ) => {
     const { purchaseId } = request.params;
     const {

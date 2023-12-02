@@ -7,7 +7,6 @@ import { repairNoteRouter } from "../repairNote";
 import { customerRouter } from "../customer";
 import { productReviewRouter } from "../productReview";
 import { productCategoryRouter } from "../productCategory";
-import { version } from "os";
 import { purchaseRouter } from "../purchase";
 import { rmaRouter } from "../rma";
 

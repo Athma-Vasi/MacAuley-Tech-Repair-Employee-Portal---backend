@@ -218,7 +218,7 @@ async function getCustomerDocWithPaymentInfoService(
 ): DatabaseResponseNullable<CustomerDocument> {
   try {
     const customerDocument = await CustomerModel.findById(customerId)
-      .select("-password -__v")
+      .select("-password")
       .lean()
       .exec();
     return customerDocument;

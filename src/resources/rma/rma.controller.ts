@@ -12,6 +12,7 @@ import type {
   UpdateRMAByIdRequest,
   UpdateRMAsBulkRequest,
   GetAllRMAsBulkRequest,
+  RMAServerResponseDocument,
 } from "./rma.types";
 
 import {
@@ -93,7 +94,7 @@ const createNewRMAsBulkHandler = expressAsyncHandler(
     // check if any rma were created
     if (successfullyCreatedRMAs.length === rmaSchemas.length) {
       response.status(201).json({
-        message: `Successfully created ${successfullyCreatedRMAs.length} Product Reviews`,
+        message: `Successfully created ${successfullyCreatedRMAs.length} RMAs`,
         resourceData: successfullyCreatedRMAs,
       });
       return;
@@ -101,7 +102,7 @@ const createNewRMAsBulkHandler = expressAsyncHandler(
 
     if (successfullyCreatedRMAs.length === 0) {
       response.status(400).json({
-        message: "Could not create any Product Reviews",
+        message: "Could not create any RMAs",
         resourceData: [],
       });
       return;
@@ -110,7 +111,7 @@ const createNewRMAsBulkHandler = expressAsyncHandler(
     response.status(201).json({
       message: `Successfully created ${
         rmaSchemas.length - successfullyCreatedRMAs.length
-      } Product Reviews`,
+      } RMAs`,
       resourceData: successfullyCreatedRMAs,
     });
     return;
@@ -151,7 +152,7 @@ const updateRMAsBulkHandler = expressAsyncHandler(
     // check if any rma were created
     if (successfullyCreatedRMAs.length === rmaFields.length) {
       response.status(201).json({
-        message: `Successfully created ${successfullyCreatedRMAs.length} Product Reviews`,
+        message: `Successfully created ${successfullyCreatedRMAs.length} RMAs`,
         resourceData: successfullyCreatedRMAs,
       });
       return;
@@ -159,7 +160,7 @@ const updateRMAsBulkHandler = expressAsyncHandler(
 
     if (successfullyCreatedRMAs.length === 0) {
       response.status(400).json({
-        message: "Could not create any Product Reviews",
+        message: "Could not create any RMAs",
         resourceData: [],
       });
       return;
@@ -168,7 +169,7 @@ const updateRMAsBulkHandler = expressAsyncHandler(
     response.status(201).json({
       message: `Successfully created ${
         rmaFields.length - successfullyCreatedRMAs.length
-      } Product Reviews`,
+      } RMAs`,
       resourceData: successfullyCreatedRMAs,
     });
     return;
@@ -207,13 +208,7 @@ const getAllRMAsBulkHandler = expressAsyncHandler(
 const getQueriedRMAsHandler = expressAsyncHandler(
   async (
     request: GetQueriedRMAsRequest,
-    response: Response<
-      GetQueriedResourceRequestServerResponse<
-        RMADocument & {
-          productCategoryDocs: Array<Record<string, unknown>>;
-        }
-      >
-    >
+    response: Response<GetQueriedResourceRequestServerResponse<RMAServerResponseDocument>>
   ) => {
     let { newQueryFlag, totalDocuments } = request.body;
 
@@ -245,23 +240,13 @@ const getQueriedRMAsHandler = expressAsyncHandler(
 
     const rmadProducts = await Promise.all(
       rmas.map(async (rma) => {
-        const { productsReturned } = rma;
+        const { productId, productCategory } = rma;
 
-        const productCategoryDocs = await Promise.all(
-          productsReturned.map(async (product) => {
-            const { productCategory, productId } = product;
-            const productCategoryDoc = await PRODUCT_CATEGORY_SERVICE_MAP[
-              productCategory
-            ](productId);
-
-            return productCategoryDoc;
-          })
+        const productCategoryDoc = await PRODUCT_CATEGORY_SERVICE_MAP[productCategory](
+          productId
         );
 
-        // wait for all productCategoryDocs to resolve
-        const productCategoryDocsResolved = await Promise.all(productCategoryDocs);
-
-        return productCategoryDocsResolved.filter(removeUndefinedAndNullValues);
+        return productCategoryDoc;
       })
     );
 
@@ -289,7 +274,7 @@ const getQueriedRMAsHandler = expressAsyncHandler(
 const getQueriedRMAsByUserHandler = expressAsyncHandler(
   async (
     request: GetQueriedRMAsByUserRequest,
-    response: Response<GetQueriedResourceRequestServerResponse<RMADocument>>
+    response: Response<GetQueriedResourceRequestServerResponse<RMAServerResponseDocument>>
   ) => {
     let { newQueryFlag, totalDocuments, userToBeQueriedId } = request.body;
 
@@ -323,23 +308,13 @@ const getQueriedRMAsByUserHandler = expressAsyncHandler(
 
     const rmadProducts = await Promise.all(
       rmas.map(async (rma) => {
-        const { productsReturned } = rma;
+        const { productId, productCategory } = rma;
 
-        const productCategoryDocs = await Promise.all(
-          productsReturned.map(async (product) => {
-            const { productCategory, productId } = product;
-            const productCategoryDoc = await PRODUCT_CATEGORY_SERVICE_MAP[
-              productCategory
-            ](productId);
-
-            return productCategoryDoc;
-          })
+        const productCategoryDoc = await PRODUCT_CATEGORY_SERVICE_MAP[productCategory](
+          productId
         );
 
-        // wait for all productCategoryDocs to resolve
-        const productCategoryDocsResolved = await Promise.all(productCategoryDocs);
-
-        return productCategoryDocsResolved.filter(removeUndefinedAndNullValues);
+        return productCategoryDoc;
       })
     );
 
@@ -367,7 +342,7 @@ const getQueriedRMAsByUserHandler = expressAsyncHandler(
 const getRMAByIdHandler = expressAsyncHandler(
   async (
     request: GetRMAByIdRequest,
-    response: Response<ResourceRequestServerResponse<RMADocument>>
+    response: Response<ResourceRequestServerResponse<RMAServerResponseDocument>>
   ) => {
     const { rmaId } = request.params;
 
@@ -378,20 +353,15 @@ const getRMAByIdHandler = expressAsyncHandler(
       return;
     }
 
-    const productCategoryDocs = await Promise.all(
-      rmaDocument.productsReturned.map(async (product) => {
-        const { productCategory, productId } = product;
-        const productCategoryDoc = await PRODUCT_CATEGORY_SERVICE_MAP[productCategory](
-          productId
-        );
+    const { productCategory, productId } = rmaDocument;
 
-        return productCategoryDoc;
-      })
+    const productCategoryDoc = await PRODUCT_CATEGORY_SERVICE_MAP[productCategory](
+      productId
     );
 
     const rmaResponseDoc = {
       ...rmaDocument,
-      productCategoryDocs: productCategoryDocs.filter(removeUndefinedAndNullValues),
+      productCategoryDoc,
     };
 
     response.status(200).json({
@@ -434,7 +404,7 @@ const deleteRMAHandler = expressAsyncHandler(
 const updateRMAByIdHandler = expressAsyncHandler(
   async (
     request: UpdateRMAByIdRequest,
-    response: Response<ResourceRequestServerResponse<RMADocument>>
+    response: Response<ResourceRequestServerResponse<RMAServerResponseDocument>>
   ) => {
     const { rmaId } = request.params;
     const {
@@ -452,20 +422,15 @@ const updateRMAByIdHandler = expressAsyncHandler(
       return;
     }
 
-    const productCategoryDocs = await Promise.all(
-      updatedRMA.productsReturned.map(async (product) => {
-        const { productCategory, productId } = product;
-        const productCategoryDoc = await PRODUCT_CATEGORY_SERVICE_MAP[productCategory](
-          productId
-        );
+    const { productCategory, productId } = updatedRMA;
 
-        return productCategoryDoc;
-      })
+    const productCategoryDoc = await PRODUCT_CATEGORY_SERVICE_MAP[productCategory](
+      productId
     );
 
     const rmaResponseDoc = {
       ...updatedRMA,
-      productCategoryDocs: productCategoryDocs.filter(removeUndefinedAndNullValues),
+      productCategoryDoc,
     };
 
     response.status(200).json({
