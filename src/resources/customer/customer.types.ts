@@ -119,7 +119,12 @@ interface GetAllCustomersBulkRequest extends RequestAfterJWTVerification {
     sessionId: Types.ObjectId;
   };
 }
-
+/**
+ * - Type signature of document sent by the server for GET, PATCH requests.
+ * - This type parameter is passed to ResourceRequestServerResponse(single document fetched by _id) or GetQueriedResourceRequestServerResponse(multiple documents fetched with filter, projection, options params),
+ * - which is, in turn, passed to the Express Response type.
+ * - The OmitFields type parameter is used to omit fields from the CustomerDocument type. (ex: -password or -paymentInformation)
+ */
 type CustomerServerResponseDocument<OmitFields extends string = string> = Omit<
   CustomerDocument,
   OmitFields

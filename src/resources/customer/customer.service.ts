@@ -7,6 +7,7 @@ import type { CustomerDocument, CustomerSchema } from "./customer.model";
 import { CustomerModel } from "./customer.model";
 import {
   ArrayOperators,
+  DatabaseResponse,
   DatabaseResponseNullable,
   FieldOperators,
   QueriedResourceGetRequestServiceInput,
@@ -153,7 +154,9 @@ async function getCustomerWithPasswordService(
   }
 }
 
-async function getAllCustomersService(excludedFields?: string[]) {
+async function getAllCustomersService(
+  excludedFields?: string[]
+): DatabaseResponse<CustomerDocument> {
   try {
     const customer = await CustomerModel.find()
       .select(excludedFields?.join(" ") ?? "-password -paymentInformation")
@@ -169,7 +172,7 @@ async function getQueriedCustomersService({
   filter = {},
   projection = null,
   options = {},
-}: QueriedResourceGetRequestServiceInput<CustomerDocument>) {
+}: QueriedResourceGetRequestServiceInput<CustomerDocument>): DatabaseResponse<CustomerDocument> {
   try {
     const customer = await CustomerModel.find(filter, projection, options)
       .select("-password -paymentInformation")
@@ -257,7 +260,7 @@ type UpdateCustomerPasswordServiceInput = {
 async function updateCustomerPasswordService({
   userId,
   newPassword,
-}: UpdateCustomerPasswordServiceInput) {
+}: UpdateCustomerPasswordServiceInput): DatabaseResponseNullable<CustomerDocument> {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(newPassword, salt);
 
