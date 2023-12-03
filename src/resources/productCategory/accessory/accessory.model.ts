@@ -6,7 +6,7 @@ import type {
   ProductReview,
   StarRatingsCount,
   WeightUnit,
-} from "../product.types";
+} from "../productCategory.types";
 import type { Currency } from "../../actions/company/expenseClaim";
 
 type AccessorySchema = {

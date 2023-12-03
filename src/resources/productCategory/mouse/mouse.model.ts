@@ -8,7 +8,7 @@ import type {
   PeripheralsInterface,
   MouseSensor,
   StarRatingsCount,
-} from "../product.types";
+} from "../productCategory.types";
 import type { Currency } from "../../actions/company/expenseClaim";
 
 type MouseSchema = {

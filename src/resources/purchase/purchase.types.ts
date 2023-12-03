@@ -7,7 +7,7 @@ import type {
   DocumentUpdateOperation,
 } from "../../types";
 import { PurchaseSchema, PurchaseDocument } from "./purchase.model";
-import { ProductCategoryDocument } from "../productCategory/product.types";
+import { ProductCategoryDocument } from "../productCategory/productCategory.types";
 
 interface CreateNewPurchaseRequest extends RequestAfterJWTVerification {
   body: {

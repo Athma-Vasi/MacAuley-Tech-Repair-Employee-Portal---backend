@@ -7,7 +7,7 @@ import type {
   DocumentUpdateOperation,
 } from "../../types";
 import type { ProductReviewDocument, ProductReviewSchema } from "./productReview.model";
-import { ProductCategoryDocument } from "../productCategory/product.types";
+import { ProductCategoryDocument } from "../productCategory/productCategory.types";
 
 interface CreateNewProductReviewRequest extends RequestAfterJWTVerification {
   body: {

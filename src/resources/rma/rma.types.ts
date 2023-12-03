@@ -7,7 +7,7 @@ import type {
   DocumentUpdateOperation,
 } from "../../types";
 import { RMASchema, RMADocument } from "./rma.model";
-import { ProductCategoryDocument } from "../productCategory/product.types";
+import { ProductCategoryDocument } from "../productCategory/productCategory.types";
 
 interface CreateNewRMARequest extends RequestAfterJWTVerification {
   body: {

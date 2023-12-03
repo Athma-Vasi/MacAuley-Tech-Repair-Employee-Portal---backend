@@ -5,7 +5,7 @@
 /**
  * Imports
  */
-import { productCategoryRouter } from './product.routes';
+import { productCategoryRouter } from "./productCategory.routes";
 
 import type {
   CaseSidePanel,
@@ -40,7 +40,7 @@ import type {
   WebcamInterface,
   WebcamResolution,
   WeightUnit,
-} from './product.types';
+} from "./productCategory.types";
 
 /**
  * Exports

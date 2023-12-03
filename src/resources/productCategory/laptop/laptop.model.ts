@@ -12,7 +12,7 @@ import type {
   StorageInterface,
   DisplayPanelType,
   StarRatingsCount,
-} from "../product.types";
+} from "../productCategory.types";
 import type { Currency } from "../../actions/company/expenseClaim";
 
 type LaptopSchema = {

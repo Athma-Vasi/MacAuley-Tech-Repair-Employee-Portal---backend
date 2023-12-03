@@ -10,7 +10,7 @@ import type {
   KeyboardSwitch,
   KeyboardBacklight,
   StarRatingsCount,
-} from "../product.types";
+} from "../productCategory.types";
 import type { Currency } from "../../actions/company/expenseClaim";
 
 type KeyboardSchema = {

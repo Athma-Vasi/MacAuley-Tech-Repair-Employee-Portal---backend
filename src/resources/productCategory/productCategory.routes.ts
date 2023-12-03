@@ -18,11 +18,13 @@ import { smartphoneRouter } from "./smartphone";
 import { speakerRouter } from "./speaker";
 import { tabletRouter } from "./tablet";
 import { webcamRouter } from "./webcam";
-import { verifyJWTMiddleware, verifyRoles } from "../../middlewares";
+import { assignQueryDefaults, verifyJWTMiddleware, verifyRoles } from "../../middlewares";
+import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../constants";
 
 const productCategoryRouter = Router();
 
 productCategoryRouter.use(verifyJWTMiddleware, verifyRoles());
+productCategoryRouter.route("/").get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS));
 
 productCategoryRouter.use("/accessory", accessoryRouter);
 productCategoryRouter.use("/cpu", cpuRouter);

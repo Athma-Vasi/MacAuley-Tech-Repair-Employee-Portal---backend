@@ -1,41 +1,41 @@
-import { Router } from "express";
-import { assignQueryDefaults } from "../../../middlewares";
+import { NextFunction, Request, Response, Router } from "express";
 import {
-	createNewAccessoryBulkHandler,
-	createNewAccessoryHandler,
-	deleteAAccessoryHandler,
-	deleteAllAccessoriesHandler,
-	getAccessoryByIdHandler,
-	getQueriedAccessoriesHandler,
-	updateAccessoriesBulkHandler,
-	updateAccessoryByIdHandler,
+  assignQueryDefaults,
+  verifyJWTMiddleware,
+  verifyRoles,
+} from "../../../middlewares";
+import {
+  createNewAccessoryBulkHandler,
+  createNewAccessoryHandler,
+  deleteAAccessoryHandler,
+  deleteAllAccessoriesHandler,
+  getAccessoryByIdHandler,
+  getQueriedAccessoriesHandler,
+  updateAccessoriesBulkHandler,
+  updateAccessoryByIdHandler,
 } from "./accessory.controller";
-import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
 const accessoryRouter = Router();
 
 accessoryRouter
-	.route("/")
-	.get(
-		assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
-		getQueriedAccessoriesHandler,
-	)
-	.post(createNewAccessoryHandler);
+  .route("/")
+  .post(createNewAccessoryHandler)
+  .get(getQueriedAccessoriesHandler);
 
 // separate route for safety reasons (as it deletes all documents in the collection)
 accessoryRouter.route("/delete-all").delete(deleteAllAccessoriesHandler);
 
 // DEV ROUTE
 accessoryRouter
-	.route("/dev")
-	.post(createNewAccessoryBulkHandler)
-	.patch(updateAccessoriesBulkHandler);
+  .route("/dev")
+  .post(createNewAccessoryBulkHandler)
+  .patch(updateAccessoriesBulkHandler);
 
 // single document routes
 accessoryRouter
-	.route("/:accessoryId")
-	.get(getAccessoryByIdHandler)
-	.delete(deleteAAccessoryHandler)
-	.patch(updateAccessoryByIdHandler);
+  .route("/:accessoryId")
+  .get(getAccessoryByIdHandler)
+  .delete(deleteAAccessoryHandler)
+  .patch(updateAccessoryByIdHandler);
 
 export { accessoryRouter };
