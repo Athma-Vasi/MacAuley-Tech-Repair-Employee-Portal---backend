@@ -12,6 +12,7 @@ import type {
   UpdateProductReviewByIdRequest,
   UpdateProductReviewsBulkRequest,
   GetAllProductReviewsBulkRequest,
+  ProductReviewServerResponseDocument,
 } from "./productReview.types";
 
 import {
@@ -216,7 +217,7 @@ const getQueriedProductReviewsHandler = expressAsyncHandler(
     response: Response<
       GetQueriedResourceRequestServerResponse<
         ProductReviewDocument & {
-          productCategoryDocuments: Record<string, any>[];
+          productCategoryDocs: Record<string, any>[];
         }
       >
     >
@@ -249,7 +250,7 @@ const getQueriedProductReviewsHandler = expressAsyncHandler(
       return;
     }
 
-    const productCategoryDocuments = await Promise.all(
+    const productCategoryDocs = await Promise.all(
       productReviews.map(async (productReview) => {
         const { productCategory, productId } = productReview;
 
@@ -265,7 +266,7 @@ const getQueriedProductReviewsHandler = expressAsyncHandler(
       (productReview, index) => {
         return {
           ...productReview,
-          productCategoryDocuments: [productCategoryDocuments[index]],
+          productCategoryDocs: [productCategoryDocs[index]],
         };
       }
     );
@@ -286,11 +287,7 @@ const getQueriedProductReviewsByUserHandler = expressAsyncHandler(
   async (
     request: GetQueriedProductReviewsByUserRequest,
     response: Response<
-      GetQueriedResourceRequestServerResponse<
-        ProductReviewDocument & {
-          productCategoryDocuments: Record<string, any>[];
-        }
-      >
+      GetQueriedResourceRequestServerResponse<ProductReviewServerResponseDocument>
     >
   ) => {
     let { newQueryFlag, totalDocuments, userToBeQueriedId } = request.body;
@@ -323,7 +320,7 @@ const getQueriedProductReviewsByUserHandler = expressAsyncHandler(
       return;
     }
 
-    const productCategoryDocuments = await Promise.all(
+    const productCategoryDocs = await Promise.all(
       productReviews.map(async (productReview) => {
         const { productCategory, productId } = productReview;
 
@@ -339,7 +336,7 @@ const getQueriedProductReviewsByUserHandler = expressAsyncHandler(
       (productReview, index) => {
         return {
           ...productReview,
-          productCategoryDocuments: [productCategoryDocuments[index]],
+          productCategoryDocs: [productCategoryDocs[index]],
         };
       }
     );
@@ -359,13 +356,7 @@ const getQueriedProductReviewsByUserHandler = expressAsyncHandler(
 const getProductReviewByIdHandler = expressAsyncHandler(
   async (
     request: GetProductReviewByIdRequest,
-    response: Response<
-      ResourceRequestServerResponse<
-        ProductReviewDocument & {
-          productCategoryDocuments: Record<string, any>[];
-        }
-      >
-    >
+    response: Response<ResourceRequestServerResponse<ProductReviewServerResponseDocument>>
   ) => {
     const { productReviewId } = request.params;
 
@@ -386,7 +377,7 @@ const getProductReviewByIdHandler = expressAsyncHandler(
 
     const productReviewDocumentWithProductCategoryDocument = {
       ...productReviewDocument,
-      productCategoryDocuments: [productCategoryDocument],
+      productCategoryDocs: [productCategoryDocument],
     };
 
     response.status(200).json({
@@ -429,13 +420,7 @@ const deleteProductReviewHandler = expressAsyncHandler(
 const updateProductReviewByIdHandler = expressAsyncHandler(
   async (
     request: UpdateProductReviewByIdRequest,
-    response: Response<
-      ResourceRequestServerResponse<
-        ProductReviewDocument & {
-          productCategoryDocuments: Record<string, any>[];
-        }
-      >
-    >
+    response: Response<ResourceRequestServerResponse<ProductReviewServerResponseDocument>>
   ) => {
     const { productReviewId } = request.params;
     const {
@@ -463,7 +448,7 @@ const updateProductReviewByIdHandler = expressAsyncHandler(
 
     const productReviewDocumentWithProductCategoryDocument = {
       ...updatedProductReview,
-      productCategoryDocuments: [productCategoryDocument],
+      productCategoryDocs: [productCategoryDocument],
     };
 
     response.status(200).json({

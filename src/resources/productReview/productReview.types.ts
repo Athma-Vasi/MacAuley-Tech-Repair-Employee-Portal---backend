@@ -2,70 +2,67 @@ import type { Types } from "mongoose";
 import type { RequestAfterJWTVerification } from "../auth";
 import type { UserRoles } from "../user";
 import type {
-	GetQueriedResourceRequest,
-	GetQueriedResourceByUserRequest,
-	DocumentUpdateOperation,
+  GetQueriedResourceRequest,
+  GetQueriedResourceByUserRequest,
+  DocumentUpdateOperation,
 } from "../../types";
-import type {
-	ProductReviewDocument,
-	ProductReviewSchema,
-} from "./productReview.model";
+import type { ProductReviewDocument, ProductReviewSchema } from "./productReview.model";
+import { ProductCategoryDocument } from "../productCategory/product.types";
 
 interface CreateNewProductReviewRequest extends RequestAfterJWTVerification {
-	body: {
-		userInfo: {
-			userId: Types.ObjectId;
-			username: string;
-			roles: UserRoles;
-		};
-		sessionId: Types.ObjectId;
-		productReviewFields: Omit<ProductReviewSchema, "userId" | "username">;
-	};
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    productReviewFields: Omit<ProductReviewSchema, "userId" | "username">;
+  };
 }
 
 // DEV ROUTE
-interface CreateNewProductReviewsBulkRequest
-	extends RequestAfterJWTVerification {
-	body: {
-		userInfo: {
-			userId: Types.ObjectId;
-			username: string;
-			roles: UserRoles;
-		};
-		sessionId: Types.ObjectId;
-		productReviewSchemas: ProductReviewSchema[];
-	};
+interface CreateNewProductReviewsBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    productReviewSchemas: ProductReviewSchema[];
+  };
 }
 
 // DEV ROUTE
 interface UpdateProductReviewsBulkRequest extends RequestAfterJWTVerification {
-	body: {
-		userInfo: {
-			userId: Types.ObjectId;
-			username: string;
-			roles: UserRoles;
-		};
-		sessionId: Types.ObjectId;
-		productReviewFields: {
-			productReviewId: Types.ObjectId;
-			documentUpdate: DocumentUpdateOperation<ProductReviewDocument>;
-		}[];
-	};
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    productReviewFields: {
+      productReviewId: Types.ObjectId;
+      documentUpdate: DocumentUpdateOperation<ProductReviewDocument>;
+    }[];
+  };
 }
 
 interface GetAllProductReviewsBulkRequest extends RequestAfterJWTVerification {
-	body: {
-		userInfo: {
-			userId: Types.ObjectId;
-			username: string;
-			roles: UserRoles;
-		};
-		sessionId: Types.ObjectId;
-	};
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+  };
 }
 
 interface DeleteAProductReviewRequest extends RequestAfterJWTVerification {
-	params: { productReviewId: string };
+  params: { productReviewId: string };
 }
 
 type DeleteAllProductReviewsRequest = RequestAfterJWTVerification;
@@ -74,39 +71,53 @@ type GetQueriedProductReviewsRequest = GetQueriedResourceRequest;
 type GetQueriedProductReviewsByUserRequest = GetQueriedResourceByUserRequest;
 
 interface GetProductReviewByIdRequest extends RequestAfterJWTVerification {
-	body: {
-		userInfo: {
-			userId: Types.ObjectId;
-			username: string;
-			roles: UserRoles;
-		};
-		sessionId: Types.ObjectId;
-	};
-	params: { productReviewId: string };
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+  };
+  params: { productReviewId: string };
 }
 
 interface UpdateProductReviewByIdRequest extends RequestAfterJWTVerification {
-	body: {
-		userInfo: {
-			userId: Types.ObjectId;
-			username: string;
-			roles: UserRoles;
-		};
-		sessionId: Types.ObjectId;
-		documentUpdate: DocumentUpdateOperation<ProductReviewDocument>;
-	};
-	params: { productReviewId: string };
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    documentUpdate: DocumentUpdateOperation<ProductReviewDocument>;
+  };
+  params: { productReviewId: string };
 }
 
+/**
+ * - Type signature of document sent by the server for GET, PATCH requests.
+ * - This type parameter is passed to ResourceRequestServerResponse(single document fetched by _id) or GetQueriedResourceRequestServerResponse(multiple documents fetched with filter, projection, options params),
+ * - which is, in turn, passed to the Express Response type.
+ * - The OmitFields type parameter is used to omit fields from the ProductReviewDocument type. (ex: -password or -paymentInformation)
+ */
+type ProductReviewServerResponseDocument<OmitFields extends string = string> = Omit<
+  ProductReviewDocument,
+  OmitFields
+> & {
+  productCategoryDocs: ProductCategoryDocument[];
+};
+
 export type {
-	CreateNewProductReviewRequest,
-	GetQueriedProductReviewsByUserRequest,
-	CreateNewProductReviewsBulkRequest,
-	DeleteAProductReviewRequest,
-	DeleteAllProductReviewsRequest,
-	GetProductReviewByIdRequest,
-	GetQueriedProductReviewsRequest,
-	UpdateProductReviewByIdRequest,
-	UpdateProductReviewsBulkRequest,
-	GetAllProductReviewsBulkRequest,
+  CreateNewProductReviewRequest,
+  CreateNewProductReviewsBulkRequest,
+  DeleteAProductReviewRequest,
+  DeleteAllProductReviewsRequest,
+  GetAllProductReviewsBulkRequest,
+  GetProductReviewByIdRequest,
+  GetQueriedProductReviewsByUserRequest,
+  GetQueriedProductReviewsRequest,
+  ProductReviewServerResponseDocument,
+  UpdateProductReviewByIdRequest,
+  UpdateProductReviewsBulkRequest,
 };
