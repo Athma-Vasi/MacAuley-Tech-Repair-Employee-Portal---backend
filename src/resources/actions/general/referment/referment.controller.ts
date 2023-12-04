@@ -1,185 +1,69 @@
-import expressAsyncHandler from 'express-async-handler';
+import expressAsyncHandler from "express-async-handler";
 
-import type { Response } from 'express';
+import type { FilterQuery, QueryOptions } from "mongoose";
+import type { Response } from "express";
+import type { DeleteResult } from "mongodb";
 import type {
   CreateNewRefermentRequest,
-  DeleteARefermentRequest,
-  DeleteAllRefermentsRequest,
-  GetRefermentRequestById,
-  GetQueriedRefermentsRequest,
-  GetQueriedRefermentsByUserRequest,
-  UpdateRefermentStatusByIdRequest,
   CreateNewRefermentsBulkRequest,
-} from './referment.types';
-
-import {
-  checkRefermentExistsService,
-  createNewRefermentService,
-  deleteARefermentService,
-  deleteAllRefermentsService,
-  getRefermentByIdService,
-  getQueriedRefermentsService,
-  getQueriedRefermentsByUserService,
-  updateRefermentStatusByIdService,
-  getQueriedTotalRefermentsService,
-} from './referment.service';
-import { RefermentDocument } from './referment.model';
-import {
+  DeleteAllRefermentsRequest,
+  DeleteRefermentRequest,
+  GetRefermentByIdRequest,
+  GetQueriedRefermentsByUserRequest,
+  GetQueriedRefermentsRequest,
+  UpdateRefermentByIdRequest,
+  UpdateRefermentsBulkRequest,
+} from "./referment.types";
+import type {
   GetQueriedResourceRequestServerResponse,
   QueryObjectParsedWithDefaults,
   ResourceRequestServerResponse,
-} from '../../../../types';
-import { FilterQuery, QueryOptions } from 'mongoose';
+} from "../../../../types";
+import type { RefermentDocument, RefermentSchema } from "./referment.model";
 
-// @desc   create new referment
-// @route  POST /referments
+import {
+  createNewRefermentService,
+  deleteAllRefermentsService,
+  deleteRefermentByIdService,
+  getRefermentByIdService,
+  getQueriedRefermentsByUserService,
+  getQueriedRefermentsService,
+  getQueriedTotalRefermentsService,
+  updateRefermentByIdService,
+} from "./referment.service";
+import { removeUndefinedAndNullValues } from "../../../../utils";
+import { getUserByIdService } from "../../../user";
+
+// @desc   Create a new referment
+// @route  POST api/v1/actions/general/referment
 // @access Private
 const createNewRefermentHandler = expressAsyncHandler(
   async (
     request: CreateNewRefermentRequest,
     response: Response<ResourceRequestServerResponse<RefermentDocument>>
   ) => {
-    const {
-      userInfo: { userId, username },
-      referment: {
-        candidateFullName,
-        candidateEmail,
-        candidateContactNumber,
-        candidateCurrentJobTitle,
-        candidateCurrentCompany,
-        candidateProfileUrl,
-        departmentReferredFor,
-        positionReferredFor,
-        positionJobDescription,
-        referralReason,
-        additionalInformation,
-        privacyConsent,
-      },
-    } = request.body;
+    const { refermentSchema } = request.body;
 
-    // user must acknowledge privacy consent
-    if (!privacyConsent) {
-      response.status(400).json({ message: 'Privacy consent is required', resourceData: [] });
-      return;
-    }
+    const refermentDocument = await createNewRefermentService(refermentSchema);
 
-    const newReferment = await createNewRefermentService({
-      userId,
-      username,
-      action: 'general',
-      category: 'referment',
-
-      candidateFullName,
-      candidateEmail,
-      candidateContactNumber,
-      candidateCurrentJobTitle,
-      candidateCurrentCompany,
-      candidateProfileUrl,
-
-      departmentReferredFor,
-      positionReferredFor,
-      positionJobDescription,
-      referralReason,
-      additionalInformation,
-      privacyConsent,
-      requestStatus: 'pending',
-    });
-
-    if (!newReferment) {
-      response.status(400).json({ message: 'Referment could not be created', resourceData: [] });
+    if (!refermentDocument) {
+      response.status(400).json({
+        message: "New referment could not be created",
+        resourceData: [],
+      });
       return;
     }
 
     response.status(201).json({
-      message: `Successfully submitted candidate ${candidateFullName} for referment.`,
-      resourceData: [newReferment],
+      message: 'Successfully created referment',
+      resourceData: [refermentDocument],
     });
   }
 );
 
-// DEV ROUTE
-// @desc   create new referments in bulk
-// @route  POST /referments/dev
-// @access Private/Manager/Admin
-const createNewRefermentsBulkHandler = expressAsyncHandler(
-  async (
-    request: CreateNewRefermentsBulkRequest,
-    response: Response<ResourceRequestServerResponse<RefermentDocument>>
-  ) => {
-    const { referments } = request.body;
-
-    // create new referments
-    const newReferments = await Promise.all(
-      referments.map(async (referment) => {
-        const {
-          userId,
-          username,
-          candidateFullName,
-          candidateEmail,
-          candidateContactNumber,
-          candidateCurrentJobTitle,
-          candidateCurrentCompany,
-          candidateProfileUrl,
-          departmentReferredFor,
-          positionReferredFor,
-          positionJobDescription,
-          referralReason,
-          additionalInformation,
-          privacyConsent,
-          requestStatus,
-        } = referment;
-
-        // create new referment object
-        const newReferment = await createNewRefermentService({
-          userId,
-          username,
-          action: 'general',
-          category: 'referment',
-
-          candidateFullName,
-          candidateEmail,
-          candidateContactNumber,
-          candidateCurrentJobTitle,
-          candidateCurrentCompany,
-          candidateProfileUrl,
-
-          departmentReferredFor,
-          positionReferredFor,
-          positionJobDescription,
-          referralReason,
-          additionalInformation,
-          privacyConsent,
-          requestStatus,
-        });
-
-        return newReferment;
-      })
-    );
-
-    // filter out any referments that were not created
-    const successfullyCreatedReferments = newReferments.filter((referment) => referment);
-
-    if (successfullyCreatedReferments.length === referments.length) {
-      response.status(201).json({
-        message: `Successfully created ${successfullyCreatedReferments.length} referments.`,
-        resourceData: successfullyCreatedReferments,
-      });
-    } else {
-      response.status(400).json({
-        message: `Successfully created ${
-          successfullyCreatedReferments.length
-        } referments. Could not create ${
-          referments.length - successfullyCreatedReferments.length
-        } referments.`,
-        resourceData: successfullyCreatedReferments,
-      });
-    }
-  }
-);
-
-// @desc   get all referments
-// @route  GET /referments
-// @access Private
+// @desc   Get all referments
+// @route  GET api/v1/actions/general/referment
+// @access Private/Admin/Manager
 const getQueriedRefermentsHandler = expressAsyncHandler(
   async (
     request: GetQueriedRefermentsRequest,
@@ -187,7 +71,8 @@ const getQueriedRefermentsHandler = expressAsyncHandler(
   ) => {
     let { newQueryFlag, totalDocuments } = request.body;
 
-    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+    const { filter, projection, options } =
+      request.query as QueryObjectParsedWithDefaults;
 
     // only perform a countDocuments scan if a new query is being made
     if (newQueryFlag) {
@@ -197,43 +82,48 @@ const getQueriedRefermentsHandler = expressAsyncHandler(
     }
 
     // get all referments
-    const referments = await getQueriedRefermentsService({
+    const referment = await getQueriedRefermentsService({
       filter: filter as FilterQuery<RefermentDocument> | undefined,
       projection: projection as QueryOptions<RefermentDocument>,
       options: options as QueryOptions<RefermentDocument>,
     });
-    if (referments.length === 0) {
+
+    if (!referment.length) {
       response.status(200).json({
-        message: 'No referments that match query parameters were found',
+        message: "No referments that match query parameters were found",
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
       });
-    } else {
-      response.status(200).json({
-        message: 'Successfully found referments',
-        pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments,
-        resourceData: referments,
-      });
+      return;
     }
+
+    response.status(200).json({
+      message: "Referments found successfully",
+      pages: Math.ceil(totalDocuments / Number(options?.limit)),
+      totalDocuments,
+      resourceData: referment,
+    });
   }
 );
 
-// @desc   get referments by user
-// @route  GET /referments/user/
+// @desc   Get all referment requests by user
+// @route  GET api/v1/actions/general/referment
 // @access Private
-const getQueriedRefermentsByUserHandler = expressAsyncHandler(
+const getRefermentsByUserHandler = expressAsyncHandler(
   async (
     request: GetQueriedRefermentsByUserRequest,
     response: Response<GetQueriedResourceRequestServerResponse<RefermentDocument>>
   ) => {
+    // anyone can view their own referment requests
     const {
       userInfo: { userId },
     } = request.body;
+
     let { newQueryFlag, totalDocuments } = request.body;
 
-    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+    const { filter, projection, options } =
+      request.query as QueryObjectParsedWithDefaults;
 
     // assign userId to filter
     const filterWithUserId = { ...filter, userId };
@@ -245,137 +135,254 @@ const getQueriedRefermentsByUserHandler = expressAsyncHandler(
       });
     }
 
+    // get all referment requests by user
     const referments = await getQueriedRefermentsByUserService({
       filter: filterWithUserId as FilterQuery<RefermentDocument> | undefined,
       projection: projection as QueryOptions<RefermentDocument>,
       options: options as QueryOptions<RefermentDocument>,
     });
-    if (referments.length === 0) {
+
+    if (!referments.length) {
       response.status(200).json({
-        message: 'No referments found',
+        message: "No referment requests found",
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
       });
-    } else {
-      response.status(200).json({
-        message: 'Referments found successfully',
-        pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments,
-        resourceData: referments,
-      });
+      return;
     }
+
+    response.status(200).json({
+      message: "Referment requests found successfully",
+      pages: Math.ceil(totalDocuments / Number(options?.limit)),
+      totalDocuments,
+      resourceData: referments,
+    });
   }
 );
 
-// @desc   get a referment
-// @route  GET /referments/:refermentId
-// @access Private
-const getARefermentByIdHandler = expressAsyncHandler(
-  async (
-    request: GetRefermentRequestById,
-    response: Response<ResourceRequestServerResponse<RefermentDocument>>
-  ) => {
-    const { refermentId } = request.params;
-
-    const referment = await getRefermentByIdService(refermentId);
-    if (referment) {
-      response
-        .status(200)
-        .json({ message: 'Referment fetched successfully', resourceData: [referment] });
-    } else {
-      response.status(400).json({ message: 'Referment could not be fetched', resourceData: [] });
-    }
-  }
-);
-
-// @desc   update a referment
-// @route  PATCH /referments/:refermentId
-// @access Private
+// @desc   Update referment status
+// @route  PATCH api/v1/actions/general/referment
+// @access Private/Admin/Manager
 const updateRefermentStatusByIdHandler = expressAsyncHandler(
   async (
-    request: UpdateRefermentStatusByIdRequest,
+    request: UpdateRefermentByIdRequest,
     response: Response<ResourceRequestServerResponse<RefermentDocument>>
   ) => {
     const { refermentId } = request.params;
     const {
-      referment: { requestStatus },
+      documentUpdate: { fields, updateOperator },
+      userInfo: { userId },
     } = request.body;
 
-    // check if referment exists
-    const isRefermentExists = await checkRefermentExistsService({ refermentId });
-    if (!isRefermentExists) {
-      response.status(404).json({ message: 'Referment not found', resourceData: [] });
+    // check if user exists
+    const userExists = await getUserByIdService(userId);
+    if (!userExists) {
+      response.status(404).json({ message: "User does not exist", resourceData: [] });
       return;
     }
 
-    // update referment
-    const updatedReferment = await updateRefermentStatusByIdService({
-      refermentId,
-      requestStatus,
+    // update referment request status
+    const updatedReferment = await updateRefermentByIdService({
+      _id: refermentId,
+      fields,
+      updateOperator,
     });
-    if (updatedReferment) {
-      response
-        .status(200)
-        .json({ message: 'Referment updated successfully', resourceData: [updatedReferment] });
-    } else {
-      response.status(400).json({ message: 'Referment could not be updated', resourceData: [] });
+
+    if (!updatedReferment) {
+      response.status(400).json({
+        message: "Referment request status update failed. Please try again!",
+        resourceData: [],
+      });
+      return;
     }
+
+    response.status(200).json({
+      message: "Referment request status updated successfully",
+      resourceData: [updatedReferment],
+    });
   }
 );
 
-// @desc   delete a referment
-// @route  DELETE /referments/:refermentId
+// @desc   Get an referment request
+// @route  GET api/v1/actions/general/referment
 // @access Private
-const deleteARefermentHandler = expressAsyncHandler(
+const getRefermentByIdHandler = expressAsyncHandler(
   async (
-    request: DeleteARefermentRequest,
+    request: GetRefermentByIdRequest,
     response: Response<ResourceRequestServerResponse<RefermentDocument>>
   ) => {
     const { refermentId } = request.params;
-    // check if referment exists
-    const isRefermentExists = await checkRefermentExistsService({ refermentId });
-    if (!isRefermentExists) {
-      response.status(404).json({ message: 'Referment not found', resourceData: [] });
+    const referment = await getRefermentByIdService(refermentId);
+    if (!referment) {
+      response
+        .status(404)
+        .json({ message: "Referment request not found", resourceData: [] });
       return;
     }
 
-    // delete referment
-    const deletedResult = await deleteARefermentService(refermentId);
-    if (deletedResult) {
-      response.status(200).json({ message: 'Referment deleted successfully', resourceData: [] });
-    } else {
-      response.status(400).json({ message: 'Referment could not be deleted', resourceData: [] });
-    }
+    response.status(200).json({
+      message: "Referment request found successfully",
+      resourceData: [referment],
+    });
   }
 );
 
-// @desc   delete all referments
-// @route  DELETE /referments
+// @desc   Delete an referment request by its id
+// @route  DELETE api/v1/actions/general/referment
 // @access Private
+const deleteRefermentHandler = expressAsyncHandler(
+  async (request: DeleteRefermentRequest, response: Response) => {
+    const { refermentId } = request.params;
+
+    // delete referment request by id
+    const deletedResult: DeleteResult = await deleteRefermentByIdService(refermentId);
+
+    if (!deletedResult.deletedCount) {
+      response.status(400).json({
+        message: "Referment request could not be deleted",
+        resourceData: [],
+      });
+      return;
+    }
+
+    response.status(200).json({
+      message: "Referment request deleted successfully",
+      resourceData: [],
+    });
+  }
+);
+
+// @desc    Delete all referment requests
+// @route   DELETE api/v1/actions/general/request-resource/referment
+// @access  Private
 const deleteAllRefermentsHandler = expressAsyncHandler(
+  async (_request: DeleteAllRefermentsRequest, response: Response) => {
+    const deletedResult: DeleteResult = await deleteAllRefermentsService();
+
+    if (!deletedResult.deletedCount) {
+      response.status(400).json({
+        message: "All referment requests could not be deleted",
+        resourceData: [],
+      });
+      return;
+    }
+
+    response.status(200).json({
+      message: "All referment requests deleted successfully",
+      resourceData: [],
+    });
+  }
+);
+
+// DEV ROUTE
+// @desc   Create new referment requests in bulk
+// @route  POST api/v1/actions/general/referment
+// @access Private
+const createNewRefermentsBulkHandler = expressAsyncHandler(
   async (
-    _request: DeleteAllRefermentsRequest,
+    request: CreateNewRefermentsBulkRequest,
     response: Response<ResourceRequestServerResponse<RefermentDocument>>
   ) => {
-    const deletedResult = await deleteAllRefermentsService();
-    if (deletedResult.acknowledged) {
-      response
-        .status(200)
-        .json({ message: 'All referments deleted successfully', resourceData: [] });
-    } else {
-      response.status(400).json({ message: 'Referments could not be deleted', resourceData: [] });
+    const { refermentSchemas } = request.body;
+
+    const refermentDocuments = await Promise.all(
+      refermentSchemas.map(async (refermentSchema) => {
+        const refermentDocument = await createNewRefermentService(refermentSchema);
+        return refermentDocument;
+      })
+    );
+
+    // filter out any null documents
+    const filteredRefermentDocuments = refermentDocuments.filter(
+      removeUndefinedAndNullValues
+    );
+
+    // check if any documents were created
+    if (filteredRefermentDocuments.length === 0) {
+      response.status(400).json({
+        message: "Referment requests creation failed",
+        resourceData: [],
+      });
+      return;
     }
+
+    const uncreatedDocumentsAmount =
+      refermentSchemas.length - filteredRefermentDocuments.length;
+
+    response.status(201).json({
+      message: `Successfully created ${
+        filteredRefermentDocuments.length
+      } Referment requests.${
+        uncreatedDocumentsAmount
+          ? ` ${uncreatedDocumentsAmount} documents were not created.`
+          : ""
+      }}`,
+      resourceData: filteredRefermentDocuments,
+    });
+  }
+);
+
+// DEV ROUTE
+// @desc   Update Referments in bulk
+// @route  PATCH api/v1/actions/general/referment
+// @access Private
+const updateRefermentsBulkHandler = expressAsyncHandler(
+  async (
+    request: UpdateRefermentsBulkRequest,
+    response: Response<ResourceRequestServerResponse<RefermentDocument>>
+  ) => {
+    const { refermentFields } = request.body;
+
+    const updatedReferments = await Promise.all(
+      refermentFields.map(async (refermentField) => {
+        const {
+          documentUpdate: { fields, updateOperator },
+          refermentId,
+        } = refermentField;
+
+        const updatedReferment = await updateRefermentByIdService({
+          _id: refermentId,
+          fields,
+          updateOperator,
+        });
+
+        return updatedReferment;
+      })
+    );
+
+    // filter out any referments that were not created
+    const successfullyCreatedReferments = updatedReferments.filter(
+      removeUndefinedAndNullValues
+    );
+
+    if (successfullyCreatedReferments.length === 0) {
+      response.status(400).json({
+        message: "Could not create any Referments",
+        resourceData: [],
+      });
+      return;
+    }
+
+    response.status(201).json({
+      message: `Successfully created ${
+        successfullyCreatedReferments.length
+      } Referments. ${
+        refermentFields.length - successfullyCreatedReferments.length
+      } Referments failed to be created.`,
+      resourceData: successfullyCreatedReferments,
+    });
   }
 );
 
 export {
   createNewRefermentHandler,
-  createNewRefermentsBulkHandler,
-  deleteARefermentHandler,
-  deleteAllRefermentsHandler,
   getQueriedRefermentsHandler,
-  getARefermentByIdHandler,
-  getQueriedRefermentsByUserHandler,
+  getRefermentsByUserHandler,
+  getRefermentByIdHandler,
+  deleteRefermentHandler,
+  deleteAllRefermentsHandler,
   updateRefermentStatusByIdHandler,
+  createNewRefermentsBulkHandler,
+  updateRefermentsBulkHandler,
 };

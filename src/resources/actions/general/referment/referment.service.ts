@@ -1,54 +1,35 @@
-import type { FlattenMaps, Types } from 'mongoose';
-import type { DeleteResult } from 'mongodb';
+import type { Types } from "mongoose";
+import type { DeleteResult } from "mongodb";
+import type { RefermentDocument, RefermentSchema } from "./referment.model";
 
-import { RefermentDocument, RefermentModel, RefermentSchema } from './referment.model';
+import { RefermentModel } from "./referment.model";
 import {
   DatabaseResponse,
   DatabaseResponseNullable,
   QueriedResourceGetRequestServiceInput,
   QueriedTotalResourceGetRequestServiceInput,
-  RequestStatus,
-} from '../../../../types';
-import { JobPosition, PhoneNumber } from '../../../user';
+  UpdateDocumentByIdServiceInput,
+} from "../../../../types";
 
-type CheckRefermentExistsServiceInput = {
-  refermentId?: Types.ObjectId | string;
-  title?: string;
-  userId?: Types.ObjectId | string;
-};
-
-async function checkRefermentExistsService({
-  refermentId,
-  title,
-  userId,
-}: CheckRefermentExistsServiceInput): Promise<boolean> {
+async function getRefermentByIdService(
+  refermentId: Types.ObjectId | string
+): DatabaseResponseNullable<RefermentDocument> {
   try {
-    if (refermentId) {
-      const referment = await RefermentModel.findById(refermentId).lean().exec();
-      return referment ? true : false;
-    }
-
-    if (title) {
-      const referment = await RefermentModel.find({ title }).lean().exec();
-      return referment.length > 0 ? true : false;
-    }
-
-    if (userId) {
-      const referment = await RefermentModel.findById(userId).lean().exec();
-      return referment ? true : false;
-    }
-    return false;
+    const referment = await RefermentModel.findById(refermentId).lean().exec();
+    return referment;
   } catch (error: any) {
-    throw new Error(error, { cause: 'checkRefermentExistsService' });
+    throw new Error(error, { cause: "getRefermentByIdService" });
   }
 }
 
-async function createNewRefermentService(input: RefermentSchema) {
+async function createNewRefermentService(
+  refermentSchema: RefermentSchema
+): Promise<RefermentDocument> {
   try {
-    const newReferment = await RefermentModel.create(input);
-    return newReferment;
+    const referment = await RefermentModel.create(refermentSchema);
+    return referment;
   } catch (error: any) {
-    throw new Error(error, { cause: 'createNewRefermentService' });
+    throw new Error(error, { cause: "createNewRefermentService" });
   }
 }
 
@@ -58,10 +39,12 @@ async function getQueriedRefermentsService({
   options = {},
 }: QueriedResourceGetRequestServiceInput<RefermentDocument>): DatabaseResponse<RefermentDocument> {
   try {
-    const referments = await RefermentModel.find(filter, projection, options).lean().exec();
-    return referments;
+    const referment = await RefermentModel.find(filter, projection, options)
+      .lean()
+      .exec();
+    return referment;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getQueriedRefermentsService' });
+    throw new Error(error, { cause: "getQueriedRefermentsService" });
   }
 }
 
@@ -72,7 +55,7 @@ async function getQueriedTotalRefermentsService({
     const totalReferments = await RefermentModel.countDocuments(filter).lean().exec();
     return totalReferments;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getQueriedTotalRefermentsService' });
+    throw new Error(error, { cause: "getQueriedTotalRefermentsService" });
   }
 }
 
@@ -82,76 +65,66 @@ async function getQueriedRefermentsByUserService({
   options = {},
 }: QueriedResourceGetRequestServiceInput<RefermentDocument>): DatabaseResponse<RefermentDocument> {
   try {
-    const referments = await RefermentModel.find(filter, projection, options).lean().exec();
+    const referments = await RefermentModel.find(filter, projection, options)
+      .lean()
+      .exec();
     return referments;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getQueriedRefermentsByUserService' });
+    throw new Error(error, { cause: "getQueriedRefermentsByUserService" });
   }
 }
 
-async function getRefermentByIdService(
-  refermentId: string
-): DatabaseResponseNullable<RefermentDocument> {
+async function updateRefermentByIdService({
+  _id,
+  fields,
+  updateOperator,
+}: UpdateDocumentByIdServiceInput<RefermentDocument>) {
+  const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
+  const updateObject = JSON.parse(updateString);
+
   try {
-    const referment = await RefermentModel.findById(refermentId).lean().exec();
+    const referment = await RefermentModel.findByIdAndUpdate(_id, updateObject, {
+      new: true,
+    })
+      .lean()
+      .exec();
     return referment;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getRefermentByIdService' });
+    throw new Error(error, { cause: "updateRefermentStatusByIdService" });
   }
 }
 
-async function deleteARefermentService(refermentId: string): Promise<DeleteResult> {
+async function deleteRefermentByIdService(
+  refermentId: Types.ObjectId | string
+): Promise<DeleteResult> {
   try {
-    const deleteResult = await RefermentModel.deleteOne({
+    const deletedResult = await RefermentModel.deleteOne({
       _id: refermentId,
     })
       .lean()
       .exec();
-    return deleteResult;
+    return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: 'deleteARefermentService' });
+    throw new Error(error, { cause: "deleteRefermentByIdService" });
   }
 }
 
 async function deleteAllRefermentsService(): Promise<DeleteResult> {
   try {
-    const deleteResult = await RefermentModel.deleteMany({}).lean().exec();
-    return deleteResult;
+    const deletedResult = await RefermentModel.deleteMany({}).lean().exec();
+    return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: 'deleteAllRefermentsService' });
-  }
-}
-
-async function updateRefermentStatusByIdService({
-  refermentId,
-  requestStatus,
-}: {
-  refermentId: Types.ObjectId | string;
-  requestStatus: RequestStatus;
-}) {
-  try {
-    const referment = await RefermentModel.findByIdAndUpdate(
-      refermentId,
-      { requestStatus },
-      { new: true }
-    )
-      .select(['-__v', '-action', '-category'])
-      .lean()
-      .exec();
-    return referment;
-  } catch (error: any) {
-    throw new Error(error, { cause: 'updateRefermentStatusByIdService' });
+    throw new Error(error, { cause: "deleteAllRefermentsService" });
   }
 }
 
 export {
-  checkRefermentExistsService,
-  createNewRefermentService,
-  deleteARefermentService,
-  deleteAllRefermentsService,
-  getQueriedRefermentsService,
   getRefermentByIdService,
+  createNewRefermentService,
+  getQueriedRefermentsService,
   getQueriedTotalRefermentsService,
   getQueriedRefermentsByUserService,
-  updateRefermentStatusByIdService,
+  deleteRefermentByIdService,
+  deleteAllRefermentsService,
+  updateRefermentByIdService,
 };

@@ -1,37 +1,41 @@
-import { Router } from 'express';
-
+import { Router } from "express";
 import {
   createNewRefermentHandler,
-  deleteARefermentHandler,
-  deleteAllRefermentsHandler,
-  getARefermentByIdHandler,
   getQueriedRefermentsHandler,
-  getQueriedRefermentsByUserHandler,
+  getRefermentsByUserHandler,
+  getRefermentByIdHandler,
+  deleteRefermentHandler,
+  deleteAllRefermentsHandler,
   updateRefermentStatusByIdHandler,
   createNewRefermentsBulkHandler,
-} from './referment.controller';
-import { assignQueryDefaults, verifyRoles } from '../../../../middlewares';
-import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
+  updateRefermentsBulkHandler,
+} from "./referment.controller";
+import { assignQueryDefaults } from "../../../../middlewares";
+import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../../constants";
 
 const refermentRouter = Router();
 
-refermentRouter.use(verifyRoles());
-
 refermentRouter
-  .route('/')
+  .route("/")
   .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedRefermentsHandler)
-  .post(createNewRefermentHandler)
-  .delete(deleteAllRefermentsHandler);
+  .post(createNewRefermentHandler);
 
-refermentRouter.route('/user').get(getQueriedRefermentsByUserHandler);
-
-// DEV ROUTE
-refermentRouter.route('/dev').post(createNewRefermentsBulkHandler);
+refermentRouter.route("/delete-all").delete(deleteAllRefermentsHandler);
 
 refermentRouter
-  .route('/:refermentId')
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getARefermentByIdHandler)
-  .delete(deleteARefermentHandler)
+  .route("/user")
+  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getRefermentsByUserHandler);
+
+// DEV ROUTES
+refermentRouter
+  .route("/dev")
+  .post(createNewRefermentsBulkHandler)
+  .patch(updateRefermentsBulkHandler);
+
+refermentRouter
+  .route("/:refermentId")
+  .get(getRefermentByIdHandler)
+  .delete(deleteRefermentHandler)
   .patch(updateRefermentStatusByIdHandler);
 
 export { refermentRouter };

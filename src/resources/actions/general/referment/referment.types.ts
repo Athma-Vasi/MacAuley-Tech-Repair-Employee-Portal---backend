@@ -1,67 +1,15 @@
-import type { Types } from 'mongoose';
-import type { RequestAfterJWTVerification } from '../../../auth';
-import type { UserRoles, JobPosition, PhoneNumber, Department } from '../../../user';
-import { GetQueriedResourceRequest, RequestStatus } from '../../../../types';
+import type { Types } from "mongoose";
+import type { RequestAfterJWTVerification } from "../../../auth";
+import type { UserRoles } from "../../../user";
+import {
+  DocumentUpdateOperation,
+  GetQueriedResourceByUserRequest,
+  GetQueriedResourceRequest,
+} from "../../../../types";
+import { RefermentDocument, RefermentSchema } from "./referment.model";
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
-
 interface CreateNewRefermentRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId; // referrer userId
-      username: string; // referrer username
-      roles: UserRoles;
-    };
-    sessionId: Types.ObjectId;
-    referment: {
-      candidateFullName: string;
-      candidateEmail: string;
-      candidateContactNumber: PhoneNumber;
-      candidateCurrentJobTitle: string;
-      candidateCurrentCompany: string;
-      candidateProfileUrl: string;
-
-      departmentReferredFor: Department;
-      positionReferredFor: JobPosition;
-      positionJobDescription: string;
-      referralReason: string;
-      additionalInformation: string;
-      privacyConsent: boolean;
-    };
-  };
-}
-
-// DEV ROUTE
-interface CreateNewRefermentsBulkRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId; // referrer userId
-      username: string; // referrer username
-      roles: UserRoles;
-    };
-    sessionId: Types.ObjectId;
-    referments: {
-      userId: Types.ObjectId; // referrer userId
-      username: string; // referrer username
-      candidateFullName: string;
-      candidateEmail: string;
-      candidateContactNumber: PhoneNumber;
-      candidateCurrentJobTitle: string;
-      candidateCurrentCompany: string;
-      candidateProfileUrl: string;
-
-      departmentReferredFor: Department;
-      positionReferredFor: JobPosition;
-      positionJobDescription: string;
-      referralReason: string;
-      additionalInformation: string;
-      privacyConsent: boolean;
-      requestStatus: RequestStatus;
-    }[];
-  };
-}
-
-interface DeleteARefermentRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {
       userId: Types.ObjectId;
@@ -69,7 +17,11 @@ interface DeleteARefermentRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
+    refermentSchema: RefermentSchema;
   };
+}
+
+interface DeleteRefermentRequest extends RequestAfterJWTVerification {
   params: {
     refermentId: string;
   };
@@ -77,11 +29,9 @@ interface DeleteARefermentRequest extends RequestAfterJWTVerification {
 
 type DeleteAllRefermentsRequest = RequestAfterJWTVerification;
 
-type GetQueriedRefermentsRequest = GetQueriedResourceRequest;
+type GetQueriedRefermentsByUserRequest = GetQueriedResourceByUserRequest;
 
-type GetQueriedRefermentsByUserRequest = GetQueriedResourceRequest;
-
-interface GetRefermentRequestById extends RequestAfterJWTVerification {
+interface GetRefermentByIdRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {
       userId: Types.ObjectId;
@@ -89,30 +39,62 @@ interface GetRefermentRequestById extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    params: { refermentId: string };
-  };
-}
-
-interface UpdateRefermentStatusByIdRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-    sessionId: Types.ObjectId;
-    referment: { requestStatus: RequestStatus };
   };
   params: { refermentId: string };
 }
 
+interface UpdateRefermentByIdRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    documentUpdate: DocumentUpdateOperation<RefermentDocument>;
+  };
+  params: { refermentId: string };
+}
+
+type GetQueriedRefermentsRequest = GetQueriedResourceRequest;
+
+// DEV ROUTE
+interface CreateNewRefermentsBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    refermentSchemas: RefermentSchema[];
+  };
+}
+
+// DEV ROUTE
+interface UpdateRefermentsBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    refermentFields: {
+      refermentId: Types.ObjectId;
+      documentUpdate: DocumentUpdateOperation<RefermentDocument>;
+    }[];
+  };
+}
+
 export type {
   CreateNewRefermentRequest,
-  CreateNewRefermentsBulkRequest,
-  DeleteARefermentRequest,
+  DeleteRefermentRequest,
   DeleteAllRefermentsRequest,
-  GetQueriedRefermentsRequest,
   GetQueriedRefermentsByUserRequest,
-  GetRefermentRequestById,
-  UpdateRefermentStatusByIdRequest,
+  GetRefermentByIdRequest,
+  GetQueriedRefermentsRequest,
+  UpdateRefermentByIdRequest,
+  CreateNewRefermentsBulkRequest,
+  UpdateRefermentsBulkRequest,
 };

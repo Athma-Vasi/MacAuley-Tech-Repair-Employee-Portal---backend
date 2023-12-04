@@ -7,9 +7,6 @@ import { RequestStatus } from "../../../../types";
 type RefermentSchema = {
   userId: Types.ObjectId;
   username: string;
-  action: Action;
-  category: ActionsGeneral;
-
   candidateFullName: string;
   candidateEmail: string;
   candidateContactNumber: PhoneNumber | string;
@@ -38,22 +35,12 @@ const refermentSchema = new Schema<RefermentSchema>(
     userId: {
       type: Schema.Types.ObjectId,
       required: [true, "userId is required"],
-      ref: "User", // referring to the User model
+      ref: "User",
       index: true,
     },
     username: {
       type: String,
       required: [true, "Username is required"],
-    },
-    action: {
-      type: String,
-      required: [true, "Action is required"],
-      enum: ["company", "general", "outreach"],
-    },
-    category: {
-      type: String,
-      required: [true, "Category is required"],
-      enum: ["endorsement", "printer issue", "anonymous request", "referment"],
     },
     candidateFullName: {
       type: String,
