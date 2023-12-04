@@ -1,48 +1,52 @@
-import { Router } from 'express';
-
+import { Router } from "express";
 import {
   createNewCommentHandler,
-  deleteACommentHandler,
-  deleteAllCommentsHandler,
   getQueriedCommentsHandler,
+  getCommentsByUserHandler,
   getCommentByIdHandler,
-  getQueriedCommentsByUserHandler,
-  getQueriedCommentsByParentResourceIdHandler,
-  updateCommentByIdHandler,
+  deleteCommentHandler,
+  deleteAllCommentsHandler,
+  updateCommentStatusByIdHandler,
   createNewCommentsBulkHandler,
-} from './comment.controller';
-import { assignQueryDefaults, verifyJWTMiddleware, verifyRoles } from '../../middlewares';
-import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../constants';
+  updateCommentsBulkHandler,
+  getQueriedCommentsByParentResourceIdHandler,
+} from "./comment.controller";
+
+import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../constants";
+import { verifyJWTMiddleware, verifyRoles, assignQueryDefaults } from "../../middlewares";
 
 const commentRouter = Router();
 
-commentRouter.use(verifyJWTMiddleware);
-commentRouter.use(verifyRoles());
+commentRouter.use(verifyJWTMiddleware, verifyRoles());
 
 commentRouter
-  .route('/')
+  .route("/")
   .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedCommentsHandler)
-  .delete(deleteAllCommentsHandler)
   .post(createNewCommentHandler);
 
-commentRouter
-  .route('/user')
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedCommentsByUserHandler);
-
-// DEV ROUTE
-commentRouter.route('/dev').post(createNewCommentsBulkHandler);
+commentRouter.route("/delete-all").delete(deleteAllCommentsHandler);
 
 commentRouter
-  .route('/parentResource/:parentResourceId')
+  .route("/user")
+  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getCommentsByUserHandler);
+
+commentRouter
+  .route("/parentResource/:parentResourceId")
   .get(
     assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
     getQueriedCommentsByParentResourceIdHandler
   );
 
+// DEV ROUTES
 commentRouter
-  .route('/:commentId')
+  .route("/dev")
+  .post(createNewCommentsBulkHandler)
+  .patch(updateCommentsBulkHandler);
+
+commentRouter
+  .route("/:commentId")
   .get(getCommentByIdHandler)
-  .delete(deleteACommentHandler)
-  .patch(updateCommentByIdHandler);
+  .delete(deleteCommentHandler)
+  .patch(updateCommentStatusByIdHandler);
 
 export { commentRouter };

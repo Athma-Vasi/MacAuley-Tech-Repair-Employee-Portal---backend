@@ -6,34 +6,44 @@
  * Imports
  */
 
-import { CommentModel } from './comment.model';
-import { commentRouter } from './comment.routes';
+import { CommentModel } from "./comment.model";
+import { commentRouter } from "./comment.routes";
 import {
   createNewCommentHandler,
-  deleteACommentHandler,
+  createNewCommentsBulkHandler,
   deleteAllCommentsHandler,
-  getQueriedCommentsHandler,
+  deleteCommentHandler,
   getCommentByIdHandler,
-  getQueriedCommentsByUserHandler,
-} from './comment.controller';
+  getCommentsByUserHandler,
+  getQueriedCommentsByParentResourceIdHandler,
+  getQueriedCommentsHandler,
+  updateCommentStatusByIdHandler,
+  updateCommentsBulkHandler,
+} from "./comment.controller";
 import {
   createNewCommentService,
-  deleteACommentService,
   deleteAllCommentsService,
-  getQueriedCommentsService,
+  deleteCommentByIdService,
   getCommentByIdService,
   getQueriedCommentsByUserService,
-} from './comment.service';
+  getQueriedCommentsService,
+  getQueriedTotalCommentsService,
+  updateCommentByIdService,
+} from "./comment.service";
 
-import type { CommentDocument, CommentSchema } from './comment.model';
+import type { CommentDocument, CommentSchema } from "./comment.model";
 import type {
   CreateNewCommentRequest,
-  DeleteACommentRequest,
+  CreateNewCommentsBulkRequest,
   DeleteAllCommentsRequest,
-  GetQueriedCommentsRequest,
+  DeleteCommentRequest,
   GetCommentByIdRequest,
+  GetQueriedCommentsByParentResourceIdRequest,
   GetQueriedCommentsByUserRequest,
-} from './comment.types';
+  GetQueriedCommentsRequest,
+  UpdateCommentByIdRequest,
+  UpdateCommentsBulkRequest,
+} from "./comment.types";
 
 /**
  * Exports
@@ -43,26 +53,36 @@ export {
   CommentModel,
   commentRouter,
   createNewCommentHandler,
-  deleteACommentHandler,
-  deleteAllCommentsHandler,
-  getQueriedCommentsHandler,
-  getCommentByIdHandler,
-  getQueriedCommentsByUserHandler,
   createNewCommentService,
-  deleteACommentService,
+  createNewCommentsBulkHandler,
+  deleteAllCommentsHandler,
   deleteAllCommentsService,
-  getQueriedCommentsService,
+  deleteCommentHandler,
+  deleteCommentByIdService,
+  getCommentByIdHandler,
   getCommentByIdService,
+  getCommentsByUserHandler,
+  getQueriedCommentsByParentResourceIdHandler,
   getQueriedCommentsByUserService,
+  getQueriedCommentsHandler,
+  getQueriedCommentsService,
+  getQueriedTotalCommentsService,
+  updateCommentByIdService,
+  updateCommentStatusByIdHandler,
+  updateCommentsBulkHandler,
 };
 
 export type {
   CommentDocument,
   CommentSchema,
   CreateNewCommentRequest,
-  DeleteACommentRequest,
+  CreateNewCommentsBulkRequest,
   DeleteAllCommentsRequest,
-  GetQueriedCommentsRequest,
+  DeleteCommentRequest,
   GetCommentByIdRequest,
+  GetQueriedCommentsByParentResourceIdRequest,
   GetQueriedCommentsByUserRequest,
+  GetQueriedCommentsRequest,
+  UpdateCommentByIdRequest,
+  UpdateCommentsBulkRequest,
 };

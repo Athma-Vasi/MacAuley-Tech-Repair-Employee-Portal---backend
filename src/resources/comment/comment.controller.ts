@@ -1,11 +1,10 @@
-import expressAsyncHandler from 'express-async-handler';
+import expressAsyncHandler from "express-async-handler";
 
-import type { DeleteResult } from 'mongodb';
-import type { Response } from 'express';
-import type { CommentDocument, CommentSchema } from './comment.model';
+import type { DeleteResult } from "mongodb";
+import type { Response } from "express";
+import type { CommentDocument } from "./comment.model";
 import type {
   CreateNewCommentRequest,
-  DeleteACommentRequest,
   DeleteAllCommentsRequest,
   GetQueriedCommentsRequest,
   GetCommentByIdRequest,
@@ -13,188 +12,59 @@ import type {
   GetQueriedCommentsByParentResourceIdRequest,
   UpdateCommentByIdRequest,
   CreateNewCommentsBulkRequest,
-} from './comment.types';
+  DeleteCommentRequest,
+  UpdateCommentsBulkRequest,
+} from "./comment.types";
 import {
   createNewCommentService,
-  deleteACommentService,
   deleteAllCommentsService,
   getQueriedCommentsService,
   getCommentByIdService,
   getQueriedCommentsByUserService,
   getQueriedTotalCommentsService,
   updateCommentByIdService,
-} from './comment.service';
+  deleteCommentByIdService,
+} from "./comment.service";
 import {
   GetQueriedResourceRequestServerResponse,
   QueryObjectParsedWithDefaults,
   ResourceRequestServerResponse,
-} from '../../types';
-import { FilterQuery, QueryOptions } from 'mongoose';
+} from "../../types";
+import { FilterQuery, QueryOptions } from "mongoose";
+
+import { removeUndefinedAndNullValues } from "../../utils";
+import { getUserByIdService } from "../user";
 
 // @desc   Create a new comment
-// @route  POST /comment
+// @route  POST api/v1/actions/general/comment
 // @access Private
 const createNewCommentHandler = expressAsyncHandler(
   async (
     request: CreateNewCommentRequest,
     response: Response<ResourceRequestServerResponse<CommentDocument>>
   ) => {
-    const {
-      userInfo: { userId, username, roles },
-      comment: {
-        firstName,
-        lastName,
-        middleName,
-        comment,
-        department,
-        jobPosition,
-        profilePictureUrl,
-        quotedComment,
-        quotedUsername,
-        dislikesCount,
-        isDeleted,
-        isFeatured,
-        likesCount,
-        parentResourceId,
-        reportsCount,
-        dislikedUserIds,
-        likedUserIds,
-        reportedUserIds,
-      },
-    } = request.body;
+    const { commentSchema } = request.body;
 
-    // create new comment object
-    const newCommentObject: CommentSchema = {
-      userId,
-      username,
-      roles,
+    const commentDocument = await createNewCommentService(commentSchema);
 
-      firstName,
-      lastName,
-      middleName,
-      department,
-      jobPosition,
-      profilePictureUrl,
-      comment,
-      quotedUsername,
-      quotedComment,
-      dislikesCount,
-      isDeleted,
-      isFeatured,
-      likesCount,
-      parentResourceId,
-      reportsCount,
-      dislikedUserIds,
-      likedUserIds,
-      reportedUserIds,
-    };
-
-    // create new comment
-    const newComment = await createNewCommentService(newCommentObject);
-    if (!newComment) {
-      response.status(400).json({ message: 'Unable to create new comment', resourceData: [] });
+    if (!commentDocument) {
+      response.status(400).json({
+        message: "New comment could not be created",
+        resourceData: [],
+      });
       return;
     }
 
-    response
-      .status(201)
-      .json({ message: 'Successfully created comment!', resourceData: [newComment] });
-  }
-);
-
-// DEV ROUTE
-// @desc   Create new comments in bulk
-// @route  POST /comment/dev
-// @access Private/Manager/Admin
-const createNewCommentsBulkHandler = expressAsyncHandler(
-  async (
-    request: CreateNewCommentsBulkRequest,
-    response: Response<ResourceRequestServerResponse<CommentDocument>>
-  ) => {
-    const { comments } = request.body;
-
-    // promise array of new comments
-    const newComments = await Promise.all(
-      comments.map(async (commentBody) => {
-        const {
-          userId,
-          username,
-          roles,
-          firstName,
-          lastName,
-          middleName,
-          department,
-          jobPosition,
-          profilePictureUrl,
-          comment,
-          quotedUsername,
-          quotedComment,
-          likesCount,
-          dislikesCount,
-          reportsCount,
-          isFeatured,
-          isDeleted,
-          parentResourceId,
-          likedUserIds,
-          dislikedUserIds,
-          reportedUserIds,
-        } = commentBody;
-
-        // create new comment object
-        const newCommentObject: CommentSchema = {
-          userId,
-          username,
-          roles,
-
-          firstName,
-          lastName,
-          middleName,
-          department,
-          jobPosition,
-          profilePictureUrl,
-          comment,
-          quotedUsername,
-          quotedComment,
-          likesCount,
-          dislikesCount,
-          reportsCount,
-          isFeatured,
-          isDeleted,
-          parentResourceId,
-          likedUserIds,
-          dislikedUserIds,
-          reportedUserIds,
-        };
-
-        // create new comment
-        const newComment = await createNewCommentService(newCommentObject);
-
-        return newComment;
-      })
-    );
-
-    // filter out undefined values
-    const newCommentsFiltered = newComments.filter(
-      (comment) => comment !== undefined
-    ) as CommentDocument[];
-
-    if (newCommentsFiltered.length === comments.length) {
-      response.status(201).json({
-        message: 'Successfully created new comments',
-        resourceData: newCommentsFiltered,
-      });
-    } else {
-      response.status(400).json({
-        message: 'Some comments were not created successfully',
-        resourceData: newCommentsFiltered,
-      });
-    }
+    response.status(201).json({
+      message: "Successfully created comment",
+      resourceData: [commentDocument],
+    });
   }
 );
 
 // @desc   Get all comments
-// @route  GET /comment
-// @access Private
+// @route  GET api/v1/actions/general/comment
+// @access Private/Admin/Manager
 const getQueriedCommentsHandler = expressAsyncHandler(
   async (
     request: GetQueriedCommentsRequest,
@@ -202,7 +72,8 @@ const getQueriedCommentsHandler = expressAsyncHandler(
   ) => {
     let { newQueryFlag, totalDocuments } = request.body;
 
-    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+    const { filter, projection, options } =
+      request.query as QueryObjectParsedWithDefaults;
 
     // only perform a countDocuments scan if a new query is being made
     if (newQueryFlag) {
@@ -212,15 +83,15 @@ const getQueriedCommentsHandler = expressAsyncHandler(
     }
 
     // get all comments
-    const comments = await getQueriedCommentsService({
+    const comment = await getQueriedCommentsService({
       filter: filter as FilterQuery<CommentDocument> | undefined,
       projection: projection as QueryOptions<CommentDocument>,
       options: options as QueryOptions<CommentDocument>,
     });
 
-    if (!comments.length) {
+    if (!comment.length) {
       response.status(200).json({
-        message: 'No comments that match query parameters were found',
+        message: "No comments that match query parameters were found",
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
@@ -229,28 +100,31 @@ const getQueriedCommentsHandler = expressAsyncHandler(
     }
 
     response.status(200).json({
-      message: 'Successfully found comments',
+      message: "Comments found successfully",
       pages: Math.ceil(totalDocuments / Number(options?.limit)),
       totalDocuments,
-      resourceData: comments,
+      resourceData: comment,
     });
   }
 );
 
-// @desc   Get all comments by user
-// @route  GET /comment/user
+// @desc   Get all comment requests by user
+// @route  GET api/v1/actions/general/comment
 // @access Private
-const getQueriedCommentsByUserHandler = expressAsyncHandler(
+const getCommentsByUserHandler = expressAsyncHandler(
   async (
     request: GetQueriedCommentsByUserRequest,
     response: Response<GetQueriedResourceRequestServerResponse<CommentDocument>>
   ) => {
+    // anyone can view their own comment requests
     const {
       userInfo: { userId },
     } = request.body;
+
     let { newQueryFlag, totalDocuments } = request.body;
 
-    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+    const { filter, projection, options } =
+      request.query as QueryObjectParsedWithDefaults;
 
     // assign userId to filter
     const filterWithUserId = { ...filter, userId };
@@ -262,6 +136,7 @@ const getQueriedCommentsByUserHandler = expressAsyncHandler(
       });
     }
 
+    // get all comment requests by user
     const comments = await getQueriedCommentsByUserService({
       filter: filterWithUserId as FilterQuery<CommentDocument> | undefined,
       projection: projection as QueryOptions<CommentDocument>,
@@ -270,7 +145,7 @@ const getQueriedCommentsByUserHandler = expressAsyncHandler(
 
     if (!comments.length) {
       response.status(200).json({
-        message: 'No comments that match query parameters were found',
+        message: "No comment requests found",
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
@@ -279,10 +154,53 @@ const getQueriedCommentsByUserHandler = expressAsyncHandler(
     }
 
     response.status(200).json({
-      message: 'Successfully found comments',
+      message: "Comment requests found successfully",
       pages: Math.ceil(totalDocuments / Number(options?.limit)),
       totalDocuments,
       resourceData: comments,
+    });
+  }
+);
+
+// @desc   Update comment status
+// @route  PATCH api/v1/actions/general/comment
+// @access Private/Admin/Manager
+const updateCommentStatusByIdHandler = expressAsyncHandler(
+  async (
+    request: UpdateCommentByIdRequest,
+    response: Response<ResourceRequestServerResponse<CommentDocument>>
+  ) => {
+    const { commentId } = request.params;
+    const {
+      documentUpdate: { fields, updateOperator },
+      userInfo: { userId },
+    } = request.body;
+
+    // check if user exists
+    const userExists = await getUserByIdService(userId);
+    if (!userExists) {
+      response.status(404).json({ message: "User does not exist", resourceData: [] });
+      return;
+    }
+
+    // update comment request status
+    const updatedComment = await updateCommentByIdService({
+      _id: commentId,
+      fields,
+      updateOperator,
+    });
+
+    if (!updatedComment) {
+      response.status(400).json({
+        message: "Comment request status update failed. Please try again!",
+        resourceData: [],
+      });
+      return;
+    }
+
+    response.status(200).json({
+      message: "Comment request status updated successfully",
+      resourceData: [updatedComment],
     });
   }
 );
@@ -308,7 +226,6 @@ const getQueriedCommentsByParentResourceIdHandler = expressAsyncHandler(
       totalDocuments = await getQueriedTotalCommentsService({
         filter: filter as FilterQuery<CommentDocument> | undefined,
       });
-      console.log({ totalDocuments });
     }
 
     // get all comments
@@ -320,7 +237,7 @@ const getQueriedCommentsByParentResourceIdHandler = expressAsyncHandler(
 
     if (!comments.length) {
       response.status(200).json({
-        message: 'No comments that match query parameters were found',
+        message: "No comments that match query parameters were found",
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
@@ -329,7 +246,7 @@ const getQueriedCommentsByParentResourceIdHandler = expressAsyncHandler(
     }
 
     response.status(200).json({
-      message: 'Successfully found comments',
+      message: "Successfully found comments",
       pages: Math.ceil(totalDocuments / Number(options?.limit)),
       totalDocuments,
       resourceData: comments,
@@ -337,8 +254,8 @@ const getQueriedCommentsByParentResourceIdHandler = expressAsyncHandler(
   }
 );
 
-// @desc   Get a comment by id
-// @route  GET /comment/:commentId
+// @desc   Get an comment request
+// @route  GET api/v1/actions/general/comment
 // @access Private
 const getCommentByIdHandler = expressAsyncHandler(
   async (
@@ -346,106 +263,175 @@ const getCommentByIdHandler = expressAsyncHandler(
     response: Response<ResourceRequestServerResponse<CommentDocument>>
   ) => {
     const { commentId } = request.params;
-
-    // get a comment by id
-    const commentById = await getCommentByIdService(commentId);
-    if (!commentById) {
-      response.status(400).json({ message: 'Unable to get comment by id', resourceData: [] });
+    const comment = await getCommentByIdService(commentId);
+    if (!comment) {
+      response
+        .status(404)
+        .json({ message: "Comment request not found", resourceData: [] });
       return;
     }
 
-    response
-      .status(200)
-      .json({ message: 'Successfully retrieved comment!', resourceData: [commentById] });
-  }
-);
-
-// @desc   Update a comment by id
-// @route  PATCH /comment/:commentId
-// @access Private
-const updateCommentByIdHandler = expressAsyncHandler(
-  async (
-    request: UpdateCommentByIdRequest,
-    response: Response<ResourceRequestServerResponse<CommentDocument>>
-  ) => {
-    const { commentId } = request.params;
-    const {
-      userInfo: { userId },
-      fieldsToUpdate,
-    } = request.body;
-
-    // check if comment exists
-    const commentById = await getCommentByIdService(commentId);
-    if (!commentById) {
-      response.status(400).json({ message: 'Unable to get comment by id', resourceData: [] });
-      return;
-    }
-
-    // update comment
-    const updatedComment = await updateCommentByIdService({
-      commentId,
-      fieldsToUpdate: { ...fieldsToUpdate, userId },
+    response.status(200).json({
+      message: "Comment request found successfully",
+      resourceData: [comment],
     });
-
-    if (!updatedComment) {
-      response.status(400).json({ message: 'Unable to update comment', resourceData: [] });
-      return;
-    }
-
-    response
-      .status(200)
-      .json({ message: 'Successfully updated comment!', resourceData: [updatedComment] });
   }
 );
 
-// @desc   Delete a comment
-// @route  DELETE /comment/:commentId
+// @desc   Delete an comment request by its id
+// @route  DELETE api/v1/actions/general/comment
 // @access Private
-const deleteACommentHandler = expressAsyncHandler(
-  async (
-    request: DeleteACommentRequest,
-    response: Response<ResourceRequestServerResponse<CommentDocument>>
-  ) => {
+const deleteCommentHandler = expressAsyncHandler(
+  async (request: DeleteCommentRequest, response: Response) => {
     const { commentId } = request.params;
 
-    // delete a comment
-    const deleteResult: DeleteResult = await deleteACommentService(commentId);
-    if (deleteResult.deletedCount === 0) {
-      response.status(400).json({ message: 'Unable to delete comment', resourceData: [] });
+    // delete comment request by id
+    const deletedResult: DeleteResult = await deleteCommentByIdService(commentId);
+
+    if (!deletedResult.deletedCount) {
+      response.status(400).json({
+        message: "Comment request could not be deleted",
+        resourceData: [],
+      });
       return;
     }
 
-    response.status(200).json({ message: 'Comment deleted', resourceData: [] });
+    response.status(200).json({
+      message: "Comment request deleted successfully",
+      resourceData: [],
+    });
   }
 );
 
-// @desc   Delete all comments
-// @route  DELETE /comment
-// @access Private
+// @desc    Delete all comment requests
+// @route   DELETE api/v1/actions/general/request-resource/comment
+// @access  Private
 const deleteAllCommentsHandler = expressAsyncHandler(
-  async (
-    _request: DeleteAllCommentsRequest,
-    response: Response<ResourceRequestServerResponse<CommentDocument>>
-  ) => {
-    // delete all comments
-    const deleteResult: DeleteResult = await deleteAllCommentsService();
-    if (deleteResult.deletedCount === 0) {
-      response.status(400).json({ message: 'Unable to delete all comments', resourceData: [] });
+  async (_request: DeleteAllCommentsRequest, response: Response) => {
+    const deletedResult: DeleteResult = await deleteAllCommentsService();
+
+    if (!deletedResult.deletedCount) {
+      response.status(400).json({
+        message: "All comment requests could not be deleted",
+        resourceData: [],
+      });
       return;
     }
 
-    response.status(200).json({ message: 'All comments deleted', resourceData: [] });
+    response.status(200).json({
+      message: "All comment requests deleted successfully",
+      resourceData: [],
+    });
+  }
+);
+
+// DEV ROUTE
+// @desc   Create new comment requests in bulk
+// @route  POST api/v1/actions/general/comment
+// @access Private
+const createNewCommentsBulkHandler = expressAsyncHandler(
+  async (
+    request: CreateNewCommentsBulkRequest,
+    response: Response<ResourceRequestServerResponse<CommentDocument>>
+  ) => {
+    const { commentSchemas } = request.body;
+
+    const commentDocuments = await Promise.all(
+      commentSchemas.map(async (commentSchema) => {
+        const commentDocument = await createNewCommentService(commentSchema);
+        return commentDocument;
+      })
+    );
+
+    // filter out any null documents
+    const filteredCommentDocuments = commentDocuments.filter(
+      removeUndefinedAndNullValues
+    );
+
+    // check if any documents were created
+    if (filteredCommentDocuments.length === 0) {
+      response.status(400).json({
+        message: "Comment requests creation failed",
+        resourceData: [],
+      });
+      return;
+    }
+
+    const uncreatedDocumentsAmount =
+      commentSchemas.length - filteredCommentDocuments.length;
+
+    response.status(201).json({
+      message: `Successfully created ${
+        filteredCommentDocuments.length
+      } Comment requests.${
+        uncreatedDocumentsAmount
+          ? ` ${uncreatedDocumentsAmount} documents were not created.`
+          : ""
+      }}`,
+      resourceData: filteredCommentDocuments,
+    });
+  }
+);
+
+// DEV ROUTE
+// @desc   Update Comments in bulk
+// @route  PATCH api/v1/actions/general/comment
+// @access Private
+const updateCommentsBulkHandler = expressAsyncHandler(
+  async (
+    request: UpdateCommentsBulkRequest,
+    response: Response<ResourceRequestServerResponse<CommentDocument>>
+  ) => {
+    const { commentFields } = request.body;
+
+    const updatedComments = await Promise.all(
+      commentFields.map(async (commentField) => {
+        const {
+          documentUpdate: { fields, updateOperator },
+          commentId,
+        } = commentField;
+
+        const updatedComment = await updateCommentByIdService({
+          _id: commentId,
+          fields,
+          updateOperator,
+        });
+
+        return updatedComment;
+      })
+    );
+
+    // filter out any comments that were not created
+    const successfullyCreatedComments = updatedComments.filter(
+      removeUndefinedAndNullValues
+    );
+
+    if (successfullyCreatedComments.length === 0) {
+      response.status(400).json({
+        message: "Could not create any Comments",
+        resourceData: [],
+      });
+      return;
+    }
+
+    response.status(201).json({
+      message: `Successfully created ${successfullyCreatedComments.length} Comments. ${
+        commentFields.length - successfullyCreatedComments.length
+      } Comments failed to be created.`,
+      resourceData: successfullyCreatedComments,
+    });
   }
 );
 
 export {
   createNewCommentHandler,
-  createNewCommentsBulkHandler,
-  deleteACommentHandler,
-  deleteAllCommentsHandler,
-  getQueriedCommentsByParentResourceIdHandler,
   getQueriedCommentsHandler,
-  getQueriedCommentsByUserHandler,
-  updateCommentByIdHandler,
+  getCommentsByUserHandler,
+  updateCommentStatusByIdHandler,
+  getQueriedCommentsByParentResourceIdHandler,
   getCommentByIdHandler,
+  deleteCommentHandler,
+  deleteAllCommentsHandler,
+  createNewCommentsBulkHandler,
+  updateCommentsBulkHandler,
 };

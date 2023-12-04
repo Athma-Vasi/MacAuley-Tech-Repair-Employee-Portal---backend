@@ -1,22 +1,35 @@
-import { Types } from 'mongoose';
+import type { Types } from "mongoose";
+import type { DeleteResult } from "mongodb";
+import type { CommentDocument, CommentSchema } from "./comment.model";
 
-import type { DeleteResult } from 'mongodb';
-import type { CommentDocument, CommentSchema } from './comment.model';
-import type {
+import { CommentModel } from "./comment.model";
+import {
   DatabaseResponse,
   DatabaseResponseNullable,
   QueriedResourceGetRequestServiceInput,
   QueriedTotalResourceGetRequestServiceInput,
-} from '../../types';
+  UpdateDocumentByIdServiceInput,
+} from "../../types";
 
-import { CommentModel } from './comment.model';
-
-async function createNewCommentService(commentObj: CommentSchema): Promise<CommentDocument> {
+async function getCommentByIdService(
+  commentId: Types.ObjectId | string
+): DatabaseResponseNullable<CommentDocument> {
   try {
-    const newComment = await CommentModel.create(commentObj);
-    return newComment;
+    const comment = await CommentModel.findById(commentId).lean().exec();
+    return comment;
   } catch (error: any) {
-    throw new Error(error, { cause: 'createNewCommentService' });
+    throw new Error(error, { cause: "getCommentByIdService" });
+  }
+}
+
+async function createNewCommentService(
+  commentSchema: CommentSchema
+): Promise<CommentDocument> {
+  try {
+    const comment = await CommentModel.create(commentSchema);
+    return comment;
+  } catch (error: any) {
+    throw new Error(error, { cause: "createNewCommentService" });
   }
 }
 
@@ -26,10 +39,10 @@ async function getQueriedCommentsService({
   options = {},
 }: QueriedResourceGetRequestServiceInput<CommentDocument>): DatabaseResponse<CommentDocument> {
   try {
-    const comments = await CommentModel.find(filter, projection, options).lean().exec();
-    return comments;
+    const comment = await CommentModel.find(filter, projection, options).lean().exec();
+    return comment;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getQueriedCommentsService' });
+    throw new Error(error, { cause: "getQueriedCommentsService" });
   }
 }
 
@@ -40,7 +53,7 @@ async function getQueriedTotalCommentsService({
     const totalComments = await CommentModel.countDocuments(filter).lean().exec();
     return totalComments;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getQueriedTotalCommentsService' });
+    throw new Error(error, { cause: "getQueriedTotalCommentsService" });
   }
 }
 
@@ -53,67 +66,61 @@ async function getQueriedCommentsByUserService({
     const comments = await CommentModel.find(filter, projection, options).lean().exec();
     return comments;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getQueriedCommentsByUserService' });
-  }
-}
-
-async function getCommentByIdService(
-  commentId: string | Types.ObjectId
-): DatabaseResponseNullable<CommentDocument> {
-  try {
-    const comment = await CommentModel.findById(commentId).lean().exec();
-    return comment;
-  } catch (error: any) {
-    throw new Error(error, { cause: 'getCommentByIdService' });
+    throw new Error(error, { cause: "getQueriedCommentsByUserService" });
   }
 }
 
 async function updateCommentByIdService({
-  commentId,
-  fieldsToUpdate,
-}: {
-  commentId: string | Types.ObjectId;
-  fieldsToUpdate: Partial<CommentSchema>;
-}) {
+  _id,
+  fields,
+  updateOperator,
+}: UpdateDocumentByIdServiceInput<CommentDocument>) {
+  const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
+  const updateObject = JSON.parse(updateString);
+
   try {
-    const updatedComment = await CommentModel.findByIdAndUpdate(
-      commentId,
-      { ...fieldsToUpdate },
-      { new: true }
-    )
+    const comment = await CommentModel.findByIdAndUpdate(_id, updateObject, {
+      new: true,
+    })
       .lean()
       .exec();
-    return updatedComment;
+    return comment;
   } catch (error: any) {
-    throw new Error(error, { cause: 'updateCommentByIdService' });
+    throw new Error(error, { cause: "updateCommentStatusByIdService" });
   }
 }
 
-async function deleteACommentService(commentId: string): Promise<DeleteResult> {
+async function deleteCommentByIdService(
+  commentId: Types.ObjectId | string
+): Promise<DeleteResult> {
   try {
-    const deleteResult = await CommentModel.deleteOne({ _id: commentId }).lean().exec();
-    return deleteResult;
+    const deletedResult = await CommentModel.deleteOne({
+      _id: commentId,
+    })
+      .lean()
+      .exec();
+    return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: 'deleteACommentService' });
+    throw new Error(error, { cause: "deleteCommentByIdService" });
   }
 }
 
 async function deleteAllCommentsService(): Promise<DeleteResult> {
   try {
-    const deleteResult = await CommentModel.deleteMany({}).lean().exec();
-    return deleteResult;
+    const deletedResult = await CommentModel.deleteMany({}).lean().exec();
+    return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: 'deleteAllCommentsService' });
+    throw new Error(error, { cause: "deleteAllCommentsService" });
   }
 }
 
 export {
-  createNewCommentService,
   getCommentByIdService,
-  deleteACommentService,
-  deleteAllCommentsService,
+  createNewCommentService,
   getQueriedCommentsService,
-  getQueriedCommentsByUserService,
   getQueriedTotalCommentsService,
+  getQueriedCommentsByUserService,
+  deleteCommentByIdService,
+  deleteAllCommentsService,
   updateCommentByIdService,
 };

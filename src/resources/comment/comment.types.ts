@@ -1,11 +1,14 @@
-import type { Types } from 'mongoose';
-import type { RequestAfterJWTVerification } from '../auth';
-import type { Department, JobPosition, UserRoles } from '../user';
-import { GetQueriedResourceRequest } from '../../types';
-import { CommentDocument } from './comment.model';
+import type { Types } from "mongoose";
+import type { RequestAfterJWTVerification } from "../auth";
+import type { UserRoles } from "../user";
+import {
+  DocumentUpdateOperation,
+  GetQueriedResourceByUserRequest,
+  GetQueriedResourceRequest,
+} from "../../types";
+import { CommentDocument, CommentSchema } from "./comment.model";
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
-
 interface CreateNewCommentRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {
@@ -13,64 +16,12 @@ interface CreateNewCommentRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    comment: {
-      firstName: string;
-      middleName: string;
-      lastName: string;
-      department: Department;
-      jobPosition: JobPosition;
-      profilePictureUrl: string;
-      parentResourceId: Types.ObjectId;
-      comment: string;
-      quotedUsername: string;
-      quotedComment: string;
-      likesCount: number;
-      dislikesCount: number;
-      reportsCount: number;
-      isFeatured: boolean;
-      isDeleted: boolean;
-      likedUserIds: Types.ObjectId[];
-      dislikedUserIds: Types.ObjectId[];
-      reportedUserIds: Types.ObjectId[];
-    };
+    sessionId: Types.ObjectId;
+    commentSchema: CommentSchema;
   };
 }
 
-// DEV ROUTE
-interface CreateNewCommentsBulkRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-    comments: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-      firstName: string;
-      middleName: string;
-      lastName: string;
-      department: Department;
-      jobPosition: JobPosition;
-      profilePictureUrl: string;
-      parentResourceId: Types.ObjectId;
-      comment: string;
-      quotedUsername: string;
-      quotedComment: string;
-      likesCount: number;
-      dislikesCount: number;
-      reportsCount: number;
-      isFeatured: boolean;
-      isDeleted: boolean;
-      likedUserIds: Types.ObjectId[];
-      dislikedUserIds: Types.ObjectId[];
-      reportedUserIds: Types.ObjectId[];
-    }[];
-  };
-}
-
-interface DeleteACommentRequest extends RequestAfterJWTVerification {
+interface DeleteCommentRequest extends RequestAfterJWTVerification {
   params: {
     commentId: string;
   };
@@ -78,11 +29,10 @@ interface DeleteACommentRequest extends RequestAfterJWTVerification {
 
 type DeleteAllCommentsRequest = RequestAfterJWTVerification;
 
-type GetQueriedCommentsRequest = GetQueriedResourceRequest;
-
-type GetQueriedCommentsByParentResourceIdRequest = GetQueriedResourceRequest;
-
-type GetQueriedCommentsByUserRequest = GetQueriedResourceRequest;
+type GetQueriedCommentsByUserRequest = GetQueriedResourceByUserRequest;
+interface GetQueriedCommentsByParentResourceIdRequest extends GetQueriedResourceRequest {
+  params: { parentResourceId: string };
+}
 
 interface GetCommentByIdRequest extends RequestAfterJWTVerification {
   body: {
@@ -91,6 +41,7 @@ interface GetCommentByIdRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
+    sessionId: Types.ObjectId;
   };
   params: { commentId: string };
 }
@@ -102,19 +53,52 @@ interface UpdateCommentByIdRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    fieldsToUpdate: Partial<CommentDocument>;
+    sessionId: Types.ObjectId;
+    documentUpdate: DocumentUpdateOperation<CommentDocument>;
   };
   params: { commentId: string };
+}
+
+type GetQueriedCommentsRequest = GetQueriedResourceRequest;
+
+// DEV ROUTE
+interface CreateNewCommentsBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    commentSchemas: CommentSchema[];
+  };
+}
+
+// DEV ROUTE
+interface UpdateCommentsBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    commentFields: {
+      commentId: Types.ObjectId;
+      documentUpdate: DocumentUpdateOperation<CommentDocument>;
+    }[];
+  };
 }
 
 export type {
   CreateNewCommentRequest,
   CreateNewCommentsBulkRequest,
-  DeleteACommentRequest,
   DeleteAllCommentsRequest,
-  GetQueriedCommentsRequest,
-  GetQueriedCommentsByUserRequest,
-  GetQueriedCommentsByParentResourceIdRequest,
-  UpdateCommentByIdRequest,
+  DeleteCommentRequest,
   GetCommentByIdRequest,
+  GetQueriedCommentsByParentResourceIdRequest,
+  GetQueriedCommentsByUserRequest,
+  GetQueriedCommentsRequest,
+  UpdateCommentByIdRequest,
+  UpdateCommentsBulkRequest,
 };
