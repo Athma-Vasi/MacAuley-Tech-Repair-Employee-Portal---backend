@@ -95,15 +95,6 @@ const createNewProductReviewsBulkHandler = expressAsyncHandler(
       removeUndefinedAndNullValues
     );
 
-    // check if any productReviews were created
-    if (successfullyCreatedProductReviews.length === productReviewSchemas.length) {
-      response.status(201).json({
-        message: `Successfully created ${successfullyCreatedProductReviews.length} Product Reviews`,
-        resourceData: successfullyCreatedProductReviews,
-      });
-      return;
-    }
-
     if (successfullyCreatedProductReviews.length === 0) {
       response.status(400).json({
         message: "Could not create any Product Reviews",
@@ -114,8 +105,10 @@ const createNewProductReviewsBulkHandler = expressAsyncHandler(
 
     response.status(201).json({
       message: `Successfully created ${
+        successfullyCreatedProductReviews.length
+      } Product Reviews. ${
         productReviewSchemas.length - successfullyCreatedProductReviews.length
-      } Product Reviews`,
+      } Product Reviews failed to be created.`,
       resourceData: successfullyCreatedProductReviews,
     });
     return;
@@ -123,7 +116,7 @@ const createNewProductReviewsBulkHandler = expressAsyncHandler(
 );
 
 // DEV ROUTE
-// @desc   Add field to all productReviews
+// @desc   Update productReviews in bulk
 // @route  PATCH /api/v1/product-review/dev
 // @access Private
 const updateProductReviewsBulkHandler = expressAsyncHandler(
@@ -155,15 +148,6 @@ const updateProductReviewsBulkHandler = expressAsyncHandler(
       removeUndefinedAndNullValues
     );
 
-    // check if any productReviews were created
-    if (successfullyCreatedProductReviews.length === productReviewFields.length) {
-      response.status(201).json({
-        message: `Successfully created ${successfullyCreatedProductReviews.length} Product Reviews`,
-        resourceData: successfullyCreatedProductReviews,
-      });
-      return;
-    }
-
     if (successfullyCreatedProductReviews.length === 0) {
       response.status(400).json({
         message: "Could not create any Product Reviews",
@@ -174,11 +158,12 @@ const updateProductReviewsBulkHandler = expressAsyncHandler(
 
     response.status(201).json({
       message: `Successfully created ${
+        successfullyCreatedProductReviews.length
+      } Product Reviews. ${
         productReviewFields.length - successfullyCreatedProductReviews.length
-      } Product Reviews`,
+      } Product Reviews failed to be created.`,
       resourceData: successfullyCreatedProductReviews,
     });
-    return;
   }
 );
 
@@ -215,11 +200,7 @@ const getQueriedProductReviewsHandler = expressAsyncHandler(
   async (
     request: GetQueriedProductReviewsRequest,
     response: Response<
-      GetQueriedResourceRequestServerResponse<
-        ProductReviewDocument & {
-          productCategoryDocs: Record<string, any>[];
-        }
-      >
+      GetQueriedResourceRequestServerResponse<ProductReviewServerResponseDocument>
     >
   ) => {
     let { newQueryFlag, totalDocuments } = request.body;

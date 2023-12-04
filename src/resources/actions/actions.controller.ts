@@ -1,70 +1,73 @@
-import expressAsyncHandler from 'express-async-handler';
+import expressAsyncHandler from "express-async-handler";
 import {
   ActionsResourceRequestServerResponse,
   GetAllActionsResourceRequest,
   GetUsersActionsResourceRequest,
-} from './actions.types';
-import { Response } from 'express';
+} from "./actions.types";
+import { Response } from "express";
 import {
   AddressChangeDocument,
   getQueriedAddressChangesByUserService,
   getQueriedAddressChangesService,
-} from './company/addressChange';
-import { QueryObjectParsedWithDefaults } from '../../types';
-import { FilterQuery, QueryOptions } from 'mongoose';
+} from "./company/addressChange";
+import { QueryObjectParsedWithDefaults } from "../../types";
+import { FilterQuery, QueryOptions } from "mongoose";
 import {
   ExpenseClaimDocument,
   getQueriedExpenseClaimsByUserService,
   getQueriedExpenseClaimsService,
-} from './company/expenseClaim';
+} from "./company/expenseClaim";
 import {
   RequestResourceDocument,
   getQueriedRequestResourceByUserService,
   getQueriedRequestResourceService,
-} from './company/requestResource';
+} from "./company/requestResource";
 import {
   LeaveRequestDocument,
   getQueriedLeaveRequestsByUserService,
   getQueriedLeaveRequestsService,
-} from './company/leaveRequest';
+} from "./company/leaveRequest";
 import {
   BenefitsDocument,
   getQueriedBenefitsByUserService,
   getQueriedBenefitsService,
-} from './company/benefits';
+} from "./company/benefit";
 import {
   EndorsementDocument,
   getQueriedEndorsementsByUserService,
   getQueriedEndorsementsService,
-} from './general/endorsement';
+} from "./general/endorsement";
 import {
   PrinterIssueDocument,
   getQueriedPrinterIssuesByUserService,
   getQueriedPrinterIssuesService,
-} from './general/printerIssue';
+} from "./general/printerIssue";
 import {
   AnonymousRequestDocument,
   getQueriedAnonymousRequestsService,
-} from './general/anonymousRequest';
+} from "./general/anonymousRequest";
 import {
   RefermentDocument,
   getQueriedRefermentsByUserService,
   getQueriedRefermentsService,
-} from './general/referment';
-import { AnnouncementDocument, getQueriedAnnouncementsService } from './outreach/announcement';
+} from "./general/referment";
+import {
+  AnnouncementDocument,
+  getQueriedAnnouncementsService,
+} from "./outreach/announcement";
 import {
   SurveyBuilderDocument,
   getQueriedSurveysByUserService,
   getQueriedSurveysService,
-} from './outreach/survey';
+} from "./outreach/survey";
 import {
   EventCreatorDocument,
   getQueriedEventsByUserService,
   getQueriedEventsService,
-} from './outreach/event';
-import { RepairNoteDocument, getQueriedRepairNotesService } from '../repairNote';
-import { UserDocument, getQueriedUsersService } from '../user';
-import { getAllUsersService } from '../user/user.service';
+} from "./outreach/event";
+import { RepairNoteDocument, getQueriedRepairNotesService } from "../repairNote";
+import { UserDocument, getQueriedUsersService } from "../user";
+import { getAllUsersService } from "../user/user.service";
 
 // @desc  get all actions company data
 // @route  /actions/home
@@ -74,15 +77,16 @@ const getAllActionsDocumentsHandler = expressAsyncHandler(
     request: GetAllActionsResourceRequest,
     response: Response<ActionsResourceRequestServerResponse>
   ) => {
-    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+    const { filter, projection, options } =
+      request.query as QueryObjectParsedWithDefaults;
 
     const awaitingApprovalFilter = {
       ...filter,
-      repairStatus: { $in: ['Awaiting approval'] },
+      repairStatus: { $in: ["Awaiting approval"] },
     };
     const pendingFilter = {
       ...filter,
-      requestStatus: { $in: ['pending'] },
+      requestStatus: { $in: ["pending"] },
     };
     const surveyOptions = {
       limit: 5,
@@ -207,7 +211,7 @@ const getAllActionsDocumentsHandler = expressAsyncHandler(
     ] = actionsData;
 
     response.status(200).json({
-      message: 'Successfully retrieved all actions data',
+      message: "Successfully retrieved all actions data",
       repairNoteData: repairNoteData.filter((data) => data),
       companyData: {
         addressChangeData: addressChangeData.filter((data) => data),
@@ -245,13 +249,14 @@ const getUsersActionsDocumentsHandler = expressAsyncHandler(
     const {
       userInfo: { userId },
     } = request.body;
-    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+    const { filter, projection, options } =
+      request.query as QueryObjectParsedWithDefaults;
 
     // assign userId to filter
     const filterWithUserId = { ...filter, userId };
     const pendingFilter = {
       ...filterWithUserId,
-      requestStatus: { $in: ['pending'] },
+      requestStatus: { $in: ["pending"] },
     };
 
     const surveyOptions = {
@@ -373,7 +378,7 @@ const getUsersActionsDocumentsHandler = expressAsyncHandler(
     ] = actionsCompanyData;
 
     response.status(200).json({
-      message: 'Successfully retrieved all company data',
+      message: "Successfully retrieved all company data",
       repairNoteData: repairNoteData.filter((data) => data),
       companyData: {
         addressChangeData: addressChangeData.filter((data) => data),

@@ -6,8 +6,8 @@
  * Imports
  */
 
-import { BenefitsModel } from './benefits.model';
-import { benefitsRouter } from './benefits.routes';
+import { BenefitModel } from "./benefit.model";
+import { benefitsRouter } from "./benefit.routes";
 import {
   createNewBenefitsHandler,
   deleteABenefitHandler,
@@ -15,7 +15,7 @@ import {
   getAllBenefitsHandler,
   getBenefitByIdHandler,
   getQueriedBenefitsByUserHandler,
-} from './benefits.controller';
+} from "./benefit.controller";
 import {
   createNewBenefitService,
   deleteABenefitService,
@@ -23,14 +23,14 @@ import {
   getQueriedBenefitsService,
   getBenefitByIdService,
   getQueriedBenefitsByUserService,
-} from './benefits.service';
+} from "./benefit.service";
 
 import type {
-  BenefitsDocument,
-  BenefitsSchema,
+  BenefitDocument,
+  BenefitSchema,
   BenefitsPlanKind,
   Currency,
-} from './benefits.model';
+} from "./benefit.model";
 import type {
   CreateNewBenefitsRequest,
   DeleteABenefitRequest,
@@ -38,14 +38,14 @@ import type {
   GetQueriedBenefitsRequest,
   GetBenefitsByIdRequest,
   GetQueriedBenefitsByUserRequest,
-} from './benefits.types';
+} from "./benefit.types";
 
 /**
  * Exports
  */
 
 export {
-  BenefitsModel,
+  BenefitModel,
   benefitsRouter,
   createNewBenefitsHandler,
   deleteABenefitHandler,
@@ -62,8 +62,8 @@ export {
 };
 
 export type {
-  BenefitsDocument,
-  BenefitsSchema,
+  BenefitDocument,
+  BenefitSchema,
   BenefitsPlanKind,
   Currency,
   CreateNewBenefitsRequest,

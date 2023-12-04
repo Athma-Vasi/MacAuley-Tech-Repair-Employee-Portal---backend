@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router } from "express";
 import {
   createNewAddressChangeHandler,
   getQueriedAddressChangesHandler,
@@ -7,25 +7,34 @@ import {
   deleteAnAddressChangeHandler,
   deleteAllAddressChangesHandler,
   updateAddressChangeStatusByIdHandler,
-} from './addressChange.controller';
-import { assignQueryDefaults, verifyRoles } from '../../../../middlewares';
-import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
+  createNewAddressChangesBulkHandler,
+  updateAddressChangesBulkHandler,
+} from "./addressChange.controller";
+import { assignQueryDefaults } from "../../../../middlewares";
+import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../../constants";
 
 const addressChangeRouter = Router();
 
-addressChangeRouter.use(verifyRoles());
-
 addressChangeRouter
-  .route('/')
+  .route("/")
   .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedAddressChangesHandler)
-  .post(createNewAddressChangeHandler)
-  .delete(deleteAllAddressChangesHandler);
+  .post(createNewAddressChangeHandler);
 
-addressChangeRouter.route('/user').get(getAddressChangesByUserHandler);
+addressChangeRouter.route("/delete-all").delete(deleteAllAddressChangesHandler);
 
 addressChangeRouter
-  .route('/:addressChangeId')
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getAddressChangeByIdHandler)
+  .route("/user")
+  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getAddressChangesByUserHandler);
+
+// DEV ROUTES
+addressChangeRouter
+  .route("/dev")
+  .post(createNewAddressChangesBulkHandler)
+  .patch(updateAddressChangesBulkHandler);
+
+addressChangeRouter
+  .route("/:addressChangeId")
+  .get(getAddressChangeByIdHandler)
   .delete(deleteAnAddressChangeHandler)
   .patch(updateAddressChangeStatusByIdHandler);
 

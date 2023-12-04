@@ -1,22 +1,22 @@
-import { Types } from 'mongoose';
-import { RequestAfterJWTVerification } from '../auth';
-import { UserDocument, UserRoles } from '../user';
-import { AddressChangeDocument } from './company/addressChange';
-import { ExpenseClaimDocument } from './company/expenseClaim';
-import { RequestResourceDocument } from './company/requestResource';
-import { LeaveRequestDocument } from './company/leaveRequest';
-import { BenefitsDocument } from './company/benefits';
-import { GetQueriedResourceRequest } from '../../types';
-import { EndorsementDocument } from './general/endorsement';
-import { PrinterIssueDocument } from './general/printerIssue';
-import { AnonymousRequestDocument } from './general/anonymousRequest';
-import { RefermentDocument } from './general/referment';
-import { AnnouncementDocument } from './outreach/announcement';
-import { SurveyBuilderDocument } from './outreach/survey';
-import { EventCreatorDocument } from './outreach/event';
-import { RepairNoteDocument } from '../repairNote';
+import { Types } from "mongoose";
+import { RequestAfterJWTVerification } from "../auth";
+import { UserDocument, UserRoles } from "../user";
+import { AddressChangeDocument } from "./company/addressChange";
+import { ExpenseClaimDocument } from "./company/expenseClaim";
+import { RequestResourceDocument } from "./company/requestResource";
+import { LeaveRequestDocument } from "./company/leaveRequest";
+import { BenefitsDocument } from "./company/benefit";
+import { GetQueriedResourceRequest } from "../../types";
+import { EndorsementDocument } from "./general/endorsement";
+import { PrinterIssueDocument } from "./general/printerIssue";
+import { AnonymousRequestDocument } from "./general/anonymousRequest";
+import { RefermentDocument } from "./general/referment";
+import { AnnouncementDocument } from "./outreach/announcement";
+import { SurveyBuilderDocument } from "./outreach/survey";
+import { EventCreatorDocument } from "./outreach/event";
+import { RepairNoteDocument } from "../repairNote";
 
-type Action = 'company' | 'general' | 'outreach' | 'dashboard';
+type Action = "company" | "general" | "outreach" | "dashboard";
 
 type GetAllActionsResourceRequest = GetQueriedResourceRequest;
 

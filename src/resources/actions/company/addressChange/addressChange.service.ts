@@ -1,32 +1,38 @@
-import type { Types } from 'mongoose';
-import type { DeleteResult } from 'mongodb';
-import type { AddressChangeDocument, AddressChangeSchema } from './addressChange.model';
+import type { Types } from "mongoose";
+import type { DeleteResult } from "mongodb";
+import type { AddressChangeDocument, AddressChangeSchema } from "./addressChange.model";
 
-import { AddressChangeModel } from './addressChange.model';
+import { AddressChangeModel } from "./addressChange.model";
 import {
   DatabaseResponse,
+  DatabaseResponseNullable,
   QueriedResourceGetRequestServiceInput,
   QueriedTotalResourceGetRequestServiceInput,
   RequestStatus,
-} from '../../../../types';
+  UpdateDocumentByIdServiceInput,
+} from "../../../../types";
 
-async function getAddressChangeByIdService(addressChangeId: Types.ObjectId | string) {
+async function getAddressChangeByIdService(
+  addressChangeId: Types.ObjectId | string
+): DatabaseResponseNullable<AddressChangeDocument> {
   try {
-    const addressChange = await AddressChangeModel.findById(addressChangeId).lean().exec();
+    const addressChange = await AddressChangeModel.findById(addressChangeId)
+      .lean()
+      .exec();
     return addressChange;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getAddressChangeByIdService' });
+    throw new Error(error, { cause: "getAddressChangeByIdService" });
   }
 }
 
 async function createNewAddressChangeService(
-  input: AddressChangeSchema
+  addressChangeSchema: AddressChangeSchema
 ): Promise<AddressChangeDocument> {
   try {
-    const addressChange = await AddressChangeModel.create(input);
+    const addressChange = await AddressChangeModel.create(addressChangeSchema);
     return addressChange;
   } catch (error: any) {
-    throw new Error(error, { cause: 'createNewAddressChangeService' });
+    throw new Error(error, { cause: "createNewAddressChangeService" });
   }
 }
 
@@ -36,10 +42,12 @@ async function getQueriedAddressChangesService({
   options = {},
 }: QueriedResourceGetRequestServiceInput<AddressChangeDocument>): DatabaseResponse<AddressChangeDocument> {
   try {
-    const addressChange = await AddressChangeModel.find(filter, projection, options).lean().exec();
+    const addressChange = await AddressChangeModel.find(filter, projection, options)
+      .lean()
+      .exec();
     return addressChange;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getQueriedAddressChangesService' });
+    throw new Error(error, { cause: "getQueriedAddressChangesService" });
   }
 }
 
@@ -47,10 +55,12 @@ async function getQueriedTotalAddressChangesService({
   filter = {},
 }: QueriedTotalResourceGetRequestServiceInput<AddressChangeDocument>): Promise<number> {
   try {
-    const totalAddressChanges = await AddressChangeModel.countDocuments(filter).lean().exec();
+    const totalAddressChanges = await AddressChangeModel.countDocuments(filter)
+      .lean()
+      .exec();
     return totalAddressChanges;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getQueriedTotalAddressChangesService' });
+    throw new Error(error, { cause: "getQueriedTotalAddressChangesService" });
   }
 }
 
@@ -60,32 +70,32 @@ async function getQueriedAddressChangesByUserService({
   options = {},
 }: QueriedResourceGetRequestServiceInput<AddressChangeDocument>): DatabaseResponse<AddressChangeDocument> {
   try {
-    const addressChanges = await AddressChangeModel.find(filter, projection, options).lean().exec();
+    const addressChanges = await AddressChangeModel.find(filter, projection, options)
+      .lean()
+      .exec();
     return addressChanges;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getQueriedAddressChangesByUserService' });
+    throw new Error(error, { cause: "getQueriedAddressChangesByUserService" });
   }
 }
 
-async function updateAddressChangeStatusByIdService({
-  addressChangeId,
-  requestStatus,
-}: {
-  addressChangeId: Types.ObjectId | string;
-  requestStatus: RequestStatus;
-}) {
+async function updateAddressChangeByIdService({
+  _id,
+  fields,
+  updateOperator,
+}: UpdateDocumentByIdServiceInput<AddressChangeDocument>) {
+  const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
+  const updateObject = JSON.parse(updateString);
+
   try {
-    const addressChange = await AddressChangeModel.findByIdAndUpdate(
-      addressChangeId,
-      { requestStatus },
-      { new: true }
-    )
-      .select(['-__v', '-action', '-category'])
+    const addressChange = await AddressChangeModel.findByIdAndUpdate(_id, updateObject, {
+      new: true,
+    })
       .lean()
       .exec();
     return addressChange;
   } catch (error: any) {
-    throw new Error(error, { cause: 'updateAddressChangeStatusByIdService' });
+    throw new Error(error, { cause: "updateAddressChangeStatusByIdService" });
   }
 }
 
@@ -98,7 +108,7 @@ async function deleteAddressChangeByIdService(
       .exec();
     return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: 'deleteAddressChangeByIdService' });
+    throw new Error(error, { cause: "deleteAddressChangeByIdService" });
   }
 }
 
@@ -107,7 +117,7 @@ async function deleteAllAddressChangesService(): Promise<DeleteResult> {
     const deletedResult = await AddressChangeModel.deleteMany({}).lean().exec();
     return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: 'deleteAllAddressChangesService' });
+    throw new Error(error, { cause: "deleteAllAddressChangesService" });
   }
 }
 
@@ -119,5 +129,5 @@ export {
   getQueriedAddressChangesByUserService,
   deleteAddressChangeByIdService,
   deleteAllAddressChangesService,
-  updateAddressChangeStatusByIdService,
+  updateAddressChangeByIdService,
 };

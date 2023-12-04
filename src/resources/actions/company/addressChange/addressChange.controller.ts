@@ -1,18 +1,20 @@
-import expressAsyncHandler from 'express-async-handler';
-import type { DeleteResult } from 'mongodb';
+import expressAsyncHandler from "express-async-handler";
+import type { DeleteResult } from "mongodb";
 
-import type { AddressChangeDocument, AddressChangeSchema } from './addressChange.model';
-import type { Response } from 'express';
+import type { AddressChangeDocument, AddressChangeSchema } from "./addressChange.model";
+import type { Response } from "express";
 import type {
   CreateNewAddressChangeRequest,
   DeleteAnAddressChangeRequest,
   DeleteAllAddressChangesRequest,
   GetQueriedAddressChangesByUserRequest,
   GetAddressChangeByIdRequest,
-  UpdateAddressChangeStatusByIdRequest,
-} from './addressChange.types';
+  UpdateAddressChangeByIdRequest,
+  CreateNewAddressChangesBulkRequest,
+  UpdateAddressChangesBulkRequest,
+} from "./addressChange.types";
 
-import { getUserByIdService, updateUserByIdService } from '../../../user';
+import { getUserByIdService, updateUserByIdService } from "../../../user";
 import {
   createNewAddressChangeService,
   deleteAddressChangeByIdService,
@@ -21,19 +23,20 @@ import {
   getQueriedAddressChangesByUserService,
   getQueriedTotalAddressChangesService,
   getQueriedAddressChangesService,
-  updateAddressChangeStatusByIdService,
-} from './addressChange.service';
-import { FilterQuery, QueryOptions } from 'mongoose';
+  updateAddressChangeByIdService,
+} from "./addressChange.service";
+import { FilterQuery, QueryOptions } from "mongoose";
 
 import {
   GetQueriedResourceRequest,
   GetQueriedResourceRequestServerResponse,
   QueryObjectParsedWithDefaults,
   ResourceRequestServerResponse,
-} from '../../../../types';
+} from "../../../../types";
+import { removeUndefinedAndNullValues } from "../../../../utils";
 
 // @desc   Create a new address change request
-// @route  POST /address-change
+// @route  POST api/v1/company/address-change
 // @access Private
 const createNewAddressChangeHandler = expressAsyncHandler(
   async (
@@ -42,38 +45,41 @@ const createNewAddressChangeHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      addressChange: {
+      addressChangeFields: {
         contactNumber,
-        acknowledgement,
         addressLine,
         city,
         country,
         postalCode,
         province,
         state,
+        acknowledgement,
       },
     } = request.body;
-
-    // user must acknowledge that new address is correct
-    if (!acknowledgement) {
-      response.status(400).json({ message: 'Acknowledgement is required', resourceData: [] });
-      return;
-    }
 
     // check if user exists
     const userExists = await getUserByIdService(userId);
     if (!userExists) {
-      response.status(404).json({ message: 'User does not exist', resourceData: [] });
+      response.status(404).json({ message: "User does not exist", resourceData: [] });
       return;
     }
 
     const { address: oldAddress } = userExists;
-    const newAddress = { contactNumber, addressLine, city, country, postalCode, province, state };
+    const newAddress = {
+      contactNumber,
+      addressLine,
+      city,
+      country,
+      postalCode,
+      province,
+      state,
+    };
     // check if new address is the same as current address
     if (JSON.stringify(newAddress) === JSON.stringify(oldAddress)) {
-      response
-        .status(400)
-        .json({ message: 'New address is the same as current address', resourceData: [] });
+      response.status(400).json({
+        message: "New address is the same as current address",
+        resourceData: [],
+      });
       return;
     }
 
@@ -81,8 +87,6 @@ const createNewAddressChangeHandler = expressAsyncHandler(
     const newAddressChange: AddressChangeSchema = {
       userId,
       username,
-      action: 'company',
-      category: 'address change',
       contactNumber,
       addressLine,
       city,
@@ -91,27 +95,28 @@ const createNewAddressChangeHandler = expressAsyncHandler(
       province,
       state,
       acknowledgement,
-      requestStatus: 'pending',
+      requestStatus: "pending",
     };
 
     // save new address change object to database
     const createdAddressChange = await createNewAddressChangeService(newAddressChange);
     if (!createdAddressChange) {
-      response
-        .status(400)
-        .json({ message: 'New address change request creation failed', resourceData: [] });
+      response.status(400).json({
+        message: "New address change request creation failed",
+        resourceData: [],
+      });
       return;
     }
 
     response.status(201).json({
-      message: 'Address change request created successfully',
+      message: "Address change request created successfully",
       resourceData: [createdAddressChange],
     });
   }
 );
 
 // @desc   Get all address changes
-// @route  GET /address-change
+// @route  GET api/v1/company/address-change
 // @access Private/Admin/Manager
 const getQueriedAddressChangesHandler = expressAsyncHandler(
   async (
@@ -120,7 +125,8 @@ const getQueriedAddressChangesHandler = expressAsyncHandler(
   ) => {
     let { newQueryFlag, totalDocuments } = request.body;
 
-    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+    const { filter, projection, options } =
+      request.query as QueryObjectParsedWithDefaults;
 
     // only perform a countDocuments scan if a new query is being made
     if (newQueryFlag) {
@@ -138,7 +144,7 @@ const getQueriedAddressChangesHandler = expressAsyncHandler(
 
     if (!addressChange.length) {
       response.status(200).json({
-        message: 'No address changes that match query parameters were found',
+        message: "No address changes that match query parameters were found",
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
@@ -147,7 +153,7 @@ const getQueriedAddressChangesHandler = expressAsyncHandler(
     }
 
     response.status(200).json({
-      message: 'Address changes found successfully',
+      message: "Address changes found successfully",
       pages: Math.ceil(totalDocuments / Number(options?.limit)),
       totalDocuments,
       resourceData: addressChange,
@@ -156,7 +162,7 @@ const getQueriedAddressChangesHandler = expressAsyncHandler(
 );
 
 // @desc   Get all address change requests by user
-// @route  GET /address-change/user
+// @route  GET api/v1/company/address-change/user
 // @access Private
 const getAddressChangesByUserHandler = expressAsyncHandler(
   async (
@@ -170,7 +176,8 @@ const getAddressChangesByUserHandler = expressAsyncHandler(
 
     let { newQueryFlag, totalDocuments } = request.body;
 
-    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+    const { filter, projection, options } =
+      request.query as QueryObjectParsedWithDefaults;
 
     // assign userId to filter
     const filterWithUserId = { ...filter, userId };
@@ -190,14 +197,14 @@ const getAddressChangesByUserHandler = expressAsyncHandler(
     });
     if (addressChanges.length === 0) {
       response.status(200).json({
-        message: 'No address change requests found',
+        message: "No address change requests found",
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
       });
     } else {
       response.status(200).json({
-        message: 'Address change requests found successfully',
+        message: "Address change requests found successfully",
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
         totalDocuments,
         resourceData: addressChanges,
@@ -207,75 +214,50 @@ const getAddressChangesByUserHandler = expressAsyncHandler(
 );
 
 // @desc   Update address change status
-// @route  PATCH /address-change/:addressChangeId
+// @route  PATCH api/v1/company/address-change/:addressChangeId
 // @access Private/Admin/Manager
 const updateAddressChangeStatusByIdHandler = expressAsyncHandler(
   async (
-    request: UpdateAddressChangeStatusByIdRequest,
+    request: UpdateAddressChangeByIdRequest,
     response: Response<ResourceRequestServerResponse<AddressChangeDocument>>
   ) => {
     const { addressChangeId } = request.params;
     const {
-      addressChange: { requestStatus },
+      documentUpdate: { fields, updateOperator },
       userInfo: { userId },
     } = request.body;
 
     // check if user exists
     const userExists = await getUserByIdService(userId);
     if (!userExists) {
-      response.status(404).json({ message: 'User does not exist', resourceData: [] });
-      return;
-    }
-
-    // check if addressChange request exists
-    const addressChangeExists = await getAddressChangeByIdService(addressChangeId);
-    if (!addressChangeExists) {
-      response.status(404).json({ message: 'Address change does not exist', resourceData: [] });
-      return;
-    }
-
-    // grab the new address from addressChange request
-    const { addressLine, city, province, postalCode, state, country } = addressChangeExists;
-    const newAddress = { addressLine, city, province, postalCode, state, country };
-
-    // create new user object with new address
-    const newUserObject = {
-      ...userExists,
-      userId,
-      address: newAddress,
-    };
-    // update user's address
-    const updatedUser = await updateUserByIdService({
-      userId,
-      userFields: newUserObject,
-    });
-    if (!updatedUser) {
-      response.status(400).json({ message: 'User update failed', resourceData: [] });
+      response.status(404).json({ message: "User does not exist", resourceData: [] });
       return;
     }
 
     // update addressChange request status
-    const updatedAddressChange = await updateAddressChangeStatusByIdService({
-      addressChangeId,
-      requestStatus,
+    const updatedAddressChange = await updateAddressChangeByIdService({
+      _id: addressChangeId,
+      fields,
+      updateOperator,
     });
+
     if (!updatedAddressChange) {
       response.status(400).json({
-        message: 'Address change request status update failed. Please try again!',
+        message: "Address change request status update failed. Please try again!",
         resourceData: [],
       });
       return;
     }
 
     response.status(200).json({
-      message: 'Address change request status updated successfully',
+      message: "Address change request status updated successfully",
       resourceData: [updatedAddressChange],
     });
   }
 );
 
 // @desc   Get an address change request
-// @route  GET /address-change/:addressChangeId
+// @route  GET api/v1/company/address-change/:addressChangeId
 // @access Private
 const getAddressChangeByIdHandler = expressAsyncHandler(
   async (
@@ -286,66 +268,167 @@ const getAddressChangeByIdHandler = expressAsyncHandler(
     // get addressChange request by id
     const addressChange = await getAddressChangeByIdService(addressChangeId);
     if (!addressChange) {
-      response.status(404).json({ message: 'AddressChange request not found', resourceData: [] });
-    } else {
-      response.status(200).json({
-        message: 'Address change request found successfully',
-        resourceData: [addressChange],
-      });
+      response
+        .status(404)
+        .json({ message: "AddressChange request not found", resourceData: [] });
+      return;
     }
+
+    response.status(200).json({
+      message: "Address change request found successfully",
+      resourceData: [addressChange],
+    });
   }
 );
 
 // @desc   Delete an address change request by its id
-// @route  DELETE /address-change/:addressChangeId
+// @route  DELETE api/v1/company/address-change/:addressChangeId
 // @access Private
 const deleteAnAddressChangeHandler = expressAsyncHandler(
   async (request: DeleteAnAddressChangeRequest, response: Response) => {
-    const addressChangeId = request.params.addressChangeId;
+    const { addressChangeId } = request.params;
 
-    // check addressChange request exists
-    const addressChangeExists = await getAddressChangeByIdService(addressChangeId);
-    if (!addressChangeExists) {
-      response
-        .status(404)
-        .json({ message: 'Address change request does not exist', resourceData: [] });
+    // delete addressChange request by id
+    const deletedResult: DeleteResult = await deleteAddressChangeByIdService(
+      addressChangeId
+    );
+
+    if (!deletedResult.deletedCount) {
+      response.status(400).json({
+        message: "Address change request could not be deleted",
+        resourceData: [],
+      });
       return;
     }
 
-    // delete addressChange request by id
-    const deletedResult: DeleteResult = await deleteAddressChangeByIdService(addressChangeId);
-    if (deletedResult.deletedCount === 1) {
-      response.status(200).json({
-        message: 'AddressChange request deleted successfully',
-        resourceData: [],
-      });
-    } else {
-      response.status(400).json({
-        message: 'Address change request could not be deleted',
-        resourceData: [],
-      });
-    }
+    response.status(200).json({
+      message: "AddressChange request deleted successfully",
+      resourceData: [],
+    });
   }
 );
 
 // @desc    Delete all address change requests
-// @route   DELETE /address-change
+// @route   DELETE api/v1/company/address-change/delete-all
 // @access  Private
 const deleteAllAddressChangesHandler = expressAsyncHandler(
   async (_request: DeleteAllAddressChangesRequest, response: Response) => {
-    // delete all addressChange requests
     const deletedResult: DeleteResult = await deleteAllAddressChangesService();
-    if (deletedResult.deletedCount > 0) {
-      response.status(200).json({
-        message: 'All address change requests deleted successfully',
-        resourceData: [],
-      });
-    } else {
+
+    if (!deletedResult.deletedCount) {
       response.status(400).json({
-        message: 'All address change requests could not be deleted',
+        message: "All address change requests could not be deleted",
         resourceData: [],
       });
+      return;
     }
+
+    response.status(200).json({
+      message: "All address change requests deleted successfully",
+      resourceData: [],
+    });
+  }
+);
+
+// DEV ROUTE
+// @desc   Create new address change requests in bulk
+// @route  POST api/v1/company/address-change/dev
+// @access Private
+const createNewAddressChangesBulkHandler = expressAsyncHandler(
+  async (
+    request: CreateNewAddressChangesBulkRequest,
+    response: Response<ResourceRequestServerResponse<AddressChangeDocument>>
+  ) => {
+    const { addressChangeSchemas } = request.body;
+
+    const addressChangeDocuments = await Promise.all(
+      addressChangeSchemas.map(async (addressChangeSchema) => {
+        const addressChangeDocument = await createNewAddressChangeService(
+          addressChangeSchema
+        );
+        return addressChangeDocument;
+      })
+    );
+
+    // filter out any null documents
+    const filteredAddressChangeDocuments = addressChangeDocuments.filter(
+      removeUndefinedAndNullValues
+    );
+
+    // check if any documents were created
+    if (filteredAddressChangeDocuments.length === 0) {
+      response.status(400).json({
+        message: "Address change requests creation failed",
+        resourceData: [],
+      });
+      return;
+    }
+
+    const uncreatedDocumentsAmount =
+      addressChangeSchemas.length - filteredAddressChangeDocuments.length;
+
+    response.status(201).json({
+      message: `Successfully created ${
+        filteredAddressChangeDocuments.length
+      } Address Change Requests.${
+        uncreatedDocumentsAmount
+          ? ` ${uncreatedDocumentsAmount} documents were not created.`
+          : ""
+      }}`,
+      resourceData: filteredAddressChangeDocuments,
+    });
+  }
+);
+
+// DEV ROUTE
+// @desc   Update AddressChanges in bulk
+// @route  PATCH api/v1/company/address-change/dev
+// @access Private
+const updateAddressChangesBulkHandler = expressAsyncHandler(
+  async (
+    request: UpdateAddressChangesBulkRequest,
+    response: Response<ResourceRequestServerResponse<AddressChangeDocument>>
+  ) => {
+    const { addressChangeFields } = request.body;
+
+    const updatedAddressChanges = await Promise.all(
+      addressChangeFields.map(async (addressChangeField) => {
+        const {
+          documentUpdate: { fields, updateOperator },
+          addressChangeId,
+        } = addressChangeField;
+
+        const updatedAddressChange = await updateAddressChangeByIdService({
+          _id: addressChangeId,
+          fields,
+          updateOperator,
+        });
+
+        return updatedAddressChange;
+      })
+    );
+
+    // filter out any addressChanges that were not created
+    const successfullyCreatedAddressChanges = updatedAddressChanges.filter(
+      removeUndefinedAndNullValues
+    );
+
+    if (successfullyCreatedAddressChanges.length === 0) {
+      response.status(400).json({
+        message: "Could not create any Address Changes",
+        resourceData: [],
+      });
+      return;
+    }
+
+    response.status(201).json({
+      message: `Successfully created ${
+        successfullyCreatedAddressChanges.length
+      } Address Changes. ${
+        addressChangeFields.length - successfullyCreatedAddressChanges.length
+      } Address Changes failed to be created.`,
+      resourceData: successfullyCreatedAddressChanges,
+    });
   }
 );
 
@@ -357,4 +440,6 @@ export {
   deleteAnAddressChangeHandler,
   deleteAllAddressChangesHandler,
   updateAddressChangeStatusByIdHandler,
+  createNewAddressChangesBulkHandler,
+  updateAddressChangesBulkHandler,
 };

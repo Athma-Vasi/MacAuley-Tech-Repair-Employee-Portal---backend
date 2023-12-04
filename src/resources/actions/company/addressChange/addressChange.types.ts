@@ -1,5 +1,5 @@
-import type { Types } from 'mongoose';
-import type { RequestAfterJWTVerification } from '../../../auth';
+import type { Types } from "mongoose";
+import type { RequestAfterJWTVerification } from "../../../auth";
 import type {
   Country,
   PhoneNumber,
@@ -7,8 +7,14 @@ import type {
   Province,
   StatesUS,
   UserRoles,
-} from '../../../user';
-import { GetQueriedResourceRequest, RequestStatus } from '../../../../types';
+} from "../../../user";
+import {
+  DocumentUpdateOperation,
+  GetQueriedResourceByUserRequest,
+  GetQueriedResourceRequest,
+  RequestStatus,
+} from "../../../../types";
+import { AddressChangeDocument, AddressChangeSchema } from "./addressChange.model";
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 interface CreateNewAddressChangeRequest extends RequestAfterJWTVerification {
@@ -18,17 +24,8 @@ interface CreateNewAddressChangeRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    addressChange: {
-      contactNumber: PhoneNumber;
-      addressLine: string;
-      city: string;
-      province?: Province;
-      state?: StatesUS;
-      postalCode: PostalCode;
-      country: Country;
-      acknowledgement: boolean;
-      requestStatus: RequestStatus;
-    };
+    sessionId: Types.ObjectId;
+    addressChangeFields: Omit<AddressChangeSchema, "userId" | "username">;
   };
 }
 
@@ -40,7 +37,7 @@ interface DeleteAnAddressChangeRequest extends RequestAfterJWTVerification {
 
 type DeleteAllAddressChangesRequest = RequestAfterJWTVerification;
 
-type GetQueriedAddressChangesByUserRequest = GetQueriedResourceRequest;
+type GetQueriedAddressChangesByUserRequest = GetQueriedResourceByUserRequest;
 
 interface GetAddressChangeByIdRequest extends RequestAfterJWTVerification {
   body: {
@@ -49,27 +46,54 @@ interface GetAddressChangeByIdRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    addressChangeId: string;
+    sessionId: Types.ObjectId;
   };
+  params: { addressChangeId: string };
 }
 
-interface UpdateAddressChangeStatusByIdRequest extends RequestAfterJWTVerification {
+interface UpdateAddressChangeByIdRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {
       userId: Types.ObjectId;
       username: string;
       roles: UserRoles;
     };
-    addressChange: {
-      requestStatus: RequestStatus;
-    };
+    sessionId: Types.ObjectId;
+    documentUpdate: DocumentUpdateOperation<AddressChangeDocument>;
   };
-  params: {
-    addressChangeId: string;
-  };
+  params: { addressChangeId: string };
 }
 
 type GetQueriedAddressChangesRequest = GetQueriedResourceRequest;
+
+// DEV ROUTE
+interface CreateNewAddressChangesBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    addressChangeSchemas: AddressChangeSchema[];
+  };
+}
+
+// DEV ROUTE
+interface UpdateAddressChangesBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    addressChangeFields: {
+      addressChangeId: Types.ObjectId;
+      documentUpdate: DocumentUpdateOperation<AddressChangeDocument>;
+    }[];
+  };
+}
 
 export type {
   CreateNewAddressChangeRequest,
@@ -78,5 +102,7 @@ export type {
   GetQueriedAddressChangesByUserRequest,
   GetAddressChangeByIdRequest,
   GetQueriedAddressChangesRequest,
-  UpdateAddressChangeStatusByIdRequest,
+  UpdateAddressChangeByIdRequest,
+  CreateNewAddressChangesBulkRequest,
+  UpdateAddressChangesBulkRequest,
 };
