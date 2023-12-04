@@ -1,75 +1,82 @@
 /**
- * This barrel file is used to import/export benefits model, router, types, handlers and services
+ * This barrel file is used to import/export benefit model, router, types, handlers and services
  */
 
 /**
  * Imports
  */
-
 import { BenefitModel } from "./benefit.model";
-import { benefitsRouter } from "./benefit.routes";
+import { benefitRouter } from "./benefit.routes";
 import {
-  createNewBenefitsHandler,
-  deleteABenefitHandler,
-  deleteAllBenefitsByUserHandler,
-  getAllBenefitsHandler,
+  createNewBenefitHandler,
+  createNewBenefitsBulkHandler,
+  deleteAllBenefitsHandler,
+  deleteBenefitHandler,
   getBenefitByIdHandler,
-  getQueriedBenefitsByUserHandler,
+  getBenefitsByUserHandler,
+  getQueriedBenefitsHandler,
+  updateBenefitStatusByIdHandler,
+  updateBenefitsBulkHandler,
 } from "./benefit.controller";
 import {
   createNewBenefitService,
-  deleteABenefitService,
-  deleteAllBenefitsByUserService,
-  getQueriedBenefitsService,
+  deleteBenefitByIdService,
+  deleteAllBenefitsService,
   getBenefitByIdService,
   getQueriedBenefitsByUserService,
+  getQueriedBenefitsService,
+  getQueriedTotalBenefitsService,
+  updateBenefitByIdService,
 } from "./benefit.service";
 
+import type { BenefitDocument, BenefitSchema } from "./benefit.model";
 import type {
-  BenefitDocument,
-  BenefitSchema,
-  BenefitsPlanKind,
-  Currency,
-} from "./benefit.model";
-import type {
-  CreateNewBenefitsRequest,
-  DeleteABenefitRequest,
-  DeleteAllBenefitsByUserRequest,
-  GetQueriedBenefitsRequest,
-  GetBenefitsByIdRequest,
+  CreateNewBenefitRequest,
+  CreateNewBenefitsBulkRequest,
+  DeleteAllBenefitsRequest,
+  DeleteAnBenefitRequest,
+  GetBenefitByIdRequest,
   GetQueriedBenefitsByUserRequest,
+  GetQueriedBenefitsRequest,
+  UpdateBenefitByIdRequest,
+  UpdateBenefitsBulkRequest,
 } from "./benefit.types";
 
 /**
  * Exports
  */
-
 export {
   BenefitModel,
-  benefitsRouter,
-  createNewBenefitsHandler,
-  deleteABenefitHandler,
-  deleteAllBenefitsByUserHandler,
-  getAllBenefitsHandler,
-  getBenefitByIdHandler,
-  getQueriedBenefitsByUserHandler,
+  benefitRouter,
+  createNewBenefitHandler,
   createNewBenefitService,
-  deleteABenefitService,
-  deleteAllBenefitsByUserService,
-  getQueriedBenefitsService,
+  createNewBenefitsBulkHandler,
+  deleteBenefitByIdService,
+  deleteAllBenefitsHandler,
+  deleteAllBenefitsService,
+  deleteBenefitHandler,
+  getBenefitByIdHandler,
   getBenefitByIdService,
+  getBenefitsByUserHandler,
   getQueriedBenefitsByUserService,
+  getQueriedBenefitsHandler,
+  getQueriedBenefitsService,
+  getQueriedTotalBenefitsService,
+  updateBenefitByIdService,
+  updateBenefitStatusByIdHandler,
+  updateBenefitsBulkHandler,
 };
 
 export type {
   BenefitDocument,
   BenefitSchema,
-  BenefitsPlanKind,
-  Currency,
-  CreateNewBenefitsRequest,
-  DeleteABenefitRequest,
-  DeleteAllBenefitsByUserRequest,
-  GetQueriedBenefitsRequest,
-  GetBenefitsByIdRequest,
+  CreateNewBenefitRequest,
+  CreateNewBenefitsBulkRequest,
+  DeleteAllBenefitsRequest,
+  DeleteAnBenefitRequest,
+  GetBenefitByIdRequest,
   GetQueriedBenefitsByUserRequest,
+  GetQueriedBenefitsRequest,
+  UpdateBenefitByIdRequest,
+  UpdateBenefitsBulkRequest,
 };

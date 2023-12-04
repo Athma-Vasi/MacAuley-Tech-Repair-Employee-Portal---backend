@@ -5,35 +5,42 @@
 /**
  * Imports
  */
-import { AddressChangeModel } from './addressChange.model';
-import { addressChangeRouter } from './addressChange.routes';
+import { AddressChangeModel } from "./addressChange.model";
+import { addressChangeRouter } from "./addressChange.routes";
 import {
   createNewAddressChangeHandler,
-  deleteAnAddressChangeHandler,
+  createNewAddressChangesBulkHandler,
   deleteAllAddressChangesHandler,
-  getAddressChangesByUserHandler,
+  deleteAnAddressChangeHandler,
   getAddressChangeByIdHandler,
+  getAddressChangesByUserHandler,
   getQueriedAddressChangesHandler,
-} from './addressChange.controller';
+  updateAddressChangeStatusByIdHandler,
+  updateAddressChangesBulkHandler,
+} from "./addressChange.controller";
 import {
   createNewAddressChangeService,
   deleteAddressChangeByIdService,
   deleteAllAddressChangesService,
-  getQueriedAddressChangesService,
-  getQueriedTotalAddressChangesService,
   getAddressChangeByIdService,
   getQueriedAddressChangesByUserService,
-} from './addressChange.service';
+  getQueriedAddressChangesService,
+  getQueriedTotalAddressChangesService,
+  updateAddressChangeByIdService,
+} from "./addressChange.service";
 
-import type { AddressChangeDocument, AddressChangeSchema } from './addressChange.model';
+import type { AddressChangeDocument, AddressChangeSchema } from "./addressChange.model";
 import type {
   CreateNewAddressChangeRequest,
-  DeleteAnAddressChangeRequest,
-  GetQueriedAddressChangesByUserRequest,
-  GetAddressChangeByIdRequest,
+  CreateNewAddressChangesBulkRequest,
   DeleteAllAddressChangesRequest,
+  DeleteAnAddressChangeRequest,
+  GetAddressChangeByIdRequest,
+  GetQueriedAddressChangesByUserRequest,
   GetQueriedAddressChangesRequest,
-} from './addressChange.types';
+  UpdateAddressChangeByIdRequest,
+  UpdateAddressChangesBulkRequest,
+} from "./addressChange.types";
 
 /**
  * Exports
@@ -42,27 +49,34 @@ export {
   AddressChangeModel,
   addressChangeRouter,
   createNewAddressChangeHandler,
-  deleteAnAddressChangeHandler,
-  deleteAllAddressChangesHandler,
-  getAddressChangesByUserHandler,
-  getQueriedAddressChangesHandler,
-  getAddressChangeByIdHandler,
   createNewAddressChangeService,
+  createNewAddressChangesBulkHandler,
   deleteAddressChangeByIdService,
+  deleteAllAddressChangesHandler,
   deleteAllAddressChangesService,
+  deleteAnAddressChangeHandler,
+  getAddressChangeByIdHandler,
   getAddressChangeByIdService,
+  getAddressChangesByUserHandler,
   getQueriedAddressChangesByUserService,
+  getQueriedAddressChangesHandler,
   getQueriedAddressChangesService,
   getQueriedTotalAddressChangesService,
+  updateAddressChangeByIdService,
+  updateAddressChangeStatusByIdHandler,
+  updateAddressChangesBulkHandler,
 };
 
 export type {
   AddressChangeDocument,
   AddressChangeSchema,
   CreateNewAddressChangeRequest,
-  DeleteAnAddressChangeRequest,
-  GetQueriedAddressChangesByUserRequest,
-  GetAddressChangeByIdRequest,
+  CreateNewAddressChangesBulkRequest,
   DeleteAllAddressChangesRequest,
+  DeleteAnAddressChangeRequest,
+  GetAddressChangeByIdRequest,
+  GetQueriedAddressChangesByUserRequest,
   GetQueriedAddressChangesRequest,
+  UpdateAddressChangeByIdRequest,
+  UpdateAddressChangesBulkRequest,
 };
