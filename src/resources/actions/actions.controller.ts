@@ -56,12 +56,12 @@ import {
   getQueriedAnnouncementsService,
 } from "./outreach/announcement";
 import {
-  SurveyBuilderDocument,
+  SurveyDocument,
   getQueriedSurveysByUserService,
   getQueriedSurveysService,
 } from "./outreach/survey";
 import {
-  EventCreatorDocument,
+  EventDocument,
   getQueriedEventsByUserService,
   getQueriedEventsService,
 } from "./outreach/event";
@@ -173,15 +173,15 @@ const getAllActionsDocumentsHandler = expressAsyncHandler(
       }),
       // survey
       getQueriedSurveysService({
-        filter: filter as FilterQuery<SurveyBuilderDocument> | undefined,
-        projection: projection as QueryOptions<SurveyBuilderDocument>,
-        options: surveyOptions as QueryOptions<SurveyBuilderDocument>,
+        filter: filter as FilterQuery<SurveyDocument> | undefined,
+        projection: projection as QueryOptions<SurveyDocument>,
+        options: surveyOptions as QueryOptions<SurveyDocument>,
       }),
       // event
       getQueriedEventsService({
-        filter: filter as FilterQuery<EventCreatorDocument> | undefined,
-        projection: projection as QueryOptions<EventCreatorDocument>,
-        options: eventOptions as QueryOptions<EventCreatorDocument>,
+        filter: filter as FilterQuery<EventDocument> | undefined,
+        projection: projection as QueryOptions<EventDocument>,
+        options: eventOptions as QueryOptions<EventDocument>,
       }),
 
       // employees
@@ -338,15 +338,15 @@ const getUsersActionsDocumentsHandler = expressAsyncHandler(
       }),
       // survey
       getQueriedSurveysByUserService({
-        filter: filter as FilterQuery<SurveyBuilderDocument> | undefined,
-        projection: projection as QueryOptions<SurveyBuilderDocument>,
-        options: surveyOptions as QueryOptions<SurveyBuilderDocument>,
+        filter: filter as FilterQuery<SurveyDocument> | undefined,
+        projection: projection as QueryOptions<SurveyDocument>,
+        options: surveyOptions as QueryOptions<SurveyDocument>,
       }),
       // event
       getQueriedEventsByUserService({
-        filter: filter as FilterQuery<EventCreatorDocument> | undefined,
-        projection: projection as QueryOptions<EventCreatorDocument>,
-        options: eventOptions as QueryOptions<EventCreatorDocument>,
+        filter: filter as FilterQuery<EventDocument> | undefined,
+        projection: projection as QueryOptions<EventDocument>,
+        options: eventOptions as QueryOptions<EventDocument>,
       }),
       // employees
       getQueriedUsersService({

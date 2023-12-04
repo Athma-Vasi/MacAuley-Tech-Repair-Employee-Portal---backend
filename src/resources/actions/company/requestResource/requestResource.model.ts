@@ -1,7 +1,8 @@
 import { Schema, Types, model } from "mongoose";
 import type { Department } from "../../../user";
-import type { Urgency } from "../../actions/general/printerIssue";
+
 import { RequestStatus } from "../../../../types";
+import { Urgency } from "../../general/printerIssue";
 
 type RequestResourceKind = "Hardware" | "Software" | "Access" | "Other";
 

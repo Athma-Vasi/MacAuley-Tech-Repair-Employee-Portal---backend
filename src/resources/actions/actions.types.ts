@@ -12,8 +12,8 @@ import { PrinterIssueDocument } from "./general/printerIssue";
 import { AnonymousRequestDocument } from "./general/anonymousRequest";
 import { RefermentDocument } from "./general/referment";
 import { AnnouncementDocument } from "./outreach/announcement";
-import { SurveyBuilderDocument } from "./outreach/survey";
-import { EventCreatorDocument } from "./outreach/event";
+import { SurveyDocument } from "./outreach/survey";
+import { EventDocument } from "./outreach/event";
 import { RepairNoteDocument } from "../repairNote";
 
 type Action = "company" | "general" | "outreach" | "dashboard";
@@ -49,8 +49,8 @@ type ActionsResourceRequestServerResponse = {
   };
   outreachData: {
     announcementData: AnnouncementDocument[];
-    surveyData: SurveyBuilderDocument[];
-    eventData: EventCreatorDocument[];
+    surveyData: SurveyDocument[];
+    eventData: EventDocument[];
   };
   employeeData: UserDocument[];
 };
