@@ -5,27 +5,29 @@
 /**
  * Imports
  */
-import { RepairNoteModel } from './repairNote.model';
-import { repairNoteRouter } from './repairNote.routes';
+import { RepairNoteModel } from "./repairNote.model";
+import { repairNoteRouter } from "./repairNote.routes";
 import {
   createNewRepairNoteHandler,
-  deleteRepairNoteByIdHandler,
+  createNewRepairNotesBulkHandler,
   deleteAllRepairNotesHandler,
+  deleteRepairNoteHandler,
   getQueriedRepairNotesHandler,
   getRepairNoteByIdHandler,
-  getQueriedRepairNotesByUserHandler,
-  updateRepairNoteByIdHandler,
-} from './repairNote.controller';
+  getRepairNotesByUserHandler,
+  updateRepairNoteStatusByIdHandler,
+  updateRepairNotesBulkHandler,
+} from "./repairNote.controller";
 import {
   createNewRepairNoteService,
-  getRepairNoteByIdService,
-  deleteRepairNoteByIdService,
   deleteAllRepairNotesService,
-  getQueriedRepairNotesService,
+  deleteRepairNoteByIdService,
   getQueriedRepairNotesByUserService,
-  updateRepairNoteByIdService,
+  getQueriedRepairNotesService,
   getQueriedTotalRepairNotesService,
-} from './repairNote.service';
+  getRepairNoteByIdService,
+  updateRepairNoteByIdService,
+} from "./repairNote.service";
 
 import type {
   RepairNoteDocument,
@@ -35,17 +37,20 @@ import type {
   PartsNeeded,
   RepairNoteInitialSchema,
   RepairNoteFinalSchema,
-} from './repairNote.model';
+} from "./repairNote.model";
 
 import type {
   CreateNewRepairNoteRequest,
-  DeleteARepairNoteRequest,
+  CreateNewRepairNotesBulkRequest,
   DeleteAllRepairNotesRequest,
-  GetRepairNoteByIdRequest,
+  DeleteRepairNoteRequest,
+  GetQueriedRepairNotesByParentResourceIdRequest,
   GetQueriedRepairNotesByUserRequest,
-  UpdateRepairNoteByIdRequest,
   GetQueriedRepairNotesRequest,
-} from './repairNote.types';
+  GetRepairNoteByIdRequest,
+  UpdateRepairNoteByIdRequest,
+  UpdateRepairNotesBulkRequest,
+} from "./repairNote.types";
 
 /**
  * Exports
@@ -55,35 +60,40 @@ export {
   RepairNoteModel,
   repairNoteRouter,
   createNewRepairNoteHandler,
-  deleteRepairNoteByIdHandler,
+  createNewRepairNotesBulkHandler,
   deleteAllRepairNotesHandler,
+  deleteRepairNoteHandler,
   getQueriedRepairNotesHandler,
   getRepairNoteByIdHandler,
-  getQueriedRepairNotesByUserHandler,
-  updateRepairNoteByIdHandler,
+  getRepairNotesByUserHandler,
+  updateRepairNoteStatusByIdHandler,
+  updateRepairNotesBulkHandler,
   createNewRepairNoteService,
-  getRepairNoteByIdService,
-  deleteRepairNoteByIdService,
   deleteAllRepairNotesService,
-  getQueriedRepairNotesService,
+  deleteRepairNoteByIdService,
   getQueriedRepairNotesByUserService,
-  updateRepairNoteByIdService,
+  getQueriedRepairNotesService,
   getQueriedTotalRepairNotesService,
+  getRepairNoteByIdService,
+  updateRepairNoteByIdService,
 };
 
 export type {
-  RepairNoteSchema,
   RepairNoteDocument,
+  RepairNoteSchema,
+  RepairStatus,
   RequiredRepairs,
   PartsNeeded,
-  RepairStatus,
   RepairNoteInitialSchema,
   RepairNoteFinalSchema,
   CreateNewRepairNoteRequest,
-  DeleteARepairNoteRequest,
+  CreateNewRepairNotesBulkRequest,
   DeleteAllRepairNotesRequest,
-  GetRepairNoteByIdRequest,
+  DeleteRepairNoteRequest,
+  GetQueriedRepairNotesByParentResourceIdRequest,
   GetQueriedRepairNotesByUserRequest,
-  UpdateRepairNoteByIdRequest,
   GetQueriedRepairNotesRequest,
+  GetRepairNoteByIdRequest,
+  UpdateRepairNoteByIdRequest,
+  UpdateRepairNotesBulkRequest,
 };

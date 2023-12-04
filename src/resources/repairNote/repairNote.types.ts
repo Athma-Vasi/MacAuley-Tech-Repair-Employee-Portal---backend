@@ -1,9 +1,14 @@
-import type { Types } from 'mongoose';
-import type { RequestAfterJWTVerification } from '../auth';
-import { UserRoles } from '../user';
-import { RepairNoteSchema } from './repairNote.model';
-import { GetQueriedResourceRequest } from '../../types';
+import type { Types } from "mongoose";
+import type { RequestAfterJWTVerification } from "../auth";
+import type { UserRoles } from "../user";
+import {
+  DocumentUpdateOperation,
+  GetQueriedResourceByUserRequest,
+  GetQueriedResourceRequest,
+} from "../../types";
+import { RepairNoteDocument, RepairNoteSchema } from "./repairNote.model";
 
+// RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 interface CreateNewRepairNoteRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {
@@ -11,11 +16,12 @@ interface CreateNewRepairNoteRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    repairNote: Omit<RepairNoteSchema, 'workOrderId'>;
+    sessionId: Types.ObjectId;
+    repairNoteFields: Omit<RepairNoteSchema, "userId" | "username">;
   };
 }
 
-interface DeleteARepairNoteRequest extends RequestAfterJWTVerification {
+interface DeleteRepairNoteRequest extends RequestAfterJWTVerification {
   params: {
     repairNoteId: string;
   };
@@ -23,9 +29,11 @@ interface DeleteARepairNoteRequest extends RequestAfterJWTVerification {
 
 type DeleteAllRepairNotesRequest = RequestAfterJWTVerification;
 
-type GetQueriedRepairNotesByUserRequest = GetQueriedResourceRequest;
-
-type GetQueriedRepairNotesRequest = GetQueriedResourceRequest;
+type GetQueriedRepairNotesByUserRequest = GetQueriedResourceByUserRequest;
+interface GetQueriedRepairNotesByParentResourceIdRequest
+  extends GetQueriedResourceRequest {
+  params: { parentResourceId: string };
+}
 
 interface GetRepairNoteByIdRequest extends RequestAfterJWTVerification {
   body: {
@@ -34,6 +42,7 @@ interface GetRepairNoteByIdRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
+    sessionId: Types.ObjectId;
   };
   params: { repairNoteId: string };
 }
@@ -45,17 +54,52 @@ interface UpdateRepairNoteByIdRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    repairNote: Partial<RepairNoteSchema>;
+    sessionId: Types.ObjectId;
+    documentUpdate: DocumentUpdateOperation<RepairNoteDocument>;
   };
   params: { repairNoteId: string };
 }
 
+type GetQueriedRepairNotesRequest = GetQueriedResourceRequest;
+
+// DEV ROUTE
+interface CreateNewRepairNotesBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    repairNoteSchemas: RepairNoteSchema[];
+  };
+}
+
+// DEV ROUTE
+interface UpdateRepairNotesBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    repairNoteFields: {
+      repairNoteId: Types.ObjectId;
+      documentUpdate: DocumentUpdateOperation<RepairNoteDocument>;
+    }[];
+  };
+}
+
 export type {
   CreateNewRepairNoteRequest,
-  DeleteARepairNoteRequest,
+  CreateNewRepairNotesBulkRequest,
   DeleteAllRepairNotesRequest,
-  GetQueriedRepairNotesByUserRequest,
+  DeleteRepairNoteRequest,
   GetRepairNoteByIdRequest,
+  GetQueriedRepairNotesByParentResourceIdRequest,
+  GetQueriedRepairNotesByUserRequest,
   GetQueriedRepairNotesRequest,
   UpdateRepairNoteByIdRequest,
+  UpdateRepairNotesBulkRequest,
 };
