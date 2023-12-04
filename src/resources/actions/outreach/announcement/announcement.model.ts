@@ -1,6 +1,6 @@
-import { Schema, model, Types } from 'mongoose';
-import type { Action } from '../../../actions';
-import type { ActionsOutreach } from '../../outreach';
+import { Schema, model, Types } from "mongoose";
+import type { Action } from "../../../actions";
+import type { ActionsOutreach } from "..";
 
 type RatingEmotion = {
   estatic: number;
@@ -42,48 +42,48 @@ const announcementSchema = new Schema<AnnouncementSchema>(
   {
     userId: {
       type: Schema.Types.ObjectId,
-      required: [true, 'User is required'],
-      ref: 'User',
+      required: [true, "User is required"],
+      ref: "User",
       index: true,
     },
     username: {
       type: String,
-      required: [true, 'Username is required'],
+      required: [true, "Username is required"],
     },
     action: {
       type: String,
-      required: [true, 'Action is required'],
+      required: [true, "Action is required"],
     },
     category: {
       type: String,
-      required: [true, 'Category is required'],
+      required: [true, "Category is required"],
     },
 
     title: {
       type: String,
-      required: [true, 'Title is required'],
+      required: [true, "Title is required"],
     },
     author: {
       type: String,
-      required: [true, 'Author is required'],
+      required: [true, "Author is required"],
     },
     bannerImageSrc: {
       type: String,
       required: false,
-      default: '',
+      default: "",
     },
     bannerImageAlt: {
       type: String,
       required: false,
-      default: '',
+      default: "",
     },
     article: {
       type: [String],
-      required: [true, 'Article is required'],
+      required: [true, "Article is required"],
     },
     timeToRead: {
       type: Number,
-      required: [true, 'TimeToRead is required'],
+      required: [true, "TimeToRead is required"],
     },
     ratingResponse: {
       type: Object,
@@ -112,15 +112,15 @@ const announcementSchema = new Schema<AnnouncementSchema>(
 
 // text index for searching
 announcementSchema.index({
-  title: 'text',
-  article: 'text',
-  username: 'text',
-  author: 'text',
-  bannerImageAlt: 'text',
-  bannerImageSrc: 'text',
+  title: "text",
+  article: "text",
+  username: "text",
+  author: "text",
+  bannerImageAlt: "text",
+  bannerImageSrc: "text",
 });
 
-const AnnouncementModel = model<AnnouncementDocument>('Announcement', announcementSchema);
+const AnnouncementModel = model<AnnouncementDocument>("Announcement", announcementSchema);
 
 export { AnnouncementModel };
 export type { AnnouncementSchema, AnnouncementDocument, RatingEmotion, RatingResponse };

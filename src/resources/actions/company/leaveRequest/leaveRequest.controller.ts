@@ -35,7 +35,7 @@ import { removeUndefinedAndNullValues } from "../../../../utils";
 import { getUserByIdService } from "../../../user";
 
 // @desc   Create a new leave request
-// @route  POST api/v1/company/leave-request
+// @route  POST api/v1/actions/company/leave-request
 // @access Private
 const createNewLeaveRequestHandler = expressAsyncHandler(
   async (
@@ -72,7 +72,7 @@ const createNewLeaveRequestHandler = expressAsyncHandler(
 );
 
 // @desc   Get all leaveRequests
-// @route  GET api/v1/company/leave-request
+// @route  GET api/v1/actions/company/leave-request
 // @access Private/Admin/Manager
 const getQueriedLeaveRequestsHandler = expressAsyncHandler(
   async (
@@ -118,7 +118,7 @@ const getQueriedLeaveRequestsHandler = expressAsyncHandler(
 );
 
 // @desc   Get all leaveRequest requests by user
-// @route  GET api/v1/company/leave-request/user
+// @route  GET api/v1/actions/company/leave-request/user
 // @access Private
 const getLeaveRequestsByUserHandler = expressAsyncHandler(
   async (
@@ -172,7 +172,7 @@ const getLeaveRequestsByUserHandler = expressAsyncHandler(
 );
 
 // @desc   Update leaveRequest status
-// @route  PATCH api/v1/company/leave-request/:leaveRequestId
+// @route  PATCH api/v1/actions/company/leave-request/:leaveRequestId
 // @access Private/Admin/Manager
 const updateLeaveRequestStatusByIdHandler = expressAsyncHandler(
   async (
@@ -215,7 +215,7 @@ const updateLeaveRequestStatusByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Get an leaveRequest request
-// @route  GET api/v1/company/leave-request/:leaveRequestId
+// @route  GET api/v1/actions/company/leave-request/:leaveRequestId
 // @access Private
 const getLeaveRequestByIdHandler = expressAsyncHandler(
   async (
@@ -239,7 +239,7 @@ const getLeaveRequestByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Delete an leaveRequest request by its id
-// @route  DELETE api/v1/company/leave-request/:leaveRequestId
+// @route  DELETE api/v1/actions/company/leave-request/:leaveRequestId
 // @access Private
 const deleteLeaveRequestHandler = expressAsyncHandler(
   async (request: DeleteLeaveRequestRequest, response: Response) => {
@@ -266,7 +266,7 @@ const deleteLeaveRequestHandler = expressAsyncHandler(
 );
 
 // @desc    Delete all leaveRequest requests
-// @route   DELETE api/v1/company/leave-request/delete-all
+// @route   DELETE api/v1/actions/company/leave-request/delete-all
 // @access  Private
 const deleteAllLeaveRequestsHandler = expressAsyncHandler(
   async (_request: DeleteAllLeaveRequestsRequest, response: Response) => {
@@ -289,7 +289,7 @@ const deleteAllLeaveRequestsHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Create new leaveRequest requests in bulk
-// @route  POST api/v1/company/leave-request/dev
+// @route  POST api/v1/actions/company/leave-request/dev
 // @access Private
 const createNewLeaveRequestsBulkHandler = expressAsyncHandler(
   async (
@@ -339,7 +339,7 @@ const createNewLeaveRequestsBulkHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Update Leave Requests in bulk
-// @route  PATCH api/v1/company/leave-request/dev
+// @route  PATCH api/v1/actions/company/leave-request/dev
 // @access Private
 const updateLeaveRequestsBulkHandler = expressAsyncHandler(
   async (

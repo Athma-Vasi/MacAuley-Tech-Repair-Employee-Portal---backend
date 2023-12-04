@@ -1,33 +1,47 @@
-import { Router } from 'express';
+import { Router } from "express";
 import {
   createNewAnonymousRequestHandler,
-  deleteAllAnonymousRequestsHandler,
-  deleteAnAnonymousRequestHandler,
   getQueriedAnonymousRequestsHandler,
-  getAnAnonymousRequestHandler,
+  getAnonymousRequestsByUserHandler,
+  getAnonymousRequestByIdHandler,
+  deleteAnonymousRequestHandler,
+  deleteAllAnonymousRequestsHandler,
   updateAnonymousRequestStatusByIdHandler,
   createNewAnonymousRequestsBulkHandler,
-} from './anonymousRequest.controller';
-import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
-import { assignQueryDefaults } from '../../../../middlewares';
+  updateAnonymousRequestsBulkHandler,
+} from "./anonymousRequest.controller";
+import { assignQueryDefaults } from "../../../../middlewares";
+import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../../constants";
 
 const anonymousRequestRouter = Router();
 
-// no roles verification for anonymous requests
+anonymousRequestRouter
+  .route("/")
+  .get(
+    assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
+    getQueriedAnonymousRequestsHandler
+  )
+  .post(createNewAnonymousRequestHandler);
+
+anonymousRequestRouter.route("/delete-all").delete(deleteAllAnonymousRequestsHandler);
 
 anonymousRequestRouter
-  .route('/')
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedAnonymousRequestsHandler)
-  .post(createNewAnonymousRequestHandler)
-  .delete(deleteAllAnonymousRequestsHandler);
+  .route("/user")
+  .get(
+    assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
+    getAnonymousRequestsByUserHandler
+  );
 
-// DEV ROUTE
-anonymousRequestRouter.route('/dev').post(createNewAnonymousRequestsBulkHandler);
+// DEV ROUTES
+anonymousRequestRouter
+  .route("/dev")
+  .post(createNewAnonymousRequestsBulkHandler)
+  .patch(updateAnonymousRequestsBulkHandler);
 
 anonymousRequestRouter
-  .route('/:anonymousRequestId')
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getAnAnonymousRequestHandler)
-  .delete(deleteAnAnonymousRequestHandler)
+  .route("/:anonymousRequestId")
+  .get(getAnonymousRequestByIdHandler)
+  .delete(deleteAnonymousRequestHandler)
   .patch(updateAnonymousRequestStatusByIdHandler);
 
 export { anonymousRequestRouter };

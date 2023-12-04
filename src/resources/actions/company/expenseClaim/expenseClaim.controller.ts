@@ -47,7 +47,7 @@ import { getUserByIdService } from "../../../user";
 import { removeUndefinedAndNullValues } from "../../../../utils";
 
 // @desc   Create a new expense claim
-// @route  POST api/v1/company/expense-claim
+// @route  POST api/v1/actions/company/expense-claim
 // @access Private
 const createNewExpenseClaimHandler = expressAsyncHandler(
   async (
@@ -116,7 +116,7 @@ const createNewExpenseClaimHandler = expressAsyncHandler(
 );
 
 // @desc   Get all expense claims
-// @route  GET /expense-claim
+// @route  GET api/v1/actions/company/expense-claim
 // @access Private/Admin/Manager
 const getQueriedExpenseClaimsHandler = expressAsyncHandler(
   async (
@@ -193,7 +193,7 @@ const getQueriedExpenseClaimsHandler = expressAsyncHandler(
 );
 
 // @desc   Get expense claims by user
-// @route  GET /expense-claim/user
+// @route  GET api/v1/actions/company/expense-claim/user
 // @access Private
 const getQueriedExpenseClaimsByUserHandler = expressAsyncHandler(
   async (
@@ -276,7 +276,7 @@ const getQueriedExpenseClaimsByUserHandler = expressAsyncHandler(
 );
 
 // @desc   Get expense claim by id
-// @route  GET /expense-claim/:expenseClaimId
+// @route  GET api/v1/actions/company/expense-claim/:expenseClaimId
 // @access Private/Admin/Manager
 const getExpenseClaimByIdHandler = expressAsyncHandler(
   async (
@@ -317,7 +317,7 @@ const getExpenseClaimByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Update an expense claim by id
-// @route  PUT /expense-claim/:expenseClaimId
+// @route  PATCH api/v1/actions/company/expense-claim/:expenseClaimId
 // @access Private/Admin/Manager
 const updateExpenseClaimByIdHandler = expressAsyncHandler(
   async (
@@ -360,7 +360,7 @@ const updateExpenseClaimByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Delete all expense claims
-// @route  DELETE /expense-claim
+// @route  DELETE api/v1/actions/company/expense-claim
 // @access Private/Admin/Manager
 const deleteAllExpenseClaimsHandler = expressAsyncHandler(
   async (
@@ -400,7 +400,7 @@ const deleteAllExpenseClaimsHandler = expressAsyncHandler(
 );
 
 // @desc   Delete expense claim by id
-// @route  DELETE /expense-claim/:expenseClaimId
+// @route  DELETE api/v1/actions/company/expense-claim/:expenseClaimId
 // @access Private/Admin/Manager
 const deleteExpenseClaimHandler = expressAsyncHandler(
   async (
@@ -457,7 +457,7 @@ const deleteExpenseClaimHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Create new expense claims in bulk
-// @route  POST api/v1/company/expense-claim/dev
+// @route  POST api/v1/actions/company/expense-claim/dev
 // @access Private
 const createNewExpenseClaimsBulkHandler = expressAsyncHandler(
   async (
@@ -507,7 +507,7 @@ const createNewExpenseClaimsBulkHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Update expense claims in bulk
-// @route  PATCH api/v1/company/expense-claim/dev
+// @route  PATCH api/v1/actions/company/expense-claim/dev
 // @access Private
 const updateExpenseClaimsBulkHandler = expressAsyncHandler(
   async (

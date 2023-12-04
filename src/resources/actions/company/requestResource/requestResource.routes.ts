@@ -17,14 +17,20 @@ const requestResourceRouter = Router();
 
 requestResourceRouter
   .route("/")
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedRequestResourcesHandler)
+  .get(
+    assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
+    getQueriedRequestResourcesHandler
+  )
   .post(createNewRequestResourceHandler);
 
 requestResourceRouter.route("/delete-all").delete(deleteAllRequestResourcesHandler);
 
 requestResourceRouter
   .route("/user")
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getRequestResourcesByUserHandler);
+  .get(
+    assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
+    getRequestResourcesByUserHandler
+  );
 
 // DEV ROUTES
 requestResourceRouter

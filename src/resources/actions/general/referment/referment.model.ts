@@ -1,8 +1,8 @@
-import { Schema, model, Types } from 'mongoose';
-import { Department, JobPosition, PhoneNumber } from '../../../user';
-import { Action } from '../../../actions';
-import { ActionsGeneral } from '../../general';
-import { RequestStatus } from '../../../../types';
+import { Schema, model, Types } from "mongoose";
+import { Department, JobPosition, PhoneNumber } from "../../../user";
+import { Action } from "../../../actions";
+import { ActionsGeneral } from "..";
+import { RequestStatus } from "../../../../types";
 
 type RefermentSchema = {
   userId: Types.ObjectId;
@@ -37,82 +37,82 @@ const refermentSchema = new Schema<RefermentSchema>(
   {
     userId: {
       type: Schema.Types.ObjectId,
-      required: [true, 'userId is required'],
-      ref: 'User', // referring to the User model
+      required: [true, "userId is required"],
+      ref: "User", // referring to the User model
       index: true,
     },
     username: {
       type: String,
-      required: [true, 'Username is required'],
+      required: [true, "Username is required"],
     },
     action: {
       type: String,
-      required: [true, 'Action is required'],
-      enum: ['company', 'general', 'outreach'],
+      required: [true, "Action is required"],
+      enum: ["company", "general", "outreach"],
     },
     category: {
       type: String,
-      required: [true, 'Category is required'],
-      enum: ['endorsement', 'printer issue', 'anonymous request', 'referment'],
+      required: [true, "Category is required"],
+      enum: ["endorsement", "printer issue", "anonymous request", "referment"],
     },
     candidateFullName: {
       type: String,
-      required: [true, 'CandidateFullName is required'],
+      required: [true, "CandidateFullName is required"],
     },
     candidateEmail: {
       type: String,
-      required: [true, 'CandidateEmail is required'],
+      required: [true, "CandidateEmail is required"],
     },
     candidateContactNumber: {
       type: String,
-      required: [true, 'CandidateContactNumber is required'],
+      required: [true, "CandidateContactNumber is required"],
     },
     candidateCurrentJobTitle: {
       type: String,
-      required: [true, 'CandidateCurrentJobTitle is required'],
+      required: [true, "CandidateCurrentJobTitle is required"],
     },
     candidateCurrentCompany: {
       type: String,
-      required: [true, 'CandidateCurrentCompany is required'],
+      required: [true, "CandidateCurrentCompany is required"],
     },
     candidateProfileUrl: {
       type: String,
       required: false,
-      default: '',
+      default: "",
     },
 
     departmentReferredFor: {
       type: String,
-      required: [true, 'DepartmentReferredFor is required'],
+      required: [true, "DepartmentReferredFor is required"],
       index: true,
     },
     positionReferredFor: {
       type: String,
-      required: [true, 'PositionReferredFor is required'],
+      required: [true, "PositionReferredFor is required"],
       index: true,
     },
     positionJobDescription: {
       type: String,
       required: false,
-      default: '',
+      default: "",
     },
     referralReason: {
       type: String,
-      required: [true, 'ReferralReason is required'],
+      required: [true, "ReferralReason is required"],
     },
     additionalInformation: {
       type: String,
       required: false,
-      default: '',
+      default: "",
     },
     privacyConsent: {
       type: Boolean,
-      required: [true, 'PrivacyConsent is required'],
+      required: [true, "PrivacyConsent is required"],
     },
     requestStatus: {
       type: String,
       required: false,
-      default: 'pending',
+      default: "pending",
       index: true,
     },
   },
@@ -123,19 +123,19 @@ const refermentSchema = new Schema<RefermentSchema>(
 
 // text indexes for search
 refermentSchema.index({
-  username: 'text',
-  candidateFullName: 'text',
-  candidateEmail: 'text',
-  candidateContactNumber: 'text',
-  candidateCurrentJobTitle: 'text',
-  candidateCurrentCompany: 'text',
-  candidateProfileUrl: 'text',
-  positionJobDescription: 'text',
-  referralReason: 'text',
-  additionalInformation: 'text',
+  username: "text",
+  candidateFullName: "text",
+  candidateEmail: "text",
+  candidateContactNumber: "text",
+  candidateCurrentJobTitle: "text",
+  candidateCurrentCompany: "text",
+  candidateProfileUrl: "text",
+  positionJobDescription: "text",
+  referralReason: "text",
+  additionalInformation: "text",
 });
 
-const RefermentModel = model<RefermentDocument>('Referment', refermentSchema);
+const RefermentModel = model<RefermentDocument>("Referment", refermentSchema);
 
 export { RefermentModel };
 export type { RefermentSchema, RefermentDocument };

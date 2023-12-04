@@ -1,18 +1,17 @@
-import type { Types } from 'mongoose';
-import type { RequestAfterJWTVerification } from '../../../auth';
-import type {
+import type { Types } from "mongoose";
+import type { RequestAfterJWTVerification } from "../../../auth";
+import type { UserRoles } from "../../../user";
+import {
+  DocumentUpdateOperation,
+  GetQueriedResourceByUserRequest,
+  GetQueriedResourceRequest,
+} from "../../../../types";
+import {
   AnonymousRequestDocument,
-  AnonymousRequestKind,
-  Urgency,
-} from './anonymousRequest.model';
-
-import { PhoneNumber, UserRoles } from '../../../user';
-import { GetQueriedResourceRequest, RequestStatus } from '../../../../types';
+  AnonymousRequestSchema,
+} from "./anonymousRequest.model";
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
-
-// personally identifiable information is not stored in server for ALL anonymous requests - the userInfo obj is defined in the request body for consistency
-
 interface CreateNewAnonymousRequestRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {
@@ -20,17 +19,47 @@ interface CreateNewAnonymousRequestRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    anonymousRequest: {
-      title: string;
-      secureContactNumber: PhoneNumber;
-      secureContactEmail: string;
-      requestKind: AnonymousRequestKind;
-      requestDescription: string;
-      additionalInformation: string;
-      urgency: Urgency;
-    };
+    sessionId: Types.ObjectId;
+    anonymousRequestSchema: AnonymousRequestSchema;
   };
 }
+
+interface DeleteAnonymousRequestRequest extends RequestAfterJWTVerification {
+  params: {
+    anonymousRequestId: string;
+  };
+}
+
+type DeleteAllAnonymousRequestsRequest = RequestAfterJWTVerification;
+
+type GetQueriedAnonymousRequestsByUserRequest = GetQueriedResourceByUserRequest;
+
+interface GetAnonymousRequestByIdRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+  };
+  params: { anonymousRequestId: string };
+}
+
+interface UpdateAnonymousRequestByIdRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    documentUpdate: DocumentUpdateOperation<AnonymousRequestDocument>;
+  };
+  params: { anonymousRequestId: string };
+}
+
+type GetQueriedAnonymousRequestsRequest = GetQueriedResourceRequest;
 
 // DEV ROUTE
 interface CreateNewAnonymousRequestsBulkRequest extends RequestAfterJWTVerification {
@@ -40,74 +69,35 @@ interface CreateNewAnonymousRequestsBulkRequest extends RequestAfterJWTVerificat
       username: string;
       roles: UserRoles;
     };
-    anonymousRequests: {
-      title: string;
-      secureContactNumber: PhoneNumber;
-      secureContactEmail: string;
-      requestKind: AnonymousRequestKind;
-      requestDescription: string;
-      additionalInformation: string;
-      urgency: Urgency;
-      requestStatus: RequestStatus;
+    sessionId: Types.ObjectId;
+    anonymousRequestSchemas: AnonymousRequestSchema[];
+  };
+}
+
+// DEV ROUTE
+interface UpdateAnonymousRequestsBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    anonymousRequestFields: {
+      anonymousRequestId: Types.ObjectId;
+      documentUpdate: DocumentUpdateOperation<AnonymousRequestDocument>;
     }[];
-  };
-}
-
-interface DeleteAnAnonymousRequestRequest extends RequestAfterJWTVerification {
-  body: {
-    // only managers can delete anonymous requests
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-  };
-  params: {
-    anonymousRequestId: string;
-  };
-}
-
-interface DeleteAllAnonymousRequestsRequest extends RequestAfterJWTVerification {
-  body: {
-    // only managers can delete an anonymous request
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-  };
-}
-
-type GetQueriedAnonymousRequestsRequest = GetQueriedResourceRequest;
-
-interface GetAnAnonymousRequestRequest extends RequestAfterJWTVerification {
-  params: {
-    anonymousRequestId: string;
-  };
-}
-
-interface UpdateAnonymousRequestStatusByIdRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-    anonymousRequest: {
-      requestStatus: RequestStatus;
-    };
-  };
-  params: {
-    anonymousRequestId: string;
   };
 }
 
 export type {
   CreateNewAnonymousRequestRequest,
-  CreateNewAnonymousRequestsBulkRequest,
-  DeleteAnAnonymousRequestRequest,
+  DeleteAnonymousRequestRequest,
   DeleteAllAnonymousRequestsRequest,
+  GetQueriedAnonymousRequestsByUserRequest,
+  GetAnonymousRequestByIdRequest,
   GetQueriedAnonymousRequestsRequest,
-  GetAnAnonymousRequestRequest,
-  UpdateAnonymousRequestStatusByIdRequest,
+  UpdateAnonymousRequestByIdRequest,
+  CreateNewAnonymousRequestsBulkRequest,
+  UpdateAnonymousRequestsBulkRequest,
 };

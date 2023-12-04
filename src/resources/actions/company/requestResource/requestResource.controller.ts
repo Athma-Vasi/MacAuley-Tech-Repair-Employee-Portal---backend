@@ -38,7 +38,7 @@ import { removeUndefinedAndNullValues } from "../../../../utils";
 import { getUserByIdService } from "../../../user";
 
 // @desc   Create a new request resource
-// @route  POST api/v1/company/request-resource
+// @route  POST api/v1/actions/company/request-resource
 // @access Private
 const createNewRequestResourceHandler = expressAsyncHandler(
   async (
@@ -77,7 +77,7 @@ const createNewRequestResourceHandler = expressAsyncHandler(
 );
 
 // @desc   Get all requestResources
-// @route  GET api/v1/company/request-resource
+// @route  GET api/v1/actions/company/request-resource
 // @access Private/Admin/Manager
 const getQueriedRequestResourcesHandler = expressAsyncHandler(
   async (
@@ -123,7 +123,7 @@ const getQueriedRequestResourcesHandler = expressAsyncHandler(
 );
 
 // @desc   Get all requestResource requests by user
-// @route  GET api/v1/company/request-resource/user
+// @route  GET api/v1/actions/company/request-resource/user
 // @access Private
 const getRequestResourcesByUserHandler = expressAsyncHandler(
   async (
@@ -177,7 +177,7 @@ const getRequestResourcesByUserHandler = expressAsyncHandler(
 );
 
 // @desc   Update requestResource status
-// @route  PATCH api/v1/company/request-resource/:requestResourceId
+// @route  PATCH api/v1/actions/company/request-resource/:requestResourceId
 // @access Private/Admin/Manager
 const updateRequestResourceStatusByIdHandler = expressAsyncHandler(
   async (
@@ -220,7 +220,7 @@ const updateRequestResourceStatusByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Get an requestResource request
-// @route  GET api/v1/company/request-resource/:requestResourceId
+// @route  GET api/v1/actions/company/request-resource/:requestResourceId
 // @access Private
 const getRequestResourceByIdHandler = expressAsyncHandler(
   async (
@@ -244,7 +244,7 @@ const getRequestResourceByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Delete an requestResource request by its id
-// @route  DELETE api/v1/company/request-resource/:requestResourceId
+// @route  DELETE api/v1/actions/company/request-resource/:requestResourceId
 // @access Private
 const deleteRequestResourceHandler = expressAsyncHandler(
   async (request: DeleteRequestResourceRequest, response: Response) => {
@@ -271,7 +271,7 @@ const deleteRequestResourceHandler = expressAsyncHandler(
 );
 
 // @desc    Delete all requestResource requests
-// @route   DELETE api/v1/company/request-resource/delete-all
+// @route   DELETE api/v1/actions/company/request-resource/delete-all
 // @access  Private
 const deleteAllRequestResourcesHandler = expressAsyncHandler(
   async (_request: DeleteAllRequestResourcesRequest, response: Response) => {
@@ -294,7 +294,7 @@ const deleteAllRequestResourcesHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Create new requestResource requests in bulk
-// @route  POST api/v1/company/request-resource/dev
+// @route  POST api/v1/actions/company/request-resource/dev
 // @access Private
 const createNewRequestResourcesBulkHandler = expressAsyncHandler(
   async (
@@ -344,7 +344,7 @@ const createNewRequestResourcesBulkHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Update Request Resources in bulk
-// @route  PATCH api/v1/company/request-resource/dev
+// @route  PATCH api/v1/actions/company/request-resource/dev
 // @access Private
 const updateRequestResourcesBulkHandler = expressAsyncHandler(
   async (

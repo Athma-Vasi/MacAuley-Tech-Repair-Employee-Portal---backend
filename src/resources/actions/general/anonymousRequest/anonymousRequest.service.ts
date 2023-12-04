@@ -1,24 +1,40 @@
-import type { DeleteResult } from 'mongodb';
-import type { AnonymousRequestDocument, AnonymousRequestSchema } from './anonymousRequest.model';
+import type { Types } from "mongoose";
+import type { DeleteResult } from "mongodb";
+import type {
+  AnonymousRequestDocument,
+  AnonymousRequestSchema,
+} from "./anonymousRequest.model";
 
-import { AnonymousRequestModel } from './anonymousRequest.model';
+import { AnonymousRequestModel } from "./anonymousRequest.model";
 import {
   DatabaseResponse,
   DatabaseResponseNullable,
   QueriedResourceGetRequestServiceInput,
   QueriedTotalResourceGetRequestServiceInput,
-  RequestStatus,
-} from '../../../../types';
-import { Types } from 'mongoose';
+  UpdateDocumentByIdServiceInput,
+} from "../../../../types";
+
+async function getAnonymousRequestByIdService(
+  anonymousRequestId: Types.ObjectId | string
+): DatabaseResponseNullable<AnonymousRequestDocument> {
+  try {
+    const anonymousRequest = await AnonymousRequestModel.findById(anonymousRequestId)
+      .lean()
+      .exec();
+    return anonymousRequest;
+  } catch (error: any) {
+    throw new Error(error, { cause: "getAnonymousRequestByIdService" });
+  }
+}
 
 async function createNewAnonymousRequestService(
-  input: AnonymousRequestSchema
+  anonymousRequestSchema: AnonymousRequestSchema
 ): Promise<AnonymousRequestDocument> {
   try {
-    const newAnonymousRequest = await AnonymousRequestModel.create(input);
-    return newAnonymousRequest;
+    const anonymousRequest = await AnonymousRequestModel.create(anonymousRequestSchema);
+    return anonymousRequest;
   } catch (error: any) {
-    throw new Error(error, { cause: 'createNewAnonymousRequestService' });
+    throw new Error(error, { cause: "createNewAnonymousRequestService" });
   }
 }
 
@@ -28,13 +44,12 @@ async function getQueriedAnonymousRequestsService({
   options = {},
 }: QueriedResourceGetRequestServiceInput<AnonymousRequestDocument>): DatabaseResponse<AnonymousRequestDocument> {
   try {
-    const allAnonymousRequests = await AnonymousRequestModel.find(filter, projection, options)
-      .select('-__v')
+    const anonymousRequest = await AnonymousRequestModel.find(filter, projection, options)
       .lean()
       .exec();
-    return allAnonymousRequests;
+    return anonymousRequest;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getQueriedAnonymousRequestsService' });
+    throw new Error(error, { cause: "getQueriedAnonymousRequestsService" });
   }
 }
 
@@ -43,81 +58,88 @@ async function getQueriedTotalAnonymousRequestsService({
 }: QueriedTotalResourceGetRequestServiceInput<AnonymousRequestDocument>): Promise<number> {
   try {
     const totalAnonymousRequests = await AnonymousRequestModel.countDocuments(filter)
-      .select('-__v')
       .lean()
       .exec();
     return totalAnonymousRequests;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getQueriedTotalAnonymousRequestsService' });
+    throw new Error(error, { cause: "getQueriedTotalAnonymousRequestsService" });
   }
 }
 
-async function getAnAnonymousRequestService(
-  anonymousRequestId: Types.ObjectId | string
-): DatabaseResponseNullable<AnonymousRequestDocument> {
+async function getQueriedAnonymousRequestsByUserService({
+  filter = {},
+  projection = null,
+  options = {},
+}: QueriedResourceGetRequestServiceInput<AnonymousRequestDocument>): DatabaseResponse<AnonymousRequestDocument> {
   try {
-    const anonymousRequest = await AnonymousRequestModel.findById(anonymousRequestId)
-      .select('-__v')
+    const anonymousRequests = await AnonymousRequestModel.find(
+      filter,
+      projection,
+      options
+    )
+      .lean()
+      .exec();
+    return anonymousRequests;
+  } catch (error: any) {
+    throw new Error(error, { cause: "getQueriedAnonymousRequestsByUserService" });
+  }
+}
+
+async function updateAnonymousRequestByIdService({
+  _id,
+  fields,
+  updateOperator,
+}: UpdateDocumentByIdServiceInput<AnonymousRequestDocument>) {
+  const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
+  const updateObject = JSON.parse(updateString);
+
+  try {
+    const anonymousRequest = await AnonymousRequestModel.findByIdAndUpdate(
+      _id,
+      updateObject,
+      {
+        new: true,
+      }
+    )
       .lean()
       .exec();
     return anonymousRequest;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getAnAnonymousRequestService' });
+    throw new Error(error, { cause: "updateAnonymousRequestStatusByIdService" });
   }
 }
 
-async function updateAnonymousRequestStatusByIdService({
-  anonymousRequestId,
-  requestStatus,
-}: {
-  anonymousRequestId: Types.ObjectId | string;
-  requestStatus: RequestStatus;
-}) {
-  try {
-    const updatedAnonymousRequest = await AnonymousRequestModel.findByIdAndUpdate(
-      anonymousRequestId,
-      { requestStatus },
-      { new: true }
-    )
-      .select(['-__v', '-action', '-category'])
-      .lean()
-      .exec();
-    return updatedAnonymousRequest;
-  } catch (error: any) {
-    throw new Error(error, { cause: 'updateAnonymousRequestStatusByIdService' });
-  }
-}
-
-async function deleteAnAnonymousRequestService(
+async function deleteAnonymousRequestByIdService(
   anonymousRequestId: Types.ObjectId | string
 ): Promise<DeleteResult> {
   try {
-    const deletedAnonymousRequest = await AnonymousRequestModel.deleteOne({
+    const deletedResult = await AnonymousRequestModel.deleteOne({
       _id: anonymousRequestId,
     })
       .lean()
       .exec();
-    return deletedAnonymousRequest;
+    return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: 'deleteAnAnonymousRequestService' });
+    throw new Error(error, { cause: "deleteAnonymousRequestByIdService" });
   }
 }
 
 async function deleteAllAnonymousRequestsService(): Promise<DeleteResult> {
   try {
-    const deletedAnonymousRequests = await AnonymousRequestModel.deleteMany({}).lean().exec();
-    return deletedAnonymousRequests;
+    const deletedResult = await AnonymousRequestModel.deleteMany({}).lean().exec();
+    return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: 'deleteAllAnonymousRequestsService' });
+    throw new Error(error, { cause: "deleteAllAnonymousRequestsService" });
   }
 }
 
 export {
+  getAnonymousRequestByIdService,
   createNewAnonymousRequestService,
   getQueriedAnonymousRequestsService,
-  getAnAnonymousRequestService,
-  deleteAnAnonymousRequestService,
-  deleteAllAnonymousRequestsService,
   getQueriedTotalAnonymousRequestsService,
-  updateAnonymousRequestStatusByIdService,
+  getQueriedAnonymousRequestsByUserService,
+  deleteAnonymousRequestByIdService,
+  deleteAllAnonymousRequestsService,
+  updateAnonymousRequestByIdService,
 };

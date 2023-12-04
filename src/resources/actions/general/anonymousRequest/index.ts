@@ -5,40 +5,47 @@
 /**
  * Imports
  */
-import { AnonymousRequestModel } from './anonymousRequest.model';
-import { anonymousRequestRouter } from './anonymousRequest.routes';
+import { AnonymousRequestModel } from "./anonymousRequest.model";
+import { anonymousRequestRouter } from "./anonymousRequest.routes";
 import {
   createNewAnonymousRequestHandler,
+  createNewAnonymousRequestsBulkHandler,
   deleteAllAnonymousRequestsHandler,
-  deleteAnAnonymousRequestHandler,
-  getAnAnonymousRequestHandler,
+  deleteAnonymousRequestHandler,
+  getAnonymousRequestByIdHandler,
+  getAnonymousRequestsByUserHandler,
   getQueriedAnonymousRequestsHandler,
   updateAnonymousRequestStatusByIdHandler,
-} from './anonymousRequest.controller';
+  updateAnonymousRequestsBulkHandler,
+} from "./anonymousRequest.controller";
 import {
   createNewAnonymousRequestService,
   deleteAllAnonymousRequestsService,
-  deleteAnAnonymousRequestService,
-  getAnAnonymousRequestService,
+  deleteAnonymousRequestByIdService,
+  getAnonymousRequestByIdService,
+  getQueriedAnonymousRequestsByUserService,
   getQueriedAnonymousRequestsService,
-  updateAnonymousRequestStatusByIdService,
   getQueriedTotalAnonymousRequestsService,
-} from './anonymousRequest.service';
+  updateAnonymousRequestByIdService,
+} from "./anonymousRequest.service";
 
 import type {
   AnonymousRequestDocument,
   AnonymousRequestSchema,
   AnonymousRequestKind,
   Urgency,
-} from './anonymousRequest.model';
+} from "./anonymousRequest.model";
 import type {
   CreateNewAnonymousRequestRequest,
-  DeleteAnAnonymousRequestRequest,
-  GetQueriedAnonymousRequestsRequest,
-  GetAnAnonymousRequestRequest,
+  CreateNewAnonymousRequestsBulkRequest,
   DeleteAllAnonymousRequestsRequest,
-  UpdateAnonymousRequestStatusByIdRequest,
-} from './anonymousRequest.types';
+  DeleteAnonymousRequestRequest,
+  GetAnonymousRequestByIdRequest,
+  GetQueriedAnonymousRequestsByUserRequest,
+  GetQueriedAnonymousRequestsRequest,
+  UpdateAnonymousRequestByIdRequest,
+  UpdateAnonymousRequestsBulkRequest,
+} from "./anonymousRequest.types";
 
 /**
  * Exports
@@ -47,28 +54,36 @@ export {
   AnonymousRequestModel,
   anonymousRequestRouter,
   createNewAnonymousRequestHandler,
-  deleteAllAnonymousRequestsHandler,
-  deleteAnAnonymousRequestHandler,
-  getAnAnonymousRequestHandler,
-  getQueriedAnonymousRequestsHandler,
-  updateAnonymousRequestStatusByIdHandler,
   createNewAnonymousRequestService,
+  createNewAnonymousRequestsBulkHandler,
+  deleteAllAnonymousRequestsHandler,
   deleteAllAnonymousRequestsService,
-  deleteAnAnonymousRequestService,
-  getAnAnonymousRequestService,
+  deleteAnonymousRequestHandler,
+  deleteAnonymousRequestByIdService,
+  getAnonymousRequestByIdHandler,
+  getAnonymousRequestByIdService,
+  getAnonymousRequestsByUserHandler,
+  getQueriedAnonymousRequestsByUserService,
+  getQueriedAnonymousRequestsHandler,
   getQueriedAnonymousRequestsService,
-  updateAnonymousRequestStatusByIdService,
   getQueriedTotalAnonymousRequestsService,
+  updateAnonymousRequestByIdService,
+  updateAnonymousRequestStatusByIdHandler,
+  updateAnonymousRequestsBulkHandler,
 };
+
 export type {
-  CreateNewAnonymousRequestRequest,
-  DeleteAnAnonymousRequestRequest,
-  DeleteAllAnonymousRequestsRequest,
-  GetAnAnonymousRequestRequest,
-  GetQueriedAnonymousRequestsRequest,
-  UpdateAnonymousRequestStatusByIdRequest,
   AnonymousRequestDocument,
   AnonymousRequestSchema,
   AnonymousRequestKind,
   Urgency,
+  CreateNewAnonymousRequestRequest,
+  DeleteAnonymousRequestRequest,
+  DeleteAllAnonymousRequestsRequest,
+  GetQueriedAnonymousRequestsByUserRequest,
+  GetAnonymousRequestByIdRequest,
+  GetQueriedAnonymousRequestsRequest,
+  UpdateAnonymousRequestByIdRequest,
+  UpdateAnonymousRequestsBulkRequest,
+  CreateNewAnonymousRequestsBulkRequest,
 };

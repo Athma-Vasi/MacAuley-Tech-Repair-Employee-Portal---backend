@@ -5,7 +5,7 @@ import { AddressChangeDocument } from "./company/addressChange";
 import { ExpenseClaimDocument } from "./company/expenseClaim";
 import { RequestResourceDocument } from "./company/requestResource";
 import { LeaveRequestDocument } from "./company/leaveRequest";
-import { BenefitsDocument } from "./company/benefit";
+import { BenefitDocument } from "./company/benefit";
 import { GetQueriedResourceRequest } from "../../types";
 import { EndorsementDocument } from "./general/endorsement";
 import { PrinterIssueDocument } from "./general/printerIssue";
@@ -39,7 +39,7 @@ type ActionsResourceRequestServerResponse = {
     expenseClaimData: ExpenseClaimDocument[];
     requestResourceData: RequestResourceDocument[];
     leaveRequestData: LeaveRequestDocument[];
-    benefitData: BenefitsDocument[];
+    benefitData: BenefitDocument[];
   };
   generalData: {
     endorsementData: EndorsementDocument[];

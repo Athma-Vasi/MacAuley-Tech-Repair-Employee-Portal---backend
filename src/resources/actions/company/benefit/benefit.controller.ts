@@ -35,7 +35,7 @@ import { getUserByIdService, getUserByUsernameService } from "../../../user";
 import { removeUndefinedAndNullValues } from "../../../../utils";
 
 // @desc   Create a new benefits plan
-// @route  POST api/v1/company/benefits
+// @route  POST api/v1/actions/company/benefits
 // @access Private/Admin/Manager
 const createNewBenefitHandler = expressAsyncHandler(
   async (
@@ -85,7 +85,7 @@ const createNewBenefitHandler = expressAsyncHandler(
 );
 
 // @desc   Get all benefits
-// @route  GET api/v1/company/benefit
+// @route  GET api/v1/actions/company/benefit
 // @access Private/Admin/Manager
 const getQueriedBenefitsHandler = expressAsyncHandler(
   async (
@@ -131,7 +131,7 @@ const getQueriedBenefitsHandler = expressAsyncHandler(
 );
 
 // @desc   Get all benefit requests by user
-// @route  GET api/v1/company/benefit/user
+// @route  GET api/v1/actions/company/benefit/user
 // @access Private
 const getBenefitsByUserHandler = expressAsyncHandler(
   async (
@@ -185,7 +185,7 @@ const getBenefitsByUserHandler = expressAsyncHandler(
 );
 
 // @desc   Update benefit status
-// @route  PATCH api/v1/company/benefit/:benefitId
+// @route  PATCH api/v1/actions/company/benefit/:benefitId
 // @access Private/Admin/Manager
 const updateBenefitStatusByIdHandler = expressAsyncHandler(
   async (
@@ -228,7 +228,7 @@ const updateBenefitStatusByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Get an benefit request
-// @route  GET api/v1/company/benefit/:benefitId
+// @route  GET api/v1/actions/company/benefit/:benefitId
 // @access Private
 const getBenefitByIdHandler = expressAsyncHandler(
   async (
@@ -252,7 +252,7 @@ const getBenefitByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Delete an benefit request by its id
-// @route  DELETE api/v1/company/benefit/:benefitId
+// @route  DELETE api/v1/actions/company/benefit/:benefitId
 // @access Private
 const deleteBenefitHandler = expressAsyncHandler(
   async (request: DeleteAnBenefitRequest, response: Response) => {
@@ -277,7 +277,7 @@ const deleteBenefitHandler = expressAsyncHandler(
 );
 
 // @desc    Delete all benefit requests
-// @route   DELETE api/v1/company/benefit/delete-all
+// @route   DELETE api/v1/actions/company/benefit/delete-all
 // @access  Private
 const deleteAllBenefitsHandler = expressAsyncHandler(
   async (_request: DeleteAllBenefitsRequest, response: Response) => {
@@ -300,7 +300,7 @@ const deleteAllBenefitsHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Create new benefit requests in bulk
-// @route  POST api/v1/company/benefit/dev
+// @route  POST api/v1/actions/company/benefit/dev
 // @access Private
 const createNewBenefitsBulkHandler = expressAsyncHandler(
   async (
@@ -348,7 +348,7 @@ const createNewBenefitsBulkHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Update Benefits in bulk
-// @route  PATCH api/v1/company/benefit/dev
+// @route  PATCH api/v1/actions/company/benefit/dev
 // @access Private
 const updateBenefitsBulkHandler = expressAsyncHandler(
   async (

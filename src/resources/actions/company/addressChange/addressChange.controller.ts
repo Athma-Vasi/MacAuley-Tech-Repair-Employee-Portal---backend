@@ -36,7 +36,7 @@ import {
 import { removeUndefinedAndNullValues } from "../../../../utils";
 
 // @desc   Create a new address change request
-// @route  POST api/v1/company/address-change
+// @route  POST api/v1/actions/company/address-change
 // @access Private
 const createNewAddressChangeHandler = expressAsyncHandler(
   async (
@@ -116,7 +116,7 @@ const createNewAddressChangeHandler = expressAsyncHandler(
 );
 
 // @desc   Get all address changes
-// @route  GET api/v1/company/address-change
+// @route  GET api/v1/actions/company/address-change
 // @access Private/Admin/Manager
 const getQueriedAddressChangesHandler = expressAsyncHandler(
   async (
@@ -162,7 +162,7 @@ const getQueriedAddressChangesHandler = expressAsyncHandler(
 );
 
 // @desc   Get all address change requests by user
-// @route  GET api/v1/company/address-change/user
+// @route  GET api/v1/actions/company/address-change/user
 // @access Private
 const getAddressChangesByUserHandler = expressAsyncHandler(
   async (
@@ -214,7 +214,7 @@ const getAddressChangesByUserHandler = expressAsyncHandler(
 );
 
 // @desc   Update address change status
-// @route  PATCH api/v1/company/address-change/:addressChangeId
+// @route  PATCH api/v1/actions/company/address-change/:addressChangeId
 // @access Private/Admin/Manager
 const updateAddressChangeStatusByIdHandler = expressAsyncHandler(
   async (
@@ -257,7 +257,7 @@ const updateAddressChangeStatusByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Get an address change request
-// @route  GET api/v1/company/address-change/:addressChangeId
+// @route  GET api/v1/actions/company/address-change/:addressChangeId
 // @access Private
 const getAddressChangeByIdHandler = expressAsyncHandler(
   async (
@@ -282,7 +282,7 @@ const getAddressChangeByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Delete an address change request by its id
-// @route  DELETE api/v1/company/address-change/:addressChangeId
+// @route  DELETE api/v1/actions/company/address-change/:addressChangeId
 // @access Private
 const deleteAnAddressChangeHandler = expressAsyncHandler(
   async (request: DeleteAnAddressChangeRequest, response: Response) => {
@@ -309,7 +309,7 @@ const deleteAnAddressChangeHandler = expressAsyncHandler(
 );
 
 // @desc    Delete all address change requests
-// @route   DELETE api/v1/company/address-change/delete-all
+// @route   DELETE api/v1/actions/company/address-change/delete-all
 // @access  Private
 const deleteAllAddressChangesHandler = expressAsyncHandler(
   async (_request: DeleteAllAddressChangesRequest, response: Response) => {
@@ -332,7 +332,7 @@ const deleteAllAddressChangesHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Create new address change requests in bulk
-// @route  POST api/v1/company/address-change/dev
+// @route  POST api/v1/actions/company/address-change/dev
 // @access Private
 const createNewAddressChangesBulkHandler = expressAsyncHandler(
   async (
@@ -382,7 +382,7 @@ const createNewAddressChangesBulkHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Update AddressChanges in bulk
-// @route  PATCH api/v1/company/address-change/dev
+// @route  PATCH api/v1/actions/company/address-change/dev
 // @access Private
 const updateAddressChangesBulkHandler = expressAsyncHandler(
   async (

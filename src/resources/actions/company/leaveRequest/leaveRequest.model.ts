@@ -1,6 +1,6 @@
 import { Schema, Types, model } from "mongoose";
-import type { Action } from "../../../actions";
-import type { ActionsCompany } from "../../company";
+import type { Action } from "../..";
+import type { ActionsCompany } from "..";
 import { RequestStatus } from "../../../../types";
 
 type ReasonForLeave =
