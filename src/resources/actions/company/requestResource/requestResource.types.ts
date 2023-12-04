@@ -1,10 +1,12 @@
-import type { Request } from 'express';
-import type { Types } from 'mongoose';
-import type { RequestAfterJWTVerification } from '../../../auth';
-import type { RequestResourceKind, RequestResourceSchema } from './requestResource.model';
-import type { Urgency } from '../../general/printerIssue';
-import type { Department, UserRoles } from '../../../user';
-import { GetQueriedResourceRequest, RequestStatus } from '../../../../types';
+import type { Types } from "mongoose";
+import type { RequestAfterJWTVerification } from "../../../auth";
+import type { UserRoles } from "../../../user";
+import {
+  DocumentUpdateOperation,
+  GetQueriedResourceByUserRequest,
+  GetQueriedResourceRequest,
+} from "../../../../types";
+import { RequestResourceDocument, RequestResourceSchema } from "./requestResource.model";
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 interface CreateNewRequestResourceRequest extends RequestAfterJWTVerification {
@@ -14,44 +16,12 @@ interface CreateNewRequestResourceRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    requestResource: {
-      department: Department;
-      resourceType: RequestResourceKind;
-      resourceQuantity: number;
-      resourceDescription: string;
-      reasonForRequest: string;
-      urgency: Urgency;
-      dateNeededBy: NativeDate;
-      additionalInformation: string;
-    };
+    sessionId: Types.ObjectId;
+    requestResourceFields: Omit<RequestResourceSchema, "userId" | "username">;
   };
 }
 
-// DEV ROUTE
-interface CreateNewRequestResourceBulkRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-    requestResources: {
-      userId: Types.ObjectId;
-      username: string;
-      department: Department;
-      resourceType: RequestResourceKind;
-      resourceQuantity: number;
-      resourceDescription: string;
-      reasonForRequest: string;
-      urgency: Urgency;
-      dateNeededBy: NativeDate;
-      additionalInformation: string;
-      requestStatus: RequestStatus;
-    }[];
-  };
-}
-
-interface DeleteARequestResourceRequest extends RequestAfterJWTVerification {
+interface DeleteRequestResourceRequest extends RequestAfterJWTVerification {
   params: {
     requestResourceId: string;
   };
@@ -59,39 +29,72 @@ interface DeleteARequestResourceRequest extends RequestAfterJWTVerification {
 
 type DeleteAllRequestResourcesRequest = RequestAfterJWTVerification;
 
-type GetQueriedRequestResourcesRequest = GetQueriedResourceRequest;
-
-type GetQueriedRequestResourcesByUserRequest = GetQueriedResourceRequest;
+type GetQueriedRequestResourcesByUserRequest = GetQueriedResourceByUserRequest;
 
 interface GetRequestResourceByIdRequest extends RequestAfterJWTVerification {
-  params: {
-    requestResourceId: string;
-  };
-}
-
-interface UpdateRequestResourceStatusByIdRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {
       userId: Types.ObjectId;
       username: string;
       roles: UserRoles;
     };
-    requestResource: {
-      requestStatus: RequestStatus;
-    };
+    sessionId: Types.ObjectId;
   };
-  params: {
-    requestResourceId: string;
+  params: { requestResourceId: string };
+}
+
+interface UpdateRequestResourceByIdRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    documentUpdate: DocumentUpdateOperation<RequestResourceDocument>;
+  };
+  params: { requestResourceId: string };
+}
+
+type GetQueriedRequestResourcesRequest = GetQueriedResourceRequest;
+
+// DEV ROUTE
+interface CreateNewRequestResourcesBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    requestResourceSchemas: RequestResourceSchema[];
+  };
+}
+
+// DEV ROUTE
+interface UpdateRequestResourcesBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    requestResourceFields: {
+      requestResourceId: Types.ObjectId;
+      documentUpdate: DocumentUpdateOperation<RequestResourceDocument>;
+    }[];
   };
 }
 
 export type {
   CreateNewRequestResourceRequest,
-  CreateNewRequestResourceBulkRequest,
-  DeleteARequestResourceRequest,
+  DeleteRequestResourceRequest,
   DeleteAllRequestResourcesRequest,
-  GetQueriedRequestResourcesRequest,
-  GetRequestResourceByIdRequest,
   GetQueriedRequestResourcesByUserRequest,
-  UpdateRequestResourceStatusByIdRequest,
+  GetRequestResourceByIdRequest,
+  GetQueriedRequestResourcesRequest,
+  UpdateRequestResourceByIdRequest,
+  CreateNewRequestResourcesBulkRequest,
+  UpdateRequestResourcesBulkRequest,
 };

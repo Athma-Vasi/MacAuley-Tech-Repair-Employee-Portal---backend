@@ -1,38 +1,44 @@
-import expressAsyncHandler from 'express-async-handler';
+import expressAsyncHandler from "express-async-handler";
 
-import type { DeleteResult } from 'mongodb';
-import type { Response } from 'express';
+import type { FilterQuery, QueryOptions } from "mongoose";
+import type { Response } from "express";
+import type { DeleteResult } from "mongodb";
 import type {
   CreateNewRequestResourceRequest,
-  DeleteARequestResourceRequest,
+  CreateNewRequestResourcesBulkRequest,
   DeleteAllRequestResourcesRequest,
-  GetQueriedRequestResourcesRequest,
+  DeleteRequestResourceRequest,
   GetRequestResourceByIdRequest,
   GetQueriedRequestResourcesByUserRequest,
-  UpdateRequestResourceStatusByIdRequest,
-  CreateNewRequestResourceBulkRequest,
-} from './requestResource.types';
-
-import {
-  createNewRequestResourceService,
-  deleteARequestResourceService,
-  deleteAllRequestResourcesService,
-  getQueriedRequestResourceService,
-  getRequestResourceByIdService,
-  getQueriedRequestResourceByUserService,
-  getQueriedTotalRequestResourceService,
-  updateRequestResourceStatusByIdService,
-} from './requestResource.service';
-import { RequestResourceDocument, RequestResourceSchema } from './requestResource.model';
-import {
+  GetQueriedRequestResourcesRequest,
+  UpdateRequestResourceByIdRequest,
+  UpdateRequestResourcesBulkRequest,
+} from "./requestResource.types";
+import type {
   GetQueriedResourceRequestServerResponse,
   QueryObjectParsedWithDefaults,
   ResourceRequestServerResponse,
-} from '../../../../types';
-import { FilterQuery, QueryOptions } from 'mongoose';
+} from "../../../../types";
+import type {
+  RequestResourceDocument,
+  RequestResourceSchema,
+} from "./requestResource.model";
+
+import {
+  createNewRequestResourceService,
+  deleteAllRequestResourcesService,
+  deleteRequestResourceByIdService,
+  getRequestResourceByIdService,
+  getQueriedRequestResourcesByUserService,
+  getQueriedRequestResourcesService,
+  getQueriedTotalRequestResourcesService,
+  updateRequestResourceByIdService,
+} from "./requestResource.service";
+import { removeUndefinedAndNullValues } from "../../../../utils";
+import { getUserByIdService } from "../../../user";
 
 // @desc   Create a new request resource
-// @route  POST /request-resource
+// @route  POST api/v1/company/request-resource
 // @access Private
 const createNewRequestResourceHandler = expressAsyncHandler(
   async (
@@ -41,121 +47,37 @@ const createNewRequestResourceHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      requestResource: {
-        resourceType,
-        department,
-        reasonForRequest,
-        resourceDescription,
-        resourceQuantity,
-        urgency,
-        dateNeededBy,
-        additionalInformation,
-      },
+      requestResourceFields,
     } = request.body;
 
     // create new request resource object
-    const newRequestResourceObject: RequestResourceSchema = {
+    const requestResourceSchema: RequestResourceSchema = {
+      ...requestResourceFields,
       userId,
       username,
-      action: 'company',
-      category: 'request resource',
-      resourceType,
-      department,
-      reasonForRequest,
-      resourceDescription,
-      resourceQuantity,
-      urgency,
-      dateNeededBy,
-      additionalInformation,
-      requestStatus: 'pending',
     };
 
-    // create new request resource
-    const newRequestResource = await createNewRequestResourceService(newRequestResourceObject);
-    if (newRequestResource) {
-      response.status(201).json({
-        message: `New request resource of kind ${resourceType} for ${department} created`,
-        resourceData: [newRequestResource],
-      });
-    } else {
-      response
-        .status(400)
-        .json({ message: 'New request resource could not be created', resourceData: [] });
-    }
-  }
-);
-
-// DEV ROUTE
-// @desc   Create new request resources in bulk
-// @route  POST /request-resource/dev
-// @access Private/Admin/Manager
-const createNewRequestResourceBulkHandler = expressAsyncHandler(
-  async (
-    request: CreateNewRequestResourceBulkRequest,
-    response: Response<ResourceRequestServerResponse<RequestResourceDocument>>
-  ) => {
-    const { requestResources } = request.body;
-
-    // promise all array
-    const newRequestResources = await Promise.all(
-      requestResources.map(async (requestResource) => {
-        const {
-          userId,
-          username,
-          department,
-          resourceType,
-          resourceQuantity,
-          resourceDescription,
-          reasonForRequest,
-          urgency,
-          dateNeededBy,
-          additionalInformation,
-          requestStatus,
-        } = requestResource;
-
-        // create new request resource object
-        const newRequestResourceObject: RequestResourceSchema = {
-          userId,
-          username,
-          action: 'company',
-          category: 'request resource',
-          resourceType,
-          department,
-          resourceQuantity,
-          resourceDescription,
-          reasonForRequest,
-          urgency,
-          dateNeededBy,
-          additionalInformation,
-          requestStatus,
-        };
-
-        // create new request resource
-        const newRequestResource = await createNewRequestResourceService(newRequestResourceObject);
-
-        return newRequestResource;
-      })
+    const requestResourceDocument = await createNewRequestResourceService(
+      requestResourceSchema
     );
 
-    // filter out undefined values
-    const filteredRequestResources = requestResources.filter((requestResource) => requestResource);
-
-    if (filteredRequestResources.length === newRequestResources.length) {
-      response.status(201).json({
-        message: 'New request resources created successfully',
-        resourceData: newRequestResources,
-      });
-    } else {
+    if (!requestResourceDocument) {
       response.status(400).json({
-        message: 'New request resources could not be created',
+        message: "New request resource could not be created",
         resourceData: [],
       });
+      return;
     }
+
+    response.status(201).json({
+      message: `Successfully created ${requestResourceDocument.reasonForRequest} request resource`,
+      resourceData: [requestResourceDocument],
+    });
   }
 );
 
-// @desc   Get all request resources
-// @route  GET /request-resource
+// @desc   Get all requestResources
+// @route  GET api/v1/company/request-resource
 // @access Private/Admin/Manager
 const getQueriedRequestResourcesHandler = expressAsyncHandler(
   async (
@@ -164,216 +86,322 @@ const getQueriedRequestResourcesHandler = expressAsyncHandler(
   ) => {
     let { newQueryFlag, totalDocuments } = request.body;
 
-    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+    const { filter, projection, options } =
+      request.query as QueryObjectParsedWithDefaults;
 
     // only perform a countDocuments scan if a new query is being made
     if (newQueryFlag) {
-      totalDocuments = await getQueriedTotalRequestResourceService({
+      totalDocuments = await getQueriedTotalRequestResourcesService({
         filter: filter as FilterQuery<RequestResourceDocument> | undefined,
       });
     }
 
-    // get all resource requests
-    const resourceRequests = await getQueriedRequestResourceService({
+    // get all requestResources
+    const requestResource = await getQueriedRequestResourcesService({
       filter: filter as FilterQuery<RequestResourceDocument> | undefined,
       projection: projection as QueryOptions<RequestResourceDocument>,
       options: options as QueryOptions<RequestResourceDocument>,
     });
-    if (resourceRequests.length === 0) {
+
+    if (!requestResource.length) {
       response.status(200).json({
-        message: 'No resource requests that match query parameters were found',
+        message: "No requestResources that match query parameters were found",
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
       });
-    } else {
-      response.status(200).json({
-        message: 'Successfully found resource requests',
-        pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments,
-        resourceData: resourceRequests,
-      });
+      return;
     }
+
+    response.status(200).json({
+      message: "RequestResources found successfully",
+      pages: Math.ceil(totalDocuments / Number(options?.limit)),
+      totalDocuments,
+      resourceData: requestResource,
+    });
   }
 );
 
-// @desc   Get request resource by user
-// @route  GET /request-resource/user
+// @desc   Get all requestResource requests by user
+// @route  GET api/v1/company/request-resource/user
 // @access Private
-const getRequestResourceByUserHandler = expressAsyncHandler(
+const getRequestResourcesByUserHandler = expressAsyncHandler(
   async (
     request: GetQueriedRequestResourcesByUserRequest,
     response: Response<GetQueriedResourceRequestServerResponse<RequestResourceDocument>>
   ) => {
+    // anyone can view their own requestResource requests
     const {
       userInfo: { userId },
     } = request.body;
+
     let { newQueryFlag, totalDocuments } = request.body;
 
-    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+    const { filter, projection, options } =
+      request.query as QueryObjectParsedWithDefaults;
 
     // assign userId to filter
     const filterWithUserId = { ...filter, userId };
 
     // only perform a countDocuments scan if a new query is being made
     if (newQueryFlag) {
-      totalDocuments = await getQueriedTotalRequestResourceService({
+      totalDocuments = await getQueriedTotalRequestResourcesService({
         filter: filterWithUserId,
       });
     }
 
-    const resourceRequests = await getQueriedRequestResourceByUserService({
+    // get all requestResource requests by user
+    const requestResources = await getQueriedRequestResourcesByUserService({
       filter: filterWithUserId as FilterQuery<RequestResourceDocument> | undefined,
       projection: projection as QueryOptions<RequestResourceDocument>,
       options: options as QueryOptions<RequestResourceDocument>,
     });
-    if (resourceRequests.length === 0) {
+
+    if (!requestResources.length) {
       response.status(200).json({
-        message: 'No resource requests found',
+        message: "No requestResource requests found",
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
       });
-    } else {
-      response.status(200).json({
-        message: 'Resource requests found successfully',
-        pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments,
-        resourceData: resourceRequests,
-      });
+      return;
     }
+
+    response.status(200).json({
+      message: "Request Resource requests found successfully",
+      pages: Math.ceil(totalDocuments / Number(options?.limit)),
+      totalDocuments,
+      resourceData: requestResources,
+    });
   }
 );
 
-// @desc   Get request resource by id
-// @route  GET /request-resource/:requestResourceId
+// @desc   Update requestResource status
+// @route  PATCH api/v1/company/request-resource/:requestResourceId
 // @access Private/Admin/Manager
+const updateRequestResourceStatusByIdHandler = expressAsyncHandler(
+  async (
+    request: UpdateRequestResourceByIdRequest,
+    response: Response<ResourceRequestServerResponse<RequestResourceDocument>>
+  ) => {
+    const { requestResourceId } = request.params;
+    const {
+      documentUpdate: { fields, updateOperator },
+      userInfo: { userId },
+    } = request.body;
+
+    // check if user exists
+    const userExists = await getUserByIdService(userId);
+    if (!userExists) {
+      response.status(404).json({ message: "User does not exist", resourceData: [] });
+      return;
+    }
+
+    // update requestResource request status
+    const updatedRequestResource = await updateRequestResourceByIdService({
+      _id: requestResourceId,
+      fields,
+      updateOperator,
+    });
+
+    if (!updatedRequestResource) {
+      response.status(400).json({
+        message: "Request Resource request status update failed. Please try again!",
+        resourceData: [],
+      });
+      return;
+    }
+
+    response.status(200).json({
+      message: "Request Resource request status updated successfully",
+      resourceData: [updatedRequestResource],
+    });
+  }
+);
+
+// @desc   Get an requestResource request
+// @route  GET api/v1/company/request-resource/:requestResourceId
+// @access Private
 const getRequestResourceByIdHandler = expressAsyncHandler(
   async (
     request: GetRequestResourceByIdRequest,
     response: Response<ResourceRequestServerResponse<RequestResourceDocument>>
   ) => {
     const { requestResourceId } = request.params;
-
-    // get resourceRequest
-    const resourceRequest = await getRequestResourceByIdService(requestResourceId);
-    if (resourceRequest) {
-      response.status(200).json({
-        message: 'Request resource retrieved successfully',
-        resourceData: [resourceRequest],
-      });
-    } else {
-      response.status(400).json({
-        message: 'Request resource could not be retrieved',
-        resourceData: [],
-      });
-    }
-  }
-);
-
-// @desc   Update a request resource status by id
-// @route  PATCH /request-resource/:requestResourceId
-// @access Private/Admin/Manager
-const updateRequestResourceStatusByIdHandler = expressAsyncHandler(
-  async (
-    request: UpdateRequestResourceStatusByIdRequest,
-    response: Response<ResourceRequestServerResponse<RequestResourceDocument>>
-  ) => {
-    const { requestResourceId } = request.params;
-    const {
-      requestResource: { requestStatus },
-    } = request.body;
-
-    // check if request resource exists
-    const requestResourceExists = await getRequestResourceByIdService(requestResourceId);
-    if (!requestResourceExists) {
-      response.status(404).json({ message: 'Request resource does not exist', resourceData: [] });
+    const requestResource = await getRequestResourceByIdService(requestResourceId);
+    if (!requestResource) {
+      response
+        .status(404)
+        .json({ message: "Request Resource request not found", resourceData: [] });
       return;
     }
 
-    // update request resource
-    const updatedRequestResource = await updateRequestResourceStatusByIdService({
-      requestResourceId,
-      requestStatus,
+    response.status(200).json({
+      message: "Request Resource request found successfully",
+      resourceData: [requestResource],
     });
-    if (updatedRequestResource) {
-      response.status(200).json({
-        message: 'Request resource updated successfully',
-        resourceData: [updatedRequestResource],
-      });
-    } else {
-      response.status(400).json({
-        message: 'Request resource could not be updated',
-        resourceData: [],
-      });
-    }
   }
 );
 
-// @desc   Delete a request resource
-// @route  DELETE /request-resource/:requestResourceId
-// @access Private/Admin/Manager
-const deleteARequestResourceHandler = expressAsyncHandler(
-  async (
-    request: DeleteARequestResourceRequest,
-    response: Response<ResourceRequestServerResponse<RequestResourceDocument>>
-  ) => {
+// @desc   Delete an requestResource request by its id
+// @route  DELETE api/v1/company/request-resource/:requestResourceId
+// @access Private
+const deleteRequestResourceHandler = expressAsyncHandler(
+  async (request: DeleteRequestResourceRequest, response: Response) => {
     const { requestResourceId } = request.params;
 
-    // check if request resource exists
-    const requestResourceExists = await getRequestResourceByIdService(requestResourceId);
-    if (!requestResourceExists) {
-      response.status(404).json({ message: 'Request resource does not exist', resourceData: [] });
+    // delete requestResource request by id
+    const deletedResult: DeleteResult = await deleteRequestResourceByIdService(
+      requestResourceId
+    );
+
+    if (!deletedResult.deletedCount) {
+      response.status(400).json({
+        message: "Request Resource request could not be deleted",
+        resourceData: [],
+      });
       return;
     }
 
-    // delete resourceRequest
-    const deletedResult: DeleteResult = await deleteARequestResourceService(requestResourceId);
-    if (deletedResult.deletedCount === 1) {
-      response.status(200).json({
-        message: 'Request resource deleted successfully',
-        resourceData: [],
-      });
-    } else {
-      response.status(400).json({
-        message: 'Request resource could not be deleted',
-        resourceData: [],
-      });
-    }
+    response.status(200).json({
+      message: "Request Resource request deleted successfully",
+      resourceData: [],
+    });
   }
 );
 
-// @desc   Delete all request resources
-// @route  DELETE /request-resource
-// @access Private/Admin/Manager
+// @desc    Delete all requestResource requests
+// @route   DELETE api/v1/company/request-resource/delete-all
+// @access  Private
 const deleteAllRequestResourcesHandler = expressAsyncHandler(
+  async (_request: DeleteAllRequestResourcesRequest, response: Response) => {
+    const deletedResult: DeleteResult = await deleteAllRequestResourcesService();
+
+    if (!deletedResult.deletedCount) {
+      response.status(400).json({
+        message: "All requestResource requests could not be deleted",
+        resourceData: [],
+      });
+      return;
+    }
+
+    response.status(200).json({
+      message: "All requestResource requests deleted successfully",
+      resourceData: [],
+    });
+  }
+);
+
+// DEV ROUTE
+// @desc   Create new requestResource requests in bulk
+// @route  POST api/v1/company/request-resource/dev
+// @access Private
+const createNewRequestResourcesBulkHandler = expressAsyncHandler(
   async (
-    _request: DeleteAllRequestResourcesRequest,
+    request: CreateNewRequestResourcesBulkRequest,
     response: Response<ResourceRequestServerResponse<RequestResourceDocument>>
   ) => {
-    // delete all requestResources
-    const deletedResult: DeleteResult = await deleteAllRequestResourcesService();
-    if (deletedResult.deletedCount > 0) {
-      response.status(200).json({
-        message: 'Request resources deleted successfully',
-        resourceData: [],
-      });
-    } else {
+    const { requestResourceSchemas } = request.body;
+
+    const requestResourceDocuments = await Promise.all(
+      requestResourceSchemas.map(async (requestResourceSchema) => {
+        const requestResourceDocument = await createNewRequestResourceService(
+          requestResourceSchema
+        );
+        return requestResourceDocument;
+      })
+    );
+
+    // filter out any null documents
+    const filteredRequestResourceDocuments = requestResourceDocuments.filter(
+      removeUndefinedAndNullValues
+    );
+
+    // check if any documents were created
+    if (filteredRequestResourceDocuments.length === 0) {
       response.status(400).json({
-        message: 'Request resources could not be deleted',
+        message: "Request Resource requests creation failed",
         resourceData: [],
       });
+      return;
     }
+
+    const uncreatedDocumentsAmount =
+      requestResourceSchemas.length - filteredRequestResourceDocuments.length;
+
+    response.status(201).json({
+      message: `Successfully created ${
+        filteredRequestResourceDocuments.length
+      } Request Resource requests.${
+        uncreatedDocumentsAmount
+          ? ` ${uncreatedDocumentsAmount} documents were not created.`
+          : ""
+      }}`,
+      resourceData: filteredRequestResourceDocuments,
+    });
+  }
+);
+
+// DEV ROUTE
+// @desc   Update Request Resources in bulk
+// @route  PATCH api/v1/company/request-resource/dev
+// @access Private
+const updateRequestResourcesBulkHandler = expressAsyncHandler(
+  async (
+    request: UpdateRequestResourcesBulkRequest,
+    response: Response<ResourceRequestServerResponse<RequestResourceDocument>>
+  ) => {
+    const { requestResourceFields } = request.body;
+
+    const updatedRequestResources = await Promise.all(
+      requestResourceFields.map(async (requestResourceField) => {
+        const {
+          documentUpdate: { fields, updateOperator },
+          requestResourceId,
+        } = requestResourceField;
+
+        const updatedRequestResource = await updateRequestResourceByIdService({
+          _id: requestResourceId,
+          fields,
+          updateOperator,
+        });
+
+        return updatedRequestResource;
+      })
+    );
+
+    // filter out any requestResources that were not created
+    const successfullyCreatedRequestResources = updatedRequestResources.filter(
+      removeUndefinedAndNullValues
+    );
+
+    if (successfullyCreatedRequestResources.length === 0) {
+      response.status(400).json({
+        message: "Could not create any Request Resources",
+        resourceData: [],
+      });
+      return;
+    }
+
+    response.status(201).json({
+      message: `Successfully created ${
+        successfullyCreatedRequestResources.length
+      } Request Resources. ${
+        requestResourceFields.length - successfullyCreatedRequestResources.length
+      } Request Resources failed to be created.`,
+      resourceData: successfullyCreatedRequestResources,
+    });
   }
 );
 
 export {
   createNewRequestResourceHandler,
-  createNewRequestResourceBulkHandler,
-  deleteARequestResourceHandler,
-  deleteAllRequestResourcesHandler,
   getQueriedRequestResourcesHandler,
+  getRequestResourcesByUserHandler,
   getRequestResourceByIdHandler,
-  getRequestResourceByUserHandler,
+  deleteRequestResourceHandler,
+  deleteAllRequestResourcesHandler,
   updateRequestResourceStatusByIdHandler,
+  createNewRequestResourcesBulkHandler,
+  updateRequestResourcesBulkHandler,
 };

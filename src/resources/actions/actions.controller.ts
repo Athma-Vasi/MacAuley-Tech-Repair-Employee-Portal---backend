@@ -19,8 +19,8 @@ import {
 } from "./company/expenseClaim";
 import {
   RequestResourceDocument,
-  getQueriedRequestResourceByUserService,
-  getQueriedRequestResourceService,
+  getQueriedRequestResourcesByUserService,
+  getQueriedRequestResourcesService,
 } from "./company/requestResource";
 import {
   LeaveRequestDocument,
@@ -28,7 +28,7 @@ import {
   getQueriedLeaveRequestsService,
 } from "./company/leaveRequest";
 import {
-  BenefitsDocument,
+  BenefitDocument,
   getQueriedBenefitsByUserService,
   getQueriedBenefitsService,
 } from "./company/benefit";
@@ -120,7 +120,7 @@ const getAllActionsDocumentsHandler = expressAsyncHandler(
         options: options as QueryOptions<ExpenseClaimDocument>,
       }),
       // request resource
-      getQueriedRequestResourceService({
+      getQueriedRequestResourcesService({
         filter: pendingFilter as FilterQuery<RequestResourceDocument> | undefined,
         projection: projection as QueryOptions<RequestResourceDocument>,
         options: options as QueryOptions<RequestResourceDocument>,
@@ -133,9 +133,9 @@ const getAllActionsDocumentsHandler = expressAsyncHandler(
       }),
       // benefits
       getQueriedBenefitsService({
-        filter: pendingFilter as FilterQuery<BenefitsDocument> | undefined,
-        projection: projection as QueryOptions<BenefitsDocument>,
-        options: options as QueryOptions<BenefitsDocument>,
+        filter: pendingFilter as FilterQuery<BenefitDocument> | undefined,
+        projection: projection as QueryOptions<BenefitDocument>,
+        options: options as QueryOptions<BenefitDocument>,
       }),
 
       // general data
@@ -291,7 +291,7 @@ const getUsersActionsDocumentsHandler = expressAsyncHandler(
         options: options as QueryOptions<ExpenseClaimDocument>,
       }),
       // request resource
-      getQueriedRequestResourceByUserService({
+      getQueriedRequestResourcesByUserService({
         filter: pendingFilter as FilterQuery<RequestResourceDocument> | undefined,
         projection: projection as QueryOptions<RequestResourceDocument>,
         options: options as QueryOptions<RequestResourceDocument>,
@@ -304,9 +304,9 @@ const getUsersActionsDocumentsHandler = expressAsyncHandler(
       }),
       // benefits
       getQueriedBenefitsByUserService({
-        filter: pendingFilter as FilterQuery<BenefitsDocument> | undefined,
-        projection: projection as QueryOptions<BenefitsDocument>,
-        options: options as QueryOptions<BenefitsDocument>,
+        filter: pendingFilter as FilterQuery<BenefitDocument> | undefined,
+        projection: projection as QueryOptions<BenefitDocument>,
+        options: options as QueryOptions<BenefitDocument>,
       }),
 
       // general data

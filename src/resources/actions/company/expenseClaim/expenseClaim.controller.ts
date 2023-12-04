@@ -47,7 +47,7 @@ import { getUserByIdService } from "../../../user";
 import { removeUndefinedAndNullValues } from "../../../../utils";
 
 // @desc   Create a new expense claim
-// @route  POST /expense-claim
+// @route  POST api/v1/company/expense-claim
 // @access Private
 const createNewExpenseClaimHandler = expressAsyncHandler(
   async (

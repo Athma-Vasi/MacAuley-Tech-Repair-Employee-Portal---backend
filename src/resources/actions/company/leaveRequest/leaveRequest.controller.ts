@@ -35,7 +35,7 @@ import { removeUndefinedAndNullValues } from "../../../../utils";
 import { getUserByIdService } from "../../../user";
 
 // @desc   Create a new leave request
-// @route  POST /leave-request
+// @route  POST api/v1/company/leave-request
 // @access Private
 const createNewLeaveRequestHandler = expressAsyncHandler(
   async (

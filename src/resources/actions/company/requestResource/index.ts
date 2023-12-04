@@ -6,42 +6,46 @@
  * Imports
  */
 
-import { RequestResourceModel } from './requestResource.model';
-import { requestResourceRouter } from './requestResource.routes';
+import { RequestResourceModel } from "./requestResource.model";
+import { requestResourceRouter } from "./requestResource.routes";
 import {
   createNewRequestResourceHandler,
-  deleteARequestResourceHandler,
+  createNewRequestResourcesBulkHandler,
   deleteAllRequestResourcesHandler,
+  deleteRequestResourceHandler,
   getQueriedRequestResourcesHandler,
   getRequestResourceByIdHandler,
-  getRequestResourceByUserHandler,
+  getRequestResourcesByUserHandler,
   updateRequestResourceStatusByIdHandler,
-} from './requestResource.controller';
+  updateRequestResourcesBulkHandler,
+} from "./requestResource.controller";
 import {
   createNewRequestResourceService,
-  deleteARequestResourceService,
   deleteAllRequestResourcesService,
-  getQueriedRequestResourceService,
+  deleteRequestResourceByIdService,
+  getQueriedRequestResourcesByUserService,
+  getQueriedRequestResourcesService,
+  getQueriedTotalRequestResourcesService,
   getRequestResourceByIdService,
-  getQueriedRequestResourceByUserService,
-  getQueriedTotalRequestResourceService,
-  updateRequestResourceStatusByIdService,
-} from './requestResource.service';
+  updateRequestResourceByIdService,
+} from "./requestResource.service";
 
 import type {
   RequestResourceDocument,
   RequestResourceSchema,
   RequestResourceKind,
-} from './requestResource.model';
+} from "./requestResource.model";
 import type {
   CreateNewRequestResourceRequest,
-  DeleteARequestResourceRequest,
+  CreateNewRequestResourcesBulkRequest,
   DeleteAllRequestResourcesRequest,
+  DeleteRequestResourceRequest,
+  GetQueriedRequestResourcesByUserRequest,
   GetQueriedRequestResourcesRequest,
   GetRequestResourceByIdRequest,
-  GetQueriedRequestResourcesByUserRequest,
-  UpdateRequestResourceStatusByIdRequest,
-} from './requestResource.types';
+  UpdateRequestResourceByIdRequest,
+  UpdateRequestResourcesBulkRequest,
+} from "./requestResource.types";
 
 /**
  * Exports
@@ -51,20 +55,22 @@ export {
   RequestResourceModel,
   requestResourceRouter,
   createNewRequestResourceHandler,
-  deleteARequestResourceHandler,
+  createNewRequestResourcesBulkHandler,
   deleteAllRequestResourcesHandler,
+  deleteRequestResourceHandler,
   getQueriedRequestResourcesHandler,
   getRequestResourceByIdHandler,
-  getRequestResourceByUserHandler,
+  getRequestResourcesByUserHandler,
   updateRequestResourceStatusByIdHandler,
+  updateRequestResourcesBulkHandler,
   createNewRequestResourceService,
-  deleteARequestResourceService,
   deleteAllRequestResourcesService,
-  getQueriedRequestResourceService,
+  deleteRequestResourceByIdService,
+  getQueriedRequestResourcesByUserService,
+  getQueriedRequestResourcesService,
+  getQueriedTotalRequestResourcesService,
   getRequestResourceByIdService,
-  getQueriedRequestResourceByUserService,
-  getQueriedTotalRequestResourceService,
-  updateRequestResourceStatusByIdService,
+  updateRequestResourceByIdService,
 };
 
 export type {
@@ -72,10 +78,12 @@ export type {
   RequestResourceSchema,
   RequestResourceKind,
   CreateNewRequestResourceRequest,
-  DeleteARequestResourceRequest,
+  CreateNewRequestResourcesBulkRequest,
   DeleteAllRequestResourcesRequest,
+  DeleteRequestResourceRequest,
+  GetQueriedRequestResourcesByUserRequest,
   GetQueriedRequestResourcesRequest,
   GetRequestResourceByIdRequest,
-  GetQueriedRequestResourcesByUserRequest,
-  UpdateRequestResourceStatusByIdRequest,
+  UpdateRequestResourceByIdRequest,
+  UpdateRequestResourcesBulkRequest,
 };

@@ -1,38 +1,41 @@
-import { Router } from 'express';
+import { Router } from "express";
 import {
-  createNewRequestResourceBulkHandler,
   createNewRequestResourceHandler,
-  deleteARequestResourceHandler,
-  deleteAllRequestResourcesHandler,
   getQueriedRequestResourcesHandler,
+  getRequestResourcesByUserHandler,
   getRequestResourceByIdHandler,
-  getRequestResourceByUserHandler,
+  deleteRequestResourceHandler,
+  deleteAllRequestResourcesHandler,
   updateRequestResourceStatusByIdHandler,
-} from './requestResource.controller';
-import { assignQueryDefaults, verifyRoles } from '../../../../middlewares';
-import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
+  createNewRequestResourcesBulkHandler,
+  updateRequestResourcesBulkHandler,
+} from "./requestResource.controller";
+import { assignQueryDefaults } from "../../../../middlewares";
+import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../../constants";
 
 const requestResourceRouter = Router();
 
-requestResourceRouter.use(verifyRoles());
-
 requestResourceRouter
-  .route('/')
+  .route("/")
   .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedRequestResourcesHandler)
-  .post(createNewRequestResourceHandler)
-  .delete(deleteAllRequestResourcesHandler);
+  .post(createNewRequestResourceHandler);
+
+requestResourceRouter.route("/delete-all").delete(deleteAllRequestResourcesHandler);
 
 requestResourceRouter
-  .route('/user')
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getRequestResourceByUserHandler);
+  .route("/user")
+  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getRequestResourcesByUserHandler);
 
-// DEV ROUTE
-requestResourceRouter.route('/dev').post(createNewRequestResourceBulkHandler);
+// DEV ROUTES
+requestResourceRouter
+  .route("/dev")
+  .post(createNewRequestResourcesBulkHandler)
+  .patch(updateRequestResourcesBulkHandler);
 
 requestResourceRouter
-  .route('/:requestResourceId')
+  .route("/:requestResourceId")
   .get(getRequestResourceByIdHandler)
-  .delete(deleteARequestResourceHandler)
+  .delete(deleteRequestResourceHandler)
   .patch(updateRequestResourceStatusByIdHandler);
 
 export { requestResourceRouter };

@@ -1,38 +1,41 @@
-import { Router } from 'express';
+import { Router } from "express";
 import {
   createNewLeaveRequestHandler,
-  deleteALeaveRequestHandler,
-  deleteAllLeaveRequestsHandler,
   getQueriedLeaveRequestsHandler,
+  getLeaveRequestsByUserHandler,
   getLeaveRequestByIdHandler,
-  getQueriedLeaveRequestsByUserHandler,
+  deleteLeaveRequestHandler,
+  deleteAllLeaveRequestsHandler,
   updateLeaveRequestStatusByIdHandler,
-  createNewLeaveRequestBulkHandler,
-} from './leaveRequest.controller';
-import { assignQueryDefaults, verifyRoles } from '../../../../middlewares';
-import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
+  createNewLeaveRequestsBulkHandler,
+  updateLeaveRequestsBulkHandler,
+} from "./leaveRequest.controller";
+import { assignQueryDefaults } from "../../../../middlewares";
+import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../../constants";
 
 const leaveRequestRouter = Router();
 
-leaveRequestRouter.use(verifyRoles());
-
 leaveRequestRouter
-  .route('/')
-  .post(createNewLeaveRequestHandler)
+  .route("/")
   .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedLeaveRequestsHandler)
-  .delete(deleteAllLeaveRequestsHandler);
+  .post(createNewLeaveRequestHandler);
+
+leaveRequestRouter.route("/delete-all").delete(deleteAllLeaveRequestsHandler);
 
 leaveRequestRouter
-  .route('/user')
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedLeaveRequestsByUserHandler);
+  .route("/user")
+  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getLeaveRequestsByUserHandler);
 
-// DEV ROUTE
-leaveRequestRouter.route('/dev').post(createNewLeaveRequestBulkHandler);
+// DEV ROUTES
+leaveRequestRouter
+  .route("/dev")
+  .post(createNewLeaveRequestsBulkHandler)
+  .patch(updateLeaveRequestsBulkHandler);
 
 leaveRequestRouter
-  .route('/:leaveRequestId')
+  .route("/:leaveRequestId")
   .get(getLeaveRequestByIdHandler)
-  .delete(deleteALeaveRequestHandler)
+  .delete(deleteLeaveRequestHandler)
   .patch(updateLeaveRequestStatusByIdHandler);
 
 export { leaveRequestRouter };

@@ -35,7 +35,7 @@ import { getUserByIdService, getUserByUsernameService } from "../../../user";
 import { removeUndefinedAndNullValues } from "../../../../utils";
 
 // @desc   Create a new benefits plan
-// @route  POST /benefits
+// @route  POST api/v1/company/benefits
 // @access Private/Admin/Manager
 const createNewBenefitHandler = expressAsyncHandler(
   async (
