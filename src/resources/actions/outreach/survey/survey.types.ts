@@ -1,18 +1,14 @@
-import type { Types } from 'mongoose';
-import type { RequestAfterJWTVerification } from '../../../auth';
-import type {
-  SurveyBuilderDocument,
-  SurveyQuestion,
-  SurveyRecipient,
-  SurveyResponseInput,
-  SurveyResponseKind,
-  SurveyStatistics,
-} from './survey.model';
-import type { UserRoles } from '../../../user';
-import { GetQueriedResourceRequest } from '../../../../types';
+import type { Types } from "mongoose";
+import type { RequestAfterJWTVerification } from "../../../auth";
+import type { UserRoles } from "../../../user";
+import {
+  DocumentUpdateOperation,
+  GetQueriedResourceByUserRequest,
+  GetQueriedResourceRequest,
+} from "../../../../types";
+import { SurveyDocument, SurveySchema } from "./survey.model";
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
-
 interface CreateNewSurveyRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {
@@ -20,16 +16,47 @@ interface CreateNewSurveyRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    survey: {
-      surveyTitle: string;
-      surveyDescription: string;
-      sendTo: SurveyRecipient;
-      expiryDate: NativeDate;
-      questions: Array<SurveyQuestion>;
-      surveyStatistics: SurveyStatistics[];
-    };
+    sessionId: Types.ObjectId;
+    surveySchema: SurveySchema;
   };
 }
+
+interface DeleteSurveyRequest extends RequestAfterJWTVerification {
+  params: {
+    surveyId: string;
+  };
+}
+
+type DeleteAllSurveysRequest = RequestAfterJWTVerification;
+
+type GetQueriedSurveysByUserRequest = GetQueriedResourceByUserRequest;
+
+interface GetSurveyByIdRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+  };
+  params: { surveyId: string };
+}
+
+interface UpdateSurveyByIdRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    documentUpdate: DocumentUpdateOperation<SurveyDocument>;
+  };
+  params: { surveyId: string };
+}
+
+type GetQueriedSurveysRequest = GetQueriedResourceRequest;
 
 // DEV ROUTE
 interface CreateNewSurveysBulkRequest extends RequestAfterJWTVerification {
@@ -39,66 +66,35 @@ interface CreateNewSurveysBulkRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    surveys: {
-      userId: Types.ObjectId;
-      username: string;
-      creatorRole: UserRoles;
-      surveyTitle: string;
-      surveyDescription: string;
-      sendTo: SurveyRecipient;
-      expiryDate: NativeDate;
-      questions: Array<SurveyQuestion>;
-      surveyStatistics: SurveyStatistics[];
-    }[];
+    sessionId: Types.ObjectId;
+    surveySchemas: SurveySchema[];
   };
 }
 
-interface DeleteASurveyRequest extends RequestAfterJWTVerification {
-  params: {
-    surveyId: string;
-  };
-}
-
-type DeleteAllSurveysRequest = RequestAfterJWTVerification;
-
-type GetQueriedSurveysRequest = GetQueriedResourceRequest;
-
-type GetQueriedSurveysByUserRequest = GetQueriedResourceRequest;
-
-interface GetSurveyByIdRequest extends RequestAfterJWTVerification {
+// DEV ROUTE
+interface UpdateSurveysBulkRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {
       userId: Types.ObjectId;
       username: string;
       roles: UserRoles;
     };
-  };
-  params: { surveyId: string };
-}
-
-interface UpdateSurveyStatisticsByIdRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-    surveyResponses: {
-      question: string;
-      inputKind: SurveyResponseInput;
-      response: string[] | string | number;
+    sessionId: Types.ObjectId;
+    surveyFields: {
+      surveyId: Types.ObjectId;
+      documentUpdate: DocumentUpdateOperation<SurveyDocument>;
     }[];
   };
-  params: { surveyId: string };
 }
 
 export type {
   CreateNewSurveyRequest,
-  CreateNewSurveysBulkRequest,
-  DeleteASurveyRequest,
+  DeleteSurveyRequest,
   DeleteAllSurveysRequest,
-  GetQueriedSurveysRequest,
   GetQueriedSurveysByUserRequest,
   GetSurveyByIdRequest,
-  UpdateSurveyStatisticsByIdRequest,
+  GetQueriedSurveysRequest,
+  UpdateSurveyByIdRequest,
+  CreateNewSurveysBulkRequest,
+  UpdateSurveysBulkRequest,
 };

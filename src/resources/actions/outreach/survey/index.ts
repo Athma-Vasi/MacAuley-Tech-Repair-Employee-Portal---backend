@@ -1,77 +1,93 @@
 /**
- * This barrel file is used to import/export surveyBuilder model, router, types, handlers and services
+ * This barrel file is used to import/export survey model, router, types, handlers and services
  */
 
 /**
  * Imports
  */
 
-import { SurveyBuilderModel } from './survey.model';
-import { surveyBuilderRouter } from './survey.routes';
+import { SurveyModel } from "./survey.model";
+import { surveyRouter } from "./survey.routes";
 import {
   createNewSurveyHandler,
-  deleteASurveyHandler,
+  createNewSurveysBulkHandler,
   deleteAllSurveysHandler,
+  deleteSurveyHandler,
   getQueriedSurveysHandler,
   getSurveyByIdHandler,
-  getQueriedSurveysByUserHandler,
-} from './survey.controller';
+  getSurveysByUserHandler,
+  updateSurveyStatusByIdHandler,
+  updateSurveysBulkHandler,
+} from "./survey.controller";
 import {
   createNewSurveyService,
-  deleteASurveyService,
   deleteAllSurveysService,
-  getQueriedSurveysService,
-  getSurveyByIdService,
+  deleteSurveyByIdService,
   getQueriedSurveysByUserService,
-} from './survey.service';
+  getQueriedSurveysService,
+  getQueriedTotalSurveysService,
+  getSurveyByIdService,
+  updateSurveyByIdService,
+} from "./survey.service";
 
 import type {
-  SurveyBuilderDocument,
-  SurveyBuilderSchema,
+  SurveyDocument,
+  SurveySchema,
   SurveyQuestion,
   SurveyRecipient,
   SurveyResponseKind,
-} from './survey.model';
+} from "./survey.model";
 import type {
   CreateNewSurveyRequest,
-  DeleteASurveyRequest,
+  CreateNewSurveysBulkRequest,
   DeleteAllSurveysRequest,
+  DeleteSurveyRequest,
+  GetQueriedSurveysByUserRequest,
   GetQueriedSurveysRequest,
   GetSurveyByIdRequest,
-  GetQueriedSurveysByUserRequest,
-} from './survey.types';
+  UpdateSurveyByIdRequest,
+  UpdateSurveysBulkRequest,
+} from "./survey.types";
 
 /**
  * Exports
  */
 
 export {
-  SurveyBuilderModel,
-  surveyBuilderRouter,
+  SurveyModel,
+  surveyRouter,
   createNewSurveyHandler,
-  deleteASurveyHandler,
-  deleteAllSurveysHandler,
-  getQueriedSurveysHandler,
-  getSurveyByIdHandler,
-  getQueriedSurveysByUserHandler,
   createNewSurveyService,
-  deleteASurveyService,
+  createNewSurveysBulkHandler,
+  deleteAllSurveysHandler,
   deleteAllSurveysService,
-  getQueriedSurveysService,
-  getSurveyByIdService,
+  deleteSurveyByIdService,
+  deleteSurveyHandler,
   getQueriedSurveysByUserService,
+  getQueriedSurveysHandler,
+  getQueriedSurveysService,
+  getQueriedTotalSurveysService,
+  getSurveyByIdHandler,
+  getSurveyByIdService,
+  getSurveysByUserHandler,
+  updateSurveyByIdService,
+  updateSurveyStatusByIdHandler,
+  updateSurveysBulkHandler,
 };
 
 export type {
-  SurveyBuilderDocument,
-  SurveyBuilderSchema,
+  SurveyDocument,
+  SurveySchema,
   SurveyQuestion,
   SurveyRecipient,
   SurveyResponseKind,
   CreateNewSurveyRequest,
-  DeleteASurveyRequest,
+  CreateNewSurveysBulkRequest,
   DeleteAllSurveysRequest,
+  DeleteSurveyRequest,
+  GetQueriedSurveysByUserRequest,
   GetQueriedSurveysRequest,
   GetSurveyByIdRequest,
-  GetQueriedSurveysByUserRequest,
+  UpdateSurveyByIdRequest,
+  UpdateSurveysBulkRequest,
 };

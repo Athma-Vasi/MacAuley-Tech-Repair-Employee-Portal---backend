@@ -1,39 +1,41 @@
-import { Router } from 'express';
-
+import { Router } from "express";
 import {
   createNewSurveyHandler,
-  deleteASurveyHandler,
-  deleteAllSurveysHandler,
   getQueriedSurveysHandler,
+  getSurveysByUserHandler,
   getSurveyByIdHandler,
-  getQueriedSurveysByUserHandler,
-  updateSurveyStatisticsByIdHandler,
+  deleteSurveyHandler,
+  deleteAllSurveysHandler,
+  updateSurveyStatusByIdHandler,
   createNewSurveysBulkHandler,
-} from './survey.controller';
-import { assignQueryDefaults, verifyRoles } from '../../../../middlewares';
-import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
+  updateSurveysBulkHandler,
+} from "./survey.controller";
+import { assignQueryDefaults } from "../../../../middlewares";
+import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../../constants";
 
-const surveyBuilderRouter = Router();
+const surveyRouter = Router();
 
-surveyBuilderRouter.use(verifyRoles());
-
-surveyBuilderRouter
-  .route('/')
-  .post(createNewSurveyHandler)
+surveyRouter
+  .route("/")
   .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedSurveysHandler)
-  .delete(deleteAllSurveysHandler);
+  .post(createNewSurveyHandler);
 
-surveyBuilderRouter
-  .route('/user')
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedSurveysByUserHandler);
+surveyRouter.route("/delete-all").delete(deleteAllSurveysHandler);
 
-// DEV ROUTE
-surveyBuilderRouter.route('/dev').post(createNewSurveysBulkHandler);
+surveyRouter
+  .route("/user")
+  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getSurveysByUserHandler);
 
-surveyBuilderRouter
-  .route('/:surveyId')
+// DEV ROUTES
+surveyRouter
+  .route("/dev")
+  .post(createNewSurveysBulkHandler)
+  .patch(updateSurveysBulkHandler);
+
+surveyRouter
+  .route("/:surveyId")
   .get(getSurveyByIdHandler)
-  .delete(deleteASurveyHandler)
-  .patch(updateSurveyStatisticsByIdHandler);
+  .delete(deleteSurveyHandler)
+  .patch(updateSurveyStatusByIdHandler);
 
-export { surveyBuilderRouter };
+export { surveyRouter };

@@ -1,24 +1,33 @@
-import { Types } from 'mongoose';
+import type { Types } from "mongoose";
+import type { DeleteResult } from "mongodb";
+import type { SurveyDocument, SurveySchema } from "./survey.model";
 
-import type { DeleteResult } from 'mongodb';
-import type { SurveyBuilderDocument, SurveyBuilderSchema, SurveyStatistics } from './survey.model';
-import type {
+import { SurveyModel } from "./survey.model";
+import {
   DatabaseResponse,
   DatabaseResponseNullable,
   QueriedResourceGetRequestServiceInput,
   QueriedTotalResourceGetRequestServiceInput,
-} from '../../../../types';
+  UpdateDocumentByIdServiceInput,
+} from "../../../../types";
 
-import { SurveyBuilderModel } from './survey.model';
-
-async function createNewSurveyService(
-  surveyObj: SurveyBuilderSchema
-): Promise<SurveyBuilderDocument> {
+async function getSurveyByIdService(
+  surveyId: Types.ObjectId | string
+): DatabaseResponseNullable<SurveyDocument> {
   try {
-    const newSurvey = await SurveyBuilderModel.create(surveyObj);
-    return newSurvey;
+    const survey = await SurveyModel.findById(surveyId).lean().exec();
+    return survey;
   } catch (error: any) {
-    throw new Error(error, { cause: 'createNewSurveyService' });
+    throw new Error(error, { cause: "getSurveyByIdService" });
+  }
+}
+
+async function createNewSurveyService(surveySchema: SurveySchema): Promise<SurveyDocument> {
+  try {
+    const survey = await SurveyModel.create(surveySchema);
+    return survey;
+  } catch (error: any) {
+    throw new Error(error, { cause: "createNewSurveyService" });
   }
 }
 
@@ -26,23 +35,23 @@ async function getQueriedSurveysService({
   filter = {},
   projection = null,
   options = {},
-}: QueriedResourceGetRequestServiceInput<SurveyBuilderDocument>): DatabaseResponse<SurveyBuilderDocument> {
+}: QueriedResourceGetRequestServiceInput<SurveyDocument>): DatabaseResponse<SurveyDocument> {
   try {
-    const surveys = await SurveyBuilderModel.find(filter, projection, options).lean().exec();
-    return surveys;
+    const survey = await SurveyModel.find(filter, projection, options).lean().exec();
+    return survey;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getQueriedSurveysService' });
+    throw new Error(error, { cause: "getQueriedSurveysService" });
   }
 }
 
 async function getQueriedTotalSurveysService({
   filter = {},
-}: QueriedTotalResourceGetRequestServiceInput<SurveyBuilderDocument>): Promise<number> {
+}: QueriedTotalResourceGetRequestServiceInput<SurveyDocument>): Promise<number> {
   try {
-    const totalSurveys = await SurveyBuilderModel.countDocuments(filter).lean().exec();
+    const totalSurveys = await SurveyModel.countDocuments(filter).lean().exec();
     return totalSurveys;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getQueriedTotalSurveysService' });
+    throw new Error(error, { cause: "getQueriedTotalSurveysService" });
   }
 }
 
@@ -50,73 +59,66 @@ async function getQueriedSurveysByUserService({
   filter = {},
   projection = null,
   options = {},
-}: QueriedResourceGetRequestServiceInput<SurveyBuilderDocument>): DatabaseResponse<SurveyBuilderDocument> {
+}: QueriedResourceGetRequestServiceInput<SurveyDocument>): DatabaseResponse<SurveyDocument> {
   try {
-    const surveys = await SurveyBuilderModel.find(filter, projection, options).lean().exec();
+    const surveys = await SurveyModel.find(filter, projection, options).lean().exec();
     return surveys;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getQueriedSurveysByUserService' });
-  }
-}
-
-async function getSurveyByIdService(
-  surveyId: string | Types.ObjectId
-): DatabaseResponseNullable<SurveyBuilderDocument> {
-  try {
-    const survey = await SurveyBuilderModel.findById(surveyId).select('-__v').lean().exec();
-    return survey;
-  } catch (error: any) {
-    throw new Error(error, { cause: 'getSurveyByIdService' });
+    throw new Error(error, { cause: "getQueriedSurveysByUserService" });
   }
 }
 
 async function updateSurveyByIdService({
-  surveyId,
-  surveyField,
-}: {
-  surveyId: string | Types.ObjectId;
-  surveyField: Partial<SurveyBuilderSchema>;
-}): DatabaseResponseNullable<SurveyBuilderDocument> {
+  _id,
+  fields,
+  updateOperator,
+}: UpdateDocumentByIdServiceInput<SurveyDocument>) {
+  const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
+  const updateObject = JSON.parse(updateString);
+
   try {
-    const survey = await SurveyBuilderModel.findByIdAndUpdate(
-      surveyId,
-      { ...surveyField },
-      { new: true }
-    )
-      .select(['-__v', '-action', '-category'])
+    const survey = await SurveyModel.findByIdAndUpdate(_id, updateObject, {
+      new: true,
+    })
       .lean()
       .exec();
     return survey;
   } catch (error: any) {
-    throw new Error(error, { cause: 'updateSurveyByIdService' });
+    throw new Error(error, { cause: "updateSurveyStatusByIdService" });
   }
 }
 
-async function deleteASurveyService(surveyId: string): Promise<DeleteResult> {
+async function deleteSurveyByIdService(
+  surveyId: Types.ObjectId | string
+): Promise<DeleteResult> {
   try {
-    const deleteResult = await SurveyBuilderModel.deleteOne({ _id: surveyId }).lean().exec();
-    return deleteResult;
+    const deletedResult = await SurveyModel.deleteOne({
+      _id: surveyId,
+    })
+      .lean()
+      .exec();
+    return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: 'deleteASurveyService' });
+    throw new Error(error, { cause: "deleteSurveyByIdService" });
   }
 }
 
 async function deleteAllSurveysService(): Promise<DeleteResult> {
   try {
-    const deleteResult = await SurveyBuilderModel.deleteMany({}).lean().exec();
-    return deleteResult;
+    const deletedResult = await SurveyModel.deleteMany({}).lean().exec();
+    return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: 'deleteAllSurveysService' });
+    throw new Error(error, { cause: "deleteAllSurveysService" });
   }
 }
 
 export {
-  createNewSurveyService,
   getSurveyByIdService,
-  deleteASurveyService,
-  deleteAllSurveysService,
+  createNewSurveyService,
   getQueriedSurveysService,
-  getQueriedSurveysByUserService,
   getQueriedTotalSurveysService,
+  getQueriedSurveysByUserService,
+  deleteSurveyByIdService,
+  deleteAllSurveysService,
   updateSurveyByIdService,
 };

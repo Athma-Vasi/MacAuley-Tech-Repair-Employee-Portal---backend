@@ -39,7 +39,7 @@ type EventDocument = EventSchema & {
   __v: number;
 };
 
-const eventCreatorSchema = new Schema<EventSchema>(
+const eventSchema = new Schema<EventSchema>(
   {
     userId: {
       type: Schema.Types.ObjectId,
@@ -109,7 +109,7 @@ const eventCreatorSchema = new Schema<EventSchema>(
 );
 
 // text indexes for search
-eventCreatorSchema.index({
+eventSchema.index({
   username: "text",
   eventTitle: "text",
   eventDescription: "text",
@@ -118,7 +118,7 @@ eventCreatorSchema.index({
   requiredItems: "text",
 });
 
-const EventModel = model<EventDocument>("Event", eventCreatorSchema);
+const EventModel = model<EventDocument>("Event", eventSchema);
 
 export { EventModel };
 export type { EventSchema, EventDocument, EventKind };

@@ -1,202 +1,129 @@
-import expressAsyncHandler from 'express-async-handler';
+import expressAsyncHandler from "express-async-handler";
 
-import type { DeleteResult } from 'mongodb';
-import type { Response } from 'express';
-import type { SurveyBuilderDocument, SurveyBuilderSchema, SurveyStatistics } from './survey.model';
+import type { FilterQuery, QueryOptions } from "mongoose";
+import type { Response } from "express";
+import type { DeleteResult } from "mongodb";
 import type {
   CreateNewSurveyRequest,
-  DeleteASurveyRequest,
+  CreateNewSurveysBulkRequest,
   DeleteAllSurveysRequest,
-  GetQueriedSurveysRequest,
+  DeleteSurveyRequest,
   GetSurveyByIdRequest,
   GetQueriedSurveysByUserRequest,
-  UpdateSurveyStatisticsByIdRequest,
-  CreateNewSurveysBulkRequest,
-} from './survey.types';
-import {
-  createNewSurveyService,
-  deleteASurveyService,
-  deleteAllSurveysService,
-  getQueriedSurveysService,
-  getSurveyByIdService,
-  getQueriedSurveysByUserService,
-  getQueriedTotalSurveysService,
-  updateSurveyByIdService,
-} from './survey.service';
-import {
+  GetQueriedSurveysRequest,
+  UpdateSurveyByIdRequest,
+  UpdateSurveysBulkRequest,
+} from "./survey.types";
+import type {
   GetQueriedResourceRequestServerResponse,
   QueryObjectParsedWithDefaults,
   ResourceRequestServerResponse,
-} from '../../../../types';
-import { FilterQuery, QueryOptions, Types } from 'mongoose';
-import { UserDocument, getUserByIdService, updateUserByIdService } from '../../../user';
+} from "../../../../types";
+import type { SurveyDocument, SurveySchema } from "./survey.model";
+
+import {
+  createNewSurveyService,
+  deleteAllSurveysService,
+  deleteSurveyByIdService,
+  getSurveyByIdService,
+  getQueriedSurveysByUserService,
+  getQueriedSurveysService,
+  getQueriedTotalSurveysService,
+  updateSurveyByIdService,
+} from "./survey.service";
+import { removeUndefinedAndNullValues } from "../../../../utils";
+import { getUserByIdService } from "../../../user";
 
 // @desc   Create a new survey
-// @route  POST /survey-builder
-// @access Private/Admin/Manager
+// @route  POST api/v1/actions/general/survey
+// @access Private
 const createNewSurveyHandler = expressAsyncHandler(
   async (
     request: CreateNewSurveyRequest,
-    response: Response<ResourceRequestServerResponse<SurveyBuilderDocument>>
+    response: Response<ResourceRequestServerResponse<SurveyDocument>>
   ) => {
-    const {
-      userInfo: { userId, username, roles },
-      survey: { surveyTitle, surveyDescription, sendTo, expiryDate, questions, surveyStatistics },
-    } = request.body;
+    const { surveySchema } = request.body;
 
-    // create new survey object
-    const newSurveyObject: SurveyBuilderSchema = {
-      userId,
-      username,
-      creatorRole: roles,
-      action: 'outreach',
-      category: 'survey',
+    const surveyDocument = await createNewSurveyService(surveySchema);
 
-      surveyTitle,
-      surveyDescription,
-      sendTo,
-      expiryDate,
-      questions,
-
-      surveyStatistics,
-    };
-
-    // create new survey
-    const newSurvey = await createNewSurveyService(newSurveyObject);
-    if (!newSurvey) {
-      response.status(400).json({ message: 'Unable to create new survey', resourceData: [] });
+    if (!surveyDocument) {
+      response.status(400).json({
+        message: "New survey could not be created",
+        resourceData: [],
+      });
       return;
     }
 
-    response
-      .status(201)
-      .json({ message: 'Successfully created new survey!', resourceData: [newSurvey] });
-  }
-);
-
-// DEV ROUTE
-// @desc   Create new surveys in bulk
-// @route  POST /survey-builder/dev
-// @access Private/Admin/Manager
-const createNewSurveysBulkHandler = expressAsyncHandler(
-  async (
-    request: CreateNewSurveysBulkRequest,
-    response: Response<ResourceRequestServerResponse<SurveyBuilderDocument>>
-  ) => {
-    const { surveys } = request.body;
-
-    // create new surveys
-    const newSurveys = await Promise.all(
-      surveys.map(async (survey) => {
-        const {
-          userId,
-          username,
-          creatorRole,
-          surveyTitle,
-          surveyDescription,
-          sendTo,
-          expiryDate,
-          questions,
-          surveyStatistics,
-        } = survey;
-
-        // create new survey object
-        const newSurveyObject: SurveyBuilderSchema = {
-          userId,
-          username,
-          creatorRole,
-          action: 'outreach',
-          category: 'survey',
-
-          surveyTitle,
-          surveyDescription,
-          sendTo,
-          expiryDate,
-          questions,
-
-          surveyStatistics,
-        };
-
-        // create new survey
-        const newSurvey = await createNewSurveyService(newSurveyObject);
-
-        return newSurvey;
-      })
-    );
-
-    // filter out undefined values
-    const newSurveysFiltered = newSurveys.filter(
-      (survey) => survey !== undefined
-    ) as SurveyBuilderDocument[];
-
-    // check if any surveys were created
-    if (newSurveysFiltered.length === surveys.length) {
-      response
-        .status(201)
-        .json({ message: 'Successfully created new surveys!', resourceData: newSurveysFiltered });
-    } else {
-      response.status(400).json({ message: 'Unable to create new surveys', resourceData: [] });
-    }
+    response.status(201).json({
+      message: 'Successfully created survey',
+      resourceData: [surveyDocument],
+    });
   }
 );
 
 // @desc   Get all surveys
-// @route  GET /survey-builder
+// @route  GET api/v1/actions/general/survey
 // @access Private/Admin/Manager
 const getQueriedSurveysHandler = expressAsyncHandler(
   async (
     request: GetQueriedSurveysRequest,
-    response: Response<GetQueriedResourceRequestServerResponse<SurveyBuilderDocument>>
+    response: Response<GetQueriedResourceRequestServerResponse<SurveyDocument>>
   ) => {
     let { newQueryFlag, totalDocuments } = request.body;
 
-    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+    const { filter, projection, options } =
+      request.query as QueryObjectParsedWithDefaults;
 
     // only perform a countDocuments scan if a new query is being made
     if (newQueryFlag) {
       totalDocuments = await getQueriedTotalSurveysService({
-        filter: filter as FilterQuery<SurveyBuilderDocument> | undefined,
+        filter: filter as FilterQuery<SurveyDocument> | undefined,
       });
     }
 
     // get all surveys
-    const surveys = await getQueriedSurveysService({
-      filter: filter as FilterQuery<SurveyBuilderDocument> | undefined,
-      projection: projection as QueryOptions<SurveyBuilderDocument>,
-      options: options as QueryOptions<SurveyBuilderDocument>,
+    const survey = await getQueriedSurveysService({
+      filter: filter as FilterQuery<SurveyDocument> | undefined,
+      projection: projection as QueryOptions<SurveyDocument>,
+      options: options as QueryOptions<SurveyDocument>,
     });
-    if (surveys.length === 0) {
-      response.status(404).json({
-        message: 'No surveys that match query parameters were found',
+
+    if (!survey.length) {
+      response.status(200).json({
+        message: "No surveys that match query parameters were found",
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
       });
-    } else {
-      response.status(200).json({
-        message: 'Successfully found surveys',
-        pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments,
-        resourceData: surveys,
-      });
+      return;
     }
+
+    response.status(200).json({
+      message: "Surveys found successfully",
+      pages: Math.ceil(totalDocuments / Number(options?.limit)),
+      totalDocuments,
+      resourceData: survey,
+    });
   }
 );
 
-// @desc   Get surveys by user
-// @route  GET /survey-builder/user
-// @access Private/Admin/Manager
-const getQueriedSurveysByUserHandler = expressAsyncHandler(
+// @desc   Get all survey requests by user
+// @route  GET api/v1/actions/general/survey
+// @access Private
+const getSurveysByUserHandler = expressAsyncHandler(
   async (
     request: GetQueriedSurveysByUserRequest,
-    response: Response<GetQueriedResourceRequestServerResponse<SurveyBuilderDocument>>
+    response: Response<GetQueriedResourceRequestServerResponse<SurveyDocument>>
   ) => {
+    // anyone can view their own survey requests
     const {
       userInfo: { userId },
     } = request.body;
+
     let { newQueryFlag, totalDocuments } = request.body;
 
-    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+    const { filter, projection, options } =
+      request.query as QueryObjectParsedWithDefaults;
 
     // assign userId to filter
     const filterWithUserId = { ...filter, userId };
@@ -208,232 +135,254 @@ const getQueriedSurveysByUserHandler = expressAsyncHandler(
       });
     }
 
+    // get all survey requests by user
     const surveys = await getQueriedSurveysByUserService({
-      filter: filterWithUserId as FilterQuery<SurveyBuilderDocument> | undefined,
-      projection: projection as QueryOptions<SurveyBuilderDocument>,
-      options: options as QueryOptions<SurveyBuilderDocument>,
+      filter: filterWithUserId as FilterQuery<SurveyDocument> | undefined,
+      projection: projection as QueryOptions<SurveyDocument>,
+      options: options as QueryOptions<SurveyDocument>,
     });
-    if (surveys.length === 0) {
-      response.status(404).json({
-        message: 'No surveys found',
+
+    if (!surveys.length) {
+      response.status(200).json({
+        message: "No survey requests found",
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
       });
-    } else {
-      response.status(200).json({
-        message: 'Surveys found successfully',
-        pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments,
-        resourceData: surveys,
-      });
+      return;
     }
+
+    response.status(200).json({
+      message: "Survey requests found successfully",
+      pages: Math.ceil(totalDocuments / Number(options?.limit)),
+      totalDocuments,
+      resourceData: surveys,
+    });
   }
 );
 
-// @desc   Get a survey by id
-// @route  GET /survey-builder/:surveyId
+// @desc   Update survey status
+// @route  PATCH api/v1/actions/general/survey
 // @access Private/Admin/Manager
-const getSurveyByIdHandler = expressAsyncHandler(
+const updateSurveyStatusByIdHandler = expressAsyncHandler(
   async (
-    request: GetSurveyByIdRequest,
-    response: Response<ResourceRequestServerResponse<SurveyBuilderDocument>>
-  ) => {
-    const surveyId = request.params.surveyId;
-
-    // get survey by id
-    const survey = await getSurveyByIdService(surveyId);
-    if (survey) {
-      response.status(200).json({ message: 'Survey retrieved', resourceData: [survey] });
-    } else {
-      response.status(400).json({ message: 'Unable to retrieve survey', resourceData: [] });
-    }
-  }
-);
-
-// @desc   Update survey statistics by id
-// @route  PATCH /survey-builder/:surveyId
-// @access Private/Admin/Manager
-const updateSurveyStatisticsByIdHandler = expressAsyncHandler(
-  async (
-    request: UpdateSurveyStatisticsByIdRequest,
-    response: Response<ResourceRequestServerResponse<SurveyBuilderDocument | UserDocument>>
+    request: UpdateSurveyByIdRequest,
+    response: Response<ResourceRequestServerResponse<SurveyDocument>>
   ) => {
     const { surveyId } = request.params;
     const {
-      surveyResponses,
+      documentUpdate: { fields, updateOperator },
       userInfo: { userId },
     } = request.body;
 
-    console.log({ surveyResponses, userId, surveyId });
-
-    // check that survey exists
-    const surveyToUpdate = await getSurveyByIdService(surveyId);
-    if (!surveyToUpdate) {
-      response.status(404).json({ message: 'Survey not found', resourceData: [] });
+    // check if user exists
+    const userExists = await getUserByIdService(userId);
+    if (!userExists) {
+      response.status(404).json({ message: "User does not exist", resourceData: [] });
       return;
     }
 
-    // grab survey statistics
-    const surveyStatistics = surveyToUpdate.surveyStatistics as SurveyStatistics[];
+    // update survey request status
+    const updatedSurvey = await updateSurveyByIdService({
+      _id: surveyId,
+      fields,
+      updateOperator,
+    });
 
-    // update survey statistics
-    const updatedSurveyStatistics = surveyResponses.reduce(
-      (surveyStatisticsAcc, { question, response, inputKind }) => {
-        // find question in survey statistics
-        const statisticsIdx = surveyStatisticsAcc.findIndex(
-          (surveyStatistic) => surveyStatistic.question === question
-        );
+    if (!updatedSurvey) {
+      response.status(400).json({
+        message: "Survey request status update failed. Please try again!",
+        resourceData: [],
+      });
+      return;
+    }
 
-        // if question is found, update the question's responses
-        if (statisticsIdx !== -1) {
-          const surveyStatisticObj = surveyStatisticsAcc[statisticsIdx];
+    response.status(200).json({
+      message: "Survey request status updated successfully",
+      resourceData: [updatedSurvey],
+    });
+  }
+);
 
-          // update total responses
-          surveyStatisticObj.totalResponses += 1;
+// @desc   Get an survey request
+// @route  GET api/v1/actions/general/survey
+// @access Private
+const getSurveyByIdHandler = expressAsyncHandler(
+  async (
+    request: GetSurveyByIdRequest,
+    response: Response<ResourceRequestServerResponse<SurveyDocument>>
+  ) => {
+    const { surveyId } = request.params;
+    const survey = await getSurveyByIdService(surveyId);
+    if (!survey) {
+      response
+        .status(404)
+        .json({ message: "Survey request not found", resourceData: [] });
+      return;
+    }
 
-          // update the response distribution
-          Object.entries(surveyStatisticObj.responseDistribution).forEach(
-            ([responseOption, _responseValue]) => {
-              // if response is an array of strings
-              if (Array.isArray(response)) {
-                // loop through response array
-                response.forEach((responseValue) => {
-                  // if responseOption is in response, increment responseDistribution
-                  if (responseOption === responseValue) {
-                    surveyStatisticObj.responseDistribution[responseOption] += 1;
-                  }
-                });
+    response.status(200).json({
+      message: "Survey request found successfully",
+      resourceData: [survey],
+    });
+  }
+);
 
-                // if response is a string
-              } else if (typeof response === 'string') {
-                if (responseOption === response) {
-                  surveyStatisticObj.responseDistribution[responseOption] += 1;
-                }
-              }
-              // if response is a number
-              else if (typeof response === 'number') {
-                if (responseOption === response.toString()) {
-                  surveyStatisticObj.responseDistribution[responseOption] += 1;
-                }
-              }
-            }
-          );
+// @desc   Delete an survey request by its id
+// @route  DELETE api/v1/actions/general/survey
+// @access Private
+const deleteSurveyHandler = expressAsyncHandler(
+  async (request: DeleteSurveyRequest, response: Response) => {
+    const { surveyId } = request.params;
 
-          // add the surveyStatisticObj back to the surveyStatisticsAcc
-          surveyStatisticsAcc[statisticsIdx] = surveyStatisticObj;
-        }
+    // delete survey request by id
+    const deletedResult: DeleteResult = await deleteSurveyByIdService(surveyId);
 
-        return surveyStatisticsAcc;
-      },
-      surveyStatistics
+    if (!deletedResult.deletedCount) {
+      response.status(400).json({
+        message: "Survey request could not be deleted",
+        resourceData: [],
+      });
+      return;
+    }
+
+    response.status(200).json({
+      message: "Survey request deleted successfully",
+      resourceData: [],
+    });
+  }
+);
+
+// @desc    Delete all survey requests
+// @route   DELETE api/v1/actions/general/request-resource/survey
+// @access  Private
+const deleteAllSurveysHandler = expressAsyncHandler(
+  async (_request: DeleteAllSurveysRequest, response: Response) => {
+    const deletedResult: DeleteResult = await deleteAllSurveysService();
+
+    if (!deletedResult.deletedCount) {
+      response.status(400).json({
+        message: "All survey requests could not be deleted",
+        resourceData: [],
+      });
+      return;
+    }
+
+    response.status(200).json({
+      message: "All survey requests deleted successfully",
+      resourceData: [],
+    });
+  }
+);
+
+// DEV ROUTE
+// @desc   Create new survey requests in bulk
+// @route  POST api/v1/actions/general/survey
+// @access Private
+const createNewSurveysBulkHandler = expressAsyncHandler(
+  async (
+    request: CreateNewSurveysBulkRequest,
+    response: Response<ResourceRequestServerResponse<SurveyDocument>>
+  ) => {
+    const { surveySchemas } = request.body;
+
+    const surveyDocuments = await Promise.all(
+      surveySchemas.map(async (surveySchema) => {
+        const surveyDocument = await createNewSurveyService(surveySchema);
+        return surveyDocument;
+      })
     );
 
-    // update survey
-    const updatedSurvey = await updateSurveyByIdService({
-      surveyId,
-      surveyField: { surveyStatistics: updatedSurveyStatistics },
-    });
-    if (!updatedSurvey) {
-      response.status(400).json({ message: 'Unable to update survey', resourceData: [] });
+    // filter out any null documents
+    const filteredSurveyDocuments = surveyDocuments.filter(
+      removeUndefinedAndNullValues
+    );
+
+    // check if any documents were created
+    if (filteredSurveyDocuments.length === 0) {
+      response.status(400).json({
+        message: "Survey requests creation failed",
+        resourceData: [],
+      });
       return;
     }
 
-    // fetch user
-    const user = await getUserByIdService(userId);
-    if (!user) {
-      response.status(404).json({ message: 'User not found', resourceData: [] });
-      return;
-    }
+    const uncreatedDocumentsAmount =
+      surveySchemas.length - filteredSurveyDocuments.length;
 
-    const { completedSurveys } = user;
-    const updatedCompletedSurveys = Array.from(new Set([...completedSurveys, surveyId]));
-
-    console.group('updateSurveyStatisticsByIdHandler');
-    console.log({
-      surveyId,
-      updatedSurveyStatistics,
-      completedSurveys,
-      updatedCompletedSurveys,
+    response.status(201).json({
+      message: `Successfully created ${
+        filteredSurveyDocuments.length
+      } Survey requests.${
+        uncreatedDocumentsAmount
+          ? ` ${uncreatedDocumentsAmount} documents were not created.`
+          : ""
+      }}`,
+      resourceData: filteredSurveyDocuments,
     });
-    console.groupEnd();
-
-    // update completedSurveys field with surveyId
-    const updatedUser = await updateUserByIdService({
-      userId: user._id,
-      userFields: { completedSurveys: updatedCompletedSurveys },
-    });
-    if (!updatedUser) {
-      response.status(400).json({ message: 'Unable to update user', resourceData: [] });
-      return;
-    }
-
-    response
-      .status(200)
-      .json({ message: 'Survey updated', resourceData: [updatedSurvey, updatedUser] });
   }
 );
 
-// @desc   Delete a survey by id
-// @route  DELETE /survey-builder/:surveyId
-// @access Private/Admin/Manager
-const deleteASurveyHandler = expressAsyncHandler(
+// DEV ROUTE
+// @desc   Update Surveys in bulk
+// @route  PATCH api/v1/actions/general/survey
+// @access Private
+const updateSurveysBulkHandler = expressAsyncHandler(
   async (
-    request: DeleteASurveyRequest,
-    response: Response<ResourceRequestServerResponse<SurveyBuilderDocument>>
+    request: UpdateSurveysBulkRequest,
+    response: Response<ResourceRequestServerResponse<SurveyDocument>>
   ) => {
-    const surveyId = request.params.surveyId;
+    const { surveyFields } = request.body;
 
-    // check that survey exists
-    const surveyToDelete = await getSurveyByIdService(surveyId);
-    if (!surveyToDelete) {
-      response.status(404).json({ message: 'Survey not found', resourceData: [] });
+    const updatedSurveys = await Promise.all(
+      surveyFields.map(async (surveyField) => {
+        const {
+          documentUpdate: { fields, updateOperator },
+          surveyId,
+        } = surveyField;
+
+        const updatedSurvey = await updateSurveyByIdService({
+          _id: surveyId,
+          fields,
+          updateOperator,
+        });
+
+        return updatedSurvey;
+      })
+    );
+
+    // filter out any surveys that were not created
+    const successfullyCreatedSurveys = updatedSurveys.filter(
+      removeUndefinedAndNullValues
+    );
+
+    if (successfullyCreatedSurveys.length === 0) {
+      response.status(400).json({
+        message: "Could not create any Surveys",
+        resourceData: [],
+      });
       return;
     }
 
-    // check that now is after the expiry date
-    const now = new Date().getTime();
-    const expiryDate = new Date(surveyToDelete.expiryDate).getTime();
-    if (now < expiryDate) {
-      response.status(400).json({ message: 'Survey is not expired yet', resourceData: [] });
-      return;
-    }
-
-    // delete survey
-    const deleteResult: DeleteResult = await deleteASurveyService(surveyId);
-    if (deleteResult.deletedCount === 1) {
-      response.status(200).json({ message: 'Survey deleted', resourceData: [] });
-    } else {
-      response.status(400).json({ message: 'Unable to delete survey', resourceData: [] });
-    }
-  }
-);
-
-// @desc   Delete all surveys
-// @route  DELETE /survey-builder
-// @access Private/Admin/Manager
-const deleteAllSurveysHandler = expressAsyncHandler(
-  async (
-    _request: DeleteAllSurveysRequest,
-    response: Response<ResourceRequestServerResponse<SurveyBuilderDocument>>
-  ) => {
-    // delete all surveys
-    const deleteResult: DeleteResult = await deleteAllSurveysService();
-    if (deleteResult.deletedCount > 0) {
-      response.status(200).json({ message: 'All surveys deleted', resourceData: [] });
-    } else {
-      response.status(400).json({ message: 'Unable to delete surveys', resourceData: [] });
-    }
+    response.status(201).json({
+      message: `Successfully created ${
+        successfullyCreatedSurveys.length
+      } Surveys. ${
+        surveyFields.length - successfullyCreatedSurveys.length
+      } Surveys failed to be created.`,
+      resourceData: successfullyCreatedSurveys,
+    });
   }
 );
 
 export {
   createNewSurveyHandler,
-  createNewSurveysBulkHandler,
-  deleteASurveyHandler,
-  deleteAllSurveysHandler,
   getQueriedSurveysHandler,
+  getSurveysByUserHandler,
   getSurveyByIdHandler,
-  getQueriedSurveysByUserHandler,
-  updateSurveyStatisticsByIdHandler,
+  deleteSurveyHandler,
+  deleteAllSurveysHandler,
+  updateSurveyStatusByIdHandler,
+  createNewSurveysBulkHandler,
+  updateSurveysBulkHandler,
 };
