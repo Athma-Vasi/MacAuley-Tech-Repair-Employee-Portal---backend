@@ -5,69 +5,83 @@
 /**
  * Imports
  */
-import { PrinterIssueModel } from './printerIssue.model';
-import { printerIssueRouter } from './printerIssue.routes';
+import { PrinterIssueModel } from "./printerIssue.model";
+import { printerIssueRouter } from "./printerIssue.routes";
 import {
   createNewPrinterIssueHandler,
-  deletePrinterIssueHandler,
-  getAPrinterIssueHandler,
-  getQueriedPrinterIssuesHandler,
-  getQueriedPrinterIssuesByUserHandler,
-  updatePrinterIssueByIdHandler,
+  createNewPrinterIssuesBulkHandler,
   deleteAllPrinterIssuesHandler,
-} from './printerIssue.controller';
+  deletePrinterIssueHandler,
+  getPrinterIssueByIdHandler,
+  getPrinterIssuesByUserHandler,
+  getQueriedPrinterIssuesHandler,
+  updatePrinterIssueStatusByIdHandler,
+  updatePrinterIssuesBulkHandler,
+} from "./printerIssue.controller";
 import {
   createNewPrinterIssueService,
-  deletePrinterIssueService,
-  getAPrinterIssueService,
-  getQueriedPrinterIssuesService,
-  getQueriedPrinterIssuesByUserService,
   deleteAllPrinterIssuesService,
+  deletePrinterIssueByIdService,
+  getPrinterIssueByIdService,
+  getQueriedPrinterIssuesByUserService,
+  getQueriedPrinterIssuesService,
+  getQueriedTotalPrinterIssuesService,
   updatePrinterIssueByIdService,
-} from './printerIssue.service';
+} from "./printerIssue.service";
 
-import type { PrinterIssueDocument, PrinterIssueSchema, Urgency } from './printerIssue.model';
+import type {
+  PrinterIssueDocument,
+  PrinterIssueSchema,
+  Urgency,
+} from "./printerIssue.model";
 import type {
   CreateNewPrinterIssueRequest,
-  DeletePrinterIssueRequest,
-  GetAPrinterIssueRequest,
-  GetQueriedPrinterIssuesRequest,
-  GetQueriedPrinterIssuesByUserRequest,
+  CreateNewPrinterIssuesBulkRequest,
   DeleteAllPrinterIssuesRequest,
-  UpdatePrinterIssueStatusByIdRequest,
-} from './printerIssue.types';
+  DeletePrinterIssueRequest,
+  GetPrinterIssueByIdRequest,
+  GetQueriedPrinterIssuesByUserRequest,
+  GetQueriedPrinterIssuesRequest,
+  UpdatePrinterIssueByIdRequest,
+  UpdatePrinterIssuesBulkRequest,
+} from "./printerIssue.types";
 
 /**
  * Exports
  */
 export {
-  createNewPrinterIssueHandler,
-  deletePrinterIssueHandler,
-  getAPrinterIssueHandler,
-  getQueriedPrinterIssuesHandler,
-  getQueriedPrinterIssuesByUserHandler,
-  createNewPrinterIssueService,
-  deletePrinterIssueService,
-  getAPrinterIssueService,
-  getQueriedPrinterIssuesService,
-  getQueriedPrinterIssuesByUserService,
   PrinterIssueModel,
   printerIssueRouter,
+  createNewPrinterIssueHandler,
+  createNewPrinterIssueService,
+  createNewPrinterIssuesBulkHandler,
   deleteAllPrinterIssuesHandler,
   deleteAllPrinterIssuesService,
-  updatePrinterIssueByIdHandler,
+  deletePrinterIssueByIdService,
+  deletePrinterIssueHandler,
+  getPrinterIssueByIdHandler,
+  getPrinterIssueByIdService,
+  getPrinterIssuesByUserHandler,
+  getQueriedPrinterIssuesByUserService,
+  getQueriedPrinterIssuesHandler,
+  getQueriedPrinterIssuesService,
+  getQueriedTotalPrinterIssuesService,
   updatePrinterIssueByIdService,
+  updatePrinterIssueStatusByIdHandler,
+  updatePrinterIssuesBulkHandler,
 };
 
 export type {
   CreateNewPrinterIssueRequest,
-  DeletePrinterIssueRequest,
+  CreateNewPrinterIssuesBulkRequest,
   DeleteAllPrinterIssuesRequest,
-  GetAPrinterIssueRequest,
-  GetQueriedPrinterIssuesRequest,
+  DeletePrinterIssueRequest,
+  GetPrinterIssueByIdRequest,
   GetQueriedPrinterIssuesByUserRequest,
+  GetQueriedPrinterIssuesRequest,
+  UpdatePrinterIssueByIdRequest,
+  UpdatePrinterIssuesBulkRequest,
   PrinterIssueDocument,
   PrinterIssueSchema,
   Urgency,
-  UpdatePrinterIssueStatusByIdRequest,
 };

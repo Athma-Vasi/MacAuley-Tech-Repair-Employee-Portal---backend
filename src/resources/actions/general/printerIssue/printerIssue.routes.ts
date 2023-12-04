@@ -1,38 +1,41 @@
-import { Router } from 'express';
+import { Router } from "express";
 import {
   createNewPrinterIssueHandler,
-  deleteAllPrinterIssuesHandler,
-  deletePrinterIssueHandler,
-  getAPrinterIssueHandler,
   getQueriedPrinterIssuesHandler,
-  getQueriedPrinterIssuesByUserHandler,
-  updatePrinterIssueByIdHandler,
+  getPrinterIssuesByUserHandler,
+  getPrinterIssueByIdHandler,
+  deletePrinterIssueHandler,
+  deleteAllPrinterIssuesHandler,
+  updatePrinterIssueStatusByIdHandler,
   createNewPrinterIssuesBulkHandler,
-} from './printerIssue.controller';
-import { assignQueryDefaults, verifyRoles } from '../../../../middlewares';
-import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
+  updatePrinterIssuesBulkHandler,
+} from "./printerIssue.controller";
+import { assignQueryDefaults } from "../../../../middlewares";
+import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../../constants";
 
 const printerIssueRouter = Router();
 
-printerIssueRouter.use(verifyRoles());
-
 printerIssueRouter
-  .route('/')
+  .route("/")
   .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedPrinterIssuesHandler)
-  .post(createNewPrinterIssueHandler)
-  .delete(deleteAllPrinterIssuesHandler);
+  .post(createNewPrinterIssueHandler);
+
+printerIssueRouter.route("/delete-all").delete(deleteAllPrinterIssuesHandler);
 
 printerIssueRouter
-  .route('/user')
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedPrinterIssuesByUserHandler);
+  .route("/user")
+  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getPrinterIssuesByUserHandler);
 
-// DEV ROUTE
-printerIssueRouter.route('/dev').post(createNewPrinterIssuesBulkHandler);
+// DEV ROUTES
+printerIssueRouter
+  .route("/dev")
+  .post(createNewPrinterIssuesBulkHandler)
+  .patch(updatePrinterIssuesBulkHandler);
 
 printerIssueRouter
-  .route('/:printerIssueId')
-  .get(getAPrinterIssueHandler)
+  .route("/:printerIssueId")
+  .get(getPrinterIssueByIdHandler)
   .delete(deletePrinterIssueHandler)
-  .patch(updatePrinterIssueByIdHandler);
+  .patch(updatePrinterIssueStatusByIdHandler);
 
 export { printerIssueRouter };

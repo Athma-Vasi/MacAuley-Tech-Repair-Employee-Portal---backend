@@ -1,9 +1,12 @@
-import type { Types } from 'mongoose';
-import type { RequestAfterJWTVerification } from '../../../auth';
-
-import type { Urgency, PrinterIssueDocument, PrinterMake, TimeRailway } from './printerIssue.model';
-import type { PhoneNumber, UserRoles } from '../../../user';
-import { GetQueriedResourceRequest, RequestStatus } from '../../../../types';
+import type { Types } from "mongoose";
+import type { RequestAfterJWTVerification } from "../../../auth";
+import type { UserRoles } from "../../../user";
+import {
+  DocumentUpdateOperation,
+  GetQueriedResourceByUserRequest,
+  GetQueriedResourceRequest,
+} from "../../../../types";
+import { PrinterIssueDocument, PrinterIssueSchema } from "./printerIssue.model";
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 interface CreateNewPrinterIssueRequest extends RequestAfterJWTVerification {
@@ -13,62 +16,8 @@ interface CreateNewPrinterIssueRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    printerIssue: {
-      title: string;
-      contactNumber: PhoneNumber;
-      contactEmail: string;
-      dateOfOccurrence: NativeDate;
-      timeOfOccurrence: TimeRailway;
-      printerMake: PrinterMake;
-      printerModel: string;
-      printerSerialNumber: string;
-      printerIssueDescription: string;
-      urgency: Urgency;
-      additionalInformation: string;
-    };
-  };
-}
-
-// DEV ROUTE
-interface CreateNewPrinterIssuesBulkRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-    printerIssues: {
-      userId: Types.ObjectId;
-      username: string;
-      title: string;
-      contactNumber: PhoneNumber;
-      contactEmail: string;
-      dateOfOccurrence: NativeDate;
-      timeOfOccurrence: TimeRailway;
-      printerMake: PrinterMake;
-      printerModel: string;
-      printerSerialNumber: string;
-      printerIssueDescription: string;
-      urgency: Urgency;
-      additionalInformation: string;
-      requestStatus: RequestStatus;
-    }[];
-  };
-}
-
-interface UpdatePrinterIssueStatusByIdRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-    printerIssue: {
-      requestStatus: RequestStatus;
-    };
-  };
-  params: {
-    printerIssueId: string;
+    sessionId: Types.ObjectId;
+    printerIssueSchema: PrinterIssueSchema;
   };
 }
 
@@ -80,23 +29,72 @@ interface DeletePrinterIssueRequest extends RequestAfterJWTVerification {
 
 type DeleteAllPrinterIssuesRequest = RequestAfterJWTVerification;
 
+type GetQueriedPrinterIssuesByUserRequest = GetQueriedResourceByUserRequest;
+
+interface GetPrinterIssueByIdRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+  };
+  params: { printerIssueId: string };
+}
+
+interface UpdatePrinterIssueByIdRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    documentUpdate: DocumentUpdateOperation<PrinterIssueDocument>;
+  };
+  params: { printerIssueId: string };
+}
+
 type GetQueriedPrinterIssuesRequest = GetQueriedResourceRequest;
 
-interface GetAPrinterIssueRequest extends RequestAfterJWTVerification {
-  params: {
-    printerIssueId: string;
+// DEV ROUTE
+interface CreateNewPrinterIssuesBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    printerIssueSchemas: PrinterIssueSchema[];
   };
 }
 
-type GetQueriedPrinterIssuesByUserRequest = GetQueriedResourceRequest;
+// DEV ROUTE
+interface UpdatePrinterIssuesBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    printerIssueFields: {
+      printerIssueId: Types.ObjectId;
+      documentUpdate: DocumentUpdateOperation<PrinterIssueDocument>;
+    }[];
+  };
+}
 
 export type {
   CreateNewPrinterIssueRequest,
-  CreateNewPrinterIssuesBulkRequest,
   DeletePrinterIssueRequest,
   DeleteAllPrinterIssuesRequest,
-  GetQueriedPrinterIssuesRequest,
-  GetAPrinterIssueRequest,
   GetQueriedPrinterIssuesByUserRequest,
-  UpdatePrinterIssueStatusByIdRequest,
+  GetPrinterIssueByIdRequest,
+  GetQueriedPrinterIssuesRequest,
+  UpdatePrinterIssueByIdRequest,
+  CreateNewPrinterIssuesBulkRequest,
+  UpdatePrinterIssuesBulkRequest,
 };

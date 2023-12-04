@@ -1,46 +1,35 @@
-import type { Types } from 'mongoose';
-import type { DeleteResult } from 'mongodb';
-import type { PrinterIssueDocument, PrinterIssueSchema } from './printerIssue.model';
+import type { Types } from "mongoose";
+import type { DeleteResult } from "mongodb";
+import type { PrinterIssueDocument, PrinterIssueSchema } from "./printerIssue.model";
 
-import { PrinterIssueModel } from './printerIssue.model';
+import { PrinterIssueModel } from "./printerIssue.model";
 import {
   DatabaseResponse,
   DatabaseResponseNullable,
   QueriedResourceGetRequestServiceInput,
   QueriedTotalResourceGetRequestServiceInput,
-  RequestStatus,
-} from '../../../../types';
+  UpdateDocumentByIdServiceInput,
+} from "../../../../types";
 
-async function createNewPrinterIssueService(
-  input: PrinterIssueSchema
-): Promise<PrinterIssueDocument> {
+async function getPrinterIssueByIdService(
+  printerIssueId: Types.ObjectId | string
+): DatabaseResponseNullable<PrinterIssueDocument> {
   try {
-    const newPrinterIssue = await PrinterIssueModel.create(input);
-    return newPrinterIssue;
+    const printerIssue = await PrinterIssueModel.findById(printerIssueId).lean().exec();
+    return printerIssue;
   } catch (error: any) {
-    throw new Error(error, { cause: 'createNewPrinterIssueService' });
+    throw new Error(error, { cause: "getPrinterIssueByIdService" });
   }
 }
 
-async function updatePrinterIssueByIdService({
-  printerIssueId,
-  requestStatus,
-}: {
-  printerIssueId: string | Types.ObjectId;
-  requestStatus: RequestStatus;
-}): DatabaseResponseNullable<PrinterIssueDocument> {
+async function createNewPrinterIssueService(
+  printerIssueSchema: PrinterIssueSchema
+): Promise<PrinterIssueDocument> {
   try {
-    const updatedPrinterIssue = await PrinterIssueModel.findByIdAndUpdate(
-      printerIssueId,
-      { requestStatus },
-      { new: true }
-    )
-      .select('-__v')
-      .lean()
-      .exec();
-    return updatedPrinterIssue;
+    const printerIssue = await PrinterIssueModel.create(printerIssueSchema);
+    return printerIssue;
   } catch (error: any) {
-    throw new Error(error, { cause: 'updatePrinterIssueByIdService' });
+    throw new Error(error, { cause: "createNewPrinterIssueService" });
   }
 }
 
@@ -50,12 +39,12 @@ async function getQueriedPrinterIssuesService({
   options = {},
 }: QueriedResourceGetRequestServiceInput<PrinterIssueDocument>): DatabaseResponse<PrinterIssueDocument> {
   try {
-    const allPrinterIssues = await PrinterIssueModel.find(filter, projection, options)
+    const printerIssue = await PrinterIssueModel.find(filter, projection, options)
       .lean()
       .exec();
-    return allPrinterIssues;
+    return printerIssue;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getQueriedPrinterIssuesService' });
+    throw new Error(error, { cause: "getQueriedPrinterIssuesService" });
   }
 }
 
@@ -63,10 +52,12 @@ async function getQueriedTotalPrinterIssuesService({
   filter = {},
 }: QueriedTotalResourceGetRequestServiceInput<PrinterIssueDocument>): Promise<number> {
   try {
-    const totalPrinterIssues = await PrinterIssueModel.countDocuments(filter).lean().exec();
+    const totalPrinterIssues = await PrinterIssueModel.countDocuments(filter)
+      .lean()
+      .exec();
     return totalPrinterIssues;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getQueriedTotalPrinterIssuesService' });
+    throw new Error(error, { cause: "getQueriedTotalPrinterIssuesService" });
   }
 }
 
@@ -76,49 +67,66 @@ async function getQueriedPrinterIssuesByUserService({
   options = {},
 }: QueriedResourceGetRequestServiceInput<PrinterIssueDocument>): DatabaseResponse<PrinterIssueDocument> {
   try {
-    const printerIssues = await PrinterIssueModel.find(filter, projection, options).lean().exec();
+    const printerIssues = await PrinterIssueModel.find(filter, projection, options)
+      .lean()
+      .exec();
     return printerIssues;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getQueriedPrinterIssuesByUserService' });
+    throw new Error(error, { cause: "getQueriedPrinterIssuesByUserService" });
   }
 }
 
-async function getAPrinterIssueService(
-  id: Types.ObjectId | string
-): DatabaseResponseNullable<PrinterIssueDocument> {
+async function updatePrinterIssueByIdService({
+  _id,
+  fields,
+  updateOperator,
+}: UpdateDocumentByIdServiceInput<PrinterIssueDocument>) {
+  const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
+  const updateObject = JSON.parse(updateString);
+
   try {
-    const printerIssue = await PrinterIssueModel.findById(id).lean().exec();
+    const printerIssue = await PrinterIssueModel.findByIdAndUpdate(_id, updateObject, {
+      new: true,
+    })
+      .lean()
+      .exec();
     return printerIssue;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getAPrinterIssueService' });
+    throw new Error(error, { cause: "updatePrinterIssueStatusByIdService" });
   }
 }
 
-async function deletePrinterIssueService(id: Types.ObjectId | string): Promise<DeleteResult> {
+async function deletePrinterIssueByIdService(
+  printerIssueId: Types.ObjectId | string
+): Promise<DeleteResult> {
   try {
-    const deletedPrinterIssue = await PrinterIssueModel.deleteOne({ _id: id }).lean().exec();
-    return deletedPrinterIssue;
+    const deletedResult = await PrinterIssueModel.deleteOne({
+      _id: printerIssueId,
+    })
+      .lean()
+      .exec();
+    return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: 'deletePrinterIssueService' });
+    throw new Error(error, { cause: "deletePrinterIssueByIdService" });
   }
 }
 
 async function deleteAllPrinterIssuesService(): Promise<DeleteResult> {
   try {
-    const deletedPrinterIssues = await PrinterIssueModel.deleteMany({}).lean().exec();
-    return deletedPrinterIssues;
+    const deletedResult = await PrinterIssueModel.deleteMany({}).lean().exec();
+    return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: 'deleteAllPrinterIssuesService' });
+    throw new Error(error, { cause: "deleteAllPrinterIssuesService" });
   }
 }
 
 export {
+  getPrinterIssueByIdService,
   createNewPrinterIssueService,
   getQueriedPrinterIssuesService,
-  deletePrinterIssueService,
-  deleteAllPrinterIssuesService,
-  getAPrinterIssueService,
   getQueriedTotalPrinterIssuesService,
   getQueriedPrinterIssuesByUserService,
+  deletePrinterIssueByIdService,
+  deleteAllPrinterIssuesService,
   updatePrinterIssueByIdService,
 };
