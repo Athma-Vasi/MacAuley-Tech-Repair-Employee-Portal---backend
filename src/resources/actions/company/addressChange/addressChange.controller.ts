@@ -15,7 +15,7 @@ import type {
   GetQueriedAddressChangesRequest,
 } from "./addressChange.types";
 
-import { getUserByIdService, updateUserByIdService } from "../../../user";
+import { getUserByIdService } from "../../../user";
 import {
   createNewAddressChangeService,
   deleteAddressChangeByIdService,
@@ -29,7 +29,6 @@ import {
 import { FilterQuery, QueryOptions } from "mongoose";
 
 import {
-  GetQueriedResourceRequest,
   GetQueriedResourceRequestServerResponse,
   QueryObjectParsedWithDefaults,
   ResourceRequestServerResponse,

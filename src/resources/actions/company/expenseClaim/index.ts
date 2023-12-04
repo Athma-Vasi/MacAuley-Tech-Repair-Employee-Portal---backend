@@ -30,7 +30,13 @@ import {
   updateExpenseClaimByIdService,
 } from "./expenseClaim.service";
 
-import type { ExpenseClaimDocument, ExpenseClaimSchema } from "./expenseClaim.model";
+import type {
+  Currency,
+  ExpenseClaimDocument,
+  ExpenseClaimSchema,
+  ExpenseClaimServerResponse,
+} from "./expenseClaim.model";
+
 import type {
   CreateNewExpenseClaimRequest,
   CreateNewExpenseClaimsBulkRequest,
@@ -73,10 +79,12 @@ export {
 export type {
   CreateNewExpenseClaimRequest,
   CreateNewExpenseClaimsBulkRequest,
+  Currency,
   DeleteAllExpenseClaimsRequest,
   DeleteExpenseClaimRequest,
   ExpenseClaimDocument,
   ExpenseClaimSchema,
+  ExpenseClaimServerResponse,
   ExpenseClaimServerResponseDocument,
   GetExpenseClaimByIdRequest,
   GetQueriedExpenseClaimsByUserRequest,

@@ -25,7 +25,6 @@ import {
 } from "./benefit.service";
 import { BenefitDocument, BenefitSchema } from "./benefit.model";
 import {
-  GetQueriedResourceRequest,
   GetQueriedResourceRequestServerResponse,
   QueryObjectParsedWithDefaults,
   ResourceRequestServerResponse,

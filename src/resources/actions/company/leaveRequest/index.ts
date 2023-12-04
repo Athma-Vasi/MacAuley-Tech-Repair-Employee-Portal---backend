@@ -5,37 +5,46 @@
 /**
  * Imports
  */
-import { LeaveRequestModel } from './leaveRequest.model';
-import { leaveRequestRouter } from './leaveRequest.routes';
+import { LeaveRequestModel } from "./leaveRequest.model";
+import { leaveRequestRouter } from "./leaveRequest.routes";
 import {
   createNewLeaveRequestHandler,
-  deleteALeaveRequestHandler,
+  createNewLeaveRequestsBulkHandler,
   deleteAllLeaveRequestsHandler,
-  getQueriedLeaveRequestsHandler,
+  deleteLeaveRequestHandler,
   getLeaveRequestByIdHandler,
-  getQueriedLeaveRequestsByUserHandler,
-} from './leaveRequest.controller';
+  getLeaveRequestsByUserHandler,
+  getQueriedLeaveRequestsHandler,
+  updateLeaveRequestStatusByIdHandler,
+  updateLeaveRequestsBulkHandler,
+} from "./leaveRequest.controller";
 import {
   createNewLeaveRequestService,
-  getLeaveRequestByIdService,
-  deleteALeaveRequestService,
   deleteAllLeaveRequestsService,
-  getQueriedLeaveRequestsService,
+  deleteLeaveRequestByIdService,
+  getLeaveRequestByIdService,
   getQueriedLeaveRequestsByUserService,
-} from './leaveRequest.service';
+  getQueriedLeaveRequestsService,
+  getQueriedTotalLeaveRequestsService,
+  updateLeaveRequestByIdService,
+} from "./leaveRequest.service";
 
 import type {
   LeaveRequestDocument,
   LeaveRequestSchema,
   ReasonForLeave,
-} from './leaveRequest.model';
+} from "./leaveRequest.model";
 import type {
   CreateNewLeaveRequestRequest,
-  DeleteALeaveRequestRequest,
+  CreateNewLeaveRequestsBulkRequest,
   DeleteAllLeaveRequestsRequest,
+  DeleteLeaveRequestRequest,
   GetLeaveRequestByIdRequest,
   GetQueriedLeaveRequestsByUserRequest,
-} from './leaveRequest.types';
+  GetQueriedLeaveRequestsRequest,
+  UpdateLeaveRequestByIdRequest,
+  UpdateLeaveRequestsBulkRequest,
+} from "./leaveRequest.types";
 
 /**
  * Exports
@@ -45,17 +54,22 @@ export {
   LeaveRequestModel,
   leaveRequestRouter,
   createNewLeaveRequestHandler,
-  deleteALeaveRequestHandler,
+  createNewLeaveRequestsBulkHandler,
   deleteAllLeaveRequestsHandler,
-  getQueriedLeaveRequestsHandler,
+  deleteLeaveRequestHandler,
   getLeaveRequestByIdHandler,
-  getQueriedLeaveRequestsByUserHandler,
+  getLeaveRequestsByUserHandler,
+  getQueriedLeaveRequestsHandler,
+  updateLeaveRequestStatusByIdHandler,
+  updateLeaveRequestsBulkHandler,
   createNewLeaveRequestService,
-  getLeaveRequestByIdService,
-  deleteALeaveRequestService,
   deleteAllLeaveRequestsService,
-  getQueriedLeaveRequestsService,
+  deleteLeaveRequestByIdService,
+  getLeaveRequestByIdService,
   getQueriedLeaveRequestsByUserService,
+  getQueriedLeaveRequestsService,
+  getQueriedTotalLeaveRequestsService,
+  updateLeaveRequestByIdService,
 };
 
 export type {
@@ -63,8 +77,12 @@ export type {
   LeaveRequestSchema,
   ReasonForLeave,
   CreateNewLeaveRequestRequest,
-  DeleteALeaveRequestRequest,
+  CreateNewLeaveRequestsBulkRequest,
   DeleteAllLeaveRequestsRequest,
+  DeleteLeaveRequestRequest,
   GetLeaveRequestByIdRequest,
   GetQueriedLeaveRequestsByUserRequest,
+  GetQueriedLeaveRequestsRequest,
+  UpdateLeaveRequestByIdRequest,
+  UpdateLeaveRequestsBulkRequest,
 };

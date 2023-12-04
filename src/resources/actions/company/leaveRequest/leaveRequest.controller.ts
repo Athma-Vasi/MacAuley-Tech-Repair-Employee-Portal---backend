@@ -1,35 +1,38 @@
-import expressAsyncHandler from 'express-async-handler';
+import expressAsyncHandler from "express-async-handler";
 
-import type { FilterQuery, QueryOptions } from 'mongoose';
-import type { Response } from 'express';
-import type { DeleteResult } from 'mongodb';
+import type { FilterQuery, QueryOptions } from "mongoose";
+import type { Response } from "express";
+import type { DeleteResult } from "mongodb";
 import type {
-  CreateNewLeaveRequestBulkRequest,
   CreateNewLeaveRequestRequest,
-  DeleteALeaveRequestRequest,
+  CreateNewLeaveRequestsBulkRequest,
   DeleteAllLeaveRequestsRequest,
+  DeleteLeaveRequestRequest,
   GetLeaveRequestByIdRequest,
   GetQueriedLeaveRequestsByUserRequest,
   GetQueriedLeaveRequestsRequest,
-  UpdateLeaveRequestStatusByIdRequest,
-} from './leaveRequest.types';
+  UpdateLeaveRequestByIdRequest,
+  UpdateLeaveRequestsBulkRequest,
+} from "./leaveRequest.types";
 import type {
   GetQueriedResourceRequestServerResponse,
   QueryObjectParsedWithDefaults,
   ResourceRequestServerResponse,
-} from '../../../../types';
-import type { LeaveRequestDocument, LeaveRequestSchema } from './leaveRequest.model';
+} from "../../../../types";
+import type { LeaveRequestDocument, LeaveRequestSchema } from "./leaveRequest.model";
 
 import {
   createNewLeaveRequestService,
-  deleteALeaveRequestService,
   deleteAllLeaveRequestsService,
-  getQueriedLeaveRequestsService,
+  deleteLeaveRequestByIdService,
   getLeaveRequestByIdService,
   getQueriedLeaveRequestsByUserService,
+  getQueriedLeaveRequestsService,
   getQueriedTotalLeaveRequestsService,
-  updateLeaveRequestStatusByIdService,
-} from './leaveRequest.service';
+  updateLeaveRequestByIdService,
+} from "./leaveRequest.service";
+import { removeUndefinedAndNullValues } from "../../../../utils";
+import { getUserByIdService } from "../../../user";
 
 // @desc   Create a new leave request
 // @route  POST /leave-request
@@ -41,133 +44,35 @@ const createNewLeaveRequestHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      leaveRequest: {
-        startDate,
-        endDate,
-        reasonForLeave,
-        delegatedToEmployee,
-        delegatedResponsibilities,
-        additionalComments,
-        acknowledgement,
-      },
+      leaveRequestFields,
     } = request.body;
 
-    // user must acknowledge that leaveRequest info is correct
-    if (!acknowledgement) {
-      response.status(400).json({ message: 'Acknowledgement is required', resourceData: [] });
-      return;
-    }
-
     // create new leave request object
-    const newLeaveRequestObject: LeaveRequestSchema = {
+    const leaveRequestSchema: LeaveRequestSchema = {
+      ...leaveRequestFields,
       userId,
       username,
-      action: 'company',
-      category: 'leave request',
-      startDate,
-      endDate,
-      reasonForLeave,
-      delegatedToEmployee,
-      delegatedResponsibilities,
-      additionalComments,
-      acknowledgement,
-      requestStatus: 'pending',
     };
 
-    // create new leave request
-    const newLeaveRequest = await createNewLeaveRequestService(newLeaveRequestObject);
+    const leaveRequestDocument = await createNewLeaveRequestService(leaveRequestSchema);
 
-    if (!newLeaveRequest) {
+    if (!leaveRequestDocument) {
       response.status(400).json({
-        message: 'New leave request could not be created',
+        message: "New leave request could not be created",
         resourceData: [],
       });
       return;
     }
 
     response.status(201).json({
-      message: `Successfully created ${reasonForLeave} leave request`,
-      resourceData: [newLeaveRequest],
+      message: `Successfully created ${leaveRequestDocument.reasonForLeave} leave request`,
+      resourceData: [leaveRequestDocument],
     });
   }
 );
 
-// DEV ROUTE
-// @desc   Create new leave requests in bulk
-// @route  POST /leave-request/dev
-// @access Private/Admin/Manager
-const createNewLeaveRequestBulkHandler = expressAsyncHandler(
-  async (
-    request: CreateNewLeaveRequestBulkRequest,
-    response: Response<ResourceRequestServerResponse<LeaveRequestDocument>>
-  ) => {
-    const { leaveRequests } = request.body;
-
-    // promise array of new leave requests
-    const newLeaveRequests = await Promise.all(
-      leaveRequests.map(async (leaveRequest) => {
-        const {
-          userId,
-          username,
-          startDate,
-          endDate,
-          reasonForLeave,
-          delegatedToEmployee,
-          delegatedResponsibilities,
-          additionalComments,
-          acknowledgement,
-          requestStatus,
-        } = leaveRequest;
-
-        // create new leave request object
-        const newLeaveRequestObject: LeaveRequestSchema = {
-          userId,
-          username,
-          action: 'company',
-          category: 'leave request',
-          startDate,
-          endDate,
-          reasonForLeave,
-          delegatedToEmployee,
-          delegatedResponsibilities,
-          additionalComments,
-          acknowledgement,
-          requestStatus,
-        };
-
-        // create new leave request
-        const newLeaveRequest = await createNewLeaveRequestService(newLeaveRequestObject);
-
-        return newLeaveRequest;
-      })
-    );
-
-    // filter out any leave requests that were not created
-    const successfullyCreatedLeaveRequests = newLeaveRequests.filter(
-      (leaveRequest) => leaveRequest
-    );
-
-    // check if any leave requests were created
-    if (successfullyCreatedLeaveRequests.length === leaveRequests.length) {
-      response.status(201).json({
-        message: `Successfully created ${successfullyCreatedLeaveRequests.length} leave requests`,
-        resourceData: successfullyCreatedLeaveRequests,
-      });
-    } else {
-      response.status(400).json({
-        message: `Successfully created ${
-          successfullyCreatedLeaveRequests.length
-        } leave requests, but failed to create ${
-          leaveRequests.length - successfullyCreatedLeaveRequests.length
-        } leave requests`,
-        resourceData: successfullyCreatedLeaveRequests,
-      });
-    }
-  }
-);
-
-// @desc   Get all leave requests
-// @route  GET /leave-request
+// @desc   Get all leaveRequests
+// @route  GET api/v1/company/leave-request
 // @access Private/Admin/Manager
 const getQueriedLeaveRequestsHandler = expressAsyncHandler(
   async (
@@ -176,7 +81,8 @@ const getQueriedLeaveRequestsHandler = expressAsyncHandler(
   ) => {
     let { newQueryFlag, totalDocuments } = request.body;
 
-    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+    const { filter, projection, options } =
+      request.query as QueryObjectParsedWithDefaults;
 
     // only perform a countDocuments scan if a new query is being made
     if (newQueryFlag) {
@@ -185,15 +91,16 @@ const getQueriedLeaveRequestsHandler = expressAsyncHandler(
       });
     }
 
-    // get all leave requests
-    const leaveRequests = await getQueriedLeaveRequestsService({
+    // get all leaveRequests
+    const leaveRequest = await getQueriedLeaveRequestsService({
       filter: filter as FilterQuery<LeaveRequestDocument> | undefined,
       projection: projection as QueryOptions<LeaveRequestDocument>,
       options: options as QueryOptions<LeaveRequestDocument>,
     });
-    if (!leaveRequests.length) {
+
+    if (!leaveRequest.length) {
       response.status(200).json({
-        message: 'No leave requests that match query parameters were found',
+        message: "No leaveRequests that match query parameters were found",
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
@@ -202,28 +109,31 @@ const getQueriedLeaveRequestsHandler = expressAsyncHandler(
     }
 
     response.status(200).json({
-      message: 'Successfully found leave requests',
+      message: "LeaveRequests found successfully",
       pages: Math.ceil(totalDocuments / Number(options?.limit)),
       totalDocuments,
-      resourceData: leaveRequests,
+      resourceData: leaveRequest,
     });
   }
 );
 
-// @desc   Get all leave requests for a user
-// @route  GET /leave-request/user
-// @access Private/Admin/Manager/Employee
-const getQueriedLeaveRequestsByUserHandler = expressAsyncHandler(
+// @desc   Get all leaveRequest requests by user
+// @route  GET api/v1/company/leave-request/user
+// @access Private
+const getLeaveRequestsByUserHandler = expressAsyncHandler(
   async (
     request: GetQueriedLeaveRequestsByUserRequest,
     response: Response<GetQueriedResourceRequestServerResponse<LeaveRequestDocument>>
   ) => {
+    // anyone can view their own leaveRequest requests
     const {
       userInfo: { userId },
     } = request.body;
+
     let { newQueryFlag, totalDocuments } = request.body;
 
-    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+    const { filter, projection, options } =
+      request.query as QueryObjectParsedWithDefaults;
 
     // assign userId to filter
     const filterWithUserId = { ...filter, userId };
@@ -235,14 +145,16 @@ const getQueriedLeaveRequestsByUserHandler = expressAsyncHandler(
       });
     }
 
+    // get all leaveRequest requests by user
     const leaveRequests = await getQueriedLeaveRequestsByUserService({
       filter: filterWithUserId as FilterQuery<LeaveRequestDocument> | undefined,
       projection: projection as QueryOptions<LeaveRequestDocument>,
       options: options as QueryOptions<LeaveRequestDocument>,
     });
+
     if (!leaveRequests.length) {
       response.status(200).json({
-        message: 'No leave requests found',
+        message: "No leaveRequest requests found",
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
@@ -251,7 +163,7 @@ const getQueriedLeaveRequestsByUserHandler = expressAsyncHandler(
     }
 
     response.status(200).json({
-      message: 'Leave requests found successfully',
+      message: "Leave Request requests found successfully",
       pages: Math.ceil(totalDocuments / Number(options?.limit)),
       totalDocuments,
       resourceData: leaveRequests,
@@ -259,139 +171,232 @@ const getQueriedLeaveRequestsByUserHandler = expressAsyncHandler(
   }
 );
 
-// @desc   Get a leave request by id
-// @route  GET /leave-request/:leaveRequestId
-// @access Private/Admin/Manager
-const getLeaveRequestByIdHandler = expressAsyncHandler(
-  async (
-    request: GetLeaveRequestByIdRequest,
-    response: Response<ResourceRequestServerResponse<LeaveRequestDocument>>
-  ) => {
-    const leaveRequestId = request.params.leaveRequestId;
-
-    // get leave request
-    const leaveRequest = await getLeaveRequestByIdService(leaveRequestId);
-    if (!leaveRequest) {
-      response.status(200).json({
-        message: 'Leave request not found',
-        resourceData: [],
-      });
-      return;
-    }
-
-    response.status(200).json({
-      message: 'Leave request found successfully',
-      resourceData: [leaveRequest],
-    });
-  }
-);
-
-// @desc   Update a leave request status by id
-// @route  PATCH /leave-request/:leaveRequestId
+// @desc   Update leaveRequest status
+// @route  PATCH api/v1/company/leave-request/:leaveRequestId
 // @access Private/Admin/Manager
 const updateLeaveRequestStatusByIdHandler = expressAsyncHandler(
   async (
-    request: UpdateLeaveRequestStatusByIdRequest,
+    request: UpdateLeaveRequestByIdRequest,
     response: Response<ResourceRequestServerResponse<LeaveRequestDocument>>
   ) => {
     const { leaveRequestId } = request.params;
     const {
-      leaveRequest: { requestStatus },
+      documentUpdate: { fields, updateOperator },
+      userInfo: { userId },
     } = request.body;
 
-    // check if leave request exists
-    const leaveRequestExists = await getLeaveRequestByIdService(leaveRequestId);
-    if (!leaveRequestExists) {
-      response.status(404).json({ message: 'Leave request does not exist', resourceData: [] });
+    // check if user exists
+    const userExists = await getUserByIdService(userId);
+    if (!userExists) {
+      response.status(404).json({ message: "User does not exist", resourceData: [] });
       return;
     }
 
-    // update leave request
-    const updatedLeaveRequest = await updateLeaveRequestStatusByIdService({
-      leaveRequestId,
-      requestStatus,
+    // update leaveRequest request status
+    const updatedLeaveRequest = await updateLeaveRequestByIdService({
+      _id: leaveRequestId,
+      fields,
+      updateOperator,
     });
+
     if (!updatedLeaveRequest) {
       response.status(400).json({
-        message: 'Leave request could not be updated',
+        message: "Leave Request request status update failed. Please try again!",
         resourceData: [],
       });
       return;
     }
 
     response.status(200).json({
-      message: 'Leave request updated successfully',
+      message: "Leave Request request status updated successfully",
       resourceData: [updatedLeaveRequest],
     });
   }
 );
 
-// @desc   Delete a leave request by id
-// @route  DELETE /leave-request/:leaveRequestId
-// @access Private/Admin/Manager
-const deleteALeaveRequestHandler = expressAsyncHandler(
+// @desc   Get an leaveRequest request
+// @route  GET api/v1/company/leave-request/:leaveRequestId
+// @access Private
+const getLeaveRequestByIdHandler = expressAsyncHandler(
   async (
-    request: DeleteALeaveRequestRequest,
+    request: GetLeaveRequestByIdRequest,
     response: Response<ResourceRequestServerResponse<LeaveRequestDocument>>
   ) => {
-    const leaveRequestId = request.params.leaveRequestId;
-
-    // check if leave request exists
-    const leaveRequestExists = await getLeaveRequestByIdService(leaveRequestId);
-    if (!leaveRequestExists) {
-      response.status(404).json({ message: 'Leave request does not exist', resourceData: [] });
+    const { leaveRequestId } = request.params;
+    const leaveRequest = await getLeaveRequestByIdService(leaveRequestId);
+    if (!leaveRequest) {
+      response
+        .status(404)
+        .json({ message: "Leave Request request not found", resourceData: [] });
       return;
     }
 
-    // delete leave request
-    const deletedResult: DeleteResult = await deleteALeaveRequestService(leaveRequestId);
+    response.status(200).json({
+      message: "Leave Request request found successfully",
+      resourceData: [leaveRequest],
+    });
+  }
+);
+
+// @desc   Delete an leaveRequest request by its id
+// @route  DELETE api/v1/company/leave-request/:leaveRequestId
+// @access Private
+const deleteLeaveRequestHandler = expressAsyncHandler(
+  async (request: DeleteLeaveRequestRequest, response: Response) => {
+    const { leaveRequestId } = request.params;
+
+    // delete leaveRequest request by id
+    const deletedResult: DeleteResult = await deleteLeaveRequestByIdService(
+      leaveRequestId
+    );
+
     if (!deletedResult.deletedCount) {
       response.status(400).json({
-        message: 'Leave request could not be deleted',
+        message: "Leave Request request could not be deleted",
         resourceData: [],
       });
       return;
     }
 
     response.status(200).json({
-      message: 'Leave request deleted successfully',
+      message: "Leave Request request deleted successfully",
       resourceData: [],
     });
   }
 );
 
-// @desc   Delete all leave requests
-// @route  DELETE /leave-request
-// @access Private/Admin/Manager
+// @desc    Delete all leaveRequest requests
+// @route   DELETE api/v1/company/leave-request/delete-all
+// @access  Private
 const deleteAllLeaveRequestsHandler = expressAsyncHandler(
-  async (
-    _request: DeleteAllLeaveRequestsRequest,
-    response: Response<ResourceRequestServerResponse<LeaveRequestDocument>>
-  ) => {
-    // delete all leave requests
+  async (_request: DeleteAllLeaveRequestsRequest, response: Response) => {
     const deletedResult: DeleteResult = await deleteAllLeaveRequestsService();
+
     if (!deletedResult.deletedCount) {
       response.status(400).json({
-        message: 'All leave requests could not be deleted. Please try again!',
+        message: "All leaveRequest requests could not be deleted",
         resourceData: [],
       });
       return;
     }
 
     response.status(200).json({
-      message: 'All leave requests deleted successfully',
+      message: "All leaveRequest requests deleted successfully",
       resourceData: [],
+    });
+  }
+);
+
+// DEV ROUTE
+// @desc   Create new leaveRequest requests in bulk
+// @route  POST api/v1/company/leave-request/dev
+// @access Private
+const createNewLeaveRequestsBulkHandler = expressAsyncHandler(
+  async (
+    request: CreateNewLeaveRequestsBulkRequest,
+    response: Response<ResourceRequestServerResponse<LeaveRequestDocument>>
+  ) => {
+    const { leaveRequestSchemas } = request.body;
+
+    const leaveRequestDocuments = await Promise.all(
+      leaveRequestSchemas.map(async (leaveRequestSchema) => {
+        const leaveRequestDocument = await createNewLeaveRequestService(
+          leaveRequestSchema
+        );
+        return leaveRequestDocument;
+      })
+    );
+
+    // filter out any null documents
+    const filteredLeaveRequestDocuments = leaveRequestDocuments.filter(
+      removeUndefinedAndNullValues
+    );
+
+    // check if any documents were created
+    if (filteredLeaveRequestDocuments.length === 0) {
+      response.status(400).json({
+        message: "Leave Request requests creation failed",
+        resourceData: [],
+      });
+      return;
+    }
+
+    const uncreatedDocumentsAmount =
+      leaveRequestSchemas.length - filteredLeaveRequestDocuments.length;
+
+    response.status(201).json({
+      message: `Successfully created ${
+        filteredLeaveRequestDocuments.length
+      } LeaveRequest Requests.${
+        uncreatedDocumentsAmount
+          ? ` ${uncreatedDocumentsAmount} documents were not created.`
+          : ""
+      }}`,
+      resourceData: filteredLeaveRequestDocuments,
+    });
+  }
+);
+
+// DEV ROUTE
+// @desc   Update Leave Requests in bulk
+// @route  PATCH api/v1/company/leave-request/dev
+// @access Private
+const updateLeaveRequestsBulkHandler = expressAsyncHandler(
+  async (
+    request: UpdateLeaveRequestsBulkRequest,
+    response: Response<ResourceRequestServerResponse<LeaveRequestDocument>>
+  ) => {
+    const { leaveRequestFields } = request.body;
+
+    const updatedLeaveRequests = await Promise.all(
+      leaveRequestFields.map(async (leaveRequestField) => {
+        const {
+          documentUpdate: { fields, updateOperator },
+          leaveRequestId,
+        } = leaveRequestField;
+
+        const updatedLeaveRequest = await updateLeaveRequestByIdService({
+          _id: leaveRequestId,
+          fields,
+          updateOperator,
+        });
+
+        return updatedLeaveRequest;
+      })
+    );
+
+    // filter out any leaveRequests that were not created
+    const successfullyCreatedLeaveRequests = updatedLeaveRequests.filter(
+      removeUndefinedAndNullValues
+    );
+
+    if (successfullyCreatedLeaveRequests.length === 0) {
+      response.status(400).json({
+        message: "Could not create any Leave Requests",
+        resourceData: [],
+      });
+      return;
+    }
+
+    response.status(201).json({
+      message: `Successfully created ${
+        successfullyCreatedLeaveRequests.length
+      } Leave Requests. ${
+        leaveRequestFields.length - successfullyCreatedLeaveRequests.length
+      } Leave Requests failed to be created.`,
+      resourceData: successfullyCreatedLeaveRequests,
     });
   }
 );
 
 export {
   createNewLeaveRequestHandler,
-  createNewLeaveRequestBulkHandler,
-  deleteALeaveRequestHandler,
-  deleteAllLeaveRequestsHandler,
-  getLeaveRequestByIdHandler,
   getQueriedLeaveRequestsHandler,
-  getQueriedLeaveRequestsByUserHandler,
+  getLeaveRequestsByUserHandler,
+  getLeaveRequestByIdHandler,
+  deleteLeaveRequestHandler,
+  deleteAllLeaveRequestsHandler,
   updateLeaveRequestStatusByIdHandler,
+  createNewLeaveRequestsBulkHandler,
+  updateLeaveRequestsBulkHandler,
 };

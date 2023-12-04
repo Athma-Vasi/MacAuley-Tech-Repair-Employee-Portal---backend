@@ -3,11 +3,10 @@ import type {
   DimensionUnit,
   PeripheralsInterface,
   ProductAvailability,
-  ProductReview,
   StarRatingsCount,
   WeightUnit,
 } from "../productCategory.types";
-import type { Currency } from "../../actions/company/expenseClaim";
+import { Currency } from "../../actions/company/expenseClaim";
 
 type AccessorySchema = {
   // page 1

@@ -1,8 +1,12 @@
-import type { Types } from 'mongoose';
-import type { RequestAfterJWTVerification } from '../../../auth';
-import type { ReasonForLeave } from './leaveRequest.model';
-import { UserRoles } from '../../../user';
-import { GetQueriedResourceRequest, RequestStatus } from '../../../../types';
+import type { Types } from "mongoose";
+import type { RequestAfterJWTVerification } from "../../../auth";
+import type { UserRoles } from "../../../user";
+import {
+  DocumentUpdateOperation,
+  GetQueriedResourceByUserRequest,
+  GetQueriedResourceRequest,
+} from "../../../../types";
+import { LeaveRequestDocument, LeaveRequestSchema } from "./leaveRequest.model";
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 interface CreateNewLeaveRequestRequest extends RequestAfterJWTVerification {
@@ -13,43 +17,11 @@ interface CreateNewLeaveRequestRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    leaveRequest: {
-      startDate: Date;
-      endDate: Date;
-      reasonForLeave: ReasonForLeave;
-      delegatedToEmployee: string;
-      delegatedResponsibilities: string;
-      additionalComments: string;
-      acknowledgement: boolean;
-    };
+    leaveRequestFields: Omit<LeaveRequestSchema, "userId" | "username">;
   };
 }
 
-// DEV ROUTE
-interface CreateNewLeaveRequestBulkRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-    sessionId: Types.ObjectId;
-    leaveRequests: {
-      userId: Types.ObjectId;
-      username: string;
-      startDate: Date;
-      endDate: Date;
-      reasonForLeave: ReasonForLeave;
-      delegatedToEmployee: string;
-      delegatedResponsibilities: string;
-      additionalComments: string;
-      acknowledgement: boolean;
-      requestStatus: RequestStatus;
-    }[];
-  };
-}
-
-interface DeleteALeaveRequestRequest extends RequestAfterJWTVerification {
+interface DeleteLeaveRequestRequest extends RequestAfterJWTVerification {
   params: {
     leaveRequestId: string;
   };
@@ -57,9 +29,7 @@ interface DeleteALeaveRequestRequest extends RequestAfterJWTVerification {
 
 type DeleteAllLeaveRequestsRequest = RequestAfterJWTVerification;
 
-type GetQueriedLeaveRequestsByUserRequest = GetQueriedResourceRequest;
-
-type GetQueriedLeaveRequestsRequest = GetQueriedResourceRequest;
+type GetQueriedLeaveRequestsByUserRequest = GetQueriedResourceByUserRequest;
 
 interface GetLeaveRequestByIdRequest extends RequestAfterJWTVerification {
   body: {
@@ -73,7 +43,7 @@ interface GetLeaveRequestByIdRequest extends RequestAfterJWTVerification {
   params: { leaveRequestId: string };
 }
 
-interface UpdateLeaveRequestStatusByIdRequest extends RequestAfterJWTVerification {
+interface UpdateLeaveRequestByIdRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {
       userId: Types.ObjectId;
@@ -81,20 +51,50 @@ interface UpdateLeaveRequestStatusByIdRequest extends RequestAfterJWTVerificatio
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    leaveRequest: {
-      requestStatus: RequestStatus;
-    };
+    documentUpdate: DocumentUpdateOperation<LeaveRequestDocument>;
   };
   params: { leaveRequestId: string };
 }
 
+type GetQueriedLeaveRequestsRequest = GetQueriedResourceRequest;
+
+// DEV ROUTE
+interface CreateNewLeaveRequestsBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    leaveRequestSchemas: LeaveRequestSchema[];
+  };
+}
+
+// DEV ROUTE
+interface UpdateLeaveRequestsBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    leaveRequestFields: {
+      leaveRequestId: Types.ObjectId;
+      documentUpdate: DocumentUpdateOperation<LeaveRequestDocument>;
+    }[];
+  };
+}
+
 export type {
   CreateNewLeaveRequestRequest,
-  CreateNewLeaveRequestBulkRequest,
-  DeleteALeaveRequestRequest,
+  DeleteLeaveRequestRequest,
   DeleteAllLeaveRequestsRequest,
   GetQueriedLeaveRequestsByUserRequest,
   GetLeaveRequestByIdRequest,
   GetQueriedLeaveRequestsRequest,
-  UpdateLeaveRequestStatusByIdRequest,
+  UpdateLeaveRequestByIdRequest,
+  CreateNewLeaveRequestsBulkRequest,
+  UpdateLeaveRequestsBulkRequest,
 };

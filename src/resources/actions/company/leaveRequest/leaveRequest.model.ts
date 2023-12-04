@@ -1,25 +1,22 @@
-import { Schema, Types, model } from 'mongoose';
-import type { Action } from '../../../actions';
-import type { ActionsCompany } from '../../company';
-import { RequestStatus } from '../../../../types';
+import { Schema, Types, model } from "mongoose";
+import type { Action } from "../../../actions";
+import type { ActionsCompany } from "../../company";
+import { RequestStatus } from "../../../../types";
 
 type ReasonForLeave =
-  | 'Vacation'
-  | 'Medical'
-  | 'Parental'
-  | 'Bereavement'
-  | 'Jury Duty'
-  | 'Military'
-  | 'Education'
-  | 'Religious'
-  | 'Other';
+  | "Vacation"
+  | "Medical"
+  | "Parental"
+  | "Bereavement"
+  | "Jury Duty"
+  | "Military"
+  | "Education"
+  | "Religious"
+  | "Other";
 
 type LeaveRequestSchema = {
   userId: Types.ObjectId;
   username: string;
-  action: Action;
-  category: ActionsCompany;
-
   startDate: NativeDate;
   endDate: NativeDate;
   reasonForLeave: ReasonForLeave;
@@ -41,64 +38,54 @@ const leaveRequestSchema = new Schema<LeaveRequestSchema>(
   {
     userId: {
       type: Schema.Types.ObjectId,
-      required: [true, 'User ID is required'],
-      ref: 'User',
+      required: [true, "User ID is required"],
+      ref: "User",
       index: true,
     },
     username: {
       type: String,
-      required: [true, 'Username is required'],
-      index: true,
-    },
-    action: {
-      type: String,
-      required: [true, 'Action is required'],
-      index: true,
-    },
-    category: {
-      type: String,
-      required: [true, 'Category is required'],
+      required: [true, "Username is required"],
       index: true,
     },
     startDate: {
       type: Date,
-      required: [true, 'Start date is required'],
+      required: [true, "Start date is required"],
       index: true,
     },
     endDate: {
       type: Date,
-      required: [true, 'End date is required'],
+      required: [true, "End date is required"],
       index: true,
     },
     reasonForLeave: {
       type: String,
-      required: [true, 'Reason for leave is required'],
+      required: [true, "Reason for leave is required"],
       index: true,
     },
     delegatedToEmployee: {
       type: String,
       required: false,
-      default: '',
+      default: "",
     },
     delegatedResponsibilities: {
       type: String,
       required: false,
-      default: '',
+      default: "",
     },
     additionalComments: {
       type: String,
       required: false,
-      default: '',
+      default: "",
     },
     acknowledgement: {
       type: Boolean,
-      required: [true, 'Acknowledgement is required'],
+      required: [true, "Acknowledgement is required"],
       default: false,
     },
     requestStatus: {
       type: String,
       required: false,
-      default: 'pending',
+      default: "pending",
       index: true,
     },
   },
@@ -106,12 +93,12 @@ const leaveRequestSchema = new Schema<LeaveRequestSchema>(
 );
 
 leaveRequestSchema.index({
-  delegatedToEmployee: 'text',
-  delegatedResponsibilities: 'text',
-  additionalComments: 'text',
+  delegatedToEmployee: "text",
+  delegatedResponsibilities: "text",
+  additionalComments: "text",
 });
 
-const LeaveRequestModel = model<LeaveRequestDocument>('LeaveRequest', leaveRequestSchema);
+const LeaveRequestModel = model<LeaveRequestDocument>("LeaveRequest", leaveRequestSchema);
 
 export { LeaveRequestModel };
 export type { LeaveRequestSchema, LeaveRequestDocument, ReasonForLeave };
