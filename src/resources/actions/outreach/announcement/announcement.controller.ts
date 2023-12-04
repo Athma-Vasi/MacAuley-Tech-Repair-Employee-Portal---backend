@@ -1,192 +1,78 @@
-import expressAsyncHandler from 'express-async-handler';
+import expressAsyncHandler from "express-async-handler";
 
-import type { DeleteResult } from 'mongodb';
-import type { Response } from 'express';
+import type { FilterQuery, QueryOptions } from "mongoose";
+import type { Response } from "express";
+import type { DeleteResult } from "mongodb";
 import type {
   CreateNewAnnouncementRequest,
-  DeleteAnAnnouncementRequest,
-  GetAllAnnouncementsRequest,
-  UpdateAnnouncementRequest,
-  GetAnnouncementsByUserRequest,
-  DeleteAllAnnouncementsRequest,
-  GetAnnouncementRequestById,
-  UpdateAnnouncementRatingRequest,
   CreateNewAnnouncementsBulkRequest,
-} from './announcement.types';
-
-import {
-  checkAnnouncementExistsService,
-  createNewAnnouncementService,
-  deleteAllAnnouncementsService,
-  deleteAnnouncementService,
-  getQueriedAnnouncementsService,
-  getAnnouncementByIdService,
-  getQueriedAnouncementsByUserService,
-  updateAnnouncementService,
-  getQueriedTotalAnnouncementsService,
-} from './announcement.service';
-import { AnnouncementDocument, AnnouncementSchema } from './announcement.model';
-import {
-  DatabaseResponseNullable,
+  DeleteAllAnnouncementsRequest,
+  DeleteAnnouncementRequest,
+  GetAnnouncementByIdRequest,
+  GetQueriedAnnouncementsByUserRequest,
+  GetQueriedAnnouncementsRequest,
+  UpdateAnnouncementByIdRequest,
+  UpdateAnnouncementsBulkRequest,
+} from "./announcement.types";
+import type {
   GetQueriedResourceRequestServerResponse,
   QueryObjectParsedWithDefaults,
   ResourceRequestServerResponse,
-} from '../../../../types';
-import { FilterQuery, QueryOptions } from 'mongoose';
-import {
-  UserDocument,
-  checkUserExistsService,
-  getUserByIdService,
-  updateUserByIdService,
-} from '../../../user';
+} from "../../../../types";
+import type { AnnouncementDocument } from "./announcement.model";
 
-// @desc   create new announcement
-// @route  POST /announcements
+import {
+  createNewAnnouncementService,
+  deleteAllAnnouncementsService,
+  deleteAnnouncementByIdService,
+  getAnnouncementByIdService,
+  getQueriedAnnouncementsByUserService,
+  getQueriedAnnouncementsService,
+  getQueriedTotalAnnouncementsService,
+  updateAnnouncementByIdService,
+} from "./announcement.service";
+import { removeUndefinedAndNullValues } from "../../../../utils";
+import { getUserByIdService } from "../../../user";
+
+// @desc   Create a new announcement
+// @route  POST api/v1/actions/outreach/announcement
 // @access Private
 const createNewAnnouncementHandler = expressAsyncHandler(
   async (
     request: CreateNewAnnouncementRequest,
     response: Response<ResourceRequestServerResponse<AnnouncementDocument>>
   ) => {
-    const {
-      userInfo: { userId, username },
-      announcement: {
-        title,
-        author,
-        article,
-        bannerImageSrcCompressed,
-        bannerImageAlt,
-        bannerImageSrc,
-        timeToRead,
-        ratingResponse,
-        ratedUserIds,
-      },
-    } = request.body;
+    const { announcementSchema } = request.body;
 
-    // check if announcement with same title already exists
-    const isDuplicateAnnouncement = await checkAnnouncementExistsService({ title });
-    if (isDuplicateAnnouncement) {
-      response
-        .status(400)
-        .json({ message: 'Announcement with same title already exists', resourceData: [] });
-      return;
-    }
+    const announcementDocument = await createNewAnnouncementService(announcementSchema);
 
-    // create new announcement if all checks pass successfully
-    const newAnnouncementObject: AnnouncementSchema = {
-      userId,
-      username,
-      action: 'outreach',
-      category: 'announcement',
-      title,
-      author,
-      article,
-      bannerImageSrcCompressed,
-      bannerImageAlt,
-      bannerImageSrc,
-      timeToRead,
-      ratingResponse,
-      ratedUserIds,
-    };
-
-    const newAnnouncement = await createNewAnnouncementService(newAnnouncementObject);
-    if (!newAnnouncement) {
-      response.status(400).json({ message: 'Announcement could not be created', resourceData: [] });
-      return;
-    }
-
-    response.status(201).json({
-      message: 'Announcement created successfully!',
-      resourceData: [newAnnouncement],
-    });
-  }
-);
-
-// DEV ROUTE
-// @desc   create new announcements in bulk
-// @route  POST /announcements/dev
-// @access Private/Manager/Admin
-const createNewAnnouncementsBulkHandler = expressAsyncHandler(
-  async (
-    request: CreateNewAnnouncementsBulkRequest,
-    response: Response<ResourceRequestServerResponse<AnnouncementDocument>>
-  ) => {
-    const { announcements } = request.body;
-
-    // create new announcements in bulk
-    const newAnnouncements = await Promise.all(
-      announcements.map(async (announcement) => {
-        const {
-          userId,
-          username,
-          title,
-          author,
-          article,
-          bannerImageAlt,
-          bannerImageSrc,
-          bannerImageSrcCompressed,
-          timeToRead,
-          ratingResponse,
-          ratedUserIds,
-        } = announcement;
-
-        // create new announcement object
-        const newAnnouncementObject: AnnouncementSchema = {
-          userId,
-          username,
-          action: 'outreach',
-          category: 'announcement',
-          title,
-          author,
-          article,
-          bannerImageAlt,
-          bannerImageSrc,
-          bannerImageSrcCompressed,
-          timeToRead,
-          ratingResponse,
-          ratedUserIds,
-        };
-
-        // create new announcement
-        const newAnnouncement = await createNewAnnouncementService(newAnnouncementObject);
-
-        return newAnnouncement;
-      })
-    );
-
-    // filter out undefined values
-    const newAnnouncementsFiltered = newAnnouncements.filter(
-      (announcement) => announcement
-    ) as AnnouncementDocument[];
-
-    // check if any announcements were created
-    if (newAnnouncementsFiltered.length === announcements.length) {
-      response.status(201).json({
-        message: 'Announcements created successfully!',
-        resourceData: newAnnouncementsFiltered,
-      });
-      return;
-    } else {
+    if (!announcementDocument) {
       response.status(400).json({
-        message: 'Announcements could not be created',
+        message: "New announcement could not be created",
         resourceData: [],
       });
       return;
     }
+
+    response.status(201).json({
+      message: "Successfully created announcement",
+      resourceData: [announcementDocument],
+    });
   }
 );
 
-// @desc   create new announcement
-// @route  POST /announcements
-// @access Public
+// @desc   Get all announcements
+// @route  GET api/v1/actions/outreach/announcement
+// @access Private/Admin/Manager
 const getQueriedAnnouncementsHandler = expressAsyncHandler(
   async (
-    request: GetAllAnnouncementsRequest,
+    request: GetQueriedAnnouncementsRequest,
     response: Response<GetQueriedResourceRequestServerResponse<AnnouncementDocument>>
   ) => {
     let { newQueryFlag, totalDocuments } = request.body;
 
-    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+    const { filter, projection, options } =
+      request.query as QueryObjectParsedWithDefaults;
 
     // only perform a countDocuments scan if a new query is being made
     if (newQueryFlag) {
@@ -196,15 +82,15 @@ const getQueriedAnnouncementsHandler = expressAsyncHandler(
     }
 
     // get all announcements
-    const announcements = await getQueriedAnnouncementsService({
+    const announcement = await getQueriedAnnouncementsService({
       filter: filter as FilterQuery<AnnouncementDocument> | undefined,
       projection: projection as QueryOptions<AnnouncementDocument>,
       options: options as QueryOptions<AnnouncementDocument>,
     });
 
-    if (!announcements?.length) {
+    if (!announcement.length) {
       response.status(200).json({
-        message: 'No announcements that match query parameters were found',
+        message: "No announcements that match query parameters were found",
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
@@ -213,28 +99,31 @@ const getQueriedAnnouncementsHandler = expressAsyncHandler(
     }
 
     response.status(200).json({
-      message: 'Successfully found announcements',
+      message: "Announcements found successfully",
       pages: Math.ceil(totalDocuments / Number(options?.limit)),
       totalDocuments,
-      resourceData: announcements,
+      resourceData: announcement,
     });
   }
 );
 
-// @desc   get corresponding announcements for requesting user
-// @route  GET /announcement/user
+// @desc   Get all announcement requests by user
+// @route  GET api/v1/actions/outreach/announcement
 // @access Private
-const getQueriedAnouncementsByUserHandler = expressAsyncHandler(
+const getAnnouncementsByUserHandler = expressAsyncHandler(
   async (
-    request: GetAnnouncementsByUserRequest,
+    request: GetQueriedAnnouncementsByUserRequest,
     response: Response<GetQueriedResourceRequestServerResponse<AnnouncementDocument>>
   ) => {
+    // anyone can view their own announcement requests
     const {
       userInfo: { userId },
     } = request.body;
+
     let { newQueryFlag, totalDocuments } = request.body;
 
-    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+    const { filter, projection, options } =
+      request.query as QueryObjectParsedWithDefaults;
 
     // assign userId to filter
     const filterWithUserId = { ...filter, userId };
@@ -246,16 +135,16 @@ const getQueriedAnouncementsByUserHandler = expressAsyncHandler(
       });
     }
 
-    // get all announcements by an user
-    const announcements = await getQueriedAnouncementsByUserService({
+    // get all announcement requests by user
+    const announcements = await getQueriedAnnouncementsByUserService({
       filter: filterWithUserId as FilterQuery<AnnouncementDocument> | undefined,
       projection: projection as QueryOptions<AnnouncementDocument>,
       options: options as QueryOptions<AnnouncementDocument>,
     });
 
-    if (!announcements?.length) {
+    if (!announcements.length) {
       response.status(200).json({
-        message: 'No announcements that match query parameters were found',
+        message: "No announcement requests found",
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
@@ -264,7 +153,7 @@ const getQueriedAnouncementsByUserHandler = expressAsyncHandler(
     }
 
     response.status(200).json({
-      message: 'Successfully found announcements',
+      message: "Announcement requests found successfully",
       pages: Math.ceil(totalDocuments / Number(options?.limit)),
       totalDocuments,
       resourceData: announcements,
@@ -272,177 +161,232 @@ const getQueriedAnouncementsByUserHandler = expressAsyncHandler(
   }
 );
 
-// @desc   update announcement
-// @route  PATCH /announcement/:announcementId
-// @access Private
-const updateAnnouncementHandler = expressAsyncHandler(
+// @desc   Update announcement status
+// @route  PATCH api/v1/actions/outreach/announcement
+// @access Private/Admin/Manager
+const updateAnnouncementStatusByIdHandler = expressAsyncHandler(
   async (
-    request: UpdateAnnouncementRequest,
+    request: UpdateAnnouncementByIdRequest,
     response: Response<ResourceRequestServerResponse<AnnouncementDocument>>
-  ) => {
-    const { announcementFields } = request.body;
-    const { announcementId } = request.params;
-
-    console.log({ announcementFields, announcementId });
-
-    // check if announcement exists
-    const isAnnouncement = await getAnnouncementByIdService(announcementId);
-    if (!isAnnouncement) {
-      response.status(400).json({ message: 'Announcement does not exist', resourceData: [] });
-      return;
-    }
-
-    const updatedAnnouncement = await updateAnnouncementService({
-      announcementId,
-      announcementFields,
-    });
-
-    if (!updatedAnnouncement) {
-      response.status(400).json({ message: 'Announcement could not be updated', resourceData: [] });
-      return;
-    }
-
-    response.status(201).json({
-      message: 'Announcement updated successfully',
-      resourceData: [updatedAnnouncement],
-    });
-  }
-);
-
-// @desc   update announcement rating
-// @route  PATCH /announcement/:announcementId/rating
-// @access Private
-const updateAnnouncementRatingHandler = expressAsyncHandler(
-  async (
-    request: UpdateAnnouncementRatingRequest,
-    response: Response<ResourceRequestServerResponse<AnnouncementDocument | UserDocument>>
   ) => {
     const { announcementId } = request.params;
     const {
-      announcementFields: { ratedUserIds, ratingResponse },
+      documentUpdate: { fields, updateOperator },
+      userInfo: { userId },
     } = request.body;
 
-    // check if announcement exists
-    const isAnnouncement = await getAnnouncementByIdService(announcementId);
-    if (!isAnnouncement) {
-      response.status(400).json({ message: 'Announcement does not exist', resourceData: [] });
+    // check if user exists
+    const userExists = await getUserByIdService(userId);
+    if (!userExists) {
+      response.status(404).json({ message: "User does not exist", resourceData: [] });
       return;
     }
 
-    const updatedAnnouncement = await updateAnnouncementService({
-      announcementId,
-      announcementFields: { ratedUserIds, ratingResponse },
+    // update announcement request status
+    const updatedAnnouncement = await updateAnnouncementByIdService({
+      _id: announcementId,
+      fields,
+      updateOperator,
     });
+
     if (!updatedAnnouncement) {
-      response.status(400).json({ message: 'Announcement could not be updated', resourceData: [] });
+      response.status(400).json({
+        message: "Announcement request status update failed. Please try again!",
+        resourceData: [],
+      });
       return;
     }
 
-    response.status(201).json({
-      message: 'Announcement rating updated successfully!',
+    response.status(200).json({
+      message: "Announcement request status updated successfully",
       resourceData: [updatedAnnouncement],
     });
   }
 );
 
-// @desc   delete announcement
-// @route  DELETE /announcement/:announcementId
+// @desc   Get an announcement request
+// @route  GET api/v1/actions/outreach/announcement
 // @access Private
-const deleteAnnouncementHandler = expressAsyncHandler(
+const getAnnouncementByIdHandler = expressAsyncHandler(
   async (
-    request: DeleteAnAnnouncementRequest,
+    request: GetAnnouncementByIdRequest,
     response: Response<ResourceRequestServerResponse<AnnouncementDocument>>
   ) => {
     const { announcementId } = request.params;
-
-    // check if announcement exists
-    const isAnnouncement = await checkAnnouncementExistsService({ announcementId });
-    if (!isAnnouncement) {
-      response.status(400).json({ message: 'Announcement does not exist', resourceData: [] });
+    const announcement = await getAnnouncementByIdService(announcementId);
+    if (!announcement) {
+      response
+        .status(404)
+        .json({ message: "Announcement request not found", resourceData: [] });
       return;
     }
 
-    // delete announcement if all checks pass successfully
-    const deletedAnnouncement: DeleteResult = await deleteAnnouncementService(announcementId);
-    if (deletedAnnouncement.deletedCount === 0) {
-      response.status(400).json({ message: 'Announcement could not be deleted', resourceData: [] });
+    response.status(200).json({
+      message: "Announcement request found successfully",
+      resourceData: [announcement],
+    });
+  }
+);
+
+// @desc   Delete an announcement request by its id
+// @route  DELETE api/v1/actions/outreach/announcement
+// @access Private
+const deleteAnnouncementHandler = expressAsyncHandler(
+  async (request: DeleteAnnouncementRequest, response: Response) => {
+    const { announcementId } = request.params;
+
+    // delete announcement request by id
+    const deletedResult: DeleteResult = await deleteAnnouncementByIdService(
+      announcementId
+    );
+
+    if (!deletedResult.deletedCount) {
+      response.status(400).json({
+        message: "Announcement request could not be deleted",
+        resourceData: [],
+      });
+      return;
+    }
+
+    response.status(200).json({
+      message: "Announcement request deleted successfully",
+      resourceData: [],
+    });
+  }
+);
+
+// @desc    Delete all announcement requests
+// @route   DELETE api/v1/actions/outreach/request-resource/announcement
+// @access  Private
+const deleteAllAnnouncementsHandler = expressAsyncHandler(
+  async (_request: DeleteAllAnnouncementsRequest, response: Response) => {
+    const deletedResult: DeleteResult = await deleteAllAnnouncementsService();
+
+    if (!deletedResult.deletedCount) {
+      response.status(400).json({
+        message: "All announcement requests could not be deleted",
+        resourceData: [],
+      });
+      return;
+    }
+
+    response.status(200).json({
+      message: "All announcement requests deleted successfully",
+      resourceData: [],
+    });
+  }
+);
+
+// DEV ROUTE
+// @desc   Create new announcement requests in bulk
+// @route  POST api/v1/actions/outreach/announcement
+// @access Private
+const createNewAnnouncementsBulkHandler = expressAsyncHandler(
+  async (
+    request: CreateNewAnnouncementsBulkRequest,
+    response: Response<ResourceRequestServerResponse<AnnouncementDocument>>
+  ) => {
+    const { announcementSchemas } = request.body;
+
+    const announcementDocuments = await Promise.all(
+      announcementSchemas.map(async (announcementSchema) => {
+        const announcementDocument = await createNewAnnouncementService(
+          announcementSchema
+        );
+        return announcementDocument;
+      })
+    );
+
+    // filter out any null documents
+    const filteredAnnouncementDocuments = announcementDocuments.filter(
+      removeUndefinedAndNullValues
+    );
+
+    // check if any documents were created
+    if (filteredAnnouncementDocuments.length === 0) {
+      response.status(400).json({
+        message: "Announcement requests creation failed",
+        resourceData: [],
+      });
+      return;
+    }
+
+    const uncreatedDocumentsAmount =
+      announcementSchemas.length - filteredAnnouncementDocuments.length;
+
+    response.status(201).json({
+      message: `Successfully created ${
+        filteredAnnouncementDocuments.length
+      } Announcement requests.${
+        uncreatedDocumentsAmount
+          ? ` ${uncreatedDocumentsAmount} documents were not created.`
+          : ""
+      }}`,
+      resourceData: filteredAnnouncementDocuments,
+    });
+  }
+);
+
+// DEV ROUTE
+// @desc   Update Announcements in bulk
+// @route  PATCH api/v1/actions/outreach/announcement
+// @access Private
+const updateAnnouncementsBulkHandler = expressAsyncHandler(
+  async (
+    request: UpdateAnnouncementsBulkRequest,
+    response: Response<ResourceRequestServerResponse<AnnouncementDocument>>
+  ) => {
+    const { announcementFields } = request.body;
+
+    const updatedAnnouncements = await Promise.all(
+      announcementFields.map(async (announcementField) => {
+        const {
+          documentUpdate: { fields, updateOperator },
+          announcementId,
+        } = announcementField;
+
+        const updatedAnnouncement = await updateAnnouncementByIdService({
+          _id: announcementId,
+          fields,
+          updateOperator,
+        });
+
+        return updatedAnnouncement;
+      })
+    );
+
+    // filter out any announcements that were not created
+    const successfullyCreatedAnnouncements = updatedAnnouncements.filter(
+      removeUndefinedAndNullValues
+    );
+
+    if (successfullyCreatedAnnouncements.length === 0) {
+      response.status(400).json({
+        message: "Could not create any Announcements",
+        resourceData: [],
+      });
       return;
     }
 
     response.status(201).json({
-      message: 'Announcement deleted successfully',
-      resourceData: [],
-    });
-  }
-);
-
-// @desc    Delete all announcements
-// @route   DELETE /announcements
-// @access  Private
-const deleteAllAnnouncementsHandler = expressAsyncHandler(
-  async (_request: DeleteAllAnnouncementsRequest, response: Response) => {
-    // delete all announcements if all checks pass successfully
-    const deletedResult: DeleteResult = await deleteAllAnnouncementsService();
-    if (deletedResult.deletedCount === 0) {
-      response.status(400).json({
-        message: 'Announcements could not be deleted',
-        resourceData: [],
-      });
-      return;
-    }
-
-    response.status(200).json({
-      message: 'All announcements deleted successfully',
-      resourceData: [],
-    });
-  }
-);
-
-// @desc   get an announcement by its id
-// @route  GET /announcement/:announcementId
-// @access Private
-const getAnnouncementByIdHandler = expressAsyncHandler(
-  async (
-    request: GetAnnouncementRequestById,
-    response: Response<ResourceRequestServerResponse<AnnouncementDocument>>
-  ) => {
-    const { announcementId } = request.params;
-
-    // check if announcement exists
-    const isAnnouncement = await checkAnnouncementExistsService({ announcementId });
-    if (!isAnnouncement) {
-      response.status(404).json({
-        message: 'Announcement does not exist',
-        resourceData: [],
-      });
-      return;
-    }
-
-    // get announcement if all checks pass successfully
-    const announcement = await getAnnouncementByIdService(announcementId);
-    if (!announcement) {
-      response.status(400).json({
-        message: 'Announcement could not be retrieved',
-        resourceData: [],
-      });
-      return;
-    }
-
-    response.status(200).json({
-      message: 'Announcement retrieved successfully',
-      resourceData: [announcement],
+      message: `Successfully created ${
+        successfullyCreatedAnnouncements.length
+      } Announcements. ${
+        announcementFields.length - successfullyCreatedAnnouncements.length
+      } Announcements failed to be created.`,
+      resourceData: successfullyCreatedAnnouncements,
     });
   }
 );
 
 export {
   createNewAnnouncementHandler,
-  createNewAnnouncementsBulkHandler,
+  getQueriedAnnouncementsHandler,
+  getAnnouncementsByUserHandler,
+  getAnnouncementByIdHandler,
   deleteAnnouncementHandler,
   deleteAllAnnouncementsHandler,
-  getAnnouncementByIdHandler,
-  getQueriedAnnouncementsHandler,
-  getQueriedAnouncementsByUserHandler,
-  updateAnnouncementHandler,
-  updateAnnouncementRatingHandler,
+  updateAnnouncementStatusByIdHandler,
+  createNewAnnouncementsBulkHandler,
+  updateAnnouncementsBulkHandler,
 };

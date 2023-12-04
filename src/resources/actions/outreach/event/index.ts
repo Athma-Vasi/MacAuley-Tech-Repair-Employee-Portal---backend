@@ -1,75 +1,85 @@
 /**
- * This barrel index file is used to import/export eventCreator model, router, types, handlers and services
+ * This barrel index file is used to import/export event model, router, types, handlers and services
  */
 
 /**
  * Imports
  */
 
-import { EventCreatorModel } from './event.model';
-import { eventCreatorRouter } from './event.routes';
+import { EventModel } from "./event.model";
+import { eventRouter } from "./event.routes";
 import {
   createNewEventHandler,
-  deleteAllEventsByUserHandler,
-  deleteAnEventHandler,
-  getQueriedEventsHandler,
+  createNewEventsBulkHandler,
+  deleteAllEventsHandler,
+  deleteEventHandler,
   getEventByIdHandler,
-  getQueriedEventsByUserHandler,
-  updateAnEventHandler,
-} from './event.controller';
+  getEventsByUserHandler,
+  getQueriedEventsHandler,
+  updateEventStatusByIdHandler,
+  updateEventsBulkHandler,
+} from "./event.controller";
 import {
   createNewEventService,
-  deleteAllEventsByUserService,
-  deleteAnEventService,
-  getQueriedEventsService,
+  deleteAllEventsService,
+  deleteEventByIdService,
   getEventByIdService,
   getQueriedEventsByUserService,
-  updateAnEventByIdService,
-} from './event.service';
+  getQueriedEventsService,
+  getQueriedTotalEventsService,
+  updateEventByIdService,
+} from "./event.service";
 
 import type {
   CreateNewEventRequest,
-  DeleteAllEventsByUserRequest,
-  DeleteAnEventRequest,
-  GetQueriedEventsRequest,
+  CreateNewEventsBulkRequest,
+  DeleteAllEventsRequest,
+  DeleteEventRequest,
   GetEventByIdRequest,
   GetQueriedEventsByUserRequest,
-  UpdateAnEventByIdRequest,
-} from './event.types';
-import type { EventCreatorDocument, EventCreatorSchema, EventKind } from './event.model';
+  GetQueriedEventsRequest,
+  UpdateEventByIdRequest,
+  UpdateEventsBulkRequest,
+} from "./event.types";
+import type { EventDocument, EventSchema, EventKind } from "./event.model";
 
 /**
  * Exports
  */
 
 export {
-  EventCreatorModel,
-  eventCreatorRouter,
+  EventModel,
+  eventRouter,
   createNewEventHandler,
-  deleteAllEventsByUserHandler,
-  deleteAnEventHandler,
-  getQueriedEventsHandler,
-  getEventByIdHandler,
-  getQueriedEventsByUserHandler,
-  updateAnEventHandler,
   createNewEventService,
-  deleteAllEventsByUserService,
-  deleteAnEventService,
-  getQueriedEventsService,
+  createNewEventsBulkHandler,
+  deleteAllEventsHandler,
+  deleteAllEventsService,
+  deleteEventByIdService,
+  deleteEventHandler,
+  getEventByIdHandler,
   getEventByIdService,
+  getEventsByUserHandler,
   getQueriedEventsByUserService,
-  updateAnEventByIdService,
+  getQueriedEventsHandler,
+  getQueriedEventsService,
+  getQueriedTotalEventsService,
+  updateEventByIdService,
+  updateEventStatusByIdHandler,
+  updateEventsBulkHandler,
 };
 
 export type {
   CreateNewEventRequest,
-  DeleteAllEventsByUserRequest,
-  DeleteAnEventRequest,
-  GetQueriedEventsRequest,
+  CreateNewEventsBulkRequest,
+  DeleteAllEventsRequest,
+  DeleteEventRequest,
   GetEventByIdRequest,
   GetQueriedEventsByUserRequest,
-  UpdateAnEventByIdRequest,
-  EventCreatorDocument,
-  EventCreatorSchema,
+  GetQueriedEventsRequest,
+  UpdateEventByIdRequest,
+  UpdateEventsBulkRequest,
+  EventSchema,
+  EventDocument,
   EventKind,
 };

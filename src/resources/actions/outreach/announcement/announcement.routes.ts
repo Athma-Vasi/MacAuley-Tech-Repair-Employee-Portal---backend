@@ -1,39 +1,41 @@
-import { Router } from 'express';
-
-import { assignQueryDefaults, verifyRoles } from '../../../../middlewares';
+import { Router } from "express";
 import {
   createNewAnnouncementHandler,
-  deleteAnnouncementHandler,
   getQueriedAnnouncementsHandler,
-  updateAnnouncementHandler,
-  getQueriedAnouncementsByUserHandler,
-  deleteAllAnnouncementsHandler,
+  getAnnouncementsByUserHandler,
   getAnnouncementByIdHandler,
-  updateAnnouncementRatingHandler,
+  deleteAnnouncementHandler,
+  deleteAllAnnouncementsHandler,
+  updateAnnouncementStatusByIdHandler,
   createNewAnnouncementsBulkHandler,
-} from './announcement.controller';
-import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
+  updateAnnouncementsBulkHandler,
+} from "./announcement.controller";
+import { assignQueryDefaults } from "../../../../middlewares";
+import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../../constants";
 
 const announcementRouter = Router();
 
-announcementRouter.use(verifyRoles());
-
 announcementRouter
-  .route('/')
+  .route("/")
   .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedAnnouncementsHandler)
-  .post(createNewAnnouncementHandler)
-  .delete(deleteAllAnnouncementsHandler);
+  .post(createNewAnnouncementHandler);
 
-announcementRouter.route('/user').get(getQueriedAnouncementsByUserHandler);
-
-// DEV ROUTE
-announcementRouter.route('/dev').post(createNewAnnouncementsBulkHandler);
+announcementRouter.route("/delete-all").delete(deleteAllAnnouncementsHandler);
 
 announcementRouter
-  .route('/:announcementId')
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getAnnouncementByIdHandler)
-  .delete(deleteAnnouncementHandler)
-  .patch(updateAnnouncementHandler);
+  .route("/user")
+  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getAnnouncementsByUserHandler);
 
-announcementRouter.route('/:announcementId/rating').patch(updateAnnouncementRatingHandler);
+// DEV ROUTES
+announcementRouter
+  .route("/dev")
+  .post(createNewAnnouncementsBulkHandler)
+  .patch(updateAnnouncementsBulkHandler);
+
+announcementRouter
+  .route("/:announcementId")
+  .get(getAnnouncementByIdHandler)
+  .delete(deleteAnnouncementHandler)
+  .patch(updateAnnouncementStatusByIdHandler);
+
 export { announcementRouter };

@@ -1,12 +1,14 @@
-import type { Request } from 'express';
-import type { Types } from 'mongoose';
-import type { RequestAfterJWTVerification } from '../../../auth';
-import type { UserRoles } from '../../../user';
-import type { EventCreatorDocument, EventKind } from './event.model';
-import { GetQueriedResourceRequest } from '../../../../types';
+import type { Types } from "mongoose";
+import type { RequestAfterJWTVerification } from "../../../auth";
+import type { UserRoles } from "../../../user";
+import {
+  DocumentUpdateOperation,
+  GetQueriedResourceByUserRequest,
+  GetQueriedResourceRequest,
+} from "../../../../types";
+import { EventDocument, EventSchema } from "./event.model";
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
-
 interface CreateNewEventRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {
@@ -14,21 +16,47 @@ interface CreateNewEventRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    event: {
-      eventTitle: string;
-      eventDescription: string;
-      eventKind: EventKind;
-      eventStartDate: NativeDate;
-      eventEndDate: NativeDate;
-      eventStartTime: string;
-      eventEndTime: string;
-      eventLocation: string;
-      eventAttendees: string;
-      requiredItems: string;
-      rsvpDeadline: NativeDate;
-    };
+    sessionId: Types.ObjectId;
+    eventSchema: EventSchema;
   };
 }
+
+interface DeleteEventRequest extends RequestAfterJWTVerification {
+  params: {
+    eventId: string;
+  };
+}
+
+type DeleteAllEventsRequest = RequestAfterJWTVerification;
+
+type GetQueriedEventsByUserRequest = GetQueriedResourceByUserRequest;
+
+interface GetEventByIdRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+  };
+  params: { eventId: string };
+}
+
+interface UpdateEventByIdRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    documentUpdate: DocumentUpdateOperation<EventDocument>;
+  };
+  params: { eventId: string };
+}
+
+type GetQueriedEventsRequest = GetQueriedResourceRequest;
 
 // DEV ROUTE
 interface CreateNewEventsBulkRequest extends RequestAfterJWTVerification {
@@ -38,67 +66,35 @@ interface CreateNewEventsBulkRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    events: {
+    sessionId: Types.ObjectId;
+    eventSchemas: EventSchema[];
+  };
+}
+
+// DEV ROUTE
+interface UpdateEventsBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
       userId: Types.ObjectId;
       username: string;
-      creatorRole: UserRoles;
-      eventTitle: string;
-      eventDescription: string;
-      eventKind: EventKind;
-      eventStartDate: NativeDate;
-      eventEndDate: NativeDate;
-      eventStartTime: string;
-      eventEndTime: string;
-      eventLocation: string;
-      eventAttendees: string;
-      requiredItems: string;
-      rsvpDeadline: NativeDate;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    eventFields: {
+      eventId: Types.ObjectId;
+      documentUpdate: DocumentUpdateOperation<EventDocument>;
     }[];
   };
 }
 
-interface DeleteAnEventRequest extends RequestAfterJWTVerification {
-  params: {
-    eventId: string;
-  };
-}
-
-type DeleteAllEventsByUserRequest = RequestAfterJWTVerification;
-
-type GetQueriedEventsRequest = GetQueriedResourceRequest;
-
-type GetQueriedEventsByUserRequest = GetQueriedResourceRequest;
-
-interface GetEventByIdRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-  };
-  params: { eventId: string };
-}
-
-interface UpdateAnEventByIdRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-    event: EventCreatorDocument;
-  };
-  params: { eventId: string };
-}
-
 export type {
   CreateNewEventRequest,
-  CreateNewEventsBulkRequest,
-  DeleteAnEventRequest,
-  DeleteAllEventsByUserRequest,
-  GetQueriedEventsRequest,
+  DeleteEventRequest,
+  DeleteAllEventsRequest,
   GetQueriedEventsByUserRequest,
   GetEventByIdRequest,
-  UpdateAnEventByIdRequest,
+  GetQueriedEventsRequest,
+  UpdateEventByIdRequest,
+  CreateNewEventsBulkRequest,
+  UpdateEventsBulkRequest,
 };

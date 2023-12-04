@@ -1,39 +1,38 @@
-import { Router } from 'express';
-
+import { Router } from "express";
 import {
   createNewEventHandler,
-  deleteAllEventsByUserHandler,
-  deleteAnEventHandler,
   getQueriedEventsHandler,
+  getEventsByUserHandler,
   getEventByIdHandler,
-  getQueriedEventsByUserHandler,
-  updateAnEventHandler,
+  deleteEventHandler,
+  deleteAllEventsHandler,
+  updateEventStatusByIdHandler,
   createNewEventsBulkHandler,
-} from './event.controller';
-import { assignQueryDefaults, verifyRoles } from '../../../../middlewares';
-import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
+  updateEventsBulkHandler,
+} from "./event.controller";
+import { assignQueryDefaults } from "../../../../middlewares";
+import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../../constants";
 
-const eventCreatorRouter = Router();
+const eventRouter = Router();
 
-eventCreatorRouter.use(verifyRoles());
+eventRouter
+  .route("/")
+  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedEventsHandler)
+  .post(createNewEventHandler);
 
-eventCreatorRouter
-  .route('/')
-  .post(createNewEventHandler)
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedEventsHandler);
+eventRouter.route("/delete-all").delete(deleteAllEventsHandler);
 
-eventCreatorRouter
-  .route('/user')
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedEventsByUserHandler)
-  .delete(deleteAllEventsByUserHandler);
+eventRouter
+  .route("/user")
+  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getEventsByUserHandler);
 
-// DEV ROUTE
-eventCreatorRouter.route('/dev').post(createNewEventsBulkHandler);
+// DEV ROUTES
+eventRouter.route("/dev").post(createNewEventsBulkHandler).patch(updateEventsBulkHandler);
 
-eventCreatorRouter
-  .route('/:eventId')
+eventRouter
+  .route("/:eventId")
   .get(getEventByIdHandler)
-  .delete(deleteAnEventHandler)
-  .put(updateAnEventHandler);
+  .delete(deleteEventHandler)
+  .patch(updateEventStatusByIdHandler);
 
-export { eventCreatorRouter };
+export { eventRouter };

@@ -1,8 +1,12 @@
-import type { Types } from 'mongoose';
-import type { RequestAfterJWTVerification } from '../../../auth';
-import type { UserRoles } from '../../../user';
-import { GetQueriedResourceRequest } from '../../../../types';
-import { AnnouncementSchema, RatingResponse } from './announcement.model';
+import type { Types } from "mongoose";
+import type { RequestAfterJWTVerification } from "../../../auth";
+import type { UserRoles } from "../../../user";
+import {
+  DocumentUpdateOperation,
+  GetQueriedResourceByUserRequest,
+  GetQueriedResourceRequest,
+} from "../../../../types";
+import { AnnouncementDocument, AnnouncementSchema } from "./announcement.model";
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 interface CreateNewAnnouncementRequest extends RequestAfterJWTVerification {
@@ -12,20 +16,47 @@ interface CreateNewAnnouncementRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    // below are the fields required to be sent with post request
-    announcement: {
-      title: string;
-      author: string;
-      bannerImageSrcCompressed: string;
-      bannerImageSrc: string;
-      bannerImageAlt: string;
-      article: string[];
-      timeToRead: number;
-      ratingResponse: RatingResponse;
-      ratedUserIds: Types.ObjectId[];
-    };
+    sessionId: Types.ObjectId;
+    announcementSchema: AnnouncementSchema;
   };
 }
+
+interface DeleteAnnouncementRequest extends RequestAfterJWTVerification {
+  params: {
+    announcementId: string;
+  };
+}
+
+type DeleteAllAnnouncementsRequest = RequestAfterJWTVerification;
+
+type GetQueriedAnnouncementsByUserRequest = GetQueriedResourceByUserRequest;
+
+interface GetAnnouncementByIdRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+  };
+  params: { announcementId: string };
+}
+
+interface UpdateAnnouncementByIdRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    documentUpdate: DocumentUpdateOperation<AnnouncementDocument>;
+  };
+  params: { announcementId: string };
+}
+
+type GetQueriedAnnouncementsRequest = GetQueriedResourceRequest;
 
 // DEV ROUTE
 interface CreateNewAnnouncementsBulkRequest extends RequestAfterJWTVerification {
@@ -35,85 +66,35 @@ interface CreateNewAnnouncementsBulkRequest extends RequestAfterJWTVerification 
       username: string;
       roles: UserRoles;
     };
-    // below are the fields required to be sent with post request
-    announcements: {
-      userId: Types.ObjectId;
-      username: string;
-      title: string;
-      author: string;
-      bannerImageSrcCompressed: string;
-      bannerImageSrc: string;
-      bannerImageAlt: string;
-      article: string[];
-      timeToRead: number;
-      ratingResponse: RatingResponse;
-      ratedUserIds: Types.ObjectId[];
-    }[];
+    sessionId: Types.ObjectId;
+    announcementSchemas: AnnouncementSchema[];
   };
 }
 
-interface DeleteAnAnnouncementRequest extends RequestAfterJWTVerification {
-  params: {
-    announcementId: string;
-  };
-}
-
-type DeleteAllAnnouncementsRequest = RequestAfterJWTVerification;
-
-type GetAllAnnouncementsRequest = GetQueriedResourceRequest;
-
-type GetAnnouncementsByUserRequest = GetQueriedResourceRequest;
-
-interface GetAnnouncementRequestById extends RequestAfterJWTVerification {
+// DEV ROUTE
+interface UpdateAnnouncementsBulkRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {
       userId: Types.ObjectId;
       username: string;
       roles: UserRoles;
     };
-    params: { announcementId: string };
-  };
-}
-
-interface UpdateAnnouncementRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-    announcementFields: Partial<AnnouncementSchema>;
-  };
-  params: {
-    announcementId: string;
-  };
-}
-
-interface UpdateAnnouncementRatingRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
+    sessionId: Types.ObjectId;
     announcementFields: {
-      ratedUserIds: Types.ObjectId[];
-      ratingResponse: RatingResponse;
-    };
-  };
-  params: {
-    announcementId: string;
+      announcementId: Types.ObjectId;
+      documentUpdate: DocumentUpdateOperation<AnnouncementDocument>;
+    }[];
   };
 }
 
 export type {
   CreateNewAnnouncementRequest,
-  CreateNewAnnouncementsBulkRequest,
-  DeleteAnAnnouncementRequest,
+  DeleteAnnouncementRequest,
   DeleteAllAnnouncementsRequest,
-  GetAllAnnouncementsRequest,
-  UpdateAnnouncementRequest,
-  GetAnnouncementsByUserRequest,
-  GetAnnouncementRequestById,
-  UpdateAnnouncementRatingRequest,
+  GetQueriedAnnouncementsByUserRequest,
+  GetAnnouncementByIdRequest,
+  GetQueriedAnnouncementsRequest,
+  UpdateAnnouncementByIdRequest,
+  CreateNewAnnouncementsBulkRequest,
+  UpdateAnnouncementsBulkRequest,
 };

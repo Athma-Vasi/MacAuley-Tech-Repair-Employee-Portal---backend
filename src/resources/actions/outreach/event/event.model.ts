@@ -1,27 +1,24 @@
-import { Schema, Types, model } from 'mongoose';
-import type { UserRoles } from '../../../user';
-import type { Action } from '../..';
-import type { ActionsOutreach } from '..';
+import { Schema, Types, model } from "mongoose";
+import type { UserRoles } from "../../../user";
+import type { Action } from "../..";
+import type { ActionsOutreach } from "..";
 
 type EventKind =
-  | 'Webinar'
-  | 'Workshop'
-  | 'Seminar'
-  | 'Conference'
-  | 'Networking'
-  | 'Tech Talk'
-  | 'Charity'
-  | 'Team Building'
-  | 'Awards'
-  | 'Other';
+  | "Webinar"
+  | "Workshop"
+  | "Seminar"
+  | "Conference"
+  | "Networking"
+  | "Tech Talk"
+  | "Charity"
+  | "Team Building"
+  | "Awards"
+  | "Other";
 
-type EventCreatorSchema = {
+type EventSchema = {
   userId: Types.ObjectId;
   username: string;
   creatorRole: UserRoles;
-  action: Action;
-  category: ActionsOutreach;
-
   eventTitle: string;
   eventKind: EventKind;
   eventStartDate: NativeDate;
@@ -35,83 +32,75 @@ type EventCreatorSchema = {
   rsvpDeadline: NativeDate;
 };
 
-type EventCreatorDocument = EventCreatorSchema & {
+type EventDocument = EventSchema & {
   _id: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
   __v: number;
 };
 
-const eventCreatorSchema = new Schema<EventCreatorSchema>(
+const eventCreatorSchema = new Schema<EventSchema>(
   {
     userId: {
       type: Schema.Types.ObjectId,
-      required: [true, 'User ID is required'],
-      ref: 'User',
+      required: [true, "User ID is required"],
+      ref: "User",
       index: true,
     },
     username: {
       type: String,
-      required: [true, 'Username is required'],
+      required: [true, "Username is required"],
     },
     creatorRole: {
       type: [String],
-      required: [true, 'User role is required'],
-    },
-    action: {
-      type: String,
-      required: [true, 'Action is required'],
-    },
-    category: {
-      type: String,
-      required: [true, 'Category is required'],
+      required: [true, "User role is required"],
     },
     eventTitle: {
       type: String,
-      required: [true, 'Event title is required'],
+      required: [true, "Event title is required"],
     },
     eventDescription: {
       type: String,
-      required: [true, 'Event description is required'],
+      required: [true, "Event description is required"],
     },
     eventKind: {
       type: String,
-      required: [true, 'Event kind is required'],
+      required: [true, "Event kind is required"],
       index: true,
     },
     eventStartDate: {
       type: Date,
-      required: [true, 'Event date is required'],
+      required: [true, "Event date is required"],
     },
     eventEndDate: {
       type: Date,
-      required: [true, 'Event date is required'],
+      required: [true, "Event date is required"],
     },
     eventStartTime: {
       type: String,
-      required: [true, 'Event start time is required'],
+      required: [true, "Event start time is required"],
     },
     eventEndTime: {
       type: String,
-      required: [true, 'Event end time is required'],
+      required: [true, "Event end time is required"],
     },
     eventLocation: {
       type: String,
-      required: [true, 'Event location is required'],
+      required: [true, "Event location is required"],
     },
     eventAttendees: {
       type: String,
       required: false,
-      default: '',
+      default: "",
     },
     requiredItems: {
       type: String,
       required: false,
-      default: '',
+      default: "",
     },
     rsvpDeadline: {
       type: Date,
-      required: [true, 'RSVP deadline is required'],
+      required: [true, "RSVP deadline is required"],
     },
   },
   {
@@ -121,15 +110,15 @@ const eventCreatorSchema = new Schema<EventCreatorSchema>(
 
 // text indexes for search
 eventCreatorSchema.index({
-  username: 'text',
-  eventTitle: 'text',
-  eventDescription: 'text',
-  eventLocation: 'text',
-  eventAttendees: 'text',
-  requiredItems: 'text',
+  username: "text",
+  eventTitle: "text",
+  eventDescription: "text",
+  eventLocation: "text",
+  eventAttendees: "text",
+  requiredItems: "text",
 });
 
-const EventCreatorModel = model<EventCreatorDocument>('Events', eventCreatorSchema);
+const EventModel = model<EventDocument>("Event", eventCreatorSchema);
 
-export { EventCreatorModel };
-export type { EventCreatorSchema, EventCreatorDocument, EventKind };
+export { EventModel };
+export type { EventSchema, EventDocument, EventKind };

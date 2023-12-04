@@ -18,8 +18,6 @@ type RatingResponse = {
 type AnnouncementSchema = {
   userId: Types.ObjectId;
   username: string;
-  action: Action;
-  category: ActionsOutreach;
   title: string;
   author: string;
   bannerImageSrcCompressed: string;
@@ -50,15 +48,6 @@ const announcementSchema = new Schema<AnnouncementSchema>(
       type: String,
       required: [true, "Username is required"],
     },
-    action: {
-      type: String,
-      required: [true, "Action is required"],
-    },
-    category: {
-      type: String,
-      required: [true, "Category is required"],
-    },
-
     title: {
       type: String,
       required: [true, "Title is required"],
