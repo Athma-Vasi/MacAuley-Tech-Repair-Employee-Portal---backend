@@ -1,12 +1,15 @@
-import type { Request } from 'express';
-import type { Types } from 'mongoose';
-import type { RequestAfterJWTVerification } from '../../../auth';
-import type { ExpenseClaimKind, Currency, ExpenseClaimDocument } from './expenseClaim.model';
-import { UserRoles } from '../../../user';
-import { GetQueriedResourceRequest, RequestStatus } from '../../../../types';
+import type { Types } from "mongoose";
+import type { RequestAfterJWTVerification } from "../../../auth";
+import type { UserRoles } from "../../../user";
+import {
+  DocumentUpdateOperation,
+  GetQueriedResourceByUserRequest,
+  GetQueriedResourceRequest,
+} from "../../../../types";
+import { ExpenseClaimDocument, ExpenseClaimSchema } from "./expenseClaim.model";
+import { FileUploadDocument } from "../../../fileUpload";
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
-
 interface CreateNewExpenseClaimRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {
@@ -15,63 +18,19 @@ interface CreateNewExpenseClaimRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    expenseClaim: {
-      uploadedFilesIds: Types.ObjectId[];
-      expenseClaimKind: ExpenseClaimKind;
-      expenseClaimAmount: number;
-      expenseClaimCurrency: Currency;
-      expenseClaimDate: NativeDate;
-      expenseClaimDescription: string;
-      additionalComments: string;
-      acknowledgement: boolean;
-    };
+    expenseClaimFields: Omit<ExpenseClaimSchema, "userId" | "username">;
   };
 }
 
-// DEV ROUTE
-interface CreateNewExpenseClaimBulkRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-    sessionId: Types.ObjectId;
-    expenseClaims: {
-      userId: Types.ObjectId;
-      username: string;
-      uploadedFilesIds: Types.ObjectId[];
-      expenseClaimKind: ExpenseClaimKind;
-      expenseClaimAmount: number;
-      expenseClaimCurrency: Currency;
-      expenseClaimDate: NativeDate;
-      expenseClaimDescription: string;
-      additionalComments: string;
-      acknowledgement: boolean;
-      requestStatus: RequestStatus;
-    }[];
-  };
-}
-
-interface DeleteAnExpenseClaimRequest extends RequestAfterJWTVerification {
+interface DeleteExpenseClaimRequest extends RequestAfterJWTVerification {
   params: {
     expenseClaimId: string;
-  };
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-    sessionId: Types.ObjectId;
   };
 }
 
 type DeleteAllExpenseClaimsRequest = RequestAfterJWTVerification;
 
-type GetQueriedExpenseClaimsRequest = GetQueriedResourceRequest;
-
-type GetQueriedExpenseClaimsByUserRequest = GetQueriedResourceRequest;
+type GetQueriedExpenseClaimsByUserRequest = GetQueriedResourceByUserRequest;
 
 interface GetExpenseClaimByIdRequest extends RequestAfterJWTVerification {
   body: {
@@ -85,21 +44,6 @@ interface GetExpenseClaimByIdRequest extends RequestAfterJWTVerification {
   params: { expenseClaimId: string };
 }
 
-interface UpdateExpenseClaimStatusByIdRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-    sessionId: Types.ObjectId;
-    expenseClaim: {
-      requestStatus: RequestStatus;
-    };
-  };
-  params: { expenseClaimId: string };
-}
-
 interface UpdateExpenseClaimByIdRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {
@@ -108,19 +52,64 @@ interface UpdateExpenseClaimByIdRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    expenseClaim: ExpenseClaimDocument;
+    documentUpdate: DocumentUpdateOperation<ExpenseClaimDocument>;
   };
   params: { expenseClaimId: string };
 }
 
+type GetQueriedExpenseClaimsRequest = GetQueriedResourceRequest;
+
+// DEV ROUTE
+interface CreateNewExpenseClaimsBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    expenseClaimSchemas: ExpenseClaimSchema[];
+  };
+}
+
+// DEV ROUTE
+interface UpdateExpenseClaimsBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    expenseClaimFields: {
+      expenseClaimId: Types.ObjectId;
+      documentUpdate: DocumentUpdateOperation<ExpenseClaimDocument>;
+    }[];
+  };
+}
+
+/**
+ * - Type signature of document sent by the server for GET, PATCH requests.
+ * - This type parameter is passed to ResourceRequestServerResponse(single document fetched by _id) or GetQueriedResourceRequestServerResponse(multiple documents fetched with filter, projection, options params),
+ * - which is, in turn, passed to the Express Response type.
+ * - The OmitFields type parameter is used to omit fields from the ExpenseClaimDocument type. (ex: -password or -paymentInformation)
+ */
+type ExpenseClaimServerResponseDocument<OmitFields extends string = string> = Omit<
+  ExpenseClaimDocument,
+  OmitFields
+> & {
+  fileUploads: FileUploadDocument[];
+};
+
 export type {
   CreateNewExpenseClaimRequest,
-  CreateNewExpenseClaimBulkRequest,
-  DeleteAnExpenseClaimRequest,
+  CreateNewExpenseClaimsBulkRequest,
   DeleteAllExpenseClaimsRequest,
-  GetQueriedExpenseClaimsRequest,
-  GetQueriedExpenseClaimsByUserRequest,
+  DeleteExpenseClaimRequest,
+  ExpenseClaimServerResponseDocument,
   GetExpenseClaimByIdRequest,
-  UpdateExpenseClaimStatusByIdRequest,
+  GetQueriedExpenseClaimsByUserRequest,
+  GetQueriedExpenseClaimsRequest,
   UpdateExpenseClaimByIdRequest,
+  UpdateExpenseClaimsBulkRequest,
 };

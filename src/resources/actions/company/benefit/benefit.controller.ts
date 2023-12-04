@@ -90,7 +90,7 @@ const createNewBenefitHandler = expressAsyncHandler(
 // @access Private/Admin/Manager
 const getQueriedBenefitsHandler = expressAsyncHandler(
   async (
-    request: GetQueriedResourceRequest,
+    request: GetQueriedBenefitsRequest,
     response: Response<GetQueriedResourceRequestServerResponse<BenefitDocument>>
   ) => {
     let { newQueryFlag, totalDocuments } = request.body;

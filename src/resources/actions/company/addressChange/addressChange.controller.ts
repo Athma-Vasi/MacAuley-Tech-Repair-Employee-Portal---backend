@@ -12,6 +12,7 @@ import type {
   UpdateAddressChangeByIdRequest,
   CreateNewAddressChangesBulkRequest,
   UpdateAddressChangesBulkRequest,
+  GetQueriedAddressChangesRequest,
 } from "./addressChange.types";
 
 import { getUserByIdService, updateUserByIdService } from "../../../user";
@@ -120,7 +121,7 @@ const createNewAddressChangeHandler = expressAsyncHandler(
 // @access Private/Admin/Manager
 const getQueriedAddressChangesHandler = expressAsyncHandler(
   async (
-    request: GetQueriedResourceRequest,
+    request: GetQueriedAddressChangesRequest,
     response: Response<GetQueriedResourceRequestServerResponse<AddressChangeDocument>>
   ) => {
     let { newQueryFlag, totalDocuments } = request.body;

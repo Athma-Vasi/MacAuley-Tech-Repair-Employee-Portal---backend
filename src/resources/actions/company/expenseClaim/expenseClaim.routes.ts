@@ -1,40 +1,44 @@
-import { Router } from 'express';
+import { Router } from "express";
 import {
+  createNewExpenseClaimsBulkHandler,
   createNewExpenseClaimHandler,
   deleteAllExpenseClaimsHandler,
-  deleteAnExpenseClaimHandler,
-  getQueriedExpenseClaimsHandler,
+  deleteExpenseClaimHandler,
   getExpenseClaimByIdHandler,
   getQueriedExpenseClaimsByUserHandler,
-  updateExpenseClaimStatusByIdHandler,
+  getQueriedExpenseClaimsHandler,
   updateExpenseClaimByIdHandler,
-  createNewExpenseClaimBulkHandler,
-} from './expenseClaim.controller';
-import { assignQueryDefaults, verifyRoles } from '../../../../middlewares';
-import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
+  updateExpenseClaimsBulkHandler,
+} from "./expenseClaim.controller";
+import { assignQueryDefaults } from "../../../../middlewares";
+import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../../constants";
 
 const expenseClaimRouter = Router();
 
-expenseClaimRouter.use(verifyRoles());
-
 expenseClaimRouter
-  .route('/')
+  .route("/")
   .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedExpenseClaimsHandler)
-  .post(createNewExpenseClaimHandler)
-  .delete(deleteAllExpenseClaimsHandler);
+  .post(createNewExpenseClaimHandler);
+
+expenseClaimRouter.route("/delete-all").delete(deleteAllExpenseClaimsHandler);
 
 expenseClaimRouter
-  .route('/user')
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedExpenseClaimsByUserHandler);
+  .route("/user")
+  .get(
+    assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
+    getQueriedExpenseClaimsByUserHandler
+  );
 
-// DEV ROUTE
-expenseClaimRouter.route('/dev').post(createNewExpenseClaimBulkHandler);
+// DEV ROUTES
+expenseClaimRouter
+  .route("/dev")
+  .post(createNewExpenseClaimsBulkHandler)
+  .patch(updateExpenseClaimsBulkHandler);
 
 expenseClaimRouter
-  .route('/:expenseClaimId')
+  .route("/:expenseClaimId")
   .get(getExpenseClaimByIdHandler)
-  .delete(deleteAnExpenseClaimHandler)
-  .patch(updateExpenseClaimStatusByIdHandler)
-  .put(updateExpenseClaimByIdHandler);
+  .delete(deleteExpenseClaimHandler)
+  .patch(updateExpenseClaimByIdHandler);
 
 export { expenseClaimRouter };

@@ -5,73 +5,82 @@
 /**
  * Imports
  */
-
-import { ExpenseClaimModel } from './expenseClaim.model';
-import { expenseClaimRouter } from './expenseClaim.routes';
+import { ExpenseClaimModel } from "./expenseClaim.model";
+import { expenseClaimRouter } from "./expenseClaim.routes";
 import {
   createNewExpenseClaimHandler,
+  createNewExpenseClaimsBulkHandler,
   deleteAllExpenseClaimsHandler,
-  deleteAnExpenseClaimHandler,
-  getQueriedExpenseClaimsHandler,
+  deleteExpenseClaimHandler,
   getExpenseClaimByIdHandler,
   getQueriedExpenseClaimsByUserHandler,
-} from './expenseClaim.controller';
+  getQueriedExpenseClaimsHandler,
+  updateExpenseClaimByIdHandler,
+  updateExpenseClaimsBulkHandler,
+} from "./expenseClaim.controller";
 import {
   createNewExpenseClaimService,
+  deleteExpenseClaimByIdService,
   deleteAllExpenseClaimsService,
-  deleteAnExpenseClaimService,
-  getQueriedExpenseClaimsService,
   getExpenseClaimByIdService,
   getQueriedExpenseClaimsByUserService,
-} from './expenseClaim.service';
+  getQueriedExpenseClaimsService,
+  getQueriedTotalExpenseClaimsService,
+  returnAllExpenseClaimsUploadedFileIdsService,
+  updateExpenseClaimByIdService,
+} from "./expenseClaim.service";
 
-import type {
-  ExpenseClaimDocument,
-  ExpenseClaimSchema,
-  Currency,
-  ExpenseClaimKind,
-} from './expenseClaim.model';
+import type { ExpenseClaimDocument, ExpenseClaimSchema } from "./expenseClaim.model";
 import type {
   CreateNewExpenseClaimRequest,
+  CreateNewExpenseClaimsBulkRequest,
   DeleteAllExpenseClaimsRequest,
-  DeleteAnExpenseClaimRequest,
-  GetQueriedExpenseClaimsRequest,
+  DeleteExpenseClaimRequest,
+  ExpenseClaimServerResponseDocument,
   GetExpenseClaimByIdRequest,
   GetQueriedExpenseClaimsByUserRequest,
-  UpdateExpenseClaimStatusByIdRequest,
-} from './expenseClaim.types';
+  GetQueriedExpenseClaimsRequest,
+  UpdateExpenseClaimByIdRequest,
+  UpdateExpenseClaimsBulkRequest,
+} from "./expenseClaim.types";
 
 /**
  * Exports
  */
-
 export {
   ExpenseClaimModel,
-  expenseClaimRouter,
   createNewExpenseClaimHandler,
-  deleteAllExpenseClaimsHandler,
-  deleteAnExpenseClaimHandler,
-  getQueriedExpenseClaimsHandler,
-  getExpenseClaimByIdHandler,
-  getQueriedExpenseClaimsByUserHandler,
   createNewExpenseClaimService,
+  createNewExpenseClaimsBulkHandler,
+  deleteAllExpenseClaimsHandler,
   deleteAllExpenseClaimsService,
-  deleteAnExpenseClaimService,
-  getQueriedExpenseClaimsService,
+  deleteExpenseClaimByIdService,
+  deleteExpenseClaimHandler,
+  expenseClaimRouter,
+  getExpenseClaimByIdHandler,
   getExpenseClaimByIdService,
+  getQueriedExpenseClaimsByUserHandler,
   getQueriedExpenseClaimsByUserService,
+  getQueriedExpenseClaimsHandler,
+  getQueriedExpenseClaimsService,
+  getQueriedTotalExpenseClaimsService,
+  returnAllExpenseClaimsUploadedFileIdsService,
+  updateExpenseClaimByIdHandler,
+  updateExpenseClaimByIdService,
+  updateExpenseClaimsBulkHandler,
 };
 
 export type {
+  CreateNewExpenseClaimRequest,
+  CreateNewExpenseClaimsBulkRequest,
+  DeleteAllExpenseClaimsRequest,
+  DeleteExpenseClaimRequest,
   ExpenseClaimDocument,
   ExpenseClaimSchema,
-  Currency,
-  ExpenseClaimKind,
-  CreateNewExpenseClaimRequest,
-  DeleteAllExpenseClaimsRequest,
-  DeleteAnExpenseClaimRequest,
-  GetQueriedExpenseClaimsRequest,
+  ExpenseClaimServerResponseDocument,
   GetExpenseClaimByIdRequest,
   GetQueriedExpenseClaimsByUserRequest,
-  UpdateExpenseClaimStatusByIdRequest,
+  GetQueriedExpenseClaimsRequest,
+  UpdateExpenseClaimByIdRequest,
+  UpdateExpenseClaimsBulkRequest,
 };
