@@ -5,72 +5,82 @@
 /**
  * imports
  */
-import { endorsementRouter } from './endorsement.routes';
-import { EndorsementModel } from './endorsement.model';
+import { endorsementRouter } from "./endorsement.routes";
+import { EndorsementModel } from "./endorsement.model";
 import {
   createNewEndorsementHandler,
-  deleteEndorsementHandler,
+  createNewEndorsementsBulkHandler,
   deleteAllEndorsementsHandler,
+  deleteEndorsementHandler,
+  getEndorsementByIdHandler,
+  getEndorsementsByUserHandler,
   getQueriedEndorsementsHandler,
-  getAnEndorsementHandler,
-  getQueriedEndorsementsByUserHandler,
-  updateAnEndorsementHandler,
-} from './endorsement.controller';
+  updateEndorsementStatusByIdHandler,
+  updateEndorsementsBulkHandler,
+} from "./endorsement.controller";
 import {
   createNewEndorsementService,
-  deleteEndorsementService,
   deleteAllEndorsementsService,
-  getQueriedEndorsementsService,
-  getAnEndorsementService,
+  deleteEndorsementByIdService,
+  getEndorsementByIdService,
   getQueriedEndorsementsByUserService,
-  updateEndorsementStatusByIdService,
-} from './endorsement.service';
+  getQueriedEndorsementsService,
+  getQueriedTotalEndorsementsService,
+  updateEndorsementByIdService,
+} from "./endorsement.service";
 
 import type {
   EndorsementDocument,
   EndorsementSchema,
   EmployeeAttributes,
-} from './endorsement.model';
+} from "./endorsement.model";
 import type {
   CreateNewEndorsementRequest,
-  DeleteEndorsementRequest,
-  GetQueriedEndorsementsRequest,
-  GetAnEndorsementRequest,
-  GetQueriedEndorsementsByUserRequest,
+  CreateNewEndorsementsBulkRequest,
   DeleteAllEndorsementsRequest,
-  UpdateEndorsementStatusByIdRequest,
-} from './endorsement.types';
+  DeleteEndorsementRequest,
+  GetEndorsementByIdRequest,
+  GetQueriedEndorsementsByUserRequest,
+  GetQueriedEndorsementsRequest,
+  UpdateEndorsementByIdRequest,
+  UpdateEndorsementsBulkRequest,
+} from "./endorsement.types";
 
 /**
  * exports
  */
 export {
-  endorsementRouter,
   EndorsementModel,
+  endorsementRouter,
   createNewEndorsementHandler,
-  deleteEndorsementHandler,
-  deleteAllEndorsementsHandler,
-  getQueriedEndorsementsHandler,
-  getAnEndorsementHandler,
-  getQueriedEndorsementsByUserHandler,
-  updateAnEndorsementHandler,
   createNewEndorsementService,
-  deleteEndorsementService,
+  createNewEndorsementsBulkHandler,
+  deleteAllEndorsementsHandler,
   deleteAllEndorsementsService,
-  getQueriedEndorsementsService,
-  getAnEndorsementService,
+  deleteEndorsementByIdService,
+  deleteEndorsementHandler,
+  getEndorsementByIdHandler,
+  getEndorsementByIdService,
+  getEndorsementsByUserHandler,
   getQueriedEndorsementsByUserService,
-  updateEndorsementStatusByIdService,
+  getQueriedEndorsementsHandler,
+  getQueriedEndorsementsService,
+  getQueriedTotalEndorsementsService,
+  updateEndorsementByIdService,
+  updateEndorsementStatusByIdHandler,
+  updateEndorsementsBulkHandler,
 };
 export type {
   EndorsementDocument,
   EndorsementSchema,
-  EmployeeAttributes,
   CreateNewEndorsementRequest,
-  DeleteEndorsementRequest,
+  CreateNewEndorsementsBulkRequest,
   DeleteAllEndorsementsRequest,
-  GetQueriedEndorsementsRequest,
-  GetAnEndorsementRequest,
+  DeleteEndorsementRequest,
+  GetEndorsementByIdRequest,
   GetQueriedEndorsementsByUserRequest,
-  UpdateEndorsementStatusByIdRequest,
+  GetQueriedEndorsementsRequest,
+  UpdateEndorsementByIdRequest,
+  UpdateEndorsementsBulkRequest,
+  EmployeeAttributes,
 };

@@ -1,8 +1,12 @@
-import type { Types } from 'mongoose';
-import type { RequestAfterJWTVerification } from '../../../auth';
-import type { EmployeeAttributes, EndorsementDocument } from './endorsement.model';
-import type { UserRoles } from '../../../user';
-import { GetQueriedResourceRequest, RequestStatus } from '../../../../types';
+import type { Types } from "mongoose";
+import type { RequestAfterJWTVerification } from "../../../auth";
+import type { UserRoles } from "../../../user";
+import {
+  DocumentUpdateOperation,
+  GetQueriedResourceByUserRequest,
+  GetQueriedResourceRequest,
+} from "../../../../types";
+import { EndorsementDocument, EndorsementSchema } from "./endorsement.model";
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 interface CreateNewEndorsementRequest extends RequestAfterJWTVerification {
@@ -12,49 +16,8 @@ interface CreateNewEndorsementRequest extends RequestAfterJWTVerification {
       username: string;
       roles: UserRoles;
     };
-    // below are the fields required to be sent with post request
-    endorsement: {
-      title: string;
-      userToBeEndorsed: string;
-      summaryOfEndorsement: string;
-      attributeEndorsed: EmployeeAttributes;
-    };
-  };
-}
-
-// DEV ROUTE
-interface CreateNewEndorsementsBulkRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-    endorsements: {
-      userId: Types.ObjectId;
-      username: string;
-      title: string;
-      userToBeEndorsed: string;
-      summaryOfEndorsement: string;
-      attributeEndorsed: EmployeeAttributes;
-      requestStatus: RequestStatus;
-    }[];
-  };
-}
-
-interface UpdateEndorsementStatusByIdRequest extends RequestAfterJWTVerification {
-  body: {
-    userInfo: {
-      userId: Types.ObjectId;
-      username: string;
-      roles: UserRoles;
-    };
-    endorsement: {
-      requestStatus: RequestStatus;
-    };
-  };
-  params: {
-    endorsementId: string;
+    sessionId: Types.ObjectId;
+    endorsementSchema: EndorsementSchema;
   };
 }
 
@@ -66,23 +29,72 @@ interface DeleteEndorsementRequest extends RequestAfterJWTVerification {
 
 type DeleteAllEndorsementsRequest = RequestAfterJWTVerification;
 
+type GetQueriedEndorsementsByUserRequest = GetQueriedResourceByUserRequest;
+
+interface GetEndorsementByIdRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+  };
+  params: { endorsementId: string };
+}
+
+interface UpdateEndorsementByIdRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    documentUpdate: DocumentUpdateOperation<EndorsementDocument>;
+  };
+  params: { endorsementId: string };
+}
+
 type GetQueriedEndorsementsRequest = GetQueriedResourceRequest;
 
-interface GetAnEndorsementRequest extends RequestAfterJWTVerification {
-  params: {
-    endorsementId: string;
+// DEV ROUTE
+interface CreateNewEndorsementsBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    endorsementSchemas: EndorsementSchema[];
   };
 }
 
-type GetQueriedEndorsementsByUserRequest = GetQueriedResourceRequest;
+// DEV ROUTE
+interface UpdateEndorsementsBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    endorsementFields: {
+      endorsementId: Types.ObjectId;
+      documentUpdate: DocumentUpdateOperation<EndorsementDocument>;
+    }[];
+  };
+}
 
 export type {
   CreateNewEndorsementRequest,
-  CreateNewEndorsementsBulkRequest,
   DeleteEndorsementRequest,
   DeleteAllEndorsementsRequest,
-  GetQueriedEndorsementsRequest,
-  GetAnEndorsementRequest,
   GetQueriedEndorsementsByUserRequest,
-  UpdateEndorsementStatusByIdRequest,
+  GetEndorsementByIdRequest,
+  GetQueriedEndorsementsRequest,
+  UpdateEndorsementByIdRequest,
+  CreateNewEndorsementsBulkRequest,
+  UpdateEndorsementsBulkRequest,
 };

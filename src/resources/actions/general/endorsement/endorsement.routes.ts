@@ -1,37 +1,41 @@
-import { Router } from 'express';
-
+import { Router } from "express";
 import {
   createNewEndorsementHandler,
+  getQueriedEndorsementsHandler,
+  getEndorsementsByUserHandler,
+  getEndorsementByIdHandler,
   deleteEndorsementHandler,
   deleteAllEndorsementsHandler,
-  getQueriedEndorsementsHandler,
-  getAnEndorsementHandler,
-  getQueriedEndorsementsByUserHandler,
-  updateAnEndorsementHandler,
+  updateEndorsementStatusByIdHandler,
   createNewEndorsementsBulkHandler,
-} from './endorsement.controller';
-import { assignQueryDefaults, verifyRoles } from '../../../../middlewares';
-import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../../../constants';
+  updateEndorsementsBulkHandler,
+} from "./endorsement.controller";
+import { assignQueryDefaults } from "../../../../middlewares";
+import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../../constants";
 
 const endorsementRouter = Router();
 
-endorsementRouter.use(verifyRoles());
-
 endorsementRouter
-  .route('/')
+  .route("/")
   .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedEndorsementsHandler)
-  .post(createNewEndorsementHandler)
-  .delete(deleteAllEndorsementsHandler);
+  .post(createNewEndorsementHandler);
 
-endorsementRouter.route('/user').get(getQueriedEndorsementsByUserHandler);
-
-// DEV ROUTE
-endorsementRouter.route('/dev').post(createNewEndorsementsBulkHandler);
+endorsementRouter.route("/delete-all").delete(deleteAllEndorsementsHandler);
 
 endorsementRouter
-  .route('/:endorsementId')
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getAnEndorsementHandler)
+  .route("/user")
+  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getEndorsementsByUserHandler);
+
+// DEV ROUTES
+endorsementRouter
+  .route("/dev")
+  .post(createNewEndorsementsBulkHandler)
+  .patch(updateEndorsementsBulkHandler);
+
+endorsementRouter
+  .route("/:endorsementId")
+  .get(getEndorsementByIdHandler)
   .delete(deleteEndorsementHandler)
-  .patch(updateAnEndorsementHandler);
+  .patch(updateEndorsementStatusByIdHandler);
 
 export { endorsementRouter };

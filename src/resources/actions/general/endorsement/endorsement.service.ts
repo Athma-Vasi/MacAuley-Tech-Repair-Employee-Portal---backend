@@ -1,22 +1,35 @@
-import type { Types } from 'mongoose';
-import type { DeleteResult } from 'mongodb';
-import type { EndorsementDocument, EndorsementSchema } from './endorsement.model';
+import type { Types } from "mongoose";
+import type { DeleteResult } from "mongodb";
+import type { EndorsementDocument, EndorsementSchema } from "./endorsement.model";
 
-import { EndorsementModel } from './endorsement.model';
+import { EndorsementModel } from "./endorsement.model";
 import {
   DatabaseResponse,
   DatabaseResponseNullable,
   QueriedResourceGetRequestServiceInput,
   QueriedTotalResourceGetRequestServiceInput,
-  RequestStatus,
-} from '../../../../types';
+  UpdateDocumentByIdServiceInput,
+} from "../../../../types";
 
-async function createNewEndorsementService(input: EndorsementSchema): Promise<EndorsementDocument> {
+async function getEndorsementByIdService(
+  endorsementId: Types.ObjectId | string
+): DatabaseResponseNullable<EndorsementDocument> {
   try {
-    const newEndorsement = await EndorsementModel.create(input);
-    return newEndorsement;
+    const endorsement = await EndorsementModel.findById(endorsementId).lean().exec();
+    return endorsement;
   } catch (error: any) {
-    throw new Error(error, { cause: 'createNewEndorsementService' });
+    throw new Error(error, { cause: "getEndorsementByIdService" });
+  }
+}
+
+async function createNewEndorsementService(
+  endorsementSchema: EndorsementSchema
+): Promise<EndorsementDocument> {
+  try {
+    const endorsement = await EndorsementModel.create(endorsementSchema);
+    return endorsement;
+  } catch (error: any) {
+    throw new Error(error, { cause: "createNewEndorsementService" });
   }
 }
 
@@ -26,10 +39,12 @@ async function getQueriedEndorsementsService({
   options = {},
 }: QueriedResourceGetRequestServiceInput<EndorsementDocument>): DatabaseResponse<EndorsementDocument> {
   try {
-    const allEndorsements = await EndorsementModel.find(filter, projection, options).lean().exec();
-    return allEndorsements;
+    const endorsement = await EndorsementModel.find(filter, projection, options)
+      .lean()
+      .exec();
+    return endorsement;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getQueriedEndorsementsService' });
+    throw new Error(error, { cause: "getQueriedEndorsementsService" });
   }
 }
 
@@ -40,7 +55,7 @@ async function getQueriedTotalEndorsementsService({
     const totalEndorsements = await EndorsementModel.countDocuments(filter).lean().exec();
     return totalEndorsements;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getQueriedTotalEndorsementsService' });
+    throw new Error(error, { cause: "getQueriedTotalEndorsementsService" });
   }
 }
 
@@ -50,75 +65,66 @@ async function getQueriedEndorsementsByUserService({
   options = {},
 }: QueriedResourceGetRequestServiceInput<EndorsementDocument>): DatabaseResponse<EndorsementDocument> {
   try {
-    const endorsements = await EndorsementModel.find(filter, projection, options).lean().exec();
+    const endorsements = await EndorsementModel.find(filter, projection, options)
+      .lean()
+      .exec();
     return endorsements;
   } catch (error: any) {
-    throw new Error(error, { cause: 'getQueriedEndorsementsByUserService' });
+    throw new Error(error, { cause: "getQueriedEndorsementsByUserService" });
   }
 }
 
-async function getAnEndorsementService(
-  id: Types.ObjectId | string
-): DatabaseResponseNullable<EndorsementDocument> {
-  try {
-    const endorsement = await EndorsementModel.findById({ _id: id }).select('-__v').lean().exec();
-    return endorsement;
-  } catch (error: any) {
-    throw new Error(error, { cause: 'getAnEndorsementService' });
-  }
-}
+async function updateEndorsementByIdService({
+  _id,
+  fields,
+  updateOperator,
+}: UpdateDocumentByIdServiceInput<EndorsementDocument>) {
+  const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
+  const updateObject = JSON.parse(updateString);
 
-async function deleteEndorsementService(id: Types.ObjectId | string): Promise<DeleteResult> {
   try {
-    const deletedEndorsement = await EndorsementModel.deleteOne({
-      _id: id,
+    const endorsement = await EndorsementModel.findByIdAndUpdate(_id, updateObject, {
+      new: true,
     })
       .lean()
       .exec();
-    return deletedEndorsement;
+    return endorsement;
   } catch (error: any) {
-    throw new Error(error, { cause: 'deleteEndorsementService' });
+    throw new Error(error, { cause: "updateEndorsementStatusByIdService" });
+  }
+}
+
+async function deleteEndorsementByIdService(
+  endorsementId: Types.ObjectId | string
+): Promise<DeleteResult> {
+  try {
+    const deletedResult = await EndorsementModel.deleteOne({
+      _id: endorsementId,
+    })
+      .lean()
+      .exec();
+    return deletedResult;
+  } catch (error: any) {
+    throw new Error(error, { cause: "deleteEndorsementByIdService" });
   }
 }
 
 async function deleteAllEndorsementsService(): Promise<DeleteResult> {
   try {
-    const deletedEndorsements = await EndorsementModel.deleteMany({}).lean().exec();
-    return deletedEndorsements;
+    const deletedResult = await EndorsementModel.deleteMany({}).lean().exec();
+    return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: 'deleteAllEndorsementsService' });
-  }
-}
-
-async function updateEndorsementStatusByIdService({
-  endorsementId,
-  requestStatus,
-}: {
-  endorsementId: Types.ObjectId | string;
-  requestStatus: RequestStatus;
-}): DatabaseResponseNullable<EndorsementDocument> {
-  try {
-    const updatedEndorsement = await EndorsementModel.findByIdAndUpdate(
-      endorsementId,
-      { requestStatus },
-      { new: true }
-    )
-      .select(['-__v', '-action', '-category'])
-      .lean()
-      .exec();
-    return updatedEndorsement;
-  } catch (error: any) {
-    throw new Error(error, { cause: 'updateEndorsementStatusByIdService' });
+    throw new Error(error, { cause: "deleteAllEndorsementsService" });
   }
 }
 
 export {
+  getEndorsementByIdService,
   createNewEndorsementService,
-  deleteEndorsementService,
-  deleteAllEndorsementsService,
   getQueriedEndorsementsService,
-  getQueriedEndorsementsByUserService,
-  getAnEndorsementService,
   getQueriedTotalEndorsementsService,
-  updateEndorsementStatusByIdService,
+  getQueriedEndorsementsByUserService,
+  deleteEndorsementByIdService,
+  deleteAllEndorsementsService,
+  updateEndorsementByIdService,
 };
