@@ -24,7 +24,7 @@ import {
   getCustomerByIdService,
   updateCustomerPasswordService,
   getAllCustomersService,
-  updateCustomerDocumentByIdService,
+  updateCustomerByIdService,
   getCustomerDocWithPaymentInfoService,
   deleteAllCustomersService,
 } from "./customer.service";
@@ -205,7 +205,7 @@ const updateCustomerFieldsBulkHandler = expressAsyncHandler(
           documentUpdate: { fields, updateOperator },
         } = customerField;
 
-        const updatedCustomer = await updateCustomerDocumentByIdService({
+        const updatedCustomer = await updateCustomerByIdService({
           fields,
           updateOperator,
           _id: customerId,
@@ -528,7 +528,7 @@ const updateCustomerByIdHandler = expressAsyncHandler(
     } = request.body;
     const { customerId } = request.params;
 
-    const updatedCustomer = await updateCustomerDocumentByIdService({
+    const updatedCustomer = await updateCustomerByIdService({
       fields,
       updateOperator,
       _id: customerId,

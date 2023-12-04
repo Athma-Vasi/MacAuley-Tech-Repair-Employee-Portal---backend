@@ -1,12 +1,17 @@
-import { Types } from 'mongoose';
+import { Types } from "mongoose";
 
-import type { RequestAfterJWTVerification } from '../auth';
-import type { UserRoles, UserSchema } from './user.model';
-import { GetQueriedResourceRequest } from '../../types';
+import type { RequestAfterJWTVerification } from "../auth";
+import type { UserDocument, UserSchema } from "./user.model";
+import { DocumentUpdateOperation, GetQueriedResourceRequest } from "../../types";
+import { UserRoles } from "../user";
+import { ProductReviewDocument } from "../productReview";
+import { PurchaseDocument } from "../purchase";
+import { RMADocument } from "../rma";
+import { SurveyDocument } from "../actions/outreach/survey";
 
 interface CreateNewUserRequest {
   body: {
-    user: UserSchema;
+    userSchema: UserSchema;
   };
 }
 
@@ -18,12 +23,11 @@ interface DeleteUserRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    userToBeDeletedId: string;
   };
+  params: { userToBeDeletedId: string };
 }
 
-// DEV ROUTE
-interface AddFieldToUsersBulkRequest extends RequestAfterJWTVerification {
+interface DeleteAllUsersRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {
       userId: Types.ObjectId;
@@ -31,11 +35,6 @@ interface AddFieldToUsersBulkRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    users: {
-      userId: Types.ObjectId;
-      field: string;
-      value: string;
-    }[];
   };
 }
 
@@ -63,8 +62,9 @@ interface UpdateUserRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    userFields: Partial<UserSchema>;
+    documentUpdate: DocumentUpdateOperation<UserDocument>;
   };
+  params: { userToBeUpdatedId: string };
 }
 
 interface UpdateUserPasswordRequest extends RequestAfterJWTVerification {
@@ -78,15 +78,60 @@ interface UpdateUserPasswordRequest extends RequestAfterJWTVerification {
     currentPassword: string;
     newPassword: string;
   };
+  params: { userId: string };
+}
+
+// DEV ROUTE
+interface CreateNewUsersBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    userSchemas: UserSchema[];
+  };
+}
+
+// DEV ROUTE
+interface UpdateUserFieldsBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+    userFields: {
+      userId: Types.ObjectId;
+      documentUpdate: DocumentUpdateOperation<UserDocument>;
+    }[];
+  };
+}
+
+// DEV ROUTE
+interface GetAllUsersBulkRequest extends RequestAfterJWTVerification {
+  body: {
+    userInfo: {
+      userId: Types.ObjectId;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: Types.ObjectId;
+  };
 }
 
 export type {
-  AddFieldToUsersBulkRequest,
   CreateNewUserRequest,
+  CreateNewUsersBulkRequest,
+  DeleteAllUsersRequest,
   DeleteUserRequest,
+  GetAllUsersBulkRequest,
   GetAllUsersRequest,
   GetUserByIdRequest,
   GetUsersDirectoryRequest,
+  UpdateUserFieldsBulkRequest,
   UpdateUserPasswordRequest,
   UpdateUserRequest,
 };

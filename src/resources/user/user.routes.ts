@@ -1,42 +1,46 @@
-import { Router } from 'express';
+import { Router } from "express";
 
-import { assignQueryDefaults, verifyJWTMiddleware, verifyRoles } from '../../middlewares';
+import { assignQueryDefaults, verifyJWTMiddleware, verifyRoles } from "../../middlewares";
 import {
-  addFieldToUsersBulkHandler,
   createNewUserHandler,
+  createNewUsersBulkHandler,
   deleteUserHandler,
+  getAllUsersBulkHandler,
   getQueriedUsersHandler,
   getUserByIdHandler,
   getUsersDirectoryHandler,
   updateUserByIdHandler,
+  updateUserFieldsBulkHandler,
   updateUserPasswordHandler,
-} from './user.controller';
-import { FIND_QUERY_OPTIONS_KEYWORDS } from '../../constants';
+} from "./user.controller";
+import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../constants";
 
 const userRouter = Router();
 
-// verifyJWT middleware is applied to all routes except [POST /users] creating a new user
+userRouter.use(verifyJWTMiddleware, verifyRoles());
 
 userRouter
-  .route('/')
-  .get(
-    verifyJWTMiddleware,
-    verifyRoles(),
-    assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
-    getQueriedUsersHandler
-  )
-  .post(createNewUserHandler)
-  .patch(verifyJWTMiddleware, verifyRoles(), updateUserByIdHandler)
-  .delete(verifyJWTMiddleware, verifyRoles(), deleteUserHandler);
+  .route("/")
+  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedUsersHandler)
+  .post(createNewUserHandler);
+
+userRouter.route("/update-password").put(updateUserPasswordHandler);
+
+userRouter.route("/delete-all").delete(deleteUserHandler);
+
+userRouter.route("/directory").get(getUsersDirectoryHandler);
+
+// DEV ROUTES
+userRouter
+  .route("/dev")
+  .post(createNewUsersBulkHandler)
+  .get(getAllUsersBulkHandler)
+  .patch(updateUserFieldsBulkHandler);
 
 userRouter
-  .route('/update-password')
-  .put(verifyJWTMiddleware, verifyRoles(), updateUserPasswordHandler);
-
-userRouter.route('/dev/add-field').post(addFieldToUsersBulkHandler);
-
-userRouter.route('/directory').get(verifyJWTMiddleware, verifyRoles(), getUsersDirectoryHandler);
-
-userRouter.route('/:userId').get(verifyJWTMiddleware, verifyRoles(), getUserByIdHandler);
+  .route("/:userId")
+  .get(getUserByIdHandler)
+  .patch(updateUserByIdHandler)
+  .delete(deleteUserHandler);
 
 export { userRouter };

@@ -6,10 +6,8 @@ import type { CustomerDocument, CustomerSchema } from "./customer.model";
 
 import { CustomerModel } from "./customer.model";
 import {
-  ArrayOperators,
   DatabaseResponse,
   DatabaseResponseNullable,
-  FieldOperators,
   QueriedResourceGetRequestServiceInput,
   QueriedTotalResourceGetRequestServiceInput,
   UpdateDocumentByIdServiceInput,
@@ -195,7 +193,7 @@ async function getQueriedTotalCustomersService({
   }
 }
 
-async function updateCustomerDocumentByIdService({
+async function updateCustomerByIdService({
   fields,
   updateOperator,
   _id,
@@ -280,19 +278,19 @@ async function updateCustomerPasswordService({
 }
 
 export {
-  createNewCustomerService,
   checkCustomerExistsService,
   checkCustomerIsActiveService,
+  checkCustomerPasswordService,
+  createNewCustomerService,
+  deleteAllCustomersService,
   deleteCustomerService,
-  getQueriedCustomersService,
+  getAllCustomersService,
   getCustomerByIdService,
   getCustomerByUsernameService,
-  updateCustomerDocumentByIdService,
-  getQueriedTotalCustomersService,
-  checkCustomerPasswordService,
-  updateCustomerPasswordService,
-  getCustomerWithPasswordService,
-  getAllCustomersService,
   getCustomerDocWithPaymentInfoService,
-  deleteAllCustomersService,
+  getCustomerWithPasswordService,
+  getQueriedCustomersService,
+  getQueriedTotalCustomersService,
+  updateCustomerByIdService,
+  updateCustomerPasswordService,
 };

@@ -7,7 +7,7 @@ import { UserRoles } from "../user";
 import { ProductReviewDocument } from "../productReview";
 import { PurchaseDocument } from "../purchase";
 import { RMADocument } from "../rma";
-import { SurveyBuilderDocument } from "../actions/outreach/survey";
+import { SurveyDocument } from "../actions/outreach/survey";
 
 interface CreateNewCustomerRequest {
   body: {
@@ -132,7 +132,7 @@ type CustomerServerResponseDocument<OmitFields extends string = string> = Omit<
   productReviews: ProductReviewDocument[];
   purchaseHistory: PurchaseDocument[];
   rmaHistory: RMADocument[];
-  completedSurveys: SurveyBuilderDocument[];
+  completedSurveys: SurveyDocument[];
 };
 
 export type {
