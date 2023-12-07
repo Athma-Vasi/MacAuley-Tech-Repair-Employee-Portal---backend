@@ -6,25 +6,21 @@ import {
   getAnnouncementByIdHandler,
   deleteAnnouncementHandler,
   deleteAllAnnouncementsHandler,
-  updateAnnouncementStatusByIdHandler,
+  updateAnnouncementByIdHandler,
   createNewAnnouncementsBulkHandler,
   updateAnnouncementsBulkHandler,
 } from "./announcement.controller";
-import { assignQueryDefaults } from "../../../../middlewares";
-import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../../constants";
 
 const announcementRouter = Router();
 
 announcementRouter
   .route("/")
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedAnnouncementsHandler)
+  .get(getQueriedAnnouncementsHandler)
   .post(createNewAnnouncementHandler);
 
 announcementRouter.route("/delete-all").delete(deleteAllAnnouncementsHandler);
 
-announcementRouter
-  .route("/user")
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getAnnouncementsByUserHandler);
+announcementRouter.route("/user").get(getAnnouncementsByUserHandler);
 
 // DEV ROUTES
 announcementRouter
@@ -36,6 +32,6 @@ announcementRouter
   .route("/:announcementId")
   .get(getAnnouncementByIdHandler)
   .delete(deleteAnnouncementHandler)
-  .patch(updateAnnouncementStatusByIdHandler);
+  .patch(updateAnnouncementByIdHandler);
 
 export { announcementRouter };

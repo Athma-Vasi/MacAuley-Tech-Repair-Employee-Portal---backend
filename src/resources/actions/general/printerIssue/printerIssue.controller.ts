@@ -164,7 +164,7 @@ const getPrinterIssuesByUserHandler = expressAsyncHandler(
 // @desc   Update printerIssue status
 // @route  PATCH api/v1/actions/general/printer-issue
 // @access Private/Admin/Manager
-const updatePrinterIssueStatusByIdHandler = expressAsyncHandler(
+const updatePrinterIssueByIdHandler = expressAsyncHandler(
   async (
     request: UpdatePrinterIssueByIdRequest,
     response: Response<ResourceRequestServerResponse<PrinterIssueDocument>>
@@ -386,7 +386,7 @@ export {
   getPrinterIssueByIdHandler,
   deletePrinterIssueHandler,
   deleteAllPrinterIssuesHandler,
-  updatePrinterIssueStatusByIdHandler,
+  updatePrinterIssueByIdHandler,
   createNewPrinterIssuesBulkHandler,
   updatePrinterIssuesBulkHandler,
 };

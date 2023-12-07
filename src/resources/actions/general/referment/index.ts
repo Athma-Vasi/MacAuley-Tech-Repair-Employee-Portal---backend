@@ -15,7 +15,7 @@ import {
   getQueriedRefermentsHandler,
   getRefermentByIdHandler,
   getRefermentsByUserHandler,
-  updateRefermentStatusByIdHandler,
+  updateRefermentByIdHandler,
   updateRefermentsBulkHandler,
 } from "./referment.controller";
 import {
@@ -63,7 +63,7 @@ export {
   getRefermentByIdService,
   getRefermentsByUserHandler,
   updateRefermentByIdService,
-  updateRefermentStatusByIdHandler,
+  updateRefermentByIdHandler,
   updateRefermentsBulkHandler,
 };
 export type {

@@ -15,7 +15,7 @@ import {
   getAnonymousRequestByIdHandler,
   getAnonymousRequestsByUserHandler,
   getQueriedAnonymousRequestsHandler,
-  updateAnonymousRequestStatusByIdHandler,
+  updateAnonymousRequestByIdHandler,
   updateAnonymousRequestsBulkHandler,
 } from "./anonymousRequest.controller";
 import {
@@ -68,7 +68,7 @@ export {
   getQueriedAnonymousRequestsService,
   getQueriedTotalAnonymousRequestsService,
   updateAnonymousRequestByIdService,
-  updateAnonymousRequestStatusByIdHandler,
+  updateAnonymousRequestByIdHandler,
   updateAnonymousRequestsBulkHandler,
 };
 

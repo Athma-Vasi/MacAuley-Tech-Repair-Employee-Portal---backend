@@ -216,7 +216,7 @@ const getAddressChangesByUserHandler = expressAsyncHandler(
 // @desc   Update address change status
 // @route  PATCH api/v1/actions/company/address-change/:addressChangeId
 // @access Private/Admin/Manager
-const updateAddressChangeStatusByIdHandler = expressAsyncHandler(
+const updateAddressChangeByIdHandler = expressAsyncHandler(
   async (
     request: UpdateAddressChangeByIdRequest,
     response: Response<ResourceRequestServerResponse<AddressChangeDocument>>
@@ -439,7 +439,7 @@ export {
   getAddressChangeByIdHandler,
   deleteAnAddressChangeHandler,
   deleteAllAddressChangesHandler,
-  updateAddressChangeStatusByIdHandler,
+  updateAddressChangeByIdHandler,
   createNewAddressChangesBulkHandler,
   updateAddressChangesBulkHandler,
 };

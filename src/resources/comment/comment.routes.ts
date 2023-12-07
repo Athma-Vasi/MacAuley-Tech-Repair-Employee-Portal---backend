@@ -6,7 +6,7 @@ import {
   getCommentByIdHandler,
   deleteCommentHandler,
   deleteAllCommentsHandler,
-  updateCommentStatusByIdHandler,
+  updateCommentByIdHandler,
   createNewCommentsBulkHandler,
   updateCommentsBulkHandler,
   getQueriedCommentsByParentResourceIdHandler,
@@ -17,25 +17,21 @@ import { verifyJWTMiddleware, verifyRoles, assignQueryDefaults } from "../../mid
 
 const commentRouter = Router();
 
-commentRouter.use(verifyJWTMiddleware, verifyRoles());
+commentRouter.use(
+  verifyJWTMiddleware,
+  verifyRoles(),
+  assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS)
+);
 
-commentRouter
-  .route("/")
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedCommentsHandler)
-  .post(createNewCommentHandler);
+commentRouter.route("/").get(getQueriedCommentsHandler).post(createNewCommentHandler);
 
 commentRouter.route("/delete-all").delete(deleteAllCommentsHandler);
 
-commentRouter
-  .route("/user")
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getCommentsByUserHandler);
+commentRouter.route("/user").get(getCommentsByUserHandler);
 
 commentRouter
   .route("/parentResource/:parentResourceId")
-  .get(
-    assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
-    getQueriedCommentsByParentResourceIdHandler
-  );
+  .get(getQueriedCommentsByParentResourceIdHandler);
 
 // DEV ROUTES
 commentRouter
@@ -47,6 +43,6 @@ commentRouter
   .route("/:commentId")
   .get(getCommentByIdHandler)
   .delete(deleteCommentHandler)
-  .patch(updateCommentStatusByIdHandler);
+  .patch(updateCommentByIdHandler);
 
 export { commentRouter };

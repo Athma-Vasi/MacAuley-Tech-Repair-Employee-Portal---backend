@@ -17,19 +17,18 @@ import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../constants";
 
 const productReviewRouter = Router();
 
-productReviewRouter.use(verifyJWTMiddleware, verifyRoles());
+productReviewRouter.use(
+  verifyJWTMiddleware,
+  verifyRoles(),
+  assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS)
+);
 
 productReviewRouter
   .route("/")
   .post(createNewProductReviewHandler)
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedProductReviewsHandler);
+  .get(getQueriedProductReviewsHandler);
 
-productReviewRouter
-  .route("/user")
-  .get(
-    assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
-    getQueriedProductReviewsByUserHandler
-  );
+productReviewRouter.route("/user").get(getQueriedProductReviewsByUserHandler);
 
 productReviewRouter.route("/delete-all").delete(deleteAllProductReviewsHandler);
 

@@ -1,5 +1,5 @@
-import { Router } from 'express';
-import expressFileUpload from 'express-fileupload';
+import { Router } from "express";
+import expressFileUpload from "express-fileupload";
 
 import {
   verifyJWTMiddleware,
@@ -9,8 +9,8 @@ import {
   fileInfoExtracterMiddleware,
   verifyRoles,
   assignQueryDefaults,
-} from '../../middlewares';
-import { ALLOWED_FILE_EXTENSIONS, FIND_QUERY_OPTIONS_KEYWORDS } from '../../constants';
+} from "../../middlewares";
+import { ALLOWED_FILE_EXTENSIONS, FIND_QUERY_OPTIONS_KEYWORDS } from "../../constants";
 import {
   createNewFileUploadHandler,
   deleteAFileUploadHandler,
@@ -19,16 +19,20 @@ import {
   getFileUploadByIdHandler,
   getQueriedFileUploadsByUserHandler,
   insertAssociatedResourceDocumentIdHandler,
-} from './fileUpload.controller';
+} from "./fileUpload.controller";
 
 const fileUploadRouter = Router();
 
-fileUploadRouter.use(verifyJWTMiddleware);
+fileUploadRouter.use(
+  verifyJWTMiddleware,
+  verifyRoles(),
+  assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS)
+);
 fileUploadRouter.use(verifyRoles());
 
 fileUploadRouter
-  .route('/')
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getAllFileUploadsHandler)
+  .route("/")
+  .get(getAllFileUploadsHandler)
   .post(
     expressFileUpload({ createParentPath: true }),
     filesPayloadExistsMiddleware,
@@ -38,14 +42,12 @@ fileUploadRouter
     createNewFileUploadHandler
   );
 
-fileUploadRouter.route('/delete-all').delete(deleteAllFileUploadsHandler);
+fileUploadRouter.route("/delete-all").delete(deleteAllFileUploadsHandler);
+
+fileUploadRouter.route("/user").get(getQueriedFileUploadsByUserHandler);
 
 fileUploadRouter
-  .route('/user')
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedFileUploadsByUserHandler);
-
-fileUploadRouter
-  .route('/:fileUploadId')
+  .route("/:fileUploadId")
   .get(getFileUploadByIdHandler)
   .delete(deleteAFileUploadHandler)
   .put(insertAssociatedResourceDocumentIdHandler);

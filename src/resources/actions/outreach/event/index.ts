@@ -16,7 +16,7 @@ import {
   getEventByIdHandler,
   getEventsByUserHandler,
   getQueriedEventsHandler,
-  updateEventStatusByIdHandler,
+  updateEventByIdHandler,
   updateEventsBulkHandler,
 } from "./event.controller";
 import {
@@ -65,7 +65,7 @@ export {
   getQueriedEventsService,
   getQueriedTotalEventsService,
   updateEventByIdService,
-  updateEventStatusByIdHandler,
+  updateEventByIdHandler,
   updateEventsBulkHandler,
 };
 

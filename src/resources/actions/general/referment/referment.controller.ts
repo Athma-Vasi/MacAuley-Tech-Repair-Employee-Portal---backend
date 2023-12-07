@@ -55,7 +55,7 @@ const createNewRefermentHandler = expressAsyncHandler(
     }
 
     response.status(201).json({
-      message: 'Successfully created referment',
+      message: "Successfully created referment",
       resourceData: [refermentDocument],
     });
   }
@@ -164,7 +164,7 @@ const getRefermentsByUserHandler = expressAsyncHandler(
 // @desc   Update referment status
 // @route  PATCH api/v1/actions/general/referment
 // @access Private/Admin/Manager
-const updateRefermentStatusByIdHandler = expressAsyncHandler(
+const updateRefermentByIdHandler = expressAsyncHandler(
   async (
     request: UpdateRefermentByIdRequest,
     response: Response<ResourceRequestServerResponse<RefermentDocument>>
@@ -382,7 +382,7 @@ export {
   getRefermentByIdHandler,
   deleteRefermentHandler,
   deleteAllRefermentsHandler,
-  updateRefermentStatusByIdHandler,
+  updateRefermentByIdHandler,
   createNewRefermentsBulkHandler,
   updateRefermentsBulkHandler,
 };

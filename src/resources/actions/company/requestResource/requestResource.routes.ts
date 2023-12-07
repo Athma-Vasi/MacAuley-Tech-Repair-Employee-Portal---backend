@@ -6,31 +6,21 @@ import {
   getRequestResourceByIdHandler,
   deleteRequestResourceHandler,
   deleteAllRequestResourcesHandler,
-  updateRequestResourceStatusByIdHandler,
+  updateRequestResourceByIdHandler,
   createNewRequestResourcesBulkHandler,
   updateRequestResourcesBulkHandler,
 } from "./requestResource.controller";
-import { assignQueryDefaults } from "../../../../middlewares";
-import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../../constants";
 
 const requestResourceRouter = Router();
 
 requestResourceRouter
   .route("/")
-  .get(
-    assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
-    getQueriedRequestResourcesHandler
-  )
+  .get(getQueriedRequestResourcesHandler)
   .post(createNewRequestResourceHandler);
 
 requestResourceRouter.route("/delete-all").delete(deleteAllRequestResourcesHandler);
 
-requestResourceRouter
-  .route("/user")
-  .get(
-    assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
-    getRequestResourcesByUserHandler
-  );
+requestResourceRouter.route("/user").get(getRequestResourcesByUserHandler);
 
 // DEV ROUTES
 requestResourceRouter
@@ -42,6 +32,6 @@ requestResourceRouter
   .route("/:requestResourceId")
   .get(getRequestResourceByIdHandler)
   .delete(deleteRequestResourceHandler)
-  .patch(updateRequestResourceStatusByIdHandler);
+  .patch(updateRequestResourceByIdHandler);
 
 export { requestResourceRouter };

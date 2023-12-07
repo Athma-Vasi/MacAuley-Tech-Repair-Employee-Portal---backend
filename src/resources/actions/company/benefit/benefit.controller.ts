@@ -187,7 +187,7 @@ const getBenefitsByUserHandler = expressAsyncHandler(
 // @desc   Update benefit status
 // @route  PATCH api/v1/actions/company/benefit/:benefitId
 // @access Private/Admin/Manager
-const updateBenefitStatusByIdHandler = expressAsyncHandler(
+const updateBenefitByIdHandler = expressAsyncHandler(
   async (
     request: UpdateBenefitByIdRequest,
     response: Response<ResourceRequestServerResponse<BenefitDocument>>
@@ -403,7 +403,7 @@ export {
   getBenefitByIdHandler,
   deleteBenefitHandler,
   deleteAllBenefitsHandler,
-  updateBenefitStatusByIdHandler,
+  updateBenefitByIdHandler,
   createNewBenefitsBulkHandler,
   updateBenefitsBulkHandler,
 };

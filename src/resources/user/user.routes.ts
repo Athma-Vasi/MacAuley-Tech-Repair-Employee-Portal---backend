@@ -17,12 +17,13 @@ import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../constants";
 
 const userRouter = Router();
 
-userRouter.use(verifyJWTMiddleware, verifyRoles());
+userRouter.use(
+  verifyJWTMiddleware,
+  verifyRoles(),
+  assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS)
+);
 
-userRouter
-  .route("/")
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedUsersHandler)
-  .post(createNewUserHandler);
+userRouter.route("/").get(getQueriedUsersHandler).post(createNewUserHandler);
 
 userRouter.route("/update-password").put(updateUserPasswordHandler);
 

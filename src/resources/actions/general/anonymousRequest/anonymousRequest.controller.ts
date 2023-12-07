@@ -169,7 +169,7 @@ const getAnonymousRequestsByUserHandler = expressAsyncHandler(
 // @desc   Update anonymousRequest status
 // @route  PATCH api/v1/actions/general/anonymous-request
 // @access Private/Admin/Manager
-const updateAnonymousRequestStatusByIdHandler = expressAsyncHandler(
+const updateAnonymousRequestByIdHandler = expressAsyncHandler(
   async (
     request: UpdateAnonymousRequestByIdRequest,
     response: Response<ResourceRequestServerResponse<AnonymousRequestDocument>>
@@ -391,7 +391,7 @@ export {
   getAnonymousRequestByIdHandler,
   deleteAnonymousRequestHandler,
   deleteAllAnonymousRequestsHandler,
-  updateAnonymousRequestStatusByIdHandler,
+  updateAnonymousRequestByIdHandler,
   createNewAnonymousRequestsBulkHandler,
   updateAnonymousRequestsBulkHandler,
 };

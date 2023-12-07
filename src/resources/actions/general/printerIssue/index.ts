@@ -15,7 +15,7 @@ import {
   getPrinterIssueByIdHandler,
   getPrinterIssuesByUserHandler,
   getQueriedPrinterIssuesHandler,
-  updatePrinterIssueStatusByIdHandler,
+  updatePrinterIssueByIdHandler,
   updatePrinterIssuesBulkHandler,
 } from "./printerIssue.controller";
 import {
@@ -67,7 +67,7 @@ export {
   getQueriedPrinterIssuesService,
   getQueriedTotalPrinterIssuesService,
   updatePrinterIssueByIdService,
-  updatePrinterIssueStatusByIdHandler,
+  updatePrinterIssueByIdHandler,
   updatePrinterIssuesBulkHandler,
 };
 

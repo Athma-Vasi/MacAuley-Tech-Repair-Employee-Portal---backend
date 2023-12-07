@@ -55,7 +55,7 @@ const createNewEventHandler = expressAsyncHandler(
     }
 
     response.status(201).json({
-      message: 'Successfully created event',
+      message: "Successfully created event",
       resourceData: [eventDocument],
     });
   }
@@ -164,7 +164,7 @@ const getEventsByUserHandler = expressAsyncHandler(
 // @desc   Update event status
 // @route  PATCH api/v1/actions/general/event
 // @access Private/Admin/Manager
-const updateEventStatusByIdHandler = expressAsyncHandler(
+const updateEventByIdHandler = expressAsyncHandler(
   async (
     request: UpdateEventByIdRequest,
     response: Response<ResourceRequestServerResponse<EventDocument>>
@@ -215,9 +215,7 @@ const getEventByIdHandler = expressAsyncHandler(
     const { eventId } = request.params;
     const event = await getEventByIdService(eventId);
     if (!event) {
-      response
-        .status(404)
-        .json({ message: "Event request not found", resourceData: [] });
+      response.status(404).json({ message: "Event request not found", resourceData: [] });
       return;
     }
 
@@ -294,9 +292,7 @@ const createNewEventsBulkHandler = expressAsyncHandler(
     );
 
     // filter out any null documents
-    const filteredEventDocuments = eventDocuments.filter(
-      removeUndefinedAndNullValues
-    );
+    const filteredEventDocuments = eventDocuments.filter(removeUndefinedAndNullValues);
 
     // check if any documents were created
     if (filteredEventDocuments.length === 0) {
@@ -307,13 +303,10 @@ const createNewEventsBulkHandler = expressAsyncHandler(
       return;
     }
 
-    const uncreatedDocumentsAmount =
-      eventSchemas.length - filteredEventDocuments.length;
+    const uncreatedDocumentsAmount = eventSchemas.length - filteredEventDocuments.length;
 
     response.status(201).json({
-      message: `Successfully created ${
-        filteredEventDocuments.length
-      } Event requests.${
+      message: `Successfully created ${filteredEventDocuments.length} Event requests.${
         uncreatedDocumentsAmount
           ? ` ${uncreatedDocumentsAmount} documents were not created.`
           : ""
@@ -352,9 +345,7 @@ const updateEventsBulkHandler = expressAsyncHandler(
     );
 
     // filter out any events that were not created
-    const successfullyCreatedEvents = updatedEvents.filter(
-      removeUndefinedAndNullValues
-    );
+    const successfullyCreatedEvents = updatedEvents.filter(removeUndefinedAndNullValues);
 
     if (successfullyCreatedEvents.length === 0) {
       response.status(400).json({
@@ -365,9 +356,7 @@ const updateEventsBulkHandler = expressAsyncHandler(
     }
 
     response.status(201).json({
-      message: `Successfully created ${
-        successfullyCreatedEvents.length
-      } Events. ${
+      message: `Successfully created ${successfullyCreatedEvents.length} Events. ${
         eventFields.length - successfullyCreatedEvents.length
       } Events failed to be created.`,
       resourceData: successfullyCreatedEvents,
@@ -382,7 +371,7 @@ export {
   getEventByIdHandler,
   deleteEventHandler,
   deleteAllEventsHandler,
-  updateEventStatusByIdHandler,
+  updateEventByIdHandler,
   createNewEventsBulkHandler,
   updateEventsBulkHandler,
 };

@@ -164,7 +164,7 @@ const getAnnouncementsByUserHandler = expressAsyncHandler(
 // @desc   Update announcement status
 // @route  PATCH api/v1/actions/outreach/announcement
 // @access Private/Admin/Manager
-const updateAnnouncementStatusByIdHandler = expressAsyncHandler(
+const updateAnnouncementByIdHandler = expressAsyncHandler(
   async (
     request: UpdateAnnouncementByIdRequest,
     response: Response<ResourceRequestServerResponse<AnnouncementDocument>>
@@ -386,7 +386,7 @@ export {
   getAnnouncementByIdHandler,
   deleteAnnouncementHandler,
   deleteAllAnnouncementsHandler,
-  updateAnnouncementStatusByIdHandler,
+  updateAnnouncementByIdHandler,
   createNewAnnouncementsBulkHandler,
   updateAnnouncementsBulkHandler,
 };

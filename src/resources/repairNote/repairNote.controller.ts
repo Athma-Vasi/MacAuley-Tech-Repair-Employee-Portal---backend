@@ -177,7 +177,7 @@ const getRepairNotesByUserHandler = expressAsyncHandler(
 // @desc   Update repairNote status
 // @route  PATCH api/v1/repairNote
 // @access Private/Admin/Manager
-const updateRepairNoteStatusByIdHandler = expressAsyncHandler(
+const updateRepairNoteByIdHandler = expressAsyncHandler(
   async (
     request: UpdateRepairNoteByIdRequest,
     response: Response<ResourceRequestServerResponse<RepairNoteDocument>>
@@ -395,7 +395,7 @@ export {
   getRepairNoteByIdHandler,
   deleteRepairNoteHandler,
   deleteAllRepairNotesHandler,
-  updateRepairNoteStatusByIdHandler,
+  updateRepairNoteByIdHandler,
   createNewRepairNotesBulkHandler,
   updateRepairNotesBulkHandler,
 };

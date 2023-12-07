@@ -6,25 +6,18 @@ import {
   getBenefitByIdHandler,
   deleteBenefitHandler,
   deleteAllBenefitsHandler,
-  updateBenefitStatusByIdHandler,
+  updateBenefitByIdHandler,
   createNewBenefitsBulkHandler,
   updateBenefitsBulkHandler,
 } from "./benefit.controller";
-import { assignQueryDefaults } from "../../../../middlewares";
-import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../../constants";
 
 const benefitRouter = Router();
 
-benefitRouter
-  .route("/")
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedBenefitsHandler)
-  .post(createNewBenefitHandler);
+benefitRouter.route("/").get(getQueriedBenefitsHandler).post(createNewBenefitHandler);
 
 benefitRouter.route("/delete-all").delete(deleteAllBenefitsHandler);
 
-benefitRouter
-  .route("/user")
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getBenefitsByUserHandler);
+benefitRouter.route("/user").get(getBenefitsByUserHandler);
 
 // DEV ROUTES
 benefitRouter
@@ -36,6 +29,6 @@ benefitRouter
   .route("/:benefitId")
   .get(getBenefitByIdHandler)
   .delete(deleteBenefitHandler)
-  .patch(updateBenefitStatusByIdHandler);
+  .patch(updateBenefitByIdHandler);
 
 export { benefitRouter };

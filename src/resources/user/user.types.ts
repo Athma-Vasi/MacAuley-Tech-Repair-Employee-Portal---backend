@@ -23,6 +23,13 @@ interface DeleteUserRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
+    newQueryFlag: boolean;
+    totalDocuments: number;
+  };
+  query: {
+    projection: string | string[] | Record<string, any>;
+    options: Record<string, any>;
+    filter: Record<string, any>;
   };
   params: { userToBeDeletedId: string };
 }
@@ -35,6 +42,13 @@ interface DeleteAllUsersRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
+    newQueryFlag: boolean;
+    totalDocuments: number;
+  };
+  query: {
+    projection: string | string[] | Record<string, any>;
+    options: Record<string, any>;
+    filter: Record<string, any>;
   };
 }
 
@@ -50,6 +64,13 @@ interface GetUserByIdRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
+    newQueryFlag: boolean;
+    totalDocuments: number;
+  };
+  query: {
+    projection: string | string[] | Record<string, any>;
+    options: Record<string, any>;
+    filter: Record<string, any>;
   };
   params: { userId: string };
 }
@@ -119,6 +140,13 @@ interface GetAllUsersBulkRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
+    newQueryFlag: boolean;
+    totalDocuments: number;
+  };
+  query: {
+    projection: string | string[] | Record<string, any>;
+    options: Record<string, any>;
+    filter: Record<string, any>;
   };
 }
 

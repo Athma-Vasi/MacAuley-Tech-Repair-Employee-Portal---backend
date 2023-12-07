@@ -6,25 +6,21 @@ import {
   getAddressChangeByIdHandler,
   deleteAnAddressChangeHandler,
   deleteAllAddressChangesHandler,
-  updateAddressChangeStatusByIdHandler,
+  updateAddressChangeByIdHandler,
   createNewAddressChangesBulkHandler,
   updateAddressChangesBulkHandler,
 } from "./addressChange.controller";
-import { assignQueryDefaults } from "../../../../middlewares";
-import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../../constants";
 
 const addressChangeRouter = Router();
 
 addressChangeRouter
   .route("/")
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedAddressChangesHandler)
+  .get(getQueriedAddressChangesHandler)
   .post(createNewAddressChangeHandler);
 
 addressChangeRouter.route("/delete-all").delete(deleteAllAddressChangesHandler);
 
-addressChangeRouter
-  .route("/user")
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getAddressChangesByUserHandler);
+addressChangeRouter.route("/user").get(getAddressChangesByUserHandler);
 
 // DEV ROUTES
 addressChangeRouter
@@ -36,6 +32,6 @@ addressChangeRouter
   .route("/:addressChangeId")
   .get(getAddressChangeByIdHandler)
   .delete(deleteAnAddressChangeHandler)
-  .patch(updateAddressChangeStatusByIdHandler);
+  .patch(updateAddressChangeByIdHandler);
 
 export { addressChangeRouter };

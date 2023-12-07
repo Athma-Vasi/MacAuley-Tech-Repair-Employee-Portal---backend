@@ -58,6 +58,13 @@ interface GetAllRMAsBulkRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
+    newQueryFlag: boolean;
+    totalDocuments: number;
+  };
+  query: {
+    projection: string | string[] | Record<string, any>;
+    options: Record<string, any>;
+    filter: Record<string, any>;
   };
 }
 
@@ -78,6 +85,13 @@ interface GetRMAByIdRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
+    newQueryFlag: boolean;
+    totalDocuments: number;
+  };
+  query: {
+    projection: string | string[] | Record<string, any>;
+    options: Record<string, any>;
+    filter: Record<string, any>;
   };
   params: { rmaId: string };
 }

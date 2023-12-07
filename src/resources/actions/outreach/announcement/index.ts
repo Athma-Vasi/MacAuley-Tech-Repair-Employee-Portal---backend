@@ -15,7 +15,7 @@ import {
   getAnnouncementByIdHandler,
   getAnnouncementsByUserHandler,
   getQueriedAnnouncementsHandler,
-  updateAnnouncementStatusByIdHandler,
+  updateAnnouncementByIdHandler,
   updateAnnouncementsBulkHandler,
 } from "./announcement.controller";
 import {
@@ -70,7 +70,7 @@ export {
   getQueriedAnnouncementsService,
   getQueriedTotalAnnouncementsService,
   updateAnnouncementByIdService,
-  updateAnnouncementStatusByIdHandler,
+  updateAnnouncementByIdHandler,
   updateAnnouncementsBulkHandler,
 };
 

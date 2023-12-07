@@ -174,7 +174,7 @@ const getLeaveRequestsByUserHandler = expressAsyncHandler(
 // @desc   Update leaveRequest status
 // @route  PATCH api/v1/actions/company/leave-request/:leaveRequestId
 // @access Private/Admin/Manager
-const updateLeaveRequestStatusByIdHandler = expressAsyncHandler(
+const updateLeaveRequestByIdHandler = expressAsyncHandler(
   async (
     request: UpdateLeaveRequestByIdRequest,
     response: Response<ResourceRequestServerResponse<LeaveRequestDocument>>
@@ -396,7 +396,7 @@ export {
   getLeaveRequestByIdHandler,
   deleteLeaveRequestHandler,
   deleteAllLeaveRequestsHandler,
-  updateLeaveRequestStatusByIdHandler,
+  updateLeaveRequestByIdHandler,
   createNewLeaveRequestsBulkHandler,
   updateLeaveRequestsBulkHandler,
 };

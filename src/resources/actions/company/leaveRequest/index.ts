@@ -15,7 +15,7 @@ import {
   getLeaveRequestByIdHandler,
   getLeaveRequestsByUserHandler,
   getQueriedLeaveRequestsHandler,
-  updateLeaveRequestStatusByIdHandler,
+  updateLeaveRequestByIdHandler,
   updateLeaveRequestsBulkHandler,
 } from "./leaveRequest.controller";
 import {
@@ -60,7 +60,7 @@ export {
   getLeaveRequestByIdHandler,
   getLeaveRequestsByUserHandler,
   getQueriedLeaveRequestsHandler,
-  updateLeaveRequestStatusByIdHandler,
+  updateLeaveRequestByIdHandler,
   updateLeaveRequestsBulkHandler,
   createNewLeaveRequestService,
   deleteAllLeaveRequestsService,

@@ -6,25 +6,21 @@ import {
   getLeaveRequestByIdHandler,
   deleteLeaveRequestHandler,
   deleteAllLeaveRequestsHandler,
-  updateLeaveRequestStatusByIdHandler,
+  updateLeaveRequestByIdHandler,
   createNewLeaveRequestsBulkHandler,
   updateLeaveRequestsBulkHandler,
 } from "./leaveRequest.controller";
-import { assignQueryDefaults } from "../../../../middlewares";
-import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../../constants";
 
 const leaveRequestRouter = Router();
 
 leaveRequestRouter
   .route("/")
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedLeaveRequestsHandler)
+  .get(getQueriedLeaveRequestsHandler)
   .post(createNewLeaveRequestHandler);
 
 leaveRequestRouter.route("/delete-all").delete(deleteAllLeaveRequestsHandler);
 
-leaveRequestRouter
-  .route("/user")
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getLeaveRequestsByUserHandler);
+leaveRequestRouter.route("/user").get(getLeaveRequestsByUserHandler);
 
 // DEV ROUTES
 leaveRequestRouter
@@ -36,6 +32,6 @@ leaveRequestRouter
   .route("/:leaveRequestId")
   .get(getLeaveRequestByIdHandler)
   .delete(deleteLeaveRequestHandler)
-  .patch(updateLeaveRequestStatusByIdHandler);
+  .patch(updateLeaveRequestByIdHandler);
 
 export { leaveRequestRouter };

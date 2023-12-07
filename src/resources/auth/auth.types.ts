@@ -1,6 +1,6 @@
-import type { Request } from 'express';
-import type { Types } from 'mongoose';
-import { UserRoles } from '../user';
+import type { Request } from "express";
+import type { Types } from "mongoose";
+import { UserRoles } from "../user";
 
 interface LoginUserRequest extends Request {
   body: {
@@ -62,7 +62,14 @@ interface RequestAfterJWTVerification extends Request {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
+    // newQueryFlag: boolean;
+    // totalDocuments: number;
   };
+  // query: {
+  //   projection: string | string[] | Record<string, any>;
+  //   options: Record<string, string | number | boolean | Record<string, any>>;
+  //   filter: Record<string, string | number | boolean | Record<string, any>>;
+  // };
 }
 
 export type {

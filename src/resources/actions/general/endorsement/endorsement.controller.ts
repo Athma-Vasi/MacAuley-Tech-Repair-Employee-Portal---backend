@@ -164,7 +164,7 @@ const getEndorsementsByUserHandler = expressAsyncHandler(
 // @desc   Update endorsement status
 // @route  PATCH api/v1/actions/general/endorsement
 // @access Private/Admin/Manager
-const updateEndorsementStatusByIdHandler = expressAsyncHandler(
+const updateEndorsementByIdHandler = expressAsyncHandler(
   async (
     request: UpdateEndorsementByIdRequest,
     response: Response<ResourceRequestServerResponse<EndorsementDocument>>
@@ -382,7 +382,7 @@ export {
   getEndorsementByIdHandler,
   deleteEndorsementHandler,
   deleteAllEndorsementsHandler,
-  updateEndorsementStatusByIdHandler,
+  updateEndorsementByIdHandler,
   createNewEndorsementsBulkHandler,
   updateEndorsementsBulkHandler,
 };

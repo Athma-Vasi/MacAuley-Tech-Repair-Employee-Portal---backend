@@ -55,7 +55,7 @@ const createNewSurveyHandler = expressAsyncHandler(
     }
 
     response.status(201).json({
-      message: 'Successfully created survey',
+      message: "Successfully created survey",
       resourceData: [surveyDocument],
     });
   }
@@ -164,7 +164,7 @@ const getSurveysByUserHandler = expressAsyncHandler(
 // @desc   Update survey status
 // @route  PATCH api/v1/actions/general/survey
 // @access Private/Admin/Manager
-const updateSurveyStatusByIdHandler = expressAsyncHandler(
+const updateSurveyByIdHandler = expressAsyncHandler(
   async (
     request: UpdateSurveyByIdRequest,
     response: Response<ResourceRequestServerResponse<SurveyDocument>>
@@ -294,9 +294,7 @@ const createNewSurveysBulkHandler = expressAsyncHandler(
     );
 
     // filter out any null documents
-    const filteredSurveyDocuments = surveyDocuments.filter(
-      removeUndefinedAndNullValues
-    );
+    const filteredSurveyDocuments = surveyDocuments.filter(removeUndefinedAndNullValues);
 
     // check if any documents were created
     if (filteredSurveyDocuments.length === 0) {
@@ -311,9 +309,7 @@ const createNewSurveysBulkHandler = expressAsyncHandler(
       surveySchemas.length - filteredSurveyDocuments.length;
 
     response.status(201).json({
-      message: `Successfully created ${
-        filteredSurveyDocuments.length
-      } Survey requests.${
+      message: `Successfully created ${filteredSurveyDocuments.length} Survey requests.${
         uncreatedDocumentsAmount
           ? ` ${uncreatedDocumentsAmount} documents were not created.`
           : ""
@@ -365,9 +361,7 @@ const updateSurveysBulkHandler = expressAsyncHandler(
     }
 
     response.status(201).json({
-      message: `Successfully created ${
-        successfullyCreatedSurveys.length
-      } Surveys. ${
+      message: `Successfully created ${successfullyCreatedSurveys.length} Surveys. ${
         surveyFields.length - successfullyCreatedSurveys.length
       } Surveys failed to be created.`,
       resourceData: successfullyCreatedSurveys,
@@ -382,7 +376,7 @@ export {
   getSurveyByIdHandler,
   deleteSurveyHandler,
   deleteAllSurveysHandler,
-  updateSurveyStatusByIdHandler,
+  updateSurveyByIdHandler,
   createNewSurveysBulkHandler,
   updateSurveysBulkHandler,
 };

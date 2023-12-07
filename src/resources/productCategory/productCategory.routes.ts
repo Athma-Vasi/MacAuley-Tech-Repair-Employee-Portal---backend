@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { accessoryRouter } from "./accessory";
 import { cpuRouter } from "./cpu";
-import { gpuRouter } from "./gpu";
+import { getQueriedGpusHandler, gpuRouter } from "./gpu";
 import { motherboardRouter } from "./motherboard";
 import { ramRouter } from "./ram";
 import { storageRouter } from "./storage";
@@ -21,10 +21,19 @@ import { webcamRouter } from "./webcam";
 import { assignQueryDefaults, verifyJWTMiddleware, verifyRoles } from "../../middlewares";
 import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../constants";
 
-const productCategoryRouter = Router();
+const productCategoryRouter = Router({
+  strict: true,
+});
+productCategoryRouter.use(
+  verifyJWTMiddleware,
+  verifyRoles(),
+  assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS)
+);
+// productCategoryRouter.route("/").get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS));
 
-productCategoryRouter.use(verifyJWTMiddleware, verifyRoles());
-productCategoryRouter.route("/").get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS));
+// productCategoryRouter
+//   .route("/gpu")
+//   .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedGpusHandler);
 
 productCategoryRouter.use("/accessory", accessoryRouter);
 productCategoryRouter.use("/cpu", cpuRouter);

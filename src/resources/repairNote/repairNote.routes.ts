@@ -6,25 +6,28 @@ import {
   getRepairNoteByIdHandler,
   deleteRepairNoteHandler,
   deleteAllRepairNotesHandler,
-  updateRepairNoteStatusByIdHandler,
+  updateRepairNoteByIdHandler,
   createNewRepairNotesBulkHandler,
   updateRepairNotesBulkHandler,
 } from "./repairNote.controller";
-import { assignQueryDefaults } from "../../middlewares";
+import { assignQueryDefaults, verifyJWTMiddleware, verifyRoles } from "../../middlewares";
 import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../constants";
 
 const repairNoteRouter = Router();
+repairNoteRouter.use(
+  verifyJWTMiddleware,
+  verifyRoles(),
+  assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS)
+);
 
 repairNoteRouter
   .route("/")
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedRepairNotesHandler)
+  .get(getQueriedRepairNotesHandler)
   .post(createNewRepairNoteHandler);
 
 repairNoteRouter.route("/delete-all").delete(deleteAllRepairNotesHandler);
 
-repairNoteRouter
-  .route("/user")
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getRepairNotesByUserHandler);
+repairNoteRouter.route("/user").get(getRepairNotesByUserHandler);
 
 // DEV ROUTES
 repairNoteRouter
@@ -36,6 +39,6 @@ repairNoteRouter
   .route("/:repairNoteId")
   .get(getRepairNoteByIdHandler)
   .delete(deleteRepairNoteHandler)
-  .patch(updateRepairNoteStatusByIdHandler);
+  .patch(updateRepairNoteByIdHandler);
 
 export { repairNoteRouter };

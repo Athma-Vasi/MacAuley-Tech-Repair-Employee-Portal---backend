@@ -18,12 +18,13 @@ import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../constants";
 
 const customerRouter = Router();
 
-customerRouter.use(verifyJWTMiddleware, verifyRoles());
+customerRouter.use(
+  verifyJWTMiddleware,
+  verifyRoles(),
+  assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS)
+);
 
-customerRouter
-  .route("/")
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedCustomersHandler)
-  .post(createNewCustomerHandler);
+customerRouter.route("/").get(getQueriedCustomersHandler).post(createNewCustomerHandler);
 
 customerRouter.route("/payment-info").get(getCustomerDocWithPaymentInfoHandler);
 

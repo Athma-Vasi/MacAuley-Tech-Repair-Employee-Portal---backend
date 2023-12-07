@@ -6,25 +6,18 @@ import {
   getSurveyByIdHandler,
   deleteSurveyHandler,
   deleteAllSurveysHandler,
-  updateSurveyStatusByIdHandler,
+  updateSurveyByIdHandler,
   createNewSurveysBulkHandler,
   updateSurveysBulkHandler,
 } from "./survey.controller";
-import { assignQueryDefaults } from "../../../../middlewares";
-import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../../constants";
 
 const surveyRouter = Router();
 
-surveyRouter
-  .route("/")
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedSurveysHandler)
-  .post(createNewSurveyHandler);
+surveyRouter.route("/").get(getQueriedSurveysHandler).post(createNewSurveyHandler);
 
 surveyRouter.route("/delete-all").delete(deleteAllSurveysHandler);
 
-surveyRouter
-  .route("/user")
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getSurveysByUserHandler);
+surveyRouter.route("/user").get(getSurveysByUserHandler);
 
 // DEV ROUTES
 surveyRouter
@@ -36,6 +29,6 @@ surveyRouter
   .route("/:surveyId")
   .get(getSurveyByIdHandler)
   .delete(deleteSurveyHandler)
-  .patch(updateSurveyStatusByIdHandler);
+  .patch(updateSurveyByIdHandler);
 
 export { surveyRouter };

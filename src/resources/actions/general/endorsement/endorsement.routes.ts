@@ -6,25 +6,21 @@ import {
   getEndorsementByIdHandler,
   deleteEndorsementHandler,
   deleteAllEndorsementsHandler,
-  updateEndorsementStatusByIdHandler,
+  updateEndorsementByIdHandler,
   createNewEndorsementsBulkHandler,
   updateEndorsementsBulkHandler,
 } from "./endorsement.controller";
-import { assignQueryDefaults } from "../../../../middlewares";
-import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../../constants";
 
 const endorsementRouter = Router();
 
 endorsementRouter
   .route("/")
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedEndorsementsHandler)
+  .get(getQueriedEndorsementsHandler)
   .post(createNewEndorsementHandler);
 
 endorsementRouter.route("/delete-all").delete(deleteAllEndorsementsHandler);
 
-endorsementRouter
-  .route("/user")
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getEndorsementsByUserHandler);
+endorsementRouter.route("/user").get(getEndorsementsByUserHandler);
 
 // DEV ROUTES
 endorsementRouter
@@ -36,6 +32,6 @@ endorsementRouter
   .route("/:endorsementId")
   .get(getEndorsementByIdHandler)
   .delete(deleteEndorsementHandler)
-  .patch(updateEndorsementStatusByIdHandler);
+  .patch(updateEndorsementByIdHandler);
 
 export { endorsementRouter };

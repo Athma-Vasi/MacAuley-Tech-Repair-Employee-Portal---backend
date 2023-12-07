@@ -237,6 +237,7 @@ const assignQueryDefaults =
     });
 
     console.group("assignQueryDefaults");
+    console.log("REQUEST BODY", JSON.stringify(request.body, null, 2));
     console.log("query.newQueryFlag: ", query.newQueryFlag);
     console.log("query.totalDocuments: ", query.totalDocuments);
     console.log({ options, projection, filter });
@@ -244,7 +245,7 @@ const assignQueryDefaults =
     console.groupEnd();
 
     next();
-    return;
+    // return;
 
     /**
      * example: here is a sample query object before transformation:

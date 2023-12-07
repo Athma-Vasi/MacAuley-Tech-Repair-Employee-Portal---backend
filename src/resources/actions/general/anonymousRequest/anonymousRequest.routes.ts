@@ -6,31 +6,21 @@ import {
   getAnonymousRequestByIdHandler,
   deleteAnonymousRequestHandler,
   deleteAllAnonymousRequestsHandler,
-  updateAnonymousRequestStatusByIdHandler,
+  updateAnonymousRequestByIdHandler,
   createNewAnonymousRequestsBulkHandler,
   updateAnonymousRequestsBulkHandler,
 } from "./anonymousRequest.controller";
-import { assignQueryDefaults } from "../../../../middlewares";
-import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../../constants";
 
 const anonymousRequestRouter = Router();
 
 anonymousRequestRouter
   .route("/")
-  .get(
-    assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
-    getQueriedAnonymousRequestsHandler
-  )
+  .get(getQueriedAnonymousRequestsHandler)
   .post(createNewAnonymousRequestHandler);
 
 anonymousRequestRouter.route("/delete-all").delete(deleteAllAnonymousRequestsHandler);
 
-anonymousRequestRouter
-  .route("/user")
-  .get(
-    assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
-    getAnonymousRequestsByUserHandler
-  );
+anonymousRequestRouter.route("/user").get(getAnonymousRequestsByUserHandler);
 
 // DEV ROUTES
 anonymousRequestRouter
@@ -42,6 +32,6 @@ anonymousRequestRouter
   .route("/:anonymousRequestId")
   .get(getAnonymousRequestByIdHandler)
   .delete(deleteAnonymousRequestHandler)
-  .patch(updateAnonymousRequestStatusByIdHandler);
+  .patch(updateAnonymousRequestByIdHandler);
 
 export { anonymousRequestRouter };

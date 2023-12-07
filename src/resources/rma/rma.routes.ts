@@ -17,16 +17,15 @@ import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../constants";
 
 const rmaRouter = Router();
 
-rmaRouter.use(verifyJWTMiddleware, verifyRoles());
+rmaRouter.use(
+  verifyJWTMiddleware,
+  verifyRoles(),
+  assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS)
+);
 
-rmaRouter
-  .route("/")
-  .post(createNewRMAHandler)
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedRMAsHandler);
+rmaRouter.route("/").post(createNewRMAHandler).get(getQueriedRMAsHandler);
 
-rmaRouter
-  .route("/user")
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedRMAsByUserHandler);
+rmaRouter.route("/user").get(getQueriedRMAsByUserHandler);
 
 rmaRouter.route("/delete-all").delete(deleteAllRMAsHandler);
 

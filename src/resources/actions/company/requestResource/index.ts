@@ -16,7 +16,7 @@ import {
   getQueriedRequestResourcesHandler,
   getRequestResourceByIdHandler,
   getRequestResourcesByUserHandler,
-  updateRequestResourceStatusByIdHandler,
+  updateRequestResourceByIdHandler,
   updateRequestResourcesBulkHandler,
 } from "./requestResource.controller";
 import {
@@ -61,7 +61,7 @@ export {
   getQueriedRequestResourcesHandler,
   getRequestResourceByIdHandler,
   getRequestResourcesByUserHandler,
-  updateRequestResourceStatusByIdHandler,
+  updateRequestResourceByIdHandler,
   updateRequestResourcesBulkHandler,
   createNewRequestResourceService,
   deleteAllRequestResourcesService,

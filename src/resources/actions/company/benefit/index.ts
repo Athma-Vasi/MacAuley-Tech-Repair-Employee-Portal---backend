@@ -15,7 +15,7 @@ import {
   getBenefitByIdHandler,
   getBenefitsByUserHandler,
   getQueriedBenefitsHandler,
-  updateBenefitStatusByIdHandler,
+  updateBenefitByIdHandler,
   updateBenefitsBulkHandler,
 } from "./benefit.controller";
 import {
@@ -63,7 +63,7 @@ export {
   getQueriedBenefitsService,
   getQueriedTotalBenefitsService,
   updateBenefitByIdService,
-  updateBenefitStatusByIdHandler,
+  updateBenefitByIdHandler,
   updateBenefitsBulkHandler,
 };
 

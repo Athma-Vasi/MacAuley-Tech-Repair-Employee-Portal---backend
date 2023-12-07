@@ -23,6 +23,13 @@ interface DeleteCustomerRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
+    newQueryFlag: boolean;
+    totalDocuments: number;
+  };
+  query: {
+    projection: string | string[] | Record<string, any>;
+    options: Record<string, any>;
+    filter: Record<string, any>;
   };
   params: { customerId: string };
 }
@@ -35,6 +42,13 @@ interface DeleteAllCustomersRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
+    newQueryFlag: boolean;
+    totalDocuments: number;
+  };
+  query: {
+    projection: string | string[] | Record<string, any>;
+    options: Record<string, any>;
+    filter: Record<string, any>;
   };
 }
 
@@ -48,6 +62,13 @@ interface GetCustomerByIdRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
+    newQueryFlag: boolean;
+    totalDocuments: number;
+  };
+  query: {
+    projection: string | string[] | Record<string, any>;
+    options: Record<string, any>;
+    filter: Record<string, any>;
   };
   params: { customerId: string };
 }
@@ -117,6 +138,13 @@ interface GetAllCustomersBulkRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
+    newQueryFlag: boolean;
+    totalDocuments: number;
+  };
+  query: {
+    projection: string | string[] | Record<string, any>;
+    options: Record<string, any>;
+    filter: Record<string, any>;
   };
 }
 /**

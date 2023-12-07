@@ -179,7 +179,7 @@ const getRequestResourcesByUserHandler = expressAsyncHandler(
 // @desc   Update requestResource status
 // @route  PATCH api/v1/actions/company/request-resource/:requestResourceId
 // @access Private/Admin/Manager
-const updateRequestResourceStatusByIdHandler = expressAsyncHandler(
+const updateRequestResourceByIdHandler = expressAsyncHandler(
   async (
     request: UpdateRequestResourceByIdRequest,
     response: Response<ResourceRequestServerResponse<RequestResourceDocument>>
@@ -401,7 +401,7 @@ export {
   getRequestResourceByIdHandler,
   deleteRequestResourceHandler,
   deleteAllRequestResourcesHandler,
-  updateRequestResourceStatusByIdHandler,
+  updateRequestResourceByIdHandler,
   createNewRequestResourcesBulkHandler,
   updateRequestResourcesBulkHandler,
 };

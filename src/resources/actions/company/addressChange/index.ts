@@ -15,7 +15,7 @@ import {
   getAddressChangeByIdHandler,
   getAddressChangesByUserHandler,
   getQueriedAddressChangesHandler,
-  updateAddressChangeStatusByIdHandler,
+  updateAddressChangeByIdHandler,
   updateAddressChangesBulkHandler,
 } from "./addressChange.controller";
 import {
@@ -63,7 +63,7 @@ export {
   getQueriedAddressChangesService,
   getQueriedTotalAddressChangesService,
   updateAddressChangeByIdService,
-  updateAddressChangeStatusByIdHandler,
+  updateAddressChangeByIdHandler,
   updateAddressChangesBulkHandler,
 };
 

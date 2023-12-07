@@ -15,7 +15,7 @@ import {
   getQueriedRepairNotesHandler,
   getRepairNoteByIdHandler,
   getRepairNotesByUserHandler,
-  updateRepairNoteStatusByIdHandler,
+  updateRepairNoteByIdHandler,
   updateRepairNotesBulkHandler,
 } from "./repairNote.controller";
 import {
@@ -66,7 +66,7 @@ export {
   getQueriedRepairNotesHandler,
   getRepairNoteByIdHandler,
   getRepairNotesByUserHandler,
-  updateRepairNoteStatusByIdHandler,
+  updateRepairNoteByIdHandler,
   updateRepairNotesBulkHandler,
   createNewRepairNoteService,
   deleteAllRepairNotesService,

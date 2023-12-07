@@ -17,7 +17,7 @@ import {
   getCommentsByUserHandler,
   getQueriedCommentsByParentResourceIdHandler,
   getQueriedCommentsHandler,
-  updateCommentStatusByIdHandler,
+  updateCommentByIdHandler,
   updateCommentsBulkHandler,
 } from "./comment.controller";
 import {
@@ -68,7 +68,7 @@ export {
   getQueriedCommentsService,
   getQueriedTotalCommentsService,
   updateCommentByIdService,
-  updateCommentStatusByIdHandler,
+  updateCommentByIdHandler,
   updateCommentsBulkHandler,
 };
 

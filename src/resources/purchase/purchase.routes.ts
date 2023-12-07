@@ -17,19 +17,15 @@ import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../constants";
 
 const purchaseRouter = Router();
 
-purchaseRouter.use(verifyJWTMiddleware, verifyRoles());
+purchaseRouter.use(
+  verifyJWTMiddleware,
+  verifyRoles(),
+  assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS)
+);
 
-purchaseRouter
-  .route("/")
-  .post(createNewPurchaseHandler)
-  .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedPurchasesHandler);
+purchaseRouter.route("/").post(createNewPurchaseHandler).get(getQueriedPurchasesHandler);
 
-purchaseRouter
-  .route("/user")
-  .get(
-    assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
-    getQueriedPurchasesByUserHandler
-  );
+purchaseRouter.route("/user").get(getQueriedPurchasesByUserHandler);
 
 purchaseRouter.route("/delete-all").delete(deleteAllPurchasesHandler);
 

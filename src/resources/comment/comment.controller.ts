@@ -165,7 +165,7 @@ const getCommentsByUserHandler = expressAsyncHandler(
 // @desc   Update comment status
 // @route  PATCH api/v1/actions/general/comment
 // @access Private/Admin/Manager
-const updateCommentStatusByIdHandler = expressAsyncHandler(
+const updateCommentByIdHandler = expressAsyncHandler(
   async (
     request: UpdateCommentByIdRequest,
     response: Response<ResourceRequestServerResponse<CommentDocument>>
@@ -427,7 +427,7 @@ export {
   createNewCommentHandler,
   getQueriedCommentsHandler,
   getCommentsByUserHandler,
-  updateCommentStatusByIdHandler,
+  updateCommentByIdHandler,
   getQueriedCommentsByParentResourceIdHandler,
   getCommentByIdHandler,
   deleteCommentHandler,

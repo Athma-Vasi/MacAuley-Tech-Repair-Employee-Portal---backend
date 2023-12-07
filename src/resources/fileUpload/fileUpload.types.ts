@@ -1,8 +1,8 @@
-import type { Types } from 'mongoose';
-import type { RequestAfterJWTVerification } from '../auth';
-import type { AssociatedResourceKind, FileUploadDocument } from './fileUpload.model';
-import type { UserRoles } from '../user';
-import { FileInfoObject, GetQueriedResourceRequest } from '../../types';
+import type { Types } from "mongoose";
+import type { RequestAfterJWTVerification } from "../auth";
+import type { AssociatedResourceKind, FileUploadDocument } from "./fileUpload.model";
+import type { UserRoles } from "../user";
+import { FileInfoObject, GetQueriedResourceRequest } from "../../types";
 
 // RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body
 
@@ -57,6 +57,13 @@ interface DeleteAllFileUploadsRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
+    newQueryFlag: boolean;
+    totalDocuments: number;
+  };
+  query: {
+    projection: string | string[] | Record<string, any>;
+    options: Record<string, any>;
+    filter: Record<string, any>;
   };
 }
 
@@ -72,6 +79,13 @@ interface GetFileUploadByIdRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
+    newQueryFlag: boolean;
+    totalDocuments: number;
+  };
+  query: {
+    projection: string | string[] | Record<string, any>;
+    options: Record<string, any>;
+    filter: Record<string, any>;
   };
   params: { fileUploadId: string };
 }

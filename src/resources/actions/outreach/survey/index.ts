@@ -16,7 +16,7 @@ import {
   getQueriedSurveysHandler,
   getSurveyByIdHandler,
   getSurveysByUserHandler,
-  updateSurveyStatusByIdHandler,
+  updateSurveyByIdHandler,
   updateSurveysBulkHandler,
 } from "./survey.controller";
 import {
@@ -71,7 +71,7 @@ export {
   getSurveyByIdService,
   getSurveysByUserHandler,
   updateSurveyByIdService,
-  updateSurveyStatusByIdHandler,
+  updateSurveyByIdHandler,
   updateSurveysBulkHandler,
 };
 

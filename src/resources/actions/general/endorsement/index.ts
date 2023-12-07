@@ -15,7 +15,7 @@ import {
   getEndorsementByIdHandler,
   getEndorsementsByUserHandler,
   getQueriedEndorsementsHandler,
-  updateEndorsementStatusByIdHandler,
+  updateEndorsementByIdHandler,
   updateEndorsementsBulkHandler,
 } from "./endorsement.controller";
 import {
@@ -67,7 +67,7 @@ export {
   getQueriedEndorsementsService,
   getQueriedTotalEndorsementsService,
   updateEndorsementByIdService,
-  updateEndorsementStatusByIdHandler,
+  updateEndorsementByIdHandler,
   updateEndorsementsBulkHandler,
 };
 export type {
