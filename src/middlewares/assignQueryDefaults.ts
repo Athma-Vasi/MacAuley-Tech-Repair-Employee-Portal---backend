@@ -8,6 +8,25 @@ import { NextFunction, Request, Response } from "express";
 const assignQueryDefaults =
   (findQueryOptionsKeywords: Set<string>) =>
   (request: Request, _response: Response, next: NextFunction) => {
+    const FIND_QUERY_OPTIONS_KEYWORDS = new Set([
+      "tailable",
+      "limit",
+      "skip",
+      "allowDiskUse",
+      "batchSize",
+      "readPreference",
+      "hint",
+      "comment",
+      "lean",
+      "populate",
+      "maxTimeMS",
+      "sort",
+      "strict",
+      "collation",
+      "session",
+      "explain",
+    ]);
+
     /**
      * Object.defineProperty is used to satisfy the typescript compiler
      */
@@ -82,11 +101,11 @@ const assignQueryDefaults =
     console.log("mongoDbQueryObject: ", mongoDbQueryObject);
     console.log("projection: ", projection);
     console.log("rest: ", rest);
-    console.log("findQueryOptionsKeywords: ", findQueryOptionsKeywords);
+    console.log("findQueryOptionsKeywords: ", FIND_QUERY_OPTIONS_KEYWORDS);
 
     Object.entries(rest).forEach(([key, value]) => {
       // if keys are in the findQueryOptionsKeywords set, then they will be part of the options object passed in the mongoose find method
-      if (findQueryOptionsKeywords.has(key)) {
+      if (FIND_QUERY_OPTIONS_KEYWORDS.has(key)) {
         Object.defineProperty(options, key, {
           value,
           ...propertyDescriptor,

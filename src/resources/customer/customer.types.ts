@@ -23,14 +23,14 @@ interface DeleteCustomerRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    newQueryFlag: boolean;
-    totalDocuments: number;
+    // newQueryFlag: boolean;
+    // totalDocuments: number;
   };
-  query: {
-    projection: string | string[] | Record<string, any>;
-    options: Record<string, any>;
-    filter: Record<string, any>;
-  };
+  // query: {
+  //   projection: string | string[] | Record<string, any>;
+  //   options: Record<string, any>;
+  //   filter: Record<string, any>;
+  // };
   params: { customerId: string };
 }
 
@@ -62,14 +62,14 @@ interface GetCustomerByIdRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    newQueryFlag: boolean;
-    totalDocuments: number;
+    // newQueryFlag: boolean;
+    // totalDocuments: number;
   };
-  query: {
-    projection: string | string[] | Record<string, any>;
-    options: Record<string, any>;
-    filter: Record<string, any>;
-  };
+  // query: {
+  //   projection: string | string[] | Record<string, any>;
+  //   options: Record<string, any>;
+  //   filter: Record<string, any>;
+  // };
   params: { customerId: string };
 }
 
@@ -138,14 +138,14 @@ interface GetAllCustomersBulkRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    newQueryFlag: boolean;
-    totalDocuments: number;
+    // newQueryFlag: boolean;
+    // totalDocuments: number;
   };
-  query: {
-    projection: string | string[] | Record<string, any>;
-    options: Record<string, any>;
-    filter: Record<string, any>;
-  };
+  // query: {
+  //   projection: string | string[] | Record<string, any>;
+  //   options: Record<string, any>;
+  //   filter: Record<string, any>;
+  // };
 }
 /**
  * - Type signature of document sent by the server for GET, PATCH requests.

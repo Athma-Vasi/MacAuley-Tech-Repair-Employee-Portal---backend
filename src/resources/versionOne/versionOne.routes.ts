@@ -3,7 +3,7 @@ import { actionsRouter } from "../actions";
 import { commentRouter } from "../comment";
 import { fileUploadRouter } from "../fileUpload";
 import { userRouter } from "../user";
-import { repairNoteRouter } from "../repairNote";
+import { repairTicketRouter } from "../repairTicket";
 import { customerRouter } from "../customer";
 import { productReviewRouter } from "../productReview";
 import { productCategoryRouter } from "../productCategory";
@@ -14,7 +14,7 @@ const versionOneRouter = Router();
 // route: /api/v1
 versionOneRouter.use("/actions", actionsRouter);
 versionOneRouter.use("/user", userRouter);
-versionOneRouter.use("/repair-note", repairNoteRouter);
+versionOneRouter.use("/repair-ticket", repairTicketRouter);
 versionOneRouter.use("/file-upload", fileUploadRouter);
 versionOneRouter.use("/comment", commentRouter);
 versionOneRouter.use("/customer", customerRouter);

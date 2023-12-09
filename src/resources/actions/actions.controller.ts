@@ -65,7 +65,7 @@ import {
   getQueriedEventsByUserService,
   getQueriedEventsService,
 } from "./outreach/event";
-import { RepairNoteDocument, getQueriedRepairNotesService } from "../repairNote";
+import { RepairTicketDocument, getQueriedRepairTicketsService } from "../repairTicket";
 import { UserDocument, getQueriedUsersService } from "../user";
 import { getAllUsersService } from "../user/user.service";
 
@@ -101,10 +101,10 @@ const getAllActionsDocumentsHandler = expressAsyncHandler(
 
     const actionsData = await Promise.all([
       // repair notes
-      getQueriedRepairNotesService({
-        filter: awaitingApprovalFilter as FilterQuery<RepairNoteDocument> | undefined,
-        projection: projection as QueryOptions<RepairNoteDocument>,
-        options: options as QueryOptions<RepairNoteDocument>,
+      getQueriedRepairTicketsService({
+        filter: awaitingApprovalFilter as FilterQuery<RepairTicketDocument> | undefined,
+        projection: projection as QueryOptions<RepairTicketDocument>,
+        options: options as QueryOptions<RepairTicketDocument>,
       }),
       // company data
       // address change
@@ -190,7 +190,7 @@ const getAllActionsDocumentsHandler = expressAsyncHandler(
 
     const [
       // repair notes
-      repairNoteData,
+      repairTicketData,
       // company data
       addressChangeData,
       expenseClaimData,
@@ -212,7 +212,7 @@ const getAllActionsDocumentsHandler = expressAsyncHandler(
 
     response.status(200).json({
       message: "Successfully retrieved all actions data",
-      repairNoteData: repairNoteData.filter((data) => data),
+      repairTicketData: repairTicketData.filter((data) => data),
       companyData: {
         addressChangeData: addressChangeData.filter((data) => data),
         expenseClaimData: expenseClaimData.filter((data) => data),
@@ -272,10 +272,10 @@ const getUsersActionsDocumentsHandler = expressAsyncHandler(
 
     const actionsCompanyData = await Promise.all([
       // repair notes
-      getQueriedRepairNotesService({
-        filter: pendingFilter as FilterQuery<RepairNoteDocument> | undefined,
-        projection: projection as QueryOptions<RepairNoteDocument>,
-        options: options as QueryOptions<RepairNoteDocument>,
+      getQueriedRepairTicketsService({
+        filter: pendingFilter as FilterQuery<RepairTicketDocument> | undefined,
+        projection: projection as QueryOptions<RepairTicketDocument>,
+        options: options as QueryOptions<RepairTicketDocument>,
       }),
       // company data
       // address change
@@ -358,7 +358,7 @@ const getUsersActionsDocumentsHandler = expressAsyncHandler(
 
     const [
       // repair notes
-      repairNoteData,
+      repairTicketData,
       // company data
       addressChangeData,
       expenseClaimData,
@@ -379,7 +379,7 @@ const getUsersActionsDocumentsHandler = expressAsyncHandler(
 
     response.status(200).json({
       message: "Successfully retrieved all company data",
-      repairNoteData: repairNoteData.filter((data) => data),
+      repairTicketData: repairTicketData.filter((data) => data),
       companyData: {
         addressChangeData: addressChangeData.filter((data) => data),
         expenseClaimData: expenseClaimData.filter((data) => data),

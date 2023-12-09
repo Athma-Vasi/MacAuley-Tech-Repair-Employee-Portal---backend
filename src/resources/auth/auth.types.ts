@@ -51,8 +51,9 @@ type RefreshTokenDecoded = {
 };
 
 /**
- * -RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWT middleware to the request body.
- * - This is the type signature of the transformed request object after the verifyJWT middleware is executed. All subsequent middleware and controller functions will have access to the decoded JWT (which is the userInfo object) from verifyJWT middleware.
+ * - RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWTMiddleware to the request body.
+ * - This is the type signature of the transformed request object after the verifyJWTMiddleware is executed.
+ * - All routes' (except user, customer registration POST) subsequent middleware and controller functions will have access to the decoded JWT.
  */
 interface RequestAfterJWTVerification extends Request {
   body: {
@@ -62,21 +63,34 @@ interface RequestAfterJWTVerification extends Request {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    // newQueryFlag: boolean;
-    // totalDocuments: number;
   };
-  // query: {
-  //   projection: string | string[] | Record<string, any>;
-  //   options: Record<string, string | number | boolean | Record<string, any>>;
-  //   filter: Record<string, string | number | boolean | Record<string, any>>;
-  // };
 }
 
+/**
+ * - RequestAfterJWTVerificationWithQuery is an Union type of RequestAfterJWTVerification and Request types.
+ * - It is the shape of the Express Request object after assignQueryDefaults middleware runs.
+ * - verifyJWTMiddleware => verifyRoles => assignQueryDefaults => controller function
+ * - Typically used in GET requests (all requests routes for some resources).
+ * - Query object fields are used in service functions: ${resource}Model.find(filter, projection, options) method.
+ */
+type RequestAfterJWTVerificationWithQuery = RequestAfterJWTVerification & {
+  body: {
+    newQueryFlag: boolean;
+    totalDocuments: number;
+  };
+  query: {
+    filter: Record<string, string | number | boolean | Record<string, any>>;
+    projection: string | string[] | Record<string, any>;
+    options: Record<string, string | number | boolean | Record<string, any>>;
+  };
+};
+
 export type {
-  LoginUserRequest,
-  RefreshTokenRequest,
-  LogoutUserRequest,
-  RequestAfterJWTVerification,
   AccessTokenDecoded,
+  LoginUserRequest,
+  LogoutUserRequest,
   RefreshTokenDecoded,
+  RefreshTokenRequest,
+  RequestAfterJWTVerification,
+  RequestAfterJWTVerificationWithQuery,
 };

@@ -18,31 +18,54 @@ import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../constants";
 
 const customerRouter = Router();
 
-customerRouter.use(
-  verifyJWTMiddleware,
-  verifyRoles(),
-  assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS)
-);
+customerRouter
+  .route("/")
+  .get(
+    verifyJWTMiddleware,
+    verifyRoles(),
+    assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
+    getQueriedCustomersHandler
+  )
+  .post(createNewCustomerHandler);
 
-customerRouter.route("/").get(getQueriedCustomersHandler).post(createNewCustomerHandler);
+customerRouter
+  .route("/payment-info")
+  .get(
+    verifyJWTMiddleware,
+    verifyRoles(),
+    assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
+    getCustomerDocWithPaymentInfoHandler
+  );
 
-customerRouter.route("/payment-info").get(getCustomerDocWithPaymentInfoHandler);
+customerRouter
+  .route("/update-password")
+  .patch(verifyJWTMiddleware, verifyRoles(), updateCustomerPasswordHandler);
 
-customerRouter.route("/update-password").patch(updateCustomerPasswordHandler);
-
-customerRouter.route("/delete-all").delete(deleteAllCustomersHandler);
+customerRouter
+  .route("/delete-all")
+  .delete(verifyJWTMiddleware, verifyRoles(), deleteAllCustomersHandler);
 
 // DEV ROUTES
 customerRouter
   .route("/dev")
-  .post(createNewCustomersBulkHandler)
-  .get(getAllCustomersBulkHandler)
-  .patch(updateCustomerFieldsBulkHandler);
+  .post(verifyJWTMiddleware, verifyRoles(), createNewCustomersBulkHandler)
+  .get(
+    verifyJWTMiddleware,
+    verifyRoles(),
+    assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
+    getAllCustomersBulkHandler
+  )
+  .patch(verifyJWTMiddleware, verifyRoles(), updateCustomerFieldsBulkHandler);
 
 customerRouter
   .route("/:customerId")
-  .get(getCustomerByIdHandler)
-  .patch(updateCustomerByIdHandler)
-  .delete(deleteCustomerHandler);
+  .get(
+    verifyJWTMiddleware,
+    verifyRoles(),
+    assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
+    getCustomerByIdHandler
+  )
+  .patch(verifyJWTMiddleware, verifyRoles(), updateCustomerByIdHandler)
+  .delete(verifyJWTMiddleware, verifyRoles(), deleteCustomerHandler);
 
 export { customerRouter };

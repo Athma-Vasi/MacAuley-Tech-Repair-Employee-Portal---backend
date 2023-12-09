@@ -23,14 +23,14 @@ interface DeleteUserRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    newQueryFlag: boolean;
-    totalDocuments: number;
+    // newQueryFlag: boolean;
+    // totalDocuments: number;
   };
-  query: {
-    projection: string | string[] | Record<string, any>;
-    options: Record<string, any>;
-    filter: Record<string, any>;
-  };
+  // query: {
+  //   projection: string | string[] | Record<string, any>;
+  //   options: Record<string, any>;
+  //   filter: Record<string, any>;
+  // };
   params: { userToBeDeletedId: string };
 }
 
@@ -42,14 +42,14 @@ interface DeleteAllUsersRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    newQueryFlag: boolean;
-    totalDocuments: number;
+    // newQueryFlag: boolean;
+    // totalDocuments: number;
   };
-  query: {
-    projection: string | string[] | Record<string, any>;
-    options: Record<string, any>;
-    filter: Record<string, any>;
-  };
+  // query: {
+  //   projection: string | string[] | Record<string, any>;
+  //   options: Record<string, any>;
+  //   filter: Record<string, any>;
+  // };
 }
 
 type GetAllUsersRequest = GetQueriedResourceRequest;
@@ -64,14 +64,14 @@ interface GetUserByIdRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    newQueryFlag: boolean;
-    totalDocuments: number;
+    // newQueryFlag: boolean;
+    // totalDocuments: number;
   };
-  query: {
-    projection: string | string[] | Record<string, any>;
-    options: Record<string, any>;
-    filter: Record<string, any>;
-  };
+  // query: {
+  //   projection: string | string[] | Record<string, any>;
+  //   options: Record<string, any>;
+  //   filter: Record<string, any>;
+  // };
   params: { userId: string };
 }
 
@@ -140,14 +140,14 @@ interface GetAllUsersBulkRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    newQueryFlag: boolean;
-    totalDocuments: number;
+    // newQueryFlag: boolean;
+    // totalDocuments: number;
   };
-  query: {
-    projection: string | string[] | Record<string, any>;
-    options: Record<string, any>;
-    filter: Record<string, any>;
-  };
+  // query: {
+  //   projection: string | string[] | Record<string, any>;
+  //   options: Record<string, any>;
+  //   filter: Record<string, any>;
+  // };
 }
 
 export type {

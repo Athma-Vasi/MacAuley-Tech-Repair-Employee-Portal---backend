@@ -4,6 +4,7 @@ import { assignQueryDefaults, verifyJWTMiddleware, verifyRoles } from "../../mid
 import {
   createNewUserHandler,
   createNewUsersBulkHandler,
+  deleteAllUsersHandler,
   deleteUserHandler,
   getAllUsersBulkHandler,
   getQueriedUsersHandler,
@@ -17,31 +18,54 @@ import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../constants";
 
 const userRouter = Router();
 
-userRouter.use(
-  verifyJWTMiddleware,
-  verifyRoles(),
-  assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS)
-);
+userRouter
+  .route("/")
+  .get(
+    verifyJWTMiddleware,
+    verifyRoles(),
+    assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
+    getQueriedUsersHandler
+  )
+  .post(createNewUserHandler);
 
-userRouter.route("/").get(getQueriedUsersHandler).post(createNewUserHandler);
+userRouter
+  .route("/update-password")
+  .put(verifyJWTMiddleware, verifyRoles(), updateUserPasswordHandler);
 
-userRouter.route("/update-password").put(updateUserPasswordHandler);
+userRouter
+  .route("/delete-all")
+  .delete(verifyJWTMiddleware, verifyRoles(), deleteAllUsersHandler);
 
-userRouter.route("/delete-all").delete(deleteUserHandler);
-
-userRouter.route("/directory").get(getUsersDirectoryHandler);
+userRouter
+  .route("/directory")
+  .get(
+    verifyJWTMiddleware,
+    verifyRoles(),
+    assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
+    getUsersDirectoryHandler
+  );
 
 // DEV ROUTES
 userRouter
   .route("/dev")
-  .post(createNewUsersBulkHandler)
-  .get(getAllUsersBulkHandler)
-  .patch(updateUserFieldsBulkHandler);
+  .post(verifyJWTMiddleware, verifyRoles(), createNewUsersBulkHandler)
+  .get(
+    verifyJWTMiddleware,
+    verifyRoles(),
+    assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
+    getAllUsersBulkHandler
+  )
+  .patch(verifyJWTMiddleware, verifyRoles(), updateUserFieldsBulkHandler);
 
 userRouter
   .route("/:userId")
-  .get(getUserByIdHandler)
-  .patch(updateUserByIdHandler)
-  .delete(deleteUserHandler);
+  .get(
+    verifyJWTMiddleware,
+    verifyRoles(),
+    assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
+    getUserByIdHandler
+  )
+  .patch(verifyJWTMiddleware, verifyRoles(), updateUserByIdHandler)
+  .delete(verifyJWTMiddleware, verifyRoles(), deleteUserHandler);
 
 export { userRouter };

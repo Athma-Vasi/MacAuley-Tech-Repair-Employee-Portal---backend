@@ -14,7 +14,7 @@ import { RefermentDocument } from "./general/referment";
 import { AnnouncementDocument } from "./outreach/announcement";
 import { SurveyDocument } from "./outreach/survey";
 import { EventDocument } from "./outreach/event";
-import { RepairNoteDocument } from "../repairNote";
+import { RepairTicketDocument } from "../repairTicket";
 
 type Action = "company" | "general" | "outreach" | "dashboard";
 
@@ -40,7 +40,7 @@ interface GetUsersActionsResourceRequest extends RequestAfterJWTVerification {
 
 type ActionsResourceRequestServerResponse = {
   message: string;
-  repairNoteData: RepairNoteDocument[];
+  repairTicketData: RepairTicketDocument[];
   companyData: {
     addressChangeData: AddressChangeDocument[];
     expenseClaimData: ExpenseClaimDocument[];

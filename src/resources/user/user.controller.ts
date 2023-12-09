@@ -494,4 +494,5 @@ export {
   updateUserByIdHandler,
   updateUserFieldsBulkHandler,
   updateUserPasswordHandler,
+  deleteAllUsersHandler,
 };
