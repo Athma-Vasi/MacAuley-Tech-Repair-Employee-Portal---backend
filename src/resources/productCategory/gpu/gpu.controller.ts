@@ -18,7 +18,7 @@ import type {
   QueryObjectParsedWithDefaults,
   ResourceRequestServerResponse,
 } from "../../../types";
-import type { GpuDocument, GpuSchema } from "./gpu.model";
+import type { GpuDocument } from "./gpu.model";
 
 import {
   createNewGpuService,
@@ -30,17 +30,9 @@ import {
   returnAllGpusUploadedFileIdsService,
   updateGpuByIdService,
 } from "./gpu.service";
-import {
-  FileUploadDocument,
-  deleteFileUploadByIdService,
-  getFileUploadByIdService,
-} from "../../fileUpload";
+import { deleteFileUploadByIdService } from "../../fileUpload";
 
-import {
-  ProductReviewDocument,
-  deleteAProductReviewService,
-  getProductReviewByIdService,
-} from "../../productReview";
+import { deleteAProductReviewService } from "../../productReview";
 import { removeUndefinedAndNullValues } from "../../../utils";
 
 // @desc   Create new gpu
@@ -181,19 +173,9 @@ const updateGpusBulkHandler = expressAsyncHandler(
 const getQueriedGpusHandler = expressAsyncHandler(
   async (
     request: GetQueriedGpusRequest,
-    response: Response<
-      GetQueriedResourceRequestServerResponse<
-        GpuDocument & {
-          fileUploads: FileUploadDocument[];
-          productReviews: ProductReviewDocument[];
-        }
-      >
-    >
+    response: Response<GetQueriedResourceRequestServerResponse<GpuDocument>>
   ) => {
     let { newQueryFlag, totalDocuments } = request.body;
-
-    console.log("REQUEST BODY INSIDE GETQUERIEDGPUSHANDLER", request.body);
-    console.log("REQUEST QUERY INSIDE GETQUERIEDGPUSHANDLER", request.query);
 
     const { filter, projection, options } =
       request.query as QueryObjectParsedWithDefaults;
@@ -221,56 +203,11 @@ const getQueriedGpusHandler = expressAsyncHandler(
       return;
     }
 
-    // find all fileUploads associated with the gpus
-    const fileUploadsArrArr = await Promise.all(
-      gpus.map(async (gpu) => {
-        const fileUploadPromises = gpu.uploadedFilesIds.map(async (uploadedFileId) => {
-          const fileUpload = await getFileUploadByIdService(uploadedFileId);
-
-          return fileUpload;
-        });
-
-        // Wait for all the promises to resolve before continuing to the next iteration
-        const fileUploads = await Promise.all(fileUploadPromises);
-
-        // Filter out any undefined values (in case fileUpload was not found)
-        return fileUploads.filter(removeUndefinedAndNullValues);
-      })
-    );
-
-    // find all reviews associated with the gpus
-    const reviewsArrArr = await Promise.all(
-      gpus.map(async (gpu) => {
-        const reviewPromises = gpu.productReviewsIds.map(async (reviewId) => {
-          const review = await getProductReviewByIdService(reviewId);
-
-          return review;
-        });
-
-        // Wait for all the promises to resolve before continuing to the next iteration
-        const reviews = await Promise.all(reviewPromises);
-
-        // Filter out any undefined values (in case review was not found)
-        return reviews.filter(removeUndefinedAndNullValues);
-      })
-    );
-
-    // create gpuServerResponse array
-    const gpuServerResponseArray = gpus.map((gpu, index) => {
-      const fileUploads = fileUploadsArrArr[index];
-      const productReviews = reviewsArrArr[index];
-      return {
-        ...gpu,
-        fileUploads,
-        productReviews,
-      };
-    });
-
     response.status(200).json({
       message: "Successfully retrieved gpus",
       pages: Math.ceil(totalDocuments / Number(options?.limit)),
       totalDocuments,
-      resourceData: gpuServerResponseArray,
+      resourceData: gpus,
     });
   }
 );
@@ -281,14 +218,7 @@ const getQueriedGpusHandler = expressAsyncHandler(
 const getGpuByIdHandler = expressAsyncHandler(
   async (
     request: GetGpuByIdRequest,
-    response: Response<
-      ResourceRequestServerResponse<
-        GpuDocument & {
-          fileUploads: FileUploadDocument[];
-          productReviews: ProductReviewDocument[];
-        }
-      >
-    >
+    response: Response<ResourceRequestServerResponse<GpuDocument>>
   ) => {
     const gpuId = request.params.gpuId;
 
@@ -299,34 +229,9 @@ const getGpuByIdHandler = expressAsyncHandler(
       return;
     }
 
-    // get all fileUploads associated with the gpu
-    const fileUploads = await Promise.all(
-      gpu.uploadedFilesIds.map(async (uploadedFileId) => {
-        const fileUpload = await getFileUploadByIdService(uploadedFileId);
-
-        return fileUpload;
-      })
-    );
-
-    // get all reviews associated with the gpu
-    const productReviews = await Promise.all(
-      gpu.productReviewsIds.map(async (reviewId) => {
-        const review = await getProductReviewByIdService(reviewId);
-
-        return review;
-      })
-    );
-
-    // create gpuServerResponse
-    const gpuServerResponse = {
-      ...gpu,
-      fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
-      productReviews: productReviews.filter(removeUndefinedAndNullValues),
-    };
-
     response.status(200).json({
       message: "Successfully retrieved gpu",
-      resourceData: [gpuServerResponse],
+      resourceData: [gpu],
     });
   }
 );
@@ -337,14 +242,7 @@ const getGpuByIdHandler = expressAsyncHandler(
 const updateGpuByIdHandler = expressAsyncHandler(
   async (
     request: UpdateGpuByIdRequest,
-    response: Response<
-      ResourceRequestServerResponse<
-        GpuDocument & {
-          fileUploads: FileUploadDocument[];
-          productReviews: ProductReviewDocument[];
-        }
-      >
-    >
+    response: Response<ResourceRequestServerResponse<GpuDocument>>
   ) => {
     const { gpuId } = request.params;
     const {
@@ -366,34 +264,9 @@ const updateGpuByIdHandler = expressAsyncHandler(
       return;
     }
 
-    // get all fileUploads associated with the gpu
-    const fileUploads = await Promise.all(
-      updatedGpu.uploadedFilesIds.map(async (uploadedFileId) => {
-        const fileUpload = await getFileUploadByIdService(uploadedFileId);
-
-        return fileUpload;
-      })
-    );
-
-    // get all reviews associated with the gpu
-    const productReviews = await Promise.all(
-      updatedGpu.productReviewsIds.map(async (reviewId) => {
-        const review = await getProductReviewByIdService(reviewId);
-
-        return review;
-      })
-    );
-
-    // create gpuServerResponse
-    const gpuServerResponse = {
-      ...updatedGpu,
-      fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
-      productReviews: productReviews.filter(removeUndefinedAndNullValues),
-    };
-
     response.status(200).json({
       message: "Gpu updated successfully",
-      resourceData: [gpuServerResponse],
+      resourceData: [updatedGpu],
     });
   }
 );

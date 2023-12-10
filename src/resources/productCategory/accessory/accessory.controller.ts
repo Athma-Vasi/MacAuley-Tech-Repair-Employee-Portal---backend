@@ -18,7 +18,7 @@ import type {
   QueryObjectParsedWithDefaults,
   ResourceRequestServerResponse,
 } from "../../../types";
-import type { AccessoryDocument, AccessorySchema } from "./accessory.model";
+import type { AccessoryDocument } from "./accessory.model";
 
 import {
   createNewAccessoryService,
@@ -30,17 +30,9 @@ import {
   returnAllAccessoriesUploadedFileIdsService,
   updateAccessoryByIdService,
 } from "./accessory.service";
-import {
-  FileUploadDocument,
-  deleteFileUploadByIdService,
-  getFileUploadByIdService,
-} from "../../fileUpload";
+import { deleteFileUploadByIdService } from "../../fileUpload";
 
-import {
-  ProductReviewDocument,
-  deleteAProductReviewService,
-  getProductReviewByIdService,
-} from "../../productReview";
+import { deleteAProductReviewService } from "../../productReview";
 import { removeUndefinedAndNullValues } from "../../../utils";
 
 // @desc   Create new accessory
@@ -187,14 +179,7 @@ const updateAccessoriesBulkHandler = expressAsyncHandler(
 const getQueriedAccessoriesHandler = expressAsyncHandler(
   async (
     request: GetQueriedAccessoriesRequest,
-    response: Response<
-      GetQueriedResourceRequestServerResponse<
-        AccessoryDocument & {
-          fileUploads: FileUploadDocument[];
-          productReviews: ProductReviewDocument[];
-        }
-      >
-    >
+    response: Response<GetQueriedResourceRequestServerResponse<AccessoryDocument>>
   ) => {
     let { newQueryFlag, totalDocuments } = request.body;
 
@@ -224,58 +209,11 @@ const getQueriedAccessoriesHandler = expressAsyncHandler(
       return;
     }
 
-    // find all fileUploads associated with the accessories
-    const fileUploadsArrArr = await Promise.all(
-      accessories.map(async (accessory) => {
-        const fileUploadPromises = accessory.uploadedFilesIds.map(
-          async (uploadedFileId) => {
-            const fileUpload = await getFileUploadByIdService(uploadedFileId);
-
-            return fileUpload;
-          }
-        );
-
-        // Wait for all the promises to resolve before continuing to the next iteration
-        const fileUploads = await Promise.all(fileUploadPromises);
-
-        // Filter out any undefined values (in case fileUpload was not found)
-        return fileUploads.filter(removeUndefinedAndNullValues);
-      })
-    );
-
-    // find all reviews associated with the accessories
-    const reviewsArrArr = await Promise.all(
-      accessories.map(async (accessory) => {
-        const reviewPromises = accessory.productReviewsIds.map(async (reviewId) => {
-          const review = await getProductReviewByIdService(reviewId);
-
-          return review;
-        });
-
-        // Wait for all the promises to resolve before continuing to the next iteration
-        const reviews = await Promise.all(reviewPromises);
-
-        // Filter out any undefined values (in case review was not found)
-        return reviews.filter(removeUndefinedAndNullValues);
-      })
-    );
-
-    // create accessoryServerResponse array
-    const accessoryServerResponseArray = accessories.map((accessory, index) => {
-      const fileUploads = fileUploadsArrArr[index];
-      const productReviews = reviewsArrArr[index];
-      return {
-        ...accessory,
-        fileUploads,
-        productReviews,
-      };
-    });
-
     response.status(200).json({
       message: "Successfully retrieved accessories",
       pages: Math.ceil(totalDocuments / Number(options?.limit)),
       totalDocuments,
-      resourceData: accessoryServerResponseArray,
+      resourceData: accessories,
     });
   }
 );
@@ -286,16 +224,9 @@ const getQueriedAccessoriesHandler = expressAsyncHandler(
 const getAccessoryByIdHandler = expressAsyncHandler(
   async (
     request: GetAccessoryByIdRequest,
-    response: Response<
-      ResourceRequestServerResponse<
-        AccessoryDocument & {
-          fileUploads: FileUploadDocument[];
-          productReviews: ProductReviewDocument[];
-        }
-      >
-    >
+    response: Response<ResourceRequestServerResponse<AccessoryDocument>>
   ) => {
-    const accessoryId = request.params.accessoryId;
+    const { accessoryId } = request.params;
 
     // get accessory by id
     const accessory = await getAccessoryByIdService(accessoryId);
@@ -304,34 +235,9 @@ const getAccessoryByIdHandler = expressAsyncHandler(
       return;
     }
 
-    // get all fileUploads associated with the accessory
-    const fileUploads = await Promise.all(
-      accessory.uploadedFilesIds.map(async (uploadedFileId) => {
-        const fileUpload = await getFileUploadByIdService(uploadedFileId);
-
-        return fileUpload;
-      })
-    );
-
-    // get all reviews associated with the accessory
-    const productReviews = await Promise.all(
-      accessory.productReviewsIds.map(async (reviewId) => {
-        const review = await getProductReviewByIdService(reviewId);
-
-        return review;
-      })
-    );
-
-    // create accessoryServerResponse
-    const accessoryServerResponse = {
-      ...accessory,
-      fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
-      productReviews: productReviews.filter(removeUndefinedAndNullValues),
-    };
-
     response.status(200).json({
       message: "Successfully retrieved accessory",
-      resourceData: [accessoryServerResponse],
+      resourceData: [accessory],
     });
   }
 );
@@ -342,14 +248,7 @@ const getAccessoryByIdHandler = expressAsyncHandler(
 const updateAccessoryByIdHandler = expressAsyncHandler(
   async (
     request: UpdateAccessoryByIdRequest,
-    response: Response<
-      ResourceRequestServerResponse<
-        AccessoryDocument & {
-          fileUploads: FileUploadDocument[];
-          productReviews: ProductReviewDocument[];
-        }
-      >
-    >
+    response: Response<ResourceRequestServerResponse<AccessoryDocument>>
   ) => {
     const { accessoryId } = request.params;
     const {
@@ -371,34 +270,9 @@ const updateAccessoryByIdHandler = expressAsyncHandler(
       return;
     }
 
-    // get all fileUploads associated with the accessory
-    const fileUploads = await Promise.all(
-      updatedAccessory.uploadedFilesIds.map(async (uploadedFileId) => {
-        const fileUpload = await getFileUploadByIdService(uploadedFileId);
-
-        return fileUpload;
-      })
-    );
-
-    // get all reviews associated with the accessory
-    const productReviews = await Promise.all(
-      updatedAccessory.productReviewsIds.map(async (reviewId) => {
-        const review = await getProductReviewByIdService(reviewId);
-
-        return review;
-      })
-    );
-
-    // create accessoryServerResponse
-    const accessoryServerResponse = {
-      ...updatedAccessory,
-      fileUploads: fileUploads.filter(removeUndefinedAndNullValues),
-      productReviews: productReviews.filter(removeUndefinedAndNullValues),
-    };
-
     response.status(200).json({
       message: "Accessory updated successfully",
-      resourceData: [accessoryServerResponse],
+      resourceData: [updatedAccessory],
     });
   }
 );

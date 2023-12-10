@@ -41,7 +41,7 @@ function assignQueryDefaults(request: Request, _response: Response, next: NextFu
   if (!query) {
     Object.defineProperty(request, "query", {
       value: {
-        projection: "-__v",
+        projection: "",
         options: { sort: { createdAt: -1, _id: -1 }, limit: 10, skip: 0 },
         filter: {},
       },
@@ -65,7 +65,7 @@ function assignQueryDefaults(request: Request, _response: Response, next: NextFu
 
     Object.entries(query).forEach(([operator, value]) => {
       if (operator.endsWith("in")) {
-        // if its already in array form, return
+        // if its already in array form, do nothing
         if (Array.isArray(value)) {
           return;
         }
@@ -92,7 +92,7 @@ function assignQueryDefaults(request: Request, _response: Response, next: NextFu
   // convert string to object
   const mongoDbQueryObject = JSON.parse(queryString);
 
-  let { projection, ...rest } = mongoDbQueryObject;
+  const { projection, ...rest } = mongoDbQueryObject;
   const options: Record<string, string | number | boolean> = {};
   const filter: Record<string, string | number | boolean> = {};
 
@@ -143,8 +143,6 @@ function assignQueryDefaults(request: Request, _response: Response, next: NextFu
             });
           }
 
-          console.log("inValue: ", inValue);
-
           Object.defineProperty(filter, key, {
             value: { $in: inValue },
             ...propertyDescriptor,
@@ -179,45 +177,6 @@ function assignQueryDefaults(request: Request, _response: Response, next: NextFu
       value: sortDirection,
       ...propertyDescriptor,
     });
-  }
-
-  // set default projection exclusion if it does not exist
-  if (!Object.hasOwn(mongoDbQueryObject, "projection")) {
-    projection = "-__v";
-  } else {
-    // check if projection is exclusive or inclusive and add -__v to projection exclusion if it does not exist
-    if (typeof projection === "string") {
-      // ex: '-field1 -field2'
-      if (projection.startsWith("-")) {
-        if (!projection.includes("-__v")) {
-          projection = projection.concat(" -__v");
-        }
-      }
-    } else if (Array.isArray(projection)) {
-      // ex: ['-field1', '-field2']
-      if (projection[0].startsWith("-")) {
-        if (!projection[0].includes("-__v")) {
-          projection.push("-__v");
-        }
-      }
-    } else if (typeof projection === "object") {
-      // ex: { field1: 1, field2: 1 }
-      const calculateProjectionScore = (projection: Record<string, number>): number => {
-        return Object.values(projection).reduce((acc, curr) => {
-          return acc + curr;
-        }, 0);
-      };
-      // projection score of 0 means it is exclusive
-      if (calculateProjectionScore(projection) === 0) {
-        // ex: { field1: 0, field2: 0 }
-        if (!Object.hasOwn(projection, "__v")) {
-          Object.defineProperty(projection, "__v", {
-            value: 0,
-            ...propertyDescriptor,
-          });
-        }
-      }
-    }
   }
 
   // set pagination default values for limit and skip
@@ -260,7 +219,7 @@ function assignQueryDefaults(request: Request, _response: Response, next: NextFu
   console.groupEnd();
 
   next();
-  // return;
+  return;
 
   /**
      * example: here is a sample query object before transformation:
@@ -290,3 +249,42 @@ function assignQueryDefaults(request: Request, _response: Response, next: NextFu
 }
 
 export { assignQueryDefaults };
+
+// // set default projection exclusion if it does not exist
+// if (!Object.hasOwn(mongoDbQueryObject, "projection")) {
+//   projection = "-__v";
+// } else {
+//   // check if projection is exclusive or inclusive and add -__v to projection exclusion if it does not exist
+//   if (typeof projection === "string") {
+//     // ex: '-field1 -field2'
+//     if (projection.startsWith("-")) {
+//       if (!projection.includes("-__v")) {
+//         projection = projection.concat(" -__v");
+//       }
+//     }
+//   } else if (Array.isArray(projection)) {
+//     // ex: ['-field1', '-field2']
+//     if (projection[0].startsWith("-")) {
+//       if (!projection[0].includes("-__v")) {
+//         projection.push("-__v");
+//       }
+//     }
+//   } else if (typeof projection === "object") {
+//     // ex: { field1: 1, field2: 1 }
+//     const calculateProjectionScore = (projection: Record<string, number>): number => {
+//       return Object.values(projection).reduce((acc, curr) => {
+//         return acc + curr;
+//       }, 0);
+//     };
+//     // projection score of 0 means it is exclusive
+//     if (calculateProjectionScore(projection) === 0) {
+//       // ex: { field1: 0, field2: 0 }
+//       if (!Object.hasOwn(projection, "__v")) {
+//         Object.defineProperty(projection, "__v", {
+//           value: 0,
+//           ...propertyDescriptor,
+//         });
+//       }
+//     }
+//   }
+// }
