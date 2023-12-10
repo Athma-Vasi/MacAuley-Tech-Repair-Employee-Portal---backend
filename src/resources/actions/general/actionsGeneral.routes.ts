@@ -8,14 +8,9 @@ import {
   verifyJWTMiddleware,
   verifyRoles,
 } from "../../../middlewares";
-import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
 const actionsGeneralRouter = Router();
-actionsGeneralRouter.use(
-  verifyJWTMiddleware,
-  verifyRoles(),
-  assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS)
-);
+actionsGeneralRouter.use(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults);
 
 actionsGeneralRouter.use("/endorsement", endorsementRouter);
 actionsGeneralRouter.use("/printer-issue", printerIssueRouter);

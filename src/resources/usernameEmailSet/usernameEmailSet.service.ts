@@ -1,13 +1,6 @@
 import { UsernameEmailSetModel } from "./usernameEmailSet.model";
 
-async function checkUsernameExistsService(
-  filter: Record<
-    "$in",
-    {
-      username: string[];
-    }
-  >
-) {
+async function checkUsernameExistsService(filter: { username: { $in: string[] } }) {
   try {
     const count = await UsernameEmailSetModel.countDocuments(filter).lean().exec();
     return count ? true : false;
@@ -16,14 +9,7 @@ async function checkUsernameExistsService(
   }
 }
 
-async function checkEmailExistsService(
-  filter: Record<
-    "$in",
-    {
-      email: string[];
-    }
-  >
-) {
+async function checkEmailExistsService(filter: { email: { $in: string[] } }) {
   try {
     const count = await UsernameEmailSetModel.countDocuments(filter).lean().exec();
     return count ? true : false;
@@ -34,18 +20,19 @@ async function checkEmailExistsService(
 
 /**
  * @description only runs once to create the document (only one document exists in collection)
+ * - created by DEV only
  */
 async function createUsernameEmailSetService({
   username,
   email,
 }: {
-  username: string;
-  email: string;
+  username: string[];
+  email: string[];
 }) {
   try {
     const usernameEmailSet = await UsernameEmailSetModel.create({
-      username: [username],
-      email: [email],
+      username,
+      email,
     });
     return usernameEmailSet;
   } catch (error: any) {

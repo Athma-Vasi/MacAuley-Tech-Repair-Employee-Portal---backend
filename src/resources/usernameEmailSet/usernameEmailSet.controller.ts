@@ -47,7 +47,7 @@ const postUsernameEmailSetHandler = expressAsyncHandler(
 );
 
 // @desc   check if username or email exists
-// @route  GET /api/v1/username-email-set
+// @route  POST /api/v1/username-email-set/check
 // @access Public
 const checkUsernameEmailExistsHandler = expressAsyncHandler(
   async (
@@ -57,24 +57,24 @@ const checkUsernameEmailExistsHandler = expressAsyncHandler(
     const { email, username } = request.body.fields;
 
     const filter = email
-      ? { $in: { email: [email] } }
-      : { $in: { username: [username] } };
+      ? { email: { $in: [email] } }
+      : { username: { $in: [username] } };
 
     const isUsernameOrEmailExists = email
-      ? await checkEmailExistsService(filter as Record<"$in", { email: string[] }>)
-      : await checkUsernameExistsService(filter as Record<"$in", { username: string[] }>);
+      ? await checkEmailExistsService(filter as { email: { $in: string[] } })
+      : await checkUsernameExistsService(filter as { username: { $in: string[] } });
 
     if (isUsernameOrEmailExists) {
       response.status(200).json({
         status: "error",
-        message: "Username or email already exists",
+        message: `${email ? "Email" : "Username"} already exists.`,
       });
       return;
     }
 
     response.status(200).json({
       status: "success",
-      message: "Username or email does not exist",
+      message: `${email ? "Email" : "Username"} does not exist.`,
     });
   }
 );

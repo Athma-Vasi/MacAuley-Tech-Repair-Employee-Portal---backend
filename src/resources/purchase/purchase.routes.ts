@@ -13,15 +13,10 @@ import {
   getQueriedPurchasesByUserHandler,
   updatePurchaseByIdHandler,
 } from "./purchase.controller";
-import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../constants";
 
 const purchaseRouter = Router();
 
-purchaseRouter.use(
-  verifyJWTMiddleware,
-  verifyRoles(),
-  assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS)
-);
+purchaseRouter.use(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults);
 
 purchaseRouter.route("/").post(createNewPurchaseHandler).get(getQueriedPurchasesHandler);
 

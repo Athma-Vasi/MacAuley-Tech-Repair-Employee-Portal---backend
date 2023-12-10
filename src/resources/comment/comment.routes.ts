@@ -12,16 +12,11 @@ import {
   getQueriedCommentsByParentResourceIdHandler,
 } from "./comment.controller";
 
-import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../constants";
 import { verifyJWTMiddleware, verifyRoles, assignQueryDefaults } from "../../middlewares";
 
 const commentRouter = Router();
 
-commentRouter.use(
-  verifyJWTMiddleware,
-  verifyRoles(),
-  assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS)
-);
+commentRouter.use(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults);
 
 commentRouter.route("/").get(getQueriedCommentsHandler).post(createNewCommentHandler);
 

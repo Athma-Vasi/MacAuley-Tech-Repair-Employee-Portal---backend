@@ -14,7 +14,6 @@ import {
   getCustomerDocWithPaymentInfoHandler,
   deleteAllCustomersHandler,
 } from "./customer.controller";
-import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../constants";
 
 const customerRouter = Router();
 
@@ -23,7 +22,7 @@ customerRouter
   .get(
     verifyJWTMiddleware,
     verifyRoles(),
-    assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
+    assignQueryDefaults,
     getQueriedCustomersHandler
   )
   .post(createNewCustomerHandler);
@@ -33,7 +32,7 @@ customerRouter
   .get(
     verifyJWTMiddleware,
     verifyRoles(),
-    assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
+    assignQueryDefaults,
     getCustomerDocWithPaymentInfoHandler
   );
 
@@ -52,19 +51,14 @@ customerRouter
   .get(
     verifyJWTMiddleware,
     verifyRoles(),
-    assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
+    assignQueryDefaults,
     getAllCustomersBulkHandler
   )
   .patch(verifyJWTMiddleware, verifyRoles(), updateCustomerFieldsBulkHandler);
 
 customerRouter
   .route("/:customerId")
-  .get(
-    verifyJWTMiddleware,
-    verifyRoles(),
-    assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
-    getCustomerByIdHandler
-  )
+  .get(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults, getCustomerByIdHandler)
   .patch(verifyJWTMiddleware, verifyRoles(), updateCustomerByIdHandler)
   .delete(verifyJWTMiddleware, verifyRoles(), deleteCustomerHandler);
 

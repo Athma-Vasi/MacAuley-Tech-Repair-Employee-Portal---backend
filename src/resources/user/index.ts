@@ -5,17 +5,16 @@
 /**
  * Imports
  */
-import { UserModel } from './user.model';
-import { userRouter } from './user.routes';
+import { UserModel } from "./user.model";
+import { userRouter } from "./user.routes";
 import {
   createNewUserHandler,
   deleteUserHandler,
   getQueriedUsersHandler,
   updateUserByIdHandler,
-} from './user.controller';
+} from "./user.controller";
 import {
   createNewUserService,
-  checkUserExistsService,
   checkUserIsActiveService,
   deleteUserService,
   getQueriedUsersService,
@@ -24,7 +23,7 @@ import {
   updateUserByIdService,
   checkUserPasswordService,
   updateUserPasswordService,
-} from './user.service';
+} from "./user.service";
 
 import type {
   UserDocument,
@@ -38,14 +37,14 @@ import type {
   PreferredPronouns,
   Province,
   StatesUS,
-} from './user.model';
+} from "./user.model";
 import type {
   CreateNewUserRequest,
   DeleteUserRequest,
   GetAllUsersRequest,
   UpdateUserRequest,
   UpdateUserPasswordRequest,
-} from './user.types';
+} from "./user.types";
 
 /**
  * Exports
@@ -58,7 +57,6 @@ export {
   getQueriedUsersHandler,
   updateUserByIdHandler,
   createNewUserService,
-  checkUserExistsService,
   checkUserIsActiveService,
   deleteUserService,
   getQueriedUsersService,

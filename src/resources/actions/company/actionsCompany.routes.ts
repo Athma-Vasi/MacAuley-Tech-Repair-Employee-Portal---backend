@@ -9,15 +9,10 @@ import {
   verifyJWTMiddleware,
   verifyRoles,
 } from "../../../middlewares";
-import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
 const actionsCompanyRouter = Router();
 
-actionsCompanyRouter.use(
-  verifyJWTMiddleware,
-  verifyRoles(),
-  assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS)
-);
+actionsCompanyRouter.use(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults);
 
 actionsCompanyRouter.use("/address-change", addressChangeRouter);
 actionsCompanyRouter.use("/leave-request", leaveRequestRouter);

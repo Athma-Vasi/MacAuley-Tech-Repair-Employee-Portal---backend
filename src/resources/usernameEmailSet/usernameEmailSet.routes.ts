@@ -9,7 +9,8 @@ const usernameEmailSetRouter = Router();
 
 usernameEmailSetRouter
   .route("/")
-  .post(verifyJWTMiddleware, verifyRoles(), postUsernameEmailSetHandler)
-  .get(checkUsernameEmailExistsHandler);
+  .post(verifyJWTMiddleware, verifyRoles(), postUsernameEmailSetHandler);
+
+usernameEmailSetRouter.route("/check").post(checkUsernameEmailExistsHandler);
 
 export { usernameEmailSetRouter };

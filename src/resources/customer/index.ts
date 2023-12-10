@@ -20,7 +20,6 @@ import {
   updateCustomerPasswordHandler,
 } from "./customer.controller";
 import {
-  checkCustomerExistsService,
   checkCustomerIsActiveService,
   checkCustomerPasswordService,
   createNewCustomerService,
@@ -54,7 +53,6 @@ import type {
 
 export {
   CustomerModel,
-  checkCustomerExistsService,
   checkCustomerIsActiveService,
   checkCustomerPasswordService,
   createNewCustomerHandler,

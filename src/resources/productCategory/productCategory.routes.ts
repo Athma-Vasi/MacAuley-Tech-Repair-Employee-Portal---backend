@@ -19,21 +19,16 @@ import { speakerRouter } from "./speaker";
 import { tabletRouter } from "./tablet";
 import { webcamRouter } from "./webcam";
 import { assignQueryDefaults, verifyJWTMiddleware, verifyRoles } from "../../middlewares";
-import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../constants";
 
 const productCategoryRouter = Router({
   strict: true,
 });
-productCategoryRouter.use(
-  verifyJWTMiddleware,
-  verifyRoles(),
-  assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS)
-);
-// productCategoryRouter.route("/").get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS));
+productCategoryRouter.use(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults);
+// productCategoryRouter.route("/").get(assignQueryDefaults);
 
 // productCategoryRouter
 //   .route("/gpu")
-//   .get(assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS), getQueriedGpusHandler);
+//   .get(assignQueryDefaults, getQueriedGpusHandler);
 
 productCategoryRouter.use("/accessory", accessoryRouter);
 productCategoryRouter.use("/cpu", cpuRouter);

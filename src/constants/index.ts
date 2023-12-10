@@ -23,25 +23,6 @@ import { getWebcamByIdService } from "../resources/productCategory/webcam";
 
 const ALLOWED_FILE_EXTENSIONS = [".jpg", ".jpeg", ".png"];
 
-const FIND_QUERY_OPTIONS_KEYWORDS = new Set([
-  "tailable",
-  "limit",
-  "skip",
-  "allowDiskUse",
-  "batchSize",
-  "readPreference",
-  "hint",
-  "comment",
-  "lean",
-  "populate",
-  "maxTimeMS",
-  "sort",
-  "strict",
-  "collation",
-  "session",
-  "explain",
-]);
-
 /**
  * @description Map of product category names to their respective service functions.
  * - used in `src/resources/productCategory/productCategory.controller.ts`
@@ -71,8 +52,4 @@ const PRODUCT_CATEGORY_SERVICE_MAP: Record<
   Webcam: getWebcamByIdService,
 };
 
-export {
-  ALLOWED_FILE_EXTENSIONS,
-  FIND_QUERY_OPTIONS_KEYWORDS,
-  PRODUCT_CATEGORY_SERVICE_MAP,
-};
+export { ALLOWED_FILE_EXTENSIONS, PRODUCT_CATEGORY_SERVICE_MAP };

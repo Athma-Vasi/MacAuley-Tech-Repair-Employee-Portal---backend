@@ -16,8 +16,6 @@ import type {
 } from "./user.types";
 
 import {
-  checkUserExistsService,
-  checkUserIsActiveService,
   checkUserPasswordService,
   createNewUserService,
   deleteAllUsersService,
@@ -40,6 +38,12 @@ import {
 } from "../../types";
 import { FilterQuery, QueryOptions } from "mongoose";
 import { removeUndefinedAndNullValues } from "../../utils";
+import {
+  checkEmailExistsService,
+  checkUsernameExistsService,
+  updateUsernameEmailSetWithEmailService,
+  updateUsernameEmailSetWithUsernameService,
+} from "../usernameEmailSet";
 
 // @desc   Create new user
 // @route  POST /user
@@ -63,14 +67,18 @@ const createNewUserHandler = expressAsyncHandler(
     }
 
     // check for duplicate email
-    const isDuplicateEmail = await checkUserExistsService({ email });
+    const isDuplicateEmail = await checkEmailExistsService({ email: { $in: [email] } });
     if (isDuplicateEmail) {
       response.status(409).json({ message: "Email already exists", resourceData: [] });
       return;
     }
 
     // check for duplicate username
-    const isDuplicateUser = await checkUserExistsService({ username });
+    const isDuplicateUser = await checkUsernameExistsService({
+      username: {
+        $in: [username],
+      },
+    });
     if (isDuplicateUser) {
       response.status(409).json({ message: "Username already exists", resourceData: [] });
       return;
@@ -79,6 +87,16 @@ const createNewUserHandler = expressAsyncHandler(
     // create new user if all checks pass successfully
     const userDocument = await createNewUserService(userSchema);
     if (!userDocument) {
+      response.status(400).json({ message: "User creation failed", resourceData: [] });
+      return;
+    }
+
+    // add new username and email to usernameEmailSet collection
+    const updatedUsernameEmailSet = await Promise.all([
+      updateUsernameEmailSetWithUsernameService(username),
+      updateUsernameEmailSetWithEmailService(email),
+    ]);
+    if (updatedUsernameEmailSet.some((value) => !value)) {
       response.status(400).json({ message: "User creation failed", resourceData: [] });
       return;
     }
@@ -359,7 +377,9 @@ const createNewUsersBulkHandler = expressAsyncHandler(
         }
 
         // check for duplicate email
-        const isDuplicateEmail = await checkUserExistsService({ email });
+        const isDuplicateEmail = await checkEmailExistsService({
+          email: { $in: [email] },
+        });
         if (isDuplicateEmail) {
           response
             .status(409)
@@ -368,8 +388,10 @@ const createNewUsersBulkHandler = expressAsyncHandler(
         }
 
         // check for duplicate username
-        const isDuplicateUser = await checkUserExistsService({
-          username,
+        const isDuplicateUser = await checkUsernameExistsService({
+          username: {
+            $in: [username],
+          },
         });
         if (isDuplicateUser) {
           response
@@ -380,6 +402,18 @@ const createNewUsersBulkHandler = expressAsyncHandler(
 
         // create new user if all checks pass successfully
         const userDocument: UserDocument = await createNewUserService(userSchema);
+
+        // add new username and email to usernameEmailSet collection
+        const updatedUsernameEmailSet = await Promise.all([
+          updateUsernameEmailSetWithUsernameService(username),
+          updateUsernameEmailSetWithEmailService(email),
+        ]);
+        if (updatedUsernameEmailSet.some((value) => !value)) {
+          response
+            .status(400)
+            .json({ message: "User creation failed", resourceData: [] });
+          return;
+        }
 
         return userDocument;
       })

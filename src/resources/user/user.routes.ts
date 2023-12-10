@@ -14,18 +14,12 @@ import {
   updateUserFieldsBulkHandler,
   updateUserPasswordHandler,
 } from "./user.controller";
-import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../constants";
 
 const userRouter = Router();
 
 userRouter
   .route("/")
-  .get(
-    verifyJWTMiddleware,
-    verifyRoles(),
-    assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
-    getQueriedUsersHandler
-  )
+  .get(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults, getQueriedUsersHandler)
   .post(createNewUserHandler);
 
 userRouter
@@ -38,33 +32,18 @@ userRouter
 
 userRouter
   .route("/directory")
-  .get(
-    verifyJWTMiddleware,
-    verifyRoles(),
-    assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
-    getUsersDirectoryHandler
-  );
+  .get(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults, getUsersDirectoryHandler);
 
 // DEV ROUTES
 userRouter
   .route("/dev")
   .post(verifyJWTMiddleware, verifyRoles(), createNewUsersBulkHandler)
-  .get(
-    verifyJWTMiddleware,
-    verifyRoles(),
-    assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
-    getAllUsersBulkHandler
-  )
+  .get(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults, getAllUsersBulkHandler)
   .patch(verifyJWTMiddleware, verifyRoles(), updateUserFieldsBulkHandler);
 
 userRouter
   .route("/:userId")
-  .get(
-    verifyJWTMiddleware,
-    verifyRoles(),
-    assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS),
-    getUserByIdHandler
-  )
+  .get(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults, getUserByIdHandler)
   .patch(verifyJWTMiddleware, verifyRoles(), updateUserByIdHandler)
   .delete(verifyJWTMiddleware, verifyRoles(), deleteUserHandler);
 

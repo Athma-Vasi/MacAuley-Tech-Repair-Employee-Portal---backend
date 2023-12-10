@@ -11,14 +11,9 @@ import {
   updateRepairTicketsBulkHandler,
 } from "./repairTicket.controller";
 import { assignQueryDefaults, verifyJWTMiddleware, verifyRoles } from "../../middlewares";
-import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../constants";
 
 const repairTicketRouter = Router();
-repairTicketRouter.use(
-  verifyJWTMiddleware,
-  verifyRoles(),
-  assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS)
-);
+repairTicketRouter.use(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults);
 
 repairTicketRouter
   .route("/")

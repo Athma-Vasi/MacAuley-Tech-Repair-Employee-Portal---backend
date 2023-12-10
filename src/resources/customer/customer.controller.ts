@@ -15,7 +15,6 @@ import type {
 } from "./customer.types";
 
 import {
-  checkCustomerExistsService,
   checkCustomerPasswordService,
   createNewCustomerService,
   deleteCustomerService,
@@ -40,6 +39,12 @@ import { getProductReviewByIdService } from "../productReview";
 import { getSurveyByIdService } from "../actions/outreach/survey";
 import { getPurchaseByIdService } from "../purchase";
 import { getRMAByIdService } from "../rma";
+import {
+  checkEmailExistsService,
+  checkUsernameExistsService,
+  updateUsernameEmailSetWithEmailService,
+  updateUsernameEmailSetWithUsernameService,
+} from "../usernameEmailSet";
 
 // @desc   Create new user
 // @route  POST /api/v1/customer
@@ -68,18 +73,20 @@ const createNewCustomerHandler = expressAsyncHandler(
     }
 
     // check for duplicate email
-    const isDuplicateEmail = await checkCustomerExistsService({ email });
+    const isDuplicateEmail = await checkEmailExistsService({ email: { $in: [email] } });
     if (isDuplicateEmail) {
       response.status(409).json({ message: "Email already exists", resourceData: [] });
       return;
     }
 
     // check for duplicate username
-    const isDuplicateCustomer = await checkCustomerExistsService({ username });
-    if (isDuplicateCustomer) {
-      response
-        .status(409)
-        .json({ message: "Customername already exists", resourceData: [] });
+    const isDuplicateUser = await checkUsernameExistsService({
+      username: {
+        $in: [username],
+      },
+    });
+    if (isDuplicateUser) {
+      response.status(409).json({ message: "Username already exists", resourceData: [] });
       return;
     }
 
@@ -88,6 +95,18 @@ const createNewCustomerHandler = expressAsyncHandler(
       customerSchema
     );
     if (!customerDocument) {
+      response
+        .status(400)
+        .json({ message: "Customer creation failed", resourceData: [] });
+      return;
+    }
+
+    // add new username and email to usernameEmailSet collection
+    const updatedUsernameEmailSet = await Promise.all([
+      updateUsernameEmailSetWithUsernameService(username),
+      updateUsernameEmailSetWithEmailService(email),
+    ]);
+    if (updatedUsernameEmailSet.some((value) => !value)) {
       response
         .status(400)
         .json({ message: "Customer creation failed", resourceData: [] });
@@ -135,7 +154,9 @@ const createNewCustomersBulkHandler = expressAsyncHandler(
         }
 
         // check for duplicate email
-        const isDuplicateEmail = await checkCustomerExistsService({ email });
+        const isDuplicateEmail = await checkEmailExistsService({
+          email: { $in: [email] },
+        });
         if (isDuplicateEmail) {
           response
             .status(409)
@@ -144,13 +165,15 @@ const createNewCustomersBulkHandler = expressAsyncHandler(
         }
 
         // check for duplicate username
-        const isDuplicateCustomer = await checkCustomerExistsService({
-          username,
+        const isDuplicateUser = await checkUsernameExistsService({
+          username: {
+            $in: [username],
+          },
         });
-        if (isDuplicateCustomer) {
+        if (isDuplicateUser) {
           response
             .status(409)
-            .json({ message: "Customername already exists", resourceData: [] });
+            .json({ message: "Username already exists", resourceData: [] });
           return;
         }
 
@@ -158,6 +181,18 @@ const createNewCustomersBulkHandler = expressAsyncHandler(
         const customerDocument: CustomerDocument = await createNewCustomerService(
           customerSchema
         );
+
+        // add new username and email to usernameEmailSet collection
+        const updatedUsernameEmailSet = await Promise.all([
+          updateUsernameEmailSetWithUsernameService(username),
+          updateUsernameEmailSetWithEmailService(email),
+        ]);
+        if (updatedUsernameEmailSet.some((value) => !value)) {
+          response
+            .status(400)
+            .json({ message: "Customer creation failed", resourceData: [] });
+          return;
+        }
 
         return customerDocument;
       })

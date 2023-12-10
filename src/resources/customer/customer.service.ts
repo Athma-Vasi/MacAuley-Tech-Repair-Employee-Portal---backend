@@ -19,32 +19,32 @@ type CheckUserExistsServiceInput = {
   userId?: Types.ObjectId | undefined;
 };
 
-async function checkCustomerExistsService({
-  email,
-  username,
-  userId,
-}: CheckUserExistsServiceInput): Promise<boolean> {
-  try {
-    if (userId) {
-      const userCount = await CustomerModel.countDocuments().lean().exec();
-      return userCount ? true : false;
-    }
+// async function checkCustomerExistsService({
+//   email,
+//   username,
+//   userId,
+// }: CheckUserExistsServiceInput): Promise<boolean> {
+//   try {
+//     if (userId) {
+//       const userCount = await CustomerModel.countDocuments().lean().exec();
+//       return userCount ? true : false;
+//     }
 
-    if (email) {
-      const userCount = await CustomerModel.countDocuments({ email }).lean().exec();
-      return userCount ? true : false;
-    }
+//     if (email) {
+//       const userCount = await CustomerModel.countDocuments({ email }).lean().exec();
+//       return userCount ? true : false;
+//     }
 
-    if (username) {
-      const userCount = await CustomerModel.countDocuments({ username }).lean().exec();
-      return userCount ? true : false;
-    }
+//     if (username) {
+//       const userCount = await CustomerModel.countDocuments({ username }).lean().exec();
+//       return userCount ? true : false;
+//     }
 
-    return false;
-  } catch (error: any) {
-    throw new Error(error, { cause: "checkCustomerExistsService" });
-  }
-}
+//     return false;
+//   } catch (error: any) {
+//     throw new Error(error, { cause: "checkCustomerExistsService" });
+//   }
+// }
 
 type CheckCustomerIsActiveServiceInput = {
   username?: string | undefined;
@@ -278,7 +278,7 @@ async function updateCustomerPasswordService({
 }
 
 export {
-  checkCustomerExistsService,
+  // checkCustomerExistsService,
   checkCustomerIsActiveService,
   checkCustomerPasswordService,
   createNewCustomerService,

@@ -14,8 +14,8 @@ type GetUsernameEmailExistsRequest = RequestAfterJWTVerificationWithQuery & {
  */
 type PostUsernameEmailSetRequest = RequestAfterJWTVerificationWithQuery & {
   body: {
-    username: string;
-    email: string;
+    username: string[];
+    email: string[];
   };
 };
 

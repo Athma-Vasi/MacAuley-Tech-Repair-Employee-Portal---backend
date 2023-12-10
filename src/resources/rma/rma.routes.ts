@@ -13,15 +13,10 @@ import {
   getQueriedRMAsByUserHandler,
   updateRMAByIdHandler,
 } from "./rma.controller";
-import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../constants";
 
 const rmaRouter = Router();
 
-rmaRouter.use(
-  verifyJWTMiddleware,
-  verifyRoles(),
-  assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS)
-);
+rmaRouter.use(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults);
 
 rmaRouter.route("/").post(createNewRMAHandler).get(getQueriedRMAsHandler);
 

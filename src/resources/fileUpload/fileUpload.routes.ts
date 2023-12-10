@@ -10,7 +10,7 @@ import {
   verifyRoles,
   assignQueryDefaults,
 } from "../../middlewares";
-import { ALLOWED_FILE_EXTENSIONS, FIND_QUERY_OPTIONS_KEYWORDS } from "../../constants";
+import { ALLOWED_FILE_EXTENSIONS } from "../../constants";
 import {
   createNewFileUploadHandler,
   deleteAFileUploadHandler,
@@ -23,11 +23,7 @@ import {
 
 const fileUploadRouter = Router();
 
-fileUploadRouter.use(
-  verifyJWTMiddleware,
-  verifyRoles(),
-  assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS)
-);
+fileUploadRouter.use(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults);
 fileUploadRouter.use(verifyRoles());
 
 fileUploadRouter

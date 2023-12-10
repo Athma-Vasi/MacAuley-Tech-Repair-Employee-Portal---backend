@@ -7,14 +7,9 @@ import {
   verifyJWTMiddleware,
   verifyRoles,
 } from "../../../middlewares";
-import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../../constants";
 
 const actionsOutreachRouter = Router();
-actionsOutreachRouter.use(
-  verifyJWTMiddleware,
-  verifyRoles(),
-  assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS)
-);
+actionsOutreachRouter.use(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults);
 
 actionsOutreachRouter.use("/survey", surveyRouter);
 actionsOutreachRouter.use("/event", eventRouter);

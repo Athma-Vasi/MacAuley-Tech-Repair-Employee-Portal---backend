@@ -13,15 +13,10 @@ import {
   getQueriedProductReviewsByUserHandler,
   updateProductReviewByIdHandler,
 } from "./productReview.controller";
-import { FIND_QUERY_OPTIONS_KEYWORDS } from "../../constants";
 
 const productReviewRouter = Router();
 
-productReviewRouter.use(
-  verifyJWTMiddleware,
-  verifyRoles(),
-  assignQueryDefaults(FIND_QUERY_OPTIONS_KEYWORDS)
-);
+productReviewRouter.use(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults);
 
 productReviewRouter
   .route("/")
