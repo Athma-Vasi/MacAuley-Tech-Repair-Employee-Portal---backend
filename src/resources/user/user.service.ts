@@ -177,24 +177,6 @@ async function getQueriedTotalUsersService({
   }
 }
 
-async function getUsersDirectoryService() {
-  try {
-    const exclusionArray = [
-      "-password",
-      "-dateOfBirth",
-      "-address.addressLine",
-      "-address.postalCode",
-      "-emergencyContact",
-      "-startDate",
-      "-completedSurveys",
-    ];
-    const users = await UserModel.find().select(exclusionArray).lean().exec();
-    return users;
-  } catch (error: any) {
-    throw new Error(error, { cause: "getUsersDirectoryService" });
-  }
-}
-
 async function updateUserByIdService({
   fields,
   updateOperator,
@@ -276,7 +258,6 @@ export {
   getUserByIdService,
   getUserByUsernameService,
   getUserWithPasswordService,
-  getUsersDirectoryService,
   updateUserByIdService,
   updateUserPasswordService,
 };

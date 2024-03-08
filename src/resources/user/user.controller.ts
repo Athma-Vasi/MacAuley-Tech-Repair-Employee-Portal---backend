@@ -4,12 +4,10 @@ import type { Response } from "express";
 import type {
   CreateNewUserRequest,
   CreateNewUsersBulkRequest,
-  DeleteAllUsersRequest,
   DeleteUserRequest,
   GetAllUsersBulkRequest,
   GetAllUsersRequest,
   GetUserByIdRequest,
-  GetUsersDirectoryRequest,
   UpdateUserFieldsBulkRequest,
   UpdateUserPasswordRequest,
   UpdateUserRequest,
@@ -24,9 +22,6 @@ import {
   getQueriedTotalUsersService,
   getQueriedUsersService,
   getUserByIdService,
-  getUserByUsernameService,
-  getUserWithPasswordService,
-  getUsersDirectoryService,
   updateUserByIdService,
   updateUserPasswordService,
 } from "./user.service";
@@ -104,33 +99,6 @@ const createNewUserHandler = expressAsyncHandler(
     response.status(201).json({
       message: `User ${username} created successfully`,
       resourceData: [userDocument],
-    });
-  }
-);
-
-// @desc   Get users directory
-// @route  GET /user/directory
-// @access Private
-const getUsersDirectoryHandler = expressAsyncHandler(
-  async (
-    _request: GetUsersDirectoryRequest,
-    response: Response<ResourceRequestServerResponse<DirectoryUserDocument>>
-  ) => {
-    // fetch all users
-    const users = await getUsersDirectoryService();
-    if (!users.length) {
-      response.status(200).json({
-        message: "No users were found",
-        resourceData: [],
-      });
-      return;
-    }
-
-    console.log("users directory", users);
-
-    response.status(200).json({
-      message: "Successfully found users",
-      resourceData: users,
     });
   }
 );
@@ -524,7 +492,6 @@ export {
   getAllUsersBulkHandler,
   getQueriedUsersHandler,
   getUserByIdHandler,
-  getUsersDirectoryHandler,
   updateUserByIdHandler,
   updateUserFieldsBulkHandler,
   updateUserPasswordHandler,

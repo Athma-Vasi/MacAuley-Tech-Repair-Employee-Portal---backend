@@ -54,8 +54,6 @@ interface DeleteAllUsersRequest extends RequestAfterJWTVerification {
 
 type GetAllUsersRequest = GetQueriedResourceRequest;
 
-type GetUsersDirectoryRequest = RequestAfterJWTVerification;
-
 interface GetUserByIdRequest extends RequestAfterJWTVerification {
   body: {
     userInfo: {
@@ -158,7 +156,6 @@ export type {
   GetAllUsersBulkRequest,
   GetAllUsersRequest,
   GetUserByIdRequest,
-  GetUsersDirectoryRequest,
   UpdateUserFieldsBulkRequest,
   UpdateUserPasswordRequest,
   UpdateUserRequest,

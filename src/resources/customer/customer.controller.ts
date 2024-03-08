@@ -11,7 +11,6 @@ import type {
   UpdateCustomerFieldsBulkRequest,
   CreateNewCustomersBulkRequest,
   GetAllCustomersBulkRequest,
-  CustomerServerResponseDocument,
 } from "./customer.types";
 
 import {
@@ -308,7 +307,8 @@ const getQueriedCustomersHandler = expressAsyncHandler(
     request: GetAllCustomersRequest,
     response: Response<
       GetQueriedResourceRequestServerResponse<
-        CustomerServerResponseDocument<"paymentInformation">
+        CustomerDocument,
+        "password" | "paymentInformation"
       >
     >
   ) => {
@@ -340,7 +340,220 @@ const getQueriedCustomersHandler = expressAsyncHandler(
       return;
     }
 
-    // find all productReview documents associated with the customers
+    response.status(200).json({
+      message: "Successfully found customers",
+      pages: Math.ceil(totalDocuments / Number(options?.limit)),
+      totalDocuments,
+      resourceData: customers,
+    });
+  }
+);
+
+// @desc   Get a customer by id
+// @route  GET /api/v1/customer/:id
+// @access Private
+const getCustomerByIdHandler = expressAsyncHandler(
+  async (
+    request: GetCustomerByIdRequest,
+    response: Response<
+      ResourceRequestServerResponse<CustomerDocument, "password" | "paymentInformation">
+    >
+  ) => {
+    const { customerId } = request.params;
+
+    const customer = await getCustomerByIdService(customerId);
+
+    if (!customer) {
+      response.status(404).json({ message: "Customer not found.", resourceData: [] });
+      return;
+    }
+
+    response.status(200).json({
+      message: "Successfully found customer data!",
+      resourceData: [customer],
+    });
+  }
+);
+
+// @desc   Delete a customer
+// @route  DELETE /api/v1/customer/:id
+// @access Private
+const deleteCustomerHandler = expressAsyncHandler(
+  async (
+    request: DeleteCustomerRequest,
+    response: Response<ResourceRequestServerResponse<CustomerDocument>>
+  ) => {
+    // only managers/admin are allowed to delete customers
+    const { customerId } = request.params;
+
+    const deletedCustomer = await deleteCustomerService(customerId);
+
+    if (!deletedCustomer.acknowledged) {
+      response.status(400).json({
+        message: "Failed to delete customer. Please try again!",
+        resourceData: [],
+      });
+      return;
+    }
+
+    response
+      .status(200)
+      .json({ message: "Successfully deleted customer!", resourceData: [] });
+  }
+);
+
+// @desc   Delete all customers
+// @route  DELETE /api/v1/customer/delete-all
+// @access Private
+const deleteAllCustomersHandler = expressAsyncHandler(
+  async (
+    request: DeleteCustomerRequest,
+    response: Response<ResourceRequestServerResponse<CustomerDocument>>
+  ) => {
+    const deletedCustomer = await deleteAllCustomersService();
+
+    if (!deletedCustomer.acknowledged) {
+      response.status(400).json({
+        message: "Failed to delete customer. Please try again!",
+        resourceData: [],
+      });
+      return;
+    }
+
+    response
+      .status(200)
+      .json({ message: "Successfully deleted customer!", resourceData: [] });
+  }
+);
+
+// @desc   Update a customer
+// @route  PATCH /api/v1/customer/:id
+// @access Private
+const updateCustomerByIdHandler = expressAsyncHandler(
+  async (
+    request: UpdateCustomerRequest,
+    response: Response<
+      ResourceRequestServerResponse<CustomerDocument, "password" | "paymentInformation">
+    >
+  ) => {
+    const {
+      documentUpdate: { fields, updateOperator },
+    } = request.body;
+    const { customerId } = request.params;
+
+    const updatedCustomer = await updateCustomerByIdService({
+      fields,
+      updateOperator,
+      _id: customerId,
+    });
+
+    if (!updatedCustomer) {
+      response.status(400).json({ message: "Customer update failed", resourceData: [] });
+      return;
+    }
+
+    response.status(200).json({
+      message: `Customer ${updatedCustomer.username} updated successfully`,
+      resourceData: [updatedCustomer],
+    });
+  }
+);
+
+// @desc Retrieve customer document with payment information
+// @route GET /api/v1/customer/payment-info
+// @access Private
+const getCustomerDocWithPaymentInfoHandler = expressAsyncHandler(
+  async (
+    request: GetCustomerByIdRequest,
+    response: Response<ResourceRequestServerResponse<CustomerDocument, "password">>
+  ) => {
+    const { customerId } = request.params;
+
+    const customerDocument = await getCustomerDocWithPaymentInfoService(customerId);
+
+    if (!customerDocument) {
+      response.status(404).json({ message: "Customer not found.", resourceData: [] });
+      return;
+    }
+
+    response.status(200).json({
+      message: "Successfully found customer payment information data!",
+      resourceData: [customerDocument],
+    });
+  }
+);
+
+// @desc   update customer password
+// @route  PATCH /api/v1/customer/password
+// @access Private
+const updateCustomerPasswordHandler = expressAsyncHandler(
+  async (
+    request: UpdateCustomerPasswordRequest,
+    response: Response<
+      ResourceRequestServerResponse<CustomerDocument, "password" | "paymentInformation">
+    >
+  ) => {
+    const {
+      userInfo: { userId },
+      currentPassword,
+      newPassword,
+    } = request.body;
+
+    // check if current password is correct
+    const isCurrentPasswordCorrect = await checkCustomerPasswordService({
+      userId,
+      password: currentPassword,
+    });
+    if (!isCurrentPasswordCorrect) {
+      response
+        .status(400)
+        .json({ message: "Current password is incorrect", resourceData: [] });
+      return;
+    }
+
+    // check if new password is the same as current password
+    if (currentPassword === newPassword) {
+      response.status(400).json({
+        message: "New password cannot be the same as current password",
+        resourceData: [],
+      });
+      return;
+    }
+
+    // update user password if all checks pass successfully
+    const updatedCustomer = await updateCustomerPasswordService({
+      userId,
+      newPassword,
+    });
+
+    if (!updatedCustomer) {
+      response.status(400).json({ message: "Password update failed", resourceData: [] });
+      return;
+    }
+
+    response.status(200).json({
+      message: "Password updated successfully",
+      resourceData: [updatedCustomer],
+    });
+  }
+);
+
+export {
+  createNewCustomerHandler,
+  createNewCustomersBulkHandler,
+  deleteAllCustomersHandler,
+  deleteCustomerHandler,
+  getAllCustomersBulkHandler,
+  getCustomerByIdHandler,
+  getCustomerDocWithPaymentInfoHandler,
+  getQueriedCustomersHandler,
+  updateCustomerByIdHandler,
+  updateCustomerFieldsBulkHandler,
+  updateCustomerPasswordHandler,
+};
+
+/**
+ * // find all productReview documents associated with the customers
     const reviewsArrArr = await Promise.all(
       customers.map(async (customer) => {
         const reviewPromises = customer.productReviewsIds.map(async (reviewId) => {
@@ -421,36 +634,10 @@ const getQueriedCustomersHandler = expressAsyncHandler(
         completedSurveys: completedSurveysArrArr[index],
       };
     });
+ */
 
-    response.status(200).json({
-      message: "Successfully found customers",
-      pages: Math.ceil(totalDocuments / Number(options?.limit)),
-      totalDocuments,
-      resourceData: customersWithAddedFields,
-    });
-  }
-);
-
-// @desc   Get a customer by id
-// @route  GET /api/v1/customer/:id
-// @access Private
-const getCustomerByIdHandler = expressAsyncHandler(
-  async (
-    request: GetCustomerByIdRequest,
-    response: Response<
-      ResourceRequestServerResponse<CustomerServerResponseDocument<"paymentInformation">>
-    >
-  ) => {
-    const { customerId } = request.params;
-
-    const customer = await getCustomerByIdService(customerId);
-
-    if (!customer) {
-      response.status(404).json({ message: "Customer not found.", resourceData: [] });
-      return;
-    }
-
-    const reviewsArr = await Promise.all(
+/**
+     * const reviewsArr = await Promise.all(
       customer.productReviewsIds.map(async (reviewId) => {
         const review = await getProductReviewByIdService(reviewId);
 
@@ -490,306 +677,4 @@ const getCustomerByIdHandler = expressAsyncHandler(
       completedSurveys: completedSurveysArr,
     };
 
-    response.status(200).json({
-      message: "Successfully found customer data!",
-      resourceData: [customerWithAddedFields],
-    });
-  }
-);
-
-// @desc   Delete a customer
-// @route  DELETE /api/v1/customer/:id
-// @access Private
-const deleteCustomerHandler = expressAsyncHandler(
-  async (
-    request: DeleteCustomerRequest,
-    response: Response<ResourceRequestServerResponse<CustomerDocument>>
-  ) => {
-    // only managers/admin are allowed to delete customers
-    const { customerId } = request.params;
-
-    const deletedCustomer = await deleteCustomerService(customerId);
-
-    if (!deletedCustomer.acknowledged) {
-      response.status(400).json({
-        message: "Failed to delete customer. Please try again!",
-        resourceData: [],
-      });
-      return;
-    }
-
-    response
-      .status(200)
-      .json({ message: "Successfully deleted customer!", resourceData: [] });
-  }
-);
-
-// @desc   Delete all customers
-// @route  DELETE /api/v1/customer/delete-all
-// @access Private
-const deleteAllCustomersHandler = expressAsyncHandler(
-  async (
-    request: DeleteCustomerRequest,
-    response: Response<ResourceRequestServerResponse<CustomerDocument>>
-  ) => {
-    const deletedCustomer = await deleteAllCustomersService();
-
-    if (!deletedCustomer.acknowledged) {
-      response.status(400).json({
-        message: "Failed to delete customer. Please try again!",
-        resourceData: [],
-      });
-      return;
-    }
-
-    response
-      .status(200)
-      .json({ message: "Successfully deleted customer!", resourceData: [] });
-  }
-);
-
-// @desc   Update a customer
-// @route  PATCH /api/v1/customer/:id
-// @access Private
-const updateCustomerByIdHandler = expressAsyncHandler(
-  async (
-    request: UpdateCustomerRequest,
-    response: Response<
-      ResourceRequestServerResponse<CustomerServerResponseDocument<"paymentInformation">>
-    >
-  ) => {
-    const {
-      documentUpdate: { fields, updateOperator },
-    } = request.body;
-    const { customerId } = request.params;
-
-    const updatedCustomer = await updateCustomerByIdService({
-      fields,
-      updateOperator,
-      _id: customerId,
-    });
-
-    if (!updatedCustomer) {
-      response.status(400).json({ message: "Customer update failed", resourceData: [] });
-      return;
-    }
-
-    const reviewsArr = await Promise.all(
-      updatedCustomer.productReviewsIds.map(async (reviewId) => {
-        const review = await getProductReviewByIdService(reviewId);
-
-        return review;
-      })
-    );
-
-    const purchaseHistoryArr = await Promise.all(
-      updatedCustomer.purchaseHistoryIds.map(async (purchaseHistoryId) => {
-        const purchaseHistory = await getPurchaseByIdService(purchaseHistoryId);
-
-        return purchaseHistory;
-      })
-    );
-
-    const rmaHistoryArr = await Promise.all(
-      updatedCustomer.rmaHistoryIds.map(async (rmaHistoryId) => {
-        const rmaHistory = await getRMAByIdService(rmaHistoryId);
-
-        return rmaHistory;
-      })
-    );
-
-    const completedSurveysArr = await Promise.all(
-      updatedCustomer.completedSurveys.map(async (completedSurveysId) => {
-        const completedSurveys = await getSurveyByIdService(completedSurveysId);
-
-        return completedSurveys;
-      })
-    );
-
-    const customerWithAddedFields = {
-      ...updatedCustomer,
-      productReviews: reviewsArr,
-      purchaseHistory: purchaseHistoryArr,
-      rmaHistory: rmaHistoryArr,
-      completedSurveys: completedSurveysArr,
-    };
-
-    response.status(200).json({
-      message: `Customer ${updatedCustomer.username} updated successfully`,
-      resourceData: [customerWithAddedFields],
-    });
-  }
-);
-
-// @desc Retrieve customer document with payment information
-// @route GET /api/v1/customer/payment-info
-// @access Private
-const getCustomerDocWithPaymentInfoHandler = expressAsyncHandler(
-  async (
-    request: GetCustomerByIdRequest,
-    response: Response<ResourceRequestServerResponse<CustomerDocument>>
-  ) => {
-    const { customerId } = request.params;
-
-    const customerDocument = await getCustomerDocWithPaymentInfoService(customerId);
-
-    if (!customerDocument) {
-      response.status(404).json({ message: "Customer not found.", resourceData: [] });
-      return;
-    }
-
-    const reviewsArr = await Promise.all(
-      customerDocument.productReviewsIds.map(async (reviewId) => {
-        const review = await getProductReviewByIdService(reviewId);
-
-        return review;
-      })
-    );
-
-    const purchaseHistoryArr = await Promise.all(
-      customerDocument.purchaseHistoryIds.map(async (purchaseHistoryId) => {
-        const purchaseHistory = await getPurchaseByIdService(purchaseHistoryId);
-
-        return purchaseHistory;
-      })
-    );
-
-    const rmaHistoryArr = await Promise.all(
-      customerDocument.rmaHistoryIds.map(async (rmaHistoryId) => {
-        const rmaHistory = await getRMAByIdService(rmaHistoryId);
-
-        return rmaHistory;
-      })
-    );
-
-    const completedSurveysArr = await Promise.all(
-      customerDocument.completedSurveys.map(async (completedSurveysId) => {
-        const completedSurveys = await getSurveyByIdService(completedSurveysId);
-
-        return completedSurveys;
-      })
-    );
-
-    const customerWithAddedFields = {
-      ...customerDocument,
-      productReviews: reviewsArr,
-      purchaseHistory: purchaseHistoryArr,
-      rmaHistory: rmaHistoryArr,
-      completedSurveys: completedSurveysArr,
-    };
-
-    response.status(200).json({
-      message: "Successfully found customer payment information data!",
-      resourceData: [customerWithAddedFields],
-    });
-  }
-);
-
-// @desc   update customer password
-// @route  PATCH /api/v1/customer/password
-// @access Private
-const updateCustomerPasswordHandler = expressAsyncHandler(
-  async (
-    request: UpdateCustomerPasswordRequest,
-    response: Response<
-      ResourceRequestServerResponse<CustomerServerResponseDocument<"paymentInformation">>
-    >
-  ) => {
-    const {
-      userInfo: { userId },
-      currentPassword,
-      newPassword,
-    } = request.body;
-
-    // check if current password is correct
-    const isCurrentPasswordCorrect = await checkCustomerPasswordService({
-      userId,
-      password: currentPassword,
-    });
-    if (!isCurrentPasswordCorrect) {
-      response
-        .status(400)
-        .json({ message: "Current password is incorrect", resourceData: [] });
-      return;
-    }
-
-    // check if new password is the same as current password
-    if (currentPassword === newPassword) {
-      response.status(400).json({
-        message: "New password cannot be the same as current password",
-        resourceData: [],
-      });
-      return;
-    }
-
-    // update user password if all checks pass successfully
-    const updatedCustomer = await updateCustomerPasswordService({
-      userId,
-      newPassword,
-    });
-
-    if (!updatedCustomer) {
-      response.status(400).json({ message: "Password update failed", resourceData: [] });
-      return;
-    }
-
-    const reviewsArr = await Promise.all(
-      updatedCustomer.productReviewsIds.map(async (reviewId) => {
-        const review = await getProductReviewByIdService(reviewId);
-
-        return review;
-      })
-    );
-
-    const purchaseHistoryArr = await Promise.all(
-      updatedCustomer.purchaseHistoryIds.map(async (purchaseHistoryId) => {
-        const purchaseHistory = await getPurchaseByIdService(purchaseHistoryId);
-
-        return purchaseHistory;
-      })
-    );
-
-    const rmaHistoryArr = await Promise.all(
-      updatedCustomer.rmaHistoryIds.map(async (rmaHistoryId) => {
-        const rmaHistory = await getRMAByIdService(rmaHistoryId);
-
-        return rmaHistory;
-      })
-    );
-
-    const completedSurveysArr = await Promise.all(
-      updatedCustomer.completedSurveys.map(async (completedSurveysId) => {
-        const completedSurveys = await getSurveyByIdService(completedSurveysId);
-
-        return completedSurveys;
-      })
-    );
-
-    const customerWithAddedFields = {
-      ...updatedCustomer,
-      productReviews: reviewsArr,
-      purchaseHistory: purchaseHistoryArr,
-      rmaHistory: rmaHistoryArr,
-      completedSurveys: completedSurveysArr,
-    };
-
-    response.status(200).json({
-      message: "Password updated successfully",
-      resourceData: [customerWithAddedFields],
-    });
-  }
-);
-
-export {
-  createNewCustomerHandler,
-  createNewCustomersBulkHandler,
-  deleteAllCustomersHandler,
-  deleteCustomerHandler,
-  getAllCustomersBulkHandler,
-  getCustomerByIdHandler,
-  getCustomerDocWithPaymentInfoHandler,
-  getQueriedCustomersHandler,
-  updateCustomerByIdHandler,
-  updateCustomerFieldsBulkHandler,
-  updateCustomerPasswordHandler,
-};
+     */

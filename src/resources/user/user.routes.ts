@@ -9,7 +9,6 @@ import {
   getAllUsersBulkHandler,
   getQueriedUsersHandler,
   getUserByIdHandler,
-  getUsersDirectoryHandler,
   updateUserByIdHandler,
   updateUserFieldsBulkHandler,
   updateUserPasswordHandler,
@@ -29,10 +28,6 @@ userRouter
 userRouter
   .route("/delete-all")
   .delete(verifyJWTMiddleware, verifyRoles(), deleteAllUsersHandler);
-
-userRouter
-  .route("/directory")
-  .get(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults, getUsersDirectoryHandler);
 
 // DEV ROUTES
 userRouter

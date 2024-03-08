@@ -138,30 +138,8 @@ interface GetAllCustomersBulkRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    // newQueryFlag: boolean;
-    // totalDocuments: number;
   };
-  // query: {
-  //   projection: string | string[] | Record<string, any>;
-  //   options: Record<string, any>;
-  //   filter: Record<string, any>;
-  // };
 }
-/**
- * - Type signature of document sent by the server for GET, PATCH requests.
- * - This type parameter is passed to ResourceRequestServerResponse(single document fetched by _id) or GetQueriedResourceRequestServerResponse(multiple documents fetched with filter, projection, options params),
- * - which is, in turn, passed to the Express Response type.
- * - The OmitFields type parameter is used to omit fields from the CustomerDocument type. (ex: -password or -paymentInformation)
- */
-type CustomerServerResponseDocument<OmitFields extends string = string> = Omit<
-  CustomerDocument,
-  OmitFields
-> & {
-  productReviews: ProductReviewDocument[];
-  purchaseHistory: PurchaseDocument[];
-  rmaHistory: RMADocument[];
-  completedSurveys: SurveyDocument[];
-};
 
 export type {
   UpdateCustomerFieldsBulkRequest,
@@ -174,5 +152,4 @@ export type {
   GetCustomerByIdRequest,
   UpdateCustomerPasswordRequest,
   UpdateCustomerRequest,
-  CustomerServerResponseDocument,
 };
