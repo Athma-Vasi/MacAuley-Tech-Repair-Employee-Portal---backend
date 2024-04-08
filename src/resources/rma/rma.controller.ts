@@ -255,7 +255,7 @@ const getQueriedRMAsHandler = expressAsyncHandler(
 
       return {
         ...rma,
-        productCategoryDocs: products,
+        productCategoryDocs: [products],
       };
     });
 
@@ -323,7 +323,7 @@ const getQueriedRMAsByUserHandler = expressAsyncHandler(
 
       return {
         ...rma,
-        productCategoryDocs: products,
+        productCategoryDocs: [products],
       };
     });
 

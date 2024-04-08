@@ -10,10 +10,18 @@ import {
   createNewBenefitsBulkHandler,
   updateBenefitsBulkHandler,
 } from "./benefit.controller";
+import { validateSchemaMiddleware } from "../../../../middlewares/validateSchema";
+import { createBenefitJoiSchema, updateBenefitJoiSchema } from "./benefit.validation";
 
 const benefitRouter = Router();
 
-benefitRouter.route("/").get(getQueriedBenefitsHandler).post(createNewBenefitHandler);
+benefitRouter
+  .route("/")
+  .get(getQueriedBenefitsHandler)
+  .post(
+    validateSchemaMiddleware(createBenefitJoiSchema, "benefitSchema"),
+    createNewBenefitHandler
+  );
 
 benefitRouter.route("/delete-all").delete(deleteAllBenefitsHandler);
 
@@ -29,6 +37,6 @@ benefitRouter
   .route("/:benefitId")
   .get(getBenefitByIdHandler)
   .delete(deleteBenefitHandler)
-  .patch(updateBenefitByIdHandler);
+  .patch(validateSchemaMiddleware(updateBenefitJoiSchema), updateBenefitByIdHandler);
 
 export { benefitRouter };

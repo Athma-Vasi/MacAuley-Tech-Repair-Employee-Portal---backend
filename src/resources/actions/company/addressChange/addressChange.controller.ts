@@ -45,7 +45,7 @@ const createNewAddressChangeHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      addressChangeFields: {
+      addressChangeSchema: {
         contactNumber,
         addressLine,
         city,

@@ -25,7 +25,7 @@ async function createNewPurchaseService(
 async function getAllPurchasesService(): DatabaseResponse<PurchaseDocument> {
   try {
     const purchases = await PurchaseModel.find({})
-
+      .select("-paymentInformation")
       .lean()
       .exec();
     return purchases;
@@ -41,7 +41,7 @@ async function getQueriedPurchasesService({
 }: QueriedResourceGetRequestServiceInput<PurchaseDocument>): DatabaseResponse<PurchaseDocument> {
   try {
     const purchases = await PurchaseModel.find(filter, projection, options)
-
+      .select("-paymentInformation")
       .lean()
       .exec();
     return purchases;
@@ -68,7 +68,7 @@ async function getQueriedPurchasesByUserService({
 }: QueriedResourceGetRequestServiceInput<PurchaseDocument>): DatabaseResponse<PurchaseDocument> {
   try {
     const purchases = await PurchaseModel.find(filter, projection, options)
-
+      .select("-paymentInformation")
       .lean()
       .exec();
     return purchases;
@@ -84,7 +84,7 @@ async function getPurchaseByIdService(
 ): DatabaseResponseNullable<PurchaseDocument> {
   try {
     const purchase = await PurchaseModel.findById(purchaseId)
-
+      .select("-paymentInformation")
       .lean()
       .exec();
     return purchase;
@@ -105,7 +105,7 @@ async function updatePurchaseByIdService({
     const purchase = await PurchaseModel.findByIdAndUpdate(_id, updateObject, {
       new: true,
     })
-
+      .select("-paymentInformation")
       .lean()
       .exec();
     return purchase;
@@ -121,6 +121,7 @@ async function deleteAPurchaseService(
     const purchase = await PurchaseModel.deleteOne({
       _id: purchaseId,
     })
+      .select("-paymentInformation")
       .lean()
       .exec();
     return purchase;

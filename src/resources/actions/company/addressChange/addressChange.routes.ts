@@ -10,13 +10,21 @@ import {
   createNewAddressChangesBulkHandler,
   updateAddressChangesBulkHandler,
 } from "./addressChange.controller";
+import { validateSchemaMiddleware } from "../../../../middlewares/validateSchema";
+import {
+  createAddressChangeJoiSchema,
+  updateAddressChangeJoiSchema,
+} from "./addressChange.validation";
 
 const addressChangeRouter = Router();
 
 addressChangeRouter
   .route("/")
   .get(getQueriedAddressChangesHandler)
-  .post(createNewAddressChangeHandler);
+  .post(
+    validateSchemaMiddleware(createAddressChangeJoiSchema, "addressChangeSchema"),
+    createNewAddressChangeHandler
+  );
 
 addressChangeRouter.route("/delete-all").delete(deleteAllAddressChangesHandler);
 
@@ -32,6 +40,9 @@ addressChangeRouter
   .route("/:addressChangeId")
   .get(getAddressChangeByIdHandler)
   .delete(deleteAnAddressChangeHandler)
-  .patch(updateAddressChangeByIdHandler);
+  .patch(
+    validateSchemaMiddleware(updateAddressChangeJoiSchema),
+    updateAddressChangeByIdHandler
+  );
 
 export { addressChangeRouter };

@@ -113,7 +113,7 @@ surveySchema.index({
   questions: "text",
 });
 
-const SurveyModel = model<SurveyDocument>("Survey", surveySchema);
+const SurveyModel = model<SurveyDocument>("SurveyBuilder", surveySchema);
 
 export { SurveyModel };
 export type {

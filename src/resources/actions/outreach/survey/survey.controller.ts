@@ -35,7 +35,7 @@ import { removeUndefinedAndNullValues } from "../../../../utils";
 import { getUserByIdService } from "../../../user";
 
 // @desc   Create a new survey
-// @route  POST api/v1/actions/general/survey
+// @route  POST api/v1/actions/outreach/survey
 // @access Private
 const createNewSurveyHandler = expressAsyncHandler(
   async (
@@ -62,7 +62,7 @@ const createNewSurveyHandler = expressAsyncHandler(
 );
 
 // @desc   Get all surveys
-// @route  GET api/v1/actions/general/survey
+// @route  GET api/v1/actions/outreach/survey
 // @access Private/Admin/Manager
 const getQueriedSurveysHandler = expressAsyncHandler(
   async (
@@ -108,7 +108,7 @@ const getQueriedSurveysHandler = expressAsyncHandler(
 );
 
 // @desc   Get all survey requests by user
-// @route  GET api/v1/actions/general/survey
+// @route  GET api/v1/actions/outreach/survey
 // @access Private
 const getSurveysByUserHandler = expressAsyncHandler(
   async (
@@ -162,7 +162,7 @@ const getSurveysByUserHandler = expressAsyncHandler(
 );
 
 // @desc   Update survey status
-// @route  PATCH api/v1/actions/general/survey
+// @route  PATCH api/v1/actions/outreach/survey
 // @access Private/Admin/Manager
 const updateSurveyByIdHandler = expressAsyncHandler(
   async (
@@ -205,7 +205,7 @@ const updateSurveyByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Get an survey request
-// @route  GET api/v1/actions/general/survey
+// @route  GET api/v1/actions/outreach/survey
 // @access Private
 const getSurveyByIdHandler = expressAsyncHandler(
   async (
@@ -229,7 +229,7 @@ const getSurveyByIdHandler = expressAsyncHandler(
 );
 
 // @desc   Delete an survey request by its id
-// @route  DELETE api/v1/actions/general/survey
+// @route  DELETE api/v1/actions/outreach/survey
 // @access Private
 const deleteSurveyHandler = expressAsyncHandler(
   async (request: DeleteSurveyRequest, response: Response) => {
@@ -254,7 +254,7 @@ const deleteSurveyHandler = expressAsyncHandler(
 );
 
 // @desc    Delete all survey requests
-// @route   DELETE api/v1/actions/general/request-resource/survey
+// @route   DELETE api/v1/actions/outreach/request-resource/survey
 // @access  Private
 const deleteAllSurveysHandler = expressAsyncHandler(
   async (_request: DeleteAllSurveysRequest, response: Response) => {
@@ -277,7 +277,7 @@ const deleteAllSurveysHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Create new survey requests in bulk
-// @route  POST api/v1/actions/general/survey
+// @route  POST api/v1/actions/outreach/survey
 // @access Private
 const createNewSurveysBulkHandler = expressAsyncHandler(
   async (
@@ -321,7 +321,7 @@ const createNewSurveysBulkHandler = expressAsyncHandler(
 
 // DEV ROUTE
 // @desc   Update Surveys in bulk
-// @route  PATCH api/v1/actions/general/survey
+// @route  PATCH api/v1/actions/outreach/survey
 // @access Private
 const updateSurveysBulkHandler = expressAsyncHandler(
   async (

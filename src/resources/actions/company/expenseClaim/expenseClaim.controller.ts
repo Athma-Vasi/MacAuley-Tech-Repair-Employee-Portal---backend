@@ -56,18 +56,18 @@ const createNewExpenseClaimHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      expenseClaimFields,
+      expenseClaimSchema,
     } = request.body;
 
     // create new expenseClaim object
-    const expenseClaimSchema: ExpenseClaimSchema = {
-      ...expenseClaimFields,
+    const newExpenseClaimSchema: ExpenseClaimSchema = {
+      ...expenseClaimSchema,
       userId,
       username,
     };
 
     // create new expenseClaim
-    const newExpenseClaim = await createNewExpenseClaimService(expenseClaimSchema);
+    const newExpenseClaim = await createNewExpenseClaimService(newExpenseClaimSchema);
 
     if (newExpenseClaim) {
       // for each fileUploadId, grab the corresponding fileUpload document and insert expenseClaim document id into fileUpload document
@@ -90,9 +90,10 @@ const createNewExpenseClaimHandler = expressAsyncHandler(
           };
 
           // put the updated fileUpload document into the database
-          const updatedFileUpload = await insertAssociatedResourceDocumentIdService(
+          const updatedFileUpload = (await insertAssociatedResourceDocumentIdService(
             fileUploadToUpdateObject
-          );
+          )) as FileUploadDocument;
+
           if (!updatedFileUpload) {
             response
               .status(400)

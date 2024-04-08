@@ -25,7 +25,7 @@ interface CreateNewAddressChangeRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    addressChangeFields: Omit<AddressChangeSchema, "userId" | "username">;
+    addressChangeSchema: Omit<AddressChangeSchema, "userId" | "username">;
   };
 }
 

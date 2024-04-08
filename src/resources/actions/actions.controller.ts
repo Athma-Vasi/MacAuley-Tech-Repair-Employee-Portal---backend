@@ -68,6 +68,7 @@ import {
 import { RepairTicketDocument, getQueriedRepairTicketsService } from "../repairTicket";
 import { UserDocument, getQueriedUsersService } from "../user";
 import { getAllUsersService } from "../user/user.service";
+import { getAllCustomersService } from "../customer";
 
 // @desc  get all actions company data
 // @route  /actions/home
@@ -184,6 +185,9 @@ const getAllActionsDocumentsHandler = expressAsyncHandler(
         options: eventOptions as QueryOptions<EventDocument>,
       }),
 
+      // customer
+      getAllCustomersService(),
+
       // employees
       getAllUsersService(),
     ]);
@@ -206,6 +210,8 @@ const getAllActionsDocumentsHandler = expressAsyncHandler(
       announcementData,
       surveyData,
       eventData,
+      // customer
+      customerData,
       // employees
       employeeData,
     ] = actionsData;
@@ -231,6 +237,7 @@ const getAllActionsDocumentsHandler = expressAsyncHandler(
         surveyData: surveyData.filter((data) => data),
         eventData: eventData.filter((data) => data),
       },
+      customerData: customerData.filter((data) => data),
       employeeData: employeeData.filter((data) => data),
     });
 

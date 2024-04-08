@@ -134,10 +134,17 @@ function assignQueryDefaults(request: Request, _response: Response, next: NextFu
 
           // if value is string, convert to regex
           if (typeof inValue === "string") {
-            inValue = new RegExp(inValue, "i");
+            inValue =
+              inValue === "true" || inValue === "false" // avoids Boolean CastError when querying boolean fields
+                ? inValue
+                : new RegExp(inValue, "i");
           } else if (Array.isArray(inValue)) {
             inValue = inValue.flatMap((val: string) => {
-              const splitRegexedVal = val.split(" ").map((word) => new RegExp(word, "i"));
+              const splitRegexedVal = val
+                .split(" ")
+                .map((word) =>
+                  word === "true" || word === "false" ? word : new RegExp(word, "i")
+                );
 
               return splitRegexedVal;
             });

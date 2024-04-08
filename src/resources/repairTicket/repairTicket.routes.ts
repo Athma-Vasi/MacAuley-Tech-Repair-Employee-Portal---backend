@@ -30,6 +30,7 @@ repairTicketRouter
   .post(createNewRepairTicketsBulkHandler)
   .patch(updateRepairTicketsBulkHandler);
 
+// regular routes
 repairTicketRouter
   .route("/:repairTicketId")
   .get(getRepairTicketByIdHandler)

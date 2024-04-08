@@ -10,13 +10,21 @@ import {
   createNewEndorsementsBulkHandler,
   updateEndorsementsBulkHandler,
 } from "./endorsement.controller";
+import { validateSchemaMiddleware } from "../../../../middlewares/validateSchema";
+import {
+  createEndorsementJoiSchema,
+  updateEndorsementJoiSchema,
+} from "./endorsement.validation";
 
 const endorsementRouter = Router();
 
 endorsementRouter
   .route("/")
   .get(getQueriedEndorsementsHandler)
-  .post(createNewEndorsementHandler);
+  .post(
+    validateSchemaMiddleware(createEndorsementJoiSchema, "endorsementSchema"),
+    createNewEndorsementHandler
+  );
 
 endorsementRouter.route("/delete-all").delete(deleteAllEndorsementsHandler);
 
@@ -32,6 +40,9 @@ endorsementRouter
   .route("/:endorsementId")
   .get(getEndorsementByIdHandler)
   .delete(deleteEndorsementHandler)
-  .patch(updateEndorsementByIdHandler);
+  .patch(
+    validateSchemaMiddleware(updateEndorsementJoiSchema, "documentUpdate"),
+    updateEndorsementByIdHandler
+  );
 
 export { endorsementRouter };

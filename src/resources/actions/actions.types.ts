@@ -15,6 +15,7 @@ import { AnnouncementDocument } from "./outreach/announcement";
 import { SurveyDocument } from "./outreach/survey";
 import { EventDocument } from "./outreach/event";
 import { RepairTicketDocument } from "../repairTicket";
+import { CustomerDocument } from "../customer";
 
 type Action = "company" | "general" | "outreach" | "dashboard";
 
@@ -59,6 +60,7 @@ type ActionsResourceRequestServerResponse = {
     surveyData: SurveyDocument[];
     eventData: EventDocument[];
   };
+  customerData?: Omit<CustomerDocument, "password" | "paymentInformation">[];
   employeeData: UserDocument[];
 };
 

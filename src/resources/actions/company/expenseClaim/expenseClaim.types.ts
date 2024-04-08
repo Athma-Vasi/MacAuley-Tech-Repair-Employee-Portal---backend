@@ -18,7 +18,7 @@ interface CreateNewExpenseClaimRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    expenseClaimFields: Omit<ExpenseClaimSchema, "userId" | "username">;
+    expenseClaimSchema: Omit<ExpenseClaimSchema, "userId" | "username">;
   };
 }
 

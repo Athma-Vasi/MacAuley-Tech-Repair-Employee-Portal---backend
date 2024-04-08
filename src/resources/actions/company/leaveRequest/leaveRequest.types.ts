@@ -17,7 +17,7 @@ interface CreateNewLeaveRequestRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    leaveRequestFields: Omit<LeaveRequestSchema, "userId" | "username">;
+    leaveRequestSchema: Omit<LeaveRequestSchema, "userId" | "username">;
   };
 }
 

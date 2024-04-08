@@ -210,6 +210,8 @@ const getQueriedProductReviewsHandler = expressAsyncHandler(
 
     // only perform a countDocuments scan if a new query is being made
     if (newQueryFlag) {
+      console.log("filter in getQueriedProductReviewsHandler", filter);
+
       totalDocuments = await getQueriedTotalProductReviewsService({
         filter: filter as FilterQuery<ProductReviewDocument> | undefined,
       });

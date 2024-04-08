@@ -47,18 +47,18 @@ const createNewRequestResourceHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      requestResourceFields,
+      requestResourceSchema,
     } = request.body;
 
     // create new request resource object
-    const requestResourceSchema: RequestResourceSchema = {
-      ...requestResourceFields,
+    const newRequestResourceSchema: RequestResourceSchema = {
+      ...requestResourceSchema,
       userId,
       username,
     };
 
     const requestResourceDocument = await createNewRequestResourceService(
-      requestResourceSchema
+      newRequestResourceSchema
     );
 
     if (!requestResourceDocument) {

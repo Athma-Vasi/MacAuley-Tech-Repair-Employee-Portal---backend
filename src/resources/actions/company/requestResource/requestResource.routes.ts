@@ -10,13 +10,21 @@ import {
   createNewRequestResourcesBulkHandler,
   updateRequestResourcesBulkHandler,
 } from "./requestResource.controller";
+import { validateSchemaMiddleware } from "../../../../middlewares/validateSchema";
+import {
+  createRequestResourceJoiSchema,
+  updateRequestResourceJoiSchema,
+} from "./requestResource.validation";
 
 const requestResourceRouter = Router();
 
 requestResourceRouter
   .route("/")
   .get(getQueriedRequestResourcesHandler)
-  .post(createNewRequestResourceHandler);
+  .post(
+    validateSchemaMiddleware(createRequestResourceJoiSchema, "requestResourceSchema"),
+    createNewRequestResourceHandler
+  );
 
 requestResourceRouter.route("/delete-all").delete(deleteAllRequestResourcesHandler);
 
@@ -32,6 +40,9 @@ requestResourceRouter
   .route("/:requestResourceId")
   .get(getRequestResourceByIdHandler)
   .delete(deleteRequestResourceHandler)
-  .patch(updateRequestResourceByIdHandler);
+  .patch(
+    validateSchemaMiddleware(updateRequestResourceJoiSchema),
+    updateRequestResourceByIdHandler
+  );
 
 export { requestResourceRouter };

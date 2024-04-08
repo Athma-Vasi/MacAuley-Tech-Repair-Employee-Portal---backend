@@ -17,7 +17,7 @@ interface CreateNewRequestResourceRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    requestResourceFields: Omit<RequestResourceSchema, "userId" | "username">;
+    requestResourceSchema: Omit<RequestResourceSchema, "userId" | "username">;
   };
 }
 

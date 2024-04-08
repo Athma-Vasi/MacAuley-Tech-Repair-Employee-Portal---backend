@@ -44,7 +44,7 @@ const createNewBenefitHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { roles, username },
-      benefitFields,
+      benefitSchema,
     } = request.body;
 
     // only managers can create a new benefits plan
@@ -64,13 +64,13 @@ const createNewBenefitHandler = expressAsyncHandler(
     }
     const benefitUserId = benefitUserDoc._id;
 
-    const benefitSchema: BenefitSchema = {
-      ...benefitFields,
+    const newBenefitSchema: BenefitSchema = {
+      ...benefitSchema,
       benefitUserId,
       username,
     };
 
-    const benefitDocument = await createNewBenefitService(benefitSchema);
+    const benefitDocument = await createNewBenefitService(newBenefitSchema);
     if (!benefitDocument) {
       response
         .status(400)

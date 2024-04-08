@@ -21,7 +21,7 @@ import { getStorageByIdService } from "../resources/productCategory/storage";
 import { getTabletByIdService } from "../resources/productCategory/tablet";
 import { getWebcamByIdService } from "../resources/productCategory/webcam";
 
-const ALLOWED_FILE_EXTENSIONS = [".jpg", ".jpeg", ".png"];
+const ALLOWED_FILE_EXTENSIONS = [".jpg", ".jpeg", ".png",'.webp'];
 
 /**
  * @description Map of product category names to their respective service functions.

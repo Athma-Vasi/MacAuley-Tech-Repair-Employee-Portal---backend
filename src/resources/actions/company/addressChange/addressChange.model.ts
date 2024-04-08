@@ -35,6 +35,12 @@ const addressChangeSchema = new Schema<AddressChangeSchema>(
     username: {
       type: String,
       required: [true, "Username is required"],
+      // validate: {
+      //   validator: (username: string) => {
+      //     return /^[a-zA-Z0-9_]{3,30}$/.test(username);
+      //   },
+      //   message: (props) => `${props.value} is not a valid username`,
+      // },
     },
     contactNumber: {
       type: String,

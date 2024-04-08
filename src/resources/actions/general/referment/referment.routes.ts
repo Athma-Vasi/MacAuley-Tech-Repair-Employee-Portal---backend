@@ -10,13 +10,21 @@ import {
   createNewRefermentsBulkHandler,
   updateRefermentsBulkHandler,
 } from "./referment.controller";
+import { validateSchemaMiddleware } from "../../../../middlewares/validateSchema";
+import {
+  createRefermentJoiSchema,
+  updateRefermentJoiSchema,
+} from "./referment.validation";
 
 const refermentRouter = Router();
 
 refermentRouter
   .route("/")
   .get(getQueriedRefermentsHandler)
-  .post(createNewRefermentHandler);
+  .post(
+    validateSchemaMiddleware(createRefermentJoiSchema, "refermentSchema"),
+    createNewRefermentHandler
+  );
 
 refermentRouter.route("/delete-all").delete(deleteAllRefermentsHandler);
 
@@ -32,6 +40,6 @@ refermentRouter
   .route("/:refermentId")
   .get(getRefermentByIdHandler)
   .delete(deleteRefermentHandler)
-  .patch(updateRefermentByIdHandler);
+  .patch(validateSchemaMiddleware(updateRefermentJoiSchema), updateRefermentByIdHandler);
 
 export { refermentRouter };

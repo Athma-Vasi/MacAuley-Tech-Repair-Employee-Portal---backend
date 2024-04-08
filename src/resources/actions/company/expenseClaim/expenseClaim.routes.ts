@@ -10,13 +10,21 @@ import {
   updateExpenseClaimByIdHandler,
   updateExpenseClaimsBulkHandler,
 } from "./expenseClaim.controller";
+import { validateSchemaMiddleware } from "../../../../middlewares/validateSchema";
+import {
+  createExpenseClaimJoiSchema,
+  updateExpenseClaimJoiSchema,
+} from "./expenseClaim.validation";
 
 const expenseClaimRouter = Router();
 
 expenseClaimRouter
   .route("/")
   .get(getQueriedExpenseClaimsHandler)
-  .post(createNewExpenseClaimHandler);
+  .post(
+    validateSchemaMiddleware(createExpenseClaimJoiSchema, "expenseClaimSchema"),
+    createNewExpenseClaimHandler
+  );
 
 expenseClaimRouter.route("/delete-all").delete(deleteAllExpenseClaimsHandler);
 
@@ -32,6 +40,9 @@ expenseClaimRouter
   .route("/:expenseClaimId")
   .get(getExpenseClaimByIdHandler)
   .delete(deleteExpenseClaimHandler)
-  .patch(updateExpenseClaimByIdHandler);
+  .patch(
+    validateSchemaMiddleware(updateExpenseClaimJoiSchema),
+    updateExpenseClaimByIdHandler
+  );
 
 export { expenseClaimRouter };

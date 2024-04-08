@@ -44,17 +44,19 @@ const createNewLeaveRequestHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      leaveRequestFields,
+      leaveRequestSchema,
     } = request.body;
 
     // create new leave request object
-    const leaveRequestSchema: LeaveRequestSchema = {
-      ...leaveRequestFields,
+    const newLeaveRequestSchema: LeaveRequestSchema = {
+      ...leaveRequestSchema,
       userId,
       username,
     };
 
-    const leaveRequestDocument = await createNewLeaveRequestService(leaveRequestSchema);
+    const leaveRequestDocument = await createNewLeaveRequestService(
+      newLeaveRequestSchema
+    );
 
     if (!leaveRequestDocument) {
       response.status(400).json({

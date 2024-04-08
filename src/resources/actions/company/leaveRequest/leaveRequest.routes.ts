@@ -10,13 +10,21 @@ import {
   createNewLeaveRequestsBulkHandler,
   updateLeaveRequestsBulkHandler,
 } from "./leaveRequest.controller";
+import { validateSchemaMiddleware } from "../../../../middlewares/validateSchema";
+import {
+  createLeaveRequestJoiSchema,
+  updateLeaveRequestJoiSchema,
+} from "./leaveRequest.validation";
 
 const leaveRequestRouter = Router();
 
 leaveRequestRouter
   .route("/")
   .get(getQueriedLeaveRequestsHandler)
-  .post(createNewLeaveRequestHandler);
+  .post(
+    validateSchemaMiddleware(createLeaveRequestJoiSchema, "leaveRequestSchema"),
+    createNewLeaveRequestHandler
+  );
 
 leaveRequestRouter.route("/delete-all").delete(deleteAllLeaveRequestsHandler);
 
@@ -32,6 +40,9 @@ leaveRequestRouter
   .route("/:leaveRequestId")
   .get(getLeaveRequestByIdHandler)
   .delete(deleteLeaveRequestHandler)
-  .patch(updateLeaveRequestByIdHandler);
+  .patch(
+    validateSchemaMiddleware(updateLeaveRequestJoiSchema),
+    updateLeaveRequestByIdHandler
+  );
 
 export { leaveRequestRouter };
