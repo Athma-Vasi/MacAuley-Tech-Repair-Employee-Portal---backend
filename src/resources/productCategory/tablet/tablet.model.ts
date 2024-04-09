@@ -4,7 +4,6 @@ import type {
   DimensionUnit,
   MemoryUnit,
   ProductAvailability,
-  ProductReview,
   WeightUnit,
   MobileOs,
   StarRatingsCount,
