@@ -76,7 +76,7 @@ const announcementSchema = new Schema<AnnouncementSchema>(
     },
     ratingResponse: {
       type: Object,
-      required: false,
+      required: true,
       default: {
         ratingEmotion: {
           estatic: 0,

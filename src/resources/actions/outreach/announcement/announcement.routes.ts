@@ -10,13 +10,21 @@ import {
   createNewAnnouncementsBulkHandler,
   updateAnnouncementsBulkHandler,
 } from "./announcement.controller";
+import { validateSchemaMiddleware } from "../../../../middlewares/validateSchema";
+import {
+  createAnnouncementJoiSchema,
+  updateAnnouncementJoiSchema,
+} from "./announcement.validation";
 
 const announcementRouter = Router();
 
 announcementRouter
   .route("/")
   .get(getQueriedAnnouncementsHandler)
-  .post(createNewAnnouncementHandler);
+  .post(
+    validateSchemaMiddleware(createAnnouncementJoiSchema, "announcementSchema"),
+    createNewAnnouncementHandler
+  );
 
 announcementRouter.route("/delete-all").delete(deleteAllAnnouncementsHandler);
 
@@ -32,6 +40,9 @@ announcementRouter
   .route("/:announcementId")
   .get(getAnnouncementByIdHandler)
   .delete(deleteAnnouncementHandler)
-  .patch(updateAnnouncementByIdHandler);
+  .patch(
+    validateSchemaMiddleware(updateAnnouncementJoiSchema),
+    updateAnnouncementByIdHandler
+  );
 
 export { announcementRouter };
