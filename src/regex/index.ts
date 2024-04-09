@@ -934,7 +934,16 @@ const MICROPHONE_POLAR_PATTERN_REGEX =
  */
 const MICROPHONE_INTERFACE_REGEX = /^(XLR|USB|3.5mm|Wireless|Other)$/;
 
+/**
+ * - /^(halfStar|oneStar|oneAndHalfStars|twoStars|twoAndHalfStars|threeStars|threeAndHalfStars|fourStars|fourAndHalfStars|fiveStars)$/
+ * - matches the following rating kinds: halfStar, oneStar, oneAndHalfStars, twoStars, twoAndHalfStars, threeStars, threeAndHalfStars, fourStars, fourAndHalfStars, fiveStars
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const RATING_KIND_REGEX =
+  /^(halfStar|oneStar|oneAndHalfStars|twoStars|twoAndHalfStars|threeStars|threeAndHalfStars|fourStars|fourAndHalfStars|fiveStars)$/;
+
 export {
+  RATING_KIND_REGEX,
   DIMENSIONS_REGEX,
   WEIGHT_REGEX,
   DIMENSION_UNIT_REGEX,

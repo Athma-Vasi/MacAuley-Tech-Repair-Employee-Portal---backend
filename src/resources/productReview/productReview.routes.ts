@@ -13,6 +13,11 @@ import {
   getQueriedProductReviewsByUserHandler,
   updateProductReviewByIdHandler,
 } from "./productReview.controller";
+import { validateSchemaMiddleware } from "../../middlewares/validateSchema";
+import {
+  createProductReviewJoiSchema,
+  updateProductReviewJoiSchema,
+} from "./productReview.validation";
 
 const productReviewRouter = Router();
 
@@ -20,8 +25,11 @@ productReviewRouter.use(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults)
 
 productReviewRouter
   .route("/")
-  .post(createNewProductReviewHandler)
-  .get(getQueriedProductReviewsHandler);
+  .get(getQueriedProductReviewsHandler)
+  .post(
+    validateSchemaMiddleware(createProductReviewJoiSchema, "productReviewSchema"),
+    createNewProductReviewHandler
+  );
 
 productReviewRouter.route("/user").get(getQueriedProductReviewsByUserHandler);
 
@@ -37,7 +45,10 @@ productReviewRouter
 productReviewRouter
   .route("/:productReviewId")
   .get(getProductReviewByIdHandler)
-  .patch(updateProductReviewByIdHandler)
-  .delete(deleteProductReviewHandler);
+  .delete(deleteProductReviewHandler)
+  .patch(
+    validateSchemaMiddleware(updateProductReviewJoiSchema),
+    updateProductReviewByIdHandler
+  );
 
 export { productReviewRouter };
