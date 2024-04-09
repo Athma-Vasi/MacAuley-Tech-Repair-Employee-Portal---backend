@@ -13,13 +13,18 @@ import {
   updateUserFieldsBulkHandler,
   updateUserPasswordHandler,
 } from "./user.controller";
+import { validateSchemaMiddleware } from "../../middlewares/validateSchema";
+import { createUserJoiSchema, updateUserJoiSchema } from "./user.validation";
 
 const userRouter = Router();
 
 userRouter
   .route("/")
   .get(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults, getQueriedUsersHandler)
-  .post(createNewUserHandler);
+  .post(
+    validateSchemaMiddleware(createUserJoiSchema, "userSchema"),
+    createNewUserHandler
+  );
 
 userRouter
   .route("/update-password")
@@ -39,7 +44,12 @@ userRouter
 userRouter
   .route("/:userId")
   .get(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults, getUserByIdHandler)
-  .patch(verifyJWTMiddleware, verifyRoles(), updateUserByIdHandler)
-  .delete(verifyJWTMiddleware, verifyRoles(), deleteUserHandler);
+  .delete(verifyJWTMiddleware, verifyRoles(), deleteUserHandler)
+  .patch(
+    verifyJWTMiddleware,
+    verifyRoles(),
+    validateSchemaMiddleware(updateUserJoiSchema),
+    updateUserByIdHandler
+  );
 
 export { userRouter };

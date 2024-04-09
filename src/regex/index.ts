@@ -456,14 +456,6 @@ const PRINTER_MAKE_REGEX =
   /^(HP|Canon|Epson|Brother|Xerox|Ricoh|Lexmark|Dell|Kyocera|Sharp|Konica Minolta|Toshiba TEC|OKI|Panasonic|Fujitsu|Zebra Technologies)$/;
 
 /**
- * - /^(ExecutiveManagement|StoreAdministration|OfficeAdministration|Sales|Marketing|InformationTechnology|RepairTechnicians|FieldServiceTechnicians|LogisticsAndInventory|CustomerService|HumanResources|Accounting|Maintenance)$/
- * - matches the following job positions: ExecutiveManagement, StoreAdministration, OfficeAdministration, Sales, Marketing, InformationTechnology, RepairTechnicians, FieldServiceTechnicians, LogisticsAndInventory, CustomerService, HumanResources, Accounting, Maintenance
- * - ^ and $ ensure that the entire string matches the regex.
- */
-const JOB_POSITION_REGEX =
-  /^(ExecutiveManagement|StoreAdministration|OfficeAdministration|Sales|Marketing|InformationTechnology|RepairTechnicians|FieldServiceTechnicians|LogisticsAndInventory|CustomerService|HumanResources|Accounting|Maintenance)$/;
-
-/**
  * - (?=.*[A-Za-z0-9]) ensures that there is at least one alphanumeric character, preventing the input from consisting entirely of whitespace.
  * - [\w\s.,!?():;"'-] matches any word characters (\w includes alphanumeric characters and underscores), whitespace, and a range of allowed punctuation marks commonly used in grammar and punctuation: ., ,, !, ?, (, ), :, ;, ", ', -. The hyphen is placed at the end of the list to prevent it from being interpreted as a range of characters.
  * - {1,2000} ensures that the text is between 1 and 2000 characters long.
@@ -1002,126 +994,243 @@ const REPAIR_STATUS_REGEX =
  */
 const RMA_STATUS_REGEX = /^(Pending|Received|Cancelled)$/;
 
+/**
+ * - /^(Chief Executive Officer|Chief Operations Officer|Chief Financial Officer|Chief Technology Officer|Chief Marketing Officer|Chief Sales Officer|Chief Human Resources Officer)$/
+ * - matches the following executive management positions: Chief Executive Officer, Chief Operations Officer, Chief Financial Officer, Chief Technology Officer, Chief Marketing Officer, Chief Sales Officer, Chief Human Resources Officer
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const EXECUTIVE_MANAGEMENT_REGEX =
+  /^(Chief Executive Officer|Chief Operations Officer|Chief Financial Officer|Chief Technology Officer|Chief Marketing Officer|Chief Sales Officer|Chief Human Resources Officer)$/;
+
+/**
+ * - /^(Human Resources Manager|Compensation and Benefits Specialist|Health and Safety Specialist|Training Specialist|Recruiting Specialist)$/
+ * - matches the following human resources positions: Human Resources Manager, Compensation and Benefits Specialist, Health and Safety Specialist, Training Specialist, Recruiting Specialist
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const HUMAN_RESOURCES_REGEX =
+  /^(Human Resources Manager|Compensation and Benefits Specialist|Health and Safety Specialist|Training Specialist|Recruiting Specialist)$/;
+
+/**
+ * - /^(Store Manager|Shift Supervisor|Office Manager)$/
+ * - matches the following store administration positions: Store Manager, Shift Supervisor, Office Manager
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const STORE_ADMINISTRATION_REGEX = /^(Store Manager|Shift Supervisor|Office Manager)$/;
+
+/**
+ * - /^(Office Administrator|Receptionist|Data Entry Specialist)$/
+ * - matches the following office administration positions: Office Administrator, Receptionist, Data Entry Specialist
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const OFFICE_ADMINISTRATION_REGEX =
+  /^(Office Administrator|Receptionist|Data Entry Specialist)$/;
+
+/**
+ * - /^(Accounting Manager|Accounts Payable Clerk|Accounts Receivable Clerk|Financial Analyst)$/
+ * - matches the following accounting positions: Accounting Manager, Accounts Payable Clerk, Accounts Receivable Clerk, Financial Analyst
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const ACCOUNTING_REGEX =
+  /^(Accounting Manager|Accounts Payable Clerk|Accounts Receivable Clerk|Financial Analyst)$/;
+
+/**
+ * - /^(Sales Manager|Sales Representative|Business Development Specialist|Sales Support Specialist|Sales Operations Analyst)$/
+ * - matches the following sales positions: Sales Manager, Sales Representative, Business Development Specialist, Sales Support Specialist, Sales Operations Analyst
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const SALES_REGEX =
+  /^(Sales Manager|Sales Representative|Business Development Specialist|Sales Support Specialist|Sales Operations Analyst)$/;
+
+/**
+ * - /^(Marketing Manager|Digital Marketing Specialist|Graphic Designer|Public Relations Specialist|Marketing Analyst)$/
+ * - matches the following marketing positions: Marketing Manager, Digital Marketing Specialist, Graphic Designer, Public Relations Specialist, Marketing Analyst
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const MARKETING_REGEX =
+  /^(Marketing Manager|Digital Marketing Specialist|Graphic Designer|Public Relations Specialist|Marketing Analyst)$/;
+
+/**
+ * - /^(IT Manager|Systems Administrator|IT Support Specialist|Database Administrator|Web Developer|Software Developer|Software Engineer)$/
+ * - matches the following information technology positions: IT Manager, Systems Administrator, IT Support Specialist, Database Administrator, Web Developer, Software Developer, Software Engineer
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const INFORMATION_TECHNOLOGY_REGEX =
+  /^(IT Manager|Systems Administrator|IT Support Specialist|Database Administrator|Web Developer|Software Developer|Software Engineer)$/;
+
+/**
+ * - /^(Repair Technicians Supervisor|Electronics Technician|Computer Technician|Smartphone Technician|Tablet Technician|Audio\/Video Equipment Technician)$/
+ * - matches the following repair technician positions: Repair Technicians Supervisor, Electronics Technician, Computer Technician, Smartphone Technician, Tablet Technician, Audio/Video Equipment Technician
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const REPAIR_TECHNICIANS_REGEX =
+  /^(Repair Technicians Supervisor|Electronics Technician|Computer Technician|Smartphone Technician|Tablet Technician|Audio\/Video Equipment Technician)$/;
+
+/**
+ * - /^(Field Service Supervisor|On-Site Technician)$/
+ * - matches the following field service technician positions: Field Service Supervisor, On-Site Technician
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const FIELD_SERVICE_TECHNICIANS_REGEX = /^(Field Service Supervisor|On-Site Technician)$/;
+
+/**
+ * - /^(Warehouse Supervisor|Inventory Clerk|Delivery Driver|Parts and Materials Handler|Shipper\/Receiver)$/
+ * - matches the following logistics and inventory positions: Warehouse Supervisor, Inventory Clerk, Delivery Driver, Parts and Materials Handler, Shipper/Receiver
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const LOGISTICS_AND_INVENTORY_REGEX =
+  /^(Warehouse Supervisor|Inventory Clerk|Delivery Driver|Parts and Materials Handler|Shipper\/Receiver)$/;
+
+/**
+ * - /^(Customer Service Supervisor|Customer Service Representative|Technical Support Specialist)$/
+ * - matches the following customer service positions: Customer Service Supervisor, Customer Service Representative, Technical Support Specialist
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const CUSTOMER_SERVICE_REGEX =
+  /^(Customer Service Supervisor|Customer Service Representative|Technical Support Specialist)$/;
+
+/**
+ * - /^(Maintenance Supervisor|Maintenance Worker|Custodian)$/
+ * - matches the following maintenance positions: Maintenance Supervisor, Maintenance Worker, Custodian
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const MAINTENANCE_REGEX = /^(Maintenance Supervisor|Maintenance Worker|Custodian)$/;
+
+const JOB_POSITION_REGEX =
+  /^(Chief Executive Officer|Chief Operations Officer|Chief Financial Officer|Chief Technology Officer|Chief Marketing Officer|Chief Sales Officer|Chief Human Resources Officer|Human Resources Manager|Compensation and Benefits Specialist|Health and Safety Specialist|Training Specialist|Recruiting Specialist|Store Manager|Shift Supervisor|Office Manager|Office Administrator|Receptionist|Data Entry Specialist|Accounting Manager|Accounts Payable Clerk|Accounts Receivable Clerk|Financial Analyst|Sales Manager|Sales Representative|Business Development Specialist|Sales Support Specialist|Sales Operations Analyst|Marketing Manager|Digital Marketing Specialist|Graphic Designer|Public Relations Specialist|Marketing Analyst|IT Manager|Systems Administrator|IT Support Specialist|Database Administrator|Web Developer|Software Developer|Software Engineer|Repair Technicians Supervisor|Electronics Technician|Computer Technician|Smartphone Technician|Tablet Technician|Audio\/Video Equipment Technician|Field Service Supervisor|On-Site Technician|Warehouse Supervisor|Inventory Clerk|Delivery Driver|Parts and Materials Handler|Shipper\/Receiver|Customer Service Supervisor|Customer Service Representative|Technical Support Specialist|Maintenance Supervisor|Maintenance Worker|Custodian)$/;
+
 export {
-  RMA_STATUS_REGEX,
-  REPAIR_STATUS_REGEX,
-  PARTS_NEEDED_REGEX,
-  REQUIRED_REPAIRS_REGEX,
-  REPAIR_CATEGORY_REGEX,
-  PURCHASE_KIND_REGEX,
-  STORE_LOCATION_REGEX,
-  ORDER_STATUS_REGEX,
-  RATING_KIND_REGEX,
-  DIMENSIONS_REGEX,
-  WEIGHT_REGEX,
-  DIMENSION_UNIT_REGEX,
-  WEIGHT_UNIT_REGEX,
-  CPU_FREQUENCY_REGEX,
-  OBJECT_KEY_REGEX,
-  USER_DEFINED_VALUE_REGEX,
-  MICROPHONE_INTERFACE_REGEX,
-  MICROPHONE_POLAR_PATTERN_REGEX,
-  MICROPHONE_TYPE_REGEX,
-  WEBCAM_MICROPHONE_REGEX,
-  WEBCAM_INTERFACE_REGEX,
-  WEBCAM_FRAME_RATE_REGEX,
-  WEBCAM_RESOLUTION_REGEX,
-  SPEAKER_INTERFACE_REGEX,
-  SPEAKER_TYPE_REGEX,
-  HEADPHONE_INTERFACE_REGEX,
-  HEADPHONE_TYPE_REGEX,
-  MOUSE_SENSOR_REGEX,
-  KEYBOARD_BACKLIGHT_REGEX,
-  KEYBOARD_LAYOUT_REGEX,
-  KEYBOARD_SWITCH_REGEX,
-  DISPLAY_PANEL_TYPE_REGEX,
-  CASE_SIDE_PANEL_REGEX,
-  CASE_TYPE_REGEX,
-  PSU_FORM_FACTOR_REGEX,
-  PSU_MODULARITY_REGEX,
-  PSU_EFFICIENCY_REGEX,
-  STORAGE_INTERFACE_REGEX,
-  STORAGE_FORM_FACTOR_REGEX,
-  STORAGE_TYPE_REGEX,
-  MOTHERBOARD_FORM_FACTOR_REGEX,
-  MOBILE_OS_REGEX,
-  PERIPHERALS_INTERFACE_REGEX,
-  PRODUCT_CATEGORY_REGEX,
-  MEMORY_UNIT_REGEX,
-  MEMORY_TYPE_REGEX,
-  PRODUCT_AVAILABILITY_REGEX,
   ACCESSORY_TYPE_REGEX,
-  MOBILE_CAMERA_REGEX,
-  TABLET_CHIPSET_REGEX,
-  SMARTPHONE_CHIPSET_REGEX,
-  FREQUENCY_RESPONSE_REGEX,
-  DISPLAY_ASPECT_RATIO_REGEX,
-  COLOR_VARIANT_REGEX,
-  MOTHERBOARD_CHIPSET_REGEX,
-  MOTHERBOARD_SOCKET_REGEX,
-  GPU_CHIPSET_REGEX,
-  CPU_SOCKET_REGEX,
-  BRAND_REGEX,
-  RAM_TIMING_REGEX,
-  SMALL_INTEGER_REGEX,
-  MEDIUM_INTEGER_REGEX,
-  LARGE_INTEGER_REGEX,
-  PREFERRED_PRONOUNS_REGEX,
-  SURVEY_RESPONSE_INPUT_REGEX,
-  SURVEY_RESPONSE_KIND_REGEX,
-  SURVEY_RECIPIENT_REGEX,
-  EVENT_KIND_REGEX,
-  USER_ROLES_REGEX,
-  ARTICLE_TITLE_REGEX,
-  ARTICLE_CONTENT_REGEX,
-  PRINTER_MAKE_REGEX,
-  JOB_POSITION_REGEX,
-  EMPLOYEE_ATTRIBUTES_REGEX,
-  ANONYMOUS_REQUEST_KIND_REGEX,
-  DEPARTMENT_REGEX,
-  REQUEST_RESOURCE_KIND_REGEX,
-  URGENCY_REGEX,
+  ACCOUNTING_REGEX,
   ACKNOWLEDGEMENT_TEXT_INPUT_REGEX,
   ADDRESS_LINE_REGEX,
+  ANONYMOUS_REQUEST_KIND_REGEX,
+  ARTICLE_CONTENT_REGEX,
+  ARTICLE_TITLE_REGEX,
   BENEFITS_PLAN_KIND_REGEX,
+  BRAND_REGEX,
+  CASE_SIDE_PANEL_REGEX,
+  CASE_TYPE_REGEX,
   CITY_REGEX,
+  COLOR_VARIANT_REGEX,
+  CPU_FREQUENCY_REGEX,
+  CPU_SOCKET_REGEX,
   CREDIT_CARD_CVV_REGEX,
   CREDIT_CARD_EXPIRATION_DATE_REGEX,
   CREDIT_CARD_NUMBER_REGEX,
   CURRENCY_REGEX,
+  CUSTOMER_SERVICE_REGEX,
   DATE_FULL_RANGE_REGEX,
   DATE_NEAR_FUTURE_REGEX,
   DATE_NEAR_PAST_REGEX,
   DATE_OF_BIRTH_REGEX,
   DATE_REGEX,
+  DEPARTMENT_REGEX,
+  DIMENSIONS_REGEX,
+  DIMENSION_UNIT_REGEX,
+  DISPLAY_ASPECT_RATIO_REGEX,
+  DISPLAY_PANEL_TYPE_REGEX,
   EMAIL_REGEX,
+  EMPLOYEE_ATTRIBUTES_REGEX,
+  EVENT_KIND_REGEX,
+  EXECUTIVE_MANAGEMENT_REGEX,
   EXPENSE_CLAIM_KIND_REGEX,
+  FIELD_SERVICE_TECHNICIANS_REGEX,
   FILE_ENCODING_REGEX,
   FILE_EXTENSIONS_REGEX,
   FILE_MIME_TYPES_REGEX,
   FILE_NAME_REGEX,
   FILE_SIZE_REGEX,
   FLOAT_REGEX,
+  FREQUENCY_RESPONSE_REGEX,
   FULL_NAME_REGEX,
+  GPU_CHIPSET_REGEX,
   GRAMMAR_TEXTAREA_INPUT_REGEX,
   GRAMMAR_TEXT_INPUT_REGEX,
+  HEADPHONE_INTERFACE_REGEX,
+  HEADPHONE_TYPE_REGEX,
+  HUMAN_RESOURCES_REGEX,
+  INFORMATION_TECHNOLOGY_REGEX,
   INTEGER_REGEX,
+  JOB_POSITION_REGEX,
+  KEYBOARD_BACKLIGHT_REGEX,
+  KEYBOARD_LAYOUT_REGEX,
+  KEYBOARD_SWITCH_REGEX,
+  LARGE_INTEGER_REGEX,
+  LOGISTICS_AND_INVENTORY_REGEX,
+  MAINTENANCE_REGEX,
+  MARKETING_REGEX,
+  MEDIUM_INTEGER_REGEX,
+  MEMORY_TYPE_REGEX,
+  MEMORY_UNIT_REGEX,
+  MICROPHONE_INTERFACE_REGEX,
+  MICROPHONE_POLAR_PATTERN_REGEX,
+  MICROPHONE_TYPE_REGEX,
+  MOBILE_CAMERA_REGEX,
+  MOBILE_OS_REGEX,
   MONEY_REGEX,
+  MOTHERBOARD_CHIPSET_REGEX,
+  MOTHERBOARD_FORM_FACTOR_REGEX,
+  MOTHERBOARD_SOCKET_REGEX,
+  MOUSE_SENSOR_REGEX,
   NAME_REGEX,
   NOTE_TEXT_AREA_REGEX,
   NOTE_TEXT_REGEX,
+  OBJECT_KEY_REGEX,
+  OFFICE_ADMINISTRATION_REGEX,
+  ORDER_STATUS_REGEX,
+  PARTS_NEEDED_REGEX,
   PASSWORD_REGEX,
+  PERIPHERALS_INTERFACE_REGEX,
   PHONE_NUMBER_REGEX,
   PLAN_DESCRIPTION_REGEX,
   PLAN_NAME_REGEX,
   POSTAL_CODE_REGEX_CANADA,
   POSTAL_CODE_REGEX_US,
+  PREFERRED_PRONOUNS_REGEX,
   PRINTER_MAKE_MODEL_REGEX,
+  PRINTER_MAKE_REGEX,
   PRINTER_SERIAL_NUMBER_REGEX,
+  PRODUCT_AVAILABILITY_REGEX,
+  PRODUCT_CATEGORY_REGEX,
+  PSU_EFFICIENCY_REGEX,
+  PSU_FORM_FACTOR_REGEX,
+  PSU_MODULARITY_REGEX,
+  PURCHASE_KIND_REGEX,
+  RAM_TIMING_REGEX,
+  RATING_KIND_REGEX,
   REASON_FOR_LEAVE_REGEX,
+  REPAIR_CATEGORY_REGEX,
+  REPAIR_STATUS_REGEX,
+  REPAIR_TECHNICIANS_REGEX,
+  REQUEST_RESOURCE_KIND_REGEX,
   REQUEST_STATUS_REGEX,
+  REQUIRED_REPAIRS_REGEX,
+  RMA_STATUS_REGEX,
+  SALES_REGEX,
   SERIAL_ID_REGEX,
+  SMALL_INTEGER_REGEX,
+  SMARTPHONE_CHIPSET_REGEX,
+  SPEAKER_INTERFACE_REGEX,
+  SPEAKER_TYPE_REGEX,
+  STORAGE_FORM_FACTOR_REGEX,
+  STORAGE_INTERFACE_REGEX,
+  STORAGE_TYPE_REGEX,
+  STORE_ADMINISTRATION_REGEX,
+  STORE_LOCATION_REGEX,
+  SURVEY_RECIPIENT_REGEX,
+  SURVEY_RESPONSE_INPUT_REGEX,
+  SURVEY_RESPONSE_KIND_REGEX,
+  TABLET_CHIPSET_REGEX,
   TIME_RAILWAY_REGEX,
+  URGENCY_REGEX,
   URL_REGEX,
   USERNAME_REGEX,
+  USER_DEFINED_VALUE_REGEX,
+  USER_ROLES_REGEX,
+  WEBCAM_FRAME_RATE_REGEX,
+  WEBCAM_INTERFACE_REGEX,
+  WEBCAM_MICROPHONE_REGEX,
+  WEBCAM_RESOLUTION_REGEX,
+  WEIGHT_REGEX,
+  WEIGHT_UNIT_REGEX,
 };
