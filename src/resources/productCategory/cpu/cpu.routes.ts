@@ -9,10 +9,15 @@ import {
   updateCpuByIdHandler,
   updateCpusBulkHandler,
 } from "./cpu.controller";
+import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
+import { createCpuJoiSchema, updateCpuJoiSchema } from "./cpu.validation";
 
 const cpuRouter = Router();
 
-cpuRouter.route("/").get(getQueriedCpusHandler).post(createNewCpuHandler);
+cpuRouter
+  .route("/")
+  .get(getQueriedCpusHandler)
+  .post(validateSchemaMiddleware(createCpuJoiSchema, "cpuSchema"), createNewCpuHandler);
 
 // separate route for safety reasons (as it deletes all documents in the collection)
 cpuRouter.route("/delete-all").delete(deleteAllCpusHandler);
@@ -25,6 +30,6 @@ cpuRouter
   .route("/:cpuId")
   .get(getCpuByIdHandler)
   .delete(deleteACpuHandler)
-  .patch(updateCpuByIdHandler);
+  .patch(validateSchemaMiddleware(updateCpuJoiSchema), updateCpuByIdHandler);
 
 export { cpuRouter };
