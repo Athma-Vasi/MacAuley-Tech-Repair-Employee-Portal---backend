@@ -17,7 +17,7 @@ interface CreateNewRepairTicketRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    repairTicketFields: Omit<RepairTicketSchema, "userId" | "username">;
+    repairTicketSchema: Omit<RepairTicketSchema, "userId" | "username">;
   };
 }
 

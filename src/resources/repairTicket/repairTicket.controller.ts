@@ -8,7 +8,6 @@ import type {
   CreateNewRepairTicketsBulkRequest,
   DeleteAllRepairTicketsRequest,
   DeleteRepairTicketRequest,
-  GetQueriedRepairTicketsByParentResourceIdRequest,
   GetQueriedRepairTicketsByUserRequest,
   GetQueriedRepairTicketsRequest,
   GetRepairTicketByIdRequest,
@@ -45,18 +44,20 @@ const createNewRepairTicketHandler = expressAsyncHandler(
   ) => {
     const {
       userInfo: { userId, username },
-      repairTicketFields,
+      repairTicketSchema,
     } = request.body;
 
     // create new repair note object
-    const repairTicketSchema: RepairTicketSchema = {
-      ...repairTicketFields,
+    const newRepairTicketSchema: RepairTicketSchema = {
+      ...repairTicketSchema,
       userId,
       username,
     };
 
     // create new repair note
-    const repairTicketDocument = await createNewRepairTicketService(repairTicketSchema);
+    const repairTicketDocument = await createNewRepairTicketService(
+      newRepairTicketSchema
+    );
     if (!repairTicketDocument) {
       response.status(400).json({
         message: "New repair note could not be created. Please try again!",

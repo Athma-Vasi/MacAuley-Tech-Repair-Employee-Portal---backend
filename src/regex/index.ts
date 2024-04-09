@@ -963,7 +963,43 @@ const STORE_LOCATION_REGEX = /^(Calgary|Edmonton|Vancouver)$/;
  */
 const PURCHASE_KIND_REGEX = /^(Online|In-Store)$/;
 
+/**
+ * - /^(Accessory|Computer Component|Peripheral|Electronic Device|Mobile Device|Audio\/Video)$/
+ * - matches the following repair categories: Accessory, Computer Component, Peripheral, Electronic Device, Mobile Device, Audio/Video
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const REPAIR_CATEGORY_REGEX =
+  /^(Accessory|Computer Component|Peripheral|Electronic Device|Mobile Device|Audio\/Video)$/;
+
+/**
+ * - /^(Cleaning|Component replacement|Soldering|Testing|Calibration|Software update|Diagnostic evaluation|Internal inspection|External housing|Data recovery|Other)$/
+ * - matches the following required repairs: Cleaning, Component replacement, Soldering, Testing, Calibration, Software update, Diagnostic evaluation, Internal inspection, External housing, Data recovery, Other
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const REQUIRED_REPAIRS_REGEX =
+  /^(Cleaning|Component replacement|Soldering|Testing|Calibration|Software update|Diagnostic evaluation|Internal inspection|External housing|Data recovery|Other)$/;
+
+/**
+ * - /^(Other|CPU|GPU|Motherboard|RAM|Storage|PSU|Cooling|Connectors|Software)$/
+ * - matches the following parts needed: Other, CPU, GPU, Motherboard, RAM, Storage, PSU, Cooling, Connectors, Software
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const PARTS_NEEDED_REGEX =
+  /^(Other|CPU|GPU|Motherboard|RAM|Storage|PSU|Cooling|Connectors|Software)$/;
+
+/**
+ * - /^(In progress|Waiting for parts|Awaiting approval|Completed|Cancelled)$/
+ * - matches the following repair statuses: In progress, Waiting for parts, Awaiting approval, Completed, Cancelled
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const REPAIR_STATUS_REGEX =
+  /^(In progress|Waiting for parts|Awaiting approval|Completed|Cancelled)$/;
+
 export {
+  REPAIR_STATUS_REGEX,
+  PARTS_NEEDED_REGEX,
+  REQUIRED_REPAIRS_REGEX,
+  REPAIR_CATEGORY_REGEX,
   PURCHASE_KIND_REGEX,
   STORE_LOCATION_REGEX,
   ORDER_STATUS_REGEX,
