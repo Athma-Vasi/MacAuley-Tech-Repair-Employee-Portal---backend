@@ -14,6 +14,8 @@ import {
   getCustomerDocWithPaymentInfoHandler,
   deleteAllCustomersHandler,
 } from "./customer.controller";
+import { validateSchemaMiddleware } from "../../middlewares/validateSchema";
+import { createCustomerJoiSchema, updateCustomerJoiSchema } from "./customer.validation";
 
 const customerRouter = Router();
 
@@ -25,7 +27,10 @@ customerRouter
     assignQueryDefaults,
     getQueriedCustomersHandler
   )
-  .post(createNewCustomerHandler);
+  .post(
+    validateSchemaMiddleware(createCustomerJoiSchema, "customerSchema"),
+    createNewCustomerHandler
+  );
 
 customerRouter
   .route("/payment-info")
@@ -59,7 +64,12 @@ customerRouter
 customerRouter
   .route("/:customerId")
   .get(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults, getCustomerByIdHandler)
-  .patch(verifyJWTMiddleware, verifyRoles(), updateCustomerByIdHandler)
+  .patch(
+    verifyJWTMiddleware,
+    verifyRoles(),
+    validateSchemaMiddleware(updateCustomerJoiSchema),
+    updateCustomerByIdHandler
+  )
   .delete(verifyJWTMiddleware, verifyRoles(), deleteCustomerHandler);
 
 export { customerRouter };

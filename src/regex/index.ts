@@ -518,7 +518,16 @@ const SURVEY_RESPONSE_KIND_REGEX = /^(chooseOne|chooseAny|rating)$/;
  */
 const SURVEY_RESPONSE_INPUT_REGEX = /^(agreeDisagree|radio|checkbox|emotion|stars)$/;
 
+/**
+ * - /^(He\/Him|She\/Her|They\/Them|Other|Prefer not to say)$/
+ * - matches the following preferred pronouns: He/Him, She/Her, They/Them, Other, Prefer not to say
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const PREFERRED_PRONOUNS_REGEX =
+  /^(He\/Him|She\/Her|They\/Them|Other|Prefer not to say)$/;
+
 export {
+  PREFERRED_PRONOUNS_REGEX,
   SURVEY_RESPONSE_INPUT_REGEX,
   SURVEY_RESPONSE_KIND_REGEX,
   SURVEY_RECIPIENT_REGEX,

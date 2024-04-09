@@ -1,32 +1,3 @@
-/**
- * type CommentSchema = {
-  userId: Types.ObjectId;
-  username: string;
-  roles: UserRoles;
-
-  firstName: string;
-  middleName: string;
-  lastName: string;
-  jobPosition: JobPosition;
-  department: Department;
-  profilePictureUrl: string;
-  parentResourceId: Types.ObjectId;
-  comment: string;
-  quotedUsername: string;
-  quotedComment: string;
-  likesCount: number;
-  dislikesCount: number;
-  reportsCount: number;
-
-  isFeatured: boolean;
-  isDeleted: boolean;
-
-  likedUserIds: Types.ObjectId[];
-  dislikedUserIds: Types.ObjectId[];
-  reportedUserIds: Types.ObjectId[];
-};
- */
-
 import Joi from "joi";
 import {
   DEPARTMENT_REGEX,
