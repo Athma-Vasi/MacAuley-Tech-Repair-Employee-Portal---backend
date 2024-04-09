@@ -9,10 +9,18 @@ import {
   updateWebcamByIdHandler,
   updateWebcamsBulkHandler,
 } from "./webcam.controller";
+import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
+import { createWebcamJoiSchema, updateWebcamJoiSchema } from "./webcam.validation";
 
 const webcamRouter = Router();
 
-webcamRouter.route("/").get(getQueriedWebcamsHandler).post(createNewWebcamHandler);
+webcamRouter
+  .route("/")
+  .get(getQueriedWebcamsHandler)
+  .post(
+    validateSchemaMiddleware(createWebcamJoiSchema, "webcamSchema"),
+    createNewWebcamHandler
+  );
 
 // separate route for safety reasons (as it deletes all documents in the collection)
 webcamRouter.route("/delete-all").delete(deleteAllWebcamsHandler);
@@ -28,6 +36,6 @@ webcamRouter
   .route("/:webcamId")
   .get(getWebcamByIdHandler)
   .delete(deleteAWebcamHandler)
-  .patch(updateWebcamByIdHandler);
+  .patch(validateSchemaMiddleware(updateWebcamJoiSchema), updateWebcamByIdHandler);
 
 export { webcamRouter };
