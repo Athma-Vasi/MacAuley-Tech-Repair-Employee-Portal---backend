@@ -9,10 +9,18 @@ import {
   updateDisplayByIdHandler,
   updateDisplaysBulkHandler,
 } from "./display.controller";
+import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
+import { createDisplayJoiSchema, updateDisplayJoiSchema } from "./display.validation";
 
 const displayRouter = Router();
 
-displayRouter.route("/").get(getQueriedDisplaysHandler).post(createNewDisplayHandler);
+displayRouter
+  .route("/")
+  .get(getQueriedDisplaysHandler)
+  .post(
+    validateSchemaMiddleware(createDisplayJoiSchema, "displaySchema"),
+    createNewDisplayHandler
+  );
 
 // separate route for safety reasons (as it deletes all documents in the collection)
 displayRouter.route("/delete-all").delete(deleteAllDisplaysHandler);
@@ -28,6 +36,6 @@ displayRouter
   .route("/:displayId")
   .get(getDisplayByIdHandler)
   .delete(deleteADisplayHandler)
-  .patch(updateDisplayByIdHandler);
+  .patch(validateSchemaMiddleware(updateDisplayJoiSchema), updateDisplayByIdHandler);
 
 export { displayRouter };

@@ -1,3 +1,17 @@
+/**
+ * // page 2
+  displaySize: number; // 24", 27", etc.
+  displayHorizontalResolution: number;
+  displayVerticalResolution: number;
+  displayRefreshRate: number; // 144 Hz, 165 Hz, etc.
+  displayPanelType: DisplayPanelType; // IPS, TN, etc.
+  displayResponseTime: number; // 1 ms, 4 ms, etc.
+  displayAspectRatio: string; // 16:9, 21:9, etc.
+  additionalFields: {
+    [key: string]: string;
+  };
+ */
+
 import Joi from "joi";
 import {
   BRAND_REGEX,
@@ -7,11 +21,11 @@ import {
   PRODUCT_AVAILABILITY_REGEX,
   WEIGHT_UNIT_REGEX,
   DIMENSION_UNIT_REGEX,
-  CPU_SOCKET_REGEX,
-  MEMORY_UNIT_REGEX,
+  DISPLAY_PANEL_TYPE_REGEX,
+  DISPLAY_ASPECT_RATIO_REGEX,
 } from "../../../regex";
 
-const createCpuJoiSchema = Joi.object({
+const createDisplayJoiSchema = Joi.object({
   sku: Joi.array().items(Joi.string().optional()).required(),
   brand: Joi.string().regex(BRAND_REGEX).required(),
   model: Joi.string().regex(SERIAL_ID_REGEX).required(),
@@ -30,16 +44,13 @@ const createCpuJoiSchema = Joi.object({
   heightUnit: Joi.string().regex(DIMENSION_UNIT_REGEX).required(),
   additionalComments: Joi.string().regex(GRAMMAR_TEXTAREA_INPUT_REGEX).required(),
 
-  cpuSocket: Joi.string().regex(CPU_SOCKET_REGEX).required(),
-  cpuFrequency: Joi.number().required(),
-  cpuCores: Joi.number().required(),
-  cpuL1Cache: Joi.number().required(),
-  cpuL1CacheUnit: Joi.string().regex(MEMORY_UNIT_REGEX).required(),
-  cpuL2Cache: Joi.number().required(),
-  cpuL2CacheUnit: Joi.string().regex(MEMORY_UNIT_REGEX).required(),
-  cpuL3Cache: Joi.number().required(),
-  cpuL3CacheUnit: Joi.string().regex(MEMORY_UNIT_REGEX).required(),
-  cpuWattage: Joi.number().required(),
+  displaySize: Joi.number().required(),
+  displayHorizontalResolution: Joi.number().required(),
+  displayVerticalResolution: Joi.number().required(),
+  displayRefreshRate: Joi.number().required(),
+  displayPanelType: Joi.string().regex(DISPLAY_PANEL_TYPE_REGEX).required(),
+  displayResponseTime: Joi.number().required(),
+  displayAspectRatio: Joi.string().regex(DISPLAY_ASPECT_RATIO_REGEX).required(),
   additionalFields: Joi.object().required(),
 
   starRatingsCount: Joi.object({
@@ -58,7 +69,7 @@ const createCpuJoiSchema = Joi.object({
   uploadedFilesIds: Joi.array().items(Joi.string().optional()).required(),
 });
 
-const updateCpuJoiSchema = Joi.object({
+const updateDisplayJoiSchema = Joi.object({
   sku: Joi.array().items(Joi.string().optional()),
   brand: Joi.string().regex(BRAND_REGEX),
   model: Joi.string().regex(SERIAL_ID_REGEX),
@@ -77,16 +88,13 @@ const updateCpuJoiSchema = Joi.object({
   heightUnit: Joi.string().regex(DIMENSION_UNIT_REGEX),
   additionalComments: Joi.string().regex(GRAMMAR_TEXTAREA_INPUT_REGEX),
 
-  cpuSocket: Joi.string().regex(CPU_SOCKET_REGEX),
-  cpuFrequency: Joi.number(),
-  cpuCores: Joi.number(),
-  cpuL1Cache: Joi.number(),
-  cpuL1CacheUnit: Joi.string().regex(MEMORY_UNIT_REGEX),
-  cpuL2Cache: Joi.number(),
-  cpuL2CacheUnit: Joi.string().regex(MEMORY_UNIT_REGEX),
-  cpuL3Cache: Joi.number(),
-  cpuL3CacheUnit: Joi.string().regex(MEMORY_UNIT_REGEX),
-  cpuWattage: Joi.number(),
+  displaySize: Joi.number(),
+  displayHorizontalResolution: Joi.number(),
+  displayVerticalResolution: Joi.number(),
+  displayRefreshRate: Joi.number(),
+  displayPanelType: Joi.string().regex(DISPLAY_PANEL_TYPE_REGEX),
+  displayResponseTime: Joi.number(),
+  displayAspectRatio: Joi.string().regex(DISPLAY_ASPECT_RATIO_REGEX),
   additionalFields: Joi.object(),
 
   starRatingsCount: Joi.object({
@@ -105,4 +113,4 @@ const updateCpuJoiSchema = Joi.object({
   uploadedFilesIds: Joi.array().items(Joi.string().optional()),
 });
 
-export { createCpuJoiSchema, updateCpuJoiSchema };
+export { createDisplayJoiSchema, updateDisplayJoiSchema };
