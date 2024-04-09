@@ -9,10 +9,18 @@ import {
   updateLaptopByIdHandler,
   updateLaptopsBulkHandler,
 } from "./laptop.controller";
+import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
+import { createLaptopJoiSchema, updateLaptopJoiSchema } from "./laptop.validation";
 
 const laptopRouter = Router();
 
-laptopRouter.route("/").get(getQueriedLaptopsHandler).post(createNewLaptopHandler);
+laptopRouter
+  .route("/")
+  .get(getQueriedLaptopsHandler)
+  .post(
+    validateSchemaMiddleware(createLaptopJoiSchema, "laptopSchema"),
+    createNewLaptopHandler
+  );
 
 // separate route for safety reasons (as it deletes all documents in the collection)
 laptopRouter.route("/delete-all").delete(deleteAllLaptopsHandler);
@@ -28,6 +36,6 @@ laptopRouter
   .route("/:laptopId")
   .get(getLaptopByIdHandler)
   .delete(deleteALaptopHandler)
-  .patch(updateLaptopByIdHandler);
+  .patch(validateSchemaMiddleware(updateLaptopJoiSchema), updateLaptopByIdHandler);
 
 export { laptopRouter };
