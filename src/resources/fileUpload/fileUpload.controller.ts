@@ -1,6 +1,6 @@
-import expressAsyncHandler from 'express-async-handler';
+import expressAsyncHandler from "express-async-handler";
 
-import type { Response } from 'express';
+import type { Response } from "express";
 import type {
   CreateNewFileUploadRequest,
   InsertAssociatedDocumentIdRequest,
@@ -10,7 +10,7 @@ import type {
   GetAllFileUploadsRequest,
   GetFileUploadByIdRequest,
   GetFileUploadsByUserRequest,
-} from './fileUpload.types';
+} from "./fileUpload.types";
 import {
   createNewFileUploadService,
   deleteAllFileUploadsService,
@@ -20,29 +20,38 @@ import {
   getQueriedFileUploadsByUserService,
   insertAssociatedResourceDocumentIdService,
   getQueriedTotalFileUploadsService,
-} from './fileUpload.service';
+} from "./fileUpload.service";
 import {
   GetQueriedResourceRequestServerResponse,
   QueryObjectParsedWithDefaults,
-} from '../../types';
-import { FileUploadDocument, FileUploadSchema } from './fileUpload.model';
-import { FilterQuery, QueryOptions } from 'mongoose';
+} from "../../types";
+import { FileUploadDocument, FileUploadSchema } from "./fileUpload.model";
+import { FilterQuery, QueryOptions } from "mongoose";
 
 // @desc   Create a new file upload
 // @route  POST /file-upload
 // @access Private
 const createNewFileUploadHandler = expressAsyncHandler(
-  async (request: CreateNewFileUploadRequest, response: Response<FileUploadServerResponse>) => {
+  async (
+    request: CreateNewFileUploadRequest,
+    response: Response<FileUploadServerResponse>
+  ) => {
     const {
       userInfo: { userId, username },
-      fileUploads,
+      fileUploadSchema,
     } = request.body;
 
-    const { uploadedFile, fileEncoding, fileExtension, fileMimeType, fileName, fileSize } =
-      fileUploads[0];
+    const {
+      uploadedFile,
+      fileEncoding,
+      fileExtension,
+      fileMimeType,
+      fileName,
+      fileSize,
+    } = fileUploadSchema[0];
 
     // create new fileUpload object
-    const fileUploadSchema: FileUploadSchema = {
+    const newFileUploadSchema: FileUploadSchema = {
       userId,
       username,
       uploadedFile,
@@ -53,21 +62,22 @@ const createNewFileUploadHandler = expressAsyncHandler(
       fileEncoding,
     };
 
-    console.log('\n');
-    console.group('createNewFileUploadHandler');
-    console.log('fileUploadSchema: ', fileUploadSchema);
+    console.log("\n");
+    console.group("createNewFileUploadHandler");
+    console.log("fileUploadSchema: ", newFileUploadSchema);
     console.groupEnd();
 
     // create new fileUpload
     const fileUploadDocument: FileUploadDocument = await createNewFileUploadService(
-      fileUploadSchema
+      newFileUploadSchema
     );
     if (fileUploadDocument) {
-      response
-        .status(201)
-        .json({ message: 'File uploaded successfully', documentId: fileUploadDocument._id });
+      response.status(201).json({
+        message: "File uploaded successfully",
+        documentId: fileUploadDocument._id,
+      });
     } else {
-      response.status(400).json({ message: 'File could not be uploaded' });
+      response.status(400).json({ message: "File could not be uploaded" });
     }
   }
 );
@@ -82,7 +92,8 @@ const getAllFileUploadsHandler = expressAsyncHandler(
   ) => {
     let { newQueryFlag, totalDocuments } = request.body;
 
-    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+    const { filter, projection, options } =
+      request.query as QueryObjectParsedWithDefaults;
 
     // only perform a countDocuments scan if a new query is being made
     if (newQueryFlag) {
@@ -99,14 +110,14 @@ const getAllFileUploadsHandler = expressAsyncHandler(
     });
     if (fileUploads.length === 0) {
       response.status(404).json({
-        message: 'No file uploads that match query parameters were found',
+        message: "No file uploads that match query parameters were found",
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
       });
     } else {
       response.status(200).json({
-        message: 'Successfully found file uploads',
+        message: "Successfully found file uploads",
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
         totalDocuments,
         resourceData: fileUploads,
@@ -128,7 +139,8 @@ const getQueriedFileUploadsByUserHandler = expressAsyncHandler(
     } = request.body;
     let { newQueryFlag, totalDocuments } = request.body;
 
-    const { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
+    const { filter, projection, options } =
+      request.query as QueryObjectParsedWithDefaults;
 
     // assign userId to filter
     const filterWithUserId = { ...filter, userId };
@@ -147,14 +159,14 @@ const getQueriedFileUploadsByUserHandler = expressAsyncHandler(
     });
     if (fileUploads.length === 0) {
       response.status(404).json({
-        message: 'No file uploads found',
+        message: "No file uploads found",
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
       });
     } else {
       response.status(200).json({
-        message: 'File uploads found successfully',
+        message: "File uploads found successfully",
         pages: Math.ceil(totalDocuments / Number(options?.limit)),
         totalDocuments,
         resourceData: fileUploads,
@@ -176,7 +188,7 @@ const insertAssociatedResourceDocumentIdHandler = expressAsyncHandler(
     const oldFileUpload = await getFileUploadByIdService(fileUploadId);
     if (!oldFileUpload) {
       response.status(404).json({
-        message: 'File upload not found',
+        message: "File upload not found",
       });
       return;
     }
@@ -193,9 +205,9 @@ const insertAssociatedResourceDocumentIdHandler = expressAsyncHandler(
       updatedFileUploadObject
     );
     if (updatedFileUpload) {
-      response.status(200).json({ message: 'File upload updated successfully' });
+      response.status(200).json({ message: "File upload updated successfully" });
     } else {
-      response.status(400).json({ message: 'File upload could not be updated' });
+      response.status(400).json({ message: "File upload could not be updated" });
     }
   }
 );
@@ -204,7 +216,10 @@ const insertAssociatedResourceDocumentIdHandler = expressAsyncHandler(
 // @route  DELETE /file-upload/:fileUploadId
 // @access Private
 const deleteAFileUploadHandler = expressAsyncHandler(
-  async (request: DeleteAFileUploadRequest, response: Response<FileUploadServerResponse>) => {
+  async (
+    request: DeleteAFileUploadRequest,
+    response: Response<FileUploadServerResponse>
+  ) => {
     const { fileUploadId } = request.params;
 
     // users can delete their own file uploads which are not associated with any document
@@ -212,7 +227,7 @@ const deleteAFileUploadHandler = expressAsyncHandler(
     const existingFileUpload = await getFileUploadByIdService(fileUploadId);
     if (!existingFileUpload) {
       response.status(404).json({
-        message: 'File upload not found',
+        message: "File upload not found",
       });
       return;
     }
@@ -220,11 +235,11 @@ const deleteAFileUploadHandler = expressAsyncHandler(
     // delete file upload
     const deletedResult = await deleteFileUploadByIdService(fileUploadId);
     if (deletedResult.deletedCount !== 1) {
-      response.status(400).json({ message: 'File upload could not be deleted' });
+      response.status(400).json({ message: "File upload could not be deleted" });
       return;
     }
 
-    response.status(200).json({ message: 'File upload deleted successfully' });
+    response.status(200).json({ message: "File upload deleted successfully" });
   }
 );
 
@@ -232,13 +247,16 @@ const deleteAFileUploadHandler = expressAsyncHandler(
 // @route  DELETE /file-upload/delete-all
 // @access Private/Admin/Manager
 const deleteAllFileUploadsHandler = expressAsyncHandler(
-  async (request: DeleteAllFileUploadsRequest, response: Response<FileUploadServerResponse>) => {
+  async (
+    request: DeleteAllFileUploadsRequest,
+    response: Response<FileUploadServerResponse>
+  ) => {
     // delete all file uploads
     const deletedResult = await deleteAllFileUploadsService();
     if (deletedResult.acknowledged) {
-      response.status(200).json({ message: 'All file uploads deleted successfully' });
+      response.status(200).json({ message: "All file uploads deleted successfully" });
     } else {
-      response.status(400).json({ message: 'All file uploads could not be deleted' });
+      response.status(400).json({ message: "All file uploads could not be deleted" });
     }
   }
 );
@@ -247,18 +265,21 @@ const deleteAllFileUploadsHandler = expressAsyncHandler(
 // @route  GET /file-uploads/:fileUploadId
 // @access Private
 const getFileUploadByIdHandler = expressAsyncHandler(
-  async (request: GetFileUploadByIdRequest, response: Response<FileUploadServerResponse>) => {
+  async (
+    request: GetFileUploadByIdRequest,
+    response: Response<FileUploadServerResponse>
+  ) => {
     const { fileUploadId } = request.params;
 
     // get file upload by its id
     const fileUpload = await getFileUploadByIdService(fileUploadId);
     if (fileUpload) {
       response.status(200).json({
-        message: 'File upload retrieved successfully',
+        message: "File upload retrieved successfully",
         fileUploads: [fileUpload],
       });
     } else {
-      response.status(404).json({ message: 'No file upload found', fileUploads: [] });
+      response.status(404).json({ message: "No file upload found", fileUploads: [] });
     }
   }
 );

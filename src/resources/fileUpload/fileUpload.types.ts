@@ -14,7 +14,7 @@ interface RequestAfterFileInfoExtraction extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    fileUploads: Array<FileInfoObject>;
+    fileUploadSchema: Array<FileInfoObject>;
   };
 }
 

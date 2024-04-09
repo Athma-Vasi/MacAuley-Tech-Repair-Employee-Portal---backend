@@ -20,6 +20,8 @@ import {
   getQueriedFileUploadsByUserHandler,
   insertAssociatedResourceDocumentIdHandler,
 } from "./fileUpload.controller";
+import { validateSchemaMiddleware } from "../../middlewares/validateSchema";
+import { createFileUploadJoiSchema } from "./fileUpload.validation";
 
 const fileUploadRouter = Router();
 
@@ -35,6 +37,7 @@ fileUploadRouter
     fileSizeLimiterMiddleware,
     fileExtensionLimiterMiddleware(ALLOWED_FILE_EXTENSIONS),
     fileInfoExtracterMiddleware,
+    validateSchemaMiddleware(createFileUploadJoiSchema, "fileUploadSchema"),
     createNewFileUploadHandler
   );
 
