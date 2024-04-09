@@ -9,13 +9,21 @@ import {
   updateMotherboardByIdHandler,
   updateMotherboardsBulkHandler,
 } from "./motherboard.controller";
+import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
+import {
+  createMotherboardJoiSchema,
+  updateMotherboardJoiSchema,
+} from "./motherboard.validation";
 
 const motherboardRouter = Router();
 
 motherboardRouter
   .route("/")
   .get(getQueriedMotherboardsHandler)
-  .post(createNewMotherboardHandler);
+  .post(
+    validateSchemaMiddleware(createMotherboardJoiSchema, "motherboardSchema"),
+    createNewMotherboardHandler
+  );
 
 // separate route for safety reasons (as it deletes all documents in the collection)
 motherboardRouter.route("/delete-all").delete(deleteAllMotherboardsHandler);
@@ -31,6 +39,9 @@ motherboardRouter
   .route("/:motherboardId")
   .get(getMotherboardByIdHandler)
   .delete(deleteAMotherboardHandler)
-  .patch(updateMotherboardByIdHandler);
+  .patch(
+    validateSchemaMiddleware(updateMotherboardJoiSchema),
+    updateMotherboardByIdHandler
+  );
 
 export { motherboardRouter };
