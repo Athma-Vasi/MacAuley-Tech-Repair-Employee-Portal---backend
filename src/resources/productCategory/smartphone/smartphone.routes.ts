@@ -9,13 +9,21 @@ import {
   updateSmartphoneByIdHandler,
   updateSmartphonesBulkHandler,
 } from "./smartphone.controller";
+import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
+import {
+  createSmartphoneJoiSchema,
+  updateSmartphoneJoiSchema,
+} from "./smartphone.validation";
 
 const smartphoneRouter = Router();
 
 smartphoneRouter
   .route("/")
   .get(getQueriedSmartphonesHandler)
-  .post(createNewSmartphoneHandler);
+  .post(
+    validateSchemaMiddleware(createSmartphoneJoiSchema, "smartphoneSchema"),
+    createNewSmartphoneHandler
+  );
 
 // separate route for safety reasons (as it deletes all documents in the collection)
 smartphoneRouter.route("/delete-all").delete(deleteAllSmartphonesHandler);
@@ -24,7 +32,10 @@ smartphoneRouter.route("/delete-all").delete(deleteAllSmartphonesHandler);
 smartphoneRouter
   .route("/dev")
   .post(createNewSmartphoneBulkHandler)
-  .patch(updateSmartphonesBulkHandler);
+  .patch(
+    validateSchemaMiddleware(updateSmartphoneJoiSchema),
+    updateSmartphonesBulkHandler
+  );
 
 // single document routes
 smartphoneRouter
