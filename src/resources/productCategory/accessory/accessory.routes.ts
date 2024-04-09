@@ -14,6 +14,8 @@ import {
   updateAccessoriesBulkHandler,
   updateAccessoryByIdHandler,
 } from "./accessory.controller";
+import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
+import { createAccessoryJoiSchema } from "./accessory.validation";
 
 const accessoryRouter = Router();
 
@@ -29,7 +31,10 @@ accessoryRouter.route("/delete-all").delete(deleteAllAccessoriesHandler);
 accessoryRouter
   .route("/dev")
   .post(createNewAccessoryBulkHandler)
-  .patch(updateAccessoriesBulkHandler);
+  .patch(
+    validateSchemaMiddleware(createAccessoryJoiSchema, "accessorySchema"),
+    updateAccessoriesBulkHandler
+  );
 
 // single document routes
 accessoryRouter

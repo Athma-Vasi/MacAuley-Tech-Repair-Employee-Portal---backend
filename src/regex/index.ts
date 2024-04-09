@@ -526,7 +526,469 @@ const SURVEY_RESPONSE_INPUT_REGEX = /^(agreeDisagree|radio|checkbox|emotion|star
 const PREFERRED_PRONOUNS_REGEX =
   /^(He\/Him|She\/Her|They\/Them|Other|Prefer not to say)$/;
 
+/**
+ * - /^(?![0-9])[^"'\s\\]{1,75}$/;
+ * - (?![0-9]) ensures that the first character is not a digit.
+ * - [^"'\s\\] ensures that the input does not contain any of the following characters: ", ', whitespace, \.
+ * - {1,75} matches the preceding token between 1 and 75 times.
+ * - ^ and $ ensure that the entire string matches the regex.
+ * ex: 'username' or 'username123' or 'username-123' or 'u123-sername'
+ */
+const OBJECT_KEY_REGEX = /^(?![0-9])[^"'\s\\]{1,75}$/;
+
+/**
+ * - /^(?!^\s*$)[a-zA-Z0-9!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]{2,2000}$/i
+ * - (?=.*[A-Za-z0-9]) ensures that there is at least one alphanumeric character, preventing the input from consisting entirely of whitespace.
+ * - [A-Za-z0-9!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~] matches any alphanumeric character or special character in the range of special characters commonly used in components, part numbers, and ID numbers.
+ * - {2,2000} ensures that the text is between 2 and 2000 characters long.
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const USER_DEFINED_VALUE_REGEX =
+  /^(?!^\s*$)[a-zA-Z0-9!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~\w\s]{2,2000}$/i;
+
+/**
+ * - /^(?!^$|^0*$)[0-9]{1,6}(\.[0-9]{1,2})?$/
+ * - (?!^$|^0*$): Negative lookahead assertion to ensure that the entire string is not empty (^$) or consists entirely of zeroes (^0*$).
+ * - [0-9]{1,6}: Matches one to six digits for the integral part of the weight.
+ * - (\.[0-9]{1,2})?: This part is in a capturing group and is optional (?). It allows for an optional decimal point followed by one or two digits, representing the decimal part of the weight.
+ * - ^ and $ ensure that the entire string matches the regex.
+ * - ex: 123456.78 or 123456
+ */
+const WEIGHT_REGEX = /^(?!^$|^0*$)[0-9]{1,6}(\.[0-9]{1,2})?$/;
+
+/**
+ * - /^(?!^$|^0*$)[0-9]{1,3}(\.[0-9]{1,2})?$/
+ * - (?!^$|^0*$): Negative lookahead assertion to ensure that the entire string is not empty (^$) or consists entirely of zeroes (^0*$).
+ * - (?!^0*\.?0*$): Negative lookahead assertion to ensure that the entire string is not empty (^0*$) or consists entirely of zeroes (^0*), optionally followed by a decimal point (\.?0*$).
+ * - [0-9]{1,3}: Matches one to three digits for the integral part of the length, width, or height.
+ * - (\.[0-9]{1,2})?: This part is in a capturing group and is optional (?). It allows for an optional decimal point followed by one or two digits, representing the decimal part of the length, width, or height.
+ * - ^ and $ ensure that the entire string matches the regex.
+ * - ex: 123.45 or 123
+ */
+const DIMENSIONS_REGEX = /^(?!^$|^0*$)(?!^0*\.?0*$)[0-9]{1,3}(\.[0-9]{1,2})?$/;
+
+/**
+ * - /^(?!^$|^0*$)[0-9]{1,2}(\.[0-9]{1,2})?$/
+ * - (?!^$|^0*$): Negative lookahead assertion to ensure that the entire string is not empty (^$) or consists entirely of zeroes (^0*$).
+ * - (?!^0*\.?0*$): Negative lookahead assertion to ensure that the entire string is not empty (^0*$) or consists entirely of zeroes (^0*), optionally followed by a decimal point (\.?0*$).
+ * - [0-9]{1,2}: Matches one to two digits for the integral part of the frequency.
+ * - (\.[0-9]{1,2})?: This part is in a capturing group and is optional (?). It allows for an optional decimal point followed by one or two digits, representing the decimal part of the frequency.
+ * - ^ and $ ensure that the entire string matches the regex.
+ * - ex: 12.34 or 12
+ */
+const CPU_FREQUENCY_REGEX = /^(?!^$|^0*$)(?!^0*\.?0*$)[0-9]{1}(\.[0-9]{1,2})?$/;
+
+/**
+ * - /^(?!^$|^0*$)[0-9]{1,2}$/
+ * - (?!^$|^0*$): Negative lookahead assertion to ensure that the entire string is not empty (^$) or consists entirely of zeroes (^0*$).
+ * - [0-9]{1,2}: Matches one to two digits for the integral part
+ * - ^ and $ ensure that the entire string matches the regex.
+ * - ex: 12
+ */
+const SMALL_INTEGER_REGEX = /^(?!^$|^0*$)[0-9]{1,2}$/;
+
+/**
+ * - /^(?!^$|^0*$)[0-9]{1,4}$/
+ * - (?!^$|^0*$): Negative lookahead assertion to ensure that the entire string is not empty (^$) or consists entirely of zeroes (^0*$).
+ * - [0-9]{1,4}: Matches one to four digits for the integral part
+ * - ^ and $ ensure that the entire string matches the regex.
+ * - ex: 1234
+ */
+const MEDIUM_INTEGER_REGEX = /^(?!^$|^0*$)[0-9]{1,4}$/;
+
+/**
+ * - /^(?!^$|^0*$)[0-9]{1,6}$/
+ * - (?!^$|^0*$): Negative lookahead assertion to ensure that the entire string is not empty (^$) or consists entirely of zeroes (^0*$).
+ * - [0-9]{1,6}: Matches one to six digits for the integral part of the quantity.
+ * - ^ and $ ensure that the entire string matches the regex.
+ * - ex: 123456
+ */
+const LARGE_INTEGER_REGEX = /^(?!^$|^0*$)[0-9]{1,6}$/;
+
+/**
+ * - /^(?!^$|^0*$)[0-1]{1}(\.[0-9]{1,2})?$/
+ * - (?!^$|^0*$): Negative lookahead assertion to ensure that the entire string is not empty (^$) or consists entirely of zeroes (^0*$).
+ * - (?!^0*\.?0*$): Negative lookahead assertion to ensure that the entire string is not empty (^0*$) or consists entirely of zeroes (^0*), optionally followed by a decimal point (\.?0*$).
+ * - [0-1]{1}: Matches one digit between 0 and 1 for the integral part of the voltage.
+ * - (\.[0-9]{1,2})?: This part is in a capturing group and is optional (?). It allows for an optional decimal point followed by one or two digits, representing the decimal part of the voltage.
+ * - ^ and $ ensure that the entire string matches the regex.
+ * - ex: 0.12 or 0.1 or 0. or 0 or 1.12 or 1.1 or 1
+ */
+const RAM_VOLTAGE_REGEX = /^(?!^$|^0*$)(?!^0*\.?0*$)[0-1]{1}(\.[0-9]{1,2})?$/;
+
+/**
+ * - /^[a-zA-Z0-9- ]{2,30}$/;
+ * - [a-zA-Z0-9\s-] matches any character between a-z, A-Z, 0-9, whitespace and -.
+ * - {2,30} matches between 2 and 30 of the preceding token.
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const BRAND_REGEX = /^[a-zA-Z0-9\s-]{2,30}$/;
+
+/**
+ * - /^[a-zA-Z0-9\s.,'()-]{2,30}$/i;
+ * - [a-zA-Z0-9\s.,'()-] matches any character between a-z, A-Z, 0-9, whitespace, ., ,, ', (, ), -.
+ * - {2,30} matches between 2 and 30 of the preceding token.
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const CPU_SOCKET_REGEX = /^[a-zA-Z0-9\s.,'()-]{2,30}$/;
+const GPU_CHIPSET_REGEX = CPU_SOCKET_REGEX;
+const MOTHERBOARD_SOCKET_REGEX = CPU_SOCKET_REGEX;
+const MOTHERBOARD_CHIPSET_REGEX = CPU_SOCKET_REGEX;
+
+/**
+ * - /^[0-9]{1,2}-[0-9]{1,2}-[0-9]{1,2}-[0-9]{1,2}$/
+ * - [0-9] matches any digit between 0 and 9.
+ * - {1,2} matches the preceding token between 1 and 2 times.
+ * - matches the character - literally.
+ * - ^ and $ ensure that the entire string matches the regex.
+ * - ex: 16-18-18-36 or 16-8-18-6
+ */
+const RAM_TIMING_REGEX = /^[0-9]{1,2}-[0-9]{1,2}-[0-9]{1,2}-[0-9]{1,2}$/;
+
+/**
+ * - /^[a-zA-Z0-9#()%,.\s-]{2,30}$/
+ * - [a-zA-Z0-9#()%,.\s-] matches any character between a-z, A-Z, 0-9, #, (, ), %, ,, ., whitespace and -.
+ * - {2,30} matches between 2 and 30 of the preceding token.
+ * - ^ and $ ensure that the entire string matches the regex.
+ * - ex: #e0e0e0 or hsl(0, 0%, 88%) or rgb(224, 224, 224) or rgba(224, 224, 224, 0.5) or hsla(0, 0%, 88%, 0.5)
+ */
+const COLOR_VARIANT_REGEX = /^[a-zA-Z0-9#()%,.\s-]{2,30}$/;
+
+/**
+ * - /^[0-9]{1,2}:[0-9]{1,2}$/
+ * - [0-9] matches any digit between 0 and 9.
+ * - {1,2} matches the preceding token between 1 and 2 times.
+ * - matches the character : literally.
+ * - ^ and $ ensure that the entire string matches the regex.
+ * - ex: 16:9
+ */
+const DISPLAY_ASPECT_RATIO_REGEX = /^[0-9]{1,2}:[0-9]{1,2}$/;
+
+/**
+ * - /^[0-9]{1,2}[\s]{0,1}Hz[\s]{0,1}-[\s]{0,1}[0-9]{1,2}[\s]{0,1}kHz$/
+ * - [0-9] matches any digit between 0 and 9.
+ * - {1,2} matches the preceding token between 1 and 2 times.
+ * - [\s]{0,1} matches the character whitespace literally between 0 and 1 times.
+ * - matches the character Hz literally.
+ * - matches the character - literally.
+ * - matches the character kHz literally.
+ * - ^ and $ ensure that the entire string matches the regex.
+ * - ex: 20Hz-20kHz or 20 Hz - 20 kHz or 20 Hz-20 kHz or 20Hz - 20kHz
+ */
+const FREQUENCY_RESPONSE_REGEX =
+  /^[0-9]{1,2}[\s]{0,1}Hz[\s]{0,1}-[\s]{0,1}[0-9]{1,2}[\s]{0,1}kHz$/;
+
+const SMARTPHONE_CHIPSET_REGEX = CPU_SOCKET_REGEX;
+const TABLET_CHIPSET_REGEX = CPU_SOCKET_REGEX;
+
+/**
+ * - /^([0-9]{1,3} MP)(?:, ([0-9]{1,3} MP)){1,12}$/
+ * - [0-9] matches any digit between 0 and 9.
+ * - {1,3} matches the preceding token between 1 and 3 times.
+ * - matches the character MP literally.
+ * - (?:, ([0-9]{1,3} MP)) matches the characters , and a space literally, followed by a group of 1 to 3 digits, followed by the character MP literally.
+ * - {1,12} matches the preceding token between 1 and 12 times.
+ * - ^ and $ ensure that the entire string matches the regex.
+ * - ex: '12 MP, 12 MP, 12 MP' or '12 MP'
+ */
+
+const MOBILE_CAMERA_REGEX = /^([0-9]{1,3} MP)(?:, ([0-9]{1,3} MP)){0,12}$/;
+
+const ACCESSORY_TYPE_REGEX = BRAND_REGEX;
+
+/**
+ * - /^(In Stock|Out of Stock|Pre-order|Discontinued|Other)$/
+ * - matches the following product availability statuses: In Stock, Out of Stock, Pre-order, Discontinued, Other
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const PRODUCT_AVAILABILITY_REGEX =
+  /^(In Stock|Out of Stock|Pre-order|Discontinued|Other)$/;
+
+/**
+ * - /^(mm|cm|m|in|ft)$/
+ * - matches the following dimension units: mm, cm, m, in, ft
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const DIMENSION_UNIT_REGEX = /^(mm|cm|m|in|ft)$/;
+
+/**
+ * - /^(g|kg|lb)$/
+ * - matches the following weight units: g, kg, lb
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const WEIGHT_UNIT_REGEX = /^(g|kg|lb)$/;
+
+/**
+ * - /^(Hz|kHz|MHz|GHz|THz)$/
+ * - matches the following frequency units: Hz, kHz, MHz, GHz, THz
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const MEMORY_TYPE_REGEX = /^(DDR5|DDR4|DDR3|DDR2|DDR)$/;
+
+/**
+ * - /^(KB|MB|GB|TB)$/
+ * - matches the following memory units: KB, MB, GB, TB
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const MEMORY_UNIT_REGEX = /^(KB|MB|GB|TB)$/;
+
+/**
+ * -  /^(Accessory|Central Processing Unit \(CPU\)|Computer Case|Desktop Computer|Display|Graphics Processing Unit \(GPU\)|Headphone|Keyboard|Laptop|Memory \(RAM\)|Microphone|Motherboard|Mouse|Power Supply Unit \(PSU\)|Smartphone|Speaker|Storage|Tablet|Webcam)$/
+ * - matches the following product categories: Accessory, Central Processing Unit (CPU), Computer Case, Desktop Computer, Display, Graphics Processing Unit (GPU), Headphone, Keyboard, Laptop, Memory (RAM), Microphone, Motherboard, Mouse, Power Supply Unit (PSU), Smartphone, Speaker, Storage, Tablet, Webcam
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const PRODUCT_CATEGORY_REGEX =
+  /^(Accessory|Central Processing Unit \(CPU\)|Computer Case|Desktop Computer|Display|Graphics Processing Unit \(GPU\)|Headphone|Keyboard|Laptop|Memory \(RAM\)|Microphone|Motherboard|Mouse|Power Supply Unit \(PSU\)|Smartphone|Speaker|Storage|Tablet|Webcam)$/;
+
+/**
+ * - /^(USB|Bluetooth|PS\/2|Wi-Fi|Other)$
+ * - matches the following peripherals interfaces: USB, Bluetooth, PS/2, Wi-Fi, Other
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const PERIPHERALS_INTERFACE_REGEX = /^(USB|Bluetooth|PS\/2|Wi-Fi|Other)$/;
+
+/**
+ * - /^(Android|iOS|Windows|Linux|Other)$/
+ * - matches the following operating systems: Android, iOS, Windows, Linux, Other
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const MOBILE_OS_REGEX = /^(Android|iOS|Windows|Linux|Other)$/;
+
+/**
+ * - /^(ATX|Micro ATX|Mini ITX|E-ATX|XL-ATX)$/
+ * - matches the following motherboard form factors: ATX, Micro ATX, Mini ITX, E-ATX, XL-ATX
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const MOTHERBOARD_FORM_FACTOR_REGEX = /^(ATX|Micro ATX|Mini ITX|E-ATX|XL-ATX)$/;
+
+/**
+ * - /^(SSD|HDD|SSHD|Other)$/
+ * - matches the following storage types: SSD, HDD, SSHD, Other
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const STORAGE_TYPE_REGEX = /^(SSD|HDD|SSHD|Other)$/;
+
+/**
+ * - /^(2.5"|3.5"|M.2 2280|M.2 22110|M.2 2242|M.2 2230|mSATA|U.2|Other)$/
+ * - matches the following storage form factors: 2.5", 3.5", M.2 2280, M.2 22110, M.2 2242, M.2 2230, mSATA, U.2, Other
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const STORAGE_FORM_FACTOR_REGEX =
+  /^(2.5"|3.5"|M.2 2280|M.2 22110|M.2 2242|M.2 2230|mSATA|U.2|Other)$/;
+
+/**
+ * - /^(SATA III|NVMe|PCIe|U.2|SATA-Express|M.2|mSATA|Other)$/
+ * - matches the following storage interfaces: SATA III, NVMe, PCIe, U.2, SATA-Express, M.2, mSATA, Other
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const STORAGE_INTERFACE_REGEX = /^(SATA III|NVMe|PCIe|U.2|SATA-Express|M.2|mSATA|Other)$/;
+
+/**
+ * - /^(80\+|80\+ Bronze|80\+ Silver|80\+ Gold|80\+ Platinum|80\+ Titanium)$/
+ * - matches the following PSU efficiency ratings: 80+, 80+ Bronze, 80+ Silver, 80+ Gold, 80+ Platinum, 80+ Titanium
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const PSU_EFFICIENCY_REGEX =
+  /^(80\+|80\+ Bronze|80\+ Silver|80\+ Gold|80\+ Platinum|80\+ Titanium)$/;
+
+/**
+ * - /^(Full|Semi|None|Other)$/
+ * - matches the following PSU modularity types: Full, Semi, None, Other
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const PSU_MODULARITY_REGEX = /^(Full|Semi|None|Other)$/;
+
+/**
+ * - /^(ATX|SFX|SFX-L|TFX|Flex ATX|Other)$/
+ * - matches the following PSU form factors: ATX, SFX, SFX-L, TFX, Flex ATX, Other
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const PSU_FORM_FACTOR_REGEX = /^(ATX|SFX|SFX-L|TFX|Flex ATX|Other)$/;
+
+/**
+ * - /^(Mid Tower|Full Tower|Mini Tower|Cube|Slim|Desktop|Other)$/
+ * - matches the following case types: Mid Tower, Full Tower, Mini Tower, Cube, Slim, Desktop, Other
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const CASE_TYPE_REGEX = /^(Mid Tower|Full Tower|Mini Tower|Cube|Slim|Desktop|Other)$/;
+
+/**
+ * - /^(Windowed|Solid)$/
+ * - matches the following case side panel types: Windowed, Solid
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const CASE_SIDE_PANEL_REGEX = /^(Windowed|Solid)$/;
+
+/**
+ * - /^(IPS|TN|VA|OLED|QLED|Other)$/
+ * - matches the following display panel types: IPS, TN, VA, OLED, QLED, Other
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const DISPLAY_PANEL_TYPE_REGEX = /^(IPS|TN|VA|OLED|QLED|Other)$/;
+
+/**
+ * - /^(Cherry MX Red|Cherry MX Blue|Cherry MX Brown|Cherry MX Silent Red|Cherry MX Black|Cherry MX Clear|Membrane|Other)$/
+ * - matches the following keyboard switch types: Cherry MX Red, Cherry MX Blue, Cherry MX Brown, Cherry MX Silent Red, Cherry MX Black, Cherry MX Clear, Membrane, Other
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const KEYBOARD_SWITCH_REGEX =
+  /^(Cherry MX Red|Cherry MX Blue|Cherry MX Brown|Cherry MX Silent Red|Cherry MX Black|Cherry MX Clear|Membrane|Other)$/;
+
+/**
+ * - /^(QWERTY|HHKB|Dvorak|Colemak|Workman|CARPALX|NORMAN|Other)$/
+ * - matches the following keyboard layouts: QWERTY, HHKB, Dvorak, Colemak, Workman, CARPALX, NORMAN, Other
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const KEYBOARD_LAYOUT_REGEX =
+  /^(QWERTY|HHKB|Dvorak|Colemak|Workman|CARPALX|NORMAN|Other)$/;
+
+/**
+ * - /^(RGB|Single Color|None)$/
+ * - matches the following keyboard backlight types: RGB, Single Color, None
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const KEYBOARD_BACKLIGHT_REGEX = /^(RGB|Single Color|None)$/;
+
+/**
+ * - /^(Optical|Laser|Infrared|Other)$/
+ * - matches the following mouse sensor types: Optical, Laser, Infrared, Other
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const MOUSE_SENSOR_REGEX = /^(Optical|Laser|Infrared|Other)$/;
+
+/**
+ * - /^(Over-ear|On-ear|In-ear|Other)$
+ * - matches the following headphone types: Over-ear, On-ear, In-ear, Other
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const HEADPHONE_TYPE_REGEX = /^(Over-ear|On-ear|In-ear|Other)$/;
+
+/**
+ * - /^(USB|Bluetooth|3.5 mm|2.5 mm|MMCX|Other)$/
+ * - matches the following headphone interfaces: USB, Bluetooth, 3.5 mm, 2.5 mm, MMCX, Other
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const HEADPHONE_INTERFACE_REGEX = /^(USB|Bluetooth|3.5 mm|2.5 mm|MMCX|Other)$/;
+
+/**
+ * - /^(2.0|2.1|3.1|4.1|5.1|7.1|Other)$/
+ * - matches the following speaker types: 2.0, 2.1, 3.1, 4.1, 5.1, 7.1, Other
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const SPEAKER_TYPE_REGEX = /^(2.0|2.1|3.1|4.1|5.1|7.1|Other)$/;
+
+/**
+ * - /^(USB|Bluetooth|3.5 mm|2.5 mm|RCA|TRS|Wi-Fi|Other)$/
+ * - matches the following speaker interfaces: USB, Bluetooth, 3.5 mm, 2.5 mm, RCA, TRS, Wi-Fi, Other
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const SPEAKER_INTERFACE_REGEX = /^(USB|Bluetooth|3.5 mm|2.5 mm|RCA|TRS|Wi-Fi|Other)$/;
+
+/**
+ * - /^(720p|1080p|1440p|4K|Other)$/
+ * - matches the following webcam resolutions: 720p, 1080p, 1440p, 4K, Other
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const WEBCAM_RESOLUTION_REGEX = /^(720p|1080p|1440p|4K|Other)$/;
+
+/**
+ * - /^(30 fps|60 fps|120 fps|240 fps|Other)$/
+ * - matches the following webcam frame rates: 30 fps, 60 fps, 120 fps, 240 fps, Other
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const WEBCAM_FRAME_RATE_REGEX = /^(30 fps|60 fps|120 fps|240 fps|Other)$/;
+
+/**
+ * - /^(USB|Bluetooth|Wi-Fi|Other)$/
+ * - matches the following webcam interfaces: USB, Bluetooth, Wi-Fi, Other
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const WEBCAM_INTERFACE_REGEX = /^(USB|Bluetooth|Wi-Fi|Other)$/;
+
+/**
+ * - /^(Yes|No)$/
+ * - matches the following webcam microphone options: Yes, No
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const WEBCAM_MICROPHONE_REGEX = /^(Yes|No)$/;
+
+/**
+ * - /^(Condenser|Dynamic|Ribbon|USB|Wireless|Other)$/
+ * - matches the following microphone types: Condenser, Dynamic, Ribbon, USB, Wireless, Other
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const MICROPHONE_TYPE_REGEX = /^(Condenser|Dynamic|Ribbon|USB|Wireless|Other)$/;
+
+/**
+ * - /^(Cardioid|Supercardioid|Hypercardioid|Omnidirectional|Bidirectional|Other)$/
+ * - matches the following microphone polar patterns: Cardioid, Supercardioid, Hypercardioid, Omnidirectional, Bidirectional, Other
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const MICROPHONE_POLAR_PATTERN_REGEX =
+  /^(Cardioid|Supercardioid|Hypercardioid|Omnidirectional|Bidirectional|Other)$/;
+
+/**
+ * - /^(XLR|USB|3.5mm|Wireless|Other)$/
+ * - matches the following microphone interfaces: XLR, USB, 3.5mm, Wireless, Other
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const MICROPHONE_INTERFACE_REGEX = /^(XLR|USB|3.5mm|Wireless|Other)$/;
+
 export {
+  DIMENSIONS_REGEX,
+  WEIGHT_REGEX,
+  DIMENSION_UNIT_REGEX,
+  WEIGHT_UNIT_REGEX,
+  CPU_FREQUENCY_REGEX,
+  OBJECT_KEY_REGEX,
+  USER_DEFINED_VALUE_REGEX,
+  MICROPHONE_INTERFACE_REGEX,
+  MICROPHONE_POLAR_PATTERN_REGEX,
+  MICROPHONE_TYPE_REGEX,
+  WEBCAM_MICROPHONE_REGEX,
+  WEBCAM_INTERFACE_REGEX,
+  WEBCAM_FRAME_RATE_REGEX,
+  WEBCAM_RESOLUTION_REGEX,
+  SPEAKER_INTERFACE_REGEX,
+  SPEAKER_TYPE_REGEX,
+  HEADPHONE_INTERFACE_REGEX,
+  HEADPHONE_TYPE_REGEX,
+  MOUSE_SENSOR_REGEX,
+  KEYBOARD_BACKLIGHT_REGEX,
+  KEYBOARD_LAYOUT_REGEX,
+  KEYBOARD_SWITCH_REGEX,
+  DISPLAY_PANEL_TYPE_REGEX,
+  CASE_SIDE_PANEL_REGEX,
+  CASE_TYPE_REGEX,
+  PSU_FORM_FACTOR_REGEX,
+  PSU_MODULARITY_REGEX,
+  PSU_EFFICIENCY_REGEX,
+  STORAGE_INTERFACE_REGEX,
+  STORAGE_FORM_FACTOR_REGEX,
+  STORAGE_TYPE_REGEX,
+  MOTHERBOARD_FORM_FACTOR_REGEX,
+  MOBILE_OS_REGEX,
+  PERIPHERALS_INTERFACE_REGEX,
+  PRODUCT_CATEGORY_REGEX,
+  MEMORY_UNIT_REGEX,
+  MEMORY_TYPE_REGEX,
+  PRODUCT_AVAILABILITY_REGEX,
+  ACCESSORY_TYPE_REGEX,
+  MOBILE_CAMERA_REGEX,
+  TABLET_CHIPSET_REGEX,
+  SMARTPHONE_CHIPSET_REGEX,
+  FREQUENCY_RESPONSE_REGEX,
+  DISPLAY_ASPECT_RATIO_REGEX,
+  COLOR_VARIANT_REGEX,
+  MOTHERBOARD_CHIPSET_REGEX,
+  MOTHERBOARD_SOCKET_REGEX,
+  GPU_CHIPSET_REGEX,
+  CPU_SOCKET_REGEX,
+  BRAND_REGEX,
+  RAM_TIMING_REGEX,
+  SMALL_INTEGER_REGEX,
+  MEDIUM_INTEGER_REGEX,
+  LARGE_INTEGER_REGEX,
   PREFERRED_PRONOUNS_REGEX,
   SURVEY_RESPONSE_INPUT_REGEX,
   SURVEY_RESPONSE_KIND_REGEX,
