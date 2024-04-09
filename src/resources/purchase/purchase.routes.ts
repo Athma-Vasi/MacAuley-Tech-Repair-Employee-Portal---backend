@@ -13,12 +13,20 @@ import {
   getQueriedPurchasesByUserHandler,
   updatePurchaseByIdHandler,
 } from "./purchase.controller";
+import { validateSchemaMiddleware } from "../../middlewares/validateSchema";
+import { createPurchaseJoiSchema, updatePurchaseJoiSchema } from "./purchase.validation";
 
 const purchaseRouter = Router();
 
 purchaseRouter.use(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults);
 
-purchaseRouter.route("/").post(createNewPurchaseHandler).get(getQueriedPurchasesHandler);
+purchaseRouter
+  .route("/")
+  .post(
+    validateSchemaMiddleware(createPurchaseJoiSchema, "purchaseSchema"),
+    createNewPurchaseHandler
+  )
+  .get(getQueriedPurchasesHandler);
 
 purchaseRouter.route("/user").get(getQueriedPurchasesByUserHandler);
 
@@ -34,7 +42,7 @@ purchaseRouter
 purchaseRouter
   .route("/:purchaseId")
   .get(getPurchaseByIdHandler)
-  .patch(updatePurchaseByIdHandler)
-  .delete(deletePurchaseHandler);
+  .delete(deletePurchaseHandler)
+  .patch(validateSchemaMiddleware(updatePurchaseJoiSchema), updatePurchaseByIdHandler);
 
 export { purchaseRouter };

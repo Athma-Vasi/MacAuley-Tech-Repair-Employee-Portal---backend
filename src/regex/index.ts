@@ -942,7 +942,31 @@ const MICROPHONE_INTERFACE_REGEX = /^(XLR|USB|3.5mm|Wireless|Other)$/;
 const RATING_KIND_REGEX =
   /^(halfStar|oneStar|oneAndHalfStars|twoStars|twoAndHalfStars|threeStars|threeAndHalfStars|fourStars|fourAndHalfStars|fiveStars)$/;
 
+/**
+ * - /^(Pending|Shipped|Delivered|Returned|Cancelled|Received)$/
+ * - matches the following order statuses: Pending, Shipped, Delivered, Returned, Cancelled, Received
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const ORDER_STATUS_REGEX = /^(Pending|Shipped|Delivered|Returned|Cancelled|Received)$/;
+
+/**
+ * - /^(Calgary|Edmonton|Vancouver)$/
+ * - matches the following store locations: Calgary, Edmonton, Vancouver
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const STORE_LOCATION_REGEX = /^(Calgary|Edmonton|Vancouver)$/;
+
+/**
+ * - /^(Online|In-Store)$/
+ * - matches the following purchase kinds: Online, In-Store
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const PURCHASE_KIND_REGEX = /^(Online|In-Store)$/;
+
 export {
+  PURCHASE_KIND_REGEX,
+  STORE_LOCATION_REGEX,
+  ORDER_STATUS_REGEX,
   RATING_KIND_REGEX,
   DIMENSIONS_REGEX,
   WEIGHT_REGEX,

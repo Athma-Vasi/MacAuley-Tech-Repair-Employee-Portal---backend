@@ -117,4 +117,9 @@ const updateCustomerJoiSchema = Joi.object({
   isPrefersReducedMotion: Joi.boolean().optional(),
 });
 
-export { createCustomerJoiSchema, updateCustomerJoiSchema };
+export {
+  createCustomerJoiSchema,
+  updateCustomerJoiSchema,
+  ADDRESS_SCHEMA,
+  PAYMENT_INFORMATION_SCHEMA,
+};
