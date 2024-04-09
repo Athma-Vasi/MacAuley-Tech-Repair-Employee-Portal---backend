@@ -3,7 +3,6 @@ import { Schema, Types, model } from "mongoose";
 import type {
   DimensionUnit,
   ProductAvailability,
-  ProductReview,
   PsuEfficiency,
   PsuFormFactor,
   PsuModularity,

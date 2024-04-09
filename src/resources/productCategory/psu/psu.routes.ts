@@ -9,10 +9,15 @@ import {
   updatePsuByIdHandler,
   updatePsusBulkHandler,
 } from "./psu.controller";
+import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
+import { createPsuJoiSchema, updatePsuJoiSchema } from "./psu.validation";
 
 const psuRouter = Router();
 
-psuRouter.route("/").get(getQueriedPsusHandler).post(createNewPsuHandler);
+psuRouter
+  .route("/")
+  .get(getQueriedPsusHandler)
+  .post(validateSchemaMiddleware(createPsuJoiSchema, "psuSchema"), createNewPsuHandler);
 
 // separate route for safety reasons (as it deletes all documents in the collection)
 psuRouter.route("/delete-all").delete(deleteAllPsusHandler);
@@ -25,6 +30,6 @@ psuRouter
   .route("/:psuId")
   .get(getPsuByIdHandler)
   .delete(deleteAPsuHandler)
-  .patch(updatePsuByIdHandler);
+  .patch(validateSchemaMiddleware(updatePsuJoiSchema), updatePsuByIdHandler);
 
 export { psuRouter };
