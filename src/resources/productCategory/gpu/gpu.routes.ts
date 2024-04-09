@@ -9,10 +9,15 @@ import {
   updateGpuByIdHandler,
   updateGpusBulkHandler,
 } from "./gpu.controller";
+import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
+import { createGpuJoiSchema, updateGpuJoiSchema } from "./gpu.validation";
 
 const gpuRouter = Router();
 
-gpuRouter.route("/").get(getQueriedGpusHandler).post(createNewGpuHandler);
+gpuRouter
+  .route("/")
+  .get(getQueriedGpusHandler)
+  .post(validateSchemaMiddleware(createGpuJoiSchema, "gpuSchema"), createNewGpuHandler);
 
 // separate route for safety reasons (as it deletes all documents in the collection)
 gpuRouter.route("/delete-all").delete(deleteAllGpusHandler);
@@ -25,6 +30,6 @@ gpuRouter
   .route("/:gpuId")
   .get(getGpuByIdHandler)
   .delete(deleteAGpuHandler)
-  .patch(updateGpuByIdHandler);
+  .patch(validateSchemaMiddleware(updateGpuJoiSchema), updateGpuByIdHandler);
 
 export { gpuRouter };
