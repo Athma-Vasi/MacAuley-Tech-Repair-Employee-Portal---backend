@@ -9,10 +9,18 @@ import {
   updateKeyboardByIdHandler,
   updateKeyboardsBulkHandler,
 } from "./keyboard.controller";
+import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
+import { createKeyboardJoiSchema, updateKeyboardJoiSchema } from "./keyboard.validation";
 
 const keyboardRouter = Router();
 
-keyboardRouter.route("/").get(getQueriedKeyboardsHandler).post(createNewKeyboardHandler);
+keyboardRouter
+  .route("/")
+  .get(getQueriedKeyboardsHandler)
+  .post(
+    validateSchemaMiddleware(createKeyboardJoiSchema, "keyboardSchema"),
+    createNewKeyboardHandler
+  );
 
 // separate route for safety reasons (as it deletes all documents in the collection)
 keyboardRouter.route("/delete-all").delete(deleteAllKeyboardsHandler);
@@ -28,6 +36,6 @@ keyboardRouter
   .route("/:keyboardId")
   .get(getKeyboardByIdHandler)
   .delete(deleteAKeyboardHandler)
-  .patch(updateKeyboardByIdHandler);
+  .patch(validateSchemaMiddleware(updateKeyboardJoiSchema), updateKeyboardByIdHandler);
 
 export { keyboardRouter };
