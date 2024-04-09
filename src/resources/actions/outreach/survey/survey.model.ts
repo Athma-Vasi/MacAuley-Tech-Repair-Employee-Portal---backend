@@ -49,7 +49,6 @@ type SurveySchema = {
   sendTo: SurveyRecipient;
   expiryDate: NativeDate;
   questions: Array<SurveyQuestion>;
-
   surveyStatistics: SurveyStatistics[];
 };
 

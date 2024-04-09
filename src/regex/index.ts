@@ -496,7 +496,32 @@ const USER_ROLES_REGEX = /^(Admin|Employee|Manager)$/;
 const EVENT_KIND_REGEX =
   /^(Webinar|Workshop|Seminar|Conference|Networking|Tech Talk|Charity|Team Building|Awards|Other)$/;
 
+/**
+ * - /^(Executive Management|Store Administration|Office Administration|Accounting|Human Resources|Sales|Marketing|Information Technology|Repair Technicians|Field Service Technicians|Logistics and Inventory|Customer Service|Maintenance|All)$/
+ * - matches the following survey recipient options: Executive Management, Store Administration, Office Administration, Accounting, Human Resources, Sales, Marketing, Information Technology, Repair Technicians, Field Service Technicians, Logistics and Inventory, Customer Service, Maintenance, All
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const SURVEY_RECIPIENT_REGEX =
+  /^(Executive Management|Store Administration|Office Administration|Accounting|Human Resources|Sales|Marketing|Information Technology|Repair Technicians|Field Service Technicians|Logistics and Inventory|Customer Service|Maintenance|All)$/;
+
+/**
+ * - /^(chooseOne|chooseAny|rating)$/
+ * - matches the following survey response kinds: chooseOne, chooseAny, rating
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const SURVEY_RESPONSE_KIND_REGEX = /^(chooseOne|chooseAny|rating)$/;
+
+/**
+ * - /^(agreeDisagree|radio|checkbox|emotion|stars)$/
+ * - matches the following survey response input types: agreeDisagree, radio, checkbox, emotion, stars
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const SURVEY_RESPONSE_INPUT_REGEX = /^(agreeDisagree|radio|checkbox|emotion|stars)$/;
+
 export {
+  SURVEY_RESPONSE_INPUT_REGEX,
+  SURVEY_RESPONSE_KIND_REGEX,
+  SURVEY_RECIPIENT_REGEX,
   EVENT_KIND_REGEX,
   USER_ROLES_REGEX,
   ARTICLE_TITLE_REGEX,
