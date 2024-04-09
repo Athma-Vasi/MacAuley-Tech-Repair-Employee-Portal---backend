@@ -9,13 +9,21 @@ import {
   updateComputerCaseByIdHandler,
   updateComputerCasesBulkHandler,
 } from "./computerCase.controller";
+import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
+import {
+  createComputerCaseJoiSchema,
+  updateComputerCaseJoiSchema,
+} from "./computerCase.validation";
 
 const computerCaseRouter = Router();
 
 computerCaseRouter
   .route("/")
   .get(getQueriedComputerCasesHandler)
-  .post(createNewComputerCaseHandler);
+  .post(
+    validateSchemaMiddleware(createComputerCaseJoiSchema, "computerCaseSchema"),
+    createNewComputerCaseHandler
+  );
 
 // separate route for safety reasons (as it deletes all documents in the collection)
 computerCaseRouter.route("/delete-all").delete(deleteAllComputerCasesHandler);
@@ -31,6 +39,9 @@ computerCaseRouter
   .route("/:computerCaseId")
   .get(getComputerCaseByIdHandler)
   .delete(deleteAComputerCaseHandler)
-  .patch(updateComputerCaseByIdHandler);
+  .patch(
+    validateSchemaMiddleware(updateComputerCaseJoiSchema),
+    updateComputerCaseByIdHandler
+  );
 
 export { computerCaseRouter };
