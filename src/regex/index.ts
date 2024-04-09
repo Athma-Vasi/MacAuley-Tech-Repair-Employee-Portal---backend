@@ -995,7 +995,15 @@ const PARTS_NEEDED_REGEX =
 const REPAIR_STATUS_REGEX =
   /^(In progress|Waiting for parts|Awaiting approval|Completed|Cancelled)$/;
 
+/**
+ * - /^(Pending|Received|Cancelled)$/
+ * - matches the following RMA statuses: Pending, Received, Cancelled
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const RMA_STATUS_REGEX = /^(Pending|Received|Cancelled)$/;
+
 export {
+  RMA_STATUS_REGEX,
   REPAIR_STATUS_REGEX,
   PARTS_NEEDED_REGEX,
   REQUIRED_REPAIRS_REGEX,

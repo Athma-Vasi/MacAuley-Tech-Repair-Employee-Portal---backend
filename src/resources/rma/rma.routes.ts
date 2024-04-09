@@ -13,12 +13,17 @@ import {
   getQueriedRMAsByUserHandler,
   updateRMAByIdHandler,
 } from "./rma.controller";
+import { validateSchemaMiddleware } from "../../middlewares/validateSchema";
+import { createRMAJoiSchema, updateRMAJoiSchema } from "./rma.validation";
 
 const rmaRouter = Router();
 
 rmaRouter.use(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults);
 
-rmaRouter.route("/").post(createNewRMAHandler).get(getQueriedRMAsHandler);
+rmaRouter
+  .route("/")
+  .post(validateSchemaMiddleware(createRMAJoiSchema, "rmaSchema"), createNewRMAHandler)
+  .get(getQueriedRMAsHandler);
 
 rmaRouter.route("/user").get(getQueriedRMAsByUserHandler);
 
@@ -34,7 +39,7 @@ rmaRouter
 rmaRouter
   .route("/:rmaId")
   .get(getRMAByIdHandler)
-  .patch(updateRMAByIdHandler)
-  .delete(deleteRMAHandler);
+  .delete(deleteRMAHandler)
+  .patch(validateSchemaMiddleware(updateRMAJoiSchema), updateRMAByIdHandler);
 
 export { rmaRouter };
