@@ -481,7 +481,24 @@ const ARTICLE_CONTENT_REGEX = /^(?=.*[A-Za-z0-9])[\w\s.,!?():;"'-]{1,2000}$/i;
  */
 const ARTICLE_TITLE_REGEX = /^(?=.*[A-Za-z0-9])[\w\s.,!?():;"'-]{3,150}$/i;
 
+/**
+ * - /^(Admin|Employee|Manager)$/
+ * - matches the following user roles: Admin, Employee, Manager
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const USER_ROLES_REGEX = /^(Admin|Employee|Manager)$/;
+
+/**
+ * - /^(Webinar|Workshop|Seminar|Conference|Networking|Tech Talk|Charity|Team Building|Awards|Other)$/
+ * - matches the following event kinds: Webinar, Workshop, Seminar, Conference, Networking, Tech Talk, Charity, Team Building, Awards, Other
+ * - ^ and $ ensure that the entire string matches the regex.
+ */
+const EVENT_KIND_REGEX =
+  /^(Webinar|Workshop|Seminar|Conference|Networking|Tech Talk|Charity|Team Building|Awards|Other)$/;
+
 export {
+  EVENT_KIND_REGEX,
+  USER_ROLES_REGEX,
   ARTICLE_TITLE_REGEX,
   ARTICLE_CONTENT_REGEX,
   PRINTER_MAKE_REGEX,

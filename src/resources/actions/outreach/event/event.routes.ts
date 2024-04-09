@@ -10,10 +10,18 @@ import {
   createNewEventsBulkHandler,
   updateEventsBulkHandler,
 } from "./event.controller";
+import { validateSchemaMiddleware } from "../../../../middlewares/validateSchema";
+import { createEventJoiSchema, updateEventJoiSchema } from "./event.validation";
 
 const eventRouter = Router();
 
-eventRouter.route("/").get(getQueriedEventsHandler).post(createNewEventHandler);
+eventRouter
+  .route("/")
+  .get(getQueriedEventsHandler)
+  .post(
+    validateSchemaMiddleware(createEventJoiSchema, "eventSchema"),
+    createNewEventHandler
+  );
 
 eventRouter.route("/delete-all").delete(deleteAllEventsHandler);
 
@@ -26,6 +34,6 @@ eventRouter
   .route("/:eventId")
   .get(getEventByIdHandler)
   .delete(deleteEventHandler)
-  .patch(updateEventByIdHandler);
+  .patch(validateSchemaMiddleware(updateEventJoiSchema), updateEventByIdHandler);
 
 export { eventRouter };
