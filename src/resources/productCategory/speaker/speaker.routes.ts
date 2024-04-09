@@ -9,10 +9,18 @@ import {
   updateSpeakerByIdHandler,
   updateSpeakersBulkHandler,
 } from "./speaker.controller";
+import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
+import { createSpeakerJoiSchema, updateSpeakerJoiSchema } from "./speaker.validation";
 
 const speakerRouter = Router();
 
-speakerRouter.route("/").get(getQueriedSpeakersHandler).post(createNewSpeakerHandler);
+speakerRouter
+  .route("/")
+  .get(getQueriedSpeakersHandler)
+  .post(
+    validateSchemaMiddleware(createSpeakerJoiSchema, "speakerSchema"),
+    createNewSpeakerHandler
+  );
 
 // separate route for safety reasons (as it deletes all documents in the collection)
 speakerRouter.route("/delete-all").delete(deleteAllSpeakersHandler);
@@ -28,6 +36,6 @@ speakerRouter
   .route("/:speakerId")
   .get(getSpeakerByIdHandler)
   .delete(deleteASpeakerHandler)
-  .patch(updateSpeakerByIdHandler);
+  .patch(validateSchemaMiddleware(updateSpeakerJoiSchema), updateSpeakerByIdHandler);
 
 export { speakerRouter };
