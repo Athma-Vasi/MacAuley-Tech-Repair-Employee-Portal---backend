@@ -9,10 +9,15 @@ import {
   updateRamByIdHandler,
   updateRamsBulkHandler,
 } from "./ram.controller";
+import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
+import { createRamJoiSchema, updateRamJoiSchema } from "./ram.validation";
 
 const ramRouter = Router();
 
-ramRouter.route("/").get(getQueriedRamsHandler).post(createNewRamHandler);
+ramRouter
+  .route("/")
+  .get(getQueriedRamsHandler)
+  .post(validateSchemaMiddleware(createRamJoiSchema, "ramSchema"), createNewRamHandler);
 
 // separate route for safety reasons (as it deletes all documents in the collection)
 ramRouter.route("/delete-all").delete(deleteAllRamsHandler);
@@ -25,6 +30,6 @@ ramRouter
   .route("/:ramId")
   .get(getRamByIdHandler)
   .delete(deleteARamHandler)
-  .patch(updateRamByIdHandler);
+  .patch(validateSchemaMiddleware(updateRamJoiSchema), updateRamByIdHandler);
 
 export { ramRouter };

@@ -5,7 +5,6 @@ import type {
   MemoryType,
   MemoryUnit,
   ProductAvailability,
-  ProductReview,
   StarRatingsCount,
   WeightUnit,
 } from "../productCategory.types";
