@@ -9,13 +9,21 @@ import {
   updateHeadphoneByIdHandler,
   updateHeadphonesBulkHandler,
 } from "./headphone.controller";
+import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
+import {
+  createHeadphoneJoiSchema,
+  updateHeadphoneJoiSchema,
+} from "./headphone.validation";
 
 const headphoneRouter = Router();
 
 headphoneRouter
   .route("/")
   .get(getQueriedHeadphonesHandler)
-  .post(createNewHeadphoneHandler);
+  .post(
+    validateSchemaMiddleware(createHeadphoneJoiSchema, "headphoneSchema"),
+    createNewHeadphoneHandler
+  );
 
 // separate route for safety reasons (as it deletes all documents in the collection)
 headphoneRouter.route("/delete-all").delete(deleteAllHeadphonesHandler);
@@ -31,6 +39,6 @@ headphoneRouter
   .route("/:headphoneId")
   .get(getHeadphoneByIdHandler)
   .delete(deleteAHeadphoneHandler)
-  .patch(updateHeadphoneByIdHandler);
+  .patch(validateSchemaMiddleware(updateHeadphoneJoiSchema), updateHeadphoneByIdHandler);
 
 export { headphoneRouter };
