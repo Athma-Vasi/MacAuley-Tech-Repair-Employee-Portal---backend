@@ -9,13 +9,21 @@ import {
   updateDesktopComputerByIdHandler,
   updateDesktopComputersBulkHandler,
 } from "./desktopComputer.controller";
+import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
+import {
+  createDesktopComputerJoiSchema,
+  updateDesktopComputerJoiSchema,
+} from "./desktopComputer.validation";
 
 const desktopComputerRouter = Router();
 
 desktopComputerRouter
   .route("/")
   .get(getQueriedDesktopComputersHandler)
-  .post(createNewDesktopComputerHandler);
+  .post(
+    validateSchemaMiddleware(createDesktopComputerJoiSchema, "desktopComputerSchema"),
+    createNewDesktopComputerHandler
+  );
 
 // separate route for safety reasons (as it deletes all documents in the collection)
 desktopComputerRouter.route("/delete-all").delete(deleteAllDesktopComputersHandler);
@@ -31,6 +39,9 @@ desktopComputerRouter
   .route("/:desktopComputerId")
   .get(getDesktopComputerByIdHandler)
   .delete(deleteADesktopComputerHandler)
-  .patch(updateDesktopComputerByIdHandler);
+  .patch(
+    validateSchemaMiddleware(updateDesktopComputerJoiSchema),
+    updateDesktopComputerByIdHandler
+  );
 
 export { desktopComputerRouter };
