@@ -9,13 +9,21 @@ import {
   updateMicrophoneByIdHandler,
   updateMicrophonesBulkHandler,
 } from "./microphone.controller";
+import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
+import {
+  createMicrophoneJoiSchema,
+  updateMicrophoneJoiSchema,
+} from "./microphone.validation";
 
 const microphoneRouter = Router();
 
 microphoneRouter
   .route("/")
   .get(getQueriedMicrophonesHandler)
-  .post(createNewMicrophoneHandler);
+  .post(
+    validateSchemaMiddleware(createMicrophoneJoiSchema, "microphoneSchema"),
+    createNewMicrophoneHandler
+  );
 
 // separate route for safety reasons (as it deletes all documents in the collection)
 microphoneRouter.route("/delete-all").delete(deleteAllMicrophonesHandler);
@@ -31,6 +39,9 @@ microphoneRouter
   .route("/:microphoneId")
   .get(getMicrophoneByIdHandler)
   .delete(deleteAMicrophoneHandler)
-  .patch(updateMicrophoneByIdHandler);
+  .patch(
+    validateSchemaMiddleware(updateMicrophoneJoiSchema),
+    updateMicrophoneByIdHandler
+  );
 
 export { microphoneRouter };
