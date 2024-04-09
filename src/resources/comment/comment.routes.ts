@@ -13,12 +13,20 @@ import {
 } from "./comment.controller";
 
 import { verifyJWTMiddleware, verifyRoles, assignQueryDefaults } from "../../middlewares";
+import { validateSchemaMiddleware } from "../../middlewares/validateSchema";
+import { createCommentJoiSchema, updateCommentJoiSchema } from "./comment.validation";
 
 const commentRouter = Router();
 
 commentRouter.use(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults);
 
-commentRouter.route("/").get(getQueriedCommentsHandler).post(createNewCommentHandler);
+commentRouter
+  .route("/")
+  .get(getQueriedCommentsHandler)
+  .post(
+    validateSchemaMiddleware(createCommentJoiSchema, "commentSchema"),
+    createNewCommentHandler
+  );
 
 commentRouter.route("/delete-all").delete(deleteAllCommentsHandler);
 
@@ -38,6 +46,6 @@ commentRouter
   .route("/:commentId")
   .get(getCommentByIdHandler)
   .delete(deleteCommentHandler)
-  .patch(updateCommentByIdHandler);
+  .patch(validateSchemaMiddleware(updateCommentJoiSchema), updateCommentByIdHandler);
 
 export { commentRouter };
