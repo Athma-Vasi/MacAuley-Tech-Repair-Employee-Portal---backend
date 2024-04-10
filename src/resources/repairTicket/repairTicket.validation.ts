@@ -2,6 +2,7 @@ import Joi from "joi";
 import {
   CURRENCY_REGEX,
   GRAMMAR_TEXTAREA_INPUT_REGEX,
+  NOTE_TEXT_AREA_REGEX,
   PARTS_NEEDED_REGEX,
   REPAIR_CATEGORY_REGEX,
   REPAIR_STATUS_REGEX,
@@ -24,7 +25,7 @@ const createRepairTicketJoiSchema = Joi.object({
     .items(Joi.string().regex(REQUIRED_REPAIRS_REGEX))
     .required(),
   partsNeeded: Joi.array().items(Joi.string().regex(PARTS_NEEDED_REGEX)).required(),
-  partsNeededModels: Joi.string().regex(SERIAL_ID_REGEX).required(),
+  partsNeededModels: Joi.string().regex(NOTE_TEXT_AREA_REGEX).required(),
   partUnderWarranty: Joi.boolean().required(),
   estimatedRepairCostCurrency: Joi.string().regex(CURRENCY_REGEX).required(),
   estimatedRepairCost: Joi.number().required(),
@@ -51,7 +52,7 @@ const updateRepairTicketJoiSchema = Joi.object({
     .items(Joi.string().regex(REQUIRED_REPAIRS_REGEX))
     .optional(),
   partsNeeded: Joi.array().items(Joi.string().regex(PARTS_NEEDED_REGEX)).optional(),
-  partsNeededModels: Joi.string().regex(SERIAL_ID_REGEX).optional(),
+  partsNeededModels: Joi.string().regex(NOTE_TEXT_AREA_REGEX).optional(),
   partUnderWarranty: Joi.boolean().optional(),
   estimatedRepairCostCurrency: Joi.string().regex(CURRENCY_REGEX).optional(),
   estimatedRepairCost: Joi.number().optional(),
