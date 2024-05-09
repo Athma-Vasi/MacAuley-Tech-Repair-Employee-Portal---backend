@@ -11,7 +11,7 @@ type ErrorLogSchema = {
   timestamp: Date;
 };
 
-type ErrorDocument = ErrorLogSchema & {
+type ErrorLogDocument = ErrorLogSchema & {
   _id: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
@@ -75,6 +75,6 @@ errorLogSchema.index({
   requestBody: "text",
 });
 
-const ErrorModel = model<ErrorDocument>("Error", errorLogSchema);
+const ErrorLogModel = model<ErrorLogDocument>("ErrorLog", errorLogSchema);
 
-export { ErrorModel, ErrorLogSchema, ErrorDocument };
+export { ErrorLogModel, ErrorLogSchema, ErrorLogDocument };
