@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import { RequestAfterJWTVerification } from "../auth";
 import { UserRoles } from "../user";
-import { ErrorDocument, ErrorLogSchema } from "./errorLog.model";
+import { ErrorLogDocument, ErrorLogSchema } from "./errorLog.model";
 import {
   DocumentUpdateOperation,
   GetQueriedResourceByUserRequest,
@@ -42,7 +42,7 @@ interface UpdateErrorLogByIdRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    documentUpdate: DocumentUpdateOperation<ErrorDocument>;
+    documentUpdate: DocumentUpdateOperation<ErrorLogDocument>;
   };
   params: { errorLogId: string };
 }
@@ -87,7 +87,7 @@ interface UpdateErrorLogsBulkRequest extends RequestAfterJWTVerification {
     sessionId: Types.ObjectId;
     errorLogFields: {
       errorLogId: Types.ObjectId;
-      documentUpdate: DocumentUpdateOperation<ErrorDocument>;
+      documentUpdate: DocumentUpdateOperation<ErrorLogDocument>;
     }[];
   };
 }
