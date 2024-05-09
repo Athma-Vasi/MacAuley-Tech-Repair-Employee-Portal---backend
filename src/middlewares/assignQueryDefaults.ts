@@ -29,7 +29,7 @@ function assignQueryDefaults(request: Request, _response: Response, next: NextFu
    * Object.defineProperty is used to satisfy the typescript compiler
    */
 
-  const propertyDescriptor: PropertyDescriptor = {
+  const PROPERTY_DESCRIPTOR: PropertyDescriptor = {
     writable: true,
     enumerable: true,
     configurable: true,
@@ -45,7 +45,7 @@ function assignQueryDefaults(request: Request, _response: Response, next: NextFu
         options: { sort: { createdAt: -1, _id: -1 }, limit: 10, skip: 0 },
         filter: {},
       },
-      ...propertyDescriptor,
+      ...PROPERTY_DESCRIPTOR,
     });
     next();
     return;
@@ -71,14 +71,14 @@ function assignQueryDefaults(request: Request, _response: Response, next: NextFu
         }
         Object.defineProperty(query, operator, {
           value: [value],
-          ...propertyDescriptor,
+          ...PROPERTY_DESCRIPTOR,
         });
       }
     });
 
     Object.defineProperty(queryObject, queryKey, {
       value: query,
-      ...propertyDescriptor,
+      ...PROPERTY_DESCRIPTOR,
     });
   });
 
@@ -106,7 +106,7 @@ function assignQueryDefaults(request: Request, _response: Response, next: NextFu
     if (FIND_QUERY_OPTIONS_KEYWORDS.has(key)) {
       Object.defineProperty(options, key, {
         value,
-        ...propertyDescriptor,
+        ...PROPERTY_DESCRIPTOR,
       });
     } // else they will be part of the filter object passed in same method
     else {
@@ -116,7 +116,7 @@ function assignQueryDefaults(request: Request, _response: Response, next: NextFu
       if (key === "text") {
         Object.defineProperty(filter, "$text", {
           value,
-          ...propertyDescriptor,
+          ...PROPERTY_DESCRIPTOR,
         });
       }
       // else convert string array into regex array for case insensitive search per field
@@ -152,14 +152,14 @@ function assignQueryDefaults(request: Request, _response: Response, next: NextFu
 
           Object.defineProperty(filter, key, {
             value: { $in: inValue },
-            ...propertyDescriptor,
+            ...PROPERTY_DESCRIPTOR,
           });
         }
         // ex: { field: { $eq: 'searchTerm' } }
         else {
           Object.defineProperty(filter, key, {
             value,
-            ...propertyDescriptor,
+            ...PROPERTY_DESCRIPTOR,
           });
         }
       }
@@ -171,7 +171,7 @@ function assignQueryDefaults(request: Request, _response: Response, next: NextFu
   if (!Object.hasOwn(options, "sort")) {
     Object.defineProperty(options, "sort", {
       value: { createdAt: -1 },
-      ...propertyDescriptor,
+      ...PROPERTY_DESCRIPTOR,
     });
   }
   // if there is only one sort field, _id field with corresponding sort direction is added for consistent results
@@ -182,7 +182,7 @@ function assignQueryDefaults(request: Request, _response: Response, next: NextFu
     const sortDirection = Number(Object.values(sort)[0]) < 0 ? -1 : 1;
     Object.defineProperty(sort, "_id", {
       value: sortDirection,
-      ...propertyDescriptor,
+      ...PROPERTY_DESCRIPTOR,
     });
   }
 
@@ -194,17 +194,17 @@ function assignQueryDefaults(request: Request, _response: Response, next: NextFu
   skip = skip < 1 ? 0 : skip;
   Object.defineProperty(options, "limit", {
     value: limit,
-    ...propertyDescriptor,
+    ...PROPERTY_DESCRIPTOR,
   });
   Object.defineProperty(options, "skip", {
     value: skip,
-    ...propertyDescriptor,
+    ...PROPERTY_DESCRIPTOR,
   });
 
   // overwrite query object with new values
   Object.defineProperty(request, "query", {
     value: { projection, options, filter },
-    ...propertyDescriptor,
+    ...PROPERTY_DESCRIPTOR,
   });
 
   // add newQueryFlag and totalDocuments to request body
@@ -214,7 +214,7 @@ function assignQueryDefaults(request: Request, _response: Response, next: NextFu
       newQueryFlag: query.newQueryFlag,
       totalDocuments: query.totalDocuments,
     },
-    ...propertyDescriptor,
+    ...PROPERTY_DESCRIPTOR,
   });
 
   console.group("assignQueryDefaults");
@@ -289,7 +289,7 @@ export { assignQueryDefaults };
 //       if (!Object.hasOwn(projection, "__v")) {
 //         Object.defineProperty(projection, "__v", {
 //           value: 0,
-//           ...propertyDescriptor,
+//           ...PROPERTY_DESCRIPTOR,
 //         });
 //       }
 //     }

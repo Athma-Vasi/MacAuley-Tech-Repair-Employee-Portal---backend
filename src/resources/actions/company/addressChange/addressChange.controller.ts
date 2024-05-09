@@ -34,6 +34,7 @@ import {
   ResourceRequestServerResponse,
 } from "../../../../types";
 import { removeUndefinedAndNullValues } from "../../../../utils";
+import createHttpError from "http-errors";
 
 // @desc   Create a new address change request
 // @route  POST api/v1/actions/company/address-change
