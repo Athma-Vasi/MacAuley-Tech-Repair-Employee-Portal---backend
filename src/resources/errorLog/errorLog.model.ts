@@ -3,6 +3,7 @@ import { Schema, Types, model } from "mongoose";
 type ErrorLogSchema = {
   userId: string;
   username: string;
+  sessionId: string;
   message: string;
   stack: string;
   requestBody: string;
@@ -30,6 +31,12 @@ const errorLogSchema = new Schema<ErrorLogSchema>(
       type: String,
       required: false,
       default: "Username was not provided",
+    },
+    sessionId: {
+      type: String,
+      required: false,
+      default: "Session ID was not provided",
+      index: true,
     },
     message: {
       type: String,
@@ -62,6 +69,7 @@ const errorLogSchema = new Schema<ErrorLogSchema>(
 
 errorLogSchema.index({
   username: "text",
+  sessionId: "text",
   message: "text",
   stack: "text",
   requestBody: "text",
@@ -69,4 +77,4 @@ errorLogSchema.index({
 
 const ErrorModel = model<ErrorDocument>("Error", errorLogSchema);
 
-export {};
+export { ErrorModel, ErrorLogSchema, ErrorDocument };
