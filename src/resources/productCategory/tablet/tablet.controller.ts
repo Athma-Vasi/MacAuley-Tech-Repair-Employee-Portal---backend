@@ -1,8 +1,7 @@
 import expressAsyncController from "express-async-handler";
-import createHttpError from "http-errors";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response, NextFunction } from "express";
+import type { NextFunction, Response } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewTabletBulkRequest,
@@ -35,6 +34,7 @@ import { deleteFileUploadByIdService } from "../../fileUpload";
 
 import { deleteAProductReviewService } from "../../productReview";
 import { removeUndefinedAndNullValues } from "../../../utils";
+import createHttpError from "http-errors";
 
 // @desc   Create new tablet
 // @route  POST /api/v1/product-category/tablet
@@ -42,19 +42,14 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 const createNewTabletController = expressAsyncController(
   async (
     request: CreateNewTabletRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<TabletDocument>>
+    response: Response<ResourceRequestServerResponse<TabletDocument>>,
+    next: NextFunction
   ) => {
     const { tabletSchema } = request.body;
 
     const tabletDocument: TabletDocument = await createNewTabletService(tabletSchema);
-
     if (!tabletDocument) {
-      response.status(400).json({
-        message: "Could not create new tablet",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Could not create new tablet"));
     }
 
     response.status(201).json({
@@ -71,8 +66,8 @@ const createNewTabletController = expressAsyncController(
 const createNewTabletBulkController = expressAsyncController(
   async (
     request: CreateNewTabletBulkRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<TabletDocument>>
+    response: Response<ResourceRequestServerResponse<TabletDocument>>,
+    next: NextFunction
   ) => {
     const { tabletSchemas } = request.body;
 
@@ -83,10 +78,8 @@ const createNewTabletBulkController = expressAsyncController(
       })
     );
 
-    // filter out any tablets that were not created
     const successfullyCreatedTablets = newTablets.filter((tablet) => tablet);
 
-    // check if any tablets were created
     if (successfullyCreatedTablets.length === tabletSchemas.length) {
       response.status(201).json({
         message: `Successfully created ${successfullyCreatedTablets.length} tablets`,
@@ -119,8 +112,8 @@ const createNewTabletBulkController = expressAsyncController(
 const updateTabletsBulkController = expressAsyncController(
   async (
     request: UpdateTabletsBulkRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<TabletDocument>>
+    response: Response<ResourceRequestServerResponse<TabletDocument>>,
+    next: NextFunction
   ) => {
     const { tabletFields } = request.body;
 
@@ -141,12 +134,10 @@ const updateTabletsBulkController = expressAsyncController(
       })
     );
 
-    // filter out any tablets that were not updated
     const successfullyUpdatedTablets = updatedTablets.filter(
       removeUndefinedAndNullValues
     );
 
-    // check if any tablets were updated
     if (successfullyUpdatedTablets.length === tabletFields.length) {
       response.status(201).json({
         message: `Successfully updated ${successfullyUpdatedTablets.length} tablets`,
@@ -193,12 +184,12 @@ const getQueriedTabletsController = expressAsyncController(
       });
     }
 
-    // get all tablets
     const tablets = await getQueriedTabletsService({
       filter: filter as FilterQuery<TabletDocument> | undefined,
       projection: projection as QueryOptions<TabletDocument>,
       options: options as QueryOptions<TabletDocument>,
     });
+
     if (tablets.length === 0) {
       response.status(200).json({
         message: "No tablets that match query parameters were found",
@@ -224,16 +215,14 @@ const getQueriedTabletsController = expressAsyncController(
 const getTabletByIdController = expressAsyncController(
   async (
     request: GetTabletByIdRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<TabletDocument>>
+    response: Response<ResourceRequestServerResponse<TabletDocument>>,
+    next: NextFunction
   ) => {
     const tabletId = request.params.tabletId;
 
-    // get tablet by id
     const tablet = await getTabletByIdService(tabletId);
     if (!tablet) {
-      response.status(404).json({ message: "Tablet not found", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Tablet does not exist"));
     }
 
     response.status(200).json({
@@ -249,15 +238,14 @@ const getTabletByIdController = expressAsyncController(
 const updateTabletByIdController = expressAsyncController(
   async (
     request: UpdateTabletByIdRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<TabletDocument>>
+    response: Response<ResourceRequestServerResponse<TabletDocument>>,
+    next: NextFunction
   ) => {
     const { tabletId } = request.params;
     const {
       documentUpdate: { fields, updateOperator },
     } = request.body;
 
-    // update tablet
     const updatedTablet = await updateTabletByIdService({
       _id: tabletId,
       fields,
@@ -265,11 +253,7 @@ const updateTabletByIdController = expressAsyncController(
     });
 
     if (!updatedTablet) {
-      response.status(400).json({
-        message: "Tablet could not be updated",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Could not update tablet"));
     }
 
     response.status(200).json({
@@ -285,13 +269,11 @@ const updateTabletByIdController = expressAsyncController(
 const deleteAllTabletsController = expressAsyncController(
   async (
     _request: DeleteAllTabletsRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<TabletDocument>>
+    response: Response<ResourceRequestServerResponse<TabletDocument>>,
+    next: NextFunction
   ) => {
-    // grab all tablets file upload ids
     const uploadedFilesIds = await returnAllTabletsUploadedFileIdsService();
 
-    // delete all file uploads associated with all tablets
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -301,14 +283,11 @@ const deleteAllTabletsController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Could not delete all file uploads")
+      );
     }
 
-    // delete all reviews associated with all tablets
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -316,22 +295,16 @@ const deleteAllTabletsController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Could not delete all reviews")
+      );
     }
 
-    // delete all tablets
     const deleteTabletsResult: DeleteResult = await deleteAllTabletsService();
-
     if (deleteTabletsResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "All tablets could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Could not delete all tablets")
+      );
     }
 
     response.status(200).json({ message: "All tablets deleted", resourceData: [] });
@@ -344,23 +317,18 @@ const deleteAllTabletsController = expressAsyncController(
 const deleteATabletController = expressAsyncController(
   async (
     request: DeleteATabletRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<TabletDocument>>
+    response: Response<ResourceRequestServerResponse<TabletDocument>>,
+    next: NextFunction
   ) => {
     const tabletId = request.params.tabletId;
 
-    // check if tablet exists
     const tabletExists = await getTabletByIdService(tabletId);
     if (!tabletExists) {
-      response.status(404).json({ message: "Tablet does not exist", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Tablet does not exist"));
     }
 
-    // find all file uploads associated with this tablet
-    // if it is not an array, it is made to be an array
     const uploadedFilesIds = [...tabletExists.uploadedFilesIds];
 
-    // delete all file uploads associated with all tablets
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -370,14 +338,11 @@ const deleteATabletController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Could not delete all file uploads")
+      );
     }
 
-    // delete all reviews associated with all tablets
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -385,22 +350,14 @@ const deleteATabletController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Could not delete all reviews")
+      );
     }
 
-    // delete tablet by id
     const deleteTabletResult: DeleteResult = await deleteATabletService(tabletId);
-
     if (deleteTabletResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "Tablet could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Could not delete tablet"));
     }
 
     response.status(200).json({ message: "Tablet deleted", resourceData: [] });

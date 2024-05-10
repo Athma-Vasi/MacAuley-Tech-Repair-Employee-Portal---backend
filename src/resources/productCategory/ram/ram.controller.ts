@@ -1,8 +1,7 @@
 import expressAsyncController from "express-async-handler";
-import createHttpError from "http-errors";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response, NextFunction } from "express";
+import type { NextFunction, Response } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewRamBulkRequest,
@@ -35,6 +34,7 @@ import { deleteFileUploadByIdService } from "../../fileUpload";
 
 import { deleteAProductReviewService } from "../../productReview";
 import { removeUndefinedAndNullValues } from "../../../utils";
+import createHttpError from "http-errors";
 
 // @desc   Create new ram
 // @route  POST /api/v1/product-category/ram
@@ -42,19 +42,14 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 const createNewRamController = expressAsyncController(
   async (
     request: CreateNewRamRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<RamDocument>>
+    response: Response<ResourceRequestServerResponse<RamDocument>>,
+    next: NextFunction
   ) => {
     const { ramSchema } = request.body;
 
     const ramDocument: RamDocument = await createNewRamService(ramSchema);
-
     if (!ramDocument) {
-      response.status(400).json({
-        message: "Could not create new ram",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Ram could not be created"));
     }
 
     response.status(201).json({
@@ -71,8 +66,8 @@ const createNewRamController = expressAsyncController(
 const createNewRamBulkController = expressAsyncController(
   async (
     request: CreateNewRamBulkRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<RamDocument>>
+    response: Response<ResourceRequestServerResponse<RamDocument>>,
+    next: NextFunction
   ) => {
     const { ramSchemas } = request.body;
 
@@ -83,10 +78,8 @@ const createNewRamBulkController = expressAsyncController(
       })
     );
 
-    // filter out any rams that were not created
     const successfullyCreatedRams = newRams.filter((ram) => ram);
 
-    // check if any rams were created
     if (successfullyCreatedRams.length === ramSchemas.length) {
       response.status(201).json({
         message: `Successfully created ${successfullyCreatedRams.length} rams`,
@@ -119,8 +112,8 @@ const createNewRamBulkController = expressAsyncController(
 const updateRamsBulkController = expressAsyncController(
   async (
     request: UpdateRamsBulkRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<RamDocument>>
+    response: Response<ResourceRequestServerResponse<RamDocument>>,
+    next: NextFunction
   ) => {
     const { ramFields } = request.body;
 
@@ -141,10 +134,8 @@ const updateRamsBulkController = expressAsyncController(
       })
     );
 
-    // filter out any rams that were not updated
     const successfullyUpdatedRams = updatedRams.filter(removeUndefinedAndNullValues);
 
-    // check if any rams were updated
     if (successfullyUpdatedRams.length === ramFields.length) {
       response.status(201).json({
         message: `Successfully updated ${successfullyUpdatedRams.length} rams`,
@@ -191,12 +182,12 @@ const getQueriedRamsController = expressAsyncController(
       });
     }
 
-    // get all rams
     const rams = await getQueriedRamsService({
       filter: filter as FilterQuery<RamDocument> | undefined,
       projection: projection as QueryOptions<RamDocument>,
       options: options as QueryOptions<RamDocument>,
     });
+
     if (rams.length === 0) {
       response.status(200).json({
         message: "No rams that match query parameters were found",
@@ -222,16 +213,14 @@ const getQueriedRamsController = expressAsyncController(
 const getRamByIdController = expressAsyncController(
   async (
     request: GetRamByIdRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<RamDocument>>
+    response: Response<ResourceRequestServerResponse<RamDocument>>,
+    next: NextFunction
   ) => {
     const ramId = request.params.ramId;
 
-    // get ram by id
     const ram = await getRamByIdService(ramId);
     if (!ram) {
-      response.status(404).json({ message: "Ram not found", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Ram does not exist"));
     }
 
     response.status(200).json({
@@ -247,15 +236,14 @@ const getRamByIdController = expressAsyncController(
 const updateRamByIdController = expressAsyncController(
   async (
     request: UpdateRamByIdRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<RamDocument>>
+    response: Response<ResourceRequestServerResponse<RamDocument>>,
+    next: NextFunction
   ) => {
     const { ramId } = request.params;
     const {
       documentUpdate: { fields, updateOperator },
     } = request.body;
 
-    // update ram
     const updatedRam = await updateRamByIdService({
       _id: ramId,
       fields,
@@ -263,11 +251,7 @@ const updateRamByIdController = expressAsyncController(
     });
 
     if (!updatedRam) {
-      response.status(400).json({
-        message: "Ram could not be updated",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Ram could not be updated"));
     }
 
     response.status(200).json({
@@ -283,13 +267,11 @@ const updateRamByIdController = expressAsyncController(
 const deleteAllRamsController = expressAsyncController(
   async (
     _request: DeleteAllRamsRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<RamDocument>>
+    response: Response<ResourceRequestServerResponse<RamDocument>>,
+    next: NextFunction
   ) => {
-    // grab all rams file upload ids
     const uploadedFilesIds = await returnAllRamsUploadedFileIdsService();
 
-    // delete all file uploads associated with all rams
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -299,14 +281,11 @@ const deleteAllRamsController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Some file uploads could not be deleted")
+      );
     }
 
-    // delete all reviews associated with all rams
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -314,22 +293,14 @@ const deleteAllRamsController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Some reviews could not be deleted")
+      );
     }
 
-    // delete all rams
     const deleteRamsResult: DeleteResult = await deleteAllRamsService();
-
     if (deleteRamsResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "All rams could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Rams could not be deleted"));
     }
 
     response.status(200).json({ message: "All rams deleted", resourceData: [] });
@@ -342,23 +313,19 @@ const deleteAllRamsController = expressAsyncController(
 const deleteARamController = expressAsyncController(
   async (
     request: DeleteARamRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<RamDocument>>
+    response: Response<ResourceRequestServerResponse<RamDocument>>,
+    next: NextFunction
   ) => {
     const ramId = request.params.ramId;
 
-    // check if ram exists
     const ramExists = await getRamByIdService(ramId);
     if (!ramExists) {
       response.status(404).json({ message: "Ram does not exist", resourceData: [] });
       return;
     }
 
-    // find all file uploads associated with this ram
-    // if it is not an array, it is made to be an array
     const uploadedFilesIds = [...ramExists.uploadedFilesIds];
 
-    // delete all file uploads associated with all rams
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -368,14 +335,11 @@ const deleteARamController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Some file uploads could not be deleted")
+      );
     }
 
-    // delete all reviews associated with all rams
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -383,22 +347,14 @@ const deleteARamController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Some reviews could not be deleted")
+      );
     }
 
-    // delete ram by id
     const deleteRamResult: DeleteResult = await deleteARamService(ramId);
-
     if (deleteRamResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "Ram could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Ram could not be deleted"));
     }
 
     response.status(200).json({ message: "Ram deleted", resourceData: [] });

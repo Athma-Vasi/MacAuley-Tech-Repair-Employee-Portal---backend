@@ -1,8 +1,7 @@
 import expressAsyncController from "express-async-handler";
-import createHttpError from "http-errors";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response, NextFunction } from "express";
+import type { NextFunction, Response } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewSmartphoneBulkRequest,
@@ -35,6 +34,7 @@ import { deleteFileUploadByIdService } from "../../fileUpload";
 
 import { deleteAProductReviewService } from "../../productReview";
 import { removeUndefinedAndNullValues } from "../../../utils";
+import createHttpError from "http-errors";
 
 // @desc   Create new smartphone
 // @route  POST /api/v1/product-category/smartphone
@@ -42,21 +42,18 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 const createNewSmartphoneController = expressAsyncController(
   async (
     request: CreateNewSmartphoneRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<SmartphoneDocument>>
+    response: Response<ResourceRequestServerResponse<SmartphoneDocument>>,
+    next: NextFunction
   ) => {
     const { smartphoneSchema } = request.body;
 
     const smartphoneDocument: SmartphoneDocument = await createNewSmartphoneService(
       smartphoneSchema
     );
-
     if (!smartphoneDocument) {
-      response.status(400).json({
-        message: "Could not create new smartphone",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Smartphone could not be created")
+      );
     }
 
     response.status(201).json({
@@ -73,8 +70,8 @@ const createNewSmartphoneController = expressAsyncController(
 const createNewSmartphoneBulkController = expressAsyncController(
   async (
     request: CreateNewSmartphoneBulkRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<SmartphoneDocument>>
+    response: Response<ResourceRequestServerResponse<SmartphoneDocument>>,
+    next: NextFunction
   ) => {
     const { smartphoneSchemas } = request.body;
 
@@ -85,12 +82,10 @@ const createNewSmartphoneBulkController = expressAsyncController(
       })
     );
 
-    // filter out any smartphones that were not created
     const successfullyCreatedSmartphones = newSmartphones.filter(
       (smartphone) => smartphone
     );
 
-    // check if any smartphones were created
     if (successfullyCreatedSmartphones.length === smartphoneSchemas.length) {
       response.status(201).json({
         message: `Successfully created ${successfullyCreatedSmartphones.length} smartphones`,
@@ -123,8 +118,8 @@ const createNewSmartphoneBulkController = expressAsyncController(
 const updateSmartphonesBulkController = expressAsyncController(
   async (
     request: UpdateSmartphonesBulkRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<SmartphoneDocument>>
+    response: Response<ResourceRequestServerResponse<SmartphoneDocument>>,
+    next: NextFunction
   ) => {
     const { smartphoneFields } = request.body;
 
@@ -145,12 +140,10 @@ const updateSmartphonesBulkController = expressAsyncController(
       })
     );
 
-    // filter out any smartphones that were not updated
     const successfullyUpdatedSmartphones = updatedSmartphones.filter(
       removeUndefinedAndNullValues
     );
 
-    // check if any smartphones were updated
     if (successfullyUpdatedSmartphones.length === smartphoneFields.length) {
       response.status(201).json({
         message: `Successfully updated ${successfullyUpdatedSmartphones.length} smartphones`,
@@ -197,12 +190,12 @@ const getQueriedSmartphonesController = expressAsyncController(
       });
     }
 
-    // get all smartphones
     const smartphones = await getQueriedSmartphonesService({
       filter: filter as FilterQuery<SmartphoneDocument> | undefined,
       projection: projection as QueryOptions<SmartphoneDocument>,
       options: options as QueryOptions<SmartphoneDocument>,
     });
+
     if (smartphones.length === 0) {
       response.status(200).json({
         message: "No smartphones that match query parameters were found",
@@ -228,16 +221,14 @@ const getQueriedSmartphonesController = expressAsyncController(
 const getSmartphoneByIdController = expressAsyncController(
   async (
     request: GetSmartphoneByIdRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<SmartphoneDocument>>
+    response: Response<ResourceRequestServerResponse<SmartphoneDocument>>,
+    next: NextFunction
   ) => {
     const smartphoneId = request.params.smartphoneId;
 
-    // get smartphone by id
     const smartphone = await getSmartphoneByIdService(smartphoneId);
     if (!smartphone) {
-      response.status(404).json({ message: "Smartphone not found", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Smartphone does not exist"));
     }
 
     response.status(200).json({
@@ -253,15 +244,14 @@ const getSmartphoneByIdController = expressAsyncController(
 const updateSmartphoneByIdController = expressAsyncController(
   async (
     request: UpdateSmartphoneByIdRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<SmartphoneDocument>>
+    response: Response<ResourceRequestServerResponse<SmartphoneDocument>>,
+    next: NextFunction
   ) => {
     const { smartphoneId } = request.params;
     const {
       documentUpdate: { fields, updateOperator },
     } = request.body;
 
-    // update smartphone
     const updatedSmartphone = await updateSmartphoneByIdService({
       _id: smartphoneId,
       fields,
@@ -269,11 +259,9 @@ const updateSmartphoneByIdController = expressAsyncController(
     });
 
     if (!updatedSmartphone) {
-      response.status(400).json({
-        message: "Smartphone could not be updated",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Smartphone could not be updated")
+      );
     }
 
     response.status(200).json({
@@ -289,13 +277,11 @@ const updateSmartphoneByIdController = expressAsyncController(
 const deleteAllSmartphonesController = expressAsyncController(
   async (
     _request: DeleteAllSmartphonesRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<SmartphoneDocument>>
+    response: Response<ResourceRequestServerResponse<SmartphoneDocument>>,
+    next: NextFunction
   ) => {
-    // grab all smartphones file upload ids
     const uploadedFilesIds = await returnAllSmartphonesUploadedFileIdsService();
 
-    // delete all file uploads associated with all smartphones
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -305,14 +291,13 @@ const deleteAllSmartphonesController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Some file uploads could not be deleted. Please try again."
+        )
+      );
     }
 
-    // delete all reviews associated with all smartphones
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -320,22 +305,20 @@ const deleteAllSmartphonesController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Some reviews could not be deleted. Please try again."
+        )
+      );
     }
 
-    // delete all smartphones
     const deleteSmartphonesResult: DeleteResult = await deleteAllSmartphonesService();
-
     if (deleteSmartphonesResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "All smartphones could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Some smartphones could not be deleted. Please try again."
+        )
+      );
     }
 
     response.status(200).json({ message: "All smartphones deleted", resourceData: [] });
@@ -348,25 +331,18 @@ const deleteAllSmartphonesController = expressAsyncController(
 const deleteASmartphoneController = expressAsyncController(
   async (
     request: DeleteASmartphoneRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<SmartphoneDocument>>
+    response: Response<ResourceRequestServerResponse<SmartphoneDocument>>,
+    next: NextFunction
   ) => {
     const smartphoneId = request.params.smartphoneId;
 
-    // check if smartphone exists
     const smartphoneExists = await getSmartphoneByIdService(smartphoneId);
     if (!smartphoneExists) {
-      response
-        .status(404)
-        .json({ message: "Smartphone does not exist", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Smartphone does not exist"));
     }
 
-    // find all file uploads associated with this smartphone
-    // if it is not an array, it is made to be an array
     const uploadedFilesIds = [...smartphoneExists.uploadedFilesIds];
 
-    // delete all file uploads associated with all smartphones
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -376,14 +352,13 @@ const deleteASmartphoneController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Some file uploads could not be deleted. Please try again."
+        )
+      );
     }
 
-    // delete all reviews associated with all smartphones
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -391,24 +366,22 @@ const deleteASmartphoneController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Some reviews could not be deleted. Please try again."
+        )
+      );
     }
 
-    // delete smartphone by id
     const deleteSmartphoneResult: DeleteResult = await deleteASmartphoneService(
       smartphoneId
     );
-
     if (deleteSmartphoneResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "Smartphone could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Smartphone could not be deleted. Please try again."
+        )
+      );
     }
 
     response.status(200).json({ message: "Smartphone deleted", resourceData: [] });
