@@ -180,7 +180,7 @@ const getAllProductReviewsBulkController = expressAsyncController(
 
     if (!productReviews.length) {
       response.status(200).json({
-        message: "Unable to find any product reviews. Please try again!",
+        message: "Unable to find any product reviews",
         resourceData: [],
       });
       return;
@@ -384,7 +384,7 @@ const deleteProductReviewController = expressAsyncController(
 
     if (!deletedProductReview.acknowledged) {
       response.status(400).json({
-        message: "Failed to delete product review. Please try again!",
+        message: "Failed to delete product review",
         resourceData: [],
       });
       return;
@@ -453,7 +453,7 @@ const deleteAllProductReviewsController = expressAsyncController(
 
     if (!deletedProductReviews.acknowledged) {
       response.status(400).json({
-        message: "Failed to delete product reviews. Please try again!",
+        message: "Failed to delete product reviews",
         resourceData: [],
       });
       return;

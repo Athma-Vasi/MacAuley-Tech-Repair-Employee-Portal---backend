@@ -189,7 +189,7 @@ const getAllRMAsBulkController = expressAsyncController(
 
     if (!rma.length) {
       response.status(200).json({
-        message: "Unable to find any rmas. Please try again!",
+        message: "Unable to find any rmas",
         resourceData: [],
       });
       return;
@@ -385,7 +385,7 @@ const deleteRMAController = expressAsyncController(
 
     if (!deletedRMA.acknowledged) {
       response.status(400).json({
-        message: "Failed to delete product review. Please try again!",
+        message: "Failed to delete product review",
         resourceData: [],
       });
       return;
@@ -452,7 +452,7 @@ const deleteAllRMAsController = expressAsyncController(
 
     if (!deletedRMAs.acknowledged) {
       response.status(400).json({
-        message: "Failed to delete rmas. Please try again!",
+        message: "Failed to delete rmas",
         resourceData: [],
       });
       return;

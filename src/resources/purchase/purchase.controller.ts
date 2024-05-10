@@ -197,7 +197,7 @@ const getAllPurchasesBulkController = expressAsyncController(
 
     if (!purchases.length) {
       response.status(200).json({
-        message: "Unable to find any purchases. Please try again!",
+        message: "Unable to find any purchases",
         resourceData: [],
       });
       return;
@@ -422,7 +422,7 @@ const deletePurchaseController = expressAsyncController(
 
     if (!deletedPurchase.acknowledged) {
       response.status(400).json({
-        message: "Failed to delete product review. Please try again!",
+        message: "Failed to delete product review",
         resourceData: [],
       });
       return;
@@ -494,7 +494,7 @@ const deleteAllPurchasesController = expressAsyncController(
 
     if (!deletedPurchases.acknowledged) {
       response.status(400).json({
-        message: "Failed to delete purchases. Please try again!",
+        message: "Failed to delete purchases",
         resourceData: [],
       });
       return;

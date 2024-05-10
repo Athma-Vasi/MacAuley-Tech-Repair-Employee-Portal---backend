@@ -99,9 +99,7 @@ const createNewAddressChangeController = expressAsyncController(
     );
     if (!addressChangeDocument) {
       return next(
-        new createHttpError.InternalServerError(
-          "Address change document creation failed. Please try again!"
-        )
+        new createHttpError.InternalServerError("Address change document creation failed")
       );
     }
 
@@ -234,7 +232,7 @@ const updateAddressChangeByIdController = expressAsyncController(
     if (!updatedAddressChange) {
       return next(
         new createHttpError.InternalServerError(
-          "Address change document status update failed. Please try again!"
+          "Address change document status update failed"
         )
       );
     }

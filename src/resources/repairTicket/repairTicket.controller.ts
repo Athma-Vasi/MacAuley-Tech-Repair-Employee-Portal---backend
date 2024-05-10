@@ -60,7 +60,7 @@ const createNewRepairTicketController = expressAsyncController(
     );
     if (!repairTicketDocument) {
       response.status(400).json({
-        message: "New repair note could not be created. Please try again!",
+        message: "New repair note could not be created",
         resourceData: [],
       });
       return;
@@ -137,7 +137,6 @@ const getRepairTicketsByUserController = expressAsyncController(
     const { filter, projection, options } =
       request.query as QueryObjectParsedWithDefaults;
 
-    // assign userId to filter
     const filterWithUserId = { ...filter, userId };
 
     // only perform a countDocuments scan if a new query is being made
@@ -187,7 +186,6 @@ const updateRepairTicketByIdController = expressAsyncController(
       userInfo: { userId },
     } = request.body;
 
-    // check if user exists
     const userExists = await getUserByIdService(userId);
     if (!userExists) {
       response.status(404).json({ message: "User does not exist", resourceData: [] });
@@ -203,7 +201,7 @@ const updateRepairTicketByIdController = expressAsyncController(
 
     if (!updatedRepairTicket) {
       response.status(400).json({
-        message: "RepairTicket request status update failed. Please try again!",
+        message: "RepairTicket request status update failed",
         resourceData: [],
       });
       return;
@@ -309,12 +307,10 @@ const createNewRepairTicketsBulkController = expressAsyncController(
       })
     );
 
-    // filter out any null documents
     const filteredRepairTicketDocuments = repairTicketDocuments.filter(
       removeUndefinedAndNullValues
     );
 
-    // check if any documents were created
     if (filteredRepairTicketDocuments.length === 0) {
       response.status(400).json({
         message: "RepairTicket requests creation failed",

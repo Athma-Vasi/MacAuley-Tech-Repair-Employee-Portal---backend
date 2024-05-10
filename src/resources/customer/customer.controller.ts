@@ -286,7 +286,7 @@ const getAllCustomersBulkController = expressAsyncController(
 
     if (!customers.length) {
       response.status(200).json({
-        message: "Unable to find any customers. Please try again!",
+        message: "Unable to find any customers",
         resourceData: [],
       });
       return;
@@ -390,7 +390,7 @@ const deleteCustomerController = expressAsyncController(
 
     if (!deletedCustomer.acknowledged) {
       response.status(400).json({
-        message: "Failed to delete customer. Please try again!",
+        message: "Failed to delete customer",
         resourceData: [],
       });
       return;
@@ -414,7 +414,7 @@ const deleteAllCustomersController = expressAsyncController(
 
     if (!deletedCustomer.acknowledged) {
       response.status(400).json({
-        message: "Failed to delete customer. Please try again!",
+        message: "Failed to delete customer",
         resourceData: [],
       });
       return;

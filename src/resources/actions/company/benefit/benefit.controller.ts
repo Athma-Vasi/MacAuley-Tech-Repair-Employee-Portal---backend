@@ -202,9 +202,7 @@ const updateBenefitByIdController = expressAsyncController(
 
     if (!updatedBenefit) {
       return next(
-        new createHttpError.InternalServerError(
-          "Benefit document status update failed. Please try again!"
-        )
+        new createHttpError.InternalServerError("Benefit document status update failed")
       );
     }
 
@@ -302,7 +300,7 @@ const createNewBenefitsBulkController = expressAsyncController(
 
     if (filteredBenefitDocuments.length === 0) {
       response.status(500).json({
-        message: "No Benefit Requests were created. Please try again!",
+        message: "No Benefit Requests were created",
         resourceData: [],
       });
 
@@ -359,7 +357,7 @@ const updateBenefitsBulkController = expressAsyncController(
 
     if (successfullyCreatedBenefits.length === 0) {
       response.status(500).json({
-        message: "No Benefits were updated. Please try again!",
+        message: "No Benefits were updated",
         resourceData: [],
       });
 

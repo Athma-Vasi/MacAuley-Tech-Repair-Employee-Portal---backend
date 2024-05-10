@@ -19,7 +19,7 @@ async function getLeaveRequestByIdService(
     const leaveRequest = await LeaveRequestModel.findById(leaveRequestId).lean().exec();
     return leaveRequest;
   } catch (error: any) {
-    throw new createHttpError.InternalServerError("Error in getLeaveRequestByIdService");
+    throw new createHttpError.InternalServerError("getLeaveRequestByIdService");
   }
 }
 

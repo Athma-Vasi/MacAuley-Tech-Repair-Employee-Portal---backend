@@ -19,7 +19,7 @@ async function getExpenseClaimByIdService(
     const expenseClaim = await ExpenseClaimModel.findById(expenseClaimId).lean().exec();
     return expenseClaim;
   } catch (error: any) {
-    throw new createHttpError.InternalServerError("Error in getExpenseClaimByIdService");
+    throw new createHttpError.InternalServerError("getExpenseClaimByIdService");
   }
 }
 

@@ -125,7 +125,6 @@ const getSurveysByUserController = expressAsyncController(
     const { filter, projection, options } =
       request.query as QueryObjectParsedWithDefaults;
 
-    // assign userId to filter
     const filterWithUserId = { ...filter, userId };
 
     // only perform a countDocuments scan if a new query is being made
@@ -175,7 +174,6 @@ const updateSurveyByIdController = expressAsyncController(
       userInfo: { userId },
     } = request.body;
 
-    // check if user exists
     const userExists = await getUserByIdService(userId);
     if (!userExists) {
       response.status(404).json({ message: "User does not exist", resourceData: [] });
@@ -191,7 +189,7 @@ const updateSurveyByIdController = expressAsyncController(
 
     if (!updatedSurvey) {
       response.status(400).json({
-        message: "Survey request status update failed. Please try again!",
+        message: "Survey request status update failed",
         resourceData: [],
       });
       return;
@@ -293,10 +291,8 @@ const createNewSurveysBulkController = expressAsyncController(
       })
     );
 
-    // filter out any null documents
     const filteredSurveyDocuments = surveyDocuments.filter(removeUndefinedAndNullValues);
 
-    // check if any documents were created
     if (filteredSurveyDocuments.length === 0) {
       response.status(400).json({
         message: "Survey requests creation failed",

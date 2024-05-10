@@ -66,7 +66,7 @@ const createNewRequestResourceController = expressAsyncController(
     if (!requestResourceDocument) {
       return next(
         new createHttpError.InternalServerError(
-          "Request resource document could not be created. Please try again!"
+          "Request resource document could not be created"
         )
       );
     }
@@ -205,7 +205,7 @@ const updateRequestResourceByIdController = expressAsyncController(
     if (!updatedRequestResource) {
       return next(
         new createHttpError.InternalServerError(
-          "Request resource document could not be updated. Please try again!"
+          "Request resource document could not be updated"
         )
       );
     }
@@ -257,7 +257,7 @@ const deleteRequestResourceController = expressAsyncController(
     if (!deletedResult.deletedCount) {
       return next(
         new createHttpError.InternalServerError(
-          "Request Resource request could not be deleted. Please try again!"
+          "Request Resource request could not be deleted"
         )
       );
     }
@@ -283,7 +283,7 @@ const deleteAllRequestResourcesController = expressAsyncController(
     if (!deletedResult.deletedCount) {
       return next(
         new createHttpError.InternalServerError(
-          "Request Resource documents could not be deleted. Please try again!"
+          "Request Resource documents could not be deleted"
         )
       );
     }

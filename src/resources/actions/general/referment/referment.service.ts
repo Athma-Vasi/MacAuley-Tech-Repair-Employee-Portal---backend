@@ -10,6 +10,7 @@ import {
   QueriedTotalResourceGetRequestServiceInput,
   UpdateDocumentByIdServiceInput,
 } from "../../../../types";
+import createHttpError from "http-errors";
 
 async function getRefermentByIdService(
   refermentId: Types.ObjectId | string
@@ -18,7 +19,7 @@ async function getRefermentByIdService(
     const referment = await RefermentModel.findById(refermentId).lean().exec();
     return referment;
   } catch (error: any) {
-    throw new Error(error, { cause: "getRefermentByIdService" });
+    throw new createHttpError.InternalServerError("getRefermentByIdService");
   }
 }
 
@@ -29,7 +30,7 @@ async function createNewRefermentService(
     const referment = await RefermentModel.create(refermentSchema);
     return referment;
   } catch (error: any) {
-    throw new Error(error, { cause: "createNewRefermentService" });
+    throw new createHttpError.InternalServerError("createNewRefermentService");
   }
 }
 
@@ -44,7 +45,7 @@ async function getQueriedRefermentsService({
       .exec();
     return referment;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedRefermentsService" });
+    throw new createHttpError.InternalServerError("getQueriedRefermentsService");
   }
 }
 
@@ -55,7 +56,7 @@ async function getQueriedTotalRefermentsService({
     const totalReferments = await RefermentModel.countDocuments(filter).lean().exec();
     return totalReferments;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedTotalRefermentsService" });
+    throw new createHttpError.InternalServerError("getQueriedTotalRefermentsService");
   }
 }
 
@@ -70,7 +71,7 @@ async function getQueriedRefermentsByUserService({
       .exec();
     return referments;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedRefermentsByUserService" });
+    throw new createHttpError.InternalServerError("getQueriedRefermentsByUserService");
   }
 }
 
@@ -90,7 +91,7 @@ async function updateRefermentByIdService({
       .exec();
     return referment;
   } catch (error: any) {
-    throw new Error(error, { cause: "updateRefermentStatusByIdService" });
+    throw new createHttpError.InternalServerError("updateRefermentStatusByIdService");
   }
 }
 
@@ -105,7 +106,7 @@ async function deleteRefermentByIdService(
       .exec();
     return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteRefermentByIdService" });
+    throw new createHttpError.InternalServerError("deleteRefermentByIdService");
   }
 }
 
@@ -114,7 +115,7 @@ async function deleteAllRefermentsService(): Promise<DeleteResult> {
     const deletedResult = await RefermentModel.deleteMany({}).lean().exec();
     return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteAllRefermentsService" });
+    throw new createHttpError.InternalServerError("deleteAllRefermentsService");
   }
 }
 

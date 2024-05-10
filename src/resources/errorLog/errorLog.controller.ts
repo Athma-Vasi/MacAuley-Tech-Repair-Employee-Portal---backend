@@ -124,7 +124,6 @@ const getErrorLogsByUserController = expressAsyncController(
     const { filter, projection, options } =
       request.query as QueryObjectParsedWithDefaults;
 
-    // assign userId to filter
     const filterWithUserId = { ...filter, userId };
 
     // only perform a countDocuments scan if a new query is being made
@@ -172,7 +171,6 @@ const updateErrorLogByIdController = expressAsyncController(
       userInfo: { userId },
     } = request.body;
 
-    // check if user exists
     const userExists = await getUserByIdService(userId);
     if (!userExists) {
       response.status(404).json({ message: "User does not exist", resourceData: [] });
@@ -188,7 +186,7 @@ const updateErrorLogByIdController = expressAsyncController(
 
     if (!updatedErrorLog) {
       response.status(400).json({
-        message: "Address log request status update failed. Please try again!",
+        message: "Address log request status update failed",
         resourceData: [],
       });
       return;
@@ -291,12 +289,10 @@ const createNewErrorLogsBulkController = expressAsyncController(
       })
     );
 
-    // filter out any null documents
     const filteredErrorLogDocuments = errorLogDocuments.filter(
       removeUndefinedAndNullValues
     );
 
-    // check if any documents were created
     if (filteredErrorLogDocuments.length === 0) {
       response.status(400).json({
         message: "Address log requests creation failed",

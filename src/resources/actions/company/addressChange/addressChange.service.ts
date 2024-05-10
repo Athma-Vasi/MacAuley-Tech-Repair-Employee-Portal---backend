@@ -21,7 +21,7 @@ async function getAddressChangeByIdService(
       .exec();
     return addressChange;
   } catch (error: any) {
-    throw new createHttpError.InternalServerError("Error in getAddressChangeByIdService");
+    throw new createHttpError.InternalServerError("getAddressChangeByIdService");
   }
 }
 

@@ -60,9 +60,7 @@ const createNewLeaveRequestController = expressAsyncController(
     );
     if (!leaveRequestDocument) {
       return next(
-        new createHttpError.InternalServerError(
-          "New leave request could not be created. Please try again!"
-        )
+        new createHttpError.InternalServerError("New leave request could not be created")
       );
     }
 
@@ -202,7 +200,7 @@ const updateLeaveRequestByIdController = expressAsyncController(
     if (!updatedLeaveRequest) {
       return next(
         new createHttpError.InternalServerError(
-          "Leave Request request status update failed. Please try again!"
+          "Leave Request request status update failed"
         )
       );
     }
@@ -254,7 +252,7 @@ const deleteLeaveRequestController = expressAsyncController(
     if (!deletedResult.deletedCount) {
       return next(
         new createHttpError.InternalServerError(
-          "Leave Request request could not be deleted. Please try again!"
+          "Leave Request request could not be deleted"
         )
       );
     }
@@ -280,7 +278,7 @@ const deleteAllLeaveRequestsController = expressAsyncController(
     if (!deletedResult.deletedCount) {
       return next(
         new createHttpError.InternalServerError(
-          "All leaveRequest requests could not be deleted. Please try again!"
+          "All leaveRequest requests could not be deleted"
         )
       );
     }
@@ -318,7 +316,7 @@ const createNewLeaveRequestsBulkController = expressAsyncController(
 
     if (filteredLeaveRequestDocuments.length === 0) {
       response.status(500).json({
-        message: "Leave Requests failed to be created. Please try again!",
+        message: "Leave Requests failed to be created",
         resourceData: [],
       });
 
@@ -375,7 +373,7 @@ const updateLeaveRequestsBulkController = expressAsyncController(
 
     if (successfullyCreatedLeaveRequests.length === 0) {
       response.status(500).json({
-        message: "Leave Requests failed to be updated. Please try again!",
+        message: "Leave Requests failed to be updated",
         resourceData: [],
       });
 

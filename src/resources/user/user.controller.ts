@@ -194,7 +194,7 @@ const deleteUserController = expressAsyncController(
 
     if (!deletedUser.acknowledged) {
       response.status(400).json({
-        message: "Failed to delete user. Please try again!",
+        message: "Failed to delete user",
         resourceData: [],
       });
       return;
@@ -307,7 +307,7 @@ const deleteAllUsersController = expressAsyncController(
 
     if (!deletedUser.acknowledged) {
       response.status(400).json({
-        message: "Failed to delete user. Please try again!",
+        message: "Failed to delete user",
         resourceData: [],
       });
       return;
@@ -472,7 +472,7 @@ const getAllUsersBulkController = expressAsyncController(
 
     if (!users.length) {
       response.status(200).json({
-        message: "Unable to find any users. Please try again!",
+        message: "Unable to find any users",
         resourceData: [],
       });
       return;

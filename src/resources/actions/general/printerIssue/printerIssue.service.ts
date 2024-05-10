@@ -10,6 +10,7 @@ import {
   QueriedTotalResourceGetRequestServiceInput,
   UpdateDocumentByIdServiceInput,
 } from "../../../../types";
+import createHttpError from "http-errors";
 
 async function getPrinterIssueByIdService(
   printerIssueId: Types.ObjectId | string
@@ -18,7 +19,7 @@ async function getPrinterIssueByIdService(
     const printerIssue = await PrinterIssueModel.findById(printerIssueId).lean().exec();
     return printerIssue;
   } catch (error: any) {
-    throw new Error(error, { cause: "getPrinterIssueByIdService" });
+    throw new createHttpError.InternalServerError("getPrinterIssueByIdService");
   }
 }
 
@@ -29,7 +30,7 @@ async function createNewPrinterIssueService(
     const printerIssue = await PrinterIssueModel.create(printerIssueSchema);
     return printerIssue;
   } catch (error: any) {
-    throw new Error(error, { cause: "createNewPrinterIssueService" });
+    throw new createHttpError.InternalServerError("createNewPrinterIssueService");
   }
 }
 
@@ -44,7 +45,7 @@ async function getQueriedPrinterIssuesService({
       .exec();
     return printerIssue;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedPrinterIssuesService" });
+    throw new createHttpError.InternalServerError("getQueriedPrinterIssuesService");
   }
 }
 
@@ -57,7 +58,7 @@ async function getQueriedTotalPrinterIssuesService({
       .exec();
     return totalPrinterIssues;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedTotalPrinterIssuesService" });
+    throw new createHttpError.InternalServerError("getQueriedTotalPrinterIssuesService");
   }
 }
 
@@ -72,7 +73,7 @@ async function getQueriedPrinterIssuesByUserService({
       .exec();
     return printerIssues;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedPrinterIssuesByUserService" });
+    throw new createHttpError.InternalServerError("getQueriedPrinterIssuesByUserService");
   }
 }
 
@@ -92,7 +93,7 @@ async function updatePrinterIssueByIdService({
       .exec();
     return printerIssue;
   } catch (error: any) {
-    throw new Error(error, { cause: "updatePrinterIssueStatusByIdService" });
+    throw new createHttpError.InternalServerError("updatePrinterIssueStatusByIdService");
   }
 }
 
@@ -107,7 +108,7 @@ async function deletePrinterIssueByIdService(
       .exec();
     return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: "deletePrinterIssueByIdService" });
+    throw new createHttpError.InternalServerError("deletePrinterIssueByIdService");
   }
 }
 
@@ -116,7 +117,7 @@ async function deleteAllPrinterIssuesService(): Promise<DeleteResult> {
     const deletedResult = await PrinterIssueModel.deleteMany({}).lean().exec();
     return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteAllPrinterIssuesService" });
+    throw new createHttpError.InternalServerError("deleteAllPrinterIssuesService");
   }
 }
 

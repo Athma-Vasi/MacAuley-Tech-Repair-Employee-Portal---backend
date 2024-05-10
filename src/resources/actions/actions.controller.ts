@@ -259,7 +259,6 @@ const getUsersActionsDocumentsController = expressAsyncController(
     const { filter, projection, options } =
       request.query as QueryObjectParsedWithDefaults;
 
-    // assign userId to filter
     const filterWithUserId = { ...filter, userId };
     const pendingFilter = {
       ...filterWithUserId,

@@ -125,7 +125,6 @@ const getAnnouncementsByUserController = expressAsyncController(
     const { filter, projection, options } =
       request.query as QueryObjectParsedWithDefaults;
 
-    // assign userId to filter
     const filterWithUserId = { ...filter, userId };
 
     // only perform a countDocuments scan if a new query is being made
@@ -175,7 +174,6 @@ const updateAnnouncementByIdController = expressAsyncController(
       userInfo: { userId },
     } = request.body;
 
-    // check if user exists
     const userExists = await getUserByIdService(userId);
     if (!userExists) {
       response.status(404).json({ message: "User does not exist", resourceData: [] });
@@ -191,7 +189,7 @@ const updateAnnouncementByIdController = expressAsyncController(
 
     if (!updatedAnnouncement) {
       response.status(400).json({
-        message: "Announcement request status update failed. Please try again!",
+        message: "Announcement request status update failed",
         resourceData: [],
       });
       return;
@@ -297,12 +295,10 @@ const createNewAnnouncementsBulkController = expressAsyncController(
       })
     );
 
-    // filter out any null documents
     const filteredAnnouncementDocuments = announcementDocuments.filter(
       removeUndefinedAndNullValues
     );
 
-    // check if any documents were created
     if (filteredAnnouncementDocuments.length === 0) {
       response.status(400).json({
         message: "Announcement requests creation failed",

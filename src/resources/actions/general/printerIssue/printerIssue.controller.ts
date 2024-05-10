@@ -1,7 +1,7 @@
 import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewPrinterIssueRequest,
@@ -33,6 +33,7 @@ import {
 } from "./printerIssue.service";
 import { removeUndefinedAndNullValues } from "../../../../utils";
 import { getUserByIdService } from "../../../user";
+import createHttpError from "http-errors";
 
 // @desc   Create a new printerIssue
 // @route  POST api/v1/actions/general/printer-issue
@@ -40,22 +41,21 @@ import { getUserByIdService } from "../../../user";
 const createNewPrinterIssueController = expressAsyncController(
   async (
     request: CreateNewPrinterIssueRequest,
-    response: Response<ResourceRequestServerResponse<PrinterIssueDocument>>
+    response: Response<ResourceRequestServerResponse<PrinterIssueDocument>>,
+    next: NextFunction
   ) => {
     const { printerIssueSchema } = request.body;
 
     const printerIssueDocument = await createNewPrinterIssueService(printerIssueSchema);
 
     if (!printerIssueDocument) {
-      response.status(400).json({
-        message: "New printerIssue could not be created",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Printer Issue document creation failed")
+      );
     }
 
     response.status(201).json({
-      message: `Successfully created ${printerIssueDocument.title} printerIssue`,
+      message: `Successfully created ${printerIssueDocument.title} Printer Issue`,
       resourceData: [printerIssueDocument],
     });
   }
@@ -67,7 +67,8 @@ const createNewPrinterIssueController = expressAsyncController(
 const getQueriedPrinterIssuesController = expressAsyncController(
   async (
     request: GetQueriedPrinterIssuesRequest,
-    response: Response<GetQueriedResourceRequestServerResponse<PrinterIssueDocument>>
+    response: Response<GetQueriedResourceRequestServerResponse<PrinterIssueDocument>>,
+    next: NextFunction
   ) => {
     let { newQueryFlag, totalDocuments } = request.body;
 
@@ -81,7 +82,6 @@ const getQueriedPrinterIssuesController = expressAsyncController(
       });
     }
 
-    // get all printerIssues
     const printerIssue = await getQueriedPrinterIssuesService({
       filter: filter as FilterQuery<PrinterIssueDocument> | undefined,
       projection: projection as QueryOptions<PrinterIssueDocument>,
@@ -90,7 +90,7 @@ const getQueriedPrinterIssuesController = expressAsyncController(
 
     if (!printerIssue.length) {
       response.status(200).json({
-        message: "No printerIssues that match query parameters were found",
+        message: "No printer issues that match query parameters were found",
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
@@ -99,7 +99,7 @@ const getQueriedPrinterIssuesController = expressAsyncController(
     }
 
     response.status(200).json({
-      message: "PrinterIssues found successfully",
+      message: "Printer issues found successfully",
       pages: Math.ceil(totalDocuments / Number(options?.limit)),
       totalDocuments,
       resourceData: printerIssue,
@@ -115,7 +115,6 @@ const getPrinterIssuesByUserController = expressAsyncController(
     request: GetQueriedPrinterIssuesByUserRequest,
     response: Response<GetQueriedResourceRequestServerResponse<PrinterIssueDocument>>
   ) => {
-    // anyone can view their own printerIssue requests
     const {
       userInfo: { userId },
     } = request.body;
@@ -125,7 +124,6 @@ const getPrinterIssuesByUserController = expressAsyncController(
     const { filter, projection, options } =
       request.query as QueryObjectParsedWithDefaults;
 
-    // assign userId to filter
     const filterWithUserId = { ...filter, userId };
 
     // only perform a countDocuments scan if a new query is being made
@@ -135,7 +133,6 @@ const getPrinterIssuesByUserController = expressAsyncController(
       });
     }
 
-    // get all printerIssue requests by user
     const printerIssues = await getQueriedPrinterIssuesByUserService({
       filter: filterWithUserId as FilterQuery<PrinterIssueDocument> | undefined,
       projection: projection as QueryOptions<PrinterIssueDocument>,
@@ -144,7 +141,7 @@ const getPrinterIssuesByUserController = expressAsyncController(
 
     if (!printerIssues.length) {
       response.status(200).json({
-        message: "No printerIssue requests found",
+        message: "No printer issue requests found",
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
@@ -153,7 +150,7 @@ const getPrinterIssuesByUserController = expressAsyncController(
     }
 
     response.status(200).json({
-      message: "PrinterIssue requests found successfully",
+      message: "Printer issue requests found successfully",
       pages: Math.ceil(totalDocuments / Number(options?.limit)),
       totalDocuments,
       resourceData: printerIssues,
@@ -167,7 +164,8 @@ const getPrinterIssuesByUserController = expressAsyncController(
 const updatePrinterIssueByIdController = expressAsyncController(
   async (
     request: UpdatePrinterIssueByIdRequest,
-    response: Response<ResourceRequestServerResponse<PrinterIssueDocument>>
+    response: Response<ResourceRequestServerResponse<PrinterIssueDocument>>,
+    next: NextFunction
   ) => {
     const { printerIssueId } = request.params;
     const {
@@ -175,14 +173,11 @@ const updatePrinterIssueByIdController = expressAsyncController(
       userInfo: { userId },
     } = request.body;
 
-    // check if user exists
     const userExists = await getUserByIdService(userId);
     if (!userExists) {
-      response.status(404).json({ message: "User does not exist", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("User not found"));
     }
 
-    // update printerIssue request status
     const updatedPrinterIssue = await updatePrinterIssueByIdService({
       _id: printerIssueId,
       fields,
@@ -190,15 +185,15 @@ const updatePrinterIssueByIdController = expressAsyncController(
     });
 
     if (!updatedPrinterIssue) {
-      response.status(400).json({
-        message: "PrinterIssue request status update failed. Please try again!",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Printer issue request status update failed"
+        )
+      );
     }
 
     response.status(200).json({
-      message: "PrinterIssue request status updated successfully",
+      message: "Printer issue request status updated successfully",
       resourceData: [updatedPrinterIssue],
     });
   }
@@ -210,19 +205,17 @@ const updatePrinterIssueByIdController = expressAsyncController(
 const getPrinterIssueByIdController = expressAsyncController(
   async (
     request: GetPrinterIssueByIdRequest,
-    response: Response<ResourceRequestServerResponse<PrinterIssueDocument>>
+    response: Response<ResourceRequestServerResponse<PrinterIssueDocument>>,
+    next: NextFunction
   ) => {
     const { printerIssueId } = request.params;
     const printerIssue = await getPrinterIssueByIdService(printerIssueId);
     if (!printerIssue) {
-      response
-        .status(404)
-        .json({ message: "PrinterIssue request not found", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Printer issue request not found"));
     }
 
     response.status(200).json({
-      message: "PrinterIssue request found successfully",
+      message: "Printer issue request found successfully",
       resourceData: [printerIssue],
     });
   }
@@ -232,24 +225,18 @@ const getPrinterIssueByIdController = expressAsyncController(
 // @route  DELETE api/v1/actions/general/printer-issue
 // @access Private
 const deletePrinterIssueController = expressAsyncController(
-  async (request: DeletePrinterIssueRequest, response: Response) => {
+  async (request: DeletePrinterIssueRequest, response: Response, next: NextFunction) => {
     const { printerIssueId } = request.params;
 
-    // delete printerIssue request by id
     const deletedResult: DeleteResult = await deletePrinterIssueByIdService(
       printerIssueId
     );
-
     if (!deletedResult.deletedCount) {
-      response.status(400).json({
-        message: "PrinterIssue request could not be deleted",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.NotFound("Printer issue request not found"));
     }
 
     response.status(200).json({
-      message: "PrinterIssue request deleted successfully",
+      message: "Printer issue request deleted successfully",
       resourceData: [],
     });
   }
@@ -259,19 +246,18 @@ const deletePrinterIssueController = expressAsyncController(
 // @route   DELETE api/v1/actions/general/request-resource/printerIssue
 // @access  Private
 const deleteAllPrinterIssuesController = expressAsyncController(
-  async (_request: DeleteAllPrinterIssuesRequest, response: Response) => {
+  async (
+    _request: DeleteAllPrinterIssuesRequest,
+    response: Response,
+    next: NextFunction
+  ) => {
     const deletedResult: DeleteResult = await deleteAllPrinterIssuesService();
-
     if (!deletedResult.deletedCount) {
-      response.status(400).json({
-        message: "All printerIssue requests could not be deleted",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.NotFound("No printer issue requests found"));
     }
 
     response.status(200).json({
-      message: "All printerIssue requests deleted successfully",
+      message: "All printer issue requests deleted successfully",
       resourceData: [],
     });
   }
@@ -297,15 +283,13 @@ const createNewPrinterIssuesBulkController = expressAsyncController(
       })
     );
 
-    // filter out any null documents
     const filteredPrinterIssueDocuments = printerIssueDocuments.filter(
       removeUndefinedAndNullValues
     );
 
-    // check if any documents were created
     if (filteredPrinterIssueDocuments.length === 0) {
       response.status(400).json({
-        message: "PrinterIssue requests creation failed",
+        message: "Printer issue requests creation failed",
         resourceData: [],
       });
       return;
@@ -317,7 +301,7 @@ const createNewPrinterIssuesBulkController = expressAsyncController(
     response.status(201).json({
       message: `Successfully created ${
         filteredPrinterIssueDocuments.length
-      } PrinterIssue requests.${
+      } Printer issue requests.${
         uncreatedDocumentsAmount
           ? ` ${uncreatedDocumentsAmount} documents were not created.`
           : ""
@@ -362,7 +346,7 @@ const updatePrinterIssuesBulkController = expressAsyncController(
 
     if (successfullyCreatedPrinterIssues.length === 0) {
       response.status(400).json({
-        message: "Could not create any Printer Issues",
+        message: "Could not create any Printer issues",
         resourceData: [],
       });
       return;
@@ -371,9 +355,9 @@ const updatePrinterIssuesBulkController = expressAsyncController(
     response.status(201).json({
       message: `Successfully created ${
         successfullyCreatedPrinterIssues.length
-      } Printer Issues. ${
+      } Printer issues. ${
         printerIssueFields.length - successfullyCreatedPrinterIssues.length
-      } Printer Issues failed to be created.`,
+      } Printer issues failed to be created.`,
       resourceData: successfullyCreatedPrinterIssues,
     });
   }

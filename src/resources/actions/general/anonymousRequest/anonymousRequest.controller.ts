@@ -177,7 +177,6 @@ const updateAnonymousRequestByIdController = expressAsyncController(
       userInfo: { userId },
     } = request.body;
 
-    // check if user exists
     const userExists = await getUserByIdService(userId);
     if (!userExists) {
       return next(new createHttpError.NotFound("User not found"));
@@ -193,7 +192,7 @@ const updateAnonymousRequestByIdController = expressAsyncController(
     if (!updatedAnonymousRequest) {
       return next(
         new createHttpError.InternalServerError(
-          "Anonymous Request document could not be updated. Please try again!"
+          "Anonymous Request document could not be updated"
         )
       );
     }
@@ -307,7 +306,6 @@ const createNewAnonymousRequestsBulkController = expressAsyncController(
       removeUndefinedAndNullValues
     );
 
-    // check if any documents were created
     if (filteredAnonymousRequestDocuments.length === 0) {
       response.status(400).json({
         message: "Anonymous Request requests creation failed",

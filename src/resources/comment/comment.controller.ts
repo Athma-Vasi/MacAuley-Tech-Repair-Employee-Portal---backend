@@ -126,7 +126,6 @@ const getCommentsByUserController = expressAsyncController(
     const { filter, projection, options } =
       request.query as QueryObjectParsedWithDefaults;
 
-    // assign userId to filter
     const filterWithUserId = { ...filter, userId };
 
     // only perform a countDocuments scan if a new query is being made
@@ -176,7 +175,6 @@ const updateCommentByIdController = expressAsyncController(
       userInfo: { userId },
     } = request.body;
 
-    // check if user exists
     const userExists = await getUserByIdService(userId);
     if (!userExists) {
       response.status(404).json({ message: "User does not exist", resourceData: [] });
@@ -192,7 +190,7 @@ const updateCommentByIdController = expressAsyncController(
 
     if (!updatedComment) {
       response.status(400).json({
-        message: "Comment request status update failed. Please try again!",
+        message: "Comment request status update failed",
         resourceData: [],
       });
       return;
@@ -343,12 +341,10 @@ const createNewCommentsBulkController = expressAsyncController(
       })
     );
 
-    // filter out any null documents
     const filteredCommentDocuments = commentDocuments.filter(
       removeUndefinedAndNullValues
     );
 
-    // check if any documents were created
     if (filteredCommentDocuments.length === 0) {
       response.status(400).json({
         message: "Comment requests creation failed",

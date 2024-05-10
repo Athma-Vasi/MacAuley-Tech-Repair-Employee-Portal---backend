@@ -331,7 +331,6 @@ const updateExpenseClaimByIdController = expressAsyncController(
       userInfo: { userId },
     } = request.body;
 
-    // check if user exists
     const userExists = await getUserByIdService(userId);
     if (!userExists) {
       return next(new createHttpError.NotFound("User does not exist"));
@@ -343,11 +342,7 @@ const updateExpenseClaimByIdController = expressAsyncController(
       updateOperator,
     });
     if (!updatedExpenseClaim) {
-      return next(
-        new createHttpError.InternalServerError(
-          "Expense claim update failed. Please try again!"
-        )
-      );
+      return next(new createHttpError.InternalServerError("Expense claim update failed"));
     }
 
     response.status(200).json({
@@ -476,7 +471,7 @@ const createNewExpenseClaimsBulkController = expressAsyncController(
 
     if (filteredExpenseClaimDocuments.length === 0) {
       response.status(500).json({
-        message: "Expense claims could not be created. Please try again!",
+        message: "Expense claims could not be created",
         resourceData: [],
       });
 
@@ -533,7 +528,7 @@ const updateExpenseClaimsBulkController = expressAsyncController(
 
     if (successfullyCreatedExpenseClaims.length === 0) {
       response.status(500).json({
-        message: "Expense claims could not be updated. Please try again!",
+        message: "Expense claims could not be updated",
         resourceData: [],
       });
 
