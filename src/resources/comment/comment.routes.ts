@@ -18,7 +18,7 @@ import { createCommentJoiSchema, updateCommentJoiSchema } from "./comment.valida
 
 const commentRouter = Router();
 
-commentRouter.use(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults);
+commentRouter.use(verifyJWTMiddleware, verifyRoles, assignQueryDefaults);
 
 commentRouter
   .route("/")

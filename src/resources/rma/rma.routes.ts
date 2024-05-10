@@ -18,7 +18,7 @@ import { createRMAJoiSchema, updateRMAJoiSchema } from "./rma.validation";
 
 const rmaRouter = Router();
 
-rmaRouter.use(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults);
+rmaRouter.use(verifyJWTMiddleware, verifyRoles, assignQueryDefaults);
 
 rmaRouter
   .route("/")

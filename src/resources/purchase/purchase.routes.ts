@@ -18,7 +18,7 @@ import { createPurchaseJoiSchema, updatePurchaseJoiSchema } from "./purchase.val
 
 const purchaseRouter = Router();
 
-purchaseRouter.use(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults);
+purchaseRouter.use(verifyJWTMiddleware, verifyRoles, assignQueryDefaults);
 
 purchaseRouter
   .route("/")

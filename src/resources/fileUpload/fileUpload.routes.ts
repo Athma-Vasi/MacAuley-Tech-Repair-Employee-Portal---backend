@@ -25,8 +25,8 @@ import { createFileUploadJoiSchema } from "./fileUpload.validation";
 
 const fileUploadRouter = Router();
 
-fileUploadRouter.use(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults);
-fileUploadRouter.use(verifyRoles());
+fileUploadRouter.use(verifyJWTMiddleware, verifyRoles, assignQueryDefaults);
+fileUploadRouter.use(verifyRoles);
 
 fileUploadRouter
   .route("/")

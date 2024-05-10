@@ -21,7 +21,7 @@ import {
 
 const productReviewRouter = Router();
 
-productReviewRouter.use(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults);
+productReviewRouter.use(verifyJWTMiddleware, verifyRoles, assignQueryDefaults);
 
 productReviewRouter
   .route("/")

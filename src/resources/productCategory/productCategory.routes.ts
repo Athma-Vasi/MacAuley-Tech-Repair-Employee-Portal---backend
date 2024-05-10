@@ -23,7 +23,7 @@ import { assignQueryDefaults, verifyJWTMiddleware, verifyRoles } from "../../mid
 const productCategoryRouter = Router({
   strict: true,
 });
-productCategoryRouter.use(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults);
+productCategoryRouter.use(verifyJWTMiddleware, verifyRoles, assignQueryDefaults);
 // productCategoryRouter.route("/").get(assignQueryDefaults);
 
 // productCategoryRouter

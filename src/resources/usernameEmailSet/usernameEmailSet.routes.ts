@@ -13,7 +13,7 @@ usernameEmailSetRouter
   .route("/")
   .post(
     verifyJWTMiddleware,
-    verifyRoles(),
+    verifyRoles,
     validateSchemaMiddleware(createUsernameEmailSetJoiSchema, "usernameEmailSetSchema"),
     postUsernameEmailSetHandler
   );

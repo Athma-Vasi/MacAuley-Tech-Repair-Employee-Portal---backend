@@ -20,7 +20,7 @@ const userRouter = Router();
 
 userRouter
   .route("/")
-  .get(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults, getQueriedUsersHandler)
+  .get(verifyJWTMiddleware, verifyRoles, assignQueryDefaults, getQueriedUsersHandler)
   .post(
     validateSchemaMiddleware(createUserJoiSchema, "userSchema"),
     createNewUserHandler
@@ -28,26 +28,26 @@ userRouter
 
 userRouter
   .route("/update-password")
-  .put(verifyJWTMiddleware, verifyRoles(), updateUserPasswordHandler);
+  .put(verifyJWTMiddleware, verifyRoles, updateUserPasswordHandler);
 
 userRouter
   .route("/delete-all")
-  .delete(verifyJWTMiddleware, verifyRoles(), deleteAllUsersHandler);
+  .delete(verifyJWTMiddleware, verifyRoles, deleteAllUsersHandler);
 
 // DEV ROUTES
 userRouter
   .route("/dev")
-  .post(verifyJWTMiddleware, verifyRoles(), createNewUsersBulkHandler)
-  .get(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults, getAllUsersBulkHandler)
-  .patch(verifyJWTMiddleware, verifyRoles(), updateUserFieldsBulkHandler);
+  .post(verifyJWTMiddleware, verifyRoles, createNewUsersBulkHandler)
+  .get(verifyJWTMiddleware, verifyRoles, assignQueryDefaults, getAllUsersBulkHandler)
+  .patch(verifyJWTMiddleware, verifyRoles, updateUserFieldsBulkHandler);
 
 userRouter
   .route("/:userId")
-  .get(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults, getUserByIdHandler)
-  .delete(verifyJWTMiddleware, verifyRoles(), deleteUserHandler)
+  .get(verifyJWTMiddleware, verifyRoles, assignQueryDefaults, getUserByIdHandler)
+  .delete(verifyJWTMiddleware, verifyRoles, deleteUserHandler)
   .patch(
     verifyJWTMiddleware,
-    verifyRoles(),
+    verifyRoles,
     validateSchemaMiddleware(updateUserJoiSchema),
     updateUserByIdHandler
   );

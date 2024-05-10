@@ -9,7 +9,7 @@ import {
 } from "../../../middlewares";
 
 const actionsOutreachRouter = Router();
-actionsOutreachRouter.use(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults);
+actionsOutreachRouter.use(verifyJWTMiddleware, verifyRoles, assignQueryDefaults);
 
 actionsOutreachRouter.use("/survey", surveyRouter);
 actionsOutreachRouter.use("/event", eventRouter);

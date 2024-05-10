@@ -18,7 +18,7 @@ import {
 } from "./repairTicket.validation";
 
 const repairTicketRouter = Router();
-repairTicketRouter.use(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults);
+repairTicketRouter.use(verifyJWTMiddleware, verifyRoles, assignQueryDefaults);
 
 repairTicketRouter
   .route("/")

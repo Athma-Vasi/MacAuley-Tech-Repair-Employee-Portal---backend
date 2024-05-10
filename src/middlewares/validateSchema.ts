@@ -23,11 +23,7 @@ function validateSchemaMiddleware(
     const { error } = schema.validate(fields, options);
 
     if (error) {
-      // return response.status(400).json({
-      //   message: `Validation error: ${error.details.map((x) => x.message).join(", ")}`,
-      // });
       return next(
-        // new Error(`Validation error: ${error.details.map((x) => x.message).join(", ")}`, )
         new createHttpError.BadRequest(
           `Validation error: ${error.details.map((x) => x.message).join(", ")}`
         )

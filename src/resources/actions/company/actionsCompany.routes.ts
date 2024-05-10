@@ -12,7 +12,7 @@ import {
 
 const actionsCompanyRouter = Router();
 
-actionsCompanyRouter.use(verifyJWTMiddleware, verifyRoles(), assignQueryDefaults);
+actionsCompanyRouter.use(verifyJWTMiddleware, verifyRoles, assignQueryDefaults);
 
 actionsCompanyRouter.use("/address-change", addressChangeRouter);
 actionsCompanyRouter.use("/leave-request", leaveRequestRouter);

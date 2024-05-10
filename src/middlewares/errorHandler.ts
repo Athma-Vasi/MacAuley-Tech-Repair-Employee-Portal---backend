@@ -1,4 +1,6 @@
 import { NextFunction, Request, Response } from "express";
+import { ErrorLogSchema } from "../resources/errorLog/errorLog.model";
+import { createNewErrorLogService } from "../resources/errorLog/errorLog.service";
 
 function errorHandler(
   error: any,
@@ -6,27 +8,42 @@ function errorHandler(
   response: Response,
   next: NextFunction
 ) {
-  console.group("Error Handler Middleware");
-  console.log("request body", request.body);
-  console.log("error message:", error.message);
-  console.log("error stack:", error.stack);
-  console.log("error status", error.status);
-  console.groupEnd();
+  const { message, status, stack } = error;
+  const { body } = request;
+  const {
+    userInfo: { userId, username },
+    sessionId,
+  } = body;
 
   Promise.resolve()
-    .then(() => {
-      setTimeout(() => {
-        console.log("TIMEOUT");
-      }, 1000);
+    .then(async () => {
+      const errorLogSchema: ErrorLogSchema = {
+        userId,
+        username,
+        sessionId,
+        message,
+        stack,
+        requestBody: JSON.stringify(body),
+        status,
+        timestamp: new Date(),
+      };
+
+      const errorLogDocument = await createNewErrorLogService(errorLogSchema);
+      console.group("errorHandler");
+      console.log("errorLogSchema: ", errorLogSchema);
+      console.log("errorLogDocument: ", errorLogDocument);
+      console.groupEnd();
+
+      return errorLogDocument;
     })
-    .then(() => {
-      response.status(error.status ?? 500);
-      response.json({
-        message: error.message ?? "Internal Server Error",
+    .then((document) => {
+      // response.status(error.status ?? 500);
+      // response.json({
+      //   message: error.message ?? "Internal Server Error",
+      // });
+      response.status(document.status ?? 500).json({
+        message: document.message ?? "Internal Server Error",
       });
-    })
-    .finally(() => {
-      console.log("inside finally block");
       return;
     });
 }

@@ -1,7 +1,8 @@
-import path from 'path';
+import path from "path";
 
-import type { NextFunction, Request, Response } from 'express';
-import { FileUploadObject } from '../../types';
+import type { NextFunction, Request, Response } from "express";
+import { FileUploadObject } from "../../types";
+import createHttpError from "http-errors";
 
 // creates a closure that takes in an array of allowed file extensions and returns a middleware function
 const fileExtensionLimiterMiddleware = (allowedExtensionsArray: string[]) => {
@@ -13,35 +14,30 @@ const fileExtensionLimiterMiddleware = (allowedExtensionsArray: string[]) => {
 
     Object.entries(files).forEach((file: [string, FileUploadObject]) => {
       const [_, fileObj] = file;
-      // grab the file extension from the file name
       const fileExtension = path.extname(fileObj.name);
-      // if the file extension is not in the allowedExtensionArray, add it to the filesWithDisallowedExtensions array
       if (!allowedExtensionsArray.includes(fileExtension)) {
         filesWithDisallowedExtensions.push(fileObj);
       }
     });
 
-    console.log('\n');
-    console.group('fileExtensionLimiterMiddleware');
+    console.log("\n");
+    console.group("fileExtensionLimiterMiddleware");
     console.log({ files });
     console.log({ filesWithDisallowedExtensions });
     console.groupEnd();
 
-    // if there are files with disallowed extensions, return error
     if (filesWithDisallowedExtensions.length > 0) {
-      const progressiveApostrophe = filesWithDisallowedExtensions.length > 1 ? "'s" : ' ';
-      const properVerb = filesWithDisallowedExtensions.length > 1 ? ' are' : 'is';
+      const progressiveApostrophe = filesWithDisallowedExtensions.length > 1 ? "'s" : " ";
+      const properVerb = filesWithDisallowedExtensions.length > 1 ? " are" : "is";
 
       const message = `Upload failed. The following file ${progressiveApostrophe}${properVerb} not allowed: ${filesWithDisallowedExtensions
         .map((file) => file.name)
-        .join(', ')}. Allowed extensions are: ${allowedExtensionsArray.join(', ')}`;
+        .join(", ")}. Allowed extensions are: ${allowedExtensionsArray.join(", ")}`;
 
-      response.status(422).json({ message }); // 422: Unprocessable Entity
-      return;
+      return next(new createHttpError.UnprocessableEntity(message));
     }
 
-    next();
-    return;
+    return next();
   };
 };
 
