@@ -1,7 +1,7 @@
 import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewAnnouncementRequest,
@@ -33,6 +33,7 @@ import {
 } from "./announcement.service";
 import { removeUndefinedAndNullValues } from "../../../../utils";
 import { getUserByIdService } from "../../../user";
+import createHttpError from "http-errors";
 
 // @desc   Create a new announcement
 // @route  POST api/v1/actions/outreach/announcement
@@ -40,18 +41,16 @@ import { getUserByIdService } from "../../../user";
 const createNewAnnouncementController = expressAsyncController(
   async (
     request: CreateNewAnnouncementRequest,
-    response: Response<ResourceRequestServerResponse<AnnouncementDocument>>
+    response: Response<ResourceRequestServerResponse<AnnouncementDocument>>,
+    next: NextFunction
   ) => {
     const { announcementSchema } = request.body;
 
     const announcementDocument = await createNewAnnouncementService(announcementSchema);
-
     if (!announcementDocument) {
-      response.status(400).json({
-        message: "New announcement could not be created",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Announcement creation failed")
+      );
     }
 
     response.status(201).json({
@@ -81,7 +80,6 @@ const getQueriedAnnouncementsController = expressAsyncController(
       });
     }
 
-    // get all announcements
     const announcement = await getQueriedAnnouncementsService({
       filter: filter as FilterQuery<AnnouncementDocument> | undefined,
       projection: projection as QueryOptions<AnnouncementDocument>,
@@ -115,7 +113,6 @@ const getAnnouncementsByUserController = expressAsyncController(
     request: GetQueriedAnnouncementsByUserRequest,
     response: Response<GetQueriedResourceRequestServerResponse<AnnouncementDocument>>
   ) => {
-    // anyone can view their own announcement requests
     const {
       userInfo: { userId },
     } = request.body;
@@ -134,7 +131,6 @@ const getAnnouncementsByUserController = expressAsyncController(
       });
     }
 
-    // get all announcement requests by user
     const announcements = await getQueriedAnnouncementsByUserService({
       filter: filterWithUserId as FilterQuery<AnnouncementDocument> | undefined,
       projection: projection as QueryOptions<AnnouncementDocument>,
@@ -166,7 +162,8 @@ const getAnnouncementsByUserController = expressAsyncController(
 const updateAnnouncementByIdController = expressAsyncController(
   async (
     request: UpdateAnnouncementByIdRequest,
-    response: Response<ResourceRequestServerResponse<AnnouncementDocument>>
+    response: Response<ResourceRequestServerResponse<AnnouncementDocument>>,
+    next: NextFunction
   ) => {
     const { announcementId } = request.params;
     const {
@@ -176,23 +173,22 @@ const updateAnnouncementByIdController = expressAsyncController(
 
     const userExists = await getUserByIdService(userId);
     if (!userExists) {
-      response.status(404).json({ message: "User does not exist", resourceData: [] });
-      return;
+      return next(
+        new createHttpError.NotFound("User not found, announcement update failed")
+      );
     }
 
-    // update announcement request status
     const updatedAnnouncement = await updateAnnouncementByIdService({
       _id: announcementId,
       fields,
       updateOperator,
     });
-
     if (!updatedAnnouncement) {
-      response.status(400).json({
-        message: "Announcement request status update failed",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Announcement request status update failed"
+        )
+      );
     }
 
     response.status(200).json({
@@ -208,15 +204,13 @@ const updateAnnouncementByIdController = expressAsyncController(
 const getAnnouncementByIdController = expressAsyncController(
   async (
     request: GetAnnouncementByIdRequest,
-    response: Response<ResourceRequestServerResponse<AnnouncementDocument>>
+    response: Response<ResourceRequestServerResponse<AnnouncementDocument>>,
+    next: NextFunction
   ) => {
     const { announcementId } = request.params;
     const announcement = await getAnnouncementByIdService(announcementId);
     if (!announcement) {
-      response
-        .status(404)
-        .json({ message: "Announcement request not found", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Announcement request not found"));
     }
 
     response.status(200).json({
@@ -230,20 +224,16 @@ const getAnnouncementByIdController = expressAsyncController(
 // @route  DELETE api/v1/actions/outreach/announcement
 // @access Private
 const deleteAnnouncementController = expressAsyncController(
-  async (request: DeleteAnnouncementRequest, response: Response) => {
+  async (request: DeleteAnnouncementRequest, response: Response, next: NextFunction) => {
     const { announcementId } = request.params;
 
-    // delete announcement request by id
     const deletedResult: DeleteResult = await deleteAnnouncementByIdService(
       announcementId
     );
-
     if (!deletedResult.deletedCount) {
-      response.status(400).json({
-        message: "Announcement request could not be deleted",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Announcement request deletion failed")
+      );
     }
 
     response.status(200).json({
@@ -257,15 +247,16 @@ const deleteAnnouncementController = expressAsyncController(
 // @route   DELETE api/v1/actions/outreach/request-resource/announcement
 // @access  Private
 const deleteAllAnnouncementsController = expressAsyncController(
-  async (_request: DeleteAllAnnouncementsRequest, response: Response) => {
+  async (
+    _request: DeleteAllAnnouncementsRequest,
+    response: Response,
+    next: NextFunction
+  ) => {
     const deletedResult: DeleteResult = await deleteAllAnnouncementsService();
-
     if (!deletedResult.deletedCount) {
-      response.status(400).json({
-        message: "All announcement requests could not be deleted",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Announcement requests deletion failed")
+      );
     }
 
     response.status(200).json({
@@ -351,7 +342,6 @@ const updateAnnouncementsBulkController = expressAsyncController(
       })
     );
 
-    // filter out any announcements that were not created
     const successfullyCreatedAnnouncements = updatedAnnouncements.filter(
       removeUndefinedAndNullValues
     );

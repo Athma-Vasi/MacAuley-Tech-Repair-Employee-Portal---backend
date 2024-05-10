@@ -10,43 +10,7 @@ import type {
 } from "../../../../types";
 
 import { AnnouncementModel } from "./announcement.model";
-
-type CheckAnnouncementExistsServiceInput = {
-  announcementId?: Types.ObjectId | string;
-  title?: string;
-  userId?: Types.ObjectId | string;
-};
-
-async function checkAnnouncementExistsService({
-  announcementId,
-  title,
-  userId,
-}: CheckAnnouncementExistsServiceInput): Promise<boolean> {
-  try {
-    if (announcementId) {
-      const announcement = await AnnouncementModel.countDocuments().lean().exec();
-      return announcement ? true : false;
-    }
-
-    if (title) {
-      const announcement = await AnnouncementModel.countDocuments({ title })
-        .lean()
-        .exec();
-      return announcement ? true : false;
-    }
-
-    if (userId) {
-      const announcement = await AnnouncementModel.countDocuments({ userId })
-        .lean()
-        .exec();
-      return announcement ? true : false;
-    }
-
-    return false;
-  } catch (error: any) {
-    throw new Error(error, { cause: "checkAnnouncementExistsService" });
-  }
-}
+import createHttpError from "http-errors";
 
 async function getAnnouncementByIdService(
   announcementId: Types.ObjectId | string
@@ -55,7 +19,7 @@ async function getAnnouncementByIdService(
     const announcement = await AnnouncementModel.findById(announcementId).lean().exec();
     return announcement;
   } catch (error: any) {
-    throw new Error(error, { cause: "getAnnouncementByIdService" });
+    throw new createHttpError.InternalServerError("getAnnouncementByIdService");
   }
 }
 
@@ -66,7 +30,7 @@ async function createNewAnnouncementService(
     const announcement = await AnnouncementModel.create(announcementSchema);
     return announcement;
   } catch (error: any) {
-    throw new Error(error, { cause: "createNewAnnouncementService" });
+    throw new createHttpError.InternalServerError("createNewAnnouncementService");
   }
 }
 
@@ -81,7 +45,7 @@ async function getQueriedAnnouncementsService({
       .exec();
     return announcement;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedAnnouncementsService" });
+    throw new createHttpError.InternalServerError("getQueriedAnnouncementsService");
   }
 }
 
@@ -94,7 +58,7 @@ async function getQueriedTotalAnnouncementsService({
       .exec();
     return totalAnnouncements;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedTotalAnnouncementsService" });
+    throw new createHttpError.InternalServerError("getQueriedTotalAnnouncementsService");
   }
 }
 
@@ -109,7 +73,7 @@ async function getQueriedAnnouncementsByUserService({
       .exec();
     return announcements;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedAnnouncementsByUserService" });
+    throw new createHttpError.InternalServerError("getQueriedAnnouncementsByUserService");
   }
 }
 
@@ -129,7 +93,7 @@ async function updateAnnouncementByIdService({
       .exec();
     return announcement;
   } catch (error: any) {
-    throw new Error(error, { cause: "updateAnnouncementStatusByIdService" });
+    throw new createHttpError.InternalServerError("updateAnnouncementStatusByIdService");
   }
 }
 
@@ -144,7 +108,7 @@ async function deleteAnnouncementByIdService(
       .exec();
     return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteAnnouncementByIdService" });
+    throw new createHttpError.InternalServerError("deleteAnnouncementByIdService");
   }
 }
 
@@ -153,12 +117,11 @@ async function deleteAllAnnouncementsService(): Promise<DeleteResult> {
     const deletedResult = await AnnouncementModel.deleteMany({}).lean().exec();
     return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteAllAnnouncementsService" });
+    throw new createHttpError.InternalServerError("deleteAllAnnouncementsService");
   }
 }
 
 export {
-  checkAnnouncementExistsService,
   createNewAnnouncementService,
   deleteAllAnnouncementsService,
   deleteAnnouncementByIdService,

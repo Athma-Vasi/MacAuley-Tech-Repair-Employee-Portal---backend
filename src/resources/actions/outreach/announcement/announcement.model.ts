@@ -1,6 +1,4 @@
 import { Schema, model, Types } from "mongoose";
-import type { Action } from "../../../actions";
-import type { ActionsOutreach } from "..";
 
 type RatingEmotion = {
   estatic: number;

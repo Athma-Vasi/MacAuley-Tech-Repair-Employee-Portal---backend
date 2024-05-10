@@ -19,7 +19,6 @@ import {
   updateAnnouncementsBulkController,
 } from "./announcement.controller";
 import {
-  checkAnnouncementExistsService,
   createNewAnnouncementService,
   deleteAllAnnouncementsService,
   deleteAnnouncementByIdService,
@@ -54,7 +53,6 @@ import type {
 export {
   AnnouncementModel,
   announcementRouter,
-  checkAnnouncementExistsService,
   createNewAnnouncementController,
   createNewAnnouncementService,
   createNewAnnouncementsBulkController,
