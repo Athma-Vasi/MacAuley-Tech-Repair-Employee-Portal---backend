@@ -13,6 +13,7 @@ import {
   QueriedTotalResourceGetRequestServiceInput,
   UpdateDocumentByIdServiceInput,
 } from "../../../../types";
+import createHttpError from "http-errors";
 
 async function getRequestResourceByIdService(
   requestResourceId: Types.ObjectId | string
@@ -23,7 +24,9 @@ async function getRequestResourceByIdService(
       .exec();
     return requestResource;
   } catch (error: any) {
-    throw new Error(error, { cause: "getRequestResourceByIdService" });
+    throw new createHttpError.InternalServerError(
+      "Error in getRequestResourceByIdService"
+    );
   }
 }
 
@@ -34,7 +37,9 @@ async function createNewRequestResourceService(
     const requestResource = await RequestResourceModel.create(requestResourceSchema);
     return requestResource;
   } catch (error: any) {
-    throw new Error(error, { cause: "createNewRequestResourceService" });
+    throw new createHttpError.InternalServerError(
+      "Error in createNewRequestResourceService"
+    );
   }
 }
 
@@ -49,7 +54,9 @@ async function getQueriedRequestResourcesService({
       .exec();
     return requestResource;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedRequestResourcesService" });
+    throw new createHttpError.InternalServerError(
+      "Error in getQueriedRequestResourcesService"
+    );
   }
 }
 
@@ -62,7 +69,9 @@ async function getQueriedTotalRequestResourcesService({
       .exec();
     return totalRequestResources;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedTotalRequestResourcesService" });
+    throw new createHttpError.InternalServerError(
+      "Error in getQueriedTotalRequestResourcesService"
+    );
   }
 }
 
@@ -77,7 +86,9 @@ async function getQueriedRequestResourcesByUserService({
       .exec();
     return requestResources;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedRequestResourcesByUserService" });
+    throw new createHttpError.InternalServerError(
+      "Error in getQueriedRequestResourcesByUserService"
+    );
   }
 }
 
@@ -101,7 +112,9 @@ async function updateRequestResourceByIdService({
       .exec();
     return requestResource;
   } catch (error: any) {
-    throw new Error(error, { cause: "updateRequestResourceStatusByIdService" });
+    throw new createHttpError.InternalServerError(
+      "Error in updateRequestResourceByIdService"
+    );
   }
 }
 
@@ -114,7 +127,9 @@ async function deleteRequestResourceByIdService(
       .exec();
     return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteRequestResourceByIdService" });
+    throw new createHttpError.InternalServerError(
+      "Error in deleteRequestResourceByIdService"
+    );
   }
 }
 
@@ -123,7 +138,9 @@ async function deleteAllRequestResourcesService(): Promise<DeleteResult> {
     const deletedResult = await RequestResourceModel.deleteMany({}).lean().exec();
     return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteAllRequestResourcesService" });
+    throw new createHttpError.InternalServerError(
+      "Error in deleteAllRequestResourcesService"
+    );
   }
 }
 

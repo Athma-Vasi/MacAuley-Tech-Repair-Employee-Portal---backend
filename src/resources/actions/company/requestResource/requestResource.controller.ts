@@ -1,7 +1,7 @@
 import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewRequestResourceRequest,
@@ -36,6 +36,8 @@ import {
 } from "./requestResource.service";
 import { removeUndefinedAndNullValues } from "../../../../utils";
 import { getUserByIdService } from "../../../user";
+import { create } from "domain";
+import createHttpError from "http-errors";
 
 // @desc   Create a new request resource
 // @route  POST api/v1/actions/company/request-resource
@@ -43,14 +45,14 @@ import { getUserByIdService } from "../../../user";
 const createNewRequestResourceController = expressAsyncController(
   async (
     request: CreateNewRequestResourceRequest,
-    response: Response<ResourceRequestServerResponse<RequestResourceDocument>>
+    response: Response<ResourceRequestServerResponse<RequestResourceDocument>>,
+    next: NextFunction
   ) => {
     const {
       userInfo: { userId, username },
       requestResourceSchema,
     } = request.body;
 
-    // create new request resource object
     const newRequestResourceSchema: RequestResourceSchema = {
       ...requestResourceSchema,
       userId,
@@ -62,11 +64,11 @@ const createNewRequestResourceController = expressAsyncController(
     );
 
     if (!requestResourceDocument) {
-      response.status(400).json({
-        message: "New request resource could not be created",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Request resource document could not be created. Please try again!"
+        )
+      );
     }
 
     response.status(201).json({
@@ -82,7 +84,8 @@ const createNewRequestResourceController = expressAsyncController(
 const getQueriedRequestResourcesController = expressAsyncController(
   async (
     request: GetQueriedRequestResourcesRequest,
-    response: Response<GetQueriedResourceRequestServerResponse<RequestResourceDocument>>
+    response: Response<GetQueriedResourceRequestServerResponse<RequestResourceDocument>>,
+    next: NextFunction
   ) => {
     let { newQueryFlag, totalDocuments } = request.body;
 
@@ -96,7 +99,6 @@ const getQueriedRequestResourcesController = expressAsyncController(
       });
     }
 
-    // get all requestResources
     const requestResource = await getQueriedRequestResourcesService({
       filter: filter as FilterQuery<RequestResourceDocument> | undefined,
       projection: projection as QueryOptions<RequestResourceDocument>,
@@ -122,15 +124,15 @@ const getQueriedRequestResourcesController = expressAsyncController(
   }
 );
 
-// @desc   Get all requestResource requests by user
+// @desc   Get all requestResource documents by user
 // @route  GET api/v1/actions/company/request-resource/user
 // @access Private
 const getRequestResourcesByUserController = expressAsyncController(
   async (
     request: GetQueriedRequestResourcesByUserRequest,
-    response: Response<GetQueriedResourceRequestServerResponse<RequestResourceDocument>>
+    response: Response<GetQueriedResourceRequestServerResponse<RequestResourceDocument>>,
+    next: NextFunction
   ) => {
-    // anyone can view their own requestResource requests
     const {
       userInfo: { userId },
     } = request.body;
@@ -140,7 +142,6 @@ const getRequestResourcesByUserController = expressAsyncController(
     const { filter, projection, options } =
       request.query as QueryObjectParsedWithDefaults;
 
-    // assign userId to filter
     const filterWithUserId = { ...filter, userId };
 
     // only perform a countDocuments scan if a new query is being made
@@ -150,7 +151,6 @@ const getRequestResourcesByUserController = expressAsyncController(
       });
     }
 
-    // get all requestResource requests by user
     const requestResources = await getQueriedRequestResourcesByUserService({
       filter: filterWithUserId as FilterQuery<RequestResourceDocument> | undefined,
       projection: projection as QueryOptions<RequestResourceDocument>,
@@ -159,7 +159,7 @@ const getRequestResourcesByUserController = expressAsyncController(
 
     if (!requestResources.length) {
       response.status(200).json({
-        message: "No requestResource requests found",
+        message: "No requestResource documents found",
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
@@ -168,7 +168,7 @@ const getRequestResourcesByUserController = expressAsyncController(
     }
 
     response.status(200).json({
-      message: "Request Resource requests found successfully",
+      message: "Request Resource documents found successfully",
       pages: Math.ceil(totalDocuments / Number(options?.limit)),
       totalDocuments,
       resourceData: requestResources,
@@ -182,7 +182,8 @@ const getRequestResourcesByUserController = expressAsyncController(
 const updateRequestResourceByIdController = expressAsyncController(
   async (
     request: UpdateRequestResourceByIdRequest,
-    response: Response<ResourceRequestServerResponse<RequestResourceDocument>>
+    response: Response<ResourceRequestServerResponse<RequestResourceDocument>>,
+    next: NextFunction
   ) => {
     const { requestResourceId } = request.params;
     const {
@@ -190,14 +191,11 @@ const updateRequestResourceByIdController = expressAsyncController(
       userInfo: { userId },
     } = request.body;
 
-    // check if user exists
     const userExists = await getUserByIdService(userId);
     if (!userExists) {
-      response.status(404).json({ message: "User does not exist", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("User not found"));
     }
 
-    // update requestResource request status
     const updatedRequestResource = await updateRequestResourceByIdService({
       _id: requestResourceId,
       fields,
@@ -205,11 +203,11 @@ const updateRequestResourceByIdController = expressAsyncController(
     });
 
     if (!updatedRequestResource) {
-      response.status(400).json({
-        message: "Request Resource request status update failed. Please try again!",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Request resource document could not be updated. Please try again!"
+        )
+      );
     }
 
     response.status(200).json({
@@ -225,15 +223,13 @@ const updateRequestResourceByIdController = expressAsyncController(
 const getRequestResourceByIdController = expressAsyncController(
   async (
     request: GetRequestResourceByIdRequest,
-    response: Response<ResourceRequestServerResponse<RequestResourceDocument>>
+    response: Response<ResourceRequestServerResponse<RequestResourceDocument>>,
+    next: NextFunction
   ) => {
     const { requestResourceId } = request.params;
     const requestResource = await getRequestResourceByIdService(requestResourceId);
     if (!requestResource) {
-      response
-        .status(404)
-        .json({ message: "Request Resource request not found", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Request Resource request not found"));
     }
 
     response.status(200).json({
@@ -247,20 +243,23 @@ const getRequestResourceByIdController = expressAsyncController(
 // @route  DELETE api/v1/actions/company/request-resource/:requestResourceId
 // @access Private
 const deleteRequestResourceController = expressAsyncController(
-  async (request: DeleteRequestResourceRequest, response: Response) => {
+  async (
+    request: DeleteRequestResourceRequest,
+    response: Response,
+    next: NextFunction
+  ) => {
     const { requestResourceId } = request.params;
 
-    // delete requestResource request by id
     const deletedResult: DeleteResult = await deleteRequestResourceByIdService(
       requestResourceId
     );
 
     if (!deletedResult.deletedCount) {
-      response.status(400).json({
-        message: "Request Resource request could not be deleted",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Request Resource request could not be deleted. Please try again!"
+        )
+      );
     }
 
     response.status(200).json({
@@ -274,32 +273,37 @@ const deleteRequestResourceController = expressAsyncController(
 // @route   DELETE api/v1/actions/company/request-resource/delete-all
 // @access  Private
 const deleteAllRequestResourcesController = expressAsyncController(
-  async (_request: DeleteAllRequestResourcesRequest, response: Response) => {
+  async (
+    _request: DeleteAllRequestResourcesRequest,
+    response: Response,
+    next: NextFunction
+  ) => {
     const deletedResult: DeleteResult = await deleteAllRequestResourcesService();
 
     if (!deletedResult.deletedCount) {
-      response.status(400).json({
-        message: "All requestResource requests could not be deleted",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Request Resource documents could not be deleted. Please try again!"
+        )
+      );
     }
 
     response.status(200).json({
-      message: "All requestResource requests deleted successfully",
+      message: "All request resource documents deleted successfully",
       resourceData: [],
     });
   }
 );
 
 // DEV ROUTE
-// @desc   Create new requestResource requests in bulk
+// @desc   Create new requestResource documents in bulk
 // @route  POST api/v1/actions/company/request-resource/dev
 // @access Private
 const createNewRequestResourcesBulkController = expressAsyncController(
   async (
     request: CreateNewRequestResourcesBulkRequest,
-    response: Response<ResourceRequestServerResponse<RequestResourceDocument>>
+    response: Response<ResourceRequestServerResponse<RequestResourceDocument>>,
+    next: NextFunction
   ) => {
     const { requestResourceSchemas } = request.body;
 
@@ -312,18 +316,16 @@ const createNewRequestResourcesBulkController = expressAsyncController(
       })
     );
 
-    // filter out any null documents
     const filteredRequestResourceDocuments = requestResourceDocuments.filter(
       removeUndefinedAndNullValues
     );
 
-    // check if any documents were created
     if (filteredRequestResourceDocuments.length === 0) {
-      response.status(400).json({
-        message: "Request Resource requests creation failed",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Request Resource documents could not be created. Please try again!"
+        )
+      );
     }
 
     const uncreatedDocumentsAmount =
@@ -349,7 +351,8 @@ const createNewRequestResourcesBulkController = expressAsyncController(
 const updateRequestResourcesBulkController = expressAsyncController(
   async (
     request: UpdateRequestResourcesBulkRequest,
-    response: Response<ResourceRequestServerResponse<RequestResourceDocument>>
+    response: Response<ResourceRequestServerResponse<RequestResourceDocument>>,
+    next: NextFunction
   ) => {
     const { requestResourceFields } = request.body;
 
@@ -370,17 +373,16 @@ const updateRequestResourcesBulkController = expressAsyncController(
       })
     );
 
-    // filter out any requestResources that were not created
     const successfullyCreatedRequestResources = updatedRequestResources.filter(
       removeUndefinedAndNullValues
     );
 
     if (successfullyCreatedRequestResources.length === 0) {
-      response.status(400).json({
-        message: "Could not create any Request Resources",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Request Resources could not be updated. Please try again!"
+        )
+      );
     }
 
     response.status(201).json({
