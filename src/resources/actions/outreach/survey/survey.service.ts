@@ -10,6 +10,7 @@ import {
   QueriedTotalResourceGetRequestServiceInput,
   UpdateDocumentByIdServiceInput,
 } from "../../../../types";
+import createHttpError from "http-errors";
 
 async function getSurveyByIdService(
   surveyId: Types.ObjectId | string
@@ -18,16 +19,18 @@ async function getSurveyByIdService(
     const survey = await SurveyModel.findById(surveyId).lean().exec();
     return survey;
   } catch (error: any) {
-    throw new Error(error, { cause: "getSurveyByIdService" });
+    throw new createHttpError.InternalServerError("getSurveyByIdService");
   }
 }
 
-async function createNewSurveyService(surveySchema: SurveySchema): Promise<SurveyDocument> {
+async function createNewSurveyService(
+  surveySchema: SurveySchema
+): Promise<SurveyDocument> {
   try {
     const survey = await SurveyModel.create(surveySchema);
     return survey;
   } catch (error: any) {
-    throw new Error(error, { cause: "createNewSurveyService" });
+    throw new createHttpError.InternalServerError("createNewSurveyService");
   }
 }
 
@@ -40,7 +43,7 @@ async function getQueriedSurveysService({
     const survey = await SurveyModel.find(filter, projection, options).lean().exec();
     return survey;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedSurveysService" });
+    throw new createHttpError.InternalServerError("getQueriedSurveysService");
   }
 }
 
@@ -51,7 +54,7 @@ async function getQueriedTotalSurveysService({
     const totalSurveys = await SurveyModel.countDocuments(filter).lean().exec();
     return totalSurveys;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedTotalSurveysService" });
+    throw new createHttpError.InternalServerError("getQueriedTotalSurveysService");
   }
 }
 
@@ -64,7 +67,7 @@ async function getQueriedSurveysByUserService({
     const surveys = await SurveyModel.find(filter, projection, options).lean().exec();
     return surveys;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedSurveysByUserService" });
+    throw new createHttpError.InternalServerError("getQueriedSurveysByUserService");
   }
 }
 
@@ -84,7 +87,7 @@ async function updateSurveyByIdService({
       .exec();
     return survey;
   } catch (error: any) {
-    throw new Error(error, { cause: "updateSurveyStatusByIdService" });
+    throw new createHttpError.InternalServerError("updateSurveyStatusByIdService");
   }
 }
 
@@ -99,7 +102,7 @@ async function deleteSurveyByIdService(
       .exec();
     return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteSurveyByIdService" });
+    throw new createHttpError.InternalServerError("deleteSurveyByIdService");
   }
 }
 
@@ -108,7 +111,7 @@ async function deleteAllSurveysService(): Promise<DeleteResult> {
     const deletedResult = await SurveyModel.deleteMany({}).lean().exec();
     return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteAllSurveysService" });
+    throw new createHttpError.InternalServerError("deleteAllSurveysService");
   }
 }
 

@@ -1,7 +1,7 @@
 import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewEventRequest,
@@ -33,6 +33,7 @@ import {
 } from "./event.service";
 import { removeUndefinedAndNullValues } from "../../../../utils";
 import { getUserByIdService } from "../../../user";
+import createHttpError from "http-errors";
 
 // @desc   Create a new event
 // @route  POST api/v1/actions/general/event
@@ -40,18 +41,14 @@ import { getUserByIdService } from "../../../user";
 const createNewEventController = expressAsyncController(
   async (
     request: CreateNewEventRequest,
-    response: Response<ResourceRequestServerResponse<EventDocument>>
+    response: Response<ResourceRequestServerResponse<EventDocument>>,
+    next: NextFunction
   ) => {
     const { eventSchema } = request.body;
 
     const eventDocument = await createNewEventService(eventSchema);
-
     if (!eventDocument) {
-      response.status(400).json({
-        message: "New event could not be created",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Event creation failed"));
     }
 
     response.status(201).json({
@@ -81,7 +78,6 @@ const getQueriedEventsController = expressAsyncController(
       });
     }
 
-    // get all events
     const event = await getQueriedEventsService({
       filter: filter as FilterQuery<EventDocument> | undefined,
       projection: projection as QueryOptions<EventDocument>,
@@ -115,7 +111,6 @@ const getEventsByUserController = expressAsyncController(
     request: GetQueriedEventsByUserRequest,
     response: Response<GetQueriedResourceRequestServerResponse<EventDocument>>
   ) => {
-    // anyone can view their own event requests
     const {
       userInfo: { userId },
     } = request.body;
@@ -134,7 +129,6 @@ const getEventsByUserController = expressAsyncController(
       });
     }
 
-    // get all event requests by user
     const events = await getQueriedEventsByUserService({
       filter: filterWithUserId as FilterQuery<EventDocument> | undefined,
       projection: projection as QueryOptions<EventDocument>,
@@ -166,7 +160,8 @@ const getEventsByUserController = expressAsyncController(
 const updateEventByIdController = expressAsyncController(
   async (
     request: UpdateEventByIdRequest,
-    response: Response<ResourceRequestServerResponse<EventDocument>>
+    response: Response<ResourceRequestServerResponse<EventDocument>>,
+    next: NextFunction
   ) => {
     const { eventId } = request.params;
     const {
@@ -176,23 +171,18 @@ const updateEventByIdController = expressAsyncController(
 
     const userExists = await getUserByIdService(userId);
     if (!userExists) {
-      response.status(404).json({ message: "User does not exist", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("User not found"));
     }
 
-    // update event request status
     const updatedEvent = await updateEventByIdService({
       _id: eventId,
       fields,
       updateOperator,
     });
-
     if (!updatedEvent) {
-      response.status(400).json({
-        message: "Event request status update failed",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Event request status update failed")
+      );
     }
 
     response.status(200).json({
@@ -208,13 +198,13 @@ const updateEventByIdController = expressAsyncController(
 const getEventByIdController = expressAsyncController(
   async (
     request: GetEventByIdRequest,
-    response: Response<ResourceRequestServerResponse<EventDocument>>
+    response: Response<ResourceRequestServerResponse<EventDocument>>,
+    next: NextFunction
   ) => {
     const { eventId } = request.params;
     const event = await getEventByIdService(eventId);
     if (!event) {
-      response.status(404).json({ message: "Event request not found", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Event request not found"));
     }
 
     response.status(200).json({
@@ -228,18 +218,14 @@ const getEventByIdController = expressAsyncController(
 // @route  DELETE api/v1/actions/general/event
 // @access Private
 const deleteEventController = expressAsyncController(
-  async (request: DeleteEventRequest, response: Response) => {
+  async (request: DeleteEventRequest, response: Response, next: NextFunction) => {
     const { eventId } = request.params;
 
-    // delete event request by id
     const deletedResult: DeleteResult = await deleteEventByIdService(eventId);
-
     if (!deletedResult.deletedCount) {
-      response.status(400).json({
-        message: "Event request could not be deleted",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Event request deletion failed")
+      );
     }
 
     response.status(200).json({
@@ -253,15 +239,12 @@ const deleteEventController = expressAsyncController(
 // @route   DELETE api/v1/actions/general/request-resource/event
 // @access  Private
 const deleteAllEventsController = expressAsyncController(
-  async (_request: DeleteAllEventsRequest, response: Response) => {
+  async (_request: DeleteAllEventsRequest, response: Response, next: NextFunction) => {
     const deletedResult: DeleteResult = await deleteAllEventsService();
-
     if (!deletedResult.deletedCount) {
-      response.status(400).json({
-        message: "All event requests could not be deleted",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("All event requests deletion failed")
+      );
     }
 
     response.status(200).json({
@@ -340,7 +323,6 @@ const updateEventsBulkController = expressAsyncController(
       })
     );
 
-    // filter out any events that were not created
     const successfullyCreatedEvents = updatedEvents.filter(removeUndefinedAndNullValues);
 
     if (successfullyCreatedEvents.length === 0) {

@@ -1,7 +1,7 @@
 import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewSurveyRequest,
@@ -19,7 +19,7 @@ import type {
   QueryObjectParsedWithDefaults,
   ResourceRequestServerResponse,
 } from "../../../../types";
-import type { SurveyDocument, SurveySchema } from "./survey.model";
+import type { SurveyDocument } from "./survey.model";
 
 import {
   createNewSurveyService,
@@ -33,6 +33,7 @@ import {
 } from "./survey.service";
 import { removeUndefinedAndNullValues } from "../../../../utils";
 import { getUserByIdService } from "../../../user";
+import createHttpError from "http-errors";
 
 // @desc   Create a new survey
 // @route  POST api/v1/actions/outreach/survey
@@ -40,18 +41,14 @@ import { getUserByIdService } from "../../../user";
 const createNewSurveyController = expressAsyncController(
   async (
     request: CreateNewSurveyRequest,
-    response: Response<ResourceRequestServerResponse<SurveyDocument>>
+    response: Response<ResourceRequestServerResponse<SurveyDocument>>,
+    next: NextFunction
   ) => {
     const { surveySchema } = request.body;
 
     const surveyDocument = await createNewSurveyService(surveySchema);
-
     if (!surveyDocument) {
-      response.status(400).json({
-        message: "New survey could not be created",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Survey creation failed"));
     }
 
     response.status(201).json({
@@ -81,7 +78,6 @@ const getQueriedSurveysController = expressAsyncController(
       });
     }
 
-    // get all surveys
     const survey = await getQueriedSurveysService({
       filter: filter as FilterQuery<SurveyDocument> | undefined,
       projection: projection as QueryOptions<SurveyDocument>,
@@ -115,7 +111,6 @@ const getSurveysByUserController = expressAsyncController(
     request: GetQueriedSurveysByUserRequest,
     response: Response<GetQueriedResourceRequestServerResponse<SurveyDocument>>
   ) => {
-    // anyone can view their own survey requests
     const {
       userInfo: { userId },
     } = request.body;
@@ -134,7 +129,6 @@ const getSurveysByUserController = expressAsyncController(
       });
     }
 
-    // get all survey requests by user
     const surveys = await getQueriedSurveysByUserService({
       filter: filterWithUserId as FilterQuery<SurveyDocument> | undefined,
       projection: projection as QueryOptions<SurveyDocument>,
@@ -166,7 +160,8 @@ const getSurveysByUserController = expressAsyncController(
 const updateSurveyByIdController = expressAsyncController(
   async (
     request: UpdateSurveyByIdRequest,
-    response: Response<ResourceRequestServerResponse<SurveyDocument>>
+    response: Response<ResourceRequestServerResponse<SurveyDocument>>,
+    next: NextFunction
   ) => {
     const { surveyId } = request.params;
     const {
@@ -176,23 +171,16 @@ const updateSurveyByIdController = expressAsyncController(
 
     const userExists = await getUserByIdService(userId);
     if (!userExists) {
-      response.status(404).json({ message: "User does not exist", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("User not found"));
     }
 
-    // update survey request status
     const updatedSurvey = await updateSurveyByIdService({
       _id: surveyId,
       fields,
       updateOperator,
     });
-
     if (!updatedSurvey) {
-      response.status(400).json({
-        message: "Survey request status update failed",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Survey update failed"));
     }
 
     response.status(200).json({
@@ -208,15 +196,13 @@ const updateSurveyByIdController = expressAsyncController(
 const getSurveyByIdController = expressAsyncController(
   async (
     request: GetSurveyByIdRequest,
-    response: Response<ResourceRequestServerResponse<SurveyDocument>>
+    response: Response<ResourceRequestServerResponse<SurveyDocument>>,
+    next: NextFunction
   ) => {
     const { surveyId } = request.params;
     const survey = await getSurveyByIdService(surveyId);
     if (!survey) {
-      response
-        .status(404)
-        .json({ message: "Survey request not found", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Survey request not found"));
     }
 
     response.status(200).json({
@@ -230,18 +216,14 @@ const getSurveyByIdController = expressAsyncController(
 // @route  DELETE api/v1/actions/outreach/survey
 // @access Private
 const deleteSurveyController = expressAsyncController(
-  async (request: DeleteSurveyRequest, response: Response) => {
+  async (request: DeleteSurveyRequest, response: Response, next: NextFunction) => {
     const { surveyId } = request.params;
 
-    // delete survey request by id
     const deletedResult: DeleteResult = await deleteSurveyByIdService(surveyId);
-
     if (!deletedResult.deletedCount) {
-      response.status(400).json({
-        message: "Survey request could not be deleted",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Survey request deletion failed")
+      );
     }
 
     response.status(200).json({
@@ -255,15 +237,12 @@ const deleteSurveyController = expressAsyncController(
 // @route   DELETE api/v1/actions/outreach/request-resource/survey
 // @access  Private
 const deleteAllSurveysController = expressAsyncController(
-  async (_request: DeleteAllSurveysRequest, response: Response) => {
+  async (_request: DeleteAllSurveysRequest, response: Response, next: NextFunction) => {
     const deletedResult: DeleteResult = await deleteAllSurveysService();
-
     if (!deletedResult.deletedCount) {
-      response.status(400).json({
-        message: "All survey requests could not be deleted",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("All survey requests deletion failed")
+      );
     }
 
     response.status(200).json({
@@ -343,7 +322,6 @@ const updateSurveysBulkController = expressAsyncController(
       })
     );
 
-    // filter out any surveys that were not created
     const successfullyCreatedSurveys = updatedSurveys.filter(
       removeUndefinedAndNullValues
     );

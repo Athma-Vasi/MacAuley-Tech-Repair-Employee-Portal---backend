@@ -10,6 +10,7 @@ import {
   QueriedTotalResourceGetRequestServiceInput,
   UpdateDocumentByIdServiceInput,
 } from "../../../../types";
+import createHttpError from "http-errors";
 
 async function getEventByIdService(
   eventId: Types.ObjectId | string
@@ -18,7 +19,7 @@ async function getEventByIdService(
     const event = await EventModel.findById(eventId).lean().exec();
     return event;
   } catch (error: any) {
-    throw new Error(error, { cause: "getEventByIdService" });
+    throw new createHttpError.InternalServerError("getEventByIdService");
   }
 }
 
@@ -27,7 +28,7 @@ async function createNewEventService(eventSchema: EventSchema): Promise<EventDoc
     const event = await EventModel.create(eventSchema);
     return event;
   } catch (error: any) {
-    throw new Error(error, { cause: "createNewEventService" });
+    throw new createHttpError.InternalServerError("createNewEventService");
   }
 }
 
@@ -40,7 +41,7 @@ async function getQueriedEventsService({
     const event = await EventModel.find(filter, projection, options).lean().exec();
     return event;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedEventsService" });
+    throw new createHttpError.InternalServerError("getQueriedEventsService");
   }
 }
 
@@ -51,7 +52,7 @@ async function getQueriedTotalEventsService({
     const totalEvents = await EventModel.countDocuments(filter).lean().exec();
     return totalEvents;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedTotalEventsService" });
+    throw new createHttpError.InternalServerError("getQueriedTotalEventsService");
   }
 }
 
@@ -64,7 +65,7 @@ async function getQueriedEventsByUserService({
     const events = await EventModel.find(filter, projection, options).lean().exec();
     return events;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedEventsByUserService" });
+    throw new createHttpError.InternalServerError("getQueriedEventsByUserService");
   }
 }
 
@@ -84,7 +85,7 @@ async function updateEventByIdService({
       .exec();
     return event;
   } catch (error: any) {
-    throw new Error(error, { cause: "updateEventStatusByIdService" });
+    throw new createHttpError.InternalServerError("updateEventStatusByIdService");
   }
 }
 
@@ -99,7 +100,7 @@ async function deleteEventByIdService(
       .exec();
     return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteEventByIdService" });
+    throw new createHttpError.InternalServerError("deleteEventByIdService");
   }
 }
 
@@ -108,7 +109,7 @@ async function deleteAllEventsService(): Promise<DeleteResult> {
     const deletedResult = await EventModel.deleteMany({}).lean().exec();
     return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteAllEventsService" });
+    throw new createHttpError.InternalServerError("deleteAllEventsService");
   }
 }
 
