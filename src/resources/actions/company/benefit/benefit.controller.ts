@@ -1,7 +1,7 @@
 import expressAsyncController from "express-async-handler";
 import type { DeleteResult } from "mongodb";
 
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
 import type {
   CreateNewBenefitRequest,
   CreateNewBenefitsBulkRequest,
@@ -33,6 +33,7 @@ import { FilterQuery, QueryOptions } from "mongoose";
 
 import { getUserByIdService, getUserByUsernameService } from "../../../user";
 import { removeUndefinedAndNullValues } from "../../../../utils";
+import createHttpError from "http-errors";
 
 // @desc   Create a new benefits plan
 // @route  POST api/v1/actions/company/benefits
@@ -40,30 +41,24 @@ import { removeUndefinedAndNullValues } from "../../../../utils";
 const createNewBenefitController = expressAsyncController(
   async (
     request: CreateNewBenefitRequest,
-    response: Response<ResourceRequestServerResponse<BenefitDocument>>
+    response: Response<ResourceRequestServerResponse<BenefitDocument>>,
+    next: NextFunction
   ) => {
     const {
       userInfo: { roles, username },
       benefitSchema,
     } = request.body;
 
-    // only managers can create a new benefits plan
-    // by default, verifyRoles middleware allows all to access POST routes
     if (!roles.includes("Manager")) {
-      response
-        .status(403)
-        .json({ message: "User does not have permission", resourceData: [] });
-      return;
+      return next(new createHttpError.Forbidden("User does not have permission"));
     }
 
-    // get userId from benefit username
-    const benefitUserDoc = await getUserByUsernameService(username);
-    if (!benefitUserDoc) {
-      response.status(404).json({ message: "User not found", resourceData: [] });
-      return;
+    const benefitUser = await getUserByUsernameService(username);
+    if (!benefitUser) {
+      return next(new createHttpError.NotFound("User not found"));
     }
-    const benefitUserId = benefitUserDoc._id;
 
+    const benefitUserId = benefitUser._id;
     const newBenefitSchema: BenefitSchema = {
       ...benefitSchema,
       benefitUserId,
@@ -72,10 +67,9 @@ const createNewBenefitController = expressAsyncController(
 
     const benefitDocument = await createNewBenefitService(newBenefitSchema);
     if (!benefitDocument) {
-      response
-        .status(400)
-        .json({ message: "Unable to create new benefit plan", resourceData: [] });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Unable to create new benefit plan")
+      );
     }
 
     response
@@ -104,14 +98,13 @@ const getQueriedBenefitsController = expressAsyncController(
       });
     }
 
-    // get all benefits
-    const benefit = await getQueriedBenefitsService({
+    const benefits = await getQueriedBenefitsService({
       filter: filter as FilterQuery<BenefitDocument> | undefined,
       projection: projection as QueryOptions<BenefitDocument>,
       options: options as QueryOptions<BenefitDocument>,
     });
 
-    if (!benefit.length) {
+    if (!benefits.length) {
       response.status(200).json({
         message: "No benefits that match query parameters were found",
         pages: 0,
@@ -125,12 +118,12 @@ const getQueriedBenefitsController = expressAsyncController(
       message: "Benefits found successfully",
       pages: Math.ceil(totalDocuments / Number(options?.limit)),
       totalDocuments,
-      resourceData: benefit,
+      resourceData: benefits,
     });
   }
 );
 
-// @desc   Get all benefit requests by user
+// @desc   Get all benefit documents by user
 // @route  GET api/v1/actions/company/benefit/user
 // @access Private
 const getBenefitsByUserController = expressAsyncController(
@@ -138,7 +131,6 @@ const getBenefitsByUserController = expressAsyncController(
     request: GetQueriedBenefitsByUserRequest,
     response: Response<GetQueriedResourceRequestServerResponse<BenefitDocument>>
   ) => {
-    // anyone can view their own benefit requests
     const {
       userInfo: { userId },
     } = request.body;
@@ -148,7 +140,6 @@ const getBenefitsByUserController = expressAsyncController(
     const { filter, projection, options } =
       request.query as QueryObjectParsedWithDefaults;
 
-    // assign userId to filter
     const filterWithUserId = { ...filter, userId };
 
     // only perform a countDocuments scan if a new query is being made
@@ -158,7 +149,6 @@ const getBenefitsByUserController = expressAsyncController(
       });
     }
 
-    // get all benefit requests by user
     const benefits = await getQueriedBenefitsByUserService({
       filter: filterWithUserId as FilterQuery<BenefitDocument> | undefined,
       projection: projection as QueryOptions<BenefitDocument>,
@@ -167,7 +157,7 @@ const getBenefitsByUserController = expressAsyncController(
 
     if (!benefits.length) {
       response.status(200).json({
-        message: "No benefit requests found",
+        message: "No benefit documents found",
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
@@ -190,7 +180,8 @@ const getBenefitsByUserController = expressAsyncController(
 const updateBenefitByIdController = expressAsyncController(
   async (
     request: UpdateBenefitByIdRequest,
-    response: Response<ResourceRequestServerResponse<BenefitDocument>>
+    response: Response<ResourceRequestServerResponse<BenefitDocument>>,
+    next: NextFunction
   ) => {
     const { benefitId } = request.params;
     const {
@@ -198,14 +189,11 @@ const updateBenefitByIdController = expressAsyncController(
       userInfo: { userId },
     } = request.body;
 
-    // check if user exists
     const userExists = await getUserByIdService(userId);
     if (!userExists) {
-      response.status(404).json({ message: "User does not exist", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("User not found"));
     }
 
-    // update benefit request status
     const updatedBenefit = await updateBenefitByIdService({
       _id: benefitId,
       fields,
@@ -213,15 +201,15 @@ const updateBenefitByIdController = expressAsyncController(
     });
 
     if (!updatedBenefit) {
-      response.status(400).json({
-        message: "Benefit request status update failed. Please try again!",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Benefit document status update failed. Please try again!"
+        )
+      );
     }
 
     response.status(200).json({
-      message: "Benefit request status updated successfully",
+      message: "Benefit document status updated successfully",
       resourceData: [updatedBenefit],
     });
   }
@@ -233,50 +221,44 @@ const updateBenefitByIdController = expressAsyncController(
 const getBenefitByIdController = expressAsyncController(
   async (
     request: GetBenefitByIdRequest,
-    response: Response<ResourceRequestServerResponse<BenefitDocument>>
+    response: Response<ResourceRequestServerResponse<BenefitDocument>>,
+    next: NextFunction
   ) => {
     const { benefitId } = request.params;
     const benefit = await getBenefitByIdService(benefitId);
     if (!benefit) {
-      response
-        .status(404)
-        .json({ message: "Benefit request not found", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Benefit document not found"));
     }
 
     response.status(200).json({
-      message: "Benefit request found successfully",
+      message: "Benefit document found successfully",
       resourceData: [benefit],
     });
   }
 );
 
-// @desc   Delete an benefit request by its id
+// @desc   Delete an benefit document by its id
 // @route  DELETE api/v1/actions/company/benefit/:benefitId
 // @access Private
 const deleteBenefitController = expressAsyncController(
   async (request: DeleteAnBenefitRequest, response: Response) => {
     const { benefitId } = request.params;
 
-    // delete benefit request by id
     const deletedResult: DeleteResult = await deleteBenefitByIdService(benefitId);
-
     if (!deletedResult.deletedCount) {
-      response.status(400).json({
-        message: "Benefit request could not be deleted",
-        resourceData: [],
-      });
-      return;
+      throw new createHttpError.InternalServerError(
+        "Benefit document could not be deleted"
+      );
     }
 
     response.status(200).json({
-      message: "Benefit request deleted successfully",
+      message: "Benefit document deleted successfully",
       resourceData: [],
     });
   }
 );
 
-// @desc    Delete all benefit requests
+// @desc    Delete all benefit documents
 // @route   DELETE api/v1/actions/company/benefit/delete-all
 // @access  Private
 const deleteAllBenefitsController = expressAsyncController(
@@ -284,22 +266,20 @@ const deleteAllBenefitsController = expressAsyncController(
     const deletedResult: DeleteResult = await deleteAllBenefitsService();
 
     if (!deletedResult.deletedCount) {
-      response.status(400).json({
-        message: "All benefit requests could not be deleted",
-        resourceData: [],
-      });
-      return;
+      throw new createHttpError.InternalServerError(
+        "All benefit documents could not be deleted"
+      );
     }
 
     response.status(200).json({
-      message: "All benefit requests deleted successfully",
+      message: "All benefit documents deleted successfully",
       resourceData: [],
     });
   }
 );
 
 // DEV ROUTE
-// @desc   Create new benefit requests in bulk
+// @desc   Create new benefit documents in bulk
 // @route  POST api/v1/actions/company/benefit/dev
 // @access Private
 const createNewBenefitsBulkController = expressAsyncController(
@@ -316,18 +296,14 @@ const createNewBenefitsBulkController = expressAsyncController(
       })
     );
 
-    // filter out any null documents
     const filteredBenefitDocuments = benefitDocuments.filter(
       removeUndefinedAndNullValues
     );
 
-    // check if any documents were created
     if (filteredBenefitDocuments.length === 0) {
-      response.status(400).json({
-        message: "Benefit requests creation failed",
-        resourceData: [],
-      });
-      return;
+      throw new createHttpError.InternalServerError(
+        "No Benefit Requests were created. Please try again!"
+      );
     }
 
     const uncreatedDocumentsAmount =
@@ -374,17 +350,14 @@ const updateBenefitsBulkController = expressAsyncController(
       })
     );
 
-    // filter out any benefits that were not created
     const successfullyCreatedBenefits = updatedBenefits.filter(
       removeUndefinedAndNullValues
     );
 
     if (successfullyCreatedBenefits.length === 0) {
-      response.status(400).json({
-        message: "Could not create any Benefits",
-        resourceData: [],
-      });
-      return;
+      throw new createHttpError.InternalServerError(
+        "No Benefit Requests were updated. Please try again!"
+      );
     }
 
     response.status(201).json({

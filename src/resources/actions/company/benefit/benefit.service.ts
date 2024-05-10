@@ -10,6 +10,7 @@ import {
   QueriedTotalResourceGetRequestServiceInput,
   UpdateDocumentByIdServiceInput,
 } from "../../../../types";
+import createHttpError from "http-errors";
 
 async function getBenefitByIdService(
   benefitId: Types.ObjectId | string
@@ -18,7 +19,7 @@ async function getBenefitByIdService(
     const benefit = await BenefitModel.findById(benefitId).lean().exec();
     return benefit;
   } catch (error: any) {
-    throw new Error(error, { cause: "getBenefitByIdService" });
+    throw new createHttpError.InternalServerError("getBenefitByIdService");
   }
 }
 
@@ -29,7 +30,7 @@ async function createNewBenefitService(
     const benefit = await BenefitModel.create(benefitSchema);
     return benefit;
   } catch (error: any) {
-    throw new Error(error, { cause: "createNewBenefitService" });
+    throw new createHttpError.InternalServerError("createNewBenefitService");
   }
 }
 
@@ -42,7 +43,7 @@ async function getQueriedBenefitsService({
     const benefit = await BenefitModel.find(filter, projection, options).lean().exec();
     return benefit;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedBenefitsService" });
+    throw new createHttpError.InternalServerError("getQueriedBenefitsService");
   }
 }
 
@@ -53,7 +54,7 @@ async function getQueriedTotalBenefitsService({
     const totalBenefits = await BenefitModel.countDocuments(filter).lean().exec();
     return totalBenefits;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedTotalBenefitsService" });
+    throw new createHttpError.InternalServerError("getQueriedTotalBenefitsService");
   }
 }
 
@@ -66,7 +67,7 @@ async function getQueriedBenefitsByUserService({
     const benefits = await BenefitModel.find(filter, projection, options).lean().exec();
     return benefits;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedBenefitsByUserService" });
+    throw new createHttpError.InternalServerError("getQueriedBenefitsByUserService");
   }
 }
 
@@ -86,7 +87,7 @@ async function updateBenefitByIdService({
       .exec();
     return benefit;
   } catch (error: any) {
-    throw new Error(error, { cause: "updateBenefitStatusByIdService" });
+    throw new createHttpError.InternalServerError("updateBenefitByIdService");
   }
 }
 
@@ -97,7 +98,7 @@ async function deleteBenefitByIdService(
     const deletedResult = await BenefitModel.deleteOne({ _id: benefitId }).lean().exec();
     return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteBenefitByIdService" });
+    throw new createHttpError.InternalServerError("deleteBenefitByIdService");
   }
 }
 
@@ -106,7 +107,7 @@ async function deleteAllBenefitsService(): Promise<DeleteResult> {
     const deletedResult = await BenefitModel.deleteMany({}).lean().exec();
     return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteAllBenefitsService" });
+    throw new createHttpError.InternalServerError("deleteAllBenefitsService");
   }
 }
 
