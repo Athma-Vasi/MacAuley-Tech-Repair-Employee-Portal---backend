@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
 import type { Response } from "express";
@@ -38,7 +38,7 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 // @desc   Create new microphone
 // @route  POST /api/v1/product-category/microphone
 // @access Private/Admin/Manager
-const createNewMicrophoneHandler = expressAsyncHandler(
+const createNewMicrophoneController = expressAsyncController(
   async (
     request: CreateNewMicrophoneRequest,
     response: Response<ResourceRequestServerResponse<MicrophoneDocument>>
@@ -68,7 +68,7 @@ const createNewMicrophoneHandler = expressAsyncHandler(
 // @desc   Create new microphones bulk
 // @route  POST /api/v1/product-category/microphone/dev
 // @access Private/Admin/Manager
-const createNewMicrophoneBulkHandler = expressAsyncHandler(
+const createNewMicrophoneBulkController = expressAsyncController(
   async (
     request: CreateNewMicrophoneBulkRequest,
     response: Response<ResourceRequestServerResponse<MicrophoneDocument>>
@@ -117,7 +117,7 @@ const createNewMicrophoneBulkHandler = expressAsyncHandler(
 // @desc   Update microphones bulk
 // @route  PATCH /api/v1/product-category/microphone/dev
 // @access Private/Admin/Manager
-const updateMicrophonesBulkHandler = expressAsyncHandler(
+const updateMicrophonesBulkController = expressAsyncController(
   async (
     request: UpdateMicrophonesBulkRequest,
     response: Response<ResourceRequestServerResponse<MicrophoneDocument>>
@@ -176,7 +176,7 @@ const updateMicrophonesBulkHandler = expressAsyncHandler(
 // @desc   Get all microphones
 // @route  GET /api/v1/product-category/microphone
 // @access Private/Admin/Manager
-const getQueriedMicrophonesHandler = expressAsyncHandler(
+const getQueriedMicrophonesController = expressAsyncController(
   async (
     request: GetQueriedMicrophonesRequest,
     response: Response<GetQueriedResourceRequestServerResponse<MicrophoneDocument>>
@@ -221,7 +221,7 @@ const getQueriedMicrophonesHandler = expressAsyncHandler(
 // @desc   Get microphone by id
 // @route  GET /api/v1/product-category/microphone/:microphoneId
 // @access Private/Admin/Manager
-const getMicrophoneByIdHandler = expressAsyncHandler(
+const getMicrophoneByIdController = expressAsyncController(
   async (
     request: GetMicrophoneByIdRequest,
     response: Response<ResourceRequestServerResponse<MicrophoneDocument>>
@@ -245,7 +245,7 @@ const getMicrophoneByIdHandler = expressAsyncHandler(
 // @desc   Update a microphone by id
 // @route  PUT /api/v1/product-category/microphone/:microphoneId
 // @access Private/Admin/Manager
-const updateMicrophoneByIdHandler = expressAsyncHandler(
+const updateMicrophoneByIdController = expressAsyncController(
   async (
     request: UpdateMicrophoneByIdRequest,
     response: Response<ResourceRequestServerResponse<MicrophoneDocument>>
@@ -280,7 +280,7 @@ const updateMicrophoneByIdHandler = expressAsyncHandler(
 // @desc   Delete all microphones
 // @route  DELETE /api/v1/product-category/microphone
 // @access Private/Admin/Manager
-const deleteAllMicrophonesHandler = expressAsyncHandler(
+const deleteAllMicrophonesController = expressAsyncController(
   async (
     _request: DeleteAllMicrophonesRequest,
     response: Response<ResourceRequestServerResponse<MicrophoneDocument>>
@@ -338,7 +338,7 @@ const deleteAllMicrophonesHandler = expressAsyncHandler(
 // @desc   Delete a microphone by id
 // @route  DELETE /api/v1/product-category/microphone/:microphoneId
 // @access Private/Admin/Manager
-const deleteAMicrophoneHandler = expressAsyncHandler(
+const deleteAMicrophoneController = expressAsyncController(
   async (
     request: DeleteAMicrophoneRequest,
     response: Response<ResourceRequestServerResponse<MicrophoneDocument>>
@@ -408,12 +408,12 @@ const deleteAMicrophoneHandler = expressAsyncHandler(
 );
 
 export {
-  createNewMicrophoneBulkHandler,
-  createNewMicrophoneHandler,
-  deleteAMicrophoneHandler,
-  deleteAllMicrophonesHandler,
-  getMicrophoneByIdHandler,
-  getQueriedMicrophonesHandler,
-  updateMicrophoneByIdHandler,
-  updateMicrophonesBulkHandler,
+  createNewMicrophoneBulkController,
+  createNewMicrophoneController,
+  deleteAMicrophoneController,
+  deleteAllMicrophonesController,
+  getMicrophoneByIdController,
+  getQueriedMicrophonesController,
+  updateMicrophoneByIdController,
+  updateMicrophonesBulkController,
 };

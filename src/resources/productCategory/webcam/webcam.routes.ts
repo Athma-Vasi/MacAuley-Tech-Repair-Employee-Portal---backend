@@ -1,13 +1,13 @@
 import { Router } from "express";
 import {
-  createNewWebcamBulkHandler,
-  createNewWebcamHandler,
-  deleteAWebcamHandler,
-  deleteAllWebcamsHandler,
-  getWebcamByIdHandler,
-  getQueriedWebcamsHandler,
-  updateWebcamByIdHandler,
-  updateWebcamsBulkHandler,
+  createNewWebcamBulkController,
+  createNewWebcamController,
+  deleteAWebcamController,
+  deleteAllWebcamsController,
+  getWebcamByIdController,
+  getQueriedWebcamsController,
+  updateWebcamByIdController,
+  updateWebcamsBulkController,
 } from "./webcam.controller";
 import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
 import { createWebcamJoiSchema, updateWebcamJoiSchema } from "./webcam.validation";
@@ -16,26 +16,26 @@ const webcamRouter = Router();
 
 webcamRouter
   .route("/")
-  .get(getQueriedWebcamsHandler)
+  .get(getQueriedWebcamsController)
   .post(
     validateSchemaMiddleware(createWebcamJoiSchema, "webcamSchema"),
-    createNewWebcamHandler
+    createNewWebcamController
   );
 
 // separate route for safety reasons (as it deletes all documents in the collection)
-webcamRouter.route("/delete-all").delete(deleteAllWebcamsHandler);
+webcamRouter.route("/delete-all").delete(deleteAllWebcamsController);
 
 // DEV ROUTE
 webcamRouter
   .route("/dev")
-  .post(createNewWebcamBulkHandler)
-  .patch(updateWebcamsBulkHandler);
+  .post(createNewWebcamBulkController)
+  .patch(updateWebcamsBulkController);
 
 // single document routes
 webcamRouter
   .route("/:webcamId")
-  .get(getWebcamByIdHandler)
-  .delete(deleteAWebcamHandler)
-  .patch(validateSchemaMiddleware(updateWebcamJoiSchema), updateWebcamByIdHandler);
+  .get(getWebcamByIdController)
+  .delete(deleteAWebcamController)
+  .patch(validateSchemaMiddleware(updateWebcamJoiSchema), updateWebcamByIdController);
 
 export { webcamRouter };

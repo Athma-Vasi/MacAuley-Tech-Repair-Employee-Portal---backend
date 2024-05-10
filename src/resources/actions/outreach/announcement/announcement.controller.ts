@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
 import type { Response } from "express";
@@ -37,7 +37,7 @@ import { getUserByIdService } from "../../../user";
 // @desc   Create a new announcement
 // @route  POST api/v1/actions/outreach/announcement
 // @access Private
-const createNewAnnouncementHandler = expressAsyncHandler(
+const createNewAnnouncementController = expressAsyncController(
   async (
     request: CreateNewAnnouncementRequest,
     response: Response<ResourceRequestServerResponse<AnnouncementDocument>>
@@ -64,7 +64,7 @@ const createNewAnnouncementHandler = expressAsyncHandler(
 // @desc   Get all announcements
 // @route  GET api/v1/actions/outreach/announcement
 // @access Private/Admin/Manager
-const getQueriedAnnouncementsHandler = expressAsyncHandler(
+const getQueriedAnnouncementsController = expressAsyncController(
   async (
     request: GetQueriedAnnouncementsRequest,
     response: Response<GetQueriedResourceRequestServerResponse<AnnouncementDocument>>
@@ -110,7 +110,7 @@ const getQueriedAnnouncementsHandler = expressAsyncHandler(
 // @desc   Get all announcement requests by user
 // @route  GET api/v1/actions/outreach/announcement
 // @access Private
-const getAnnouncementsByUserHandler = expressAsyncHandler(
+const getAnnouncementsByUserController = expressAsyncController(
   async (
     request: GetQueriedAnnouncementsByUserRequest,
     response: Response<GetQueriedResourceRequestServerResponse<AnnouncementDocument>>
@@ -164,7 +164,7 @@ const getAnnouncementsByUserHandler = expressAsyncHandler(
 // @desc   Update announcement status
 // @route  PATCH api/v1/actions/outreach/announcement
 // @access Private/Admin/Manager
-const updateAnnouncementByIdHandler = expressAsyncHandler(
+const updateAnnouncementByIdController = expressAsyncController(
   async (
     request: UpdateAnnouncementByIdRequest,
     response: Response<ResourceRequestServerResponse<AnnouncementDocument>>
@@ -207,7 +207,7 @@ const updateAnnouncementByIdHandler = expressAsyncHandler(
 // @desc   Get an announcement request
 // @route  GET api/v1/actions/outreach/announcement
 // @access Private
-const getAnnouncementByIdHandler = expressAsyncHandler(
+const getAnnouncementByIdController = expressAsyncController(
   async (
     request: GetAnnouncementByIdRequest,
     response: Response<ResourceRequestServerResponse<AnnouncementDocument>>
@@ -231,7 +231,7 @@ const getAnnouncementByIdHandler = expressAsyncHandler(
 // @desc   Delete an announcement request by its id
 // @route  DELETE api/v1/actions/outreach/announcement
 // @access Private
-const deleteAnnouncementHandler = expressAsyncHandler(
+const deleteAnnouncementController = expressAsyncController(
   async (request: DeleteAnnouncementRequest, response: Response) => {
     const { announcementId } = request.params;
 
@@ -258,7 +258,7 @@ const deleteAnnouncementHandler = expressAsyncHandler(
 // @desc    Delete all announcement requests
 // @route   DELETE api/v1/actions/outreach/request-resource/announcement
 // @access  Private
-const deleteAllAnnouncementsHandler = expressAsyncHandler(
+const deleteAllAnnouncementsController = expressAsyncController(
   async (_request: DeleteAllAnnouncementsRequest, response: Response) => {
     const deletedResult: DeleteResult = await deleteAllAnnouncementsService();
 
@@ -281,7 +281,7 @@ const deleteAllAnnouncementsHandler = expressAsyncHandler(
 // @desc   Create new announcement requests in bulk
 // @route  POST api/v1/actions/outreach/announcement
 // @access Private
-const createNewAnnouncementsBulkHandler = expressAsyncHandler(
+const createNewAnnouncementsBulkController = expressAsyncController(
   async (
     request: CreateNewAnnouncementsBulkRequest,
     response: Response<ResourceRequestServerResponse<AnnouncementDocument>>
@@ -331,7 +331,7 @@ const createNewAnnouncementsBulkHandler = expressAsyncHandler(
 // @desc   Update Announcements in bulk
 // @route  PATCH api/v1/actions/outreach/announcement
 // @access Private
-const updateAnnouncementsBulkHandler = expressAsyncHandler(
+const updateAnnouncementsBulkController = expressAsyncController(
   async (
     request: UpdateAnnouncementsBulkRequest,
     response: Response<ResourceRequestServerResponse<AnnouncementDocument>>
@@ -380,13 +380,13 @@ const updateAnnouncementsBulkHandler = expressAsyncHandler(
 );
 
 export {
-  createNewAnnouncementHandler,
-  getQueriedAnnouncementsHandler,
-  getAnnouncementsByUserHandler,
-  getAnnouncementByIdHandler,
-  deleteAnnouncementHandler,
-  deleteAllAnnouncementsHandler,
-  updateAnnouncementByIdHandler,
-  createNewAnnouncementsBulkHandler,
-  updateAnnouncementsBulkHandler,
+  createNewAnnouncementController,
+  getQueriedAnnouncementsController,
+  getAnnouncementsByUserController,
+  getAnnouncementByIdController,
+  deleteAnnouncementController,
+  deleteAllAnnouncementsController,
+  updateAnnouncementByIdController,
+  createNewAnnouncementsBulkController,
+  updateAnnouncementsBulkController,
 };

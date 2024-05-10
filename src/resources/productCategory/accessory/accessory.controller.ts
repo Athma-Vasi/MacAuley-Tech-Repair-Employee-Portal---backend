@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
 import type { Response } from "express";
@@ -38,7 +38,7 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 // @desc   Create new accessory
 // @route  POST /api/v1/product-category/accessory
 // @access Private/Admin/Manager
-const createNewAccessoryHandler = expressAsyncHandler(
+const createNewAccessoryController = expressAsyncController(
   async (
     request: CreateNewAccessoryRequest,
     response: Response<ResourceRequestServerResponse<AccessoryDocument>>
@@ -68,7 +68,7 @@ const createNewAccessoryHandler = expressAsyncHandler(
 // @desc   Create new accessories bulk
 // @route  POST /api/v1/product-category/accessory/dev
 // @access Private/Admin/Manager
-const createNewAccessoryBulkHandler = expressAsyncHandler(
+const createNewAccessoryBulkController = expressAsyncController(
   async (
     request: CreateNewAccessoryBulkRequest,
     response: Response<ResourceRequestServerResponse<AccessoryDocument>>
@@ -117,7 +117,7 @@ const createNewAccessoryBulkHandler = expressAsyncHandler(
 // @desc   Update accessories bulk
 // @route  PATCH /api/v1/product-category/accessory/dev
 // @access Private/Admin/Manager
-const updateAccessoriesBulkHandler = expressAsyncHandler(
+const updateAccessoriesBulkController = expressAsyncController(
   async (
     request: UpdateAccessoriesBulkRequest,
     response: Response<ResourceRequestServerResponse<AccessoryDocument>>
@@ -176,7 +176,7 @@ const updateAccessoriesBulkHandler = expressAsyncHandler(
 // @desc   Get all accessories
 // @route  GET /api/v1/product-category/accessory
 // @access Private/Admin/Manager
-const getQueriedAccessoriesHandler = expressAsyncHandler(
+const getQueriedAccessoriesController = expressAsyncController(
   async (
     request: GetQueriedAccessoriesRequest,
     response: Response<GetQueriedResourceRequestServerResponse<AccessoryDocument>>
@@ -221,7 +221,7 @@ const getQueriedAccessoriesHandler = expressAsyncHandler(
 // @desc   Get accessory by id
 // @route  GET /api/v1/product-category/accessory/:accessoryId
 // @access Private/Admin/Manager
-const getAccessoryByIdHandler = expressAsyncHandler(
+const getAccessoryByIdController = expressAsyncController(
   async (
     request: GetAccessoryByIdRequest,
     response: Response<ResourceRequestServerResponse<AccessoryDocument>>
@@ -245,7 +245,7 @@ const getAccessoryByIdHandler = expressAsyncHandler(
 // @desc   Update a accessory by id
 // @route  PUT /api/v1/product-category/accessory/:accessoryId
 // @access Private/Admin/Manager
-const updateAccessoryByIdHandler = expressAsyncHandler(
+const updateAccessoryByIdController = expressAsyncController(
   async (
     request: UpdateAccessoryByIdRequest,
     response: Response<ResourceRequestServerResponse<AccessoryDocument>>
@@ -280,7 +280,7 @@ const updateAccessoryByIdHandler = expressAsyncHandler(
 // @desc   Delete all accessories
 // @route  DELETE /api/v1/product-category/accessory
 // @access Private/Admin/Manager
-const deleteAllAccessoriesHandler = expressAsyncHandler(
+const deleteAllAccessoriesController = expressAsyncController(
   async (
     _request: DeleteAllAccessoriesRequest,
     response: Response<ResourceRequestServerResponse<AccessoryDocument>>
@@ -338,7 +338,7 @@ const deleteAllAccessoriesHandler = expressAsyncHandler(
 // @desc   Delete a accessory by id
 // @route  DELETE /api/v1/product-category/accessory/:accessoryId
 // @access Private/Admin/Manager
-const deleteAAccessoryHandler = expressAsyncHandler(
+const deleteAAccessoryController = expressAsyncController(
   async (
     request: DeleteAnAccessoryRequest,
     response: Response<ResourceRequestServerResponse<AccessoryDocument>>
@@ -408,12 +408,12 @@ const deleteAAccessoryHandler = expressAsyncHandler(
 );
 
 export {
-  createNewAccessoryBulkHandler,
-  createNewAccessoryHandler,
-  deleteAAccessoryHandler,
-  deleteAllAccessoriesHandler,
-  getAccessoryByIdHandler,
-  getQueriedAccessoriesHandler,
-  updateAccessoryByIdHandler,
-  updateAccessoriesBulkHandler,
+  createNewAccessoryBulkController,
+  createNewAccessoryController,
+  deleteAAccessoryController,
+  deleteAllAccessoriesController,
+  getAccessoryByIdController,
+  getQueriedAccessoriesController,
+  updateAccessoryByIdController,
+  updateAccessoriesBulkController,
 };

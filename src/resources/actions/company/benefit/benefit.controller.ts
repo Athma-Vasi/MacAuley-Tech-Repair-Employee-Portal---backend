@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 import type { DeleteResult } from "mongodb";
 
 import type { Response } from "express";
@@ -37,7 +37,7 @@ import { removeUndefinedAndNullValues } from "../../../../utils";
 // @desc   Create a new benefits plan
 // @route  POST api/v1/actions/company/benefits
 // @access Private/Admin/Manager
-const createNewBenefitHandler = expressAsyncHandler(
+const createNewBenefitController = expressAsyncController(
   async (
     request: CreateNewBenefitRequest,
     response: Response<ResourceRequestServerResponse<BenefitDocument>>
@@ -87,7 +87,7 @@ const createNewBenefitHandler = expressAsyncHandler(
 // @desc   Get all benefits
 // @route  GET api/v1/actions/company/benefit
 // @access Private/Admin/Manager
-const getQueriedBenefitsHandler = expressAsyncHandler(
+const getQueriedBenefitsController = expressAsyncController(
   async (
     request: GetQueriedBenefitsRequest,
     response: Response<GetQueriedResourceRequestServerResponse<BenefitDocument>>
@@ -133,7 +133,7 @@ const getQueriedBenefitsHandler = expressAsyncHandler(
 // @desc   Get all benefit requests by user
 // @route  GET api/v1/actions/company/benefit/user
 // @access Private
-const getBenefitsByUserHandler = expressAsyncHandler(
+const getBenefitsByUserController = expressAsyncController(
   async (
     request: GetQueriedBenefitsByUserRequest,
     response: Response<GetQueriedResourceRequestServerResponse<BenefitDocument>>
@@ -187,7 +187,7 @@ const getBenefitsByUserHandler = expressAsyncHandler(
 // @desc   Update benefit status
 // @route  PATCH api/v1/actions/company/benefit/:benefitId
 // @access Private/Admin/Manager
-const updateBenefitByIdHandler = expressAsyncHandler(
+const updateBenefitByIdController = expressAsyncController(
   async (
     request: UpdateBenefitByIdRequest,
     response: Response<ResourceRequestServerResponse<BenefitDocument>>
@@ -230,7 +230,7 @@ const updateBenefitByIdHandler = expressAsyncHandler(
 // @desc   Get an benefit request
 // @route  GET api/v1/actions/company/benefit/:benefitId
 // @access Private
-const getBenefitByIdHandler = expressAsyncHandler(
+const getBenefitByIdController = expressAsyncController(
   async (
     request: GetBenefitByIdRequest,
     response: Response<ResourceRequestServerResponse<BenefitDocument>>
@@ -254,7 +254,7 @@ const getBenefitByIdHandler = expressAsyncHandler(
 // @desc   Delete an benefit request by its id
 // @route  DELETE api/v1/actions/company/benefit/:benefitId
 // @access Private
-const deleteBenefitHandler = expressAsyncHandler(
+const deleteBenefitController = expressAsyncController(
   async (request: DeleteAnBenefitRequest, response: Response) => {
     const { benefitId } = request.params;
 
@@ -279,7 +279,7 @@ const deleteBenefitHandler = expressAsyncHandler(
 // @desc    Delete all benefit requests
 // @route   DELETE api/v1/actions/company/benefit/delete-all
 // @access  Private
-const deleteAllBenefitsHandler = expressAsyncHandler(
+const deleteAllBenefitsController = expressAsyncController(
   async (_request: DeleteAllBenefitsRequest, response: Response) => {
     const deletedResult: DeleteResult = await deleteAllBenefitsService();
 
@@ -302,7 +302,7 @@ const deleteAllBenefitsHandler = expressAsyncHandler(
 // @desc   Create new benefit requests in bulk
 // @route  POST api/v1/actions/company/benefit/dev
 // @access Private
-const createNewBenefitsBulkHandler = expressAsyncHandler(
+const createNewBenefitsBulkController = expressAsyncController(
   async (
     request: CreateNewBenefitsBulkRequest,
     response: Response<ResourceRequestServerResponse<BenefitDocument>>
@@ -350,7 +350,7 @@ const createNewBenefitsBulkHandler = expressAsyncHandler(
 // @desc   Update Benefits in bulk
 // @route  PATCH api/v1/actions/company/benefit/dev
 // @access Private
-const updateBenefitsBulkHandler = expressAsyncHandler(
+const updateBenefitsBulkController = expressAsyncController(
   async (
     request: UpdateBenefitsBulkRequest,
     response: Response<ResourceRequestServerResponse<BenefitDocument>>
@@ -397,13 +397,13 @@ const updateBenefitsBulkHandler = expressAsyncHandler(
 );
 
 export {
-  createNewBenefitHandler,
-  getQueriedBenefitsHandler,
-  getBenefitsByUserHandler,
-  getBenefitByIdHandler,
-  deleteBenefitHandler,
-  deleteAllBenefitsHandler,
-  updateBenefitByIdHandler,
-  createNewBenefitsBulkHandler,
-  updateBenefitsBulkHandler,
+  createNewBenefitController,
+  getQueriedBenefitsController,
+  getBenefitsByUserController,
+  getBenefitByIdController,
+  deleteBenefitController,
+  deleteAllBenefitsController,
+  updateBenefitByIdController,
+  createNewBenefitsBulkController,
+  updateBenefitsBulkController,
 };

@@ -1,13 +1,13 @@
 import { Router } from "express";
 import {
-  createNewMotherboardBulkHandler,
-  createNewMotherboardHandler,
-  deleteAMotherboardHandler,
-  deleteAllMotherboardsHandler,
-  getMotherboardByIdHandler,
-  getQueriedMotherboardsHandler,
-  updateMotherboardByIdHandler,
-  updateMotherboardsBulkHandler,
+  createNewMotherboardBulkController,
+  createNewMotherboardController,
+  deleteAMotherboardController,
+  deleteAllMotherboardsController,
+  getMotherboardByIdController,
+  getQueriedMotherboardsController,
+  updateMotherboardByIdController,
+  updateMotherboardsBulkController,
 } from "./motherboard.controller";
 import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
 import {
@@ -19,29 +19,29 @@ const motherboardRouter = Router();
 
 motherboardRouter
   .route("/")
-  .get(getQueriedMotherboardsHandler)
+  .get(getQueriedMotherboardsController)
   .post(
     validateSchemaMiddleware(createMotherboardJoiSchema, "motherboardSchema"),
-    createNewMotherboardHandler
+    createNewMotherboardController
   );
 
 // separate route for safety reasons (as it deletes all documents in the collection)
-motherboardRouter.route("/delete-all").delete(deleteAllMotherboardsHandler);
+motherboardRouter.route("/delete-all").delete(deleteAllMotherboardsController);
 
 // DEV ROUTE
 motherboardRouter
   .route("/dev")
-  .post(createNewMotherboardBulkHandler)
-  .patch(updateMotherboardsBulkHandler);
+  .post(createNewMotherboardBulkController)
+  .patch(updateMotherboardsBulkController);
 
 // single document routes
 motherboardRouter
   .route("/:motherboardId")
-  .get(getMotherboardByIdHandler)
-  .delete(deleteAMotherboardHandler)
+  .get(getMotherboardByIdController)
+  .delete(deleteAMotherboardController)
   .patch(
     validateSchemaMiddleware(updateMotherboardJoiSchema),
-    updateMotherboardByIdHandler
+    updateMotherboardByIdController
   );
 
 export { motherboardRouter };

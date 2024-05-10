@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
 import type { Response } from "express";
@@ -38,7 +38,7 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 // @desc   Create new cpu
 // @route  POST /api/v1/product-category/cpu
 // @access Private/Admin/Manager
-const createNewCpuHandler = expressAsyncHandler(
+const createNewCpuController = expressAsyncController(
   async (
     request: CreateNewCpuRequest,
     response: Response<ResourceRequestServerResponse<CpuDocument>>
@@ -66,7 +66,7 @@ const createNewCpuHandler = expressAsyncHandler(
 // @desc   Create new cpus bulk
 // @route  POST /api/v1/product-category/cpu/dev
 // @access Private/Admin/Manager
-const createNewCpuBulkHandler = expressAsyncHandler(
+const createNewCpuBulkController = expressAsyncController(
   async (
     request: CreateNewCpuBulkRequest,
     response: Response<ResourceRequestServerResponse<CpuDocument>>
@@ -113,7 +113,7 @@ const createNewCpuBulkHandler = expressAsyncHandler(
 // @desc   Update cpus bulk
 // @route  PATCH /api/v1/product-category/cpu/dev
 // @access Private/Admin/Manager
-const updateCpusBulkHandler = expressAsyncHandler(
+const updateCpusBulkController = expressAsyncController(
   async (
     request: UpdateCpusBulkRequest,
     response: Response<ResourceRequestServerResponse<CpuDocument>>
@@ -170,7 +170,7 @@ const updateCpusBulkHandler = expressAsyncHandler(
 // @desc   Get all cpus
 // @route  GET /api/v1/product-category/cpu
 // @access Private/Admin/Manager
-const getQueriedCpusHandler = expressAsyncHandler(
+const getQueriedCpusController = expressAsyncController(
   async (
     request: GetQueriedCpusRequest,
     response: Response<GetQueriedResourceRequestServerResponse<CpuDocument>>
@@ -215,7 +215,7 @@ const getQueriedCpusHandler = expressAsyncHandler(
 // @desc   Get cpu by id
 // @route  GET /api/v1/product-category/cpu/:cpuId
 // @access Private/Admin/Manager
-const getCpuByIdHandler = expressAsyncHandler(
+const getCpuByIdController = expressAsyncController(
   async (
     request: GetCpuByIdRequest,
     response: Response<ResourceRequestServerResponse<CpuDocument>>
@@ -239,7 +239,7 @@ const getCpuByIdHandler = expressAsyncHandler(
 // @desc   Update a cpu by id
 // @route  PUT /api/v1/product-category/cpu/:cpuId
 // @access Private/Admin/Manager
-const updateCpuByIdHandler = expressAsyncHandler(
+const updateCpuByIdController = expressAsyncController(
   async (
     request: UpdateCpuByIdRequest,
     response: Response<ResourceRequestServerResponse<CpuDocument>>
@@ -274,7 +274,7 @@ const updateCpuByIdHandler = expressAsyncHandler(
 // @desc   Delete all cpus
 // @route  DELETE /api/v1/product-category/cpu
 // @access Private/Admin/Manager
-const deleteAllCpusHandler = expressAsyncHandler(
+const deleteAllCpusController = expressAsyncController(
   async (
     _request: DeleteAllCpusRequest,
     response: Response<ResourceRequestServerResponse<CpuDocument>>
@@ -332,7 +332,7 @@ const deleteAllCpusHandler = expressAsyncHandler(
 // @desc   Delete a cpu by id
 // @route  DELETE /api/v1/product-category/cpu/:cpuId
 // @access Private/Admin/Manager
-const deleteACpuHandler = expressAsyncHandler(
+const deleteACpuController = expressAsyncController(
   async (
     request: DeleteACpuRequest,
     response: Response<ResourceRequestServerResponse<CpuDocument>>
@@ -398,12 +398,12 @@ const deleteACpuHandler = expressAsyncHandler(
 );
 
 export {
-  createNewCpuBulkHandler,
-  createNewCpuHandler,
-  deleteACpuHandler,
-  deleteAllCpusHandler,
-  getCpuByIdHandler,
-  getQueriedCpusHandler,
-  updateCpuByIdHandler,
-  updateCpusBulkHandler,
+  createNewCpuBulkController,
+  createNewCpuController,
+  deleteACpuController,
+  deleteAllCpusController,
+  getCpuByIdController,
+  getQueriedCpusController,
+  updateCpuByIdController,
+  updateCpusBulkController,
 };

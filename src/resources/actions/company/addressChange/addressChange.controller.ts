@@ -1,8 +1,8 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 import type { DeleteResult } from "mongodb";
 
 import type { AddressChangeDocument, AddressChangeSchema } from "./addressChange.model";
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
 import type {
   CreateNewAddressChangeRequest,
   DeleteAnAddressChangeRequest,
@@ -39,10 +39,11 @@ import createHttpError from "http-errors";
 // @desc   Create a new address change request
 // @route  POST api/v1/actions/company/address-change
 // @access Private
-const createNewAddressChangeHandler = expressAsyncHandler(
+const createNewAddressChangeController = expressAsyncController(
   async (
     request: CreateNewAddressChangeRequest,
-    response: Response<ResourceRequestServerResponse<AddressChangeDocument>>
+    response: Response<ResourceRequestServerResponse<AddressChangeDocument>>,
+    next: NextFunction
   ) => {
     const {
       userInfo: { userId, username },
@@ -58,11 +59,9 @@ const createNewAddressChangeHandler = expressAsyncHandler(
       },
     } = request.body;
 
-    // check if user exists
     const userExists = await getUserByIdService(userId);
     if (!userExists) {
-      response.status(404).json({ message: "User does not exist", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("User does not exist"));
     }
 
     const { address: oldAddress } = userExists;
@@ -75,17 +74,13 @@ const createNewAddressChangeHandler = expressAsyncHandler(
       province,
       state,
     };
-    // check if new address is the same as current address
     if (JSON.stringify(newAddress) === JSON.stringify(oldAddress)) {
-      response.status(400).json({
-        message: "New address is the same as current address",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.BadRequest("New address is the same as current address")
+      );
     }
 
-    // create new address change object
-    const newAddressChange: AddressChangeSchema = {
+    const addressChangeSchema: AddressChangeSchema = {
       userId,
       username,
       contactNumber,
@@ -99,19 +94,20 @@ const createNewAddressChangeHandler = expressAsyncHandler(
       requestStatus: "pending",
     };
 
-    // save new address change object to database
-    const createdAddressChange = await createNewAddressChangeService(newAddressChange);
-    if (!createdAddressChange) {
-      response.status(400).json({
-        message: "New address change request creation failed",
-        resourceData: [],
-      });
-      return;
+    const addressChangeDocument = await createNewAddressChangeService(
+      addressChangeSchema
+    );
+    if (!addressChangeDocument) {
+      return next(
+        new createHttpError.InternalServerError(
+          "Address change document creation failed. Please try again!"
+        )
+      );
     }
 
     response.status(201).json({
-      message: "Address change request created successfully",
-      resourceData: [createdAddressChange],
+      message: "Address change document created successfully",
+      resourceData: [addressChangeDocument],
     });
   }
 );
@@ -119,7 +115,7 @@ const createNewAddressChangeHandler = expressAsyncHandler(
 // @desc   Get all address changes
 // @route  GET api/v1/actions/company/address-change
 // @access Private/Admin/Manager
-const getQueriedAddressChangesHandler = expressAsyncHandler(
+const getQueriedAddressChangesController = expressAsyncController(
   async (
     request: GetQueriedAddressChangesRequest,
     response: Response<GetQueriedResourceRequestServerResponse<AddressChangeDocument>>
@@ -136,7 +132,6 @@ const getQueriedAddressChangesHandler = expressAsyncHandler(
       });
     }
 
-    // get all address changes
     const addressChange = await getQueriedAddressChangesService({
       filter: filter as FilterQuery<AddressChangeDocument> | undefined,
       projection: projection as QueryOptions<AddressChangeDocument>,
@@ -165,12 +160,12 @@ const getQueriedAddressChangesHandler = expressAsyncHandler(
 // @desc   Get all address change requests by user
 // @route  GET api/v1/actions/company/address-change/user
 // @access Private
-const getAddressChangesByUserHandler = expressAsyncHandler(
+const getAddressChangesByUserController = expressAsyncController(
   async (
     request: GetQueriedAddressChangesByUserRequest,
-    response: Response<GetQueriedResourceRequestServerResponse<AddressChangeDocument>>
+    response: Response<GetQueriedResourceRequestServerResponse<AddressChangeDocument>>,
+    next: NextFunction
   ) => {
-    // anyone can view their own addressChange requests
     const {
       userInfo: { userId },
     } = request.body;
@@ -180,7 +175,6 @@ const getAddressChangesByUserHandler = expressAsyncHandler(
     const { filter, projection, options } =
       request.query as QueryObjectParsedWithDefaults;
 
-    // assign userId to filter
     const filterWithUserId = { ...filter, userId };
 
     // only perform a countDocuments scan if a new query is being made
@@ -190,37 +184,40 @@ const getAddressChangesByUserHandler = expressAsyncHandler(
       });
     }
 
-    // get all addressChange requests by user
     const addressChanges = await getQueriedAddressChangesByUserService({
       filter: filterWithUserId as FilterQuery<AddressChangeDocument> | undefined,
       projection: projection as QueryOptions<AddressChangeDocument>,
       options: options as QueryOptions<AddressChangeDocument>,
     });
-    if (addressChanges.length === 0) {
+
+    if (!addressChanges.length) {
       response.status(200).json({
-        message: "No address change requests found",
+        message: "No address change documents found",
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
       });
-    } else {
-      response.status(200).json({
-        message: "Address change requests found successfully",
-        pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments,
-        resourceData: addressChanges,
-      });
+
+      return;
     }
+
+    response.status(200).json({
+      message: "Address change documents found successfully",
+      pages: Math.ceil(totalDocuments / Number(options?.limit)),
+      totalDocuments,
+      resourceData: addressChanges,
+    });
   }
 );
 
 // @desc   Update address change status
 // @route  PATCH api/v1/actions/company/address-change/:addressChangeId
 // @access Private/Admin/Manager
-const updateAddressChangeByIdHandler = expressAsyncHandler(
+const updateAddressChangeByIdController = expressAsyncController(
   async (
     request: UpdateAddressChangeByIdRequest,
-    response: Response<ResourceRequestServerResponse<AddressChangeDocument>>
+    response: Response<ResourceRequestServerResponse<AddressChangeDocument>>,
+    next: NextFunction
   ) => {
     const { addressChangeId } = request.params;
     const {
@@ -228,14 +225,6 @@ const updateAddressChangeByIdHandler = expressAsyncHandler(
       userInfo: { userId },
     } = request.body;
 
-    // check if user exists
-    const userExists = await getUserByIdService(userId);
-    if (!userExists) {
-      response.status(404).json({ message: "User does not exist", resourceData: [] });
-      return;
-    }
-
-    // update addressChange request status
     const updatedAddressChange = await updateAddressChangeByIdService({
       _id: addressChangeId,
       fields,
@@ -243,15 +232,15 @@ const updateAddressChangeByIdHandler = expressAsyncHandler(
     });
 
     if (!updatedAddressChange) {
-      response.status(400).json({
-        message: "Address change request status update failed. Please try again!",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Address change document status update failed. Please try again!"
+        )
+      );
     }
 
     response.status(200).json({
-      message: "Address change request status updated successfully",
+      message: "Address change document status updated successfully",
       resourceData: [updatedAddressChange],
     });
   }
@@ -260,23 +249,21 @@ const updateAddressChangeByIdHandler = expressAsyncHandler(
 // @desc   Get an address change request
 // @route  GET api/v1/actions/company/address-change/:addressChangeId
 // @access Private
-const getAddressChangeByIdHandler = expressAsyncHandler(
+const getAddressChangeByIdController = expressAsyncController(
   async (
     request: GetAddressChangeByIdRequest,
-    response: Response<ResourceRequestServerResponse<AddressChangeDocument>>
+    response: Response<ResourceRequestServerResponse<AddressChangeDocument>>,
+    next: NextFunction
   ) => {
     const { addressChangeId } = request.params;
-    // get addressChange request by id
+
     const addressChange = await getAddressChangeByIdService(addressChangeId);
     if (!addressChange) {
-      response
-        .status(404)
-        .json({ message: "AddressChange request not found", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Address change document not found"));
     }
 
     response.status(200).json({
-      message: "Address change request found successfully",
+      message: "Address change document found successfully",
       resourceData: [addressChange],
     });
   }
@@ -285,25 +272,28 @@ const getAddressChangeByIdHandler = expressAsyncHandler(
 // @desc   Delete an address change request by its id
 // @route  DELETE api/v1/actions/company/address-change/:addressChangeId
 // @access Private
-const deleteAnAddressChangeHandler = expressAsyncHandler(
-  async (request: DeleteAnAddressChangeRequest, response: Response) => {
+const deleteAnAddressChangeController = expressAsyncController(
+  async (
+    request: DeleteAnAddressChangeRequest,
+    response: Response,
+    next: NextFunction
+  ) => {
     const { addressChangeId } = request.params;
 
-    // delete addressChange request by id
     const deletedResult: DeleteResult = await deleteAddressChangeByIdService(
       addressChangeId
     );
 
     if (!deletedResult.deletedCount) {
-      response.status(400).json({
-        message: "Address change request could not be deleted",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Address change document could not be deleted"
+        )
+      );
     }
 
     response.status(200).json({
-      message: "AddressChange request deleted successfully",
+      message: "Address change document deleted successfully",
       resourceData: [],
     });
   }
@@ -312,20 +302,18 @@ const deleteAnAddressChangeHandler = expressAsyncHandler(
 // @desc    Delete all address change requests
 // @route   DELETE api/v1/actions/company/address-change/delete-all
 // @access  Private
-const deleteAllAddressChangesHandler = expressAsyncHandler(
+const deleteAllAddressChangesController = expressAsyncController(
   async (_request: DeleteAllAddressChangesRequest, response: Response) => {
     const deletedResult: DeleteResult = await deleteAllAddressChangesService();
 
     if (!deletedResult.deletedCount) {
-      response.status(400).json({
-        message: "All address change requests could not be deleted",
-        resourceData: [],
-      });
-      return;
+      throw new createHttpError.InternalServerError(
+        "All address change documents could not be deleted"
+      );
     }
 
     response.status(200).json({
-      message: "All address change requests deleted successfully",
+      message: "All address change documents deleted successfully",
       resourceData: [],
     });
   }
@@ -335,10 +323,11 @@ const deleteAllAddressChangesHandler = expressAsyncHandler(
 // @desc   Create new address change requests in bulk
 // @route  POST api/v1/actions/company/address-change/dev
 // @access Private
-const createNewAddressChangesBulkHandler = expressAsyncHandler(
+const createNewAddressChangesBulkController = expressAsyncController(
   async (
     request: CreateNewAddressChangesBulkRequest,
-    response: Response<ResourceRequestServerResponse<AddressChangeDocument>>
+    response: Response<ResourceRequestServerResponse<AddressChangeDocument>>,
+    next: NextFunction
   ) => {
     const { addressChangeSchemas } = request.body;
 
@@ -351,18 +340,16 @@ const createNewAddressChangesBulkHandler = expressAsyncHandler(
       })
     );
 
-    // filter out any null documents
     const filteredAddressChangeDocuments = addressChangeDocuments.filter(
       removeUndefinedAndNullValues
     );
 
-    // check if any documents were created
     if (filteredAddressChangeDocuments.length === 0) {
-      response.status(400).json({
-        message: "Address change requests creation failed",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Address change documents could not be created. Please try again."
+        )
+      );
     }
 
     const uncreatedDocumentsAmount =
@@ -385,10 +372,11 @@ const createNewAddressChangesBulkHandler = expressAsyncHandler(
 // @desc   Update AddressChanges in bulk
 // @route  PATCH api/v1/actions/company/address-change/dev
 // @access Private
-const updateAddressChangesBulkHandler = expressAsyncHandler(
+const updateAddressChangesBulkController = expressAsyncController(
   async (
     request: UpdateAddressChangesBulkRequest,
-    response: Response<ResourceRequestServerResponse<AddressChangeDocument>>
+    response: Response<ResourceRequestServerResponse<AddressChangeDocument>>,
+    next: NextFunction
   ) => {
     const { addressChangeFields } = request.body;
 
@@ -409,17 +397,16 @@ const updateAddressChangesBulkHandler = expressAsyncHandler(
       })
     );
 
-    // filter out any addressChanges that were not created
     const successfullyCreatedAddressChanges = updatedAddressChanges.filter(
       removeUndefinedAndNullValues
     );
 
     if (successfullyCreatedAddressChanges.length === 0) {
-      response.status(400).json({
-        message: "Could not create any Address Changes",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Address changes document could not be updated. Please try again."
+        )
+      );
     }
 
     response.status(201).json({
@@ -434,13 +421,13 @@ const updateAddressChangesBulkHandler = expressAsyncHandler(
 );
 
 export {
-  createNewAddressChangeHandler,
-  getQueriedAddressChangesHandler,
-  getAddressChangesByUserHandler,
-  getAddressChangeByIdHandler,
-  deleteAnAddressChangeHandler,
-  deleteAllAddressChangesHandler,
-  updateAddressChangeByIdHandler,
-  createNewAddressChangesBulkHandler,
-  updateAddressChangesBulkHandler,
+  createNewAddressChangeController,
+  getQueriedAddressChangesController,
+  getAddressChangesByUserController,
+  getAddressChangeByIdController,
+  deleteAnAddressChangeController,
+  deleteAllAddressChangesController,
+  updateAddressChangeByIdController,
+  createNewAddressChangesBulkController,
+  updateAddressChangesBulkController,
 };

@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
 import type { Response } from "express";
@@ -38,7 +38,7 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 // @desc   Create new gpu
 // @route  POST /api/v1/product-category/gpu
 // @access Private/Admin/Manager
-const createNewGpuHandler = expressAsyncHandler(
+const createNewGpuController = expressAsyncController(
   async (
     request: CreateNewGpuRequest,
     response: Response<ResourceRequestServerResponse<GpuDocument>>
@@ -66,7 +66,7 @@ const createNewGpuHandler = expressAsyncHandler(
 // @desc   Create new gpus bulk
 // @route  POST /api/v1/product-category/gpu/dev
 // @access Private/Admin/Manager
-const createNewGpuBulkHandler = expressAsyncHandler(
+const createNewGpuBulkController = expressAsyncController(
   async (
     request: CreateNewGpuBulkRequest,
     response: Response<ResourceRequestServerResponse<GpuDocument>>
@@ -113,7 +113,7 @@ const createNewGpuBulkHandler = expressAsyncHandler(
 // @desc   Update gpus bulk
 // @route  PATCH /api/v1/product-category/gpu/dev
 // @access Private/Admin/Manager
-const updateGpusBulkHandler = expressAsyncHandler(
+const updateGpusBulkController = expressAsyncController(
   async (
     request: UpdateGpusBulkRequest,
     response: Response<ResourceRequestServerResponse<GpuDocument>>
@@ -170,7 +170,7 @@ const updateGpusBulkHandler = expressAsyncHandler(
 // @desc   Get all gpus
 // @route  GET /api/v1/product-category/gpu
 // @access Private/Admin/Manager
-const getQueriedGpusHandler = expressAsyncHandler(
+const getQueriedGpusController = expressAsyncController(
   async (
     request: GetQueriedGpusRequest,
     response: Response<GetQueriedResourceRequestServerResponse<GpuDocument>>
@@ -215,7 +215,7 @@ const getQueriedGpusHandler = expressAsyncHandler(
 // @desc   Get gpu by id
 // @route  GET /api/v1/product-category/gpu/:gpuId
 // @access Private/Admin/Manager
-const getGpuByIdHandler = expressAsyncHandler(
+const getGpuByIdController = expressAsyncController(
   async (
     request: GetGpuByIdRequest,
     response: Response<ResourceRequestServerResponse<GpuDocument>>
@@ -239,7 +239,7 @@ const getGpuByIdHandler = expressAsyncHandler(
 // @desc   Update a gpu by id
 // @route  PUT /api/v1/product-category/gpu/:gpuId
 // @access Private/Admin/Manager
-const updateGpuByIdHandler = expressAsyncHandler(
+const updateGpuByIdController = expressAsyncController(
   async (
     request: UpdateGpuByIdRequest,
     response: Response<ResourceRequestServerResponse<GpuDocument>>
@@ -274,7 +274,7 @@ const updateGpuByIdHandler = expressAsyncHandler(
 // @desc   Delete all gpus
 // @route  DELETE /api/v1/product-category/gpu
 // @access Private/Admin/Manager
-const deleteAllGpusHandler = expressAsyncHandler(
+const deleteAllGpusController = expressAsyncController(
   async (
     _request: DeleteAllGpusRequest,
     response: Response<ResourceRequestServerResponse<GpuDocument>>
@@ -332,7 +332,7 @@ const deleteAllGpusHandler = expressAsyncHandler(
 // @desc   Delete a gpu by id
 // @route  DELETE /api/v1/product-category/gpu/:gpuId
 // @access Private/Admin/Manager
-const deleteAGpuHandler = expressAsyncHandler(
+const deleteAGpuController = expressAsyncController(
   async (
     request: DeleteAGpuRequest,
     response: Response<ResourceRequestServerResponse<GpuDocument>>
@@ -398,12 +398,12 @@ const deleteAGpuHandler = expressAsyncHandler(
 );
 
 export {
-  createNewGpuBulkHandler,
-  createNewGpuHandler,
-  deleteAGpuHandler,
-  deleteAllGpusHandler,
-  getGpuByIdHandler,
-  getQueriedGpusHandler,
-  updateGpuByIdHandler,
-  updateGpusBulkHandler,
+  createNewGpuBulkController,
+  createNewGpuController,
+  deleteAGpuController,
+  deleteAllGpusController,
+  getGpuByIdController,
+  getQueriedGpusController,
+  updateGpuByIdController,
+  updateGpusBulkController,
 };

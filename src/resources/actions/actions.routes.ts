@@ -5,8 +5,8 @@ import { actionsGeneralRouter } from "./general";
 import { actionsCompanyRouter } from "./company";
 import { actionsOutreachRouter } from "./outreach";
 import {
-  getAllActionsDocumentsHandler,
-  getUsersActionsDocumentsHandler,
+  getAllActionsDocumentsController,
+  getUsersActionsDocumentsController,
 } from "./actions.controller";
 
 const actionsRouter = Router();
@@ -15,9 +15,9 @@ actionsRouter.use("/company", actionsCompanyRouter);
 actionsRouter.use("/general", actionsGeneralRouter);
 actionsRouter.use("/outreach", actionsOutreachRouter);
 
-actionsRouter.route("/home").get(assignQueryDefaults, getAllActionsDocumentsHandler);
+actionsRouter.route("/home").get(assignQueryDefaults, getAllActionsDocumentsController);
 actionsRouter
   .route("/home/:userId")
-  .get(assignQueryDefaults, getUsersActionsDocumentsHandler);
+  .get(assignQueryDefaults, getUsersActionsDocumentsController);
 
 export { actionsRouter };

@@ -6,17 +6,17 @@
  * Imports
  */
 
-import { FileUploadModel } from './fileUpload.model';
-import { fileUploadRouter } from './fileUpload.routes';
+import { FileUploadModel } from "./fileUpload.model";
+import { fileUploadRouter } from "./fileUpload.routes";
 import {
-  createNewFileUploadHandler,
-  deleteAFileUploadHandler,
-  deleteAllFileUploadsHandler,
-  getAllFileUploadsHandler,
-  getFileUploadByIdHandler,
-  getQueriedFileUploadsByUserHandler,
-  insertAssociatedResourceDocumentIdHandler,
-} from './fileUpload.controller';
+  createNewFileUploadController,
+  deleteAFileUploadController,
+  deleteAllFileUploadsController,
+  getAllFileUploadsController,
+  getFileUploadByIdController,
+  getQueriedFileUploadsByUserController,
+  insertAssociatedResourceDocumentIdController,
+} from "./fileUpload.controller";
 import {
   createNewFileUploadService,
   deleteAllFileUploadsService,
@@ -25,14 +25,14 @@ import {
   getFileUploadByIdService,
   getQueriedFileUploadsByUserService,
   insertAssociatedResourceDocumentIdService,
-} from './fileUpload.service';
+} from "./fileUpload.service";
 
 import type {
   FileUploadDocument,
   FileUploadSchema,
   AssociatedResourceKind,
   FileExtension,
-} from './fileUpload.model';
+} from "./fileUpload.model";
 import type {
   CreateNewFileUploadRequest,
   DeleteAFileUploadRequest,
@@ -42,7 +42,7 @@ import type {
   GetFileUploadByIdRequest,
   GetFileUploadsByUserRequest,
   InsertAssociatedDocumentIdRequest,
-} from './fileUpload.types';
+} from "./fileUpload.types";
 
 /**
  * Exports
@@ -51,13 +51,13 @@ import type {
 export {
   FileUploadModel,
   fileUploadRouter,
-  createNewFileUploadHandler,
-  deleteAFileUploadHandler,
-  deleteAllFileUploadsHandler,
-  getAllFileUploadsHandler,
-  getFileUploadByIdHandler,
-  getQueriedFileUploadsByUserHandler,
-  insertAssociatedResourceDocumentIdHandler,
+  createNewFileUploadController,
+  deleteAFileUploadController,
+  deleteAllFileUploadsController,
+  getAllFileUploadsController,
+  getFileUploadByIdController,
+  getQueriedFileUploadsByUserController,
+  insertAssociatedResourceDocumentIdController,
   createNewFileUploadService,
   deleteAllFileUploadsService,
   deleteFileUploadByIdService,

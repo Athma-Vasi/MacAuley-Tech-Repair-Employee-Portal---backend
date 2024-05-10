@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 import type { DeleteResult } from "mongodb";
 
 import type { ErrorLogDocument, ErrorLogSchema } from "./errorLog.model";
@@ -37,7 +37,7 @@ import { getUserByIdService } from "../user";
 // @desc   Create a new error log request
 // @route  POST api/v1/error-log
 // @access Private
-const createNewErrorLogHandler = expressAsyncHandler(
+const createNewErrorLogController = expressAsyncController(
   async (
     request: CreateNewErrorLogRequest,
     response: Response<ResourceRequestServerResponse<ErrorLogDocument>>
@@ -63,7 +63,7 @@ const createNewErrorLogHandler = expressAsyncHandler(
 // @desc   Get all error logs
 // @route  GET api/v1/error-log
 // @access Private/Admin/Manager
-const getQueriedErrorLogsHandler = expressAsyncHandler(
+const getQueriedErrorLogsController = expressAsyncController(
   async (
     request: GetQueriedErrorLogsRequest,
     response: Response<GetQueriedResourceRequestServerResponse<ErrorLogDocument>>
@@ -109,7 +109,7 @@ const getQueriedErrorLogsHandler = expressAsyncHandler(
 // @desc   Get all error log requests by user
 // @route  GET api/v1/error-log/user
 // @access Private
-const getErrorLogsByUserHandler = expressAsyncHandler(
+const getErrorLogsByUserController = expressAsyncController(
   async (
     request: GetQueriedErrorLogsByUserRequest,
     response: Response<GetQueriedResourceRequestServerResponse<ErrorLogDocument>>
@@ -161,7 +161,7 @@ const getErrorLogsByUserHandler = expressAsyncHandler(
 // @desc   Update error log status
 // @route  PATCH api/v1/error-log/:errorLogId
 // @access Private/Admin/Manager
-const updateErrorLogByIdHandler = expressAsyncHandler(
+const updateErrorLogByIdController = expressAsyncController(
   async (
     request: UpdateErrorLogByIdRequest,
     response: Response<ResourceRequestServerResponse<ErrorLogDocument>>
@@ -204,7 +204,7 @@ const updateErrorLogByIdHandler = expressAsyncHandler(
 // @desc   Get an error log request
 // @route  GET api/v1/error-log/:errorLogId
 // @access Private
-const getErrorLogByIdHandler = expressAsyncHandler(
+const getErrorLogByIdController = expressAsyncController(
   async (
     request: GetErrorLogByIdRequest,
     response: Response<ResourceRequestServerResponse<ErrorLogDocument>>
@@ -229,7 +229,7 @@ const getErrorLogByIdHandler = expressAsyncHandler(
 // @desc   Delete an error log request by its id
 // @route  DELETE api/v1/error-log/:errorLogId
 // @access Private
-const deleteAnErrorLogHandler = expressAsyncHandler(
+const deleteAnErrorLogController = expressAsyncController(
   async (request: DeleteAnErrorLogRequest, response: Response) => {
     const { errorLogId } = request.params;
 
@@ -254,7 +254,7 @@ const deleteAnErrorLogHandler = expressAsyncHandler(
 // @desc    Delete all error log requests
 // @route   DELETE api/v1/error-log/delete-all
 // @access  Private
-const deleteAllErrorLogsHandler = expressAsyncHandler(
+const deleteAllErrorLogsController = expressAsyncController(
   async (_request: DeleteAllErrorLogsRequest, response: Response) => {
     const deletedResult: DeleteResult = await deleteAllErrorLogsService();
 
@@ -277,7 +277,7 @@ const deleteAllErrorLogsHandler = expressAsyncHandler(
 // @desc   Create new error log requests in bulk
 // @route  POST api/v1/error-log/dev
 // @access Private
-const createNewErrorLogsBulkHandler = expressAsyncHandler(
+const createNewErrorLogsBulkController = expressAsyncController(
   async (
     request: CreateNewErrorLogsBulkRequest,
     response: Response<ResourceRequestServerResponse<ErrorLogDocument>>
@@ -325,7 +325,7 @@ const createNewErrorLogsBulkHandler = expressAsyncHandler(
 // @desc   Update ErrorLogs in bulk
 // @route  PATCH api/v1/error-log/dev
 // @access Private
-const updateErrorLogsBulkHandler = expressAsyncHandler(
+const updateErrorLogsBulkController = expressAsyncController(
   async (
     request: UpdateErrorLogsBulkRequest,
     response: Response<ResourceRequestServerResponse<ErrorLogDocument>>
@@ -374,13 +374,13 @@ const updateErrorLogsBulkHandler = expressAsyncHandler(
 );
 
 export {
-  createNewErrorLogHandler,
-  getQueriedErrorLogsHandler,
-  getErrorLogsByUserHandler,
-  getErrorLogByIdHandler,
-  deleteAnErrorLogHandler,
-  deleteAllErrorLogsHandler,
-  updateErrorLogByIdHandler,
-  createNewErrorLogsBulkHandler,
-  updateErrorLogsBulkHandler,
+  createNewErrorLogController,
+  getQueriedErrorLogsController,
+  getErrorLogsByUserController,
+  getErrorLogByIdController,
+  deleteAnErrorLogController,
+  deleteAllErrorLogsController,
+  updateErrorLogByIdController,
+  createNewErrorLogsBulkController,
+  updateErrorLogsBulkController,
 };

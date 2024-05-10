@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
 import type { Response } from "express";
@@ -37,7 +37,7 @@ import { getUserByIdService } from "../../../user";
 // @desc   Create a new printerIssue
 // @route  POST api/v1/actions/general/printer-issue
 // @access Private
-const createNewPrinterIssueHandler = expressAsyncHandler(
+const createNewPrinterIssueController = expressAsyncController(
   async (
     request: CreateNewPrinterIssueRequest,
     response: Response<ResourceRequestServerResponse<PrinterIssueDocument>>
@@ -64,7 +64,7 @@ const createNewPrinterIssueHandler = expressAsyncHandler(
 // @desc   Get all printerIssues
 // @route  GET api/v1/actions/general/printer-issue
 // @access Private/Admin/Manager
-const getQueriedPrinterIssuesHandler = expressAsyncHandler(
+const getQueriedPrinterIssuesController = expressAsyncController(
   async (
     request: GetQueriedPrinterIssuesRequest,
     response: Response<GetQueriedResourceRequestServerResponse<PrinterIssueDocument>>
@@ -110,7 +110,7 @@ const getQueriedPrinterIssuesHandler = expressAsyncHandler(
 // @desc   Get all printerIssue requests by user
 // @route  GET api/v1/actions/general/printer-issue
 // @access Private
-const getPrinterIssuesByUserHandler = expressAsyncHandler(
+const getPrinterIssuesByUserController = expressAsyncController(
   async (
     request: GetQueriedPrinterIssuesByUserRequest,
     response: Response<GetQueriedResourceRequestServerResponse<PrinterIssueDocument>>
@@ -164,7 +164,7 @@ const getPrinterIssuesByUserHandler = expressAsyncHandler(
 // @desc   Update printerIssue status
 // @route  PATCH api/v1/actions/general/printer-issue
 // @access Private/Admin/Manager
-const updatePrinterIssueByIdHandler = expressAsyncHandler(
+const updatePrinterIssueByIdController = expressAsyncController(
   async (
     request: UpdatePrinterIssueByIdRequest,
     response: Response<ResourceRequestServerResponse<PrinterIssueDocument>>
@@ -207,7 +207,7 @@ const updatePrinterIssueByIdHandler = expressAsyncHandler(
 // @desc   Get an printerIssue request
 // @route  GET api/v1/actions/general/printer-issue
 // @access Private
-const getPrinterIssueByIdHandler = expressAsyncHandler(
+const getPrinterIssueByIdController = expressAsyncController(
   async (
     request: GetPrinterIssueByIdRequest,
     response: Response<ResourceRequestServerResponse<PrinterIssueDocument>>
@@ -231,7 +231,7 @@ const getPrinterIssueByIdHandler = expressAsyncHandler(
 // @desc   Delete an printerIssue request by its id
 // @route  DELETE api/v1/actions/general/printer-issue
 // @access Private
-const deletePrinterIssueHandler = expressAsyncHandler(
+const deletePrinterIssueController = expressAsyncController(
   async (request: DeletePrinterIssueRequest, response: Response) => {
     const { printerIssueId } = request.params;
 
@@ -258,7 +258,7 @@ const deletePrinterIssueHandler = expressAsyncHandler(
 // @desc    Delete all printerIssue requests
 // @route   DELETE api/v1/actions/general/request-resource/printerIssue
 // @access  Private
-const deleteAllPrinterIssuesHandler = expressAsyncHandler(
+const deleteAllPrinterIssuesController = expressAsyncController(
   async (_request: DeleteAllPrinterIssuesRequest, response: Response) => {
     const deletedResult: DeleteResult = await deleteAllPrinterIssuesService();
 
@@ -281,7 +281,7 @@ const deleteAllPrinterIssuesHandler = expressAsyncHandler(
 // @desc   Create new printerIssue requests in bulk
 // @route  POST api/v1/actions/general/printer-issue
 // @access Private
-const createNewPrinterIssuesBulkHandler = expressAsyncHandler(
+const createNewPrinterIssuesBulkController = expressAsyncController(
   async (
     request: CreateNewPrinterIssuesBulkRequest,
     response: Response<ResourceRequestServerResponse<PrinterIssueDocument>>
@@ -331,7 +331,7 @@ const createNewPrinterIssuesBulkHandler = expressAsyncHandler(
 // @desc   Update Printer Issues in bulk
 // @route  PATCH api/v1/actions/general/printer-issue
 // @access Private
-const updatePrinterIssuesBulkHandler = expressAsyncHandler(
+const updatePrinterIssuesBulkController = expressAsyncController(
   async (
     request: UpdatePrinterIssuesBulkRequest,
     response: Response<ResourceRequestServerResponse<PrinterIssueDocument>>
@@ -380,13 +380,13 @@ const updatePrinterIssuesBulkHandler = expressAsyncHandler(
 );
 
 export {
-  createNewPrinterIssueHandler,
-  getQueriedPrinterIssuesHandler,
-  getPrinterIssuesByUserHandler,
-  getPrinterIssueByIdHandler,
-  deletePrinterIssueHandler,
-  deleteAllPrinterIssuesHandler,
-  updatePrinterIssueByIdHandler,
-  createNewPrinterIssuesBulkHandler,
-  updatePrinterIssuesBulkHandler,
+  createNewPrinterIssueController,
+  getQueriedPrinterIssuesController,
+  getPrinterIssuesByUserController,
+  getPrinterIssueByIdController,
+  deletePrinterIssueController,
+  deleteAllPrinterIssuesController,
+  updatePrinterIssueByIdController,
+  createNewPrinterIssuesBulkController,
+  updatePrinterIssuesBulkController,
 };

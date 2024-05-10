@@ -49,7 +49,9 @@ function verifyJWTMiddleware(
 
       Object.defineProperty(request, "body", {
         value: { ...request.body, ...updatedRequestBody },
-        ...Object.getOwnPropertyDescriptor(request, "body"),
+        writable: true,
+        enumerable: true,
+        configurable: true,
       });
 
       console.log("\n");

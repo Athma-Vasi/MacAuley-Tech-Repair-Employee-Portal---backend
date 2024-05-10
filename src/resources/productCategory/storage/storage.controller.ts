@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
 import type { Response } from "express";
@@ -38,7 +38,7 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 // @desc   Create new storage
 // @route  POST /api/v1/product-category/storage
 // @access Private/Admin/Manager
-const createNewStorageHandler = expressAsyncHandler(
+const createNewStorageController = expressAsyncController(
   async (
     request: CreateNewStorageRequest,
     response: Response<ResourceRequestServerResponse<StorageDocument>>
@@ -66,7 +66,7 @@ const createNewStorageHandler = expressAsyncHandler(
 // @desc   Create new storages bulk
 // @route  POST /api/v1/product-category/storage/dev
 // @access Private/Admin/Manager
-const createNewStorageBulkHandler = expressAsyncHandler(
+const createNewStorageBulkController = expressAsyncController(
   async (
     request: CreateNewStorageBulkRequest,
     response: Response<ResourceRequestServerResponse<StorageDocument>>
@@ -113,7 +113,7 @@ const createNewStorageBulkHandler = expressAsyncHandler(
 // @desc   Update storages bulk
 // @route  PATCH /api/v1/product-category/storage/dev
 // @access Private/Admin/Manager
-const updateStoragesBulkHandler = expressAsyncHandler(
+const updateStoragesBulkController = expressAsyncController(
   async (
     request: UpdateStoragesBulkRequest,
     response: Response<ResourceRequestServerResponse<StorageDocument>>
@@ -172,7 +172,7 @@ const updateStoragesBulkHandler = expressAsyncHandler(
 // @desc   Get all storages
 // @route  GET /api/v1/product-category/storage
 // @access Private/Admin/Manager
-const getQueriedStoragesHandler = expressAsyncHandler(
+const getQueriedStoragesController = expressAsyncController(
   async (
     request: GetQueriedStoragesRequest,
     response: Response<GetQueriedResourceRequestServerResponse<StorageDocument>>
@@ -217,7 +217,7 @@ const getQueriedStoragesHandler = expressAsyncHandler(
 // @desc   Get storage by id
 // @route  GET /api/v1/product-category/storage/:storageId
 // @access Private/Admin/Manager
-const getStorageByIdHandler = expressAsyncHandler(
+const getStorageByIdController = expressAsyncController(
   async (
     request: GetStorageByIdRequest,
     response: Response<ResourceRequestServerResponse<StorageDocument>>
@@ -241,7 +241,7 @@ const getStorageByIdHandler = expressAsyncHandler(
 // @desc   Update a storage by id
 // @route  PUT /api/v1/product-category/storage/:storageId
 // @access Private/Admin/Manager
-const updateStorageByIdHandler = expressAsyncHandler(
+const updateStorageByIdController = expressAsyncController(
   async (
     request: UpdateStorageByIdRequest,
     response: Response<ResourceRequestServerResponse<StorageDocument>>
@@ -276,7 +276,7 @@ const updateStorageByIdHandler = expressAsyncHandler(
 // @desc   Delete all storages
 // @route  DELETE /api/v1/product-category/storage
 // @access Private/Admin/Manager
-const deleteAllStoragesHandler = expressAsyncHandler(
+const deleteAllStoragesController = expressAsyncController(
   async (
     _request: DeleteAllStoragesRequest,
     response: Response<ResourceRequestServerResponse<StorageDocument>>
@@ -334,7 +334,7 @@ const deleteAllStoragesHandler = expressAsyncHandler(
 // @desc   Delete a storage by id
 // @route  DELETE /api/v1/product-category/storage/:storageId
 // @access Private/Admin/Manager
-const deleteAStorageHandler = expressAsyncHandler(
+const deleteAStorageController = expressAsyncController(
   async (
     request: DeleteAStorageRequest,
     response: Response<ResourceRequestServerResponse<StorageDocument>>
@@ -400,12 +400,12 @@ const deleteAStorageHandler = expressAsyncHandler(
 );
 
 export {
-  createNewStorageBulkHandler,
-  createNewStorageHandler,
-  deleteAStorageHandler,
-  deleteAllStoragesHandler,
-  getStorageByIdHandler,
-  getQueriedStoragesHandler,
-  updateStorageByIdHandler,
-  updateStoragesBulkHandler,
+  createNewStorageBulkController,
+  createNewStorageController,
+  deleteAStorageController,
+  deleteAllStoragesController,
+  getStorageByIdController,
+  getQueriedStoragesController,
+  updateStorageByIdController,
+  updateStoragesBulkController,
 };

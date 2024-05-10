@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
 import type { Response } from "express";
@@ -38,7 +38,7 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 // @desc   Create new webcam
 // @route  POST /api/v1/product-category/webcam
 // @access Private/Admin/Manager
-const createNewWebcamHandler = expressAsyncHandler(
+const createNewWebcamController = expressAsyncController(
   async (
     request: CreateNewWebcamRequest,
     response: Response<ResourceRequestServerResponse<WebcamDocument>>
@@ -66,7 +66,7 @@ const createNewWebcamHandler = expressAsyncHandler(
 // @desc   Create new webcams bulk
 // @route  POST /api/v1/product-category/webcam/dev
 // @access Private/Admin/Manager
-const createNewWebcamBulkHandler = expressAsyncHandler(
+const createNewWebcamBulkController = expressAsyncController(
   async (
     request: CreateNewWebcamBulkRequest,
     response: Response<ResourceRequestServerResponse<WebcamDocument>>
@@ -113,7 +113,7 @@ const createNewWebcamBulkHandler = expressAsyncHandler(
 // @desc   Update webcams bulk
 // @route  PATCH /api/v1/product-category/webcam/dev
 // @access Private/Admin/Manager
-const updateWebcamsBulkHandler = expressAsyncHandler(
+const updateWebcamsBulkController = expressAsyncController(
   async (
     request: UpdateWebcamsBulkRequest,
     response: Response<ResourceRequestServerResponse<WebcamDocument>>
@@ -172,7 +172,7 @@ const updateWebcamsBulkHandler = expressAsyncHandler(
 // @desc   Get all webcams
 // @route  GET /api/v1/product-category/webcam
 // @access Private/Admin/Manager
-const getQueriedWebcamsHandler = expressAsyncHandler(
+const getQueriedWebcamsController = expressAsyncController(
   async (
     request: GetQueriedWebcamsRequest,
     response: Response<GetQueriedResourceRequestServerResponse<WebcamDocument>>
@@ -217,7 +217,7 @@ const getQueriedWebcamsHandler = expressAsyncHandler(
 // @desc   Get webcam by id
 // @route  GET /api/v1/product-category/webcam/:webcamId
 // @access Private/Admin/Manager
-const getWebcamByIdHandler = expressAsyncHandler(
+const getWebcamByIdController = expressAsyncController(
   async (
     request: GetWebcamByIdRequest,
     response: Response<ResourceRequestServerResponse<WebcamDocument>>
@@ -241,7 +241,7 @@ const getWebcamByIdHandler = expressAsyncHandler(
 // @desc   Update a webcam by id
 // @route  PUT /api/v1/product-category/webcam/:webcamId
 // @access Private/Admin/Manager
-const updateWebcamByIdHandler = expressAsyncHandler(
+const updateWebcamByIdController = expressAsyncController(
   async (
     request: UpdateWebcamByIdRequest,
     response: Response<ResourceRequestServerResponse<WebcamDocument>>
@@ -276,7 +276,7 @@ const updateWebcamByIdHandler = expressAsyncHandler(
 // @desc   Delete all webcams
 // @route  DELETE /api/v1/product-category/webcam
 // @access Private/Admin/Manager
-const deleteAllWebcamsHandler = expressAsyncHandler(
+const deleteAllWebcamsController = expressAsyncController(
   async (
     _request: DeleteAllWebcamsRequest,
     response: Response<ResourceRequestServerResponse<WebcamDocument>>
@@ -334,7 +334,7 @@ const deleteAllWebcamsHandler = expressAsyncHandler(
 // @desc   Delete a webcam by id
 // @route  DELETE /api/v1/product-category/webcam/:webcamId
 // @access Private/Admin/Manager
-const deleteAWebcamHandler = expressAsyncHandler(
+const deleteAWebcamController = expressAsyncController(
   async (
     request: DeleteAWebcamRequest,
     response: Response<ResourceRequestServerResponse<WebcamDocument>>
@@ -400,14 +400,14 @@ const deleteAWebcamHandler = expressAsyncHandler(
 );
 
 export {
-  createNewWebcamBulkHandler,
-  createNewWebcamHandler,
-  deleteAWebcamHandler,
-  deleteAllWebcamsHandler,
-  getWebcamByIdHandler,
-  getQueriedWebcamsHandler,
-  updateWebcamByIdHandler,
-  updateWebcamsBulkHandler,
+  createNewWebcamBulkController,
+  createNewWebcamController,
+  deleteAWebcamController,
+  deleteAllWebcamsController,
+  getWebcamByIdController,
+  getQueriedWebcamsController,
+  updateWebcamByIdController,
+  updateWebcamsBulkController,
 };
 
 /**

@@ -1,14 +1,14 @@
 import { Router } from "express";
 import {
-  createNewExpenseClaimsBulkHandler,
-  createNewExpenseClaimHandler,
-  deleteAllExpenseClaimsHandler,
-  deleteExpenseClaimHandler,
-  getExpenseClaimByIdHandler,
-  getQueriedExpenseClaimsByUserHandler,
-  getQueriedExpenseClaimsHandler,
-  updateExpenseClaimByIdHandler,
-  updateExpenseClaimsBulkHandler,
+  createNewExpenseClaimsBulkController,
+  createNewExpenseClaimController,
+  deleteAllExpenseClaimsController,
+  deleteExpenseClaimController,
+  getExpenseClaimByIdController,
+  getQueriedExpenseClaimsByUserController,
+  getQueriedExpenseClaimsController,
+  updateExpenseClaimByIdController,
+  updateExpenseClaimsBulkController,
 } from "./expenseClaim.controller";
 import { validateSchemaMiddleware } from "../../../../middlewares/validateSchema";
 import {
@@ -20,29 +20,29 @@ const expenseClaimRouter = Router();
 
 expenseClaimRouter
   .route("/")
-  .get(getQueriedExpenseClaimsHandler)
+  .get(getQueriedExpenseClaimsController)
   .post(
     validateSchemaMiddleware(createExpenseClaimJoiSchema, "expenseClaimSchema"),
-    createNewExpenseClaimHandler
+    createNewExpenseClaimController
   );
 
-expenseClaimRouter.route("/delete-all").delete(deleteAllExpenseClaimsHandler);
+expenseClaimRouter.route("/delete-all").delete(deleteAllExpenseClaimsController);
 
-expenseClaimRouter.route("/user").get(getQueriedExpenseClaimsByUserHandler);
+expenseClaimRouter.route("/user").get(getQueriedExpenseClaimsByUserController);
 
 // DEV ROUTES
 expenseClaimRouter
   .route("/dev")
-  .post(createNewExpenseClaimsBulkHandler)
-  .patch(updateExpenseClaimsBulkHandler);
+  .post(createNewExpenseClaimsBulkController)
+  .patch(updateExpenseClaimsBulkController);
 
 expenseClaimRouter
   .route("/:expenseClaimId")
-  .get(getExpenseClaimByIdHandler)
-  .delete(deleteExpenseClaimHandler)
+  .get(getExpenseClaimByIdController)
+  .delete(deleteExpenseClaimController)
   .patch(
     validateSchemaMiddleware(updateExpenseClaimJoiSchema),
-    updateExpenseClaimByIdHandler
+    updateExpenseClaimByIdController
   );
 
 export { expenseClaimRouter };

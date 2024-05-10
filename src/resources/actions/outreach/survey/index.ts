@@ -9,15 +9,15 @@
 import { SurveyModel } from "./survey.model";
 import { surveyRouter } from "./survey.routes";
 import {
-  createNewSurveyHandler,
-  createNewSurveysBulkHandler,
-  deleteAllSurveysHandler,
-  deleteSurveyHandler,
-  getQueriedSurveysHandler,
-  getSurveyByIdHandler,
-  getSurveysByUserHandler,
-  updateSurveyByIdHandler,
-  updateSurveysBulkHandler,
+  createNewSurveyController,
+  createNewSurveysBulkController,
+  deleteAllSurveysController,
+  deleteSurveyController,
+  getQueriedSurveysController,
+  getSurveyByIdController,
+  getSurveysByUserController,
+  updateSurveyByIdController,
+  updateSurveysBulkController,
 } from "./survey.controller";
 import {
   createNewSurveyService,
@@ -56,23 +56,23 @@ import type {
 export {
   SurveyModel,
   surveyRouter,
-  createNewSurveyHandler,
+  createNewSurveyController,
   createNewSurveyService,
-  createNewSurveysBulkHandler,
-  deleteAllSurveysHandler,
+  createNewSurveysBulkController,
+  deleteAllSurveysController,
   deleteAllSurveysService,
   deleteSurveyByIdService,
-  deleteSurveyHandler,
+  deleteSurveyController,
   getQueriedSurveysByUserService,
-  getQueriedSurveysHandler,
+  getQueriedSurveysController,
   getQueriedSurveysService,
   getQueriedTotalSurveysService,
-  getSurveyByIdHandler,
+  getSurveyByIdController,
   getSurveyByIdService,
-  getSurveysByUserHandler,
+  getSurveysByUserController,
   updateSurveyByIdService,
-  updateSurveyByIdHandler,
-  updateSurveysBulkHandler,
+  updateSurveyByIdController,
+  updateSurveysBulkController,
 };
 
 export type {

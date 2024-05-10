@@ -1,14 +1,14 @@
 import { Router } from "express";
 import {
-  createNewLeaveRequestHandler,
-  getQueriedLeaveRequestsHandler,
-  getLeaveRequestsByUserHandler,
-  getLeaveRequestByIdHandler,
-  deleteLeaveRequestHandler,
-  deleteAllLeaveRequestsHandler,
-  updateLeaveRequestByIdHandler,
-  createNewLeaveRequestsBulkHandler,
-  updateLeaveRequestsBulkHandler,
+  createNewLeaveRequestController,
+  getQueriedLeaveRequestsController,
+  getLeaveRequestsByUserController,
+  getLeaveRequestByIdController,
+  deleteLeaveRequestController,
+  deleteAllLeaveRequestsController,
+  updateLeaveRequestByIdController,
+  createNewLeaveRequestsBulkController,
+  updateLeaveRequestsBulkController,
 } from "./leaveRequest.controller";
 import { validateSchemaMiddleware } from "../../../../middlewares/validateSchema";
 import {
@@ -20,29 +20,29 @@ const leaveRequestRouter = Router();
 
 leaveRequestRouter
   .route("/")
-  .get(getQueriedLeaveRequestsHandler)
+  .get(getQueriedLeaveRequestsController)
   .post(
     validateSchemaMiddleware(createLeaveRequestJoiSchema, "leaveRequestSchema"),
-    createNewLeaveRequestHandler
+    createNewLeaveRequestController
   );
 
-leaveRequestRouter.route("/delete-all").delete(deleteAllLeaveRequestsHandler);
+leaveRequestRouter.route("/delete-all").delete(deleteAllLeaveRequestsController);
 
-leaveRequestRouter.route("/user").get(getLeaveRequestsByUserHandler);
+leaveRequestRouter.route("/user").get(getLeaveRequestsByUserController);
 
 // DEV ROUTES
 leaveRequestRouter
   .route("/dev")
-  .post(createNewLeaveRequestsBulkHandler)
-  .patch(updateLeaveRequestsBulkHandler);
+  .post(createNewLeaveRequestsBulkController)
+  .patch(updateLeaveRequestsBulkController);
 
 leaveRequestRouter
   .route("/:leaveRequestId")
-  .get(getLeaveRequestByIdHandler)
-  .delete(deleteLeaveRequestHandler)
+  .get(getLeaveRequestByIdController)
+  .delete(deleteLeaveRequestController)
   .patch(
     validateSchemaMiddleware(updateLeaveRequestJoiSchema),
-    updateLeaveRequestByIdHandler
+    updateLeaveRequestByIdController
   );
 
 export { leaveRequestRouter };

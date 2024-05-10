@@ -1,14 +1,14 @@
 import { Router } from "express";
 import {
-  createNewAnnouncementHandler,
-  getQueriedAnnouncementsHandler,
-  getAnnouncementsByUserHandler,
-  getAnnouncementByIdHandler,
-  deleteAnnouncementHandler,
-  deleteAllAnnouncementsHandler,
-  updateAnnouncementByIdHandler,
-  createNewAnnouncementsBulkHandler,
-  updateAnnouncementsBulkHandler,
+  createNewAnnouncementController,
+  getQueriedAnnouncementsController,
+  getAnnouncementsByUserController,
+  getAnnouncementByIdController,
+  deleteAnnouncementController,
+  deleteAllAnnouncementsController,
+  updateAnnouncementByIdController,
+  createNewAnnouncementsBulkController,
+  updateAnnouncementsBulkController,
 } from "./announcement.controller";
 import { validateSchemaMiddleware } from "../../../../middlewares/validateSchema";
 import {
@@ -20,29 +20,29 @@ const announcementRouter = Router();
 
 announcementRouter
   .route("/")
-  .get(getQueriedAnnouncementsHandler)
+  .get(getQueriedAnnouncementsController)
   .post(
     validateSchemaMiddleware(createAnnouncementJoiSchema, "announcementSchema"),
-    createNewAnnouncementHandler
+    createNewAnnouncementController
   );
 
-announcementRouter.route("/delete-all").delete(deleteAllAnnouncementsHandler);
+announcementRouter.route("/delete-all").delete(deleteAllAnnouncementsController);
 
-announcementRouter.route("/user").get(getAnnouncementsByUserHandler);
+announcementRouter.route("/user").get(getAnnouncementsByUserController);
 
 // DEV ROUTES
 announcementRouter
   .route("/dev")
-  .post(createNewAnnouncementsBulkHandler)
-  .patch(updateAnnouncementsBulkHandler);
+  .post(createNewAnnouncementsBulkController)
+  .patch(updateAnnouncementsBulkController);
 
 announcementRouter
   .route("/:announcementId")
-  .get(getAnnouncementByIdHandler)
-  .delete(deleteAnnouncementHandler)
+  .get(getAnnouncementByIdController)
+  .delete(deleteAnnouncementController)
   .patch(
     validateSchemaMiddleware(updateAnnouncementJoiSchema),
-    updateAnnouncementByIdHandler
+    updateAnnouncementByIdController
   );
 
 export { announcementRouter };

@@ -1,13 +1,13 @@
 import { Router } from "express";
 import {
-  createNewStorageBulkHandler,
-  createNewStorageHandler,
-  deleteAStorageHandler,
-  deleteAllStoragesHandler,
-  getStorageByIdHandler,
-  getQueriedStoragesHandler,
-  updateStorageByIdHandler,
-  updateStoragesBulkHandler,
+  createNewStorageBulkController,
+  createNewStorageController,
+  deleteAStorageController,
+  deleteAllStoragesController,
+  getStorageByIdController,
+  getQueriedStoragesController,
+  updateStorageByIdController,
+  updateStoragesBulkController,
 } from "./storage.controller";
 import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
 import { createStorageJoiSchema, updateStorageJoiSchema } from "./storage.validation";
@@ -16,26 +16,26 @@ const storageRouter = Router();
 
 storageRouter
   .route("/")
-  .get(getQueriedStoragesHandler)
+  .get(getQueriedStoragesController)
   .post(
     validateSchemaMiddleware(createStorageJoiSchema, "storageSchema"),
-    createNewStorageHandler
+    createNewStorageController
   );
 
 // separate route for safety reasons (as it deletes all documents in the collection)
-storageRouter.route("/delete-all").delete(deleteAllStoragesHandler);
+storageRouter.route("/delete-all").delete(deleteAllStoragesController);
 
 // DEV ROUTE
 storageRouter
   .route("/dev")
-  .post(createNewStorageBulkHandler)
-  .patch(updateStoragesBulkHandler);
+  .post(createNewStorageBulkController)
+  .patch(updateStoragesBulkController);
 
 // single document routes
 storageRouter
   .route("/:storageId")
-  .get(getStorageByIdHandler)
-  .delete(deleteAStorageHandler)
-  .patch(validateSchemaMiddleware(updateStorageJoiSchema), updateStorageByIdHandler);
+  .get(getStorageByIdController)
+  .delete(deleteAStorageController)
+  .patch(validateSchemaMiddleware(updateStorageJoiSchema), updateStorageByIdController);
 
 export { storageRouter };

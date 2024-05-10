@@ -12,13 +12,13 @@ import {
 } from "../../middlewares";
 import { ALLOWED_FILE_EXTENSIONS } from "../../constants";
 import {
-  createNewFileUploadHandler,
-  deleteAFileUploadHandler,
-  deleteAllFileUploadsHandler,
-  getAllFileUploadsHandler,
-  getFileUploadByIdHandler,
-  getQueriedFileUploadsByUserHandler,
-  insertAssociatedResourceDocumentIdHandler,
+  createNewFileUploadController,
+  deleteAFileUploadController,
+  deleteAllFileUploadsController,
+  getAllFileUploadsController,
+  getFileUploadByIdController,
+  getQueriedFileUploadsByUserController,
+  insertAssociatedResourceDocumentIdController,
 } from "./fileUpload.controller";
 import { validateSchemaMiddleware } from "../../middlewares/validateSchema";
 import { createFileUploadJoiSchema } from "./fileUpload.validation";
@@ -30,7 +30,7 @@ fileUploadRouter.use(verifyRoles);
 
 fileUploadRouter
   .route("/")
-  .get(getAllFileUploadsHandler)
+  .get(getAllFileUploadsController)
   .post(
     expressFileUpload({ createParentPath: true }),
     filesPayloadExistsMiddleware,
@@ -38,17 +38,17 @@ fileUploadRouter
     fileExtensionLimiterMiddleware(ALLOWED_FILE_EXTENSIONS),
     fileInfoExtracterMiddleware,
     validateSchemaMiddleware(createFileUploadJoiSchema, "fileUploadSchema"),
-    createNewFileUploadHandler
+    createNewFileUploadController
   );
 
-fileUploadRouter.route("/delete-all").delete(deleteAllFileUploadsHandler);
+fileUploadRouter.route("/delete-all").delete(deleteAllFileUploadsController);
 
-fileUploadRouter.route("/user").get(getQueriedFileUploadsByUserHandler);
+fileUploadRouter.route("/user").get(getQueriedFileUploadsByUserController);
 
 fileUploadRouter
   .route("/:fileUploadId")
-  .get(getFileUploadByIdHandler)
-  .delete(deleteAFileUploadHandler)
-  .put(insertAssociatedResourceDocumentIdHandler);
+  .get(getFileUploadByIdController)
+  .delete(deleteAFileUploadController)
+  .put(insertAssociatedResourceDocumentIdController);
 
 export { fileUploadRouter };

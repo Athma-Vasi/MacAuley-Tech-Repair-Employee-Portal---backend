@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
 import type { Response } from "express";
@@ -38,7 +38,7 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 // @desc   Create new motherboard
 // @route  POST /api/v1/product-category/motherboard
 // @access Private/Admin/Manager
-const createNewMotherboardHandler = expressAsyncHandler(
+const createNewMotherboardController = expressAsyncController(
   async (
     request: CreateNewMotherboardRequest,
     response: Response<ResourceRequestServerResponse<MotherboardDocument>>
@@ -68,7 +68,7 @@ const createNewMotherboardHandler = expressAsyncHandler(
 // @desc   Create new motherboards bulk
 // @route  POST /api/v1/product-category/motherboard/dev
 // @access Private/Admin/Manager
-const createNewMotherboardBulkHandler = expressAsyncHandler(
+const createNewMotherboardBulkController = expressAsyncController(
   async (
     request: CreateNewMotherboardBulkRequest,
     response: Response<ResourceRequestServerResponse<MotherboardDocument>>
@@ -117,7 +117,7 @@ const createNewMotherboardBulkHandler = expressAsyncHandler(
 // @desc   Update motherboards bulk
 // @route  PATCH /api/v1/product-category/motherboard/dev
 // @access Private/Admin/Manager
-const updateMotherboardsBulkHandler = expressAsyncHandler(
+const updateMotherboardsBulkController = expressAsyncController(
   async (
     request: UpdateMotherboardsBulkRequest,
     response: Response<ResourceRequestServerResponse<MotherboardDocument>>
@@ -176,7 +176,7 @@ const updateMotherboardsBulkHandler = expressAsyncHandler(
 // @desc   Get all motherboards
 // @route  GET /api/v1/product-category/motherboard
 // @access Private/Admin/Manager
-const getQueriedMotherboardsHandler = expressAsyncHandler(
+const getQueriedMotherboardsController = expressAsyncController(
   async (
     request: GetQueriedMotherboardsRequest,
     response: Response<GetQueriedResourceRequestServerResponse<MotherboardDocument>>
@@ -221,7 +221,7 @@ const getQueriedMotherboardsHandler = expressAsyncHandler(
 // @desc   Get motherboard by id
 // @route  GET /api/v1/product-category/motherboard/:motherboardId
 // @access Private/Admin/Manager
-const getMotherboardByIdHandler = expressAsyncHandler(
+const getMotherboardByIdController = expressAsyncController(
   async (
     request: GetMotherboardByIdRequest,
     response: Response<ResourceRequestServerResponse<MotherboardDocument>>
@@ -245,7 +245,7 @@ const getMotherboardByIdHandler = expressAsyncHandler(
 // @desc   Update a motherboard by id
 // @route  PUT /api/v1/product-category/motherboard/:motherboardId
 // @access Private/Admin/Manager
-const updateMotherboardByIdHandler = expressAsyncHandler(
+const updateMotherboardByIdController = expressAsyncController(
   async (
     request: UpdateMotherboardByIdRequest,
     response: Response<ResourceRequestServerResponse<MotherboardDocument>>
@@ -280,7 +280,7 @@ const updateMotherboardByIdHandler = expressAsyncHandler(
 // @desc   Delete all motherboards
 // @route  DELETE /api/v1/product-category/motherboard
 // @access Private/Admin/Manager
-const deleteAllMotherboardsHandler = expressAsyncHandler(
+const deleteAllMotherboardsController = expressAsyncController(
   async (
     _request: DeleteAllMotherboardsRequest,
     response: Response<ResourceRequestServerResponse<MotherboardDocument>>
@@ -338,7 +338,7 @@ const deleteAllMotherboardsHandler = expressAsyncHandler(
 // @desc   Delete a motherboard by id
 // @route  DELETE /api/v1/product-category/motherboard/:motherboardId
 // @access Private/Admin/Manager
-const deleteAMotherboardHandler = expressAsyncHandler(
+const deleteAMotherboardController = expressAsyncController(
   async (
     request: DeleteAMotherboardRequest,
     response: Response<ResourceRequestServerResponse<MotherboardDocument>>
@@ -408,12 +408,12 @@ const deleteAMotherboardHandler = expressAsyncHandler(
 );
 
 export {
-  createNewMotherboardBulkHandler,
-  createNewMotherboardHandler,
-  deleteAMotherboardHandler,
-  deleteAllMotherboardsHandler,
-  getMotherboardByIdHandler,
-  getQueriedMotherboardsHandler,
-  updateMotherboardByIdHandler,
-  updateMotherboardsBulkHandler,
+  createNewMotherboardBulkController,
+  createNewMotherboardController,
+  deleteAMotherboardController,
+  deleteAllMotherboardsController,
+  getMotherboardByIdController,
+  getQueriedMotherboardsController,
+  updateMotherboardByIdController,
+  updateMotherboardsBulkController,
 };

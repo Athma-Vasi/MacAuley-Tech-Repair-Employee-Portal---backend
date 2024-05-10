@@ -5,14 +5,14 @@ import {
   verifyRoles,
 } from "../../../middlewares";
 import {
-  createNewAccessoryBulkHandler,
-  createNewAccessoryHandler,
-  deleteAAccessoryHandler,
-  deleteAllAccessoriesHandler,
-  getAccessoryByIdHandler,
-  getQueriedAccessoriesHandler,
-  updateAccessoriesBulkHandler,
-  updateAccessoryByIdHandler,
+  createNewAccessoryBulkController,
+  createNewAccessoryController,
+  deleteAAccessoryController,
+  deleteAllAccessoriesController,
+  getAccessoryByIdController,
+  getQueriedAccessoriesController,
+  updateAccessoriesBulkController,
+  updateAccessoryByIdController,
 } from "./accessory.controller";
 import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
 import { createAccessoryJoiSchema } from "./accessory.validation";
@@ -21,26 +21,26 @@ const accessoryRouter = Router();
 
 accessoryRouter
   .route("/")
-  .post(createNewAccessoryHandler)
-  .get(getQueriedAccessoriesHandler);
+  .post(createNewAccessoryController)
+  .get(getQueriedAccessoriesController);
 
 // separate route for safety reasons (as it deletes all documents in the collection)
-accessoryRouter.route("/delete-all").delete(deleteAllAccessoriesHandler);
+accessoryRouter.route("/delete-all").delete(deleteAllAccessoriesController);
 
 // DEV ROUTE
 accessoryRouter
   .route("/dev")
-  .post(createNewAccessoryBulkHandler)
+  .post(createNewAccessoryBulkController)
   .patch(
     validateSchemaMiddleware(createAccessoryJoiSchema, "accessorySchema"),
-    updateAccessoriesBulkHandler
+    updateAccessoriesBulkController
   );
 
 // single document routes
 accessoryRouter
   .route("/:accessoryId")
-  .get(getAccessoryByIdHandler)
-  .delete(deleteAAccessoryHandler)
-  .patch(updateAccessoryByIdHandler);
+  .get(getAccessoryByIdController)
+  .delete(deleteAAccessoryController)
+  .patch(updateAccessoryByIdController);
 
 export { accessoryRouter };

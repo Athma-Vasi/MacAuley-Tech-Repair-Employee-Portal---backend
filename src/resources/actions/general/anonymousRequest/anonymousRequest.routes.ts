@@ -1,14 +1,14 @@
 import { Router } from "express";
 import {
-  createNewAnonymousRequestHandler,
-  getQueriedAnonymousRequestsHandler,
-  getAnonymousRequestsByUserHandler,
-  getAnonymousRequestByIdHandler,
-  deleteAnonymousRequestHandler,
-  deleteAllAnonymousRequestsHandler,
-  updateAnonymousRequestByIdHandler,
-  createNewAnonymousRequestsBulkHandler,
-  updateAnonymousRequestsBulkHandler,
+  createNewAnonymousRequestController,
+  getQueriedAnonymousRequestsController,
+  getAnonymousRequestsByUserController,
+  getAnonymousRequestByIdController,
+  deleteAnonymousRequestController,
+  deleteAllAnonymousRequestsController,
+  updateAnonymousRequestByIdController,
+  createNewAnonymousRequestsBulkController,
+  updateAnonymousRequestsBulkController,
 } from "./anonymousRequest.controller";
 import { validateSchemaMiddleware } from "../../../../middlewares/validateSchema";
 import {
@@ -20,29 +20,29 @@ const anonymousRequestRouter = Router();
 
 anonymousRequestRouter
   .route("/")
-  .get(getQueriedAnonymousRequestsHandler)
+  .get(getQueriedAnonymousRequestsController)
   .post(
     validateSchemaMiddleware(createAnonymousRequestJoiSchema, "anonymousRequestSchema"),
-    createNewAnonymousRequestHandler
+    createNewAnonymousRequestController
   );
 
-anonymousRequestRouter.route("/delete-all").delete(deleteAllAnonymousRequestsHandler);
+anonymousRequestRouter.route("/delete-all").delete(deleteAllAnonymousRequestsController);
 
-anonymousRequestRouter.route("/user").get(getAnonymousRequestsByUserHandler);
+anonymousRequestRouter.route("/user").get(getAnonymousRequestsByUserController);
 
 // DEV ROUTES
 anonymousRequestRouter
   .route("/dev")
-  .post(createNewAnonymousRequestsBulkHandler)
-  .patch(updateAnonymousRequestsBulkHandler);
+  .post(createNewAnonymousRequestsBulkController)
+  .patch(updateAnonymousRequestsBulkController);
 
 anonymousRequestRouter
   .route("/:anonymousRequestId")
-  .get(getAnonymousRequestByIdHandler)
-  .delete(deleteAnonymousRequestHandler)
+  .get(getAnonymousRequestByIdController)
+  .delete(deleteAnonymousRequestController)
   .patch(
     validateSchemaMiddleware(updateAnonymousRequestJoiSchema),
-    updateAnonymousRequestByIdHandler
+    updateAnonymousRequestByIdController
   );
 
 export { anonymousRequestRouter };

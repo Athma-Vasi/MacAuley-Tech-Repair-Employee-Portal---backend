@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
 import type { Response } from "express";
@@ -38,7 +38,7 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 // @desc   Create new ram
 // @route  POST /api/v1/product-category/ram
 // @access Private/Admin/Manager
-const createNewRamHandler = expressAsyncHandler(
+const createNewRamController = expressAsyncController(
   async (
     request: CreateNewRamRequest,
     response: Response<ResourceRequestServerResponse<RamDocument>>
@@ -66,7 +66,7 @@ const createNewRamHandler = expressAsyncHandler(
 // @desc   Create new rams bulk
 // @route  POST /api/v1/product-category/ram/dev
 // @access Private/Admin/Manager
-const createNewRamBulkHandler = expressAsyncHandler(
+const createNewRamBulkController = expressAsyncController(
   async (
     request: CreateNewRamBulkRequest,
     response: Response<ResourceRequestServerResponse<RamDocument>>
@@ -113,7 +113,7 @@ const createNewRamBulkHandler = expressAsyncHandler(
 // @desc   Update rams bulk
 // @route  PATCH /api/v1/product-category/ram/dev
 // @access Private/Admin/Manager
-const updateRamsBulkHandler = expressAsyncHandler(
+const updateRamsBulkController = expressAsyncController(
   async (
     request: UpdateRamsBulkRequest,
     response: Response<ResourceRequestServerResponse<RamDocument>>
@@ -170,7 +170,7 @@ const updateRamsBulkHandler = expressAsyncHandler(
 // @desc   Get all rams
 // @route  GET /api/v1/product-category/ram
 // @access Private/Admin/Manager
-const getQueriedRamsHandler = expressAsyncHandler(
+const getQueriedRamsController = expressAsyncController(
   async (
     request: GetQueriedRamsRequest,
     response: Response<GetQueriedResourceRequestServerResponse<RamDocument>>
@@ -215,7 +215,7 @@ const getQueriedRamsHandler = expressAsyncHandler(
 // @desc   Get ram by id
 // @route  GET /api/v1/product-category/ram/:ramId
 // @access Private/Admin/Manager
-const getRamByIdHandler = expressAsyncHandler(
+const getRamByIdController = expressAsyncController(
   async (
     request: GetRamByIdRequest,
     response: Response<ResourceRequestServerResponse<RamDocument>>
@@ -239,7 +239,7 @@ const getRamByIdHandler = expressAsyncHandler(
 // @desc   Update a ram by id
 // @route  PUT /api/v1/product-category/ram/:ramId
 // @access Private/Admin/Manager
-const updateRamByIdHandler = expressAsyncHandler(
+const updateRamByIdController = expressAsyncController(
   async (
     request: UpdateRamByIdRequest,
     response: Response<ResourceRequestServerResponse<RamDocument>>
@@ -274,7 +274,7 @@ const updateRamByIdHandler = expressAsyncHandler(
 // @desc   Delete all rams
 // @route  DELETE /api/v1/product-category/ram
 // @access Private/Admin/Manager
-const deleteAllRamsHandler = expressAsyncHandler(
+const deleteAllRamsController = expressAsyncController(
   async (
     _request: DeleteAllRamsRequest,
     response: Response<ResourceRequestServerResponse<RamDocument>>
@@ -332,7 +332,7 @@ const deleteAllRamsHandler = expressAsyncHandler(
 // @desc   Delete a ram by id
 // @route  DELETE /api/v1/product-category/ram/:ramId
 // @access Private/Admin/Manager
-const deleteARamHandler = expressAsyncHandler(
+const deleteARamController = expressAsyncController(
   async (
     request: DeleteARamRequest,
     response: Response<ResourceRequestServerResponse<RamDocument>>
@@ -398,12 +398,12 @@ const deleteARamHandler = expressAsyncHandler(
 );
 
 export {
-  createNewRamBulkHandler,
-  createNewRamHandler,
-  deleteARamHandler,
-  deleteAllRamsHandler,
-  getRamByIdHandler,
-  getQueriedRamsHandler,
-  updateRamByIdHandler,
-  updateRamsBulkHandler,
+  createNewRamBulkController,
+  createNewRamController,
+  deleteARamController,
+  deleteAllRamsController,
+  getRamByIdController,
+  getQueriedRamsController,
+  updateRamByIdController,
+  updateRamsBulkController,
 };

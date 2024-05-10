@@ -8,9 +8,9 @@ import {
   DatabaseResponseNullable,
   QueriedResourceGetRequestServiceInput,
   QueriedTotalResourceGetRequestServiceInput,
-  RequestStatus,
   UpdateDocumentByIdServiceInput,
 } from "../../../../types";
+import createHttpError from "http-errors";
 
 async function getAddressChangeByIdService(
   addressChangeId: Types.ObjectId | string
@@ -21,7 +21,7 @@ async function getAddressChangeByIdService(
       .exec();
     return addressChange;
   } catch (error: any) {
-    throw new Error(error, { cause: "getAddressChangeByIdService" });
+    throw new createHttpError.InternalServerError("Error in getAddressChangeByIdService");
   }
 }
 
@@ -32,7 +32,9 @@ async function createNewAddressChangeService(
     const addressChange = await AddressChangeModel.create(addressChangeSchema);
     return addressChange;
   } catch (error: any) {
-    throw new Error(error, { cause: "createNewAddressChangeService" });
+    throw new createHttpError.InternalServerError(
+      "Error in createNewAddressChangeService"
+    );
   }
 }
 
@@ -47,7 +49,9 @@ async function getQueriedAddressChangesService({
       .exec();
     return addressChange;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedAddressChangesService" });
+    throw new createHttpError.InternalServerError(
+      "Error in getQueriedAddressChangesService"
+    );
   }
 }
 
@@ -60,7 +64,9 @@ async function getQueriedTotalAddressChangesService({
       .exec();
     return totalAddressChanges;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedTotalAddressChangesService" });
+    throw new createHttpError.InternalServerError(
+      "Error in getQueriedTotalAddressChangesService"
+    );
   }
 }
 
@@ -75,7 +81,9 @@ async function getQueriedAddressChangesByUserService({
       .exec();
     return addressChanges;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedAddressChangesByUserService" });
+    throw new createHttpError.InternalServerError(
+      "Error in getQueriedAddressChangesByUserService"
+    );
   }
 }
 
@@ -95,7 +103,9 @@ async function updateAddressChangeByIdService({
       .exec();
     return addressChange;
   } catch (error: any) {
-    throw new Error(error, { cause: "updateAddressChangeStatusByIdService" });
+    throw new createHttpError.InternalServerError(
+      "Error in updateAddressChangeByIdService"
+    );
   }
 }
 
@@ -108,7 +118,9 @@ async function deleteAddressChangeByIdService(
       .exec();
     return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteAddressChangeByIdService" });
+    throw new createHttpError.InternalServerError(
+      "Error in deleteAddressChangeByIdService"
+    );
   }
 }
 
@@ -117,7 +129,9 @@ async function deleteAllAddressChangesService(): Promise<DeleteResult> {
     const deletedResult = await AddressChangeModel.deleteMany({}).lean().exec();
     return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteAllAddressChangesService" });
+    throw new createHttpError.InternalServerError(
+      "Error in deleteAllAddressChangesService"
+    );
   }
 }
 

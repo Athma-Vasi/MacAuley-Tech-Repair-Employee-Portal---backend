@@ -9,15 +9,15 @@
 import { EventModel } from "./event.model";
 import { eventRouter } from "./event.routes";
 import {
-  createNewEventHandler,
-  createNewEventsBulkHandler,
-  deleteAllEventsHandler,
-  deleteEventHandler,
-  getEventByIdHandler,
-  getEventsByUserHandler,
-  getQueriedEventsHandler,
-  updateEventByIdHandler,
-  updateEventsBulkHandler,
+  createNewEventController,
+  createNewEventsBulkController,
+  deleteAllEventsController,
+  deleteEventController,
+  getEventByIdController,
+  getEventsByUserController,
+  getQueriedEventsController,
+  updateEventByIdController,
+  updateEventsBulkController,
 } from "./event.controller";
 import {
   createNewEventService,
@@ -50,23 +50,23 @@ import type { EventDocument, EventSchema, EventKind } from "./event.model";
 export {
   EventModel,
   eventRouter,
-  createNewEventHandler,
+  createNewEventController,
   createNewEventService,
-  createNewEventsBulkHandler,
-  deleteAllEventsHandler,
+  createNewEventsBulkController,
+  deleteAllEventsController,
   deleteAllEventsService,
   deleteEventByIdService,
-  deleteEventHandler,
-  getEventByIdHandler,
+  deleteEventController,
+  getEventByIdController,
   getEventByIdService,
-  getEventsByUserHandler,
+  getEventsByUserController,
   getQueriedEventsByUserService,
-  getQueriedEventsHandler,
+  getQueriedEventsController,
   getQueriedEventsService,
   getQueriedTotalEventsService,
   updateEventByIdService,
-  updateEventByIdHandler,
-  updateEventsBulkHandler,
+  updateEventByIdController,
+  updateEventsBulkController,
 };
 
 export type {

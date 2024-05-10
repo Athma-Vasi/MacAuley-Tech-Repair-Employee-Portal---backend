@@ -1,13 +1,13 @@
 import { Router } from "express";
 import {
-  createNewSpeakerBulkHandler,
-  createNewSpeakerHandler,
-  deleteASpeakerHandler,
-  deleteAllSpeakersHandler,
-  getSpeakerByIdHandler,
-  getQueriedSpeakersHandler,
-  updateSpeakerByIdHandler,
-  updateSpeakersBulkHandler,
+  createNewSpeakerBulkController,
+  createNewSpeakerController,
+  deleteASpeakerController,
+  deleteAllSpeakersController,
+  getSpeakerByIdController,
+  getQueriedSpeakersController,
+  updateSpeakerByIdController,
+  updateSpeakersBulkController,
 } from "./speaker.controller";
 import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
 import { createSpeakerJoiSchema, updateSpeakerJoiSchema } from "./speaker.validation";
@@ -16,26 +16,26 @@ const speakerRouter = Router();
 
 speakerRouter
   .route("/")
-  .get(getQueriedSpeakersHandler)
+  .get(getQueriedSpeakersController)
   .post(
     validateSchemaMiddleware(createSpeakerJoiSchema, "speakerSchema"),
-    createNewSpeakerHandler
+    createNewSpeakerController
   );
 
 // separate route for safety reasons (as it deletes all documents in the collection)
-speakerRouter.route("/delete-all").delete(deleteAllSpeakersHandler);
+speakerRouter.route("/delete-all").delete(deleteAllSpeakersController);
 
 // DEV ROUTE
 speakerRouter
   .route("/dev")
-  .post(createNewSpeakerBulkHandler)
-  .patch(updateSpeakersBulkHandler);
+  .post(createNewSpeakerBulkController)
+  .patch(updateSpeakersBulkController);
 
 // single document routes
 speakerRouter
   .route("/:speakerId")
-  .get(getSpeakerByIdHandler)
-  .delete(deleteASpeakerHandler)
-  .patch(validateSchemaMiddleware(updateSpeakerJoiSchema), updateSpeakerByIdHandler);
+  .get(getSpeakerByIdController)
+  .delete(deleteASpeakerController)
+  .patch(validateSchemaMiddleware(updateSpeakerJoiSchema), updateSpeakerByIdController);
 
 export { speakerRouter };

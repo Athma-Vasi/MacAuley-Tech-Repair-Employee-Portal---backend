@@ -1,13 +1,13 @@
 import { Router } from "express";
 import {
-  createNewPsuBulkHandler,
-  createNewPsuHandler,
-  deleteAPsuHandler,
-  deleteAllPsusHandler,
-  getPsuByIdHandler,
-  getQueriedPsusHandler,
-  updatePsuByIdHandler,
-  updatePsusBulkHandler,
+  createNewPsuBulkController,
+  createNewPsuController,
+  deleteAPsuController,
+  deleteAllPsusController,
+  getPsuByIdController,
+  getQueriedPsusController,
+  updatePsuByIdController,
+  updatePsusBulkController,
 } from "./psu.controller";
 import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
 import { createPsuJoiSchema, updatePsuJoiSchema } from "./psu.validation";
@@ -16,20 +16,23 @@ const psuRouter = Router();
 
 psuRouter
   .route("/")
-  .get(getQueriedPsusHandler)
-  .post(validateSchemaMiddleware(createPsuJoiSchema, "psuSchema"), createNewPsuHandler);
+  .get(getQueriedPsusController)
+  .post(
+    validateSchemaMiddleware(createPsuJoiSchema, "psuSchema"),
+    createNewPsuController
+  );
 
 // separate route for safety reasons (as it deletes all documents in the collection)
-psuRouter.route("/delete-all").delete(deleteAllPsusHandler);
+psuRouter.route("/delete-all").delete(deleteAllPsusController);
 
 // DEV ROUTE
-psuRouter.route("/dev").post(createNewPsuBulkHandler).patch(updatePsusBulkHandler);
+psuRouter.route("/dev").post(createNewPsuBulkController).patch(updatePsusBulkController);
 
 // single document routes
 psuRouter
   .route("/:psuId")
-  .get(getPsuByIdHandler)
-  .delete(deleteAPsuHandler)
-  .patch(validateSchemaMiddleware(updatePsuJoiSchema), updatePsuByIdHandler);
+  .get(getPsuByIdController)
+  .delete(deleteAPsuController)
+  .patch(validateSchemaMiddleware(updatePsuJoiSchema), updatePsuByIdController);
 
 export { psuRouter };

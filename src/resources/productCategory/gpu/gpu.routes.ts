@@ -1,13 +1,13 @@
 import { Router } from "express";
 import {
-  createNewGpuBulkHandler,
-  createNewGpuHandler,
-  deleteAGpuHandler,
-  deleteAllGpusHandler,
-  getGpuByIdHandler,
-  getQueriedGpusHandler,
-  updateGpuByIdHandler,
-  updateGpusBulkHandler,
+  createNewGpuBulkController,
+  createNewGpuController,
+  deleteAGpuController,
+  deleteAllGpusController,
+  getGpuByIdController,
+  getQueriedGpusController,
+  updateGpuByIdController,
+  updateGpusBulkController,
 } from "./gpu.controller";
 import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
 import { createGpuJoiSchema, updateGpuJoiSchema } from "./gpu.validation";
@@ -16,20 +16,23 @@ const gpuRouter = Router();
 
 gpuRouter
   .route("/")
-  .get(getQueriedGpusHandler)
-  .post(validateSchemaMiddleware(createGpuJoiSchema, "gpuSchema"), createNewGpuHandler);
+  .get(getQueriedGpusController)
+  .post(
+    validateSchemaMiddleware(createGpuJoiSchema, "gpuSchema"),
+    createNewGpuController
+  );
 
 // separate route for safety reasons (as it deletes all documents in the collection)
-gpuRouter.route("/delete-all").delete(deleteAllGpusHandler);
+gpuRouter.route("/delete-all").delete(deleteAllGpusController);
 
 // DEV ROUTE
-gpuRouter.route("/dev").post(createNewGpuBulkHandler).patch(updateGpusBulkHandler);
+gpuRouter.route("/dev").post(createNewGpuBulkController).patch(updateGpusBulkController);
 
 // single document routes
 gpuRouter
   .route("/:gpuId")
-  .get(getGpuByIdHandler)
-  .delete(deleteAGpuHandler)
-  .patch(validateSchemaMiddleware(updateGpuJoiSchema), updateGpuByIdHandler);
+  .get(getGpuByIdController)
+  .delete(deleteAGpuController)
+  .patch(validateSchemaMiddleware(updateGpuJoiSchema), updateGpuByIdController);
 
 export { gpuRouter };

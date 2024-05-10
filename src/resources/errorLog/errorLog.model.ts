@@ -31,7 +31,6 @@ const errorLogSchema = new Schema<ErrorLogSchema>(
       type: String,
       required: [true, "User ID is required"],
       ref: "User",
-      unique: true,
       index: true,
     },
     username: {

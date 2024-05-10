@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 import type { DeleteResult } from "mongodb";
 
 import type { Response } from "express";
@@ -49,7 +49,7 @@ import { removeUndefinedAndNullValues } from "../../../../utils";
 // @desc   Create a new expense claim
 // @route  POST api/v1/actions/company/expense-claim
 // @access Private
-const createNewExpenseClaimHandler = expressAsyncHandler(
+const createNewExpenseClaimController = expressAsyncController(
   async (
     request: CreateNewExpenseClaimRequest,
     response: Response<ResourceRequestServerResponse<ExpenseClaimDocument>>
@@ -119,7 +119,7 @@ const createNewExpenseClaimHandler = expressAsyncHandler(
 // @desc   Get all expense claims
 // @route  GET api/v1/actions/company/expense-claim
 // @access Private/Admin/Manager
-const getQueriedExpenseClaimsHandler = expressAsyncHandler(
+const getQueriedExpenseClaimsController = expressAsyncController(
   async (
     request: GetQueriedExpenseClaimsRequest,
     response: Response<
@@ -196,7 +196,7 @@ const getQueriedExpenseClaimsHandler = expressAsyncHandler(
 // @desc   Get expense claims by user
 // @route  GET api/v1/actions/company/expense-claim/user
 // @access Private
-const getQueriedExpenseClaimsByUserHandler = expressAsyncHandler(
+const getQueriedExpenseClaimsByUserController = expressAsyncController(
   async (
     request: GetQueriedExpenseClaimsByUserRequest,
     response: Response<
@@ -279,7 +279,7 @@ const getQueriedExpenseClaimsByUserHandler = expressAsyncHandler(
 // @desc   Get expense claim by id
 // @route  GET api/v1/actions/company/expense-claim/:expenseClaimId
 // @access Private/Admin/Manager
-const getExpenseClaimByIdHandler = expressAsyncHandler(
+const getExpenseClaimByIdController = expressAsyncController(
   async (
     request: GetExpenseClaimByIdRequest,
     response: Response<ResourceRequestServerResponse<ExpenseClaimServerResponseDocument>>
@@ -320,7 +320,7 @@ const getExpenseClaimByIdHandler = expressAsyncHandler(
 // @desc   Update an expense claim by id
 // @route  PATCH api/v1/actions/company/expense-claim/:expenseClaimId
 // @access Private/Admin/Manager
-const updateExpenseClaimByIdHandler = expressAsyncHandler(
+const updateExpenseClaimByIdController = expressAsyncController(
   async (
     request: UpdateExpenseClaimByIdRequest,
     response: Response<ResourceRequestServerResponse<ExpenseClaimDocument>>
@@ -363,7 +363,7 @@ const updateExpenseClaimByIdHandler = expressAsyncHandler(
 // @desc   Delete all expense claims
 // @route  DELETE api/v1/actions/company/expense-claim
 // @access Private/Admin/Manager
-const deleteAllExpenseClaimsHandler = expressAsyncHandler(
+const deleteAllExpenseClaimsController = expressAsyncController(
   async (
     _request: DeleteAllExpenseClaimsRequest,
     response: Response<ResourceRequestServerResponse<ExpenseClaimDocument>>
@@ -403,7 +403,7 @@ const deleteAllExpenseClaimsHandler = expressAsyncHandler(
 // @desc   Delete expense claim by id
 // @route  DELETE api/v1/actions/company/expense-claim/:expenseClaimId
 // @access Private/Admin/Manager
-const deleteExpenseClaimHandler = expressAsyncHandler(
+const deleteExpenseClaimController = expressAsyncController(
   async (
     request: DeleteExpenseClaimRequest,
     response: Response<ResourceRequestServerResponse<ExpenseClaimDocument>>
@@ -460,7 +460,7 @@ const deleteExpenseClaimHandler = expressAsyncHandler(
 // @desc   Create new expense claims in bulk
 // @route  POST api/v1/actions/company/expense-claim/dev
 // @access Private
-const createNewExpenseClaimsBulkHandler = expressAsyncHandler(
+const createNewExpenseClaimsBulkController = expressAsyncController(
   async (
     request: CreateNewExpenseClaimsBulkRequest,
     response: Response<ResourceRequestServerResponse<ExpenseClaimDocument>>
@@ -510,7 +510,7 @@ const createNewExpenseClaimsBulkHandler = expressAsyncHandler(
 // @desc   Update expense claims in bulk
 // @route  PATCH api/v1/actions/company/expense-claim/dev
 // @access Private
-const updateExpenseClaimsBulkHandler = expressAsyncHandler(
+const updateExpenseClaimsBulkController = expressAsyncController(
   async (
     request: UpdateExpenseClaimsBulkRequest,
     response: Response<ResourceRequestServerResponse<ExpenseClaimDocument>>
@@ -559,13 +559,13 @@ const updateExpenseClaimsBulkHandler = expressAsyncHandler(
 );
 
 export {
-  createNewExpenseClaimsBulkHandler,
-  createNewExpenseClaimHandler,
-  deleteAllExpenseClaimsHandler,
-  deleteExpenseClaimHandler,
-  getExpenseClaimByIdHandler,
-  getQueriedExpenseClaimsByUserHandler,
-  getQueriedExpenseClaimsHandler,
-  updateExpenseClaimByIdHandler,
-  updateExpenseClaimsBulkHandler,
+  createNewExpenseClaimsBulkController,
+  createNewExpenseClaimController,
+  deleteAllExpenseClaimsController,
+  deleteExpenseClaimController,
+  getExpenseClaimByIdController,
+  getQueriedExpenseClaimsByUserController,
+  getQueriedExpenseClaimsController,
+  updateExpenseClaimByIdController,
+  updateExpenseClaimsBulkController,
 };

@@ -2,17 +2,17 @@ import { Router } from "express";
 
 import { assignQueryDefaults, verifyJWTMiddleware, verifyRoles } from "../../middlewares";
 import {
-  updateCustomerFieldsBulkHandler,
-  createNewCustomerHandler,
-  deleteCustomerHandler,
-  getQueriedCustomersHandler,
-  getCustomerByIdHandler,
-  updateCustomerByIdHandler,
-  updateCustomerPasswordHandler,
-  createNewCustomersBulkHandler,
-  getAllCustomersBulkHandler,
-  getCustomerDocWithPaymentInfoHandler,
-  deleteAllCustomersHandler,
+  updateCustomerFieldsBulkController,
+  createNewCustomerController,
+  deleteCustomerController,
+  getQueriedCustomersController,
+  getCustomerByIdController,
+  updateCustomerByIdController,
+  updateCustomerPasswordController,
+  createNewCustomersBulkController,
+  getAllCustomersBulkController,
+  getCustomerDocWithPaymentInfoController,
+  deleteAllCustomersController,
 } from "./customer.controller";
 import { validateSchemaMiddleware } from "../../middlewares/validateSchema";
 import { createCustomerJoiSchema, updateCustomerJoiSchema } from "./customer.validation";
@@ -21,10 +21,15 @@ const customerRouter = Router();
 
 customerRouter
   .route("/")
-  .get(verifyJWTMiddleware, verifyRoles, assignQueryDefaults, getQueriedCustomersHandler)
+  .get(
+    verifyJWTMiddleware,
+    verifyRoles,
+    assignQueryDefaults,
+    getQueriedCustomersController
+  )
   .post(
     validateSchemaMiddleware(createCustomerJoiSchema, "customerSchema"),
-    createNewCustomerHandler
+    createNewCustomerController
   );
 
 customerRouter
@@ -33,33 +38,38 @@ customerRouter
     verifyJWTMiddleware,
     verifyRoles,
     assignQueryDefaults,
-    getCustomerDocWithPaymentInfoHandler
+    getCustomerDocWithPaymentInfoController
   );
 
 customerRouter
   .route("/update-password")
-  .patch(verifyJWTMiddleware, verifyRoles, updateCustomerPasswordHandler);
+  .patch(verifyJWTMiddleware, verifyRoles, updateCustomerPasswordController);
 
 customerRouter
   .route("/delete-all")
-  .delete(verifyJWTMiddleware, verifyRoles, deleteAllCustomersHandler);
+  .delete(verifyJWTMiddleware, verifyRoles, deleteAllCustomersController);
 
 // DEV ROUTES
 customerRouter
   .route("/dev")
-  .post(verifyJWTMiddleware, verifyRoles, createNewCustomersBulkHandler)
-  .get(verifyJWTMiddleware, verifyRoles, assignQueryDefaults, getAllCustomersBulkHandler)
-  .patch(verifyJWTMiddleware, verifyRoles, updateCustomerFieldsBulkHandler);
+  .post(verifyJWTMiddleware, verifyRoles, createNewCustomersBulkController)
+  .get(
+    verifyJWTMiddleware,
+    verifyRoles,
+    assignQueryDefaults,
+    getAllCustomersBulkController
+  )
+  .patch(verifyJWTMiddleware, verifyRoles, updateCustomerFieldsBulkController);
 
 customerRouter
   .route("/:customerId")
-  .get(verifyJWTMiddleware, verifyRoles, assignQueryDefaults, getCustomerByIdHandler)
+  .get(verifyJWTMiddleware, verifyRoles, assignQueryDefaults, getCustomerByIdController)
   .patch(
     verifyJWTMiddleware,
     verifyRoles,
     validateSchemaMiddleware(updateCustomerJoiSchema),
-    updateCustomerByIdHandler
+    updateCustomerByIdController
   )
-  .delete(verifyJWTMiddleware, verifyRoles, deleteCustomerHandler);
+  .delete(verifyJWTMiddleware, verifyRoles, deleteCustomerController);
 
 export { customerRouter };

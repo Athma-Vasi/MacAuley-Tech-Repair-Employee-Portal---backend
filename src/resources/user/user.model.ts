@@ -158,7 +158,7 @@ type LogisticsAndInventory =
   | "Warehouse Supervisor"
   | "Inventory Clerk"
   | "Delivery Driver"
-  | "Parts and Materials Handler"
+  | "Parts and Materials Controller"
   | "Shipper/Receiver";
 
 type CustomerService =

@@ -1,18 +1,10 @@
 import type { Types } from "mongoose";
 import type { RequestAfterJWTVerification } from "../../../auth";
-import type {
-  Country,
-  PhoneNumber,
-  PostalCode,
-  Province,
-  StatesUS,
-  UserRoles,
-} from "../../../user";
+import type { UserRoles } from "../../../user";
 import {
   DocumentUpdateOperation,
   GetQueriedResourceByUserRequest,
   GetQueriedResourceRequest,
-  RequestStatus,
 } from "../../../../types";
 import { AddressChangeDocument, AddressChangeSchema } from "./addressChange.model";
 

@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
 import type { Response } from "express";
@@ -37,7 +37,7 @@ import { getUserByIdService } from "../../../user";
 // @desc   Create a new survey
 // @route  POST api/v1/actions/outreach/survey
 // @access Private
-const createNewSurveyHandler = expressAsyncHandler(
+const createNewSurveyController = expressAsyncController(
   async (
     request: CreateNewSurveyRequest,
     response: Response<ResourceRequestServerResponse<SurveyDocument>>
@@ -64,7 +64,7 @@ const createNewSurveyHandler = expressAsyncHandler(
 // @desc   Get all surveys
 // @route  GET api/v1/actions/outreach/survey
 // @access Private/Admin/Manager
-const getQueriedSurveysHandler = expressAsyncHandler(
+const getQueriedSurveysController = expressAsyncController(
   async (
     request: GetQueriedSurveysRequest,
     response: Response<GetQueriedResourceRequestServerResponse<SurveyDocument>>
@@ -110,7 +110,7 @@ const getQueriedSurveysHandler = expressAsyncHandler(
 // @desc   Get all survey requests by user
 // @route  GET api/v1/actions/outreach/survey
 // @access Private
-const getSurveysByUserHandler = expressAsyncHandler(
+const getSurveysByUserController = expressAsyncController(
   async (
     request: GetQueriedSurveysByUserRequest,
     response: Response<GetQueriedResourceRequestServerResponse<SurveyDocument>>
@@ -164,7 +164,7 @@ const getSurveysByUserHandler = expressAsyncHandler(
 // @desc   Update survey status
 // @route  PATCH api/v1/actions/outreach/survey
 // @access Private/Admin/Manager
-const updateSurveyByIdHandler = expressAsyncHandler(
+const updateSurveyByIdController = expressAsyncController(
   async (
     request: UpdateSurveyByIdRequest,
     response: Response<ResourceRequestServerResponse<SurveyDocument>>
@@ -207,7 +207,7 @@ const updateSurveyByIdHandler = expressAsyncHandler(
 // @desc   Get an survey request
 // @route  GET api/v1/actions/outreach/survey
 // @access Private
-const getSurveyByIdHandler = expressAsyncHandler(
+const getSurveyByIdController = expressAsyncController(
   async (
     request: GetSurveyByIdRequest,
     response: Response<ResourceRequestServerResponse<SurveyDocument>>
@@ -231,7 +231,7 @@ const getSurveyByIdHandler = expressAsyncHandler(
 // @desc   Delete an survey request by its id
 // @route  DELETE api/v1/actions/outreach/survey
 // @access Private
-const deleteSurveyHandler = expressAsyncHandler(
+const deleteSurveyController = expressAsyncController(
   async (request: DeleteSurveyRequest, response: Response) => {
     const { surveyId } = request.params;
 
@@ -256,7 +256,7 @@ const deleteSurveyHandler = expressAsyncHandler(
 // @desc    Delete all survey requests
 // @route   DELETE api/v1/actions/outreach/request-resource/survey
 // @access  Private
-const deleteAllSurveysHandler = expressAsyncHandler(
+const deleteAllSurveysController = expressAsyncController(
   async (_request: DeleteAllSurveysRequest, response: Response) => {
     const deletedResult: DeleteResult = await deleteAllSurveysService();
 
@@ -279,7 +279,7 @@ const deleteAllSurveysHandler = expressAsyncHandler(
 // @desc   Create new survey requests in bulk
 // @route  POST api/v1/actions/outreach/survey
 // @access Private
-const createNewSurveysBulkHandler = expressAsyncHandler(
+const createNewSurveysBulkController = expressAsyncController(
   async (
     request: CreateNewSurveysBulkRequest,
     response: Response<ResourceRequestServerResponse<SurveyDocument>>
@@ -323,7 +323,7 @@ const createNewSurveysBulkHandler = expressAsyncHandler(
 // @desc   Update Surveys in bulk
 // @route  PATCH api/v1/actions/outreach/survey
 // @access Private
-const updateSurveysBulkHandler = expressAsyncHandler(
+const updateSurveysBulkController = expressAsyncController(
   async (
     request: UpdateSurveysBulkRequest,
     response: Response<ResourceRequestServerResponse<SurveyDocument>>
@@ -370,13 +370,13 @@ const updateSurveysBulkHandler = expressAsyncHandler(
 );
 
 export {
-  createNewSurveyHandler,
-  getQueriedSurveysHandler,
-  getSurveysByUserHandler,
-  getSurveyByIdHandler,
-  deleteSurveyHandler,
-  deleteAllSurveysHandler,
-  updateSurveyByIdHandler,
-  createNewSurveysBulkHandler,
-  updateSurveysBulkHandler,
+  createNewSurveyController,
+  getQueriedSurveysController,
+  getSurveysByUserController,
+  getSurveyByIdController,
+  deleteSurveyController,
+  deleteAllSurveysController,
+  updateSurveyByIdController,
+  createNewSurveysBulkController,
+  updateSurveysBulkController,
 };

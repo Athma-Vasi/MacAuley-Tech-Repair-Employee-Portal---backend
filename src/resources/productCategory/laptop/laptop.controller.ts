@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
 import type { Response } from "express";
@@ -38,7 +38,7 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 // @desc   Create new laptop
 // @route  POST /api/v1/product-category/laptop
 // @access Private/Admin/Manager
-const createNewLaptopHandler = expressAsyncHandler(
+const createNewLaptopController = expressAsyncController(
   async (
     request: CreateNewLaptopRequest,
     response: Response<ResourceRequestServerResponse<LaptopDocument>>
@@ -66,7 +66,7 @@ const createNewLaptopHandler = expressAsyncHandler(
 // @desc   Create new laptops bulk
 // @route  POST /api/v1/product-category/laptop/dev
 // @access Private/Admin/Manager
-const createNewLaptopBulkHandler = expressAsyncHandler(
+const createNewLaptopBulkController = expressAsyncController(
   async (
     request: CreateNewLaptopBulkRequest,
     response: Response<ResourceRequestServerResponse<LaptopDocument>>
@@ -113,7 +113,7 @@ const createNewLaptopBulkHandler = expressAsyncHandler(
 // @desc   Update laptops bulk
 // @route  PATCH /api/v1/product-category/laptop/dev
 // @access Private/Admin/Manager
-const updateLaptopsBulkHandler = expressAsyncHandler(
+const updateLaptopsBulkController = expressAsyncController(
   async (
     request: UpdateLaptopsBulkRequest,
     response: Response<ResourceRequestServerResponse<LaptopDocument>>
@@ -172,7 +172,7 @@ const updateLaptopsBulkHandler = expressAsyncHandler(
 // @desc   Get all laptops
 // @route  GET /api/v1/product-category/laptop
 // @access Private/Admin/Manager
-const getQueriedLaptopsHandler = expressAsyncHandler(
+const getQueriedLaptopsController = expressAsyncController(
   async (
     request: GetQueriedLaptopsRequest,
     response: Response<GetQueriedResourceRequestServerResponse<LaptopDocument>>
@@ -217,7 +217,7 @@ const getQueriedLaptopsHandler = expressAsyncHandler(
 // @desc   Get laptop by id
 // @route  GET /api/v1/product-category/laptop/:laptopId
 // @access Private/Admin/Manager
-const getLaptopByIdHandler = expressAsyncHandler(
+const getLaptopByIdController = expressAsyncController(
   async (
     request: GetLaptopByIdRequest,
     response: Response<ResourceRequestServerResponse<LaptopDocument>>
@@ -241,7 +241,7 @@ const getLaptopByIdHandler = expressAsyncHandler(
 // @desc   Update a laptop by id
 // @route  PUT /api/v1/product-category/laptop/:laptopId
 // @access Private/Admin/Manager
-const updateLaptopByIdHandler = expressAsyncHandler(
+const updateLaptopByIdController = expressAsyncController(
   async (
     request: UpdateLaptopByIdRequest,
     response: Response<ResourceRequestServerResponse<LaptopDocument>>
@@ -276,7 +276,7 @@ const updateLaptopByIdHandler = expressAsyncHandler(
 // @desc   Delete all laptops
 // @route  DELETE /api/v1/product-category/laptop
 // @access Private/Admin/Manager
-const deleteAllLaptopsHandler = expressAsyncHandler(
+const deleteAllLaptopsController = expressAsyncController(
   async (
     _request: DeleteAllLaptopsRequest,
     response: Response<ResourceRequestServerResponse<LaptopDocument>>
@@ -334,7 +334,7 @@ const deleteAllLaptopsHandler = expressAsyncHandler(
 // @desc   Delete a laptop by id
 // @route  DELETE /api/v1/product-category/laptop/:laptopId
 // @access Private/Admin/Manager
-const deleteALaptopHandler = expressAsyncHandler(
+const deleteALaptopController = expressAsyncController(
   async (
     request: DeleteALaptopRequest,
     response: Response<ResourceRequestServerResponse<LaptopDocument>>
@@ -400,12 +400,12 @@ const deleteALaptopHandler = expressAsyncHandler(
 );
 
 export {
-  createNewLaptopBulkHandler,
-  createNewLaptopHandler,
-  deleteALaptopHandler,
-  deleteAllLaptopsHandler,
-  getLaptopByIdHandler,
-  getQueriedLaptopsHandler,
-  updateLaptopByIdHandler,
-  updateLaptopsBulkHandler,
+  createNewLaptopBulkController,
+  createNewLaptopController,
+  deleteALaptopController,
+  deleteAllLaptopsController,
+  getLaptopByIdController,
+  getQueriedLaptopsController,
+  updateLaptopByIdController,
+  updateLaptopsBulkController,
 };

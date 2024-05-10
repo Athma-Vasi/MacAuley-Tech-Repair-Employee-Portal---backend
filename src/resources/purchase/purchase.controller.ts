@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { Response } from "express";
 import type {
@@ -39,7 +39,7 @@ import { PRODUCT_CATEGORY_SERVICE_MAP } from "../../constants";
 // @desc   Create new user
 // @route  POST /api/v1/purchase
 // @access Private
-const createNewPurchaseHandler = expressAsyncHandler(
+const createNewPurchaseController = expressAsyncController(
   async (
     request: CreateNewPurchaseRequest,
     response: Response<ResourceRequestServerResponse<PurchaseDocument>>
@@ -76,7 +76,7 @@ const createNewPurchaseHandler = expressAsyncHandler(
 // @desc   create new purchase in bulk
 // @route  POST /api/v1/purchase/dev
 // @access Private
-const createNewPurchasesBulkHandler = expressAsyncHandler(
+const createNewPurchasesBulkController = expressAsyncController(
   async (
     request: CreateNewPurchasesBulkRequest,
     response: Response<ResourceRequestServerResponse<PurchaseDocument>>
@@ -128,7 +128,7 @@ const createNewPurchasesBulkHandler = expressAsyncHandler(
 // @desc   Add field to all purchase
 // @route  PATCH /api/v1/purchase/dev
 // @access Private
-const updatePurchasesBulkHandler = expressAsyncHandler(
+const updatePurchasesBulkController = expressAsyncController(
   async (
     request: UpdatePurchasesBulkRequest,
     response: Response<ResourceRequestServerResponse<PurchaseDocument>>
@@ -188,7 +188,7 @@ const updatePurchasesBulkHandler = expressAsyncHandler(
 // @desc   get all purchase bulk (no filter, projection or options)
 // @route  GET /api/v1/purchase/dev
 // @access Private
-const getAllPurchasesBulkHandler = expressAsyncHandler(
+const getAllPurchasesBulkController = expressAsyncController(
   async (
     request: GetAllPurchasesBulkRequest,
     response: Response<ResourceRequestServerResponse<PurchaseDocument>>
@@ -213,7 +213,7 @@ const getAllPurchasesBulkHandler = expressAsyncHandler(
 // @desc   Get all purchase queried
 // @route  GET /api/v1/purchase
 // @access Private
-const getQueriedPurchasesHandler = expressAsyncHandler(
+const getQueriedPurchasesController = expressAsyncController(
   async (
     request: GetQueriedPurchasesRequest,
     response: Response<
@@ -291,7 +291,7 @@ const getQueriedPurchasesHandler = expressAsyncHandler(
 // @desc   Get all purchase queried by a user
 // @route  GET /api/v1/purchase/user
 // @access Private
-const getQueriedPurchasesByUserHandler = expressAsyncHandler(
+const getQueriedPurchasesByUserController = expressAsyncController(
   async (
     request: GetQueriedPurchasesByUserRequest,
     response: Response<
@@ -371,7 +371,7 @@ const getQueriedPurchasesByUserHandler = expressAsyncHandler(
 // @desc   Get a purchase by id
 // @route  GET /api/v1/purchase/:id
 // @access Private
-const getPurchaseByIdHandler = expressAsyncHandler(
+const getPurchaseByIdController = expressAsyncController(
   async (
     request: GetPurchaseByIdRequest,
     response: Response<ResourceRequestServerResponse<PurchaseServerResponseDocument>>
@@ -411,7 +411,7 @@ const getPurchaseByIdHandler = expressAsyncHandler(
 // @desc   Delete a purchase
 // @route  DELETE /api/v1/purchase
 // @access Private
-const deletePurchaseHandler = expressAsyncHandler(
+const deletePurchaseController = expressAsyncController(
   async (
     request: DeleteAPurchaseRequest,
     response: Response<ResourceRequestServerResponse<PurchaseDocument>>
@@ -438,7 +438,7 @@ const deletePurchaseHandler = expressAsyncHandler(
 // @desc   Update a purchase
 // @route  PATCH /api/v1/purchase
 // @access Private
-const updatePurchaseByIdHandler = expressAsyncHandler(
+const updatePurchaseByIdController = expressAsyncController(
   async (
     request: UpdatePurchaseByIdRequest,
     response: Response<ResourceRequestServerResponse<PurchaseServerResponseDocument>>
@@ -485,7 +485,7 @@ const updatePurchaseByIdHandler = expressAsyncHandler(
 // @desc   Delete all purchases
 // @route  DELETE /api/v1/purchase/delete-all
 // @access Private
-const deleteAllPurchasesHandler = expressAsyncHandler(
+const deleteAllPurchasesController = expressAsyncController(
   async (
     request: DeleteAllPurchasesRequest,
     response: Response<ResourceRequestServerResponse<PurchaseDocument>>
@@ -508,14 +508,14 @@ const deleteAllPurchasesHandler = expressAsyncHandler(
 );
 
 export {
-  updatePurchasesBulkHandler,
-  createNewPurchaseHandler,
-  createNewPurchasesBulkHandler,
-  deleteAllPurchasesHandler,
-  deletePurchaseHandler,
-  getAllPurchasesBulkHandler,
-  getPurchaseByIdHandler,
-  getQueriedPurchasesHandler,
-  getQueriedPurchasesByUserHandler,
-  updatePurchaseByIdHandler,
+  updatePurchasesBulkController,
+  createNewPurchaseController,
+  createNewPurchasesBulkController,
+  deleteAllPurchasesController,
+  deletePurchaseController,
+  getAllPurchasesBulkController,
+  getPurchaseByIdController,
+  getQueriedPurchasesController,
+  getQueriedPurchasesByUserController,
+  updatePurchaseByIdController,
 };

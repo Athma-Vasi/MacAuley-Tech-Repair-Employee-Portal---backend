@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { Response } from "express";
 import type {
@@ -39,7 +39,7 @@ import { PRODUCT_CATEGORY_SERVICE_MAP } from "../../constants";
 // @desc   Create new user
 // @route  POST /api/v1/rma
 // @access Private
-const createNewRMAHandler = expressAsyncHandler(
+const createNewRMAController = expressAsyncController(
   async (
     request: CreateNewRMARequest,
     response: Response<ResourceRequestServerResponse<RMADocument>>
@@ -74,7 +74,7 @@ const createNewRMAHandler = expressAsyncHandler(
 // @desc   create new rma in bulk
 // @route  POST /api/v1/rma/dev
 // @access Private
-const createNewRMAsBulkHandler = expressAsyncHandler(
+const createNewRMAsBulkController = expressAsyncController(
   async (
     request: CreateNewRMAsBulkRequest,
     response: Response<ResourceRequestServerResponse<RMADocument>>
@@ -122,7 +122,7 @@ const createNewRMAsBulkHandler = expressAsyncHandler(
 // @desc   Add field to all rma
 // @route  PATCH /api/v1/rma/dev
 // @access Private
-const updateRMAsBulkHandler = expressAsyncHandler(
+const updateRMAsBulkController = expressAsyncController(
   async (
     request: UpdateRMAsBulkRequest,
     response: Response<ResourceRequestServerResponse<RMADocument>>
@@ -180,7 +180,7 @@ const updateRMAsBulkHandler = expressAsyncHandler(
 // @desc   get all rma bulk (no filter, projection or options)
 // @route  GET /api/v1/rma/dev
 // @access Private
-const getAllRMAsBulkHandler = expressAsyncHandler(
+const getAllRMAsBulkController = expressAsyncController(
   async (
     request: GetAllRMAsBulkRequest,
     response: Response<ResourceRequestServerResponse<RMADocument>>
@@ -205,7 +205,7 @@ const getAllRMAsBulkHandler = expressAsyncHandler(
 // @desc   Get all rma queried
 // @route  GET /api/v1/rma
 // @access Private
-const getQueriedRMAsHandler = expressAsyncHandler(
+const getQueriedRMAsController = expressAsyncController(
   async (
     request: GetQueriedRMAsRequest,
     response: Response<GetQueriedResourceRequestServerResponse<RMAServerResponseDocument>>
@@ -271,7 +271,7 @@ const getQueriedRMAsHandler = expressAsyncHandler(
 // @desc   Get all rma queried by a user
 // @route  GET /api/v1/rma/user
 // @access Private
-const getQueriedRMAsByUserHandler = expressAsyncHandler(
+const getQueriedRMAsByUserController = expressAsyncController(
   async (
     request: GetQueriedRMAsByUserRequest,
     response: Response<GetQueriedResourceRequestServerResponse<RMAServerResponseDocument>>
@@ -339,7 +339,7 @@ const getQueriedRMAsByUserHandler = expressAsyncHandler(
 // @desc   Get a rma by id
 // @route  GET /api/v1/rma/:id
 // @access Private
-const getRMAByIdHandler = expressAsyncHandler(
+const getRMAByIdController = expressAsyncController(
   async (
     request: GetRMAByIdRequest,
     response: Response<ResourceRequestServerResponse<RMAServerResponseDocument>>
@@ -374,7 +374,7 @@ const getRMAByIdHandler = expressAsyncHandler(
 // @desc   Delete a rma
 // @route  DELETE /api/v1/rma
 // @access Private
-const deleteRMAHandler = expressAsyncHandler(
+const deleteRMAController = expressAsyncController(
   async (
     request: DeleteARMARequest,
     response: Response<ResourceRequestServerResponse<RMADocument>>
@@ -401,7 +401,7 @@ const deleteRMAHandler = expressAsyncHandler(
 // @desc   Update a rma
 // @route  PATCH /api/v1/rma
 // @access Private
-const updateRMAByIdHandler = expressAsyncHandler(
+const updateRMAByIdController = expressAsyncController(
   async (
     request: UpdateRMAByIdRequest,
     response: Response<ResourceRequestServerResponse<RMAServerResponseDocument>>
@@ -443,7 +443,7 @@ const updateRMAByIdHandler = expressAsyncHandler(
 // @desc   Delete all rmas
 // @route  DELETE /api/v1/rma/delete-all
 // @access Private
-const deleteAllRMAsHandler = expressAsyncHandler(
+const deleteAllRMAsController = expressAsyncController(
   async (
     request: DeleteAllRMAsRequest,
     response: Response<ResourceRequestServerResponse<RMADocument>>
@@ -466,14 +466,14 @@ const deleteAllRMAsHandler = expressAsyncHandler(
 );
 
 export {
-  updateRMAsBulkHandler,
-  createNewRMAHandler,
-  createNewRMAsBulkHandler,
-  deleteAllRMAsHandler,
-  deleteRMAHandler,
-  getAllRMAsBulkHandler,
-  getRMAByIdHandler,
-  getQueriedRMAsHandler,
-  getQueriedRMAsByUserHandler,
-  updateRMAByIdHandler,
+  updateRMAsBulkController,
+  createNewRMAController,
+  createNewRMAsBulkController,
+  deleteAllRMAsController,
+  deleteRMAController,
+  getAllRMAsBulkController,
+  getRMAByIdController,
+  getQueriedRMAsController,
+  getQueriedRMAsByUserController,
+  updateRMAByIdController,
 };

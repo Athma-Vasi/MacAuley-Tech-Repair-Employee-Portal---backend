@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { DeleteResult } from "mongodb";
 import type { Response } from "express";
@@ -38,7 +38,7 @@ import { getUserByIdService } from "../user";
 // @desc   Create a new comment
 // @route  POST api/v1/actions/general/comment
 // @access Private
-const createNewCommentHandler = expressAsyncHandler(
+const createNewCommentController = expressAsyncController(
   async (
     request: CreateNewCommentRequest,
     response: Response<ResourceRequestServerResponse<CommentDocument>>
@@ -65,7 +65,7 @@ const createNewCommentHandler = expressAsyncHandler(
 // @desc   Get all comments
 // @route  GET api/v1/actions/general/comment
 // @access Private/Admin/Manager
-const getQueriedCommentsHandler = expressAsyncHandler(
+const getQueriedCommentsController = expressAsyncController(
   async (
     request: GetQueriedCommentsRequest,
     response: Response<GetQueriedResourceRequestServerResponse<CommentDocument>>
@@ -111,7 +111,7 @@ const getQueriedCommentsHandler = expressAsyncHandler(
 // @desc   Get all comment requests by user
 // @route  GET api/v1/actions/general/comment
 // @access Private
-const getCommentsByUserHandler = expressAsyncHandler(
+const getCommentsByUserController = expressAsyncController(
   async (
     request: GetQueriedCommentsByUserRequest,
     response: Response<GetQueriedResourceRequestServerResponse<CommentDocument>>
@@ -165,7 +165,7 @@ const getCommentsByUserHandler = expressAsyncHandler(
 // @desc   Update comment status
 // @route  PATCH api/v1/actions/general/comment
 // @access Private/Admin/Manager
-const updateCommentByIdHandler = expressAsyncHandler(
+const updateCommentByIdController = expressAsyncController(
   async (
     request: UpdateCommentByIdRequest,
     response: Response<ResourceRequestServerResponse<CommentDocument>>
@@ -208,7 +208,7 @@ const updateCommentByIdHandler = expressAsyncHandler(
 // @desc   Get all comments by parent resource id
 // @route  GET /comment/parentResource/:parentResourceId
 // @access Private
-const getQueriedCommentsByParentResourceIdHandler = expressAsyncHandler(
+const getQueriedCommentsByParentResourceIdController = expressAsyncController(
   async (
     request: GetQueriedCommentsByParentResourceIdRequest,
     response: Response<GetQueriedResourceRequestServerResponse<CommentDocument>>
@@ -257,7 +257,7 @@ const getQueriedCommentsByParentResourceIdHandler = expressAsyncHandler(
 // @desc   Get an comment request
 // @route  GET api/v1/actions/general/comment
 // @access Private
-const getCommentByIdHandler = expressAsyncHandler(
+const getCommentByIdController = expressAsyncController(
   async (
     request: GetCommentByIdRequest,
     response: Response<ResourceRequestServerResponse<CommentDocument>>
@@ -281,7 +281,7 @@ const getCommentByIdHandler = expressAsyncHandler(
 // @desc   Delete an comment request by its id
 // @route  DELETE api/v1/actions/general/comment
 // @access Private
-const deleteCommentHandler = expressAsyncHandler(
+const deleteCommentController = expressAsyncController(
   async (request: DeleteCommentRequest, response: Response) => {
     const { commentId } = request.params;
 
@@ -306,7 +306,7 @@ const deleteCommentHandler = expressAsyncHandler(
 // @desc    Delete all comment requests
 // @route   DELETE api/v1/actions/general/request-resource/comment
 // @access  Private
-const deleteAllCommentsHandler = expressAsyncHandler(
+const deleteAllCommentsController = expressAsyncController(
   async (_request: DeleteAllCommentsRequest, response: Response) => {
     const deletedResult: DeleteResult = await deleteAllCommentsService();
 
@@ -329,7 +329,7 @@ const deleteAllCommentsHandler = expressAsyncHandler(
 // @desc   Create new comment requests in bulk
 // @route  POST api/v1/actions/general/comment
 // @access Private
-const createNewCommentsBulkHandler = expressAsyncHandler(
+const createNewCommentsBulkController = expressAsyncController(
   async (
     request: CreateNewCommentsBulkRequest,
     response: Response<ResourceRequestServerResponse<CommentDocument>>
@@ -377,7 +377,7 @@ const createNewCommentsBulkHandler = expressAsyncHandler(
 // @desc   Update Comments in bulk
 // @route  PATCH api/v1/actions/general/comment
 // @access Private
-const updateCommentsBulkHandler = expressAsyncHandler(
+const updateCommentsBulkController = expressAsyncController(
   async (
     request: UpdateCommentsBulkRequest,
     response: Response<ResourceRequestServerResponse<CommentDocument>>
@@ -424,14 +424,14 @@ const updateCommentsBulkHandler = expressAsyncHandler(
 );
 
 export {
-  createNewCommentHandler,
-  getQueriedCommentsHandler,
-  getCommentsByUserHandler,
-  updateCommentByIdHandler,
-  getQueriedCommentsByParentResourceIdHandler,
-  getCommentByIdHandler,
-  deleteCommentHandler,
-  deleteAllCommentsHandler,
-  createNewCommentsBulkHandler,
-  updateCommentsBulkHandler,
+  createNewCommentController,
+  getQueriedCommentsController,
+  getCommentsByUserController,
+  updateCommentByIdController,
+  getQueriedCommentsByParentResourceIdController,
+  getCommentByIdController,
+  deleteCommentController,
+  deleteAllCommentsController,
+  createNewCommentsBulkController,
+  updateCommentsBulkController,
 };

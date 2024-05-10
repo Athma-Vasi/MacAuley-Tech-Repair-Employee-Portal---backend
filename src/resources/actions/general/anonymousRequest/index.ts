@@ -8,15 +8,15 @@
 import { AnonymousRequestModel } from "./anonymousRequest.model";
 import { anonymousRequestRouter } from "./anonymousRequest.routes";
 import {
-  createNewAnonymousRequestHandler,
-  createNewAnonymousRequestsBulkHandler,
-  deleteAllAnonymousRequestsHandler,
-  deleteAnonymousRequestHandler,
-  getAnonymousRequestByIdHandler,
-  getAnonymousRequestsByUserHandler,
-  getQueriedAnonymousRequestsHandler,
-  updateAnonymousRequestByIdHandler,
-  updateAnonymousRequestsBulkHandler,
+  createNewAnonymousRequestController,
+  createNewAnonymousRequestsBulkController,
+  deleteAllAnonymousRequestsController,
+  deleteAnonymousRequestController,
+  getAnonymousRequestByIdController,
+  getAnonymousRequestsByUserController,
+  getQueriedAnonymousRequestsController,
+  updateAnonymousRequestByIdController,
+  updateAnonymousRequestsBulkController,
 } from "./anonymousRequest.controller";
 import {
   createNewAnonymousRequestService,
@@ -53,23 +53,23 @@ import type {
 export {
   AnonymousRequestModel,
   anonymousRequestRouter,
-  createNewAnonymousRequestHandler,
+  createNewAnonymousRequestController,
   createNewAnonymousRequestService,
-  createNewAnonymousRequestsBulkHandler,
-  deleteAllAnonymousRequestsHandler,
+  createNewAnonymousRequestsBulkController,
+  deleteAllAnonymousRequestsController,
   deleteAllAnonymousRequestsService,
-  deleteAnonymousRequestHandler,
+  deleteAnonymousRequestController,
   deleteAnonymousRequestByIdService,
-  getAnonymousRequestByIdHandler,
+  getAnonymousRequestByIdController,
   getAnonymousRequestByIdService,
-  getAnonymousRequestsByUserHandler,
+  getAnonymousRequestsByUserController,
   getQueriedAnonymousRequestsByUserService,
-  getQueriedAnonymousRequestsHandler,
+  getQueriedAnonymousRequestsController,
   getQueriedAnonymousRequestsService,
   getQueriedTotalAnonymousRequestsService,
   updateAnonymousRequestByIdService,
-  updateAnonymousRequestByIdHandler,
-  updateAnonymousRequestsBulkHandler,
+  updateAnonymousRequestByIdController,
+  updateAnonymousRequestsBulkController,
 };
 
 export type {

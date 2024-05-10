@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { Response } from "express";
 import type {
@@ -48,7 +48,7 @@ import {
 // @desc   Create new user
 // @route  POST /api/v1/customer
 // @access Private
-const createNewCustomerHandler = expressAsyncHandler(
+const createNewCustomerController = expressAsyncController(
   async (
     request: CreateNewCustomerRequest,
     response: Response<
@@ -131,7 +131,7 @@ const createNewCustomerHandler = expressAsyncHandler(
 // @desc   create new customers in bulk
 // @route  POST /api/v1/customer/dev
 // @access Private
-const createNewCustomersBulkHandler = expressAsyncHandler(
+const createNewCustomersBulkController = expressAsyncController(
   async (
     request: CreateNewCustomersBulkRequest,
     response: Response<ResourceRequestServerResponse<CustomerDocument>>
@@ -225,7 +225,7 @@ const createNewCustomersBulkHandler = expressAsyncHandler(
 // @desc   Update customer fields in bulk
 // @route  PATCH /api/v1/customer/dev
 // @access Private
-const updateCustomerFieldsBulkHandler = expressAsyncHandler(
+const updateCustomerFieldsBulkController = expressAsyncController(
   async (
     request: UpdateCustomerFieldsBulkRequest,
     response: Response<ResourceRequestServerResponse<CustomerDocument>>
@@ -277,7 +277,7 @@ const updateCustomerFieldsBulkHandler = expressAsyncHandler(
 // @desc   get all customers bulk (no filter, projection or options)
 // @route  GET /api/v1/customer/dev
 // @access Private
-const getAllCustomersBulkHandler = expressAsyncHandler(
+const getAllCustomersBulkController = expressAsyncController(
   async (
     request: GetAllCustomersBulkRequest,
     response: Response<ResourceRequestServerResponse<CustomerDocument>>
@@ -302,7 +302,7 @@ const getAllCustomersBulkHandler = expressAsyncHandler(
 // @desc   Get all customers
 // @route  GET /api/v1/customer
 // @access Private
-const getQueriedCustomersHandler = expressAsyncHandler(
+const getQueriedCustomersController = expressAsyncController(
   async (
     request: GetAllCustomersRequest,
     response: Response<
@@ -352,7 +352,7 @@ const getQueriedCustomersHandler = expressAsyncHandler(
 // @desc   Get a customer by id
 // @route  GET /api/v1/customer/:id
 // @access Private
-const getCustomerByIdHandler = expressAsyncHandler(
+const getCustomerByIdController = expressAsyncController(
   async (
     request: GetCustomerByIdRequest,
     response: Response<
@@ -378,7 +378,7 @@ const getCustomerByIdHandler = expressAsyncHandler(
 // @desc   Delete a customer
 // @route  DELETE /api/v1/customer/:id
 // @access Private
-const deleteCustomerHandler = expressAsyncHandler(
+const deleteCustomerController = expressAsyncController(
   async (
     request: DeleteCustomerRequest,
     response: Response<ResourceRequestServerResponse<CustomerDocument>>
@@ -405,7 +405,7 @@ const deleteCustomerHandler = expressAsyncHandler(
 // @desc   Delete all customers
 // @route  DELETE /api/v1/customer/delete-all
 // @access Private
-const deleteAllCustomersHandler = expressAsyncHandler(
+const deleteAllCustomersController = expressAsyncController(
   async (
     request: DeleteCustomerRequest,
     response: Response<ResourceRequestServerResponse<CustomerDocument>>
@@ -429,7 +429,7 @@ const deleteAllCustomersHandler = expressAsyncHandler(
 // @desc   Update a customer
 // @route  PATCH /api/v1/customer/:id
 // @access Private
-const updateCustomerByIdHandler = expressAsyncHandler(
+const updateCustomerByIdController = expressAsyncController(
   async (
     request: UpdateCustomerRequest,
     response: Response<
@@ -462,7 +462,7 @@ const updateCustomerByIdHandler = expressAsyncHandler(
 // @desc Retrieve customer document with payment information
 // @route GET /api/v1/customer/payment-info
 // @access Private
-const getCustomerDocWithPaymentInfoHandler = expressAsyncHandler(
+const getCustomerDocWithPaymentInfoController = expressAsyncController(
   async (
     request: GetCustomerByIdRequest,
     response: Response<ResourceRequestServerResponse<CustomerDocument, "password">>
@@ -486,7 +486,7 @@ const getCustomerDocWithPaymentInfoHandler = expressAsyncHandler(
 // @desc   update customer password
 // @route  PATCH /api/v1/customer/password
 // @access Private
-const updateCustomerPasswordHandler = expressAsyncHandler(
+const updateCustomerPasswordController = expressAsyncController(
   async (
     request: UpdateCustomerPasswordRequest,
     response: Response<
@@ -539,17 +539,17 @@ const updateCustomerPasswordHandler = expressAsyncHandler(
 );
 
 export {
-  createNewCustomerHandler,
-  createNewCustomersBulkHandler,
-  deleteAllCustomersHandler,
-  deleteCustomerHandler,
-  getAllCustomersBulkHandler,
-  getCustomerByIdHandler,
-  getCustomerDocWithPaymentInfoHandler,
-  getQueriedCustomersHandler,
-  updateCustomerByIdHandler,
-  updateCustomerFieldsBulkHandler,
-  updateCustomerPasswordHandler,
+  createNewCustomerController,
+  createNewCustomersBulkController,
+  deleteAllCustomersController,
+  deleteCustomerController,
+  getAllCustomersBulkController,
+  getCustomerByIdController,
+  getCustomerDocWithPaymentInfoController,
+  getQueriedCustomersController,
+  updateCustomerByIdController,
+  updateCustomerFieldsBulkController,
+  updateCustomerPasswordController,
 };
 
 /**

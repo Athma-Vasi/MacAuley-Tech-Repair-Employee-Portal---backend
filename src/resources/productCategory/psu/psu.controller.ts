@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
 import type { Response } from "express";
@@ -38,7 +38,7 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 // @desc   Create new psu
 // @route  POST /api/v1/product-category/psu
 // @access Private/Admin/Manager
-const createNewPsuHandler = expressAsyncHandler(
+const createNewPsuController = expressAsyncController(
   async (
     request: CreateNewPsuRequest,
     response: Response<ResourceRequestServerResponse<PsuDocument>>
@@ -66,7 +66,7 @@ const createNewPsuHandler = expressAsyncHandler(
 // @desc   Create new psus bulk
 // @route  POST /api/v1/product-category/psu/dev
 // @access Private/Admin/Manager
-const createNewPsuBulkHandler = expressAsyncHandler(
+const createNewPsuBulkController = expressAsyncController(
   async (
     request: CreateNewPsuBulkRequest,
     response: Response<ResourceRequestServerResponse<PsuDocument>>
@@ -113,7 +113,7 @@ const createNewPsuBulkHandler = expressAsyncHandler(
 // @desc   Update psus bulk
 // @route  PATCH /api/v1/product-category/psu/dev
 // @access Private/Admin/Manager
-const updatePsusBulkHandler = expressAsyncHandler(
+const updatePsusBulkController = expressAsyncController(
   async (
     request: UpdatePsusBulkRequest,
     response: Response<ResourceRequestServerResponse<PsuDocument>>
@@ -170,7 +170,7 @@ const updatePsusBulkHandler = expressAsyncHandler(
 // @desc   Get all psus
 // @route  GET /api/v1/product-category/psu
 // @access Private/Admin/Manager
-const getQueriedPsusHandler = expressAsyncHandler(
+const getQueriedPsusController = expressAsyncController(
   async (
     request: GetQueriedPsusRequest,
     response: Response<GetQueriedResourceRequestServerResponse<PsuDocument>>
@@ -215,7 +215,7 @@ const getQueriedPsusHandler = expressAsyncHandler(
 // @desc   Get psu by id
 // @route  GET /api/v1/product-category/psu/:psuId
 // @access Private/Admin/Manager
-const getPsuByIdHandler = expressAsyncHandler(
+const getPsuByIdController = expressAsyncController(
   async (
     request: GetPsuByIdRequest,
     response: Response<ResourceRequestServerResponse<PsuDocument>>
@@ -239,7 +239,7 @@ const getPsuByIdHandler = expressAsyncHandler(
 // @desc   Update a psu by id
 // @route  PUT /api/v1/product-category/psu/:psuId
 // @access Private/Admin/Manager
-const updatePsuByIdHandler = expressAsyncHandler(
+const updatePsuByIdController = expressAsyncController(
   async (
     request: UpdatePsuByIdRequest,
     response: Response<ResourceRequestServerResponse<PsuDocument>>
@@ -274,7 +274,7 @@ const updatePsuByIdHandler = expressAsyncHandler(
 // @desc   Delete all psus
 // @route  DELETE /api/v1/product-category/psu
 // @access Private/Admin/Manager
-const deleteAllPsusHandler = expressAsyncHandler(
+const deleteAllPsusController = expressAsyncController(
   async (
     _request: DeleteAllPsusRequest,
     response: Response<ResourceRequestServerResponse<PsuDocument>>
@@ -332,7 +332,7 @@ const deleteAllPsusHandler = expressAsyncHandler(
 // @desc   Delete a psu by id
 // @route  DELETE /api/v1/product-category/psu/:psuId
 // @access Private/Admin/Manager
-const deleteAPsuHandler = expressAsyncHandler(
+const deleteAPsuController = expressAsyncController(
   async (
     request: DeleteAPsuRequest,
     response: Response<ResourceRequestServerResponse<PsuDocument>>
@@ -398,12 +398,12 @@ const deleteAPsuHandler = expressAsyncHandler(
 );
 
 export {
-  createNewPsuBulkHandler,
-  createNewPsuHandler,
-  deleteAPsuHandler,
-  deleteAllPsusHandler,
-  getPsuByIdHandler,
-  getQueriedPsusHandler,
-  updatePsuByIdHandler,
-  updatePsusBulkHandler,
+  createNewPsuBulkController,
+  createNewPsuController,
+  deleteAPsuController,
+  deleteAllPsusController,
+  getPsuByIdController,
+  getQueriedPsusController,
+  updatePsuByIdController,
+  updatePsusBulkController,
 };

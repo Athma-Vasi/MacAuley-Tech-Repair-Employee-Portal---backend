@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
 import type { Response } from "express";
@@ -38,7 +38,7 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 // @desc   Create new smartphone
 // @route  POST /api/v1/product-category/smartphone
 // @access Private/Admin/Manager
-const createNewSmartphoneHandler = expressAsyncHandler(
+const createNewSmartphoneController = expressAsyncController(
   async (
     request: CreateNewSmartphoneRequest,
     response: Response<ResourceRequestServerResponse<SmartphoneDocument>>
@@ -68,7 +68,7 @@ const createNewSmartphoneHandler = expressAsyncHandler(
 // @desc   Create new smartphones bulk
 // @route  POST /api/v1/product-category/smartphone/dev
 // @access Private/Admin/Manager
-const createNewSmartphoneBulkHandler = expressAsyncHandler(
+const createNewSmartphoneBulkController = expressAsyncController(
   async (
     request: CreateNewSmartphoneBulkRequest,
     response: Response<ResourceRequestServerResponse<SmartphoneDocument>>
@@ -117,7 +117,7 @@ const createNewSmartphoneBulkHandler = expressAsyncHandler(
 // @desc   Update smartphones bulk
 // @route  PATCH /api/v1/product-category/smartphone/dev
 // @access Private/Admin/Manager
-const updateSmartphonesBulkHandler = expressAsyncHandler(
+const updateSmartphonesBulkController = expressAsyncController(
   async (
     request: UpdateSmartphonesBulkRequest,
     response: Response<ResourceRequestServerResponse<SmartphoneDocument>>
@@ -176,7 +176,7 @@ const updateSmartphonesBulkHandler = expressAsyncHandler(
 // @desc   Get all smartphones
 // @route  GET /api/v1/product-category/smartphone
 // @access Private/Admin/Manager
-const getQueriedSmartphonesHandler = expressAsyncHandler(
+const getQueriedSmartphonesController = expressAsyncController(
   async (
     request: GetQueriedSmartphonesRequest,
     response: Response<GetQueriedResourceRequestServerResponse<SmartphoneDocument>>
@@ -221,7 +221,7 @@ const getQueriedSmartphonesHandler = expressAsyncHandler(
 // @desc   Get smartphone by id
 // @route  GET /api/v1/product-category/smartphone/:smartphoneId
 // @access Private/Admin/Manager
-const getSmartphoneByIdHandler = expressAsyncHandler(
+const getSmartphoneByIdController = expressAsyncController(
   async (
     request: GetSmartphoneByIdRequest,
     response: Response<ResourceRequestServerResponse<SmartphoneDocument>>
@@ -245,7 +245,7 @@ const getSmartphoneByIdHandler = expressAsyncHandler(
 // @desc   Update a smartphone by id
 // @route  PUT /api/v1/product-category/smartphone/:smartphoneId
 // @access Private/Admin/Manager
-const updateSmartphoneByIdHandler = expressAsyncHandler(
+const updateSmartphoneByIdController = expressAsyncController(
   async (
     request: UpdateSmartphoneByIdRequest,
     response: Response<ResourceRequestServerResponse<SmartphoneDocument>>
@@ -280,7 +280,7 @@ const updateSmartphoneByIdHandler = expressAsyncHandler(
 // @desc   Delete all smartphones
 // @route  DELETE /api/v1/product-category/smartphone
 // @access Private/Admin/Manager
-const deleteAllSmartphonesHandler = expressAsyncHandler(
+const deleteAllSmartphonesController = expressAsyncController(
   async (
     _request: DeleteAllSmartphonesRequest,
     response: Response<ResourceRequestServerResponse<SmartphoneDocument>>
@@ -338,7 +338,7 @@ const deleteAllSmartphonesHandler = expressAsyncHandler(
 // @desc   Delete a smartphone by id
 // @route  DELETE /api/v1/product-category/smartphone/:smartphoneId
 // @access Private/Admin/Manager
-const deleteASmartphoneHandler = expressAsyncHandler(
+const deleteASmartphoneController = expressAsyncController(
   async (
     request: DeleteASmartphoneRequest,
     response: Response<ResourceRequestServerResponse<SmartphoneDocument>>
@@ -408,12 +408,12 @@ const deleteASmartphoneHandler = expressAsyncHandler(
 );
 
 export {
-  createNewSmartphoneBulkHandler,
-  createNewSmartphoneHandler,
-  deleteASmartphoneHandler,
-  deleteAllSmartphonesHandler,
-  getSmartphoneByIdHandler,
-  getQueriedSmartphonesHandler,
-  updateSmartphoneByIdHandler,
-  updateSmartphonesBulkHandler,
+  createNewSmartphoneBulkController,
+  createNewSmartphoneController,
+  deleteASmartphoneController,
+  deleteAllSmartphonesController,
+  getSmartphoneByIdController,
+  getQueriedSmartphonesController,
+  updateSmartphoneByIdController,
+  updateSmartphonesBulkController,
 };

@@ -1,14 +1,14 @@
 import { Router } from "express";
 import {
-  createNewPrinterIssueHandler,
-  getQueriedPrinterIssuesHandler,
-  getPrinterIssuesByUserHandler,
-  getPrinterIssueByIdHandler,
-  deletePrinterIssueHandler,
-  deleteAllPrinterIssuesHandler,
-  updatePrinterIssueByIdHandler,
-  createNewPrinterIssuesBulkHandler,
-  updatePrinterIssuesBulkHandler,
+  createNewPrinterIssueController,
+  getQueriedPrinterIssuesController,
+  getPrinterIssuesByUserController,
+  getPrinterIssueByIdController,
+  deletePrinterIssueController,
+  deleteAllPrinterIssuesController,
+  updatePrinterIssueByIdController,
+  createNewPrinterIssuesBulkController,
+  updatePrinterIssuesBulkController,
 } from "./printerIssue.controller";
 import { validateSchemaMiddleware } from "../../../../middlewares/validateSchema";
 import {
@@ -20,29 +20,29 @@ const printerIssueRouter = Router();
 
 printerIssueRouter
   .route("/")
-  .get(getQueriedPrinterIssuesHandler)
+  .get(getQueriedPrinterIssuesController)
   .post(
     validateSchemaMiddleware(createPrinterIssueJoiSchema, "printerIssueSchema"),
-    createNewPrinterIssueHandler
+    createNewPrinterIssueController
   );
 
-printerIssueRouter.route("/delete-all").delete(deleteAllPrinterIssuesHandler);
+printerIssueRouter.route("/delete-all").delete(deleteAllPrinterIssuesController);
 
-printerIssueRouter.route("/user").get(getPrinterIssuesByUserHandler);
+printerIssueRouter.route("/user").get(getPrinterIssuesByUserController);
 
 // DEV ROUTES
 printerIssueRouter
   .route("/dev")
-  .post(createNewPrinterIssuesBulkHandler)
-  .patch(updatePrinterIssuesBulkHandler);
+  .post(createNewPrinterIssuesBulkController)
+  .patch(updatePrinterIssuesBulkController);
 
 printerIssueRouter
   .route("/:printerIssueId")
-  .get(getPrinterIssueByIdHandler)
-  .delete(deletePrinterIssueHandler)
+  .get(getPrinterIssueByIdController)
+  .delete(deletePrinterIssueController)
   .patch(
     validateSchemaMiddleware(updatePrinterIssueJoiSchema),
-    updatePrinterIssueByIdHandler
+    updatePrinterIssueByIdController
   );
 
 export { printerIssueRouter };

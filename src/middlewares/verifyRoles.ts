@@ -1,6 +1,5 @@
-import { Types } from "mongoose";
 import type { RequestAfterJWTVerification } from "../resources/auth";
-import type { Request, Response, NextFunction } from "express";
+import type { Response, NextFunction } from "express";
 import createHttpError from "http-errors";
 
 function verifyRoles(

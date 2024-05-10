@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
 import type { Response } from "express";
@@ -38,7 +38,7 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 // @desc   Create new mouse
 // @route  POST /api/v1/product-category/mouse
 // @access Private/Admin/Manager
-const createNewMouseHandler = expressAsyncHandler(
+const createNewMouseController = expressAsyncController(
   async (
     request: CreateNewMouseRequest,
     response: Response<ResourceRequestServerResponse<MouseDocument>>
@@ -66,7 +66,7 @@ const createNewMouseHandler = expressAsyncHandler(
 // @desc   Create new mouses bulk
 // @route  POST /api/v1/product-category/mouse/dev
 // @access Private/Admin/Manager
-const createNewMouseBulkHandler = expressAsyncHandler(
+const createNewMouseBulkController = expressAsyncController(
   async (
     request: CreateNewMouseBulkRequest,
     response: Response<ResourceRequestServerResponse<MouseDocument>>
@@ -113,7 +113,7 @@ const createNewMouseBulkHandler = expressAsyncHandler(
 // @desc   Update mouses bulk
 // @route  PATCH /api/v1/product-category/mouse/dev
 // @access Private/Admin/Manager
-const updateMiceBulkHandler = expressAsyncHandler(
+const updateMiceBulkController = expressAsyncController(
   async (
     request: UpdateMiceBulkRequest,
     response: Response<ResourceRequestServerResponse<MouseDocument>>
@@ -170,7 +170,7 @@ const updateMiceBulkHandler = expressAsyncHandler(
 // @desc   Get all mouses
 // @route  GET /api/v1/product-category/mouse
 // @access Private/Admin/Manager
-const getQueriedMiceHandler = expressAsyncHandler(
+const getQueriedMiceController = expressAsyncController(
   async (
     request: GetQueriedMiceRequest,
     response: Response<GetQueriedResourceRequestServerResponse<MouseDocument>>
@@ -215,7 +215,7 @@ const getQueriedMiceHandler = expressAsyncHandler(
 // @desc   Get mouse by id
 // @route  GET /api/v1/product-category/mouse/:mouseId
 // @access Private/Admin/Manager
-const getMouseByIdHandler = expressAsyncHandler(
+const getMouseByIdController = expressAsyncController(
   async (
     request: GetMouseByIdRequest,
     response: Response<ResourceRequestServerResponse<MouseDocument>>
@@ -239,7 +239,7 @@ const getMouseByIdHandler = expressAsyncHandler(
 // @desc   Update a mouse by id
 // @route  PUT /api/v1/product-category/mouse/:mouseId
 // @access Private/Admin/Manager
-const updateMouseByIdHandler = expressAsyncHandler(
+const updateMouseByIdController = expressAsyncController(
   async (
     request: UpdateMouseByIdRequest,
     response: Response<ResourceRequestServerResponse<MouseDocument>>
@@ -274,7 +274,7 @@ const updateMouseByIdHandler = expressAsyncHandler(
 // @desc   Delete all mouses
 // @route  DELETE /api/v1/product-category/mouse
 // @access Private/Admin/Manager
-const deleteAllMiceHandler = expressAsyncHandler(
+const deleteAllMiceController = expressAsyncController(
   async (
     _request: DeleteAllMiceRequest,
     response: Response<ResourceRequestServerResponse<MouseDocument>>
@@ -332,7 +332,7 @@ const deleteAllMiceHandler = expressAsyncHandler(
 // @desc   Delete a mouse by id
 // @route  DELETE /api/v1/product-category/mouse/:mouseId
 // @access Private/Admin/Manager
-const deleteAMouseHandler = expressAsyncHandler(
+const deleteAMouseController = expressAsyncController(
   async (
     request: DeleteAMouseRequest,
     response: Response<ResourceRequestServerResponse<MouseDocument>>
@@ -398,12 +398,12 @@ const deleteAMouseHandler = expressAsyncHandler(
 );
 
 export {
-  createNewMouseBulkHandler,
-  createNewMouseHandler,
-  deleteAMouseHandler,
-  deleteAllMiceHandler,
-  getMouseByIdHandler,
-  getQueriedMiceHandler,
-  updateMouseByIdHandler,
-  updateMiceBulkHandler,
+  createNewMouseBulkController,
+  createNewMouseController,
+  deleteAMouseController,
+  deleteAllMiceController,
+  getMouseByIdController,
+  getQueriedMiceController,
+  updateMouseByIdController,
+  updateMiceBulkController,
 };

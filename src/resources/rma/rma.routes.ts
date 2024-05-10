@@ -2,16 +2,16 @@ import { Router } from "express";
 import { assignQueryDefaults, verifyJWTMiddleware, verifyRoles } from "../../middlewares";
 
 import {
-  updateRMAsBulkHandler,
-  createNewRMAHandler,
-  createNewRMAsBulkHandler,
-  deleteAllRMAsHandler,
-  deleteRMAHandler,
-  getAllRMAsBulkHandler,
-  getRMAByIdHandler,
-  getQueriedRMAsHandler,
-  getQueriedRMAsByUserHandler,
-  updateRMAByIdHandler,
+  updateRMAsBulkController,
+  createNewRMAController,
+  createNewRMAsBulkController,
+  deleteAllRMAsController,
+  deleteRMAController,
+  getAllRMAsBulkController,
+  getRMAByIdController,
+  getQueriedRMAsController,
+  getQueriedRMAsByUserController,
+  updateRMAByIdController,
 } from "./rma.controller";
 import { validateSchemaMiddleware } from "../../middlewares/validateSchema";
 import { createRMAJoiSchema, updateRMAJoiSchema } from "./rma.validation";
@@ -22,24 +22,24 @@ rmaRouter.use(verifyJWTMiddleware, verifyRoles, assignQueryDefaults);
 
 rmaRouter
   .route("/")
-  .post(validateSchemaMiddleware(createRMAJoiSchema, "rmaSchema"), createNewRMAHandler)
-  .get(getQueriedRMAsHandler);
+  .post(validateSchemaMiddleware(createRMAJoiSchema, "rmaSchema"), createNewRMAController)
+  .get(getQueriedRMAsController);
 
-rmaRouter.route("/user").get(getQueriedRMAsByUserHandler);
+rmaRouter.route("/user").get(getQueriedRMAsByUserController);
 
-rmaRouter.route("/delete-all").delete(deleteAllRMAsHandler);
+rmaRouter.route("/delete-all").delete(deleteAllRMAsController);
 
 // DEV ROUTES
 rmaRouter
   .route("/dev")
-  .post(createNewRMAsBulkHandler)
-  .get(getAllRMAsBulkHandler)
-  .patch(updateRMAsBulkHandler);
+  .post(createNewRMAsBulkController)
+  .get(getAllRMAsBulkController)
+  .patch(updateRMAsBulkController);
 
 rmaRouter
   .route("/:rmaId")
-  .get(getRMAByIdHandler)
-  .delete(deleteRMAHandler)
-  .patch(validateSchemaMiddleware(updateRMAJoiSchema), updateRMAByIdHandler);
+  .get(getRMAByIdController)
+  .delete(deleteRMAController)
+  .patch(validateSchemaMiddleware(updateRMAJoiSchema), updateRMAByIdController);
 
 export { rmaRouter };

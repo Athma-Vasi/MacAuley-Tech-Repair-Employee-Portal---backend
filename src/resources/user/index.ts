@@ -8,10 +8,10 @@
 import { UserModel } from "./user.model";
 import { userRouter } from "./user.routes";
 import {
-  createNewUserHandler,
-  deleteUserHandler,
-  getQueriedUsersHandler,
-  updateUserByIdHandler,
+  createNewUserController,
+  deleteUserController,
+  getQueriedUsersController,
+  updateUserByIdController,
 } from "./user.controller";
 import {
   createNewUserService,
@@ -52,10 +52,10 @@ import type {
 export {
   UserModel,
   userRouter,
-  createNewUserHandler,
-  deleteUserHandler,
-  getQueriedUsersHandler,
-  updateUserByIdHandler,
+  createNewUserController,
+  deleteUserController,
+  getQueriedUsersController,
+  updateUserByIdController,
   createNewUserService,
   checkUserIsActiveService,
   deleteUserService,

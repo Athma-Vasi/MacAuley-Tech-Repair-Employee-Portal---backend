@@ -8,15 +8,15 @@
 import { BenefitModel } from "./benefit.model";
 import { benefitRouter } from "./benefit.routes";
 import {
-  createNewBenefitHandler,
-  createNewBenefitsBulkHandler,
-  deleteAllBenefitsHandler,
-  deleteBenefitHandler,
-  getBenefitByIdHandler,
-  getBenefitsByUserHandler,
-  getQueriedBenefitsHandler,
-  updateBenefitByIdHandler,
-  updateBenefitsBulkHandler,
+  createNewBenefitController,
+  createNewBenefitsBulkController,
+  deleteAllBenefitsController,
+  deleteBenefitController,
+  getBenefitByIdController,
+  getBenefitsByUserController,
+  getQueriedBenefitsController,
+  updateBenefitByIdController,
+  updateBenefitsBulkController,
 } from "./benefit.controller";
 import {
   createNewBenefitService,
@@ -48,23 +48,23 @@ import type {
 export {
   BenefitModel,
   benefitRouter,
-  createNewBenefitHandler,
+  createNewBenefitController,
   createNewBenefitService,
-  createNewBenefitsBulkHandler,
+  createNewBenefitsBulkController,
   deleteBenefitByIdService,
-  deleteAllBenefitsHandler,
+  deleteAllBenefitsController,
   deleteAllBenefitsService,
-  deleteBenefitHandler,
-  getBenefitByIdHandler,
+  deleteBenefitController,
+  getBenefitByIdController,
   getBenefitByIdService,
-  getBenefitsByUserHandler,
+  getBenefitsByUserController,
   getQueriedBenefitsByUserService,
-  getQueriedBenefitsHandler,
+  getQueriedBenefitsController,
   getQueriedBenefitsService,
   getQueriedTotalBenefitsService,
   updateBenefitByIdService,
-  updateBenefitByIdHandler,
-  updateBenefitsBulkHandler,
+  updateBenefitByIdController,
+  updateBenefitsBulkController,
 };
 
 export type {

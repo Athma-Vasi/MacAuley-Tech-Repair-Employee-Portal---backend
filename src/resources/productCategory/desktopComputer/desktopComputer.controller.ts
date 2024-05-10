@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
 import type { Response } from "express";
@@ -38,7 +38,7 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 // @desc   Create new desktopComputer
 // @route  POST /api/v1/product-category/desktopComputer
 // @access Private/Admin/Manager
-const createNewDesktopComputerHandler = expressAsyncHandler(
+const createNewDesktopComputerController = expressAsyncController(
   async (
     request: CreateNewDesktopComputerRequest,
     response: Response<ResourceRequestServerResponse<DesktopComputerDocument>>
@@ -67,7 +67,7 @@ const createNewDesktopComputerHandler = expressAsyncHandler(
 // @desc   Create new desktopComputers bulk
 // @route  POST /api/v1/product-category/desktopComputer/dev
 // @access Private/Admin/Manager
-const createNewDesktopComputerBulkHandler = expressAsyncHandler(
+const createNewDesktopComputerBulkController = expressAsyncController(
   async (
     request: CreateNewDesktopComputerBulkRequest,
     response: Response<ResourceRequestServerResponse<DesktopComputerDocument>>
@@ -118,7 +118,7 @@ const createNewDesktopComputerBulkHandler = expressAsyncHandler(
 // @desc   Update desktopComputers bulk
 // @route  PATCH /api/v1/product-category/desktopComputer/dev
 // @access Private/Admin/Manager
-const updateDesktopComputersBulkHandler = expressAsyncHandler(
+const updateDesktopComputersBulkController = expressAsyncController(
   async (
     request: UpdateDesktopComputersBulkRequest,
     response: Response<ResourceRequestServerResponse<DesktopComputerDocument>>
@@ -177,7 +177,7 @@ const updateDesktopComputersBulkHandler = expressAsyncHandler(
 // @desc   Get all desktopComputers
 // @route  GET /api/v1/product-category/desktopComputer
 // @access Private/Admin/Manager
-const getQueriedDesktopComputersHandler = expressAsyncHandler(
+const getQueriedDesktopComputersController = expressAsyncController(
   async (
     request: GetQueriedDesktopComputersRequest,
     response: Response<GetQueriedResourceRequestServerResponse<DesktopComputerDocument>>
@@ -222,7 +222,7 @@ const getQueriedDesktopComputersHandler = expressAsyncHandler(
 // @desc   Get desktopComputer by id
 // @route  GET /api/v1/product-category/desktopComputer/:desktopComputerId
 // @access Private/Admin/Manager
-const getDesktopComputerByIdHandler = expressAsyncHandler(
+const getDesktopComputerByIdController = expressAsyncController(
   async (
     request: GetDesktopComputerByIdRequest,
     response: Response<ResourceRequestServerResponse<DesktopComputerDocument>>
@@ -248,7 +248,7 @@ const getDesktopComputerByIdHandler = expressAsyncHandler(
 // @desc   Update a desktopComputer by id
 // @route  PUT /api/v1/product-category/desktopComputer/:desktopComputerId
 // @access Private/Admin/Manager
-const updateDesktopComputerByIdHandler = expressAsyncHandler(
+const updateDesktopComputerByIdController = expressAsyncController(
   async (
     request: UpdateDesktopComputerByIdRequest,
     response: Response<ResourceRequestServerResponse<DesktopComputerDocument>>
@@ -283,7 +283,7 @@ const updateDesktopComputerByIdHandler = expressAsyncHandler(
 // @desc   Delete all desktopComputers
 // @route  DELETE /api/v1/product-category/desktopComputer
 // @access Private/Admin/Manager
-const deleteAllDesktopComputersHandler = expressAsyncHandler(
+const deleteAllDesktopComputersController = expressAsyncController(
   async (
     _request: DeleteAllDesktopComputersRequest,
     response: Response<ResourceRequestServerResponse<DesktopComputerDocument>>
@@ -344,7 +344,7 @@ const deleteAllDesktopComputersHandler = expressAsyncHandler(
 // @desc   Delete a desktopComputer by id
 // @route  DELETE /api/v1/product-category/desktopComputer/:desktopComputerId
 // @access Private/Admin/Manager
-const deleteADesktopComputerHandler = expressAsyncHandler(
+const deleteADesktopComputerController = expressAsyncController(
   async (
     request: DeleteADesktopComputerRequest,
     response: Response<ResourceRequestServerResponse<DesktopComputerDocument>>
@@ -413,12 +413,12 @@ const deleteADesktopComputerHandler = expressAsyncHandler(
 );
 
 export {
-  createNewDesktopComputerBulkHandler,
-  createNewDesktopComputerHandler,
-  deleteADesktopComputerHandler,
-  deleteAllDesktopComputersHandler,
-  getDesktopComputerByIdHandler,
-  getQueriedDesktopComputersHandler,
-  updateDesktopComputerByIdHandler,
-  updateDesktopComputersBulkHandler,
+  createNewDesktopComputerBulkController,
+  createNewDesktopComputerController,
+  deleteADesktopComputerController,
+  deleteAllDesktopComputersController,
+  getDesktopComputerByIdController,
+  getQueriedDesktopComputersController,
+  updateDesktopComputerByIdController,
+  updateDesktopComputersBulkController,
 };

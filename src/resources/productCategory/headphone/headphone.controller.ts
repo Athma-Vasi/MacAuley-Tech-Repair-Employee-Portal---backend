@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
 import type { Response } from "express";
@@ -38,7 +38,7 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 // @desc   Create new headphone
 // @route  POST /api/v1/product-category/headphone
 // @access Private/Admin/Manager
-const createNewHeadphoneHandler = expressAsyncHandler(
+const createNewHeadphoneController = expressAsyncController(
   async (
     request: CreateNewHeadphoneRequest,
     response: Response<ResourceRequestServerResponse<HeadphoneDocument>>
@@ -68,7 +68,7 @@ const createNewHeadphoneHandler = expressAsyncHandler(
 // @desc   Create new headphones bulk
 // @route  POST /api/v1/product-category/headphone/dev
 // @access Private/Admin/Manager
-const createNewHeadphoneBulkHandler = expressAsyncHandler(
+const createNewHeadphoneBulkController = expressAsyncController(
   async (
     request: CreateNewHeadphoneBulkRequest,
     response: Response<ResourceRequestServerResponse<HeadphoneDocument>>
@@ -115,7 +115,7 @@ const createNewHeadphoneBulkHandler = expressAsyncHandler(
 // @desc   Update headphones bulk
 // @route  PATCH /api/v1/product-category/headphone/dev
 // @access Private/Admin/Manager
-const updateHeadphonesBulkHandler = expressAsyncHandler(
+const updateHeadphonesBulkController = expressAsyncController(
   async (
     request: UpdateHeadphonesBulkRequest,
     response: Response<ResourceRequestServerResponse<HeadphoneDocument>>
@@ -174,7 +174,7 @@ const updateHeadphonesBulkHandler = expressAsyncHandler(
 // @desc   Get all headphones
 // @route  GET /api/v1/product-category/headphone
 // @access Private/Admin/Manager
-const getQueriedHeadphonesHandler = expressAsyncHandler(
+const getQueriedHeadphonesController = expressAsyncController(
   async (
     request: GetQueriedHeadphonesRequest,
     response: Response<GetQueriedResourceRequestServerResponse<HeadphoneDocument>>
@@ -219,7 +219,7 @@ const getQueriedHeadphonesHandler = expressAsyncHandler(
 // @desc   Get headphone by id
 // @route  GET /api/v1/product-category/headphone/:headphoneId
 // @access Private/Admin/Manager
-const getHeadphoneByIdHandler = expressAsyncHandler(
+const getHeadphoneByIdController = expressAsyncController(
   async (
     request: GetHeadphoneByIdRequest,
     response: Response<ResourceRequestServerResponse<HeadphoneDocument>>
@@ -243,7 +243,7 @@ const getHeadphoneByIdHandler = expressAsyncHandler(
 // @desc   Update a headphone by id
 // @route  PUT /api/v1/product-category/headphone/:headphoneId
 // @access Private/Admin/Manager
-const updateHeadphoneByIdHandler = expressAsyncHandler(
+const updateHeadphoneByIdController = expressAsyncController(
   async (
     request: UpdateHeadphoneByIdRequest,
     response: Response<ResourceRequestServerResponse<HeadphoneDocument>>
@@ -278,7 +278,7 @@ const updateHeadphoneByIdHandler = expressAsyncHandler(
 // @desc   Delete all headphones
 // @route  DELETE /api/v1/product-category/headphone
 // @access Private/Admin/Manager
-const deleteAllHeadphonesHandler = expressAsyncHandler(
+const deleteAllHeadphonesController = expressAsyncController(
   async (
     _request: DeleteAllHeadphonesRequest,
     response: Response<ResourceRequestServerResponse<HeadphoneDocument>>
@@ -336,7 +336,7 @@ const deleteAllHeadphonesHandler = expressAsyncHandler(
 // @desc   Delete a headphone by id
 // @route  DELETE /api/v1/product-category/headphone/:headphoneId
 // @access Private/Admin/Manager
-const deleteAHeadphoneHandler = expressAsyncHandler(
+const deleteAHeadphoneController = expressAsyncController(
   async (
     request: DeleteAHeadphoneRequest,
     response: Response<ResourceRequestServerResponse<HeadphoneDocument>>
@@ -406,12 +406,12 @@ const deleteAHeadphoneHandler = expressAsyncHandler(
 );
 
 export {
-  createNewHeadphoneBulkHandler,
-  createNewHeadphoneHandler,
-  deleteAHeadphoneHandler,
-  deleteAllHeadphonesHandler,
-  getHeadphoneByIdHandler,
-  getQueriedHeadphonesHandler,
-  updateHeadphoneByIdHandler,
-  updateHeadphonesBulkHandler,
+  createNewHeadphoneBulkController,
+  createNewHeadphoneController,
+  deleteAHeadphoneController,
+  deleteAllHeadphonesController,
+  getHeadphoneByIdController,
+  getQueriedHeadphonesController,
+  updateHeadphoneByIdController,
+  updateHeadphonesBulkController,
 };

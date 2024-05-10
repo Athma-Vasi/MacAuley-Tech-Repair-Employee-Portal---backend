@@ -1,13 +1,13 @@
 import { Router } from "express";
 import {
-  createNewDesktopComputerBulkHandler,
-  createNewDesktopComputerHandler,
-  deleteADesktopComputerHandler,
-  deleteAllDesktopComputersHandler,
-  getDesktopComputerByIdHandler,
-  getQueriedDesktopComputersHandler,
-  updateDesktopComputerByIdHandler,
-  updateDesktopComputersBulkHandler,
+  createNewDesktopComputerBulkController,
+  createNewDesktopComputerController,
+  deleteADesktopComputerController,
+  deleteAllDesktopComputersController,
+  getDesktopComputerByIdController,
+  getQueriedDesktopComputersController,
+  updateDesktopComputerByIdController,
+  updateDesktopComputersBulkController,
 } from "./desktopComputer.controller";
 import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
 import {
@@ -19,29 +19,29 @@ const desktopComputerRouter = Router();
 
 desktopComputerRouter
   .route("/")
-  .get(getQueriedDesktopComputersHandler)
+  .get(getQueriedDesktopComputersController)
   .post(
     validateSchemaMiddleware(createDesktopComputerJoiSchema, "desktopComputerSchema"),
-    createNewDesktopComputerHandler
+    createNewDesktopComputerController
   );
 
 // separate route for safety reasons (as it deletes all documents in the collection)
-desktopComputerRouter.route("/delete-all").delete(deleteAllDesktopComputersHandler);
+desktopComputerRouter.route("/delete-all").delete(deleteAllDesktopComputersController);
 
 // DEV ROUTE
 desktopComputerRouter
   .route("/dev")
-  .post(createNewDesktopComputerBulkHandler)
-  .patch(updateDesktopComputersBulkHandler);
+  .post(createNewDesktopComputerBulkController)
+  .patch(updateDesktopComputersBulkController);
 
 // single document routes
 desktopComputerRouter
   .route("/:desktopComputerId")
-  .get(getDesktopComputerByIdHandler)
-  .delete(deleteADesktopComputerHandler)
+  .get(getDesktopComputerByIdController)
+  .delete(deleteADesktopComputerController)
   .patch(
     validateSchemaMiddleware(updateDesktopComputerJoiSchema),
-    updateDesktopComputerByIdHandler
+    updateDesktopComputerByIdController
   );
 
 export { desktopComputerRouter };

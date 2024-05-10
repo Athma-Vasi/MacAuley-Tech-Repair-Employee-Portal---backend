@@ -1,14 +1,14 @@
 import { Router } from "express";
 import {
-  createNewAddressChangeHandler,
-  getQueriedAddressChangesHandler,
-  getAddressChangesByUserHandler,
-  getAddressChangeByIdHandler,
-  deleteAnAddressChangeHandler,
-  deleteAllAddressChangesHandler,
-  updateAddressChangeByIdHandler,
-  createNewAddressChangesBulkHandler,
-  updateAddressChangesBulkHandler,
+  createNewAddressChangeController,
+  getQueriedAddressChangesController,
+  getAddressChangesByUserController,
+  getAddressChangeByIdController,
+  deleteAnAddressChangeController,
+  deleteAllAddressChangesController,
+  updateAddressChangeByIdController,
+  createNewAddressChangesBulkController,
+  updateAddressChangesBulkController,
 } from "./addressChange.controller";
 import { validateSchemaMiddleware } from "../../../../middlewares/validateSchema";
 import {
@@ -20,29 +20,29 @@ const addressChangeRouter = Router();
 
 addressChangeRouter
   .route("/")
-  .get(getQueriedAddressChangesHandler)
+  .get(getQueriedAddressChangesController)
   .post(
     validateSchemaMiddleware(createAddressChangeJoiSchema, "addressChangeSchema"),
-    createNewAddressChangeHandler
+    createNewAddressChangeController
   );
 
-addressChangeRouter.route("/delete-all").delete(deleteAllAddressChangesHandler);
+addressChangeRouter.route("/delete-all").delete(deleteAllAddressChangesController);
 
-addressChangeRouter.route("/user").get(getAddressChangesByUserHandler);
+addressChangeRouter.route("/user").get(getAddressChangesByUserController);
 
 // DEV ROUTES
 addressChangeRouter
   .route("/dev")
-  .post(createNewAddressChangesBulkHandler)
-  .patch(updateAddressChangesBulkHandler);
+  .post(createNewAddressChangesBulkController)
+  .patch(updateAddressChangesBulkController);
 
 addressChangeRouter
   .route("/:addressChangeId")
-  .get(getAddressChangeByIdHandler)
-  .delete(deleteAnAddressChangeHandler)
+  .get(getAddressChangeByIdController)
+  .delete(deleteAnAddressChangeController)
   .patch(
     validateSchemaMiddleware(updateAddressChangeJoiSchema),
-    updateAddressChangeByIdHandler
+    updateAddressChangeByIdController
   );
 
 export { addressChangeRouter };

@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
 import type { Response } from "express";
@@ -38,7 +38,7 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 // @desc   Create new computerCase
 // @route  POST /api/v1/product-category/computerCase
 // @access Private/Admin/Manager
-const createNewComputerCaseHandler = expressAsyncHandler(
+const createNewComputerCaseController = expressAsyncController(
   async (
     request: CreateNewComputerCaseRequest,
     response: Response<ResourceRequestServerResponse<ComputerCaseDocument>>
@@ -68,7 +68,7 @@ const createNewComputerCaseHandler = expressAsyncHandler(
 // @desc   Create new computerCases bulk
 // @route  POST /api/v1/product-category/computerCase/dev
 // @access Private/Admin/Manager
-const createNewComputerCaseBulkHandler = expressAsyncHandler(
+const createNewComputerCaseBulkController = expressAsyncController(
   async (
     request: CreateNewComputerCaseBulkRequest,
     response: Response<ResourceRequestServerResponse<ComputerCaseDocument>>
@@ -117,7 +117,7 @@ const createNewComputerCaseBulkHandler = expressAsyncHandler(
 // @desc   Update computerCases bulk
 // @route  PATCH /api/v1/product-category/computerCase/dev
 // @access Private/Admin/Manager
-const updateComputerCasesBulkHandler = expressAsyncHandler(
+const updateComputerCasesBulkController = expressAsyncController(
   async (
     request: UpdateComputerCasesBulkRequest,
     response: Response<ResourceRequestServerResponse<ComputerCaseDocument>>
@@ -176,7 +176,7 @@ const updateComputerCasesBulkHandler = expressAsyncHandler(
 // @desc   Get all computerCases
 // @route  GET /api/v1/product-category/computerCase
 // @access Private/Admin/Manager
-const getQueriedComputerCasesHandler = expressAsyncHandler(
+const getQueriedComputerCasesController = expressAsyncController(
   async (
     request: GetQueriedComputerCasesRequest,
     response: Response<GetQueriedResourceRequestServerResponse<ComputerCaseDocument>>
@@ -221,7 +221,7 @@ const getQueriedComputerCasesHandler = expressAsyncHandler(
 // @desc   Get computerCase by id
 // @route  GET /api/v1/product-category/computerCase/:computerCaseId
 // @access Private/Admin/Manager
-const getComputerCaseByIdHandler = expressAsyncHandler(
+const getComputerCaseByIdController = expressAsyncController(
   async (
     request: GetComputerCaseByIdRequest,
     response: Response<ResourceRequestServerResponse<ComputerCaseDocument>>
@@ -245,7 +245,7 @@ const getComputerCaseByIdHandler = expressAsyncHandler(
 // @desc   Update a computerCase by id
 // @route  PUT /api/v1/product-category/computerCase/:computerCaseId
 // @access Private/Admin/Manager
-const updateComputerCaseByIdHandler = expressAsyncHandler(
+const updateComputerCaseByIdController = expressAsyncController(
   async (
     request: UpdateComputerCaseByIdRequest,
     response: Response<ResourceRequestServerResponse<ComputerCaseDocument>>
@@ -280,7 +280,7 @@ const updateComputerCaseByIdHandler = expressAsyncHandler(
 // @desc   Delete all computerCases
 // @route  DELETE /api/v1/product-category/computerCase
 // @access Private/Admin/Manager
-const deleteAllComputerCasesHandler = expressAsyncHandler(
+const deleteAllComputerCasesController = expressAsyncController(
   async (
     _request: DeleteAllComputerCasesRequest,
     response: Response<ResourceRequestServerResponse<ComputerCaseDocument>>
@@ -338,7 +338,7 @@ const deleteAllComputerCasesHandler = expressAsyncHandler(
 // @desc   Delete a computerCase by id
 // @route  DELETE /api/v1/product-category/computerCase/:computerCaseId
 // @access Private/Admin/Manager
-const deleteAComputerCaseHandler = expressAsyncHandler(
+const deleteAComputerCaseController = expressAsyncController(
   async (
     request: DeleteAComputerCaseRequest,
     response: Response<ResourceRequestServerResponse<ComputerCaseDocument>>
@@ -408,12 +408,12 @@ const deleteAComputerCaseHandler = expressAsyncHandler(
 );
 
 export {
-  createNewComputerCaseBulkHandler,
-  createNewComputerCaseHandler,
-  deleteAComputerCaseHandler,
-  deleteAllComputerCasesHandler,
-  getComputerCaseByIdHandler,
-  getQueriedComputerCasesHandler,
-  updateComputerCaseByIdHandler,
-  updateComputerCasesBulkHandler,
+  createNewComputerCaseBulkController,
+  createNewComputerCaseController,
+  deleteAComputerCaseController,
+  deleteAllComputerCasesController,
+  getComputerCaseByIdController,
+  getQueriedComputerCasesController,
+  updateComputerCaseByIdController,
+  updateComputerCasesBulkController,
 };

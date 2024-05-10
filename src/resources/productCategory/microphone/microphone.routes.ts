@@ -1,13 +1,13 @@
 import { Router } from "express";
 import {
-  createNewMicrophoneBulkHandler,
-  createNewMicrophoneHandler,
-  deleteAMicrophoneHandler,
-  deleteAllMicrophonesHandler,
-  getMicrophoneByIdHandler,
-  getQueriedMicrophonesHandler,
-  updateMicrophoneByIdHandler,
-  updateMicrophonesBulkHandler,
+  createNewMicrophoneBulkController,
+  createNewMicrophoneController,
+  deleteAMicrophoneController,
+  deleteAllMicrophonesController,
+  getMicrophoneByIdController,
+  getQueriedMicrophonesController,
+  updateMicrophoneByIdController,
+  updateMicrophonesBulkController,
 } from "./microphone.controller";
 import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
 import {
@@ -19,29 +19,29 @@ const microphoneRouter = Router();
 
 microphoneRouter
   .route("/")
-  .get(getQueriedMicrophonesHandler)
+  .get(getQueriedMicrophonesController)
   .post(
     validateSchemaMiddleware(createMicrophoneJoiSchema, "microphoneSchema"),
-    createNewMicrophoneHandler
+    createNewMicrophoneController
   );
 
 // separate route for safety reasons (as it deletes all documents in the collection)
-microphoneRouter.route("/delete-all").delete(deleteAllMicrophonesHandler);
+microphoneRouter.route("/delete-all").delete(deleteAllMicrophonesController);
 
 // DEV ROUTE
 microphoneRouter
   .route("/dev")
-  .post(createNewMicrophoneBulkHandler)
-  .patch(updateMicrophonesBulkHandler);
+  .post(createNewMicrophoneBulkController)
+  .patch(updateMicrophonesBulkController);
 
 // single document routes
 microphoneRouter
   .route("/:microphoneId")
-  .get(getMicrophoneByIdHandler)
-  .delete(deleteAMicrophoneHandler)
+  .get(getMicrophoneByIdController)
+  .delete(deleteAMicrophoneController)
   .patch(
     validateSchemaMiddleware(updateMicrophoneJoiSchema),
-    updateMicrophoneByIdHandler
+    updateMicrophoneByIdController
   );
 
 export { microphoneRouter };

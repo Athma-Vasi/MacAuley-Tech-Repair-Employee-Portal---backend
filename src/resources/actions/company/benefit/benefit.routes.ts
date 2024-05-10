@@ -1,14 +1,14 @@
 import { Router } from "express";
 import {
-  createNewBenefitHandler,
-  getQueriedBenefitsHandler,
-  getBenefitsByUserHandler,
-  getBenefitByIdHandler,
-  deleteBenefitHandler,
-  deleteAllBenefitsHandler,
-  updateBenefitByIdHandler,
-  createNewBenefitsBulkHandler,
-  updateBenefitsBulkHandler,
+  createNewBenefitController,
+  getQueriedBenefitsController,
+  getBenefitsByUserController,
+  getBenefitByIdController,
+  deleteBenefitController,
+  deleteAllBenefitsController,
+  updateBenefitByIdController,
+  createNewBenefitsBulkController,
+  updateBenefitsBulkController,
 } from "./benefit.controller";
 import { validateSchemaMiddleware } from "../../../../middlewares/validateSchema";
 import { createBenefitJoiSchema, updateBenefitJoiSchema } from "./benefit.validation";
@@ -17,26 +17,26 @@ const benefitRouter = Router();
 
 benefitRouter
   .route("/")
-  .get(getQueriedBenefitsHandler)
+  .get(getQueriedBenefitsController)
   .post(
     validateSchemaMiddleware(createBenefitJoiSchema, "benefitSchema"),
-    createNewBenefitHandler
+    createNewBenefitController
   );
 
-benefitRouter.route("/delete-all").delete(deleteAllBenefitsHandler);
+benefitRouter.route("/delete-all").delete(deleteAllBenefitsController);
 
-benefitRouter.route("/user").get(getBenefitsByUserHandler);
+benefitRouter.route("/user").get(getBenefitsByUserController);
 
 // DEV ROUTES
 benefitRouter
   .route("/dev")
-  .post(createNewBenefitsBulkHandler)
-  .patch(updateBenefitsBulkHandler);
+  .post(createNewBenefitsBulkController)
+  .patch(updateBenefitsBulkController);
 
 benefitRouter
   .route("/:benefitId")
-  .get(getBenefitByIdHandler)
-  .delete(deleteBenefitHandler)
-  .patch(validateSchemaMiddleware(updateBenefitJoiSchema), updateBenefitByIdHandler);
+  .get(getBenefitByIdController)
+  .delete(deleteBenefitController)
+  .patch(validateSchemaMiddleware(updateBenefitJoiSchema), updateBenefitByIdController);
 
 export { benefitRouter };

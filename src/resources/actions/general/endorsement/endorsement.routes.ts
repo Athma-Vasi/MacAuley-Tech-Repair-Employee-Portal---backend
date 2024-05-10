@@ -1,14 +1,14 @@
 import { Router } from "express";
 import {
-  createNewEndorsementHandler,
-  getQueriedEndorsementsHandler,
-  getEndorsementsByUserHandler,
-  getEndorsementByIdHandler,
-  deleteEndorsementHandler,
-  deleteAllEndorsementsHandler,
-  updateEndorsementByIdHandler,
-  createNewEndorsementsBulkHandler,
-  updateEndorsementsBulkHandler,
+  createNewEndorsementController,
+  getQueriedEndorsementsController,
+  getEndorsementsByUserController,
+  getEndorsementByIdController,
+  deleteEndorsementController,
+  deleteAllEndorsementsController,
+  updateEndorsementByIdController,
+  createNewEndorsementsBulkController,
+  updateEndorsementsBulkController,
 } from "./endorsement.controller";
 import { validateSchemaMiddleware } from "../../../../middlewares/validateSchema";
 import {
@@ -20,29 +20,29 @@ const endorsementRouter = Router();
 
 endorsementRouter
   .route("/")
-  .get(getQueriedEndorsementsHandler)
+  .get(getQueriedEndorsementsController)
   .post(
     validateSchemaMiddleware(createEndorsementJoiSchema, "endorsementSchema"),
-    createNewEndorsementHandler
+    createNewEndorsementController
   );
 
-endorsementRouter.route("/delete-all").delete(deleteAllEndorsementsHandler);
+endorsementRouter.route("/delete-all").delete(deleteAllEndorsementsController);
 
-endorsementRouter.route("/user").get(getEndorsementsByUserHandler);
+endorsementRouter.route("/user").get(getEndorsementsByUserController);
 
 // DEV ROUTES
 endorsementRouter
   .route("/dev")
-  .post(createNewEndorsementsBulkHandler)
-  .patch(updateEndorsementsBulkHandler);
+  .post(createNewEndorsementsBulkController)
+  .patch(updateEndorsementsBulkController);
 
 endorsementRouter
   .route("/:endorsementId")
-  .get(getEndorsementByIdHandler)
-  .delete(deleteEndorsementHandler)
+  .get(getEndorsementByIdController)
+  .delete(deleteEndorsementController)
   .patch(
     validateSchemaMiddleware(updateEndorsementJoiSchema, "documentUpdate"),
-    updateEndorsementByIdHandler
+    updateEndorsementByIdController
   );
 
 export { endorsementRouter };

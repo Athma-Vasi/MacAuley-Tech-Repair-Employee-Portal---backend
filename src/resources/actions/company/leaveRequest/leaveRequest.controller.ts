@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
 import type { Response } from "express";
@@ -37,7 +37,7 @@ import { getUserByIdService } from "../../../user";
 // @desc   Create a new leave request
 // @route  POST api/v1/actions/company/leave-request
 // @access Private
-const createNewLeaveRequestHandler = expressAsyncHandler(
+const createNewLeaveRequestController = expressAsyncController(
   async (
     request: CreateNewLeaveRequestRequest,
     response: Response<ResourceRequestServerResponse<LeaveRequestDocument>>
@@ -76,7 +76,7 @@ const createNewLeaveRequestHandler = expressAsyncHandler(
 // @desc   Get all leaveRequests
 // @route  GET api/v1/actions/company/leave-request
 // @access Private/Admin/Manager
-const getQueriedLeaveRequestsHandler = expressAsyncHandler(
+const getQueriedLeaveRequestsController = expressAsyncController(
   async (
     request: GetQueriedLeaveRequestsRequest,
     response: Response<GetQueriedResourceRequestServerResponse<LeaveRequestDocument>>
@@ -122,7 +122,7 @@ const getQueriedLeaveRequestsHandler = expressAsyncHandler(
 // @desc   Get all leaveRequest requests by user
 // @route  GET api/v1/actions/company/leave-request/user
 // @access Private
-const getLeaveRequestsByUserHandler = expressAsyncHandler(
+const getLeaveRequestsByUserController = expressAsyncController(
   async (
     request: GetQueriedLeaveRequestsByUserRequest,
     response: Response<GetQueriedResourceRequestServerResponse<LeaveRequestDocument>>
@@ -176,7 +176,7 @@ const getLeaveRequestsByUserHandler = expressAsyncHandler(
 // @desc   Update leaveRequest status
 // @route  PATCH api/v1/actions/company/leave-request/:leaveRequestId
 // @access Private/Admin/Manager
-const updateLeaveRequestByIdHandler = expressAsyncHandler(
+const updateLeaveRequestByIdController = expressAsyncController(
   async (
     request: UpdateLeaveRequestByIdRequest,
     response: Response<ResourceRequestServerResponse<LeaveRequestDocument>>
@@ -219,7 +219,7 @@ const updateLeaveRequestByIdHandler = expressAsyncHandler(
 // @desc   Get an leaveRequest request
 // @route  GET api/v1/actions/company/leave-request/:leaveRequestId
 // @access Private
-const getLeaveRequestByIdHandler = expressAsyncHandler(
+const getLeaveRequestByIdController = expressAsyncController(
   async (
     request: GetLeaveRequestByIdRequest,
     response: Response<ResourceRequestServerResponse<LeaveRequestDocument>>
@@ -243,7 +243,7 @@ const getLeaveRequestByIdHandler = expressAsyncHandler(
 // @desc   Delete an leaveRequest request by its id
 // @route  DELETE api/v1/actions/company/leave-request/:leaveRequestId
 // @access Private
-const deleteLeaveRequestHandler = expressAsyncHandler(
+const deleteLeaveRequestController = expressAsyncController(
   async (request: DeleteLeaveRequestRequest, response: Response) => {
     const { leaveRequestId } = request.params;
 
@@ -270,7 +270,7 @@ const deleteLeaveRequestHandler = expressAsyncHandler(
 // @desc    Delete all leaveRequest requests
 // @route   DELETE api/v1/actions/company/leave-request/delete-all
 // @access  Private
-const deleteAllLeaveRequestsHandler = expressAsyncHandler(
+const deleteAllLeaveRequestsController = expressAsyncController(
   async (_request: DeleteAllLeaveRequestsRequest, response: Response) => {
     const deletedResult: DeleteResult = await deleteAllLeaveRequestsService();
 
@@ -293,7 +293,7 @@ const deleteAllLeaveRequestsHandler = expressAsyncHandler(
 // @desc   Create new leaveRequest requests in bulk
 // @route  POST api/v1/actions/company/leave-request/dev
 // @access Private
-const createNewLeaveRequestsBulkHandler = expressAsyncHandler(
+const createNewLeaveRequestsBulkController = expressAsyncController(
   async (
     request: CreateNewLeaveRequestsBulkRequest,
     response: Response<ResourceRequestServerResponse<LeaveRequestDocument>>
@@ -343,7 +343,7 @@ const createNewLeaveRequestsBulkHandler = expressAsyncHandler(
 // @desc   Update Leave Requests in bulk
 // @route  PATCH api/v1/actions/company/leave-request/dev
 // @access Private
-const updateLeaveRequestsBulkHandler = expressAsyncHandler(
+const updateLeaveRequestsBulkController = expressAsyncController(
   async (
     request: UpdateLeaveRequestsBulkRequest,
     response: Response<ResourceRequestServerResponse<LeaveRequestDocument>>
@@ -392,13 +392,13 @@ const updateLeaveRequestsBulkHandler = expressAsyncHandler(
 );
 
 export {
-  createNewLeaveRequestHandler,
-  getQueriedLeaveRequestsHandler,
-  getLeaveRequestsByUserHandler,
-  getLeaveRequestByIdHandler,
-  deleteLeaveRequestHandler,
-  deleteAllLeaveRequestsHandler,
-  updateLeaveRequestByIdHandler,
-  createNewLeaveRequestsBulkHandler,
-  updateLeaveRequestsBulkHandler,
+  createNewLeaveRequestController,
+  getQueriedLeaveRequestsController,
+  getLeaveRequestsByUserController,
+  getLeaveRequestByIdController,
+  deleteLeaveRequestController,
+  deleteAllLeaveRequestsController,
+  updateLeaveRequestByIdController,
+  createNewLeaveRequestsBulkController,
+  updateLeaveRequestsBulkController,
 };

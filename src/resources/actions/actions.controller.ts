@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 import {
   ActionsResourceRequestServerResponse,
   GetAllActionsResourceRequest,
@@ -73,7 +73,7 @@ import { getAllCustomersService } from "../customer";
 // @desc  get all actions company data
 // @route  /actions/home
 // @access Private/Manager/Admin
-const getAllActionsDocumentsHandler = expressAsyncHandler(
+const getAllActionsDocumentsController = expressAsyncController(
   async (
     request: GetAllActionsResourceRequest,
     response: Response<ActionsResourceRequestServerResponse>
@@ -248,7 +248,7 @@ const getAllActionsDocumentsHandler = expressAsyncHandler(
 // @desc   get employee's actions company data
 // @route  /actions/home/:userId
 // @access Private/Manager/Admin/Employee
-const getUsersActionsDocumentsHandler = expressAsyncHandler(
+const getUsersActionsDocumentsController = expressAsyncController(
   async (
     request: GetUsersActionsResourceRequest,
     response: Response<ActionsResourceRequestServerResponse>
@@ -409,4 +409,4 @@ const getUsersActionsDocumentsHandler = expressAsyncHandler(
   }
 );
 
-export { getAllActionsDocumentsHandler, getUsersActionsDocumentsHandler };
+export { getAllActionsDocumentsController, getUsersActionsDocumentsController };

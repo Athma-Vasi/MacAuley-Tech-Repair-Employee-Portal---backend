@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { Response } from "express";
 
@@ -19,7 +19,7 @@ import {
 /**
  * @description only runs once to create the document (only one document exists in collection)
  */
-const postUsernameEmailSetHandler = expressAsyncHandler(
+const postUsernameEmailSetController = expressAsyncController(
   async (
     request: PostUsernameEmailSetRequest,
     response: Response<UsernameEmailSetResponse>
@@ -49,7 +49,7 @@ const postUsernameEmailSetHandler = expressAsyncHandler(
 // @desc   check if username or email exists
 // @route  POST /api/v1/username-email-set/check
 // @access Public
-const checkUsernameEmailExistsHandler = expressAsyncHandler(
+const checkUsernameEmailExistsController = expressAsyncController(
   async (
     request: GetUsernameEmailExistsRequest,
     response: Response<UsernameEmailSetResponse>
@@ -79,4 +79,4 @@ const checkUsernameEmailExistsHandler = expressAsyncHandler(
   }
 );
 
-export { checkUsernameEmailExistsHandler, postUsernameEmailSetHandler };
+export { checkUsernameEmailExistsController, postUsernameEmailSetController };

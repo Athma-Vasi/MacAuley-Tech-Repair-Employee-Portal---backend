@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
 import type { Response } from "express";
@@ -38,7 +38,7 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 // @desc   Create new display
 // @route  POST /api/v1/product-category/display
 // @access Private/Admin/Manager
-const createNewDisplayHandler = expressAsyncHandler(
+const createNewDisplayController = expressAsyncController(
   async (
     request: CreateNewDisplayRequest,
     response: Response<ResourceRequestServerResponse<DisplayDocument>>
@@ -66,7 +66,7 @@ const createNewDisplayHandler = expressAsyncHandler(
 // @desc   Create new displays bulk
 // @route  POST /api/v1/product-category/display/dev
 // @access Private/Admin/Manager
-const createNewDisplayBulkHandler = expressAsyncHandler(
+const createNewDisplayBulkController = expressAsyncController(
   async (
     request: CreateNewDisplayBulkRequest,
     response: Response<ResourceRequestServerResponse<DisplayDocument>>
@@ -113,7 +113,7 @@ const createNewDisplayBulkHandler = expressAsyncHandler(
 // @desc   Update displays bulk
 // @route  PATCH /api/v1/product-category/display/dev
 // @access Private/Admin/Manager
-const updateDisplaysBulkHandler = expressAsyncHandler(
+const updateDisplaysBulkController = expressAsyncController(
   async (
     request: UpdateDisplaysBulkRequest,
     response: Response<ResourceRequestServerResponse<DisplayDocument>>
@@ -172,7 +172,7 @@ const updateDisplaysBulkHandler = expressAsyncHandler(
 // @desc   Get all displays
 // @route  GET /api/v1/product-category/display
 // @access Private/Admin/Manager
-const getQueriedDisplaysHandler = expressAsyncHandler(
+const getQueriedDisplaysController = expressAsyncController(
   async (
     request: GetQueriedDisplaysRequest,
     response: Response<GetQueriedResourceRequestServerResponse<DisplayDocument>>
@@ -217,7 +217,7 @@ const getQueriedDisplaysHandler = expressAsyncHandler(
 // @desc   Get display by id
 // @route  GET /api/v1/product-category/display/:displayId
 // @access Private/Admin/Manager
-const getDisplayByIdHandler = expressAsyncHandler(
+const getDisplayByIdController = expressAsyncController(
   async (
     request: GetDisplayByIdRequest,
     response: Response<ResourceRequestServerResponse<DisplayDocument>>
@@ -241,7 +241,7 @@ const getDisplayByIdHandler = expressAsyncHandler(
 // @desc   Update a display by id
 // @route  PUT /api/v1/product-category/display/:displayId
 // @access Private/Admin/Manager
-const updateDisplayByIdHandler = expressAsyncHandler(
+const updateDisplayByIdController = expressAsyncController(
   async (
     request: UpdateDisplayByIdRequest,
     response: Response<ResourceRequestServerResponse<DisplayDocument>>
@@ -276,7 +276,7 @@ const updateDisplayByIdHandler = expressAsyncHandler(
 // @desc   Delete all displays
 // @route  DELETE /api/v1/product-category/display
 // @access Private/Admin/Manager
-const deleteAllDisplaysHandler = expressAsyncHandler(
+const deleteAllDisplaysController = expressAsyncController(
   async (
     _request: DeleteAllDisplaysRequest,
     response: Response<ResourceRequestServerResponse<DisplayDocument>>
@@ -334,7 +334,7 @@ const deleteAllDisplaysHandler = expressAsyncHandler(
 // @desc   Delete a display by id
 // @route  DELETE /api/v1/product-category/display/:displayId
 // @access Private/Admin/Manager
-const deleteADisplayHandler = expressAsyncHandler(
+const deleteADisplayController = expressAsyncController(
   async (
     request: DeleteADisplayRequest,
     response: Response<ResourceRequestServerResponse<DisplayDocument>>
@@ -400,12 +400,12 @@ const deleteADisplayHandler = expressAsyncHandler(
 );
 
 export {
-  createNewDisplayBulkHandler,
-  createNewDisplayHandler,
-  deleteADisplayHandler,
-  deleteAllDisplaysHandler,
-  getDisplayByIdHandler,
-  getQueriedDisplaysHandler,
-  updateDisplayByIdHandler,
-  updateDisplaysBulkHandler,
+  createNewDisplayBulkController,
+  createNewDisplayController,
+  deleteADisplayController,
+  deleteAllDisplaysController,
+  getDisplayByIdController,
+  getQueriedDisplaysController,
+  updateDisplayByIdController,
+  updateDisplaysBulkController,
 };

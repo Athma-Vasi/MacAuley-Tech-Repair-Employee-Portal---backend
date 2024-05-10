@@ -1,13 +1,13 @@
 import { Router } from "express";
 import {
-  createNewSmartphoneBulkHandler,
-  createNewSmartphoneHandler,
-  deleteASmartphoneHandler,
-  deleteAllSmartphonesHandler,
-  getSmartphoneByIdHandler,
-  getQueriedSmartphonesHandler,
-  updateSmartphoneByIdHandler,
-  updateSmartphonesBulkHandler,
+  createNewSmartphoneBulkController,
+  createNewSmartphoneController,
+  deleteASmartphoneController,
+  deleteAllSmartphonesController,
+  getSmartphoneByIdController,
+  getQueriedSmartphonesController,
+  updateSmartphoneByIdController,
+  updateSmartphonesBulkController,
 } from "./smartphone.controller";
 import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
 import {
@@ -19,29 +19,29 @@ const smartphoneRouter = Router();
 
 smartphoneRouter
   .route("/")
-  .get(getQueriedSmartphonesHandler)
+  .get(getQueriedSmartphonesController)
   .post(
     validateSchemaMiddleware(createSmartphoneJoiSchema, "smartphoneSchema"),
-    createNewSmartphoneHandler
+    createNewSmartphoneController
   );
 
 // separate route for safety reasons (as it deletes all documents in the collection)
-smartphoneRouter.route("/delete-all").delete(deleteAllSmartphonesHandler);
+smartphoneRouter.route("/delete-all").delete(deleteAllSmartphonesController);
 
 // DEV ROUTE
 smartphoneRouter
   .route("/dev")
-  .post(createNewSmartphoneBulkHandler)
+  .post(createNewSmartphoneBulkController)
   .patch(
     validateSchemaMiddleware(updateSmartphoneJoiSchema),
-    updateSmartphonesBulkHandler
+    updateSmartphonesBulkController
   );
 
 // single document routes
 smartphoneRouter
   .route("/:smartphoneId")
-  .get(getSmartphoneByIdHandler)
-  .delete(deleteASmartphoneHandler)
-  .patch(updateSmartphoneByIdHandler);
+  .get(getSmartphoneByIdController)
+  .delete(deleteASmartphoneController)
+  .patch(updateSmartphoneByIdController);
 
 export { smartphoneRouter };

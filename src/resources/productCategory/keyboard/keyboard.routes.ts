@@ -1,13 +1,13 @@
 import { Router } from "express";
 import {
-  createNewKeyboardBulkHandler,
-  createNewKeyboardHandler,
-  deleteAKeyboardHandler,
-  deleteAllKeyboardsHandler,
-  getKeyboardByIdHandler,
-  getQueriedKeyboardsHandler,
-  updateKeyboardByIdHandler,
-  updateKeyboardsBulkHandler,
+  createNewKeyboardBulkController,
+  createNewKeyboardController,
+  deleteAKeyboardController,
+  deleteAllKeyboardsController,
+  getKeyboardByIdController,
+  getQueriedKeyboardsController,
+  updateKeyboardByIdController,
+  updateKeyboardsBulkController,
 } from "./keyboard.controller";
 import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
 import { createKeyboardJoiSchema, updateKeyboardJoiSchema } from "./keyboard.validation";
@@ -16,26 +16,26 @@ const keyboardRouter = Router();
 
 keyboardRouter
   .route("/")
-  .get(getQueriedKeyboardsHandler)
+  .get(getQueriedKeyboardsController)
   .post(
     validateSchemaMiddleware(createKeyboardJoiSchema, "keyboardSchema"),
-    createNewKeyboardHandler
+    createNewKeyboardController
   );
 
 // separate route for safety reasons (as it deletes all documents in the collection)
-keyboardRouter.route("/delete-all").delete(deleteAllKeyboardsHandler);
+keyboardRouter.route("/delete-all").delete(deleteAllKeyboardsController);
 
 // DEV ROUTE
 keyboardRouter
   .route("/dev")
-  .post(createNewKeyboardBulkHandler)
-  .patch(updateKeyboardsBulkHandler);
+  .post(createNewKeyboardBulkController)
+  .patch(updateKeyboardsBulkController);
 
 // single document routes
 keyboardRouter
   .route("/:keyboardId")
-  .get(getKeyboardByIdHandler)
-  .delete(deleteAKeyboardHandler)
-  .patch(validateSchemaMiddleware(updateKeyboardJoiSchema), updateKeyboardByIdHandler);
+  .get(getKeyboardByIdController)
+  .delete(deleteAKeyboardController)
+  .patch(validateSchemaMiddleware(updateKeyboardJoiSchema), updateKeyboardByIdController);
 
 export { keyboardRouter };

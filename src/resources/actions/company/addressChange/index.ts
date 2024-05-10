@@ -8,15 +8,15 @@
 import { AddressChangeModel } from "./addressChange.model";
 import { addressChangeRouter } from "./addressChange.routes";
 import {
-  createNewAddressChangeHandler,
-  createNewAddressChangesBulkHandler,
-  deleteAllAddressChangesHandler,
-  deleteAnAddressChangeHandler,
-  getAddressChangeByIdHandler,
-  getAddressChangesByUserHandler,
-  getQueriedAddressChangesHandler,
-  updateAddressChangeByIdHandler,
-  updateAddressChangesBulkHandler,
+  createNewAddressChangeController,
+  createNewAddressChangesBulkController,
+  deleteAllAddressChangesController,
+  deleteAnAddressChangeController,
+  getAddressChangeByIdController,
+  getAddressChangesByUserController,
+  getQueriedAddressChangesController,
+  updateAddressChangeByIdController,
+  updateAddressChangesBulkController,
 } from "./addressChange.controller";
 import {
   createNewAddressChangeService,
@@ -48,23 +48,23 @@ import type {
 export {
   AddressChangeModel,
   addressChangeRouter,
-  createNewAddressChangeHandler,
+  createNewAddressChangeController,
   createNewAddressChangeService,
-  createNewAddressChangesBulkHandler,
+  createNewAddressChangesBulkController,
   deleteAddressChangeByIdService,
-  deleteAllAddressChangesHandler,
+  deleteAllAddressChangesController,
   deleteAllAddressChangesService,
-  deleteAnAddressChangeHandler,
-  getAddressChangeByIdHandler,
+  deleteAnAddressChangeController,
+  getAddressChangeByIdController,
   getAddressChangeByIdService,
-  getAddressChangesByUserHandler,
+  getAddressChangesByUserController,
   getQueriedAddressChangesByUserService,
-  getQueriedAddressChangesHandler,
+  getQueriedAddressChangesController,
   getQueriedAddressChangesService,
   getQueriedTotalAddressChangesService,
   updateAddressChangeByIdService,
-  updateAddressChangeByIdHandler,
-  updateAddressChangesBulkHandler,
+  updateAddressChangeByIdController,
+  updateAddressChangesBulkController,
 };
 
 export type {

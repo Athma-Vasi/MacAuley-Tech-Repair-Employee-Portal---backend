@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { accessoryRouter } from "./accessory";
 import { cpuRouter } from "./cpu";
-import { getQueriedGpusHandler, gpuRouter } from "./gpu";
+import { getQueriedGpusController, gpuRouter } from "./gpu";
 import { motherboardRouter } from "./motherboard";
 import { ramRouter } from "./ram";
 import { storageRouter } from "./storage";
@@ -28,7 +28,7 @@ productCategoryRouter.use(verifyJWTMiddleware, verifyRoles, assignQueryDefaults)
 
 // productCategoryRouter
 //   .route("/gpu")
-//   .get(assignQueryDefaults, getQueriedGpusHandler);
+//   .get(assignQueryDefaults, getQueriedGpusController);
 
 productCategoryRouter.use("/accessory", accessoryRouter);
 productCategoryRouter.use("/cpu", cpuRouter);

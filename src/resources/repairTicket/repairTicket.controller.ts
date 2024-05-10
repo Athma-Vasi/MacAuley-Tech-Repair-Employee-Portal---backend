@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
 import type { Response } from "express";
@@ -37,7 +37,7 @@ import { getUserByIdService } from "../user";
 // @desc   Create a new repair note
 // @route  POST /repair-ticket
 // @access Private
-const createNewRepairTicketHandler = expressAsyncHandler(
+const createNewRepairTicketController = expressAsyncController(
   async (
     request: CreateNewRepairTicketRequest,
     response: Response<ResourceRequestServerResponse<RepairTicketDocument>>
@@ -76,7 +76,7 @@ const createNewRepairTicketHandler = expressAsyncHandler(
 // @desc   Get all repairTickets
 // @route  GET api/v1/repairTicket
 // @access Private/Admin/Manager
-const getQueriedRepairTicketsHandler = expressAsyncHandler(
+const getQueriedRepairTicketsController = expressAsyncController(
   async (
     request: GetQueriedRepairTicketsRequest,
     response: Response<GetQueriedResourceRequestServerResponse<RepairTicketDocument>>
@@ -122,7 +122,7 @@ const getQueriedRepairTicketsHandler = expressAsyncHandler(
 // @desc   Get all repairTicket requests by user
 // @route  GET api/v1/repairTicket
 // @access Private
-const getRepairTicketsByUserHandler = expressAsyncHandler(
+const getRepairTicketsByUserController = expressAsyncController(
   async (
     request: GetQueriedRepairTicketsByUserRequest,
     response: Response<GetQueriedResourceRequestServerResponse<RepairTicketDocument>>
@@ -176,7 +176,7 @@ const getRepairTicketsByUserHandler = expressAsyncHandler(
 // @desc   Update repairTicket status
 // @route  PATCH api/v1/repairTicket
 // @access Private/Admin/Manager
-const updateRepairTicketByIdHandler = expressAsyncHandler(
+const updateRepairTicketByIdController = expressAsyncController(
   async (
     request: UpdateRepairTicketByIdRequest,
     response: Response<ResourceRequestServerResponse<RepairTicketDocument>>
@@ -219,7 +219,7 @@ const updateRepairTicketByIdHandler = expressAsyncHandler(
 // @desc   Get an repairTicket request
 // @route  GET api/v1/repairTicket
 // @access Private
-const getRepairTicketByIdHandler = expressAsyncHandler(
+const getRepairTicketByIdController = expressAsyncController(
   async (
     request: GetRepairTicketByIdRequest,
     response: Response<ResourceRequestServerResponse<RepairTicketDocument>>
@@ -243,7 +243,7 @@ const getRepairTicketByIdHandler = expressAsyncHandler(
 // @desc   Delete an repairTicket request by its id
 // @route  DELETE api/v1/repairTicket
 // @access Private
-const deleteRepairTicketHandler = expressAsyncHandler(
+const deleteRepairTicketController = expressAsyncController(
   async (request: DeleteRepairTicketRequest, response: Response) => {
     const { repairTicketId } = request.params;
 
@@ -270,7 +270,7 @@ const deleteRepairTicketHandler = expressAsyncHandler(
 // @desc    Delete all repairTicket requests
 // @route   DELETE api/v1/request-resource/repairTicket
 // @access  Private
-const deleteAllRepairTicketsHandler = expressAsyncHandler(
+const deleteAllRepairTicketsController = expressAsyncController(
   async (_request: DeleteAllRepairTicketsRequest, response: Response) => {
     const deletedResult: DeleteResult = await deleteAllRepairTicketsService();
 
@@ -293,7 +293,7 @@ const deleteAllRepairTicketsHandler = expressAsyncHandler(
 // @desc   Create new repairTicket requests in bulk
 // @route  POST api/v1/repairTicket
 // @access Private
-const createNewRepairTicketsBulkHandler = expressAsyncHandler(
+const createNewRepairTicketsBulkController = expressAsyncController(
   async (
     request: CreateNewRepairTicketsBulkRequest,
     response: Response<ResourceRequestServerResponse<RepairTicketDocument>>
@@ -343,7 +343,7 @@ const createNewRepairTicketsBulkHandler = expressAsyncHandler(
 // @desc   Update Repair Notes in bulk
 // @route  PATCH api/v1/repairTicket
 // @access Private
-const updateRepairTicketsBulkHandler = expressAsyncHandler(
+const updateRepairTicketsBulkController = expressAsyncController(
   async (
     request: UpdateRepairTicketsBulkRequest,
     response: Response<ResourceRequestServerResponse<RepairTicketDocument>>
@@ -392,13 +392,13 @@ const updateRepairTicketsBulkHandler = expressAsyncHandler(
 );
 
 export {
-  createNewRepairTicketHandler,
-  getQueriedRepairTicketsHandler,
-  getRepairTicketsByUserHandler,
-  getRepairTicketByIdHandler,
-  deleteRepairTicketHandler,
-  deleteAllRepairTicketsHandler,
-  updateRepairTicketByIdHandler,
-  createNewRepairTicketsBulkHandler,
-  updateRepairTicketsBulkHandler,
+  createNewRepairTicketController,
+  getQueriedRepairTicketsController,
+  getRepairTicketsByUserController,
+  getRepairTicketByIdController,
+  deleteRepairTicketController,
+  deleteAllRepairTicketsController,
+  updateRepairTicketByIdController,
+  createNewRepairTicketsBulkController,
+  updateRepairTicketsBulkController,
 };

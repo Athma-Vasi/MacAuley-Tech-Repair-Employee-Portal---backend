@@ -1,14 +1,14 @@
 import { Router } from "express";
 import {
-  createNewSurveyHandler,
-  getQueriedSurveysHandler,
-  getSurveysByUserHandler,
-  getSurveyByIdHandler,
-  deleteSurveyHandler,
-  deleteAllSurveysHandler,
-  updateSurveyByIdHandler,
-  createNewSurveysBulkHandler,
-  updateSurveysBulkHandler,
+  createNewSurveyController,
+  getQueriedSurveysController,
+  getSurveysByUserController,
+  getSurveyByIdController,
+  deleteSurveyController,
+  deleteAllSurveysController,
+  updateSurveyByIdController,
+  createNewSurveysBulkController,
+  updateSurveysBulkController,
 } from "./survey.controller";
 import { validateSchemaMiddleware } from "../../../../middlewares/validateSchema";
 import { createSurveyJoiSchema, updateSurveyJoiSchema } from "./survey.validation";
@@ -17,26 +17,26 @@ const surveyRouter = Router();
 
 surveyRouter
   .route("/")
-  .get(getQueriedSurveysHandler)
+  .get(getQueriedSurveysController)
   .post(
     validateSchemaMiddleware(createSurveyJoiSchema, "surveySchema"),
-    createNewSurveyHandler
+    createNewSurveyController
   );
 
-surveyRouter.route("/delete-all").delete(deleteAllSurveysHandler);
+surveyRouter.route("/delete-all").delete(deleteAllSurveysController);
 
-surveyRouter.route("/user").get(getSurveysByUserHandler);
+surveyRouter.route("/user").get(getSurveysByUserController);
 
 // DEV ROUTES
 surveyRouter
   .route("/dev")
-  .post(createNewSurveysBulkHandler)
-  .patch(updateSurveysBulkHandler);
+  .post(createNewSurveysBulkController)
+  .patch(updateSurveysBulkController);
 
 surveyRouter
   .route("/:surveyId")
-  .get(getSurveyByIdHandler)
-  .delete(deleteSurveyHandler)
-  .patch(validateSchemaMiddleware(updateSurveyJoiSchema), updateSurveyByIdHandler);
+  .get(getSurveyByIdController)
+  .delete(deleteSurveyController)
+  .patch(validateSchemaMiddleware(updateSurveyJoiSchema), updateSurveyByIdController);
 
 export { surveyRouter };

@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
 import type { Response } from "express";
@@ -37,7 +37,7 @@ import { getUserByIdService } from "../../../user";
 // @desc   Create a new event
 // @route  POST api/v1/actions/general/event
 // @access Private
-const createNewEventHandler = expressAsyncHandler(
+const createNewEventController = expressAsyncController(
   async (
     request: CreateNewEventRequest,
     response: Response<ResourceRequestServerResponse<EventDocument>>
@@ -64,7 +64,7 @@ const createNewEventHandler = expressAsyncHandler(
 // @desc   Get all events
 // @route  GET api/v1/actions/general/event
 // @access Private/Admin/Manager
-const getQueriedEventsHandler = expressAsyncHandler(
+const getQueriedEventsController = expressAsyncController(
   async (
     request: GetQueriedEventsRequest,
     response: Response<GetQueriedResourceRequestServerResponse<EventDocument>>
@@ -110,7 +110,7 @@ const getQueriedEventsHandler = expressAsyncHandler(
 // @desc   Get all event requests by user
 // @route  GET api/v1/actions/general/event
 // @access Private
-const getEventsByUserHandler = expressAsyncHandler(
+const getEventsByUserController = expressAsyncController(
   async (
     request: GetQueriedEventsByUserRequest,
     response: Response<GetQueriedResourceRequestServerResponse<EventDocument>>
@@ -164,7 +164,7 @@ const getEventsByUserHandler = expressAsyncHandler(
 // @desc   Update event status
 // @route  PATCH api/v1/actions/general/event
 // @access Private/Admin/Manager
-const updateEventByIdHandler = expressAsyncHandler(
+const updateEventByIdController = expressAsyncController(
   async (
     request: UpdateEventByIdRequest,
     response: Response<ResourceRequestServerResponse<EventDocument>>
@@ -207,7 +207,7 @@ const updateEventByIdHandler = expressAsyncHandler(
 // @desc   Get an event request
 // @route  GET api/v1/actions/general/event
 // @access Private
-const getEventByIdHandler = expressAsyncHandler(
+const getEventByIdController = expressAsyncController(
   async (
     request: GetEventByIdRequest,
     response: Response<ResourceRequestServerResponse<EventDocument>>
@@ -229,7 +229,7 @@ const getEventByIdHandler = expressAsyncHandler(
 // @desc   Delete an event request by its id
 // @route  DELETE api/v1/actions/general/event
 // @access Private
-const deleteEventHandler = expressAsyncHandler(
+const deleteEventController = expressAsyncController(
   async (request: DeleteEventRequest, response: Response) => {
     const { eventId } = request.params;
 
@@ -254,7 +254,7 @@ const deleteEventHandler = expressAsyncHandler(
 // @desc    Delete all event requests
 // @route   DELETE api/v1/actions/general/request-resource/event
 // @access  Private
-const deleteAllEventsHandler = expressAsyncHandler(
+const deleteAllEventsController = expressAsyncController(
   async (_request: DeleteAllEventsRequest, response: Response) => {
     const deletedResult: DeleteResult = await deleteAllEventsService();
 
@@ -277,7 +277,7 @@ const deleteAllEventsHandler = expressAsyncHandler(
 // @desc   Create new event requests in bulk
 // @route  POST api/v1/actions/general/event
 // @access Private
-const createNewEventsBulkHandler = expressAsyncHandler(
+const createNewEventsBulkController = expressAsyncController(
   async (
     request: CreateNewEventsBulkRequest,
     response: Response<ResourceRequestServerResponse<EventDocument>>
@@ -320,7 +320,7 @@ const createNewEventsBulkHandler = expressAsyncHandler(
 // @desc   Update Events in bulk
 // @route  PATCH api/v1/actions/general/event
 // @access Private
-const updateEventsBulkHandler = expressAsyncHandler(
+const updateEventsBulkController = expressAsyncController(
   async (
     request: UpdateEventsBulkRequest,
     response: Response<ResourceRequestServerResponse<EventDocument>>
@@ -365,13 +365,13 @@ const updateEventsBulkHandler = expressAsyncHandler(
 );
 
 export {
-  createNewEventHandler,
-  getQueriedEventsHandler,
-  getEventsByUserHandler,
-  getEventByIdHandler,
-  deleteEventHandler,
-  deleteAllEventsHandler,
-  updateEventByIdHandler,
-  createNewEventsBulkHandler,
-  updateEventsBulkHandler,
+  createNewEventController,
+  getQueriedEventsController,
+  getEventsByUserController,
+  getEventByIdController,
+  deleteEventController,
+  deleteAllEventsController,
+  updateEventByIdController,
+  createNewEventsBulkController,
+  updateEventsBulkController,
 };

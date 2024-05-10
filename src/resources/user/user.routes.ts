@@ -2,16 +2,16 @@ import { Router } from "express";
 
 import { assignQueryDefaults, verifyJWTMiddleware, verifyRoles } from "../../middlewares";
 import {
-  createNewUserHandler,
-  createNewUsersBulkHandler,
-  deleteAllUsersHandler,
-  deleteUserHandler,
-  getAllUsersBulkHandler,
-  getQueriedUsersHandler,
-  getUserByIdHandler,
-  updateUserByIdHandler,
-  updateUserFieldsBulkHandler,
-  updateUserPasswordHandler,
+  createNewUserController,
+  createNewUsersBulkController,
+  deleteAllUsersController,
+  deleteUserController,
+  getAllUsersBulkController,
+  getQueriedUsersController,
+  getUserByIdController,
+  updateUserByIdController,
+  updateUserFieldsBulkController,
+  updateUserPasswordController,
 } from "./user.controller";
 import { validateSchemaMiddleware } from "../../middlewares/validateSchema";
 import { createUserJoiSchema, updateUserJoiSchema } from "./user.validation";
@@ -20,36 +20,36 @@ const userRouter = Router();
 
 userRouter
   .route("/")
-  .get(verifyJWTMiddleware, verifyRoles, assignQueryDefaults, getQueriedUsersHandler)
+  .get(verifyJWTMiddleware, verifyRoles, assignQueryDefaults, getQueriedUsersController)
   .post(
     validateSchemaMiddleware(createUserJoiSchema, "userSchema"),
-    createNewUserHandler
+    createNewUserController
   );
 
 userRouter
   .route("/update-password")
-  .put(verifyJWTMiddleware, verifyRoles, updateUserPasswordHandler);
+  .put(verifyJWTMiddleware, verifyRoles, updateUserPasswordController);
 
 userRouter
   .route("/delete-all")
-  .delete(verifyJWTMiddleware, verifyRoles, deleteAllUsersHandler);
+  .delete(verifyJWTMiddleware, verifyRoles, deleteAllUsersController);
 
 // DEV ROUTES
 userRouter
   .route("/dev")
-  .post(verifyJWTMiddleware, verifyRoles, createNewUsersBulkHandler)
-  .get(verifyJWTMiddleware, verifyRoles, assignQueryDefaults, getAllUsersBulkHandler)
-  .patch(verifyJWTMiddleware, verifyRoles, updateUserFieldsBulkHandler);
+  .post(verifyJWTMiddleware, verifyRoles, createNewUsersBulkController)
+  .get(verifyJWTMiddleware, verifyRoles, assignQueryDefaults, getAllUsersBulkController)
+  .patch(verifyJWTMiddleware, verifyRoles, updateUserFieldsBulkController);
 
 userRouter
   .route("/:userId")
-  .get(verifyJWTMiddleware, verifyRoles, assignQueryDefaults, getUserByIdHandler)
-  .delete(verifyJWTMiddleware, verifyRoles, deleteUserHandler)
+  .get(verifyJWTMiddleware, verifyRoles, assignQueryDefaults, getUserByIdController)
+  .delete(verifyJWTMiddleware, verifyRoles, deleteUserController)
   .patch(
     verifyJWTMiddleware,
     verifyRoles,
     validateSchemaMiddleware(updateUserJoiSchema),
-    updateUserByIdHandler
+    updateUserByIdController
   );
 
 export { userRouter };

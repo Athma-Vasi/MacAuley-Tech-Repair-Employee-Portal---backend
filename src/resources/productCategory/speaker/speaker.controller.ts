@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
 import type { Response } from "express";
@@ -38,7 +38,7 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 // @desc   Create new speaker
 // @route  POST /api/v1/product-category/speaker
 // @access Private/Admin/Manager
-const createNewSpeakerHandler = expressAsyncHandler(
+const createNewSpeakerController = expressAsyncController(
   async (
     request: CreateNewSpeakerRequest,
     response: Response<ResourceRequestServerResponse<SpeakerDocument>>
@@ -66,7 +66,7 @@ const createNewSpeakerHandler = expressAsyncHandler(
 // @desc   Create new speakers bulk
 // @route  POST /api/v1/product-category/speaker/dev
 // @access Private/Admin/Manager
-const createNewSpeakerBulkHandler = expressAsyncHandler(
+const createNewSpeakerBulkController = expressAsyncController(
   async (
     request: CreateNewSpeakerBulkRequest,
     response: Response<ResourceRequestServerResponse<SpeakerDocument>>
@@ -113,7 +113,7 @@ const createNewSpeakerBulkHandler = expressAsyncHandler(
 // @desc   Update speakers bulk
 // @route  PATCH /api/v1/product-category/speaker/dev
 // @access Private/Admin/Manager
-const updateSpeakersBulkHandler = expressAsyncHandler(
+const updateSpeakersBulkController = expressAsyncController(
   async (
     request: UpdateSpeakersBulkRequest,
     response: Response<ResourceRequestServerResponse<SpeakerDocument>>
@@ -172,7 +172,7 @@ const updateSpeakersBulkHandler = expressAsyncHandler(
 // @desc   Get all speakers
 // @route  GET /api/v1/product-category/speaker
 // @access Private/Admin/Manager
-const getQueriedSpeakersHandler = expressAsyncHandler(
+const getQueriedSpeakersController = expressAsyncController(
   async (
     request: GetQueriedSpeakersRequest,
     response: Response<GetQueriedResourceRequestServerResponse<SpeakerDocument>>
@@ -217,7 +217,7 @@ const getQueriedSpeakersHandler = expressAsyncHandler(
 // @desc   Get speaker by id
 // @route  GET /api/v1/product-category/speaker/:speakerId
 // @access Private/Admin/Manager
-const getSpeakerByIdHandler = expressAsyncHandler(
+const getSpeakerByIdController = expressAsyncController(
   async (
     request: GetSpeakerByIdRequest,
     response: Response<ResourceRequestServerResponse<SpeakerDocument>>
@@ -241,7 +241,7 @@ const getSpeakerByIdHandler = expressAsyncHandler(
 // @desc   Update a speaker by id
 // @route  PUT /api/v1/product-category/speaker/:speakerId
 // @access Private/Admin/Manager
-const updateSpeakerByIdHandler = expressAsyncHandler(
+const updateSpeakerByIdController = expressAsyncController(
   async (
     request: UpdateSpeakerByIdRequest,
     response: Response<ResourceRequestServerResponse<SpeakerDocument>>
@@ -276,7 +276,7 @@ const updateSpeakerByIdHandler = expressAsyncHandler(
 // @desc   Delete all speakers
 // @route  DELETE /api/v1/product-category/speaker
 // @access Private/Admin/Manager
-const deleteAllSpeakersHandler = expressAsyncHandler(
+const deleteAllSpeakersController = expressAsyncController(
   async (
     _request: DeleteAllSpeakersRequest,
     response: Response<ResourceRequestServerResponse<SpeakerDocument>>
@@ -334,7 +334,7 @@ const deleteAllSpeakersHandler = expressAsyncHandler(
 // @desc   Delete a speaker by id
 // @route  DELETE /api/v1/product-category/speaker/:speakerId
 // @access Private/Admin/Manager
-const deleteASpeakerHandler = expressAsyncHandler(
+const deleteASpeakerController = expressAsyncController(
   async (
     request: DeleteASpeakerRequest,
     response: Response<ResourceRequestServerResponse<SpeakerDocument>>
@@ -400,12 +400,12 @@ const deleteASpeakerHandler = expressAsyncHandler(
 );
 
 export {
-  createNewSpeakerBulkHandler,
-  createNewSpeakerHandler,
-  deleteASpeakerHandler,
-  deleteAllSpeakersHandler,
-  getSpeakerByIdHandler,
-  getQueriedSpeakersHandler,
-  updateSpeakerByIdHandler,
-  updateSpeakersBulkHandler,
+  createNewSpeakerBulkController,
+  createNewSpeakerController,
+  deleteASpeakerController,
+  deleteAllSpeakersController,
+  getSpeakerByIdController,
+  getQueriedSpeakersController,
+  updateSpeakerByIdController,
+  updateSpeakersBulkController,
 };

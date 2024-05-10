@@ -8,15 +8,15 @@
 import { ErrorLogModel } from "./errorLog.model";
 import { errorLogRouter } from "./errorLog.routes";
 import {
-  createNewErrorLogHandler,
-  createNewErrorLogsBulkHandler,
-  deleteAllErrorLogsHandler,
-  deleteAnErrorLogHandler,
-  getErrorLogByIdHandler,
-  getErrorLogsByUserHandler,
-  getQueriedErrorLogsHandler,
-  updateErrorLogByIdHandler,
-  updateErrorLogsBulkHandler,
+  createNewErrorLogController,
+  createNewErrorLogsBulkController,
+  deleteAllErrorLogsController,
+  deleteAnErrorLogController,
+  getErrorLogByIdController,
+  getErrorLogsByUserController,
+  getQueriedErrorLogsController,
+  updateErrorLogByIdController,
+  updateErrorLogsBulkController,
 } from "./errorLog.controller";
 import {
   createNewErrorLogService,
@@ -48,23 +48,23 @@ import type {
 export {
   ErrorLogModel,
   errorLogRouter,
-  createNewErrorLogHandler,
+  createNewErrorLogController,
   createNewErrorLogService,
-  createNewErrorLogsBulkHandler,
+  createNewErrorLogsBulkController,
   deleteErrorLogByIdService,
-  deleteAllErrorLogsHandler,
+  deleteAllErrorLogsController,
   deleteAllErrorLogsService,
-  deleteAnErrorLogHandler,
-  getErrorLogByIdHandler,
+  deleteAnErrorLogController,
+  getErrorLogByIdController,
   getErrorLogByIdService,
-  getErrorLogsByUserHandler,
+  getErrorLogsByUserController,
   getQueriedErrorLogsByUserService,
-  getQueriedErrorLogsHandler,
+  getQueriedErrorLogsController,
   getQueriedErrorLogsService,
   getQueriedTotalErrorLogsService,
   updateErrorLogByIdService,
-  updateErrorLogByIdHandler,
-  updateErrorLogsBulkHandler,
+  updateErrorLogByIdController,
+  updateErrorLogsBulkController,
 };
 
 export type {

@@ -8,15 +8,15 @@
 import { PrinterIssueModel } from "./printerIssue.model";
 import { printerIssueRouter } from "./printerIssue.routes";
 import {
-  createNewPrinterIssueHandler,
-  createNewPrinterIssuesBulkHandler,
-  deleteAllPrinterIssuesHandler,
-  deletePrinterIssueHandler,
-  getPrinterIssueByIdHandler,
-  getPrinterIssuesByUserHandler,
-  getQueriedPrinterIssuesHandler,
-  updatePrinterIssueByIdHandler,
-  updatePrinterIssuesBulkHandler,
+  createNewPrinterIssueController,
+  createNewPrinterIssuesBulkController,
+  deleteAllPrinterIssuesController,
+  deletePrinterIssueController,
+  getPrinterIssueByIdController,
+  getPrinterIssuesByUserController,
+  getQueriedPrinterIssuesController,
+  updatePrinterIssueByIdController,
+  updatePrinterIssuesBulkController,
 } from "./printerIssue.controller";
 import {
   createNewPrinterIssueService,
@@ -52,23 +52,23 @@ import type {
 export {
   PrinterIssueModel,
   printerIssueRouter,
-  createNewPrinterIssueHandler,
+  createNewPrinterIssueController,
   createNewPrinterIssueService,
-  createNewPrinterIssuesBulkHandler,
-  deleteAllPrinterIssuesHandler,
+  createNewPrinterIssuesBulkController,
+  deleteAllPrinterIssuesController,
   deleteAllPrinterIssuesService,
   deletePrinterIssueByIdService,
-  deletePrinterIssueHandler,
-  getPrinterIssueByIdHandler,
+  deletePrinterIssueController,
+  getPrinterIssueByIdController,
   getPrinterIssueByIdService,
-  getPrinterIssuesByUserHandler,
+  getPrinterIssuesByUserController,
   getQueriedPrinterIssuesByUserService,
-  getQueriedPrinterIssuesHandler,
+  getQueriedPrinterIssuesController,
   getQueriedPrinterIssuesService,
   getQueriedTotalPrinterIssuesService,
   updatePrinterIssueByIdService,
-  updatePrinterIssueByIdHandler,
-  updatePrinterIssuesBulkHandler,
+  updatePrinterIssueByIdController,
+  updatePrinterIssuesBulkController,
 };
 
 export type {

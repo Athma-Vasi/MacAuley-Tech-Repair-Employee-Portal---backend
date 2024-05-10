@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { Response } from "express";
 import type {
@@ -43,7 +43,7 @@ import {
 // @desc   Create new user
 // @route  POST /user
 // @access Private
-const createNewUserHandler = expressAsyncHandler(
+const createNewUserController = expressAsyncController(
   async (
     request: CreateNewUserRequest,
     response: Response<ResourceRequestServerResponse<UserDocument>>
@@ -106,7 +106,7 @@ const createNewUserHandler = expressAsyncHandler(
 // @desc   Get all users
 // @route  GET /user
 // @access Private
-const getQueriedUsersHandler = expressAsyncHandler(
+const getQueriedUsersController = expressAsyncController(
   async (
     request: GetAllUsersRequest,
     response: Response<GetQueriedResourceRequestServerResponse<UserDocument>>
@@ -151,7 +151,7 @@ const getQueriedUsersHandler = expressAsyncHandler(
 // @desc   Get a user by id
 // @route  GET /user/:id
 // @access Private
-const getUserByIdHandler = expressAsyncHandler(
+const getUserByIdController = expressAsyncController(
   async (
     request: GetUserByIdRequest,
     response: Response<ResourceRequestServerResponse<UserDocument>>
@@ -174,7 +174,7 @@ const getUserByIdHandler = expressAsyncHandler(
 // @desc   Delete a user
 // @route  DELETE /user
 // @access Private
-const deleteUserHandler = expressAsyncHandler(
+const deleteUserController = expressAsyncController(
   async (
     request: DeleteUserRequest,
     response: Response<ResourceRequestServerResponse<UserDocument>>
@@ -209,7 +209,7 @@ const deleteUserHandler = expressAsyncHandler(
 // @desc   Update a user
 // @route  PATCH /user
 // @access Private
-const updateUserByIdHandler = expressAsyncHandler(
+const updateUserByIdController = expressAsyncController(
   async (
     request: UpdateUserRequest,
     response: Response<ResourceRequestServerResponse<UserDocument>>
@@ -245,7 +245,7 @@ const updateUserByIdHandler = expressAsyncHandler(
 // @desc   update user password
 // @route  PATCH /user/password
 // @access Private
-const updateUserPasswordHandler = expressAsyncHandler(
+const updateUserPasswordController = expressAsyncController(
   async (
     request: UpdateUserPasswordRequest,
     response: Response<ResourceRequestServerResponse<UserDocument>>
@@ -298,7 +298,7 @@ const updateUserPasswordHandler = expressAsyncHandler(
 // @desc   Delete all users
 // @route  DELETE /api/v1/user/delete-all
 // @access Private
-const deleteAllUsersHandler = expressAsyncHandler(
+const deleteAllUsersController = expressAsyncController(
   async (
     request: DeleteUserRequest,
     response: Response<ResourceRequestServerResponse<UserDocument>>
@@ -323,7 +323,7 @@ const deleteAllUsersHandler = expressAsyncHandler(
 // @desc   create new users in bulk
 // @route  POST /api/v1/user/dev
 // @access Private
-const createNewUsersBulkHandler = expressAsyncHandler(
+const createNewUsersBulkController = expressAsyncController(
   async (
     request: CreateNewUsersBulkRequest,
     response: Response<ResourceRequestServerResponse<UserDocument>>
@@ -413,7 +413,7 @@ const createNewUsersBulkHandler = expressAsyncHandler(
 // @desc   Update user fields in bulk
 // @route  PATCH /api/v1/user/dev
 // @access Private
-const updateUserFieldsBulkHandler = expressAsyncHandler(
+const updateUserFieldsBulkController = expressAsyncController(
   async (
     request: UpdateUserFieldsBulkRequest,
     response: Response<ResourceRequestServerResponse<UserDocument>>
@@ -463,7 +463,7 @@ const updateUserFieldsBulkHandler = expressAsyncHandler(
 // @desc   get all users bulk (no filter, projection or options)
 // @route  GET /api/v1/user/dev
 // @access Private
-const getAllUsersBulkHandler = expressAsyncHandler(
+const getAllUsersBulkController = expressAsyncController(
   async (
     request: GetAllUsersBulkRequest,
     response: Response<ResourceRequestServerResponse<UserDocument>>
@@ -486,14 +486,14 @@ const getAllUsersBulkHandler = expressAsyncHandler(
 );
 
 export {
-  createNewUserHandler,
-  createNewUsersBulkHandler,
-  deleteUserHandler,
-  getAllUsersBulkHandler,
-  getQueriedUsersHandler,
-  getUserByIdHandler,
-  updateUserByIdHandler,
-  updateUserFieldsBulkHandler,
-  updateUserPasswordHandler,
-  deleteAllUsersHandler,
+  createNewUserController,
+  createNewUsersBulkController,
+  deleteUserController,
+  getAllUsersBulkController,
+  getQueriedUsersController,
+  getUserByIdController,
+  updateUserByIdController,
+  updateUserFieldsBulkController,
+  updateUserPasswordController,
+  deleteAllUsersController,
 };

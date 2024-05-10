@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
 import type { Response } from "express";
@@ -18,7 +18,7 @@ import type {
   QueryObjectParsedWithDefaults,
   ResourceRequestServerResponse,
 } from "../../../types";
-import type { KeyboardDocument,  } from "./keyboard.model";
+import type { KeyboardDocument } from "./keyboard.model";
 
 import {
   createNewKeyboardService,
@@ -30,19 +30,15 @@ import {
   returnAllKeyboardsUploadedFileIdsService,
   updateKeyboardByIdService,
 } from "./keyboard.service";
-import {
-  deleteFileUploadByIdService,
-} from "../../fileUpload";
+import { deleteFileUploadByIdService } from "../../fileUpload";
 
-import {
-  deleteAProductReviewService,
-} from "../../productReview";
+import { deleteAProductReviewService } from "../../productReview";
 import { removeUndefinedAndNullValues } from "../../../utils";
 
 // @desc   Create new keyboard
 // @route  POST /api/v1/product-category/keyboard
 // @access Private/Admin/Manager
-const createNewKeyboardHandler = expressAsyncHandler(
+const createNewKeyboardController = expressAsyncController(
   async (
     request: CreateNewKeyboardRequest,
     response: Response<ResourceRequestServerResponse<KeyboardDocument>>
@@ -72,7 +68,7 @@ const createNewKeyboardHandler = expressAsyncHandler(
 // @desc   Create new keyboards bulk
 // @route  POST /api/v1/product-category/keyboard/dev
 // @access Private/Admin/Manager
-const createNewKeyboardBulkHandler = expressAsyncHandler(
+const createNewKeyboardBulkController = expressAsyncController(
   async (
     request: CreateNewKeyboardBulkRequest,
     response: Response<ResourceRequestServerResponse<KeyboardDocument>>
@@ -119,7 +115,7 @@ const createNewKeyboardBulkHandler = expressAsyncHandler(
 // @desc   Update keyboards bulk
 // @route  PATCH /api/v1/product-category/keyboard/dev
 // @access Private/Admin/Manager
-const updateKeyboardsBulkHandler = expressAsyncHandler(
+const updateKeyboardsBulkController = expressAsyncController(
   async (
     request: UpdateKeyboardsBulkRequest,
     response: Response<ResourceRequestServerResponse<KeyboardDocument>>
@@ -178,7 +174,7 @@ const updateKeyboardsBulkHandler = expressAsyncHandler(
 // @desc   Get all keyboards
 // @route  GET /api/v1/product-category/keyboard
 // @access Private/Admin/Manager
-const getQueriedKeyboardsHandler = expressAsyncHandler(
+const getQueriedKeyboardsController = expressAsyncController(
   async (
     request: GetQueriedKeyboardsRequest,
     response: Response<GetQueriedResourceRequestServerResponse<KeyboardDocument>>
@@ -223,7 +219,7 @@ const getQueriedKeyboardsHandler = expressAsyncHandler(
 // @desc   Get keyboard by id
 // @route  GET /api/v1/product-category/keyboard/:keyboardId
 // @access Private/Admin/Manager
-const getKeyboardByIdHandler = expressAsyncHandler(
+const getKeyboardByIdController = expressAsyncController(
   async (
     request: GetKeyboardByIdRequest,
     response: Response<ResourceRequestServerResponse<KeyboardDocument>>
@@ -247,7 +243,7 @@ const getKeyboardByIdHandler = expressAsyncHandler(
 // @desc   Update a keyboard by id
 // @route  PUT /api/v1/product-category/keyboard/:keyboardId
 // @access Private/Admin/Manager
-const updateKeyboardByIdHandler = expressAsyncHandler(
+const updateKeyboardByIdController = expressAsyncController(
   async (
     request: UpdateKeyboardByIdRequest,
     response: Response<ResourceRequestServerResponse<KeyboardDocument>>
@@ -282,7 +278,7 @@ const updateKeyboardByIdHandler = expressAsyncHandler(
 // @desc   Delete all keyboards
 // @route  DELETE /api/v1/product-category/keyboard
 // @access Private/Admin/Manager
-const deleteAllKeyboardsHandler = expressAsyncHandler(
+const deleteAllKeyboardsController = expressAsyncController(
   async (
     _request: DeleteAllKeyboardsRequest,
     response: Response<ResourceRequestServerResponse<KeyboardDocument>>
@@ -340,7 +336,7 @@ const deleteAllKeyboardsHandler = expressAsyncHandler(
 // @desc   Delete a keyboard by id
 // @route  DELETE /api/v1/product-category/keyboard/:keyboardId
 // @access Private/Admin/Manager
-const deleteAKeyboardHandler = expressAsyncHandler(
+const deleteAKeyboardController = expressAsyncController(
   async (
     request: DeleteAKeyboardRequest,
     response: Response<ResourceRequestServerResponse<KeyboardDocument>>
@@ -406,12 +402,12 @@ const deleteAKeyboardHandler = expressAsyncHandler(
 );
 
 export {
-  createNewKeyboardBulkHandler,
-  createNewKeyboardHandler,
-  deleteAKeyboardHandler,
-  deleteAllKeyboardsHandler,
-  getKeyboardByIdHandler,
-  getQueriedKeyboardsHandler,
-  updateKeyboardByIdHandler,
-  updateKeyboardsBulkHandler,
+  createNewKeyboardBulkController,
+  createNewKeyboardController,
+  deleteAKeyboardController,
+  deleteAllKeyboardsController,
+  getKeyboardByIdController,
+  getQueriedKeyboardsController,
+  updateKeyboardByIdController,
+  updateKeyboardsBulkController,
 };

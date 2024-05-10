@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
 import type { Response } from "express";
@@ -38,7 +38,7 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 // @desc   Create new tablet
 // @route  POST /api/v1/product-category/tablet
 // @access Private/Admin/Manager
-const createNewTabletHandler = expressAsyncHandler(
+const createNewTabletController = expressAsyncController(
   async (
     request: CreateNewTabletRequest,
     response: Response<ResourceRequestServerResponse<TabletDocument>>
@@ -66,7 +66,7 @@ const createNewTabletHandler = expressAsyncHandler(
 // @desc   Create new tablets bulk
 // @route  POST /api/v1/product-category/tablet/dev
 // @access Private/Admin/Manager
-const createNewTabletBulkHandler = expressAsyncHandler(
+const createNewTabletBulkController = expressAsyncController(
   async (
     request: CreateNewTabletBulkRequest,
     response: Response<ResourceRequestServerResponse<TabletDocument>>
@@ -113,7 +113,7 @@ const createNewTabletBulkHandler = expressAsyncHandler(
 // @desc   Update tablets bulk
 // @route  PATCH /api/v1/product-category/tablet/dev
 // @access Private/Admin/Manager
-const updateTabletsBulkHandler = expressAsyncHandler(
+const updateTabletsBulkController = expressAsyncController(
   async (
     request: UpdateTabletsBulkRequest,
     response: Response<ResourceRequestServerResponse<TabletDocument>>
@@ -172,7 +172,7 @@ const updateTabletsBulkHandler = expressAsyncHandler(
 // @desc   Get all tablets
 // @route  GET /api/v1/product-category/tablet
 // @access Private/Admin/Manager
-const getQueriedTabletsHandler = expressAsyncHandler(
+const getQueriedTabletsController = expressAsyncController(
   async (
     request: GetQueriedTabletsRequest,
     response: Response<GetQueriedResourceRequestServerResponse<TabletDocument>>
@@ -217,7 +217,7 @@ const getQueriedTabletsHandler = expressAsyncHandler(
 // @desc   Get tablet by id
 // @route  GET /api/v1/product-category/tablet/:tabletId
 // @access Private/Admin/Manager
-const getTabletByIdHandler = expressAsyncHandler(
+const getTabletByIdController = expressAsyncController(
   async (
     request: GetTabletByIdRequest,
     response: Response<ResourceRequestServerResponse<TabletDocument>>
@@ -241,7 +241,7 @@ const getTabletByIdHandler = expressAsyncHandler(
 // @desc   Update a tablet by id
 // @route  PUT /api/v1/product-category/tablet/:tabletId
 // @access Private/Admin/Manager
-const updateTabletByIdHandler = expressAsyncHandler(
+const updateTabletByIdController = expressAsyncController(
   async (
     request: UpdateTabletByIdRequest,
     response: Response<ResourceRequestServerResponse<TabletDocument>>
@@ -276,7 +276,7 @@ const updateTabletByIdHandler = expressAsyncHandler(
 // @desc   Delete all tablets
 // @route  DELETE /api/v1/product-category/tablet
 // @access Private/Admin/Manager
-const deleteAllTabletsHandler = expressAsyncHandler(
+const deleteAllTabletsController = expressAsyncController(
   async (
     _request: DeleteAllTabletsRequest,
     response: Response<ResourceRequestServerResponse<TabletDocument>>
@@ -334,7 +334,7 @@ const deleteAllTabletsHandler = expressAsyncHandler(
 // @desc   Delete a tablet by id
 // @route  DELETE /api/v1/product-category/tablet/:tabletId
 // @access Private/Admin/Manager
-const deleteATabletHandler = expressAsyncHandler(
+const deleteATabletController = expressAsyncController(
   async (
     request: DeleteATabletRequest,
     response: Response<ResourceRequestServerResponse<TabletDocument>>
@@ -400,12 +400,12 @@ const deleteATabletHandler = expressAsyncHandler(
 );
 
 export {
-  createNewTabletBulkHandler,
-  createNewTabletHandler,
-  deleteATabletHandler,
-  deleteAllTabletsHandler,
-  getTabletByIdHandler,
-  getQueriedTabletsHandler,
-  updateTabletByIdHandler,
-  updateTabletsBulkHandler,
+  createNewTabletBulkController,
+  createNewTabletController,
+  deleteATabletController,
+  deleteAllTabletsController,
+  getTabletByIdController,
+  getQueriedTabletsController,
+  updateTabletByIdController,
+  updateTabletsBulkController,
 };

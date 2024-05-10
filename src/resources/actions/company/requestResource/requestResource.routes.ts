@@ -1,14 +1,14 @@
 import { Router } from "express";
 import {
-  createNewRequestResourceHandler,
-  getQueriedRequestResourcesHandler,
-  getRequestResourcesByUserHandler,
-  getRequestResourceByIdHandler,
-  deleteRequestResourceHandler,
-  deleteAllRequestResourcesHandler,
-  updateRequestResourceByIdHandler,
-  createNewRequestResourcesBulkHandler,
-  updateRequestResourcesBulkHandler,
+  createNewRequestResourceController,
+  getQueriedRequestResourcesController,
+  getRequestResourcesByUserController,
+  getRequestResourceByIdController,
+  deleteRequestResourceController,
+  deleteAllRequestResourcesController,
+  updateRequestResourceByIdController,
+  createNewRequestResourcesBulkController,
+  updateRequestResourcesBulkController,
 } from "./requestResource.controller";
 import { validateSchemaMiddleware } from "../../../../middlewares/validateSchema";
 import {
@@ -20,29 +20,29 @@ const requestResourceRouter = Router();
 
 requestResourceRouter
   .route("/")
-  .get(getQueriedRequestResourcesHandler)
+  .get(getQueriedRequestResourcesController)
   .post(
     validateSchemaMiddleware(createRequestResourceJoiSchema, "requestResourceSchema"),
-    createNewRequestResourceHandler
+    createNewRequestResourceController
   );
 
-requestResourceRouter.route("/delete-all").delete(deleteAllRequestResourcesHandler);
+requestResourceRouter.route("/delete-all").delete(deleteAllRequestResourcesController);
 
-requestResourceRouter.route("/user").get(getRequestResourcesByUserHandler);
+requestResourceRouter.route("/user").get(getRequestResourcesByUserController);
 
 // DEV ROUTES
 requestResourceRouter
   .route("/dev")
-  .post(createNewRequestResourcesBulkHandler)
-  .patch(updateRequestResourcesBulkHandler);
+  .post(createNewRequestResourcesBulkController)
+  .patch(updateRequestResourcesBulkController);
 
 requestResourceRouter
   .route("/:requestResourceId")
-  .get(getRequestResourceByIdHandler)
-  .delete(deleteRequestResourceHandler)
+  .get(getRequestResourceByIdController)
+  .delete(deleteRequestResourceController)
   .patch(
     validateSchemaMiddleware(updateRequestResourceJoiSchema),
-    updateRequestResourceByIdHandler
+    updateRequestResourceByIdController
   );
 
 export { requestResourceRouter };

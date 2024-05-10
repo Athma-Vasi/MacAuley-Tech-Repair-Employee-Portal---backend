@@ -2,16 +2,16 @@ import { Router } from "express";
 import { assignQueryDefaults, verifyJWTMiddleware, verifyRoles } from "../../middlewares";
 
 import {
-  updatePurchasesBulkHandler,
-  createNewPurchaseHandler,
-  createNewPurchasesBulkHandler,
-  deleteAllPurchasesHandler,
-  deletePurchaseHandler,
-  getAllPurchasesBulkHandler,
-  getPurchaseByIdHandler,
-  getQueriedPurchasesHandler,
-  getQueriedPurchasesByUserHandler,
-  updatePurchaseByIdHandler,
+  updatePurchasesBulkController,
+  createNewPurchaseController,
+  createNewPurchasesBulkController,
+  deleteAllPurchasesController,
+  deletePurchaseController,
+  getAllPurchasesBulkController,
+  getPurchaseByIdController,
+  getQueriedPurchasesController,
+  getQueriedPurchasesByUserController,
+  updatePurchaseByIdController,
 } from "./purchase.controller";
 import { validateSchemaMiddleware } from "../../middlewares/validateSchema";
 import { createPurchaseJoiSchema, updatePurchaseJoiSchema } from "./purchase.validation";
@@ -24,25 +24,25 @@ purchaseRouter
   .route("/")
   .post(
     validateSchemaMiddleware(createPurchaseJoiSchema, "purchaseSchema"),
-    createNewPurchaseHandler
+    createNewPurchaseController
   )
-  .get(getQueriedPurchasesHandler);
+  .get(getQueriedPurchasesController);
 
-purchaseRouter.route("/user").get(getQueriedPurchasesByUserHandler);
+purchaseRouter.route("/user").get(getQueriedPurchasesByUserController);
 
-purchaseRouter.route("/delete-all").delete(deleteAllPurchasesHandler);
+purchaseRouter.route("/delete-all").delete(deleteAllPurchasesController);
 
 // DEV ROUTES
 purchaseRouter
   .route("/dev")
-  .post(createNewPurchasesBulkHandler)
-  .get(getAllPurchasesBulkHandler)
-  .patch(updatePurchasesBulkHandler);
+  .post(createNewPurchasesBulkController)
+  .get(getAllPurchasesBulkController)
+  .patch(updatePurchasesBulkController);
 
 purchaseRouter
   .route("/:purchaseId")
-  .get(getPurchaseByIdHandler)
-  .delete(deletePurchaseHandler)
-  .patch(validateSchemaMiddleware(updatePurchaseJoiSchema), updatePurchaseByIdHandler);
+  .get(getPurchaseByIdController)
+  .delete(deletePurchaseController)
+  .patch(validateSchemaMiddleware(updatePurchaseJoiSchema), updatePurchaseByIdController);
 
 export { purchaseRouter };

@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
 import type { Response } from "express";
@@ -37,7 +37,7 @@ import { getUserByIdService } from "../../../user";
 // @desc   Create a new referment
 // @route  POST api/v1/actions/general/referment
 // @access Private
-const createNewRefermentHandler = expressAsyncHandler(
+const createNewRefermentController = expressAsyncController(
   async (
     request: CreateNewRefermentRequest,
     response: Response<ResourceRequestServerResponse<RefermentDocument>>
@@ -64,7 +64,7 @@ const createNewRefermentHandler = expressAsyncHandler(
 // @desc   Get all referments
 // @route  GET api/v1/actions/general/referment
 // @access Private/Admin/Manager
-const getQueriedRefermentsHandler = expressAsyncHandler(
+const getQueriedRefermentsController = expressAsyncController(
   async (
     request: GetQueriedRefermentsRequest,
     response: Response<GetQueriedResourceRequestServerResponse<RefermentDocument>>
@@ -110,7 +110,7 @@ const getQueriedRefermentsHandler = expressAsyncHandler(
 // @desc   Get all referment requests by user
 // @route  GET api/v1/actions/general/referment
 // @access Private
-const getRefermentsByUserHandler = expressAsyncHandler(
+const getRefermentsByUserController = expressAsyncController(
   async (
     request: GetQueriedRefermentsByUserRequest,
     response: Response<GetQueriedResourceRequestServerResponse<RefermentDocument>>
@@ -164,7 +164,7 @@ const getRefermentsByUserHandler = expressAsyncHandler(
 // @desc   Update referment status
 // @route  PATCH api/v1/actions/general/referment
 // @access Private/Admin/Manager
-const updateRefermentByIdHandler = expressAsyncHandler(
+const updateRefermentByIdController = expressAsyncController(
   async (
     request: UpdateRefermentByIdRequest,
     response: Response<ResourceRequestServerResponse<RefermentDocument>>
@@ -207,7 +207,7 @@ const updateRefermentByIdHandler = expressAsyncHandler(
 // @desc   Get an referment request
 // @route  GET api/v1/actions/general/referment
 // @access Private
-const getRefermentByIdHandler = expressAsyncHandler(
+const getRefermentByIdController = expressAsyncController(
   async (
     request: GetRefermentByIdRequest,
     response: Response<ResourceRequestServerResponse<RefermentDocument>>
@@ -231,7 +231,7 @@ const getRefermentByIdHandler = expressAsyncHandler(
 // @desc   Delete an referment request by its id
 // @route  DELETE api/v1/actions/general/referment
 // @access Private
-const deleteRefermentHandler = expressAsyncHandler(
+const deleteRefermentController = expressAsyncController(
   async (request: DeleteRefermentRequest, response: Response) => {
     const { refermentId } = request.params;
 
@@ -256,7 +256,7 @@ const deleteRefermentHandler = expressAsyncHandler(
 // @desc    Delete all referment requests
 // @route   DELETE api/v1/actions/general/request-resource/referment
 // @access  Private
-const deleteAllRefermentsHandler = expressAsyncHandler(
+const deleteAllRefermentsController = expressAsyncController(
   async (_request: DeleteAllRefermentsRequest, response: Response) => {
     const deletedResult: DeleteResult = await deleteAllRefermentsService();
 
@@ -279,7 +279,7 @@ const deleteAllRefermentsHandler = expressAsyncHandler(
 // @desc   Create new referment requests in bulk
 // @route  POST api/v1/actions/general/referment
 // @access Private
-const createNewRefermentsBulkHandler = expressAsyncHandler(
+const createNewRefermentsBulkController = expressAsyncController(
   async (
     request: CreateNewRefermentsBulkRequest,
     response: Response<ResourceRequestServerResponse<RefermentDocument>>
@@ -327,7 +327,7 @@ const createNewRefermentsBulkHandler = expressAsyncHandler(
 // @desc   Update Referments in bulk
 // @route  PATCH api/v1/actions/general/referment
 // @access Private
-const updateRefermentsBulkHandler = expressAsyncHandler(
+const updateRefermentsBulkController = expressAsyncController(
   async (
     request: UpdateRefermentsBulkRequest,
     response: Response<ResourceRequestServerResponse<RefermentDocument>>
@@ -376,13 +376,13 @@ const updateRefermentsBulkHandler = expressAsyncHandler(
 );
 
 export {
-  createNewRefermentHandler,
-  getQueriedRefermentsHandler,
-  getRefermentsByUserHandler,
-  getRefermentByIdHandler,
-  deleteRefermentHandler,
-  deleteAllRefermentsHandler,
-  updateRefermentByIdHandler,
-  createNewRefermentsBulkHandler,
-  updateRefermentsBulkHandler,
+  createNewRefermentController,
+  getQueriedRefermentsController,
+  getRefermentsByUserController,
+  getRefermentByIdController,
+  deleteRefermentController,
+  deleteAllRefermentsController,
+  updateRefermentByIdController,
+  createNewRefermentsBulkController,
+  updateRefermentsBulkController,
 };

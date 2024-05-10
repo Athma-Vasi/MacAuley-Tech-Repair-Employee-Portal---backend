@@ -1,13 +1,13 @@
 import { Router } from "express";
 import {
-  createNewLaptopBulkHandler,
-  createNewLaptopHandler,
-  deleteALaptopHandler,
-  deleteAllLaptopsHandler,
-  getLaptopByIdHandler,
-  getQueriedLaptopsHandler,
-  updateLaptopByIdHandler,
-  updateLaptopsBulkHandler,
+  createNewLaptopBulkController,
+  createNewLaptopController,
+  deleteALaptopController,
+  deleteAllLaptopsController,
+  getLaptopByIdController,
+  getQueriedLaptopsController,
+  updateLaptopByIdController,
+  updateLaptopsBulkController,
 } from "./laptop.controller";
 import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
 import { createLaptopJoiSchema, updateLaptopJoiSchema } from "./laptop.validation";
@@ -16,26 +16,26 @@ const laptopRouter = Router();
 
 laptopRouter
   .route("/")
-  .get(getQueriedLaptopsHandler)
+  .get(getQueriedLaptopsController)
   .post(
     validateSchemaMiddleware(createLaptopJoiSchema, "laptopSchema"),
-    createNewLaptopHandler
+    createNewLaptopController
   );
 
 // separate route for safety reasons (as it deletes all documents in the collection)
-laptopRouter.route("/delete-all").delete(deleteAllLaptopsHandler);
+laptopRouter.route("/delete-all").delete(deleteAllLaptopsController);
 
 // DEV ROUTE
 laptopRouter
   .route("/dev")
-  .post(createNewLaptopBulkHandler)
-  .patch(updateLaptopsBulkHandler);
+  .post(createNewLaptopBulkController)
+  .patch(updateLaptopsBulkController);
 
 // single document routes
 laptopRouter
   .route("/:laptopId")
-  .get(getLaptopByIdHandler)
-  .delete(deleteALaptopHandler)
-  .patch(validateSchemaMiddleware(updateLaptopJoiSchema), updateLaptopByIdHandler);
+  .get(getLaptopByIdController)
+  .delete(deleteALaptopController)
+  .patch(validateSchemaMiddleware(updateLaptopJoiSchema), updateLaptopByIdController);
 
 export { laptopRouter };

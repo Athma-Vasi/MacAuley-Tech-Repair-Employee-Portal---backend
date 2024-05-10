@@ -1,14 +1,14 @@
 import { Router } from "express";
 import {
-  createNewRepairTicketHandler,
-  getQueriedRepairTicketsHandler,
-  getRepairTicketsByUserHandler,
-  getRepairTicketByIdHandler,
-  deleteRepairTicketHandler,
-  deleteAllRepairTicketsHandler,
-  updateRepairTicketByIdHandler,
-  createNewRepairTicketsBulkHandler,
-  updateRepairTicketsBulkHandler,
+  createNewRepairTicketController,
+  getQueriedRepairTicketsController,
+  getRepairTicketsByUserController,
+  getRepairTicketByIdController,
+  deleteRepairTicketController,
+  deleteAllRepairTicketsController,
+  updateRepairTicketByIdController,
+  createNewRepairTicketsBulkController,
+  updateRepairTicketsBulkController,
 } from "./repairTicket.controller";
 import { assignQueryDefaults, verifyJWTMiddleware, verifyRoles } from "../../middlewares";
 import { validateSchemaMiddleware } from "../../middlewares/validateSchema";
@@ -22,30 +22,30 @@ repairTicketRouter.use(verifyJWTMiddleware, verifyRoles, assignQueryDefaults);
 
 repairTicketRouter
   .route("/")
-  .get(getQueriedRepairTicketsHandler)
+  .get(getQueriedRepairTicketsController)
   .post(
     validateSchemaMiddleware(createRepairTicketJoiSchema, "repairTicketSchema"),
-    createNewRepairTicketHandler
+    createNewRepairTicketController
   );
 
-repairTicketRouter.route("/delete-all").delete(deleteAllRepairTicketsHandler);
+repairTicketRouter.route("/delete-all").delete(deleteAllRepairTicketsController);
 
-repairTicketRouter.route("/user").get(getRepairTicketsByUserHandler);
+repairTicketRouter.route("/user").get(getRepairTicketsByUserController);
 
 // DEV ROUTES
 repairTicketRouter
   .route("/dev")
-  .post(createNewRepairTicketsBulkHandler)
-  .patch(updateRepairTicketsBulkHandler);
+  .post(createNewRepairTicketsBulkController)
+  .patch(updateRepairTicketsBulkController);
 
 // regular routes
 repairTicketRouter
   .route("/:repairTicketId")
-  .get(getRepairTicketByIdHandler)
-  .delete(deleteRepairTicketHandler)
+  .get(getRepairTicketByIdController)
+  .delete(deleteRepairTicketController)
   .patch(
     validateSchemaMiddleware(updateRepairTicketJoiSchema),
-    updateRepairTicketByIdHandler
+    updateRepairTicketByIdController
   );
 
 export { repairTicketRouter };

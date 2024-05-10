@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
 import type { Response } from "express";
@@ -37,7 +37,7 @@ import { getUserByIdService } from "../../../user";
 // @desc   Create a new endorsement
 // @route  POST api/v1/actions/general/endorsement
 // @access Private
-const createNewEndorsementHandler = expressAsyncHandler(
+const createNewEndorsementController = expressAsyncController(
   async (
     request: CreateNewEndorsementRequest,
     response: Response<ResourceRequestServerResponse<EndorsementDocument>>
@@ -64,7 +64,7 @@ const createNewEndorsementHandler = expressAsyncHandler(
 // @desc   Get all endorsements
 // @route  GET api/v1/actions/general/endorsement
 // @access Private/Admin/Manager
-const getQueriedEndorsementsHandler = expressAsyncHandler(
+const getQueriedEndorsementsController = expressAsyncController(
   async (
     request: GetQueriedEndorsementsRequest,
     response: Response<GetQueriedResourceRequestServerResponse<EndorsementDocument>>
@@ -110,7 +110,7 @@ const getQueriedEndorsementsHandler = expressAsyncHandler(
 // @desc   Get all endorsement requests by user
 // @route  GET api/v1/actions/general/endorsement
 // @access Private
-const getEndorsementsByUserHandler = expressAsyncHandler(
+const getEndorsementsByUserController = expressAsyncController(
   async (
     request: GetQueriedEndorsementsByUserRequest,
     response: Response<GetQueriedResourceRequestServerResponse<EndorsementDocument>>
@@ -164,7 +164,7 @@ const getEndorsementsByUserHandler = expressAsyncHandler(
 // @desc   Update endorsement status
 // @route  PATCH api/v1/actions/general/endorsement
 // @access Private/Admin/Manager
-const updateEndorsementByIdHandler = expressAsyncHandler(
+const updateEndorsementByIdController = expressAsyncController(
   async (
     request: UpdateEndorsementByIdRequest,
     response: Response<ResourceRequestServerResponse<EndorsementDocument>>
@@ -207,7 +207,7 @@ const updateEndorsementByIdHandler = expressAsyncHandler(
 // @desc   Get an endorsement request
 // @route  GET api/v1/actions/general/endorsement
 // @access Private
-const getEndorsementByIdHandler = expressAsyncHandler(
+const getEndorsementByIdController = expressAsyncController(
   async (
     request: GetEndorsementByIdRequest,
     response: Response<ResourceRequestServerResponse<EndorsementDocument>>
@@ -231,7 +231,7 @@ const getEndorsementByIdHandler = expressAsyncHandler(
 // @desc   Delete an endorsement request by its id
 // @route  DELETE api/v1/actions/general/endorsement
 // @access Private
-const deleteEndorsementHandler = expressAsyncHandler(
+const deleteEndorsementController = expressAsyncController(
   async (request: DeleteEndorsementRequest, response: Response) => {
     const { endorsementId } = request.params;
 
@@ -256,7 +256,7 @@ const deleteEndorsementHandler = expressAsyncHandler(
 // @desc    Delete all endorsement requests
 // @route   DELETE api/v1/actions/general/request-resource/endorsement
 // @access  Private
-const deleteAllEndorsementsHandler = expressAsyncHandler(
+const deleteAllEndorsementsController = expressAsyncController(
   async (_request: DeleteAllEndorsementsRequest, response: Response) => {
     const deletedResult: DeleteResult = await deleteAllEndorsementsService();
 
@@ -279,7 +279,7 @@ const deleteAllEndorsementsHandler = expressAsyncHandler(
 // @desc   Create new endorsement requests in bulk
 // @route  POST api/v1/actions/general/endorsement
 // @access Private
-const createNewEndorsementsBulkHandler = expressAsyncHandler(
+const createNewEndorsementsBulkController = expressAsyncController(
   async (
     request: CreateNewEndorsementsBulkRequest,
     response: Response<ResourceRequestServerResponse<EndorsementDocument>>
@@ -327,7 +327,7 @@ const createNewEndorsementsBulkHandler = expressAsyncHandler(
 // @desc   Update Endorsements in bulk
 // @route  PATCH api/v1/actions/general/endorsement
 // @access Private
-const updateEndorsementsBulkHandler = expressAsyncHandler(
+const updateEndorsementsBulkController = expressAsyncController(
   async (
     request: UpdateEndorsementsBulkRequest,
     response: Response<ResourceRequestServerResponse<EndorsementDocument>>
@@ -376,13 +376,13 @@ const updateEndorsementsBulkHandler = expressAsyncHandler(
 );
 
 export {
-  createNewEndorsementHandler,
-  getQueriedEndorsementsHandler,
-  getEndorsementsByUserHandler,
-  getEndorsementByIdHandler,
-  deleteEndorsementHandler,
-  deleteAllEndorsementsHandler,
-  updateEndorsementByIdHandler,
-  createNewEndorsementsBulkHandler,
-  updateEndorsementsBulkHandler,
+  createNewEndorsementController,
+  getQueriedEndorsementsController,
+  getEndorsementsByUserController,
+  getEndorsementByIdController,
+  deleteEndorsementController,
+  deleteAllEndorsementsController,
+  updateEndorsementByIdController,
+  createNewEndorsementsBulkController,
+  updateEndorsementsBulkController,
 };

@@ -1,14 +1,14 @@
 import { Router } from "express";
 import {
-  createNewEventHandler,
-  getQueriedEventsHandler,
-  getEventsByUserHandler,
-  getEventByIdHandler,
-  deleteEventHandler,
-  deleteAllEventsHandler,
-  updateEventByIdHandler,
-  createNewEventsBulkHandler,
-  updateEventsBulkHandler,
+  createNewEventController,
+  getQueriedEventsController,
+  getEventsByUserController,
+  getEventByIdController,
+  deleteEventController,
+  deleteAllEventsController,
+  updateEventByIdController,
+  createNewEventsBulkController,
+  updateEventsBulkController,
 } from "./event.controller";
 import { validateSchemaMiddleware } from "../../../../middlewares/validateSchema";
 import { createEventJoiSchema, updateEventJoiSchema } from "./event.validation";
@@ -17,23 +17,26 @@ const eventRouter = Router();
 
 eventRouter
   .route("/")
-  .get(getQueriedEventsHandler)
+  .get(getQueriedEventsController)
   .post(
     validateSchemaMiddleware(createEventJoiSchema, "eventSchema"),
-    createNewEventHandler
+    createNewEventController
   );
 
-eventRouter.route("/delete-all").delete(deleteAllEventsHandler);
+eventRouter.route("/delete-all").delete(deleteAllEventsController);
 
-eventRouter.route("/user").get(getEventsByUserHandler);
+eventRouter.route("/user").get(getEventsByUserController);
 
 // DEV ROUTES
-eventRouter.route("/dev").post(createNewEventsBulkHandler).patch(updateEventsBulkHandler);
+eventRouter
+  .route("/dev")
+  .post(createNewEventsBulkController)
+  .patch(updateEventsBulkController);
 
 eventRouter
   .route("/:eventId")
-  .get(getEventByIdHandler)
-  .delete(deleteEventHandler)
-  .patch(validateSchemaMiddleware(updateEventJoiSchema), updateEventByIdHandler);
+  .get(getEventByIdController)
+  .delete(deleteEventController)
+  .patch(validateSchemaMiddleware(updateEventJoiSchema), updateEventByIdController);
 
 export { eventRouter };

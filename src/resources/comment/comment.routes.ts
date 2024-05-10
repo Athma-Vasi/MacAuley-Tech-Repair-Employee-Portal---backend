@@ -1,15 +1,15 @@
 import { Router } from "express";
 import {
-  createNewCommentHandler,
-  getQueriedCommentsHandler,
-  getCommentsByUserHandler,
-  getCommentByIdHandler,
-  deleteCommentHandler,
-  deleteAllCommentsHandler,
-  updateCommentByIdHandler,
-  createNewCommentsBulkHandler,
-  updateCommentsBulkHandler,
-  getQueriedCommentsByParentResourceIdHandler,
+  createNewCommentController,
+  getQueriedCommentsController,
+  getCommentsByUserController,
+  getCommentByIdController,
+  deleteCommentController,
+  deleteAllCommentsController,
+  updateCommentByIdController,
+  createNewCommentsBulkController,
+  updateCommentsBulkController,
+  getQueriedCommentsByParentResourceIdController,
 } from "./comment.controller";
 
 import { verifyJWTMiddleware, verifyRoles, assignQueryDefaults } from "../../middlewares";
@@ -22,30 +22,30 @@ commentRouter.use(verifyJWTMiddleware, verifyRoles, assignQueryDefaults);
 
 commentRouter
   .route("/")
-  .get(getQueriedCommentsHandler)
+  .get(getQueriedCommentsController)
   .post(
     validateSchemaMiddleware(createCommentJoiSchema, "commentSchema"),
-    createNewCommentHandler
+    createNewCommentController
   );
 
-commentRouter.route("/delete-all").delete(deleteAllCommentsHandler);
+commentRouter.route("/delete-all").delete(deleteAllCommentsController);
 
-commentRouter.route("/user").get(getCommentsByUserHandler);
+commentRouter.route("/user").get(getCommentsByUserController);
 
 commentRouter
   .route("/parentResource/:parentResourceId")
-  .get(getQueriedCommentsByParentResourceIdHandler);
+  .get(getQueriedCommentsByParentResourceIdController);
 
 // DEV ROUTES
 commentRouter
   .route("/dev")
-  .post(createNewCommentsBulkHandler)
-  .patch(updateCommentsBulkHandler);
+  .post(createNewCommentsBulkController)
+  .patch(updateCommentsBulkController);
 
 commentRouter
   .route("/:commentId")
-  .get(getCommentByIdHandler)
-  .delete(deleteCommentHandler)
-  .patch(validateSchemaMiddleware(updateCommentJoiSchema), updateCommentByIdHandler);
+  .get(getCommentByIdController)
+  .delete(deleteCommentController)
+  .patch(validateSchemaMiddleware(updateCommentJoiSchema), updateCommentByIdController);
 
 export { commentRouter };

@@ -1,14 +1,14 @@
 import { Router } from "express";
 import {
-  createNewRefermentHandler,
-  getQueriedRefermentsHandler,
-  getRefermentsByUserHandler,
-  getRefermentByIdHandler,
-  deleteRefermentHandler,
-  deleteAllRefermentsHandler,
-  updateRefermentByIdHandler,
-  createNewRefermentsBulkHandler,
-  updateRefermentsBulkHandler,
+  createNewRefermentController,
+  getQueriedRefermentsController,
+  getRefermentsByUserController,
+  getRefermentByIdController,
+  deleteRefermentController,
+  deleteAllRefermentsController,
+  updateRefermentByIdController,
+  createNewRefermentsBulkController,
+  updateRefermentsBulkController,
 } from "./referment.controller";
 import { validateSchemaMiddleware } from "../../../../middlewares/validateSchema";
 import {
@@ -20,26 +20,29 @@ const refermentRouter = Router();
 
 refermentRouter
   .route("/")
-  .get(getQueriedRefermentsHandler)
+  .get(getQueriedRefermentsController)
   .post(
     validateSchemaMiddleware(createRefermentJoiSchema, "refermentSchema"),
-    createNewRefermentHandler
+    createNewRefermentController
   );
 
-refermentRouter.route("/delete-all").delete(deleteAllRefermentsHandler);
+refermentRouter.route("/delete-all").delete(deleteAllRefermentsController);
 
-refermentRouter.route("/user").get(getRefermentsByUserHandler);
+refermentRouter.route("/user").get(getRefermentsByUserController);
 
 // DEV ROUTES
 refermentRouter
   .route("/dev")
-  .post(createNewRefermentsBulkHandler)
-  .patch(updateRefermentsBulkHandler);
+  .post(createNewRefermentsBulkController)
+  .patch(updateRefermentsBulkController);
 
 refermentRouter
   .route("/:refermentId")
-  .get(getRefermentByIdHandler)
-  .delete(deleteRefermentHandler)
-  .patch(validateSchemaMiddleware(updateRefermentJoiSchema), updateRefermentByIdHandler);
+  .get(getRefermentByIdController)
+  .delete(deleteRefermentController)
+  .patch(
+    validateSchemaMiddleware(updateRefermentJoiSchema),
+    updateRefermentByIdController
+  );
 
 export { refermentRouter };

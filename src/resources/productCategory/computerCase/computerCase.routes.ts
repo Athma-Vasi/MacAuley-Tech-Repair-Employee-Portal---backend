@@ -1,13 +1,13 @@
 import { Router } from "express";
 import {
-  createNewComputerCaseBulkHandler,
-  createNewComputerCaseHandler,
-  deleteAComputerCaseHandler,
-  deleteAllComputerCasesHandler,
-  getComputerCaseByIdHandler,
-  getQueriedComputerCasesHandler,
-  updateComputerCaseByIdHandler,
-  updateComputerCasesBulkHandler,
+  createNewComputerCaseBulkController,
+  createNewComputerCaseController,
+  deleteAComputerCaseController,
+  deleteAllComputerCasesController,
+  getComputerCaseByIdController,
+  getQueriedComputerCasesController,
+  updateComputerCaseByIdController,
+  updateComputerCasesBulkController,
 } from "./computerCase.controller";
 import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
 import {
@@ -19,29 +19,29 @@ const computerCaseRouter = Router();
 
 computerCaseRouter
   .route("/")
-  .get(getQueriedComputerCasesHandler)
+  .get(getQueriedComputerCasesController)
   .post(
     validateSchemaMiddleware(createComputerCaseJoiSchema, "computerCaseSchema"),
-    createNewComputerCaseHandler
+    createNewComputerCaseController
   );
 
 // separate route for safety reasons (as it deletes all documents in the collection)
-computerCaseRouter.route("/delete-all").delete(deleteAllComputerCasesHandler);
+computerCaseRouter.route("/delete-all").delete(deleteAllComputerCasesController);
 
 // DEV ROUTE
 computerCaseRouter
   .route("/dev")
-  .post(createNewComputerCaseBulkHandler)
-  .patch(updateComputerCasesBulkHandler);
+  .post(createNewComputerCaseBulkController)
+  .patch(updateComputerCasesBulkController);
 
 // single document routes
 computerCaseRouter
   .route("/:computerCaseId")
-  .get(getComputerCaseByIdHandler)
-  .delete(deleteAComputerCaseHandler)
+  .get(getComputerCaseByIdController)
+  .delete(deleteAComputerCaseController)
   .patch(
     validateSchemaMiddleware(updateComputerCaseJoiSchema),
-    updateComputerCaseByIdHandler
+    updateComputerCaseByIdController
   );
 
 export { computerCaseRouter };

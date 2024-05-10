@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { Response } from "express";
 import type {
@@ -39,7 +39,7 @@ import { PRODUCT_CATEGORY_SERVICE_MAP } from "../../constants";
 // @desc   Create new user
 // @route  POST /api/v1/product-review
 // @access Private
-const createNewProductReviewHandler = expressAsyncHandler(
+const createNewProductReviewController = expressAsyncController(
   async (
     request: CreateNewProductReviewRequest,
     response: Response<ResourceRequestServerResponse<ProductReviewDocument>>
@@ -75,7 +75,7 @@ const createNewProductReviewHandler = expressAsyncHandler(
 // @desc   create new productReviews in bulk
 // @route  POST /api/v1/product-review/dev
 // @access Private
-const createNewProductReviewsBulkHandler = expressAsyncHandler(
+const createNewProductReviewsBulkController = expressAsyncController(
   async (
     request: CreateNewProductReviewsBulkRequest,
     response: Response<ResourceRequestServerResponse<ProductReviewDocument>>
@@ -119,7 +119,7 @@ const createNewProductReviewsBulkHandler = expressAsyncHandler(
 // @desc   Update productReviews in bulk
 // @route  PATCH /api/v1/product-review/dev
 // @access Private
-const updateProductReviewsBulkHandler = expressAsyncHandler(
+const updateProductReviewsBulkController = expressAsyncController(
   async (
     request: UpdateProductReviewsBulkRequest,
     response: Response<ResourceRequestServerResponse<ProductReviewDocument>>
@@ -171,7 +171,7 @@ const updateProductReviewsBulkHandler = expressAsyncHandler(
 // @desc   get all productReviews bulk (no filter, projection or options)
 // @route  GET /api/v1/product-review/dev
 // @access Private
-const getAllProductReviewsBulkHandler = expressAsyncHandler(
+const getAllProductReviewsBulkController = expressAsyncController(
   async (
     request: GetAllProductReviewsBulkRequest,
     response: Response<ResourceRequestServerResponse<ProductReviewDocument>>
@@ -196,7 +196,7 @@ const getAllProductReviewsBulkHandler = expressAsyncHandler(
 // @desc   Get all productReviews queried
 // @route  GET /api/v1/product-review
 // @access Private
-const getQueriedProductReviewsHandler = expressAsyncHandler(
+const getQueriedProductReviewsController = expressAsyncController(
   async (
     request: GetQueriedProductReviewsRequest,
     response: Response<
@@ -210,7 +210,7 @@ const getQueriedProductReviewsHandler = expressAsyncHandler(
 
     // only perform a countDocuments scan if a new query is being made
     if (newQueryFlag) {
-      console.log("filter in getQueriedProductReviewsHandler", filter);
+      console.log("filter in getQueriedProductReviewsController", filter);
 
       totalDocuments = await getQueriedTotalProductReviewsService({
         filter: filter as FilterQuery<ProductReviewDocument> | undefined,
@@ -266,7 +266,7 @@ const getQueriedProductReviewsHandler = expressAsyncHandler(
 // @desc   Get all productReviews queried by a user
 // @route  GET /api/v1/product-review/user
 // @access Private
-const getQueriedProductReviewsByUserHandler = expressAsyncHandler(
+const getQueriedProductReviewsByUserController = expressAsyncController(
   async (
     request: GetQueriedProductReviewsByUserRequest,
     response: Response<
@@ -336,7 +336,7 @@ const getQueriedProductReviewsByUserHandler = expressAsyncHandler(
 // @desc   Get a productReview by id
 // @route  GET /api/v1/product-review/:id
 // @access Private
-const getProductReviewByIdHandler = expressAsyncHandler(
+const getProductReviewByIdController = expressAsyncController(
   async (
     request: GetProductReviewByIdRequest,
     response: Response<ResourceRequestServerResponse<ProductReviewServerResponseDocument>>
@@ -373,7 +373,7 @@ const getProductReviewByIdHandler = expressAsyncHandler(
 // @desc   Delete a productReview
 // @route  DELETE /api/v1/product-review
 // @access Private
-const deleteProductReviewHandler = expressAsyncHandler(
+const deleteProductReviewController = expressAsyncController(
   async (
     request: DeleteAProductReviewRequest,
     response: Response<ResourceRequestServerResponse<ProductReviewDocument>>
@@ -400,7 +400,7 @@ const deleteProductReviewHandler = expressAsyncHandler(
 // @desc   Update a productReview
 // @route  PATCH /api/v1/product-review
 // @access Private
-const updateProductReviewByIdHandler = expressAsyncHandler(
+const updateProductReviewByIdController = expressAsyncController(
   async (
     request: UpdateProductReviewByIdRequest,
     response: Response<ResourceRequestServerResponse<ProductReviewServerResponseDocument>>
@@ -444,7 +444,7 @@ const updateProductReviewByIdHandler = expressAsyncHandler(
 // @desc   Delete all productReviews
 // @route  DELETE /api/v1/product-review/delete-all
 // @access Private
-const deleteAllProductReviewsHandler = expressAsyncHandler(
+const deleteAllProductReviewsController = expressAsyncController(
   async (
     request: DeleteAllProductReviewsRequest,
     response: Response<ResourceRequestServerResponse<ProductReviewDocument>>
@@ -467,14 +467,14 @@ const deleteAllProductReviewsHandler = expressAsyncHandler(
 );
 
 export {
-  updateProductReviewsBulkHandler,
-  createNewProductReviewHandler,
-  createNewProductReviewsBulkHandler,
-  deleteAllProductReviewsHandler,
-  deleteProductReviewHandler,
-  getAllProductReviewsBulkHandler,
-  getProductReviewByIdHandler,
-  getQueriedProductReviewsHandler,
-  getQueriedProductReviewsByUserHandler,
-  updateProductReviewByIdHandler,
+  updateProductReviewsBulkController,
+  createNewProductReviewController,
+  createNewProductReviewsBulkController,
+  deleteAllProductReviewsController,
+  deleteProductReviewController,
+  getAllProductReviewsBulkController,
+  getProductReviewByIdController,
+  getQueriedProductReviewsController,
+  getQueriedProductReviewsByUserController,
+  updateProductReviewByIdController,
 };

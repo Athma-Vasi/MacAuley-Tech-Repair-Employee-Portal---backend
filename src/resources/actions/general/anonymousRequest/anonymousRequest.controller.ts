@@ -1,4 +1,4 @@
-import expressAsyncHandler from "express-async-handler";
+import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
 import type { Response } from "express";
@@ -40,7 +40,7 @@ import { getUserByIdService } from "../../../user";
 // @desc   Create a new anonymous request
 // @route  POST api/v1/actions/general/anonymous-request
 // @access Private
-const createNewAnonymousRequestHandler = expressAsyncHandler(
+const createNewAnonymousRequestController = expressAsyncController(
   async (
     request: CreateNewAnonymousRequestRequest,
     response: Response<ResourceRequestServerResponse<AnonymousRequestDocument>>
@@ -69,7 +69,7 @@ const createNewAnonymousRequestHandler = expressAsyncHandler(
 // @desc   Get all anonymousRequests
 // @route  GET api/v1/actions/general/anonymous-request
 // @access Private/Admin/Manager
-const getQueriedAnonymousRequestsHandler = expressAsyncHandler(
+const getQueriedAnonymousRequestsController = expressAsyncController(
   async (
     request: GetQueriedAnonymousRequestsRequest,
     response: Response<GetQueriedResourceRequestServerResponse<AnonymousRequestDocument>>
@@ -115,7 +115,7 @@ const getQueriedAnonymousRequestsHandler = expressAsyncHandler(
 // @desc   Get all anonymousRequest requests by user
 // @route  GET api/v1/actions/general/anonymous-request
 // @access Private
-const getAnonymousRequestsByUserHandler = expressAsyncHandler(
+const getAnonymousRequestsByUserController = expressAsyncController(
   async (
     request: GetQueriedAnonymousRequestsByUserRequest,
     response: Response<GetQueriedResourceRequestServerResponse<AnonymousRequestDocument>>
@@ -169,7 +169,7 @@ const getAnonymousRequestsByUserHandler = expressAsyncHandler(
 // @desc   Update anonymousRequest status
 // @route  PATCH api/v1/actions/general/anonymous-request
 // @access Private/Admin/Manager
-const updateAnonymousRequestByIdHandler = expressAsyncHandler(
+const updateAnonymousRequestByIdController = expressAsyncController(
   async (
     request: UpdateAnonymousRequestByIdRequest,
     response: Response<ResourceRequestServerResponse<AnonymousRequestDocument>>
@@ -212,7 +212,7 @@ const updateAnonymousRequestByIdHandler = expressAsyncHandler(
 // @desc   Get an anonymousRequest request
 // @route  GET api/v1/actions/general/anonymous-request
 // @access Private
-const getAnonymousRequestByIdHandler = expressAsyncHandler(
+const getAnonymousRequestByIdController = expressAsyncController(
   async (
     request: GetAnonymousRequestByIdRequest,
     response: Response<ResourceRequestServerResponse<AnonymousRequestDocument>>
@@ -236,7 +236,7 @@ const getAnonymousRequestByIdHandler = expressAsyncHandler(
 // @desc   Delete an anonymousRequest request by its id
 // @route  DELETE api/v1/actions/general/anonymous-request
 // @access Private
-const deleteAnonymousRequestHandler = expressAsyncHandler(
+const deleteAnonymousRequestController = expressAsyncController(
   async (request: DeleteAnonymousRequestRequest, response: Response) => {
     const { anonymousRequestId } = request.params;
 
@@ -263,7 +263,7 @@ const deleteAnonymousRequestHandler = expressAsyncHandler(
 // @desc    Delete all anonymousRequest requests
 // @route   DELETE api/v1/actions/general/request-resource/anonymous-request
 // @access  Private
-const deleteAllAnonymousRequestsHandler = expressAsyncHandler(
+const deleteAllAnonymousRequestsController = expressAsyncController(
   async (_request: DeleteAllAnonymousRequestsRequest, response: Response) => {
     const deletedResult: DeleteResult = await deleteAllAnonymousRequestsService();
 
@@ -286,7 +286,7 @@ const deleteAllAnonymousRequestsHandler = expressAsyncHandler(
 // @desc   Create new anonymousRequest requests in bulk
 // @route  POST api/v1/actions/general/anonymous-request
 // @access Private
-const createNewAnonymousRequestsBulkHandler = expressAsyncHandler(
+const createNewAnonymousRequestsBulkController = expressAsyncController(
   async (
     request: CreateNewAnonymousRequestsBulkRequest,
     response: Response<ResourceRequestServerResponse<AnonymousRequestDocument>>
@@ -336,7 +336,7 @@ const createNewAnonymousRequestsBulkHandler = expressAsyncHandler(
 // @desc   Update Anonymous Requests in bulk
 // @route  PATCH api/v1/actions/general/anonymous-request
 // @access Private
-const updateAnonymousRequestsBulkHandler = expressAsyncHandler(
+const updateAnonymousRequestsBulkController = expressAsyncController(
   async (
     request: UpdateAnonymousRequestsBulkRequest,
     response: Response<ResourceRequestServerResponse<AnonymousRequestDocument>>
@@ -385,13 +385,13 @@ const updateAnonymousRequestsBulkHandler = expressAsyncHandler(
 );
 
 export {
-  createNewAnonymousRequestHandler,
-  getQueriedAnonymousRequestsHandler,
-  getAnonymousRequestsByUserHandler,
-  getAnonymousRequestByIdHandler,
-  deleteAnonymousRequestHandler,
-  deleteAllAnonymousRequestsHandler,
-  updateAnonymousRequestByIdHandler,
-  createNewAnonymousRequestsBulkHandler,
-  updateAnonymousRequestsBulkHandler,
+  createNewAnonymousRequestController,
+  getQueriedAnonymousRequestsController,
+  getAnonymousRequestsByUserController,
+  getAnonymousRequestByIdController,
+  deleteAnonymousRequestController,
+  deleteAllAnonymousRequestsController,
+  updateAnonymousRequestByIdController,
+  createNewAnonymousRequestsBulkController,
+  updateAnonymousRequestsBulkController,
 };

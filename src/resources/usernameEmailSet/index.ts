@@ -9,8 +9,8 @@ import { UsernameEmailSetModel } from "./usernameEmailSet.model";
 import { usernameEmailSetRouter } from "./usernameEmailSet.routes";
 
 import {
-  checkUsernameEmailExistsHandler,
-  postUsernameEmailSetHandler,
+  checkUsernameEmailExistsController,
+  postUsernameEmailSetController,
 } from "./usernameEmailSet.controller";
 
 import {
@@ -33,8 +33,8 @@ import type {
 export {
   UsernameEmailSetModel,
   usernameEmailSetRouter,
-  checkUsernameEmailExistsHandler,
-  postUsernameEmailSetHandler,
+  checkUsernameEmailExistsController,
+  postUsernameEmailSetController,
   checkEmailExistsService,
   checkUsernameExistsService,
   createUsernameEmailSetService,

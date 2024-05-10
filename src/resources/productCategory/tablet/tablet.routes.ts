@@ -1,13 +1,13 @@
 import { Router } from "express";
 import {
-  createNewTabletBulkHandler,
-  createNewTabletHandler,
-  deleteATabletHandler,
-  deleteAllTabletsHandler,
-  getTabletByIdHandler,
-  getQueriedTabletsHandler,
-  updateTabletByIdHandler,
-  updateTabletsBulkHandler,
+  createNewTabletBulkController,
+  createNewTabletController,
+  deleteATabletController,
+  deleteAllTabletsController,
+  getTabletByIdController,
+  getQueriedTabletsController,
+  updateTabletByIdController,
+  updateTabletsBulkController,
 } from "./tablet.controller";
 import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
 import { createTabletJoiSchema, updateTabletJoiSchema } from "./tablet.validation";
@@ -16,26 +16,26 @@ const tabletRouter = Router();
 
 tabletRouter
   .route("/")
-  .get(getQueriedTabletsHandler)
+  .get(getQueriedTabletsController)
   .post(
     validateSchemaMiddleware(createTabletJoiSchema, "tabletSchema"),
-    createNewTabletHandler
+    createNewTabletController
   );
 
 // separate route for safety reasons (as it deletes all documents in the collection)
-tabletRouter.route("/delete-all").delete(deleteAllTabletsHandler);
+tabletRouter.route("/delete-all").delete(deleteAllTabletsController);
 
 // DEV ROUTE
 tabletRouter
   .route("/dev")
-  .post(createNewTabletBulkHandler)
-  .patch(updateTabletsBulkHandler);
+  .post(createNewTabletBulkController)
+  .patch(updateTabletsBulkController);
 
 // single document routes
 tabletRouter
   .route("/:tabletId")
-  .get(getTabletByIdHandler)
-  .delete(deleteATabletHandler)
-  .patch(validateSchemaMiddleware(updateTabletJoiSchema), updateTabletByIdHandler);
+  .get(getTabletByIdController)
+  .delete(deleteATabletController)
+  .patch(validateSchemaMiddleware(updateTabletJoiSchema), updateTabletByIdController);
 
 export { tabletRouter };
