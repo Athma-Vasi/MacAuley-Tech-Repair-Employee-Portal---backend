@@ -3,6 +3,7 @@ import jwt, { VerifyErrors } from "jsonwebtoken";
 
 import { config } from "../config";
 import { AccessTokenDecoded } from "../resources/auth/auth.types";
+import createHttpError from "http-errors";
 
 function verifyJWTMiddleware(
   // technically this request object is only modified after this middleware function runs
@@ -20,8 +21,7 @@ function verifyJWTMiddleware(
       sameSite: "none",
     });
 
-    response.status(401).json({ message: "No token provided" });
-    return;
+    return next(new createHttpError.Unauthorized("No token provided"));
   }
 
   jwt.verify(
@@ -35,17 +35,10 @@ function verifyJWTMiddleware(
           sameSite: "none",
         });
 
-        response.status(403).json({ message: "Forbidden - Access token invalid" });
-        return;
+        return next(new createHttpError.Forbidden("Access token invalid"));
       }
 
       const { userInfo, sessionId } = decoded as AccessTokenDecoded;
-
-      const propertyDescriptor: PropertyDescriptor = {
-        writable: true,
-        enumerable: true,
-        configurable: true,
-      };
 
       console.log("original request.body: ", request.body);
 
@@ -56,7 +49,7 @@ function verifyJWTMiddleware(
 
       Object.defineProperty(request, "body", {
         value: { ...request.body, ...updatedRequestBody },
-        ...propertyDescriptor,
+        ...Object.getOwnPropertyDescriptor(request, "body"),
       });
 
       console.log("\n");
@@ -65,8 +58,7 @@ function verifyJWTMiddleware(
       console.log("modified request.body: ", request.body);
       console.groupEnd();
 
-      next();
-      return;
+      return next();
     }
   );
 }

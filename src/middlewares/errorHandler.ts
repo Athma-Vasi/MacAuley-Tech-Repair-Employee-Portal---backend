@@ -6,7 +6,7 @@ function errorHandler(
   error: any,
   request: Request,
   response: Response,
-  next: NextFunction
+  _next: NextFunction
 ) {
   const { message, status, stack } = error;
   const { body } = request;
