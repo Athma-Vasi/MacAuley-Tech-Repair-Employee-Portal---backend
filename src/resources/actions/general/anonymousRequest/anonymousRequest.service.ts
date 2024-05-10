@@ -13,6 +13,7 @@ import {
   QueriedTotalResourceGetRequestServiceInput,
   UpdateDocumentByIdServiceInput,
 } from "../../../../types";
+import createHttpError from "http-errors";
 
 async function getAnonymousRequestByIdService(
   anonymousRequestId: Types.ObjectId | string
@@ -23,7 +24,9 @@ async function getAnonymousRequestByIdService(
       .exec();
     return anonymousRequest;
   } catch (error: any) {
-    throw new Error(error, { cause: "getAnonymousRequestByIdService" });
+    throw new createHttpError.InternalServerError(
+      "Error in getAnonymousRequestByIdService"
+    );
   }
 }
 
@@ -34,7 +37,9 @@ async function createNewAnonymousRequestService(
     const anonymousRequest = await AnonymousRequestModel.create(anonymousRequestSchema);
     return anonymousRequest;
   } catch (error: any) {
-    throw new Error(error, { cause: "createNewAnonymousRequestService" });
+    throw new createHttpError.InternalServerError(
+      "Error in createNewAnonymousRequestService"
+    );
   }
 }
 
@@ -49,7 +54,9 @@ async function getQueriedAnonymousRequestsService({
       .exec();
     return anonymousRequest;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedAnonymousRequestsService" });
+    throw new createHttpError.InternalServerError(
+      "Error in getQueriedAnonymousRequestsService"
+    );
   }
 }
 
@@ -62,7 +69,9 @@ async function getQueriedTotalAnonymousRequestsService({
       .exec();
     return totalAnonymousRequests;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedTotalAnonymousRequestsService" });
+    throw new createHttpError.InternalServerError(
+      "Error in getQueriedTotalAnonymousRequestsService"
+    );
   }
 }
 
@@ -81,7 +90,9 @@ async function getQueriedAnonymousRequestsByUserService({
       .exec();
     return anonymousRequests;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedAnonymousRequestsByUserService" });
+    throw new createHttpError.InternalServerError(
+      "Error in getQueriedAnonymousRequestsByUserService"
+    );
   }
 }
 
@@ -105,7 +116,9 @@ async function updateAnonymousRequestByIdService({
       .exec();
     return anonymousRequest;
   } catch (error: any) {
-    throw new Error(error, { cause: "updateAnonymousRequestStatusByIdService" });
+    throw new createHttpError.InternalServerError(
+      "Error in updateAnonymousRequestByIdService"
+    );
   }
 }
 
@@ -120,7 +133,9 @@ async function deleteAnonymousRequestByIdService(
       .exec();
     return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteAnonymousRequestByIdService" });
+    throw new createHttpError.InternalServerError(
+      "Error in deleteAnonymousRequestByIdService"
+    );
   }
 }
 
@@ -129,7 +144,9 @@ async function deleteAllAnonymousRequestsService(): Promise<DeleteResult> {
     const deletedResult = await AnonymousRequestModel.deleteMany({}).lean().exec();
     return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteAllAnonymousRequestsService" });
+    throw new createHttpError.InternalServerError(
+      "Error in deleteAllAnonymousRequestsService"
+    );
   }
 }
 

@@ -1,7 +1,7 @@
 import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewAnonymousRequestRequest,
@@ -19,10 +19,7 @@ import type {
   QueryObjectParsedWithDefaults,
   ResourceRequestServerResponse,
 } from "../../../../types";
-import type {
-  AnonymousRequestDocument,
-  AnonymousRequestSchema,
-} from "./anonymousRequest.model";
+import type { AnonymousRequestDocument } from "./anonymousRequest.model";
 
 import {
   createNewAnonymousRequestService,
@@ -36,6 +33,7 @@ import {
 } from "./anonymousRequest.service";
 import { removeUndefinedAndNullValues } from "../../../../utils";
 import { getUserByIdService } from "../../../user";
+import createHttpError from "http-errors";
 
 // @desc   Create a new anonymous request
 // @route  POST api/v1/actions/general/anonymous-request
@@ -43,20 +41,20 @@ import { getUserByIdService } from "../../../user";
 const createNewAnonymousRequestController = expressAsyncController(
   async (
     request: CreateNewAnonymousRequestRequest,
-    response: Response<ResourceRequestServerResponse<AnonymousRequestDocument>>
+    response: Response<ResourceRequestServerResponse<AnonymousRequestDocument>>,
+    next: NextFunction
   ) => {
     const { anonymousRequestSchema } = request.body;
 
     const anonymousRequestDocument = await createNewAnonymousRequestService(
       anonymousRequestSchema
     );
-
     if (!anonymousRequestDocument) {
-      response.status(400).json({
-        message: "New anonymous request could not be created",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "New anonymous document could not be created"
+        )
+      );
     }
 
     response.status(201).json({
@@ -72,7 +70,8 @@ const createNewAnonymousRequestController = expressAsyncController(
 const getQueriedAnonymousRequestsController = expressAsyncController(
   async (
     request: GetQueriedAnonymousRequestsRequest,
-    response: Response<GetQueriedResourceRequestServerResponse<AnonymousRequestDocument>>
+    response: Response<GetQueriedResourceRequestServerResponse<AnonymousRequestDocument>>,
+    next: NextFunction
   ) => {
     let { newQueryFlag, totalDocuments } = request.body;
 
@@ -86,7 +85,6 @@ const getQueriedAnonymousRequestsController = expressAsyncController(
       });
     }
 
-    // get all anonymousRequests
     const anonymousRequest = await getQueriedAnonymousRequestsService({
       filter: filter as FilterQuery<AnonymousRequestDocument> | undefined,
       projection: projection as QueryOptions<AnonymousRequestDocument>,
@@ -118,9 +116,9 @@ const getQueriedAnonymousRequestsController = expressAsyncController(
 const getAnonymousRequestsByUserController = expressAsyncController(
   async (
     request: GetQueriedAnonymousRequestsByUserRequest,
-    response: Response<GetQueriedResourceRequestServerResponse<AnonymousRequestDocument>>
+    response: Response<GetQueriedResourceRequestServerResponse<AnonymousRequestDocument>>,
+    next: NextFunction
   ) => {
-    // anyone can view their own anonymousRequest requests
     const {
       userInfo: { userId },
     } = request.body;
@@ -130,7 +128,6 @@ const getAnonymousRequestsByUserController = expressAsyncController(
     const { filter, projection, options } =
       request.query as QueryObjectParsedWithDefaults;
 
-    // assign userId to filter
     const filterWithUserId = { ...filter, userId };
 
     // only perform a countDocuments scan if a new query is being made
@@ -140,7 +137,6 @@ const getAnonymousRequestsByUserController = expressAsyncController(
       });
     }
 
-    // get all anonymousRequest requests by user
     const anonymousRequests = await getQueriedAnonymousRequestsByUserService({
       filter: filterWithUserId as FilterQuery<AnonymousRequestDocument> | undefined,
       projection: projection as QueryOptions<AnonymousRequestDocument>,
@@ -172,7 +168,8 @@ const getAnonymousRequestsByUserController = expressAsyncController(
 const updateAnonymousRequestByIdController = expressAsyncController(
   async (
     request: UpdateAnonymousRequestByIdRequest,
-    response: Response<ResourceRequestServerResponse<AnonymousRequestDocument>>
+    response: Response<ResourceRequestServerResponse<AnonymousRequestDocument>>,
+    next: NextFunction
   ) => {
     const { anonymousRequestId } = request.params;
     const {
@@ -183,11 +180,10 @@ const updateAnonymousRequestByIdController = expressAsyncController(
     // check if user exists
     const userExists = await getUserByIdService(userId);
     if (!userExists) {
-      response.status(404).json({ message: "User does not exist", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("User not found"));
     }
 
-    // update anonymousRequest request status
+    // update anonymousRequest document status
     const updatedAnonymousRequest = await updateAnonymousRequestByIdService({
       _id: anonymousRequestId,
       fields,
@@ -195,15 +191,15 @@ const updateAnonymousRequestByIdController = expressAsyncController(
     });
 
     if (!updatedAnonymousRequest) {
-      response.status(400).json({
-        message: "Anonymous Request request status update failed. Please try again!",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Anonymous Request document could not be updated. Please try again!"
+        )
+      );
     }
 
     response.status(200).json({
-      message: "Anonymous Request request status updated successfully",
+      message: "Anonymous Request document status updated successfully",
       resourceData: [updatedAnonymousRequest],
     });
   }
@@ -215,46 +211,47 @@ const updateAnonymousRequestByIdController = expressAsyncController(
 const getAnonymousRequestByIdController = expressAsyncController(
   async (
     request: GetAnonymousRequestByIdRequest,
-    response: Response<ResourceRequestServerResponse<AnonymousRequestDocument>>
+    response: Response<ResourceRequestServerResponse<AnonymousRequestDocument>>,
+    next: NextFunction
   ) => {
     const { anonymousRequestId } = request.params;
     const anonymousRequest = await getAnonymousRequestByIdService(anonymousRequestId);
     if (!anonymousRequest) {
-      response
-        .status(404)
-        .json({ message: "Anonymous Request request not found", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Anonymous Request document not found"));
     }
 
     response.status(200).json({
-      message: "Anonymous Request request found successfully",
+      message: "Anonymous Request document found successfully",
       resourceData: [anonymousRequest],
     });
   }
 );
 
-// @desc   Delete an anonymousRequest request by its id
+// @desc   Delete an anonymousRequest document by its id
 // @route  DELETE api/v1/actions/general/anonymous-request
 // @access Private
 const deleteAnonymousRequestController = expressAsyncController(
-  async (request: DeleteAnonymousRequestRequest, response: Response) => {
+  async (
+    request: DeleteAnonymousRequestRequest,
+    response: Response,
+    next: NextFunction
+  ) => {
     const { anonymousRequestId } = request.params;
 
-    // delete anonymousRequest request by id
     const deletedResult: DeleteResult = await deleteAnonymousRequestByIdService(
       anonymousRequestId
     );
 
     if (!deletedResult.deletedCount) {
-      response.status(400).json({
-        message: "Anonymous Request request could not be deleted",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Anonymous Request document could not be deleted"
+        )
+      );
     }
 
     response.status(200).json({
-      message: "Anonymous Request request deleted successfully",
+      message: "Anonymous Request document deleted successfully",
       resourceData: [],
     });
   }
@@ -264,15 +261,19 @@ const deleteAnonymousRequestController = expressAsyncController(
 // @route   DELETE api/v1/actions/general/request-resource/anonymous-request
 // @access  Private
 const deleteAllAnonymousRequestsController = expressAsyncController(
-  async (_request: DeleteAllAnonymousRequestsRequest, response: Response) => {
+  async (
+    _request: DeleteAllAnonymousRequestsRequest,
+    response: Response,
+    next: NextFunction
+  ) => {
     const deletedResult: DeleteResult = await deleteAllAnonymousRequestsService();
 
     if (!deletedResult.deletedCount) {
-      response.status(400).json({
-        message: "All anonymousRequest requests could not be deleted",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Anonymous Request requests could not be deleted"
+        )
+      );
     }
 
     response.status(200).json({
@@ -302,7 +303,6 @@ const createNewAnonymousRequestsBulkController = expressAsyncController(
       })
     );
 
-    // filter out any null documents
     const filteredAnonymousRequestDocuments = anonymousRequestDocuments.filter(
       removeUndefinedAndNullValues
     );
@@ -339,7 +339,8 @@ const createNewAnonymousRequestsBulkController = expressAsyncController(
 const updateAnonymousRequestsBulkController = expressAsyncController(
   async (
     request: UpdateAnonymousRequestsBulkRequest,
-    response: Response<ResourceRequestServerResponse<AnonymousRequestDocument>>
+    response: Response<ResourceRequestServerResponse<AnonymousRequestDocument>>,
+    next: NextFunction
   ) => {
     const { anonymousRequestFields } = request.body;
 
