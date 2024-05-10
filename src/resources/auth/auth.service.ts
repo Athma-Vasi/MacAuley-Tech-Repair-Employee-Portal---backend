@@ -1,6 +1,7 @@
-import { Types } from 'mongoose';
-import { AuthModel, AuthSchema } from './auth.model';
-import type { DeleteResult } from 'mongodb';
+import { Types } from "mongoose";
+import { AuthModel, AuthSchema } from "./auth.model";
+import type { DeleteResult } from "mongodb";
+import createHttpError from "http-errors";
 
 async function createNewAuthSessionService(authSchema: AuthSchema) {
   try {
@@ -8,7 +9,7 @@ async function createNewAuthSessionService(authSchema: AuthSchema) {
 
     return newAuthSession;
   } catch (error: any) {
-    throw new Error(error, { cause: 'auth.service.ts -> createNewAuthSessionService()' });
+    throw new createHttpError.InternalServerError("createNewAuthSessionService");
   }
 }
 
@@ -18,7 +19,7 @@ async function findSessionByIdService(sessionId: Types.ObjectId | string) {
 
     return authSession;
   } catch (error: any) {
-    throw new Error(error, { cause: 'auth.service.ts -> findSessionByIdService()' });
+    throw new createHttpError.InternalServerError("findSessionByIdService");
   }
 }
 
@@ -36,27 +37,33 @@ async function updateSessionRefreshTokenDenyListService({
       { new: true }
     );
   } catch (error: any) {
-    throw new Error(error, {
-      cause: 'auth.service.ts -> updateSessionRefreshTokenDenyListService()',
-    });
+    throw new createHttpError.InternalServerError(
+      "updateSessionRefreshTokenDenyListService"
+    );
   }
 }
 
-async function deleteAuthSessionService(sessionId: Types.ObjectId | string): Promise<DeleteResult> {
+async function deleteAuthSessionService(
+  sessionId: Types.ObjectId | string
+): Promise<DeleteResult> {
   try {
-    const deletedAuthSession: DeleteResult = await AuthModel.deleteOne({ _id: sessionId });
+    const deletedAuthSession: DeleteResult = await AuthModel.deleteOne({
+      _id: sessionId,
+    });
 
     return deletedAuthSession;
   } catch (error: any) {
-    throw new Error(error, { cause: 'auth.service.ts -> deleteAuthSessionService()' });
+    throw new createHttpError.InternalServerError("deleteAuthSessionService");
   }
 }
 
-async function invalidateAllAuthSessionsService(userId: Types.ObjectId | string): Promise<void> {
+async function invalidateAllAuthSessionsService(
+  userId: Types.ObjectId | string
+): Promise<void> {
   try {
     await AuthModel.deleteMany({ userId });
   } catch (error: any) {
-    throw new Error(error, { cause: 'auth.service.ts -> invalidateAllAuthSessionsService()' });
+    throw new createHttpError.InternalServerError("invalidateAllAuthSessionsService");
   }
 }
 

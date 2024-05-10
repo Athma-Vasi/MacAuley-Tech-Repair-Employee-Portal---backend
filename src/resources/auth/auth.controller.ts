@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt, { VerifyErrors } from "jsonwebtoken";
 import expressAsyncController from "express-async-handler";
 
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
 import type { LoginUserRequest, LogoutUserRequest, RefreshTokenRequest } from "../auth";
 
 import { config } from "../../config";
@@ -18,6 +18,7 @@ import {
   updateSessionRefreshTokenDenyListService,
 } from "./auth.service";
 import { AuthSchema } from "./auth.model";
+import createHttpError from "http-errors";
 
 /**
  * @description implements 'Refresh Token Rotation' as defined in the OAuth 2.0 RFC to mitigate 'replay attacks'
@@ -30,33 +31,25 @@ import { AuthSchema } from "./auth.model";
 // @route POST /auth/login
 // @access Public
 const loginUserController = expressAsyncController(
-  async (request: LoginUserRequest, response: Response) => {
+  async (request: LoginUserRequest, response: Response, next: NextFunction) => {
     const { username, password } = request.body;
 
-    // confirm that username and password are not empty
     if (!username || !password) {
-      response.status(400).json({ message: "Username and password are required" });
-      return;
+      return next(new createHttpError.BadRequest("Username and password are required"));
     }
 
-    // find user
     const foundUser = await getUserWithPasswordService(username);
     if (!foundUser) {
-      response.status(404).json({ message: "User not found" });
-      return;
+      return next(new createHttpError.NotFound("User not found"));
     }
 
-    // check if user is active
     if (!foundUser.active) {
-      response.status(401).json({ message: "User is not active" });
-      return;
+      return next(new createHttpError.Forbidden("User is not active"));
     }
 
-    // check if password is correct
     const isPasswordCorrect = await bcrypt.compare(password, foundUser.password);
     if (!isPasswordCorrect) {
-      response.status(400).json({ message: "Password is incorrect" });
-      return;
+      return next(new createHttpError.Unauthorized("Invalid password"));
     }
 
     const { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } = config;
@@ -70,17 +63,16 @@ const loginUserController = expressAsyncController(
     };
     const newAuthSession = await createNewAuthSessionService(authSessionSchema);
     if (!newAuthSession) {
-      response.status(500).json({ message: "Internal server error" });
-      return;
+      return next(new createHttpError.InternalServerError("Error creating session"));
     }
 
-    // grab session id from auth session document
     const sessionId = newAuthSession._id;
 
     // uuid for refresh token jti that will be stored in refreshTokensDenyList field in Auth session document when the /refresh endpoint is called
     const refreshTokenJti = uuidv4();
+
     console.log({ sessionId, refreshTokenJti });
-    // create refresh token
+
     const refreshToken = jwt.sign(
       {
         userInfo: {
@@ -105,7 +97,6 @@ const loginUserController = expressAsyncController(
       maxAge: 1000 * 60 * 30, // cookie expires in 30 minutes
     });
 
-    // create access token
     const accessToken = jwt.sign(
       {
         userInfo: {
@@ -131,14 +122,11 @@ const loginUserController = expressAsyncController(
       Object.create(null)
     );
 
-    // send access token in response
-    response
-      .status(200)
-      .json({
-        message: "Login successful",
-        accessToken,
-        userDocument: userDocWithoutPassword,
-      });
+    response.status(200).json({
+      message: "Login successful",
+      accessToken,
+      userDocument: userDocWithoutPassword,
+    });
   }
 );
 
@@ -146,13 +134,11 @@ const loginUserController = expressAsyncController(
 // @route POST /auth/refresh
 // @access Private
 const refreshTokenController = expressAsyncController(
-  async (request: RefreshTokenRequest, response: Response) => {
+  async (request: RefreshTokenRequest, response: Response, next: NextFunction) => {
     const { refreshToken } = request.cookies;
     const { sessionId: sessionIdFromReqBody } = request.body;
 
-    // check if refresh token exists
     if (!refreshToken) {
-      // if refresh token does not exist, delete session
       await deleteAuthSessionService(sessionIdFromReqBody);
 
       response.clearCookie("refreshToken", {
@@ -161,8 +147,9 @@ const refreshTokenController = expressAsyncController(
         sameSite: "none",
       });
 
-      response.status(401).json({ message: "Unauthorized: Refresh token is required" });
-      return;
+      return next(
+        new createHttpError.Unauthorized("Unauthorized: No refresh token found")
+      );
     }
 
     const { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } = config;
@@ -171,7 +158,6 @@ const refreshTokenController = expressAsyncController(
       REFRESH_TOKEN_SECRET,
       async (error: VerifyErrors | null, decoded) => {
         if (error) {
-          // if error, delete session
           await deleteAuthSessionService(sessionIdFromReqBody);
 
           response.clearCookie("refreshToken", {
@@ -180,8 +166,9 @@ const refreshTokenController = expressAsyncController(
             sameSite: "none",
           });
 
-          response.status(401).json({ message: "Unauthorized: Error decoding token" });
-          return;
+          return next(
+            new createHttpError.Unauthorized("Unauthorized: Invalid refresh token")
+          );
         }
 
         const {
@@ -189,14 +176,23 @@ const refreshTokenController = expressAsyncController(
           sessionId,
           jti,
         } = decoded as RefreshTokenDecoded;
-        // check if decoded refresh token has sessionId and jti
+
         console.log("refresh token decoded", decoded);
+
         if (!sessionId || !jti) {
-          response.status(403).json({ message: "Forbidden - Invalid refresh token" });
-          return;
+          await deleteAuthSessionService(sessionIdFromReqBody);
+
+          response.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+          });
+
+          return next(
+            new createHttpError.Unauthorized("Unauthorized: Invalid refresh token")
+          );
         }
 
-        // check if session exists
         const existingSession = await findSessionByIdService(sessionId);
         if (!existingSession) {
           response.clearCookie("refreshToken", {
@@ -205,11 +201,11 @@ const refreshTokenController = expressAsyncController(
             sameSite: "none",
           });
 
-          response.status(401).json({ message: "Unauthorized: Session not found" });
-          return;
+          return next(
+            new createHttpError.Unauthorized("Unauthorized: Session not found")
+          );
         }
 
-        // check if refresh token is in deny list
         const isRefreshTokenInDenyList =
           existingSession.refreshTokensDenyList.includes(jti);
         if (isRefreshTokenInDenyList) {
@@ -221,11 +217,12 @@ const refreshTokenController = expressAsyncController(
             secure: true,
             sameSite: "none",
           });
-          response
-            .status(401)
-            .json({ message: "Unauthorized: Refresh token is invalid" });
 
-          return;
+          return next(
+            new createHttpError.Unauthorized(
+              "Unauthorized: Refresh token has been invalidated"
+            )
+          );
         }
 
         // if refresh token has not been used and session exists,
@@ -235,9 +232,8 @@ const refreshTokenController = expressAsyncController(
           refreshTokenJwtId: jti,
         });
 
-        // create new refresh token jti
         const newRefreshTokenJti = uuidv4();
-        // create refresh token
+
         const newRefreshToken = jwt.sign(
           {
             userInfo: {
@@ -262,7 +258,6 @@ const refreshTokenController = expressAsyncController(
           maxAge: 1000 * 60 * 30, // cookie expires in 30 minutes
         });
 
-        // create access token
         const newAccessToken = jwt.sign(
           {
             userInfo: {
@@ -276,7 +271,6 @@ const refreshTokenController = expressAsyncController(
           { expiresIn: "60s" }
         );
 
-        // send access token in response
         response.status(200).json({ accessToken: newAccessToken });
         return;
       }
@@ -288,10 +282,9 @@ const refreshTokenController = expressAsyncController(
 // @route POST /auth/logout
 // @access Private
 const logoutUserController = expressAsyncController(
-  async (request: LogoutUserRequest, response: Response) => {
+  async (request: LogoutUserRequest, response: Response, next: NextFunction) => {
     const { refreshToken } = request.cookies;
 
-    // check if refresh token exists
     if (!refreshToken) {
       response.clearCookie("refreshToken", {
         httpOnly: true,
@@ -299,11 +292,11 @@ const logoutUserController = expressAsyncController(
         sameSite: "none",
       });
 
-      response.status(204).json({ message: "No content" });
-      return;
+      return next(
+        new createHttpError.Unauthorized("Unauthorized: No refresh token found")
+      );
     }
 
-    // verify refresh token
     const { REFRESH_TOKEN_SECRET } = config;
     jwt.verify(refreshToken, REFRESH_TOKEN_SECRET, async (error, decoded) => {
       if (error) {
@@ -313,11 +306,11 @@ const logoutUserController = expressAsyncController(
           sameSite: "none",
         });
 
-        response.status(204).json({ message: "No content" });
-        return;
+        return next(
+          new createHttpError.Unauthorized("Unauthorized: Invalid refresh token")
+        );
       }
 
-      // check if decoded refresh token has sessionId and jwtid
       const { jti, sessionId } = decoded as RefreshTokenDecoded;
       if (!sessionId || !jti) {
         response.clearCookie("refreshToken", {
@@ -326,12 +319,14 @@ const logoutUserController = expressAsyncController(
           sameSite: "none",
         });
 
-        response.status(204).json({ message: "No content" });
-        return;
+        return next(
+          new createHttpError.Unauthorized("Unauthorized: Invalid refresh token")
+        );
       }
 
       // invalidate session
       const userWithDeletedSession = await deleteAuthSessionService(sessionId);
+
       console.log("user with deleted session", userWithDeletedSession);
 
       response.clearCookie("refreshToken", {
