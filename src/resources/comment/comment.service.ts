@@ -10,6 +10,7 @@ import {
   QueriedTotalResourceGetRequestServiceInput,
   UpdateDocumentByIdServiceInput,
 } from "../../types";
+import createHttpError from "http-errors";
 
 async function getCommentByIdService(
   commentId: Types.ObjectId | string
@@ -18,7 +19,7 @@ async function getCommentByIdService(
     const comment = await CommentModel.findById(commentId).lean().exec();
     return comment;
   } catch (error: any) {
-    throw new Error(error, { cause: "getCommentByIdService" });
+    throw new createHttpError.InternalServerError("getCommentByIdService");
   }
 }
 
@@ -29,7 +30,7 @@ async function createNewCommentService(
     const comment = await CommentModel.create(commentSchema);
     return comment;
   } catch (error: any) {
-    throw new Error(error, { cause: "createNewCommentService" });
+    throw new createHttpError.InternalServerError("createNewCommentService");
   }
 }
 
@@ -42,7 +43,7 @@ async function getQueriedCommentsService({
     const comment = await CommentModel.find(filter, projection, options).lean().exec();
     return comment;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedCommentsService" });
+    throw new createHttpError.InternalServerError("getQueriedCommentsService");
   }
 }
 
@@ -53,7 +54,7 @@ async function getQueriedTotalCommentsService({
     const totalComments = await CommentModel.countDocuments(filter).lean().exec();
     return totalComments;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedTotalCommentsService" });
+    throw new createHttpError.InternalServerError("getQueriedTotalCommentsService");
   }
 }
 
@@ -66,7 +67,7 @@ async function getQueriedCommentsByUserService({
     const comments = await CommentModel.find(filter, projection, options).lean().exec();
     return comments;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedCommentsByUserService" });
+    throw new createHttpError.InternalServerError("getQueriedCommentsByUserService");
   }
 }
 
@@ -86,7 +87,7 @@ async function updateCommentByIdService({
       .exec();
     return comment;
   } catch (error: any) {
-    throw new Error(error, { cause: "updateCommentStatusByIdService" });
+    throw new createHttpError.InternalServerError("updateCommentStatusByIdService");
   }
 }
 
@@ -101,7 +102,7 @@ async function deleteCommentByIdService(
       .exec();
     return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteCommentByIdService" });
+    throw new createHttpError.InternalServerError("deleteCommentByIdService");
   }
 }
 
@@ -110,7 +111,7 @@ async function deleteAllCommentsService(): Promise<DeleteResult> {
     const deletedResult = await CommentModel.deleteMany({}).lean().exec();
     return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteAllCommentsService" });
+    throw new createHttpError.InternalServerError("deleteAllCommentsService");
   }
 }
 

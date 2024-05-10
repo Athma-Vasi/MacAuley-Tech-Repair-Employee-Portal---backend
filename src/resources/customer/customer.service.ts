@@ -12,39 +12,7 @@ import {
   QueriedTotalResourceGetRequestServiceInput,
   UpdateDocumentByIdServiceInput,
 } from "../../types";
-
-type CheckUserExistsServiceInput = {
-  email?: string | undefined;
-  username?: string | undefined;
-  userId?: Types.ObjectId | undefined;
-};
-
-// async function checkCustomerExistsService({
-//   email,
-//   username,
-//   userId,
-// }: CheckUserExistsServiceInput): Promise<boolean> {
-//   try {
-//     if (userId) {
-//       const userCount = await CustomerModel.countDocuments().lean().exec();
-//       return userCount ? true : false;
-//     }
-
-//     if (email) {
-//       const userCount = await CustomerModel.countDocuments({ email }).lean().exec();
-//       return userCount ? true : false;
-//     }
-
-//     if (username) {
-//       const userCount = await CustomerModel.countDocuments({ username }).lean().exec();
-//       return userCount ? true : false;
-//     }
-
-//     return false;
-//   } catch (error: any) {
-//     throw new Error(error, { cause: "checkCustomerExistsService" });
-//   }
-// }
+import createHttpError from "http-errors";
 
 type CheckCustomerIsActiveServiceInput = {
   username?: string | undefined;
@@ -68,7 +36,7 @@ async function checkCustomerIsActiveService({
 
     return false;
   } catch (error: any) {
-    throw new Error(error, { cause: "checkCustomerExistsService" });
+    throw new createHttpError.InternalServerError("checkCustomerExistsService");
   }
 }
 
@@ -89,7 +57,7 @@ async function createNewCustomerService(customerSchema: CustomerSchema) {
     );
     return customerDocument;
   } catch (error: any) {
-    throw new Error(error, { cause: "createNewCustomerService" });
+    throw new createHttpError.InternalServerError("createNewCustomerService");
   }
 }
 
@@ -100,7 +68,7 @@ async function deleteCustomerService(
     const deletedCustomer = await CustomerModel.deleteOne({ _id: userId }).lean().exec();
     return deletedCustomer;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteCustomerService" });
+    throw new createHttpError.InternalServerError("deleteCustomerService");
   }
 }
 
@@ -109,7 +77,7 @@ async function deleteAllCustomersService(): Promise<DeleteResult> {
     const customers = await CustomerModel.deleteMany({}).lean().exec();
     return customers;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteAllCustomersService" });
+    throw new createHttpError.InternalServerError("deleteAllCustomersService");
   }
 }
 
@@ -123,7 +91,7 @@ async function getCustomerByIdService(
       .exec();
     return customer;
   } catch (error: any) {
-    throw new Error(error, { cause: "getCustomerByIdService" });
+    throw new createHttpError.InternalServerError("getCustomerByIdService");
   }
 }
 
@@ -137,7 +105,7 @@ async function getCustomerByUsernameService(
       .exec();
     return customer;
   } catch (error: any) {
-    throw new Error(error, { cause: "getCustomerByUsernameService" });
+    throw new createHttpError.InternalServerError("getCustomerByUsernameService");
   }
 }
 
@@ -148,7 +116,7 @@ async function getCustomerWithPasswordService(
     const customerWithPassword = await CustomerModel.findOne({ username }).lean().exec();
     return customerWithPassword;
   } catch (error: any) {
-    throw new Error(error, { cause: "getCustomerWithPasswordService" });
+    throw new createHttpError.InternalServerError("getCustomerWithPasswordService");
   }
 }
 
@@ -162,7 +130,7 @@ async function getAllCustomersService(
       .exec();
     return customer;
   } catch (error: any) {
-    throw new Error(error, { cause: "getAllCustomersService" });
+    throw new createHttpError.InternalServerError("getAllCustomersService");
   }
 }
 
@@ -178,7 +146,7 @@ async function getQueriedCustomersService({
       .exec();
     return customer;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedCustomersService" });
+    throw new createHttpError.InternalServerError("getQueriedCustomersService");
   }
 }
 
@@ -189,7 +157,7 @@ async function getQueriedTotalCustomersService({
     const totalCustomers = await CustomerModel.countDocuments(filter).lean().exec();
     return totalCustomers;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedTotalCustomersService" });
+    throw new createHttpError.InternalServerError("getQueriedTotalCustomersService");
   }
 }
 
@@ -210,7 +178,7 @@ async function updateCustomerByIdService({
       .exec();
     return updatedCustomer;
   } catch (error: any) {
-    throw new Error(error, { cause: "updateCustomerByIdService" });
+    throw new createHttpError.InternalServerError("updateCustomerByIdService");
   }
 }
 
@@ -247,7 +215,7 @@ async function checkCustomerPasswordService({
     const isPasswordMatch = await bcrypt.compare(password, customer.password);
     return isPasswordMatch;
   } catch (error: any) {
-    throw new Error(error, { cause: "checkCustomerPasswordService" });
+    throw new createHttpError.InternalServerError("checkCustomerPasswordService");
   }
 }
 
@@ -273,12 +241,11 @@ async function updateCustomerPasswordService({
       .exec();
     return updatedCustomer;
   } catch (error: any) {
-    throw new Error(error, { cause: "updateCustomerPasswordService" });
+    throw new createHttpError.InternalServerError("updateCustomerPasswordService");
   }
 }
 
 export {
-  // checkCustomerExistsService,
   checkCustomerIsActiveService,
   checkCustomerPasswordService,
   createNewCustomerService,

@@ -1,6 +1,6 @@
 import expressAsyncController from "express-async-handler";
 
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
 import type {
   UpdateCustomerRequest,
   UpdateCustomerPasswordRequest,
@@ -34,16 +34,14 @@ import {
 } from "../../types";
 import { FilterQuery, QueryOptions } from "mongoose";
 import { filterFieldsFromObject, removeUndefinedAndNullValues } from "../../utils";
-import { getProductReviewByIdService } from "../productReview";
-import { getSurveyByIdService } from "../actions/outreach/survey";
-import { getPurchaseByIdService } from "../purchase";
-import { getRMAByIdService } from "../rma";
+
 import {
   checkEmailExistsService,
   checkUsernameExistsService,
   updateUsernameEmailSetWithEmailService,
   updateUsernameEmailSetWithUsernameService,
 } from "../usernameEmailSet";
+import createHttpError from "http-errors";
 
 // @desc   Create new user
 // @route  POST /api/v1/customer
@@ -56,60 +54,44 @@ const createNewCustomerController = expressAsyncController(
         CustomerDocument,
         "password" | "paymentInformation" | "__v"
       >
-    >
+    >,
+    next: NextFunction
   ) => {
     const { customerSchema } = request.body;
     const { email, address, username } = customerSchema;
     const { province, state } = address;
 
-    // both state and province cannot be undefined (one is required)
     if (!state && !province) {
-      response.status(400).json({
-        message: "State or Province is required",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.BadRequest("State or Province is required"));
     }
 
-    // check for duplicate email
     const isDuplicateEmail = await checkEmailExistsService({ email: { $in: [email] } });
     if (isDuplicateEmail) {
-      response.status(409).json({ message: "Email already exists", resourceData: [] });
-      return;
+      return next(new createHttpError.Conflict("Email already exists"));
     }
 
-    // check for duplicate username
     const isDuplicateUser = await checkUsernameExistsService({
       username: {
         $in: [username],
       },
     });
     if (isDuplicateUser) {
-      response.status(409).json({ message: "Username already exists", resourceData: [] });
-      return;
+      return next(new createHttpError.Conflict("Username already exists"));
     }
 
-    // create new user if all checks pass successfully
     const customerDocument: CustomerDocument = await createNewCustomerService(
       customerSchema
     );
     if (!customerDocument) {
-      response
-        .status(400)
-        .json({ message: "Customer creation failed", resourceData: [] });
-      return;
+      return next(new createHttpError.InternalServerError("Customer creation failed"));
     }
 
-    // add new username and email to usernameEmailSet collection
     const updatedUsernameEmailSet = await Promise.all([
       updateUsernameEmailSetWithUsernameService(username),
       updateUsernameEmailSetWithEmailService(email),
     ]);
     if (updatedUsernameEmailSet.some((value) => !value)) {
-      response
-        .status(400)
-        .json({ message: "Customer creation failed", resourceData: [] });
-      return;
+      return next(new createHttpError.InternalServerError("Customer creation failed"));
     }
 
     const filteredCustomerDocument = filterFieldsFromObject<
@@ -143,7 +125,6 @@ const createNewCustomersBulkController = expressAsyncController(
         const { email, address, username } = customerSchema;
         const { province, state } = address;
 
-        // both state and province cannot be undefined (one is required)
         if (!state && !province) {
           response.status(400).json({
             message: "State or Province is required",
@@ -152,7 +133,6 @@ const createNewCustomersBulkController = expressAsyncController(
           return;
         }
 
-        // check for duplicate email
         const isDuplicateEmail = await checkEmailExistsService({
           email: { $in: [email] },
         });
@@ -163,7 +143,6 @@ const createNewCustomersBulkController = expressAsyncController(
           return;
         }
 
-        // check for duplicate username
         const isDuplicateUser = await checkUsernameExistsService({
           username: {
             $in: [username],
@@ -176,12 +155,10 @@ const createNewCustomersBulkController = expressAsyncController(
           return;
         }
 
-        // create new user if all checks pass successfully
         const customerDocument: CustomerDocument = await createNewCustomerService(
           customerSchema
         );
 
-        // add new username and email to usernameEmailSet collection
         const updatedUsernameEmailSet = await Promise.all([
           updateUsernameEmailSetWithUsernameService(username),
           updateUsernameEmailSetWithEmailService(email),
@@ -197,12 +174,10 @@ const createNewCustomersBulkController = expressAsyncController(
       })
     );
 
-    // filter out undefined values
     const customerDocumentsFiltered = customerDocuments.filter(
       removeUndefinedAndNullValues
     );
 
-    // check if any customers were created
     if (customerDocumentsFiltered.length === customerSchemas.length) {
       response.status(201).json({
         message: `Successfully created ${customerDocumentsFiltered.length} customers`,
@@ -249,12 +224,10 @@ const updateCustomerFieldsBulkController = expressAsyncController(
       })
     );
 
-    // filter out undefined values
     const updatedCustomersFiltered = updatedCustomers.filter(
       removeUndefinedAndNullValues
     );
 
-    // check if any customers were updated
     if (updatedCustomersFiltered.length === customerFields.length) {
       response.status(201).json({
         message: `Successfully updated ${updatedCustomersFiltered.length} customers`,
@@ -279,7 +252,7 @@ const updateCustomerFieldsBulkController = expressAsyncController(
 // @access Private
 const getAllCustomersBulkController = expressAsyncController(
   async (
-    request: GetAllCustomersBulkRequest,
+    _request: GetAllCustomersBulkRequest,
     response: Response<ResourceRequestServerResponse<CustomerDocument>>
   ) => {
     const customers = await getAllCustomersService(["-password"]);
@@ -324,7 +297,6 @@ const getQueriedCustomersController = expressAsyncController(
       });
     }
 
-    // get all customers
     const customers = await getQueriedCustomersService({
       filter: filter as FilterQuery<CustomerDocument> | undefined,
       projection: projection as QueryOptions<CustomerDocument>,
@@ -357,15 +329,14 @@ const getCustomerByIdController = expressAsyncController(
     request: GetCustomerByIdRequest,
     response: Response<
       ResourceRequestServerResponse<CustomerDocument, "password" | "paymentInformation">
-    >
+    >,
+    next: NextFunction
   ) => {
     const { customerId } = request.params;
 
     const customer = await getCustomerByIdService(customerId);
-
     if (!customer) {
-      response.status(404).json({ message: "Customer not found.", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Customer not found"));
     }
 
     response.status(200).json({
@@ -381,19 +352,14 @@ const getCustomerByIdController = expressAsyncController(
 const deleteCustomerController = expressAsyncController(
   async (
     request: DeleteCustomerRequest,
-    response: Response<ResourceRequestServerResponse<CustomerDocument>>
+    response: Response<ResourceRequestServerResponse<CustomerDocument>>,
+    next: NextFunction
   ) => {
-    // only managers/admin are allowed to delete customers
     const { customerId } = request.params;
 
     const deletedCustomer = await deleteCustomerService(customerId);
-
     if (!deletedCustomer.acknowledged) {
-      response.status(400).json({
-        message: "Failed to delete customer",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Failed to delete customer"));
     }
 
     response
@@ -407,17 +373,13 @@ const deleteCustomerController = expressAsyncController(
 // @access Private
 const deleteAllCustomersController = expressAsyncController(
   async (
-    request: DeleteCustomerRequest,
-    response: Response<ResourceRequestServerResponse<CustomerDocument>>
+    _request: DeleteCustomerRequest,
+    response: Response<ResourceRequestServerResponse<CustomerDocument>>,
+    next: NextFunction
   ) => {
     const deletedCustomer = await deleteAllCustomersService();
-
     if (!deletedCustomer.acknowledged) {
-      response.status(400).json({
-        message: "Failed to delete customer",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Failed to delete customers"));
     }
 
     response
@@ -434,7 +396,8 @@ const updateCustomerByIdController = expressAsyncController(
     request: UpdateCustomerRequest,
     response: Response<
       ResourceRequestServerResponse<CustomerDocument, "password" | "paymentInformation">
-    >
+    >,
+    next: NextFunction
   ) => {
     const {
       documentUpdate: { fields, updateOperator },
@@ -446,10 +409,8 @@ const updateCustomerByIdController = expressAsyncController(
       updateOperator,
       _id: customerId,
     });
-
     if (!updatedCustomer) {
-      response.status(400).json({ message: "Customer update failed", resourceData: [] });
-      return;
+      return next(new createHttpError.InternalServerError("Failed to update customer"));
     }
 
     response.status(200).json({
@@ -465,15 +426,14 @@ const updateCustomerByIdController = expressAsyncController(
 const getCustomerDocWithPaymentInfoController = expressAsyncController(
   async (
     request: GetCustomerByIdRequest,
-    response: Response<ResourceRequestServerResponse<CustomerDocument, "password">>
+    response: Response<ResourceRequestServerResponse<CustomerDocument, "password">>,
+    next: NextFunction
   ) => {
     const { customerId } = request.params;
 
     const customerDocument = await getCustomerDocWithPaymentInfoService(customerId);
-
     if (!customerDocument) {
-      response.status(404).json({ message: "Customer not found.", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Customer not found"));
     }
 
     response.status(200).json({
@@ -491,7 +451,8 @@ const updateCustomerPasswordController = expressAsyncController(
     request: UpdateCustomerPasswordRequest,
     response: Response<
       ResourceRequestServerResponse<CustomerDocument, "password" | "paymentInformation">
-    >
+    >,
+    next: NextFunction
   ) => {
     const {
       userInfo: { userId },
@@ -499,36 +460,28 @@ const updateCustomerPasswordController = expressAsyncController(
       newPassword,
     } = request.body;
 
-    // check if current password is correct
     const isCurrentPasswordCorrect = await checkCustomerPasswordService({
       userId,
       password: currentPassword,
     });
     if (!isCurrentPasswordCorrect) {
-      response
-        .status(400)
-        .json({ message: "Current password is incorrect", resourceData: [] });
-      return;
+      return next(new createHttpError.Unauthorized("Incorrect current password"));
     }
 
-    // check if new password is the same as current password
     if (currentPassword === newPassword) {
-      response.status(400).json({
-        message: "New password cannot be the same as current password",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.BadRequest(
+          "New password cannot be the same as current password"
+        )
+      );
     }
 
-    // update user password if all checks pass successfully
     const updatedCustomer = await updateCustomerPasswordService({
       userId,
       newPassword,
     });
-
     if (!updatedCustomer) {
-      response.status(400).json({ message: "Password update failed", resourceData: [] });
-      return;
+      return next(new createHttpError.InternalServerError("Failed to update password"));
     }
 
     response.status(200).json({
@@ -551,130 +504,3 @@ export {
   updateCustomerFieldsBulkController,
   updateCustomerPasswordController,
 };
-
-/**
- * // find all productReview documents associated with the customers
-    const reviewsArrArr = await Promise.all(
-      customers.map(async (customer) => {
-        const reviewPromises = customer.productReviewsIds.map(async (reviewId) => {
-          const review = await getProductReviewByIdService(reviewId);
-
-          return review;
-        });
-
-        // Wait for all the promises to resolve before continuing to the next iteration
-        const reviews = await Promise.all(reviewPromises);
-
-        // Filter out any undefined values (in case review was not found)
-        return reviews.filter(removeUndefinedAndNullValues);
-      })
-    );
-
-    // find all purchaseHistory documents associated with the customers
-    const purchaseHistoryArrArr = await Promise.all(
-      customers.map(async (customer) => {
-        const purchaseHistoryPromises = customer.purchaseHistoryIds.map(
-          async (purchaseHistoryId) => {
-            const purchaseHistory = await getPurchaseByIdService(purchaseHistoryId);
-
-            return purchaseHistory;
-          }
-        );
-
-        // Wait for all the promises to resolve before continuing to the next iteration
-        const purchaseHistory = await Promise.all(purchaseHistoryPromises);
-
-        // Filter out any undefined values (in case purchaseHistory was not found)
-        return purchaseHistory.filter(removeUndefinedAndNullValues);
-      })
-    );
-
-    // find all rmaHistory documents associated with the customers
-    const rmaHistoryArrArr = await Promise.all(
-      customers.map(async (customer) => {
-        const rmaHistoryPromises = customer.rmaHistoryIds.map(async (rmaHistoryId) => {
-          const rmaHistory = await getRMAByIdService(rmaHistoryId);
-
-          return rmaHistory;
-        });
-
-        // Wait for all the promises to resolve before continuing to the next iteration
-        const rmaHistory = await Promise.all(rmaHistoryPromises);
-
-        // Filter out any undefined values (in case rmaHistory was not found)
-        return rmaHistory.filter(removeUndefinedAndNullValues);
-      })
-    );
-
-    // find all completedSurveys documents associated with the customers
-    const completedSurveysArrArr = await Promise.all(
-      customers.map(async (customer) => {
-        const completedSurveysPromises = customer.completedSurveys.map(
-          async (completedSurveysId) => {
-            const completedSurveys = await getSurveyByIdService(completedSurveysId);
-
-            return completedSurveys;
-          }
-        );
-
-        // Wait for all the promises to resolve before continuing to the next iteration
-        const completedSurveys = await Promise.all(completedSurveysPromises);
-
-        // Filter out any undefined values (in case completedSurveys was not found)
-        return completedSurveys.filter(removeUndefinedAndNullValues);
-      })
-    );
-
-    const customersWithAddedFields = customers.map((customer, index) => {
-      return {
-        ...customer,
-        productReviews: reviewsArrArr[index],
-        purchaseHistory: purchaseHistoryArrArr[index],
-        rmaHistory: rmaHistoryArrArr[index],
-        completedSurveys: completedSurveysArrArr[index],
-      };
-    });
- */
-
-/**
-     * const reviewsArr = await Promise.all(
-      customer.productReviewsIds.map(async (reviewId) => {
-        const review = await getProductReviewByIdService(reviewId);
-
-        return review;
-      })
-    );
-
-    const purchaseHistoryArr = await Promise.all(
-      customer.purchaseHistoryIds.map(async (purchaseHistoryId) => {
-        const purchaseHistory = await getPurchaseByIdService(purchaseHistoryId);
-
-        return purchaseHistory;
-      })
-    );
-
-    const rmaHistoryArr = await Promise.all(
-      customer.rmaHistoryIds.map(async (rmaHistoryId) => {
-        const rmaHistory = await getRMAByIdService(rmaHistoryId);
-
-        return rmaHistory;
-      })
-    );
-
-    const completedSurveysArr = await Promise.all(
-      customer.completedSurveys.map(async (completedSurveysId) => {
-        const completedSurveys = await getSurveyByIdService(completedSurveysId);
-
-        return completedSurveys;
-      })
-    );
-
-    const customerWithAddedFields = {
-      ...customer,
-      productReviews: reviewsArr,
-      purchaseHistory: purchaseHistoryArr,
-      rmaHistory: rmaHistoryArr,
-      completedSurveys: completedSurveysArr,
-    };
-
-     */
