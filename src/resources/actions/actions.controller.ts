@@ -101,118 +101,109 @@ const getAllActionsDocumentsController = expressAsyncController(
     };
 
     const actionsData = await Promise.all([
-      // repair notes
       getQueriedRepairTicketsService({
         filter: awaitingApprovalFilter as FilterQuery<RepairTicketDocument> | undefined,
         projection: projection as QueryOptions<RepairTicketDocument>,
         options: options as QueryOptions<RepairTicketDocument>,
       }),
-      // company data
-      // address change
+
       getQueriedAddressChangesService({
         filter: pendingFilter as FilterQuery<AddressChangeDocument> | undefined,
         projection: projection as QueryOptions<AddressChangeDocument>,
         options: options as QueryOptions<AddressChangeDocument>,
       }),
-      // expense claim
+
       getQueriedExpenseClaimsService({
         filter: pendingFilter as FilterQuery<ExpenseClaimDocument> | undefined,
         projection: projection as QueryOptions<ExpenseClaimDocument>,
         options: options as QueryOptions<ExpenseClaimDocument>,
       }),
-      // request resource
+
       getQueriedRequestResourcesService({
         filter: pendingFilter as FilterQuery<RequestResourceDocument> | undefined,
         projection: projection as QueryOptions<RequestResourceDocument>,
         options: options as QueryOptions<RequestResourceDocument>,
       }),
-      // leave request
+
       getQueriedLeaveRequestsService({
         filter: pendingFilter as FilterQuery<LeaveRequestDocument> | undefined,
         projection: projection as QueryOptions<LeaveRequestDocument>,
         options: options as QueryOptions<LeaveRequestDocument>,
       }),
-      // benefits
+
       getQueriedBenefitsService({
         filter: pendingFilter as FilterQuery<BenefitDocument> | undefined,
         projection: projection as QueryOptions<BenefitDocument>,
         options: options as QueryOptions<BenefitDocument>,
       }),
 
-      // general data
-      // endorsement
       getQueriedEndorsementsService({
         filter: filter as FilterQuery<EndorsementDocument> | undefined,
         projection: projection as QueryOptions<EndorsementDocument>,
         options: options as QueryOptions<EndorsementDocument>,
       }),
-      // printer issue
+
       getQueriedPrinterIssuesService({
         filter: pendingFilter as FilterQuery<PrinterIssueDocument> | undefined,
         projection: projection as QueryOptions<PrinterIssueDocument>,
         options: options as QueryOptions<PrinterIssueDocument>,
       }),
-      // anonymous request
+
       getQueriedAnonymousRequestsService({
         filter: pendingFilter as FilterQuery<AnonymousRequestDocument> | undefined,
         projection: projection as QueryOptions<AnonymousRequestDocument>,
         options: options as QueryOptions<AnonymousRequestDocument>,
       }),
-      // referment
+
       getQueriedRefermentsService({
         filter: pendingFilter as FilterQuery<RefermentDocument> | undefined,
         projection: projection as QueryOptions<RefermentDocument>,
         options: options as QueryOptions<RefermentDocument>,
       }),
 
-      // outreach data
-      // announcement
       getQueriedAnnouncementsService({
         filter: filter as FilterQuery<AnnouncementDocument> | undefined,
         projection: projection as QueryOptions<AnnouncementDocument>,
         options: options as QueryOptions<AnnouncementDocument>,
       }),
-      // survey
+
       getQueriedSurveysService({
         filter: filter as FilterQuery<SurveyDocument> | undefined,
         projection: projection as QueryOptions<SurveyDocument>,
         options: surveyOptions as QueryOptions<SurveyDocument>,
       }),
-      // event
+
       getQueriedEventsService({
         filter: filter as FilterQuery<EventDocument> | undefined,
         projection: projection as QueryOptions<EventDocument>,
         options: eventOptions as QueryOptions<EventDocument>,
       }),
 
-      // customer
       getAllCustomersService(),
 
-      // employees
       getAllUsersService(),
     ]);
 
     const [
-      // repair notes
       repairTicketData,
-      // company data
+
       addressChangeData,
       expenseClaimData,
       requestResourceData,
       leaveRequestData,
       benefitsData,
-      // general data
+
       endorsementData,
       printerIssueData,
       anonymousRequestData,
       refermentData,
-      // outreach data
+
       announcementData,
       surveyData,
       eventData,
-      // customer
+
       customerData,
-      // employees
+
       employeeData,
     ] = actionsData;
 
@@ -277,84 +268,78 @@ const getUsersActionsDocumentsController = expressAsyncController(
     };
 
     const actionsCompanyData = await Promise.all([
-      // repair notes
       getQueriedRepairTicketsService({
         filter: pendingFilter as FilterQuery<RepairTicketDocument> | undefined,
         projection: projection as QueryOptions<RepairTicketDocument>,
         options: options as QueryOptions<RepairTicketDocument>,
       }),
-      // company data
-      // address change
+
       getQueriedAddressChangesByUserService({
         filter: pendingFilter as FilterQuery<AddressChangeDocument> | undefined,
         projection: projection as QueryOptions<AddressChangeDocument>,
         options: options as QueryOptions<AddressChangeDocument>,
       }),
-      // expense claim
+
       getQueriedExpenseClaimsByUserService({
         filter: pendingFilter as FilterQuery<ExpenseClaimDocument> | undefined,
         projection: projection as QueryOptions<ExpenseClaimDocument>,
         options: options as QueryOptions<ExpenseClaimDocument>,
       }),
-      // request resource
+
       getQueriedRequestResourcesByUserService({
         filter: pendingFilter as FilterQuery<RequestResourceDocument> | undefined,
         projection: projection as QueryOptions<RequestResourceDocument>,
         options: options as QueryOptions<RequestResourceDocument>,
       }),
-      // leave request
+
       getQueriedLeaveRequestsByUserService({
         filter: pendingFilter as FilterQuery<LeaveRequestDocument> | undefined,
         projection: projection as QueryOptions<LeaveRequestDocument>,
         options: options as QueryOptions<LeaveRequestDocument>,
       }),
-      // benefits
+
       getQueriedBenefitsByUserService({
         filter: pendingFilter as FilterQuery<BenefitDocument> | undefined,
         projection: projection as QueryOptions<BenefitDocument>,
         options: options as QueryOptions<BenefitDocument>,
       }),
 
-      // general data
-      // endorsement
       getQueriedEndorsementsByUserService({
         filter: filterWithUserId as FilterQuery<EndorsementDocument> | undefined,
         projection: projection as QueryOptions<EndorsementDocument>,
         options: options as QueryOptions<EndorsementDocument>,
       }),
-      // printer issue
+
       getQueriedPrinterIssuesByUserService({
         filter: pendingFilter as FilterQuery<PrinterIssueDocument> | undefined,
         projection: projection as QueryOptions<PrinterIssueDocument>,
         options: options as QueryOptions<PrinterIssueDocument>,
       }),
-      // referment
+
       getQueriedRefermentsByUserService({
         filter: pendingFilter as FilterQuery<RefermentDocument> | undefined,
         projection: projection as QueryOptions<RefermentDocument>,
         options: options as QueryOptions<RefermentDocument>,
       }),
 
-      // outreach data
-      // announcement
       getQueriedAnnouncementsService({
         filter: filter as FilterQuery<AnnouncementDocument> | undefined,
         projection: projection as QueryOptions<AnnouncementDocument>,
         options: options as QueryOptions<AnnouncementDocument>,
       }),
-      // survey
+
       getQueriedSurveysByUserService({
         filter: filter as FilterQuery<SurveyDocument> | undefined,
         projection: projection as QueryOptions<SurveyDocument>,
         options: surveyOptions as QueryOptions<SurveyDocument>,
       }),
-      // event
+
       getQueriedEventsByUserService({
         filter: filter as FilterQuery<EventDocument> | undefined,
         projection: projection as QueryOptions<EventDocument>,
         options: eventOptions as QueryOptions<EventDocument>,
       }),
-      // employees
+
       getQueriedUsersService({
         filter: filterWithUserId as FilterQuery<UserDocument> | undefined,
         projection: projection as QueryOptions<UserDocument>,
@@ -363,23 +348,22 @@ const getUsersActionsDocumentsController = expressAsyncController(
     ]);
 
     const [
-      // repair notes
       repairTicketData,
-      // company data
+
       addressChangeData,
       expenseClaimData,
       requestResourceData,
       leaveRequestData,
       benefitsData,
-      // general data
+
       endorsementData,
       printerIssueData,
       refermentData,
-      // outreach data
+
       announcementData,
       surveyData,
       eventData,
-      // employees
+
       employeeData,
     ] = actionsCompanyData;
 
