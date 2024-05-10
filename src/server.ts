@@ -1,21 +1,21 @@
-import compression from 'compression';
-import cookieParser from 'cookie-parser';
-import cors from 'cors';
-import express from 'express';
-import helmet from 'helmet';
-import mongoose from 'mongoose';
-import path from 'path';
+import compression from "compression";
+import cookieParser from "cookie-parser";
+import cors from "cors";
+import express, { NextFunction, Request, Response } from "express";
+import helmet from "helmet";
+import mongoose from "mongoose";
+import path from "path";
 
-import { config } from './config';
-import { connectDB } from './config/connectDB';
-import { corsOptions } from './config/cors';
-import { errorHandler, logEvents, loggerMiddleware } from './middlewares';
+import { config } from "./config";
+import { connectDB } from "./config/connectDB";
+import { corsOptions } from "./config/cors";
+import { errorHandler, logEvents, loggerMiddleware } from "./middlewares";
 
-import { rootRouter } from './resources/root';
-import { notFoundRouter } from './resources/notFound404';
-import { authRouter } from './resources/auth';
-import { apiRouter } from './resources/api';
-import { credentials } from './middlewares/credentials';
+import { rootRouter } from "./resources/root";
+import { authRouter } from "./resources/auth";
+import { apiRouter } from "./resources/api";
+import { credentials } from "./middlewares/credentials";
+import createHttpError from "http-errors";
 
 const app = express();
 
@@ -34,13 +34,15 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(compression());
 
-app.use('/', express.static(path.join(__dirname, 'public')));
+app.use("/", express.static(path.join(__dirname, "public")));
 
-app.use('/', rootRouter);
-app.use('/auth', authRouter);
-app.use('/api', apiRouter);
+app.use("/", rootRouter);
+app.use("/auth", authRouter);
+app.use("/api", apiRouter);
 
-app.all('*', notFoundRouter);
+app.use((_: Request, __: Response, next: NextFunction) => {
+  return next(new createHttpError.NotFound("This route does not exist"));
+});
 
 // error handling
 app.use(errorHandler);
@@ -51,8 +53,8 @@ app.use(errorHandler);
  *
  */
 
-mongoose.connection.once('open', () => {
-  console.log('Connected to MongoDB');
+mongoose.connection.once("open", () => {
+  console.log("Connected to MongoDB");
 
   const { PORT } = config;
   app.listen(PORT, () => {
@@ -60,11 +62,11 @@ mongoose.connection.once('open', () => {
   });
 });
 
-mongoose.connection.on('error', (error) => {
+mongoose.connection.on("error", (error) => {
   console.error(error);
 
   logEvents({
     message: `${error.no}:${error.code}\t${error.syscall}\t${error.hostname}`,
-    logFileName: 'mongoErrorLog.log',
+    logFileName: "mongoErrorLog.log",
   });
 });

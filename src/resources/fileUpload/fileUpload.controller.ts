@@ -1,6 +1,6 @@
 import expressAsyncController from "express-async-handler";
 
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
 import type {
   CreateNewFileUploadRequest,
   InsertAssociatedDocumentIdRequest,
@@ -27,6 +27,7 @@ import {
 } from "../../types";
 import { FileUploadDocument, FileUploadSchema } from "./fileUpload.model";
 import { FilterQuery, QueryOptions } from "mongoose";
+import createHttpError from "http-errors";
 
 // @desc   Create a new file upload
 // @route  POST /file-upload
@@ -34,7 +35,8 @@ import { FilterQuery, QueryOptions } from "mongoose";
 const createNewFileUploadController = expressAsyncController(
   async (
     request: CreateNewFileUploadRequest,
-    response: Response<FileUploadServerResponse>
+    response: Response<FileUploadServerResponse>,
+    next: NextFunction
   ) => {
     const {
       userInfo: { userId, username },
@@ -50,7 +52,6 @@ const createNewFileUploadController = expressAsyncController(
       fileSize,
     } = fileUploadSchema[0];
 
-    // create new fileUpload object
     const newFileUploadSchema: FileUploadSchema = {
       userId,
       username,
@@ -62,23 +63,17 @@ const createNewFileUploadController = expressAsyncController(
       fileEncoding,
     };
 
-    console.log("\n");
-    console.group("createNewFileUploadController");
-    console.log("fileUploadSchema: ", newFileUploadSchema);
-    console.groupEnd();
-
-    // create new fileUpload
     const fileUploadDocument: FileUploadDocument = await createNewFileUploadService(
       newFileUploadSchema
     );
-    if (fileUploadDocument) {
-      response.status(201).json({
-        message: "File uploaded successfully",
-        documentId: fileUploadDocument._id,
-      });
-    } else {
-      response.status(400).json({ message: "File could not be uploaded" });
+    if (!fileUploadDocument) {
+      return next(new createHttpError.InternalServerError("File could not be uploaded"));
     }
+
+    response.status(201).json({
+      message: "File uploaded successfully",
+      documentId: fileUploadDocument._id,
+    });
   }
 );
 
@@ -102,27 +97,29 @@ const getAllFileUploadsController = expressAsyncController(
       });
     }
 
-    // get all file uploads
     const fileUploads = await getQueriedFileUploadsService({
       filter: filter as FilterQuery<FileUploadDocument> | undefined,
       projection: projection as QueryOptions<FileUploadDocument>,
       options: options as QueryOptions<FileUploadDocument>,
     });
+
     if (fileUploads.length === 0) {
       response.status(404).json({
-        message: "No file uploads that match query parameters were found",
+        message: "No file uploads found",
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
       });
-    } else {
-      response.status(200).json({
-        message: "Successfully found file uploads",
-        pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments,
-        resourceData: fileUploads,
-      });
+
+      return;
     }
+
+    response.status(200).json({
+      message: "File uploads found successfully",
+      pages: Math.ceil(totalDocuments / Number(options?.limit)),
+      totalDocuments,
+      resourceData: fileUploads,
+    });
   }
 );
 
@@ -156,6 +153,7 @@ const getQueriedFileUploadsByUserController = expressAsyncController(
       projection: projection as QueryOptions<FileUploadDocument>,
       options: options as QueryOptions<FileUploadDocument>,
     });
+
     if (fileUploads.length === 0) {
       response.status(404).json({
         message: "No file uploads found",
@@ -163,14 +161,16 @@ const getQueriedFileUploadsByUserController = expressAsyncController(
         totalDocuments: 0,
         resourceData: [],
       });
-    } else {
-      response.status(200).json({
-        message: "File uploads found successfully",
-        pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments,
-        resourceData: fileUploads,
-      });
+
+      return;
     }
+
+    response.status(200).json({
+      message: "File uploads found successfully",
+      pages: Math.ceil(totalDocuments / Number(options?.limit)),
+      totalDocuments,
+      resourceData: fileUploads,
+    });
   }
 );
 
@@ -180,34 +180,37 @@ const getQueriedFileUploadsByUserController = expressAsyncController(
 const insertAssociatedResourceDocumentIdController = expressAsyncController(
   async (
     request: InsertAssociatedDocumentIdRequest,
-    response: Response<FileUploadServerResponse>
+    response: Response<FileUploadServerResponse>,
+    next: NextFunction
   ) => {
     const { fileUploadId, associatedDocumentId, associatedResource } = request.body;
 
     const oldFileUpload = await getFileUploadByIdService(fileUploadId);
     if (!oldFileUpload) {
-      response.status(404).json({
-        message: "File upload not found",
-      });
-      return;
+      return next(new createHttpError.NotFound("File upload not found"));
     }
 
-    // update fileUpload object
     const updatedFileUploadObject = {
       ...oldFileUpload,
       associatedDocumentId,
       associatedResource,
     };
 
-    // update fileUpload
     const updatedFileUpload = await insertAssociatedResourceDocumentIdService(
       updatedFileUploadObject
     );
-    if (updatedFileUpload) {
-      response.status(200).json({ message: "File upload updated successfully" });
-    } else {
-      response.status(400).json({ message: "File upload could not be updated" });
+    if (!updatedFileUpload) {
+      return next(
+        new createHttpError.InternalServerError(
+          "Associated document id could not be inserted"
+        )
+      );
     }
+
+    response.status(200).json({
+      message: "Associated document id inserted successfully",
+      fileUploads: [updatedFileUpload],
+    });
   }
 );
 
@@ -217,25 +220,21 @@ const insertAssociatedResourceDocumentIdController = expressAsyncController(
 const deleteAFileUploadController = expressAsyncController(
   async (
     request: DeleteAFileUploadRequest,
-    response: Response<FileUploadServerResponse>
+    response: Response<FileUploadServerResponse>,
+    next: NextFunction
   ) => {
     const { fileUploadId } = request.params;
 
-    // users can delete their own file uploads which are not associated with any document
-
     const existingFileUpload = await getFileUploadByIdService(fileUploadId);
     if (!existingFileUpload) {
-      response.status(404).json({
-        message: "File upload not found",
-      });
-      return;
+      return next(new createHttpError.NotFound("File upload not found"));
     }
 
-    // delete file upload
     const deletedResult = await deleteFileUploadByIdService(fileUploadId);
     if (deletedResult.deletedCount !== 1) {
-      response.status(400).json({ message: "File upload could not be deleted" });
-      return;
+      return next(
+        new createHttpError.InternalServerError("File upload could not be deleted")
+      );
     }
 
     response.status(200).json({ message: "File upload deleted successfully" });
@@ -247,16 +246,18 @@ const deleteAFileUploadController = expressAsyncController(
 // @access Private/Admin/Manager
 const deleteAllFileUploadsController = expressAsyncController(
   async (
-    request: DeleteAllFileUploadsRequest,
-    response: Response<FileUploadServerResponse>
+    _request: DeleteAllFileUploadsRequest,
+    response: Response<FileUploadServerResponse>,
+    next: NextFunction
   ) => {
-    // delete all file uploads
     const deletedResult = await deleteAllFileUploadsService();
-    if (deletedResult.acknowledged) {
-      response.status(200).json({ message: "All file uploads deleted successfully" });
-    } else {
-      response.status(400).json({ message: "All file uploads could not be deleted" });
+    if (deletedResult.deletedCount === 0) {
+      return next(
+        new createHttpError.InternalServerError("File uploads could not be deleted")
+      );
     }
+
+    response.status(200).json({ message: "File uploads deleted successfully" });
   }
 );
 
@@ -266,20 +267,20 @@ const deleteAllFileUploadsController = expressAsyncController(
 const getFileUploadByIdController = expressAsyncController(
   async (
     request: GetFileUploadByIdRequest,
-    response: Response<FileUploadServerResponse>
+    response: Response<FileUploadServerResponse>,
+    next: NextFunction
   ) => {
     const { fileUploadId } = request.params;
 
-    // get file upload by its id
     const fileUpload = await getFileUploadByIdService(fileUploadId);
-    if (fileUpload) {
-      response.status(200).json({
-        message: "File upload retrieved successfully",
-        fileUploads: [fileUpload],
-      });
-    } else {
-      response.status(404).json({ message: "No file upload found", fileUploads: [] });
+    if (!fileUpload) {
+      return next(new createHttpError.NotFound("File upload not found"));
     }
+
+    response.status(200).json({
+      message: "File upload retrieved successfully",
+      fileUploads: [fileUpload],
+    });
   }
 );
 
