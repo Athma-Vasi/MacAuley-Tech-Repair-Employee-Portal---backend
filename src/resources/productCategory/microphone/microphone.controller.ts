@@ -1,7 +1,8 @@
 import expressAsyncController from "express-async-handler";
+import createHttpError from "http-errors";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response } from "express";
+import type { Response, NextFunction } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewMicrophoneBulkRequest,
@@ -41,6 +42,7 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 const createNewMicrophoneController = expressAsyncController(
   async (
     request: CreateNewMicrophoneRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<MicrophoneDocument>>
   ) => {
     const { microphoneSchema } = request.body;
@@ -71,6 +73,7 @@ const createNewMicrophoneController = expressAsyncController(
 const createNewMicrophoneBulkController = expressAsyncController(
   async (
     request: CreateNewMicrophoneBulkRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<MicrophoneDocument>>
   ) => {
     const { microphoneSchemas } = request.body;
@@ -120,6 +123,7 @@ const createNewMicrophoneBulkController = expressAsyncController(
 const updateMicrophonesBulkController = expressAsyncController(
   async (
     request: UpdateMicrophonesBulkRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<MicrophoneDocument>>
   ) => {
     const { microphoneFields } = request.body;
@@ -224,6 +228,7 @@ const getQueriedMicrophonesController = expressAsyncController(
 const getMicrophoneByIdController = expressAsyncController(
   async (
     request: GetMicrophoneByIdRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<MicrophoneDocument>>
   ) => {
     const microphoneId = request.params.microphoneId;
@@ -248,6 +253,7 @@ const getMicrophoneByIdController = expressAsyncController(
 const updateMicrophoneByIdController = expressAsyncController(
   async (
     request: UpdateMicrophoneByIdRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<MicrophoneDocument>>
   ) => {
     const { microphoneId } = request.params;
@@ -283,6 +289,7 @@ const updateMicrophoneByIdController = expressAsyncController(
 const deleteAllMicrophonesController = expressAsyncController(
   async (
     _request: DeleteAllMicrophonesRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<MicrophoneDocument>>
   ) => {
     // grab all microphones file upload ids
@@ -341,6 +348,7 @@ const deleteAllMicrophonesController = expressAsyncController(
 const deleteAMicrophoneController = expressAsyncController(
   async (
     request: DeleteAMicrophoneRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<MicrophoneDocument>>
   ) => {
     const microphoneId = request.params.microphoneId;

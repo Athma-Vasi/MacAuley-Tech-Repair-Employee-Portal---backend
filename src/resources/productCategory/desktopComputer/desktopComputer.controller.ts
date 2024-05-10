@@ -1,7 +1,7 @@
 import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewDesktopComputerBulkRequest,
@@ -34,6 +34,7 @@ import { deleteFileUploadByIdService } from "../../fileUpload";
 
 import { deleteAProductReviewService } from "../../productReview";
 import { removeUndefinedAndNullValues } from "../../../utils";
+import createHttpError from "http-errors";
 
 // @desc   Create new desktopComputer
 // @route  POST /api/v1/product-category/desktopComputer
@@ -41,7 +42,8 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 const createNewDesktopComputerController = expressAsyncController(
   async (
     request: CreateNewDesktopComputerRequest,
-    response: Response<ResourceRequestServerResponse<DesktopComputerDocument>>
+    response: Response<ResourceRequestServerResponse<DesktopComputerDocument>>,
+    next: NextFunction
   ) => {
     const { desktopComputerSchema } = request.body;
 
@@ -49,11 +51,9 @@ const createNewDesktopComputerController = expressAsyncController(
       await createNewDesktopComputerService(desktopComputerSchema);
 
     if (!desktopComputerDocument) {
-      response.status(400).json({
-        message: "Could not create new Desktop Computer",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Desktop Computer could not be created")
+      );
     }
 
     response.status(201).json({
@@ -70,7 +70,8 @@ const createNewDesktopComputerController = expressAsyncController(
 const createNewDesktopComputerBulkController = expressAsyncController(
   async (
     request: CreateNewDesktopComputerBulkRequest,
-    response: Response<ResourceRequestServerResponse<DesktopComputerDocument>>
+    response: Response<ResourceRequestServerResponse<DesktopComputerDocument>>,
+    next: NextFunction
   ) => {
     const { desktopComputerSchemas } = request.body;
 
@@ -83,12 +84,10 @@ const createNewDesktopComputerBulkController = expressAsyncController(
       })
     );
 
-    // filter out any desktopComputers that were not created
     const successfullyCreatedDesktopComputers = newDesktopComputers.filter(
       (desktopComputer) => desktopComputer
     );
 
-    // check if any desktopComputers were created
     if (successfullyCreatedDesktopComputers.length === desktopComputerSchemas.length) {
       response.status(201).json({
         message: `Successfully created ${successfullyCreatedDesktopComputers.length} Desktop Computers`,
@@ -121,7 +120,8 @@ const createNewDesktopComputerBulkController = expressAsyncController(
 const updateDesktopComputersBulkController = expressAsyncController(
   async (
     request: UpdateDesktopComputersBulkRequest,
-    response: Response<ResourceRequestServerResponse<DesktopComputerDocument>>
+    response: Response<ResourceRequestServerResponse<DesktopComputerDocument>>,
+    next: NextFunction
   ) => {
     const { desktopComputerFields } = request.body;
 
@@ -142,12 +142,10 @@ const updateDesktopComputersBulkController = expressAsyncController(
       })
     );
 
-    // filter out any desktopComputers that were not updated
     const successfullyUpdatedDesktopComputers = updatedDesktopComputers.filter(
       removeUndefinedAndNullValues
     );
 
-    // check if any desktopComputers were updated
     if (successfullyUpdatedDesktopComputers.length === desktopComputerFields.length) {
       response.status(201).json({
         message: `Successfully updated ${successfullyUpdatedDesktopComputers.length} Desktop Computers`,
@@ -180,7 +178,8 @@ const updateDesktopComputersBulkController = expressAsyncController(
 const getQueriedDesktopComputersController = expressAsyncController(
   async (
     request: GetQueriedDesktopComputersRequest,
-    response: Response<GetQueriedResourceRequestServerResponse<DesktopComputerDocument>>
+    response: Response<GetQueriedResourceRequestServerResponse<DesktopComputerDocument>>,
+    next: NextFunction
   ) => {
     let { newQueryFlag, totalDocuments } = request.body;
 
@@ -194,12 +193,12 @@ const getQueriedDesktopComputersController = expressAsyncController(
       });
     }
 
-    // get all desktopComputers
     const desktopComputers = await getQueriedDesktopComputersService({
       filter: filter as FilterQuery<DesktopComputerDocument> | undefined,
       projection: projection as QueryOptions<DesktopComputerDocument>,
       options: options as QueryOptions<DesktopComputerDocument>,
     });
+
     if (desktopComputers.length === 0) {
       response.status(200).json({
         message: "No Desktop Computers that match query parameters were found",
@@ -225,17 +224,14 @@ const getQueriedDesktopComputersController = expressAsyncController(
 const getDesktopComputerByIdController = expressAsyncController(
   async (
     request: GetDesktopComputerByIdRequest,
-    response: Response<ResourceRequestServerResponse<DesktopComputerDocument>>
+    response: Response<ResourceRequestServerResponse<DesktopComputerDocument>>,
+    next: NextFunction
   ) => {
     const desktopComputerId = request.params.desktopComputerId;
 
-    // get desktopComputer by id
     const desktopComputer = await getDesktopComputerByIdService(desktopComputerId);
     if (!desktopComputer) {
-      response
-        .status(404)
-        .json({ message: "Desktop Computer not found", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Desktop Computer could not be found"));
     }
 
     response.status(200).json({
@@ -251,14 +247,14 @@ const getDesktopComputerByIdController = expressAsyncController(
 const updateDesktopComputerByIdController = expressAsyncController(
   async (
     request: UpdateDesktopComputerByIdRequest,
-    response: Response<ResourceRequestServerResponse<DesktopComputerDocument>>
+    response: Response<ResourceRequestServerResponse<DesktopComputerDocument>>,
+    next: NextFunction
   ) => {
     const { desktopComputerId } = request.params;
     const {
       documentUpdate: { fields, updateOperator },
     } = request.body;
 
-    // update desktopComputer
     const updatedDesktopComputer = await updateDesktopComputerByIdService({
       _id: desktopComputerId,
       fields,
@@ -266,11 +262,9 @@ const updateDesktopComputerByIdController = expressAsyncController(
     });
 
     if (!updatedDesktopComputer) {
-      response.status(400).json({
-        message: "Desktop Computer could not be updated",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Desktop Computer could not be updated")
+      );
     }
 
     response.status(200).json({
@@ -286,12 +280,11 @@ const updateDesktopComputerByIdController = expressAsyncController(
 const deleteAllDesktopComputersController = expressAsyncController(
   async (
     _request: DeleteAllDesktopComputersRequest,
-    response: Response<ResourceRequestServerResponse<DesktopComputerDocument>>
+    response: Response<ResourceRequestServerResponse<DesktopComputerDocument>>,
+    next: NextFunction
   ) => {
-    // grab all desktopComputers file upload ids
     const uploadedFilesIds = await returnAllDesktopComputersUploadedFileIdsService();
 
-    // delete all file uploads associated with all desktopComputers
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -301,14 +294,11 @@ const deleteAllDesktopComputersController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Some File uploads could not be deleted")
+      );
     }
 
-    // delete all reviews associated with all desktopComputers
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -316,23 +306,18 @@ const deleteAllDesktopComputersController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Some reviews could not be deleted")
+      );
     }
 
-    // delete all desktopComputers
     const deleteDesktopComputersResult: DeleteResult =
       await deleteAllDesktopComputersService();
 
     if (deleteDesktopComputersResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "All Desktop Computers could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Desktop Computers could not be deleted")
+      );
     }
 
     response
@@ -347,24 +332,18 @@ const deleteAllDesktopComputersController = expressAsyncController(
 const deleteADesktopComputerController = expressAsyncController(
   async (
     request: DeleteADesktopComputerRequest,
-    response: Response<ResourceRequestServerResponse<DesktopComputerDocument>>
+    response: Response<ResourceRequestServerResponse<DesktopComputerDocument>>,
+    next: NextFunction
   ) => {
     const desktopComputerId = request.params.desktopComputerId;
 
-    // check if desktopComputer exists
     const desktopComputerExists = await getDesktopComputerByIdService(desktopComputerId);
     if (!desktopComputerExists) {
-      response
-        .status(404)
-        .json({ message: "Desktop Computer does not exist", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Desktop Computer could not be found"));
     }
 
-    // find all file uploads associated with this desktopComputer
-    // if it is not an array, it is made to be an array
     const uploadedFilesIds = [...desktopComputerExists.uploadedFilesIds];
 
-    // delete all file uploads associated with all desktopComputers
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -381,7 +360,6 @@ const deleteADesktopComputerController = expressAsyncController(
       return;
     }
 
-    // delete all reviews associated with all desktopComputers
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -389,23 +367,19 @@ const deleteADesktopComputerController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Some reviews could not be deleted")
+      );
     }
-    // delete desktopComputer by id
+
     const deleteDesktopComputerResult: DeleteResult = await deleteADesktopComputerService(
       desktopComputerId
     );
 
     if (deleteDesktopComputerResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "Desktop Computer could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Desktop Computer could not be deleted")
+      );
     }
 
     response.status(200).json({ message: "Desktop Computer deleted", resourceData: [] });

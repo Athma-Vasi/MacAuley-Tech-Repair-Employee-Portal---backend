@@ -1,7 +1,7 @@
 import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewMotherboardBulkRequest,
@@ -34,6 +34,7 @@ import { deleteFileUploadByIdService } from "../../fileUpload";
 
 import { deleteAProductReviewService } from "../../productReview";
 import { removeUndefinedAndNullValues } from "../../../utils";
+import createHttpError from "http-errors";
 
 // @desc   Create new motherboard
 // @route  POST /api/v1/product-category/motherboard
@@ -41,20 +42,18 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 const createNewMotherboardController = expressAsyncController(
   async (
     request: CreateNewMotherboardRequest,
-    response: Response<ResourceRequestServerResponse<MotherboardDocument>>
+    response: Response<ResourceRequestServerResponse<MotherboardDocument>>,
+    next: NextFunction
   ) => {
     const { motherboardSchema } = request.body;
 
     const motherboardDocument: MotherboardDocument = await createNewMotherboardService(
       motherboardSchema
     );
-
     if (!motherboardDocument) {
-      response.status(400).json({
-        message: "Could not create new motherboard",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Motherboard could not be created")
+      );
     }
 
     response.status(201).json({
@@ -71,7 +70,8 @@ const createNewMotherboardController = expressAsyncController(
 const createNewMotherboardBulkController = expressAsyncController(
   async (
     request: CreateNewMotherboardBulkRequest,
-    response: Response<ResourceRequestServerResponse<MotherboardDocument>>
+    response: Response<ResourceRequestServerResponse<MotherboardDocument>>,
+    next: NextFunction
   ) => {
     const { motherboardSchemas } = request.body;
 
@@ -82,12 +82,10 @@ const createNewMotherboardBulkController = expressAsyncController(
       })
     );
 
-    // filter out any motherboards that were not created
     const successfullyCreatedMotherboards = newMotherboards.filter(
       (motherboard) => motherboard
     );
 
-    // check if any motherboards were created
     if (successfullyCreatedMotherboards.length === motherboardSchemas.length) {
       response.status(201).json({
         message: `Successfully created ${successfullyCreatedMotherboards.length} motherboards`,
@@ -120,7 +118,8 @@ const createNewMotherboardBulkController = expressAsyncController(
 const updateMotherboardsBulkController = expressAsyncController(
   async (
     request: UpdateMotherboardsBulkRequest,
-    response: Response<ResourceRequestServerResponse<MotherboardDocument>>
+    response: Response<ResourceRequestServerResponse<MotherboardDocument>>,
+    next: NextFunction
   ) => {
     const { motherboardFields } = request.body;
 
@@ -141,12 +140,10 @@ const updateMotherboardsBulkController = expressAsyncController(
       })
     );
 
-    // filter out any motherboards that were not updated
     const successfullyUpdatedMotherboards = updatedMotherboards.filter(
       removeUndefinedAndNullValues
     );
 
-    // check if any motherboards were updated
     if (successfullyUpdatedMotherboards.length === motherboardFields.length) {
       response.status(201).json({
         message: `Successfully updated ${successfullyUpdatedMotherboards.length} motherboards`,
@@ -193,12 +190,12 @@ const getQueriedMotherboardsController = expressAsyncController(
       });
     }
 
-    // get all motherboards
     const motherboards = await getQueriedMotherboardsService({
       filter: filter as FilterQuery<MotherboardDocument> | undefined,
       projection: projection as QueryOptions<MotherboardDocument>,
       options: options as QueryOptions<MotherboardDocument>,
     });
+
     if (motherboards.length === 0) {
       response.status(200).json({
         message: "No motherboards that match query parameters were found",
@@ -224,15 +221,14 @@ const getQueriedMotherboardsController = expressAsyncController(
 const getMotherboardByIdController = expressAsyncController(
   async (
     request: GetMotherboardByIdRequest,
-    response: Response<ResourceRequestServerResponse<MotherboardDocument>>
+    response: Response<ResourceRequestServerResponse<MotherboardDocument>>,
+    next: NextFunction
   ) => {
     const motherboardId = request.params.motherboardId;
 
-    // get motherboard by id
     const motherboard = await getMotherboardByIdService(motherboardId);
     if (!motherboard) {
-      response.status(404).json({ message: "Motherboard not found", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Motherboard does not exist"));
     }
 
     response.status(200).json({
@@ -248,14 +244,14 @@ const getMotherboardByIdController = expressAsyncController(
 const updateMotherboardByIdController = expressAsyncController(
   async (
     request: UpdateMotherboardByIdRequest,
-    response: Response<ResourceRequestServerResponse<MotherboardDocument>>
+    response: Response<ResourceRequestServerResponse<MotherboardDocument>>,
+    next: NextFunction
   ) => {
     const { motherboardId } = request.params;
     const {
       documentUpdate: { fields, updateOperator },
     } = request.body;
 
-    // update motherboard
     const updatedMotherboard = await updateMotherboardByIdService({
       _id: motherboardId,
       fields,
@@ -263,11 +259,9 @@ const updateMotherboardByIdController = expressAsyncController(
     });
 
     if (!updatedMotherboard) {
-      response.status(400).json({
-        message: "Motherboard could not be updated",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Motherboard could not be updated")
+      );
     }
 
     response.status(200).json({
@@ -283,12 +277,11 @@ const updateMotherboardByIdController = expressAsyncController(
 const deleteAllMotherboardsController = expressAsyncController(
   async (
     _request: DeleteAllMotherboardsRequest,
-    response: Response<ResourceRequestServerResponse<MotherboardDocument>>
+    response: Response<ResourceRequestServerResponse<MotherboardDocument>>,
+    next: NextFunction
   ) => {
-    // grab all motherboards file upload ids
     const uploadedFilesIds = await returnAllMotherboardsUploadedFileIdsService();
 
-    // delete all file uploads associated with all motherboards
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -298,14 +291,13 @@ const deleteAllMotherboardsController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Some file uploads could not be deleted. Please try again."
+        )
+      );
     }
 
-    // delete all reviews associated with all motherboards
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -313,22 +305,20 @@ const deleteAllMotherboardsController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Some product reviews could not be deleted. Please try again."
+        )
+      );
     }
 
-    // delete all motherboards
     const deleteMotherboardsResult: DeleteResult = await deleteAllMotherboardsService();
-
     if (deleteMotherboardsResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "All motherboards could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Motherboards could not be deleted. Please try again."
+        )
+      );
     }
 
     response.status(200).json({ message: "All motherboards deleted", resourceData: [] });
@@ -341,24 +331,18 @@ const deleteAllMotherboardsController = expressAsyncController(
 const deleteAMotherboardController = expressAsyncController(
   async (
     request: DeleteAMotherboardRequest,
-    response: Response<ResourceRequestServerResponse<MotherboardDocument>>
+    response: Response<ResourceRequestServerResponse<MotherboardDocument>>,
+    next: NextFunction
   ) => {
     const motherboardId = request.params.motherboardId;
 
-    // check if motherboard exists
     const motherboardExists = await getMotherboardByIdService(motherboardId);
     if (!motherboardExists) {
-      response
-        .status(404)
-        .json({ message: "Motherboard does not exist", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Motherboard does not exist"));
     }
 
-    // find all file uploads associated with this motherboard
-    // if it is not an array, it is made to be an array
     const uploadedFilesIds = [...motherboardExists.uploadedFilesIds];
 
-    // delete all file uploads associated with all motherboards
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -368,14 +352,13 @@ const deleteAMotherboardController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Some file uploads could not be deleted. Please try again."
+        )
+      );
     }
 
-    // delete all reviews associated with all motherboards
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -383,24 +366,22 @@ const deleteAMotherboardController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Some product reviews could not be deleted. Please try again."
+        )
+      );
     }
 
-    // delete motherboard by id
     const deleteMotherboardResult: DeleteResult = await deleteAMotherboardService(
       motherboardId
     );
-
     if (deleteMotherboardResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "Motherboard could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Motherboard could not be deleted. Please try again."
+        )
+      );
     }
 
     response.status(200).json({ message: "Motherboard deleted", resourceData: [] });

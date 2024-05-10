@@ -1,7 +1,8 @@
 import expressAsyncController from "express-async-handler";
+import createHttpError from "http-errors";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response } from "express";
+import type { Response, NextFunction } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewTabletBulkRequest,
@@ -41,6 +42,7 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 const createNewTabletController = expressAsyncController(
   async (
     request: CreateNewTabletRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<TabletDocument>>
   ) => {
     const { tabletSchema } = request.body;
@@ -69,6 +71,7 @@ const createNewTabletController = expressAsyncController(
 const createNewTabletBulkController = expressAsyncController(
   async (
     request: CreateNewTabletBulkRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<TabletDocument>>
   ) => {
     const { tabletSchemas } = request.body;
@@ -116,6 +119,7 @@ const createNewTabletBulkController = expressAsyncController(
 const updateTabletsBulkController = expressAsyncController(
   async (
     request: UpdateTabletsBulkRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<TabletDocument>>
   ) => {
     const { tabletFields } = request.body;
@@ -220,6 +224,7 @@ const getQueriedTabletsController = expressAsyncController(
 const getTabletByIdController = expressAsyncController(
   async (
     request: GetTabletByIdRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<TabletDocument>>
   ) => {
     const tabletId = request.params.tabletId;
@@ -244,6 +249,7 @@ const getTabletByIdController = expressAsyncController(
 const updateTabletByIdController = expressAsyncController(
   async (
     request: UpdateTabletByIdRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<TabletDocument>>
   ) => {
     const { tabletId } = request.params;
@@ -279,6 +285,7 @@ const updateTabletByIdController = expressAsyncController(
 const deleteAllTabletsController = expressAsyncController(
   async (
     _request: DeleteAllTabletsRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<TabletDocument>>
   ) => {
     // grab all tablets file upload ids
@@ -337,6 +344,7 @@ const deleteAllTabletsController = expressAsyncController(
 const deleteATabletController = expressAsyncController(
   async (
     request: DeleteATabletRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<TabletDocument>>
   ) => {
     const tabletId = request.params.tabletId;

@@ -1,7 +1,7 @@
 import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewPsuBulkRequest,
@@ -34,6 +34,7 @@ import { deleteFileUploadByIdService } from "../../fileUpload";
 
 import { deleteAProductReviewService } from "../../productReview";
 import { removeUndefinedAndNullValues } from "../../../utils";
+import createHttpError from "http-errors";
 
 // @desc   Create new psu
 // @route  POST /api/v1/product-category/psu
@@ -41,18 +42,14 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 const createNewPsuController = expressAsyncController(
   async (
     request: CreateNewPsuRequest,
-    response: Response<ResourceRequestServerResponse<PsuDocument>>
+    response: Response<ResourceRequestServerResponse<PsuDocument>>,
+    next: NextFunction
   ) => {
     const { psuSchema } = request.body;
 
     const psuDocument: PsuDocument = await createNewPsuService(psuSchema);
-
     if (!psuDocument) {
-      response.status(400).json({
-        message: "Could not create new psu",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Psu could not be created"));
     }
 
     response.status(201).json({
@@ -69,7 +66,8 @@ const createNewPsuController = expressAsyncController(
 const createNewPsuBulkController = expressAsyncController(
   async (
     request: CreateNewPsuBulkRequest,
-    response: Response<ResourceRequestServerResponse<PsuDocument>>
+    response: Response<ResourceRequestServerResponse<PsuDocument>>,
+    next: NextFunction
   ) => {
     const { psuSchemas } = request.body;
 
@@ -80,10 +78,8 @@ const createNewPsuBulkController = expressAsyncController(
       })
     );
 
-    // filter out any psus that were not created
     const successfullyCreatedPsus = newPsus.filter((psu) => psu);
 
-    // check if any psus were created
     if (successfullyCreatedPsus.length === psuSchemas.length) {
       response.status(201).json({
         message: `Successfully created ${successfullyCreatedPsus.length} psus`,
@@ -116,7 +112,8 @@ const createNewPsuBulkController = expressAsyncController(
 const updatePsusBulkController = expressAsyncController(
   async (
     request: UpdatePsusBulkRequest,
-    response: Response<ResourceRequestServerResponse<PsuDocument>>
+    response: Response<ResourceRequestServerResponse<PsuDocument>>,
+    next: NextFunction
   ) => {
     const { psuFields } = request.body;
 
@@ -137,10 +134,8 @@ const updatePsusBulkController = expressAsyncController(
       })
     );
 
-    // filter out any psus that were not updated
     const successfullyUpdatedPsus = updatedPsus.filter(removeUndefinedAndNullValues);
 
-    // check if any psus were updated
     if (successfullyUpdatedPsus.length === psuFields.length) {
       response.status(201).json({
         message: `Successfully updated ${successfullyUpdatedPsus.length} psus`,
@@ -187,12 +182,12 @@ const getQueriedPsusController = expressAsyncController(
       });
     }
 
-    // get all psus
     const psus = await getQueriedPsusService({
       filter: filter as FilterQuery<PsuDocument> | undefined,
       projection: projection as QueryOptions<PsuDocument>,
       options: options as QueryOptions<PsuDocument>,
     });
+
     if (psus.length === 0) {
       response.status(200).json({
         message: "No psus that match query parameters were found",
@@ -218,15 +213,14 @@ const getQueriedPsusController = expressAsyncController(
 const getPsuByIdController = expressAsyncController(
   async (
     request: GetPsuByIdRequest,
-    response: Response<ResourceRequestServerResponse<PsuDocument>>
+    response: Response<ResourceRequestServerResponse<PsuDocument>>,
+    next: NextFunction
   ) => {
     const psuId = request.params.psuId;
 
-    // get psu by id
     const psu = await getPsuByIdService(psuId);
     if (!psu) {
-      response.status(404).json({ message: "Psu not found", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Psu does not exist"));
     }
 
     response.status(200).json({
@@ -242,14 +236,14 @@ const getPsuByIdController = expressAsyncController(
 const updatePsuByIdController = expressAsyncController(
   async (
     request: UpdatePsuByIdRequest,
-    response: Response<ResourceRequestServerResponse<PsuDocument>>
+    response: Response<ResourceRequestServerResponse<PsuDocument>>,
+    next: NextFunction
   ) => {
     const { psuId } = request.params;
     const {
       documentUpdate: { fields, updateOperator },
     } = request.body;
 
-    // update psu
     const updatedPsu = await updatePsuByIdService({
       _id: psuId,
       fields,
@@ -257,11 +251,7 @@ const updatePsuByIdController = expressAsyncController(
     });
 
     if (!updatedPsu) {
-      response.status(400).json({
-        message: "Psu could not be updated",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Psu could not be updated"));
     }
 
     response.status(200).json({
@@ -277,12 +267,11 @@ const updatePsuByIdController = expressAsyncController(
 const deleteAllPsusController = expressAsyncController(
   async (
     _request: DeleteAllPsusRequest,
-    response: Response<ResourceRequestServerResponse<PsuDocument>>
+    response: Response<ResourceRequestServerResponse<PsuDocument>>,
+    next: NextFunction
   ) => {
-    // grab all psus file upload ids
     const uploadedFilesIds = await returnAllPsusUploadedFileIdsService();
 
-    // delete all file uploads associated with all psus
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -292,14 +281,11 @@ const deleteAllPsusController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Could not delete all file uploads")
+      );
     }
 
-    // delete all reviews associated with all psus
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -307,22 +293,14 @@ const deleteAllPsusController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Could not delete all reviews")
+      );
     }
 
-    // delete all psus
     const deletePsusResult: DeleteResult = await deleteAllPsusService();
-
     if (deletePsusResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "All psus could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Could not delete all psus"));
     }
 
     response.status(200).json({ message: "All psus deleted", resourceData: [] });
@@ -335,22 +313,19 @@ const deleteAllPsusController = expressAsyncController(
 const deleteAPsuController = expressAsyncController(
   async (
     request: DeleteAPsuRequest,
-    response: Response<ResourceRequestServerResponse<PsuDocument>>
+    response: Response<ResourceRequestServerResponse<PsuDocument>>,
+    next: NextFunction
   ) => {
     const psuId = request.params.psuId;
 
-    // check if psu exists
     const psuExists = await getPsuByIdService(psuId);
     if (!psuExists) {
       response.status(404).json({ message: "Psu does not exist", resourceData: [] });
       return;
     }
 
-    // find all file uploads associated with this psu
-    // if it is not an array, it is made to be an array
     const uploadedFilesIds = [...psuExists.uploadedFilesIds];
 
-    // delete all file uploads associated with all psus
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -360,14 +335,11 @@ const deleteAPsuController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Could not delete all file uploads")
+      );
     }
 
-    // delete all reviews associated with all psus
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -375,22 +347,14 @@ const deleteAPsuController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Could not delete all reviews")
+      );
     }
 
-    // delete psu by id
     const deletePsuResult: DeleteResult = await deleteAPsuService(psuId);
-
     if (deletePsuResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "Psu could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Could not delete psu"));
     }
 
     response.status(200).json({ message: "Psu deleted", resourceData: [] });

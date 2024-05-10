@@ -1,7 +1,7 @@
 import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewKeyboardBulkRequest,
@@ -34,6 +34,7 @@ import { deleteFileUploadByIdService } from "../../fileUpload";
 
 import { deleteAProductReviewService } from "../../productReview";
 import { removeUndefinedAndNullValues } from "../../../utils";
+import createHttpError from "http-errors";
 
 // @desc   Create new keyboard
 // @route  POST /api/v1/product-category/keyboard
@@ -41,7 +42,8 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 const createNewKeyboardController = expressAsyncController(
   async (
     request: CreateNewKeyboardRequest,
-    response: Response<ResourceRequestServerResponse<KeyboardDocument>>
+    response: Response<ResourceRequestServerResponse<KeyboardDocument>>,
+    next: NextFunction
   ) => {
     const { keyboardSchema } = request.body;
 
@@ -50,11 +52,9 @@ const createNewKeyboardController = expressAsyncController(
     );
 
     if (!keyboardDocument) {
-      response.status(400).json({
-        message: "Could not create new keyboard",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Could not create new keyboard")
+      );
     }
 
     response.status(201).json({
@@ -71,7 +71,8 @@ const createNewKeyboardController = expressAsyncController(
 const createNewKeyboardBulkController = expressAsyncController(
   async (
     request: CreateNewKeyboardBulkRequest,
-    response: Response<ResourceRequestServerResponse<KeyboardDocument>>
+    response: Response<ResourceRequestServerResponse<KeyboardDocument>>,
+    next: NextFunction
   ) => {
     const { keyboardSchemas } = request.body;
 
@@ -82,10 +83,8 @@ const createNewKeyboardBulkController = expressAsyncController(
       })
     );
 
-    // filter out any keyboards that were not created
     const successfullyCreatedKeyboards = newKeyboards.filter((keyboard) => keyboard);
 
-    // check if any keyboards were created
     if (successfullyCreatedKeyboards.length === keyboardSchemas.length) {
       response.status(201).json({
         message: `Successfully created ${successfullyCreatedKeyboards.length} keyboards`,
@@ -118,7 +117,8 @@ const createNewKeyboardBulkController = expressAsyncController(
 const updateKeyboardsBulkController = expressAsyncController(
   async (
     request: UpdateKeyboardsBulkRequest,
-    response: Response<ResourceRequestServerResponse<KeyboardDocument>>
+    response: Response<ResourceRequestServerResponse<KeyboardDocument>>,
+    next: NextFunction
   ) => {
     const { keyboardFields } = request.body;
 
@@ -139,12 +139,10 @@ const updateKeyboardsBulkController = expressAsyncController(
       })
     );
 
-    // filter out any keyboards that were not updated
     const successfullyUpdatedKeyboards = updatedKeyboards.filter(
       removeUndefinedAndNullValues
     );
 
-    // check if any keyboards were updated
     if (successfullyUpdatedKeyboards.length === keyboardFields.length) {
       response.status(201).json({
         message: `Successfully updated ${successfullyUpdatedKeyboards.length} keyboards`,
@@ -191,12 +189,12 @@ const getQueriedKeyboardsController = expressAsyncController(
       });
     }
 
-    // get all keyboards
     const keyboards = await getQueriedKeyboardsService({
       filter: filter as FilterQuery<KeyboardDocument> | undefined,
       projection: projection as QueryOptions<KeyboardDocument>,
       options: options as QueryOptions<KeyboardDocument>,
     });
+
     if (keyboards.length === 0) {
       response.status(200).json({
         message: "No keyboards that match query parameters were found",
@@ -222,15 +220,16 @@ const getQueriedKeyboardsController = expressAsyncController(
 const getKeyboardByIdController = expressAsyncController(
   async (
     request: GetKeyboardByIdRequest,
-    response: Response<ResourceRequestServerResponse<KeyboardDocument>>
+    response: Response<ResourceRequestServerResponse<KeyboardDocument>>,
+    next: NextFunction
   ) => {
     const keyboardId = request.params.keyboardId;
 
-    // get keyboard by id
     const keyboard = await getKeyboardByIdService(keyboardId);
     if (!keyboard) {
-      response.status(404).json({ message: "Keyboard not found", resourceData: [] });
-      return;
+      return next(
+        new createHttpError.NotFound(`Keyboard with id ${keyboardId} does not exist`)
+      );
     }
 
     response.status(200).json({
@@ -246,14 +245,14 @@ const getKeyboardByIdController = expressAsyncController(
 const updateKeyboardByIdController = expressAsyncController(
   async (
     request: UpdateKeyboardByIdRequest,
-    response: Response<ResourceRequestServerResponse<KeyboardDocument>>
+    response: Response<ResourceRequestServerResponse<KeyboardDocument>>,
+    next: NextFunction
   ) => {
     const { keyboardId } = request.params;
     const {
       documentUpdate: { fields, updateOperator },
     } = request.body;
 
-    // update keyboard
     const updatedKeyboard = await updateKeyboardByIdService({
       _id: keyboardId,
       fields,
@@ -261,11 +260,7 @@ const updateKeyboardByIdController = expressAsyncController(
     });
 
     if (!updatedKeyboard) {
-      response.status(400).json({
-        message: "Keyboard could not be updated",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Could not update keyboard"));
     }
 
     response.status(200).json({
@@ -281,12 +276,11 @@ const updateKeyboardByIdController = expressAsyncController(
 const deleteAllKeyboardsController = expressAsyncController(
   async (
     _request: DeleteAllKeyboardsRequest,
-    response: Response<ResourceRequestServerResponse<KeyboardDocument>>
+    response: Response<ResourceRequestServerResponse<KeyboardDocument>>,
+    next: NextFunction
   ) => {
-    // grab all keyboards file upload ids
     const uploadedFilesIds = await returnAllKeyboardsUploadedFileIdsService();
 
-    // delete all file uploads associated with all keyboards
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -296,14 +290,11 @@ const deleteAllKeyboardsController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Some file uploads could not be deleted")
+      );
     }
 
-    // delete all reviews associated with all keyboards
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -311,22 +302,16 @@ const deleteAllKeyboardsController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Some reviews could not be deleted")
+      );
     }
 
-    // delete all keyboards
     const deleteKeyboardsResult: DeleteResult = await deleteAllKeyboardsService();
-
     if (deleteKeyboardsResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "All keyboards could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Keyboards could not be deleted")
+      );
     }
 
     response.status(200).json({ message: "All keyboards deleted", resourceData: [] });
@@ -339,22 +324,20 @@ const deleteAllKeyboardsController = expressAsyncController(
 const deleteAKeyboardController = expressAsyncController(
   async (
     request: DeleteAKeyboardRequest,
-    response: Response<ResourceRequestServerResponse<KeyboardDocument>>
+    response: Response<ResourceRequestServerResponse<KeyboardDocument>>,
+    next: NextFunction
   ) => {
     const keyboardId = request.params.keyboardId;
 
-    // check if keyboard exists
     const keyboardExists = await getKeyboardByIdService(keyboardId);
     if (!keyboardExists) {
-      response.status(404).json({ message: "Keyboard does not exist", resourceData: [] });
-      return;
+      return next(
+        new createHttpError.NotFound(`Keyboard with id ${keyboardId} does not exist`)
+      );
     }
 
-    // find all file uploads associated with this keyboard
-    // if it is not an array, it is made to be an array
     const uploadedFilesIds = [...keyboardExists.uploadedFilesIds];
 
-    // delete all file uploads associated with all keyboards
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -364,14 +347,11 @@ const deleteAKeyboardController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Some file uploads could not be deleted")
+      );
     }
 
-    // delete all reviews associated with all keyboards
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -379,22 +359,16 @@ const deleteAKeyboardController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Some reviews could not be deleted")
+      );
     }
 
-    // delete keyboard by id
     const deleteKeyboardResult: DeleteResult = await deleteAKeyboardService(keyboardId);
-
     if (deleteKeyboardResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "Keyboard could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Keyboard could not be deleted")
+      );
     }
 
     response.status(200).json({ message: "Keyboard deleted", resourceData: [] });

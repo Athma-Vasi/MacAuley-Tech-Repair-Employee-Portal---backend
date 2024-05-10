@@ -1,7 +1,8 @@
 import expressAsyncController from "express-async-handler";
+import createHttpError from "http-errors";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response } from "express";
+import type { Response, NextFunction } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewSmartphoneBulkRequest,
@@ -41,6 +42,7 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 const createNewSmartphoneController = expressAsyncController(
   async (
     request: CreateNewSmartphoneRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<SmartphoneDocument>>
   ) => {
     const { smartphoneSchema } = request.body;
@@ -71,6 +73,7 @@ const createNewSmartphoneController = expressAsyncController(
 const createNewSmartphoneBulkController = expressAsyncController(
   async (
     request: CreateNewSmartphoneBulkRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<SmartphoneDocument>>
   ) => {
     const { smartphoneSchemas } = request.body;
@@ -120,6 +123,7 @@ const createNewSmartphoneBulkController = expressAsyncController(
 const updateSmartphonesBulkController = expressAsyncController(
   async (
     request: UpdateSmartphonesBulkRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<SmartphoneDocument>>
   ) => {
     const { smartphoneFields } = request.body;
@@ -224,6 +228,7 @@ const getQueriedSmartphonesController = expressAsyncController(
 const getSmartphoneByIdController = expressAsyncController(
   async (
     request: GetSmartphoneByIdRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<SmartphoneDocument>>
   ) => {
     const smartphoneId = request.params.smartphoneId;
@@ -248,6 +253,7 @@ const getSmartphoneByIdController = expressAsyncController(
 const updateSmartphoneByIdController = expressAsyncController(
   async (
     request: UpdateSmartphoneByIdRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<SmartphoneDocument>>
   ) => {
     const { smartphoneId } = request.params;
@@ -283,6 +289,7 @@ const updateSmartphoneByIdController = expressAsyncController(
 const deleteAllSmartphonesController = expressAsyncController(
   async (
     _request: DeleteAllSmartphonesRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<SmartphoneDocument>>
   ) => {
     // grab all smartphones file upload ids
@@ -341,6 +348,7 @@ const deleteAllSmartphonesController = expressAsyncController(
 const deleteASmartphoneController = expressAsyncController(
   async (
     request: DeleteASmartphoneRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<SmartphoneDocument>>
   ) => {
     const smartphoneId = request.params.smartphoneId;

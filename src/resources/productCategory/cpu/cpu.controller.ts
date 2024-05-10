@@ -1,7 +1,7 @@
 import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewCpuBulkRequest,
@@ -34,6 +34,7 @@ import { deleteFileUploadByIdService } from "../../fileUpload";
 
 import { deleteAProductReviewService } from "../../productReview";
 import { removeUndefinedAndNullValues } from "../../../utils";
+import createHttpError from "http-errors";
 
 // @desc   Create new cpu
 // @route  POST /api/v1/product-category/cpu
@@ -41,18 +42,14 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 const createNewCpuController = expressAsyncController(
   async (
     request: CreateNewCpuRequest,
-    response: Response<ResourceRequestServerResponse<CpuDocument>>
+    response: Response<ResourceRequestServerResponse<CpuDocument>>,
+    next: NextFunction
   ) => {
     const { cpuSchema } = request.body;
 
     const cpuDocument: CpuDocument = await createNewCpuService(cpuSchema);
-
     if (!cpuDocument) {
-      response.status(400).json({
-        message: "Could not create new cpu",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Cpu could not be created"));
     }
 
     response.status(201).json({
@@ -69,7 +66,8 @@ const createNewCpuController = expressAsyncController(
 const createNewCpuBulkController = expressAsyncController(
   async (
     request: CreateNewCpuBulkRequest,
-    response: Response<ResourceRequestServerResponse<CpuDocument>>
+    response: Response<ResourceRequestServerResponse<CpuDocument>>,
+    next: NextFunction
   ) => {
     const { cpuSchemas } = request.body;
 
@@ -80,10 +78,8 @@ const createNewCpuBulkController = expressAsyncController(
       })
     );
 
-    // filter out any cpus that were not created
     const successfullyCreatedCpus = newCpus.filter((cpu) => cpu);
 
-    // check if any cpus were created
     if (successfullyCreatedCpus.length === cpuSchemas.length) {
       response.status(201).json({
         message: `Successfully created ${successfullyCreatedCpus.length} cpus`,
@@ -116,7 +112,8 @@ const createNewCpuBulkController = expressAsyncController(
 const updateCpusBulkController = expressAsyncController(
   async (
     request: UpdateCpusBulkRequest,
-    response: Response<ResourceRequestServerResponse<CpuDocument>>
+    response: Response<ResourceRequestServerResponse<CpuDocument>>,
+    next: NextFunction
   ) => {
     const { cpuFields } = request.body;
 
@@ -137,10 +134,8 @@ const updateCpusBulkController = expressAsyncController(
       })
     );
 
-    // filter out any cpus that were not updated
     const successfullyUpdatedCpus = updatedCpus.filter(removeUndefinedAndNullValues);
 
-    // check if any cpus were updated
     if (successfullyUpdatedCpus.length === cpuFields.length) {
       response.status(201).json({
         message: `Successfully updated ${successfullyUpdatedCpus.length} cpus`,
@@ -173,7 +168,8 @@ const updateCpusBulkController = expressAsyncController(
 const getQueriedCpusController = expressAsyncController(
   async (
     request: GetQueriedCpusRequest,
-    response: Response<GetQueriedResourceRequestServerResponse<CpuDocument>>
+    response: Response<GetQueriedResourceRequestServerResponse<CpuDocument>>,
+    next: NextFunction
   ) => {
     let { newQueryFlag, totalDocuments } = request.body;
 
@@ -187,12 +183,12 @@ const getQueriedCpusController = expressAsyncController(
       });
     }
 
-    // get all cpus
     const cpus = await getQueriedCpusService({
       filter: filter as FilterQuery<CpuDocument> | undefined,
       projection: projection as QueryOptions<CpuDocument>,
       options: options as QueryOptions<CpuDocument>,
     });
+
     if (cpus.length === 0) {
       response.status(200).json({
         message: "No cpus that match query parameters were found",
@@ -218,15 +214,14 @@ const getQueriedCpusController = expressAsyncController(
 const getCpuByIdController = expressAsyncController(
   async (
     request: GetCpuByIdRequest,
-    response: Response<ResourceRequestServerResponse<CpuDocument>>
+    response: Response<ResourceRequestServerResponse<CpuDocument>>,
+    next: NextFunction
   ) => {
     const cpuId = request.params.cpuId;
 
-    // get cpu by id
     const cpu = await getCpuByIdService(cpuId);
     if (!cpu) {
-      response.status(404).json({ message: "Cpu not found", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Cpu does not exist"));
     }
 
     response.status(200).json({
@@ -242,14 +237,14 @@ const getCpuByIdController = expressAsyncController(
 const updateCpuByIdController = expressAsyncController(
   async (
     request: UpdateCpuByIdRequest,
-    response: Response<ResourceRequestServerResponse<CpuDocument>>
+    response: Response<ResourceRequestServerResponse<CpuDocument>>,
+    next: NextFunction
   ) => {
     const { cpuId } = request.params;
     const {
       documentUpdate: { fields, updateOperator },
     } = request.body;
 
-    // update cpu
     const updatedCpu = await updateCpuByIdService({
       _id: cpuId,
       fields,
@@ -257,11 +252,7 @@ const updateCpuByIdController = expressAsyncController(
     });
 
     if (!updatedCpu) {
-      response.status(400).json({
-        message: "Cpu could not be updated",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Cpu could not be updated"));
     }
 
     response.status(200).json({
@@ -277,12 +268,11 @@ const updateCpuByIdController = expressAsyncController(
 const deleteAllCpusController = expressAsyncController(
   async (
     _request: DeleteAllCpusRequest,
-    response: Response<ResourceRequestServerResponse<CpuDocument>>
+    response: Response<ResourceRequestServerResponse<CpuDocument>>,
+    next: NextFunction
   ) => {
-    // grab all cpus file upload ids
     const uploadedFilesIds = await returnAllCpusUploadedFileIdsService();
 
-    // delete all file uploads associated with all cpus
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -292,14 +282,11 @@ const deleteAllCpusController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Some file uploads could not be deleted")
+      );
     }
 
-    // delete all reviews associated with all cpus
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -307,22 +294,15 @@ const deleteAllCpusController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Some reviews could not be deleted")
+      );
     }
 
-    // delete all cpus
     const deleteCpusResult: DeleteResult = await deleteAllCpusService();
 
     if (deleteCpusResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "All cpus could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Cpus could not be deleted"));
     }
 
     response.status(200).json({ message: "All cpus deleted", resourceData: [] });
@@ -335,22 +315,19 @@ const deleteAllCpusController = expressAsyncController(
 const deleteACpuController = expressAsyncController(
   async (
     request: DeleteACpuRequest,
-    response: Response<ResourceRequestServerResponse<CpuDocument>>
+    response: Response<ResourceRequestServerResponse<CpuDocument>>,
+    next: NextFunction
   ) => {
     const cpuId = request.params.cpuId;
 
-    // check if cpu exists
     const cpuExists = await getCpuByIdService(cpuId);
     if (!cpuExists) {
       response.status(404).json({ message: "Cpu does not exist", resourceData: [] });
       return;
     }
 
-    // find all file uploads associated with this cpu
-    // if it is not an array, it is made to be an array
     const uploadedFilesIds = [...cpuExists.uploadedFilesIds];
 
-    // delete all file uploads associated with all cpus
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -360,14 +337,11 @@ const deleteACpuController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Some file uploads could not be deleted")
+      );
     }
 
-    // delete all reviews associated with all cpus
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -375,22 +349,15 @@ const deleteACpuController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Some reviews could not be deleted")
+      );
     }
 
-    // delete cpu by id
     const deleteCpuResult: DeleteResult = await deleteACpuService(cpuId);
 
     if (deleteCpuResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "Cpu could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Cpu could not be deleted"));
     }
 
     response.status(200).json({ message: "Cpu deleted", resourceData: [] });

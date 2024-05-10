@@ -1,7 +1,8 @@
 import expressAsyncController from "express-async-handler";
+import createHttpError from "http-errors";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response } from "express";
+import type { Response, NextFunction } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewStorageBulkRequest,
@@ -41,6 +42,7 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 const createNewStorageController = expressAsyncController(
   async (
     request: CreateNewStorageRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<StorageDocument>>
   ) => {
     const { storageSchema } = request.body;
@@ -69,6 +71,7 @@ const createNewStorageController = expressAsyncController(
 const createNewStorageBulkController = expressAsyncController(
   async (
     request: CreateNewStorageBulkRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<StorageDocument>>
   ) => {
     const { storageSchemas } = request.body;
@@ -116,6 +119,7 @@ const createNewStorageBulkController = expressAsyncController(
 const updateStoragesBulkController = expressAsyncController(
   async (
     request: UpdateStoragesBulkRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<StorageDocument>>
   ) => {
     const { storageFields } = request.body;
@@ -220,6 +224,7 @@ const getQueriedStoragesController = expressAsyncController(
 const getStorageByIdController = expressAsyncController(
   async (
     request: GetStorageByIdRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<StorageDocument>>
   ) => {
     const storageId = request.params.storageId;
@@ -244,6 +249,7 @@ const getStorageByIdController = expressAsyncController(
 const updateStorageByIdController = expressAsyncController(
   async (
     request: UpdateStorageByIdRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<StorageDocument>>
   ) => {
     const { storageId } = request.params;
@@ -279,6 +285,7 @@ const updateStorageByIdController = expressAsyncController(
 const deleteAllStoragesController = expressAsyncController(
   async (
     _request: DeleteAllStoragesRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<StorageDocument>>
   ) => {
     // grab all storages file upload ids
@@ -337,6 +344,7 @@ const deleteAllStoragesController = expressAsyncController(
 const deleteAStorageController = expressAsyncController(
   async (
     request: DeleteAStorageRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<StorageDocument>>
   ) => {
     const storageId = request.params.storageId;

@@ -1,7 +1,8 @@
 import expressAsyncController from "express-async-handler";
+import createHttpError from "http-errors";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response } from "express";
+import type { Response, NextFunction } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewRamBulkRequest,
@@ -41,6 +42,7 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 const createNewRamController = expressAsyncController(
   async (
     request: CreateNewRamRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<RamDocument>>
   ) => {
     const { ramSchema } = request.body;
@@ -69,6 +71,7 @@ const createNewRamController = expressAsyncController(
 const createNewRamBulkController = expressAsyncController(
   async (
     request: CreateNewRamBulkRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<RamDocument>>
   ) => {
     const { ramSchemas } = request.body;
@@ -116,6 +119,7 @@ const createNewRamBulkController = expressAsyncController(
 const updateRamsBulkController = expressAsyncController(
   async (
     request: UpdateRamsBulkRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<RamDocument>>
   ) => {
     const { ramFields } = request.body;
@@ -218,6 +222,7 @@ const getQueriedRamsController = expressAsyncController(
 const getRamByIdController = expressAsyncController(
   async (
     request: GetRamByIdRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<RamDocument>>
   ) => {
     const ramId = request.params.ramId;
@@ -242,6 +247,7 @@ const getRamByIdController = expressAsyncController(
 const updateRamByIdController = expressAsyncController(
   async (
     request: UpdateRamByIdRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<RamDocument>>
   ) => {
     const { ramId } = request.params;
@@ -277,6 +283,7 @@ const updateRamByIdController = expressAsyncController(
 const deleteAllRamsController = expressAsyncController(
   async (
     _request: DeleteAllRamsRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<RamDocument>>
   ) => {
     // grab all rams file upload ids
@@ -335,6 +342,7 @@ const deleteAllRamsController = expressAsyncController(
 const deleteARamController = expressAsyncController(
   async (
     request: DeleteARamRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<RamDocument>>
   ) => {
     const ramId = request.params.ramId;

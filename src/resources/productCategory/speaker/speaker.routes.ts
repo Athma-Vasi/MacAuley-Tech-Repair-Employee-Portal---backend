@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, NextFunction } from "express";
 import {
   createNewSpeakerBulkController,
   createNewSpeakerController,

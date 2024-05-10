@@ -1,7 +1,7 @@
 import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewDisplayBulkRequest,
@@ -34,6 +34,7 @@ import { deleteFileUploadByIdService } from "../../fileUpload";
 
 import { deleteAProductReviewService } from "../../productReview";
 import { removeUndefinedAndNullValues } from "../../../utils";
+import createHttpError from "http-errors";
 
 // @desc   Create new display
 // @route  POST /api/v1/product-category/display
@@ -41,18 +42,16 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 const createNewDisplayController = expressAsyncController(
   async (
     request: CreateNewDisplayRequest,
-    response: Response<ResourceRequestServerResponse<DisplayDocument>>
+    response: Response<ResourceRequestServerResponse<DisplayDocument>>,
+    next: NextFunction
   ) => {
     const { displaySchema } = request.body;
 
     const displayDocument: DisplayDocument = await createNewDisplayService(displaySchema);
-
     if (!displayDocument) {
-      response.status(400).json({
-        message: "Could not create new display",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Display document could not be created")
+      );
     }
 
     response.status(201).json({
@@ -69,7 +68,8 @@ const createNewDisplayController = expressAsyncController(
 const createNewDisplayBulkController = expressAsyncController(
   async (
     request: CreateNewDisplayBulkRequest,
-    response: Response<ResourceRequestServerResponse<DisplayDocument>>
+    response: Response<ResourceRequestServerResponse<DisplayDocument>>,
+    next: NextFunction
   ) => {
     const { displaySchemas } = request.body;
 
@@ -80,10 +80,8 @@ const createNewDisplayBulkController = expressAsyncController(
       })
     );
 
-    // filter out any displays that were not created
     const successfullyCreatedDisplays = newDisplays.filter((display) => display);
 
-    // check if any displays were created
     if (successfullyCreatedDisplays.length === displaySchemas.length) {
       response.status(201).json({
         message: `Successfully created ${successfullyCreatedDisplays.length} displays`,
@@ -116,7 +114,8 @@ const createNewDisplayBulkController = expressAsyncController(
 const updateDisplaysBulkController = expressAsyncController(
   async (
     request: UpdateDisplaysBulkRequest,
-    response: Response<ResourceRequestServerResponse<DisplayDocument>>
+    response: Response<ResourceRequestServerResponse<DisplayDocument>>,
+    next: NextFunction
   ) => {
     const { displayFields } = request.body;
 
@@ -137,12 +136,10 @@ const updateDisplaysBulkController = expressAsyncController(
       })
     );
 
-    // filter out any displays that were not updated
     const successfullyUpdatedDisplays = updatedDisplays.filter(
       removeUndefinedAndNullValues
     );
 
-    // check if any displays were updated
     if (successfullyUpdatedDisplays.length === displayFields.length) {
       response.status(201).json({
         message: `Successfully updated ${successfullyUpdatedDisplays.length} displays`,
@@ -175,7 +172,8 @@ const updateDisplaysBulkController = expressAsyncController(
 const getQueriedDisplaysController = expressAsyncController(
   async (
     request: GetQueriedDisplaysRequest,
-    response: Response<GetQueriedResourceRequestServerResponse<DisplayDocument>>
+    response: Response<GetQueriedResourceRequestServerResponse<DisplayDocument>>,
+    next: NextFunction
   ) => {
     let { newQueryFlag, totalDocuments } = request.body;
 
@@ -189,12 +187,12 @@ const getQueriedDisplaysController = expressAsyncController(
       });
     }
 
-    // get all displays
     const displays = await getQueriedDisplaysService({
       filter: filter as FilterQuery<DisplayDocument> | undefined,
       projection: projection as QueryOptions<DisplayDocument>,
       options: options as QueryOptions<DisplayDocument>,
     });
+
     if (displays.length === 0) {
       response.status(200).json({
         message: "No displays that match query parameters were found",
@@ -220,15 +218,14 @@ const getQueriedDisplaysController = expressAsyncController(
 const getDisplayByIdController = expressAsyncController(
   async (
     request: GetDisplayByIdRequest,
-    response: Response<ResourceRequestServerResponse<DisplayDocument>>
+    response: Response<ResourceRequestServerResponse<DisplayDocument>>,
+    next: NextFunction
   ) => {
     const displayId = request.params.displayId;
 
-    // get display by id
     const display = await getDisplayByIdService(displayId);
     if (!display) {
-      response.status(404).json({ message: "Display not found", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Display does not exist"));
     }
 
     response.status(200).json({
@@ -244,14 +241,14 @@ const getDisplayByIdController = expressAsyncController(
 const updateDisplayByIdController = expressAsyncController(
   async (
     request: UpdateDisplayByIdRequest,
-    response: Response<ResourceRequestServerResponse<DisplayDocument>>
+    response: Response<ResourceRequestServerResponse<DisplayDocument>>,
+    next: NextFunction
   ) => {
     const { displayId } = request.params;
     const {
       documentUpdate: { fields, updateOperator },
     } = request.body;
 
-    // update display
     const updatedDisplay = await updateDisplayByIdService({
       _id: displayId,
       fields,
@@ -259,11 +256,9 @@ const updateDisplayByIdController = expressAsyncController(
     });
 
     if (!updatedDisplay) {
-      response.status(400).json({
-        message: "Display could not be updated",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Display could not be updated")
+      );
     }
 
     response.status(200).json({
@@ -279,12 +274,11 @@ const updateDisplayByIdController = expressAsyncController(
 const deleteAllDisplaysController = expressAsyncController(
   async (
     _request: DeleteAllDisplaysRequest,
-    response: Response<ResourceRequestServerResponse<DisplayDocument>>
+    response: Response<ResourceRequestServerResponse<DisplayDocument>>,
+    next: NextFunction
   ) => {
-    // grab all displays file upload ids
     const uploadedFilesIds = await returnAllDisplaysUploadedFileIdsService();
 
-    // delete all file uploads associated with all displays
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -294,14 +288,13 @@ const deleteAllDisplaysController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Some File uploads could not be deleted. Please try again."
+        )
+      );
     }
 
-    // delete all reviews associated with all displays
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -309,22 +302,21 @@ const deleteAllDisplaysController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Some reviews could not be deleted. Please try again."
+        )
+      );
     }
 
-    // delete all displays
     const deleteDisplaysResult: DeleteResult = await deleteAllDisplaysService();
 
     if (deleteDisplaysResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "All displays could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Displays could not be deleted. Please try again."
+        )
+      );
     }
 
     response.status(200).json({ message: "All displays deleted", resourceData: [] });
@@ -337,22 +329,18 @@ const deleteAllDisplaysController = expressAsyncController(
 const deleteADisplayController = expressAsyncController(
   async (
     request: DeleteADisplayRequest,
-    response: Response<ResourceRequestServerResponse<DisplayDocument>>
+    response: Response<ResourceRequestServerResponse<DisplayDocument>>,
+    next: NextFunction
   ) => {
     const displayId = request.params.displayId;
 
-    // check if display exists
     const displayExists = await getDisplayByIdService(displayId);
     if (!displayExists) {
-      response.status(404).json({ message: "Display does not exist", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Display does not exist"));
     }
 
-    // find all file uploads associated with this display
-    // if it is not an array, it is made to be an array
     const uploadedFilesIds = [...displayExists.uploadedFilesIds];
 
-    // delete all file uploads associated with all displays
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -362,14 +350,13 @@ const deleteADisplayController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Some File uploads could not be deleted. Please try again."
+        )
+      );
     }
 
-    // delete all reviews associated with all displays
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -377,22 +364,19 @@ const deleteADisplayController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Some reviews could not be deleted")
+      );
     }
 
-    // delete display by id
     const deleteDisplayResult: DeleteResult = await deleteADisplayService(displayId);
 
     if (deleteDisplayResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "Display could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Display could not be deleted. Please try again."
+        )
+      );
     }
 
     response.status(200).json({ message: "Display deleted", resourceData: [] });

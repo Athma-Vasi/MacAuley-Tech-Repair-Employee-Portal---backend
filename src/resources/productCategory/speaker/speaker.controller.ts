@@ -1,7 +1,8 @@
 import expressAsyncController from "express-async-handler";
+import createHttpError from "http-errors";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response } from "express";
+import type { Response, NextFunction } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewSpeakerBulkRequest,
@@ -41,6 +42,7 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 const createNewSpeakerController = expressAsyncController(
   async (
     request: CreateNewSpeakerRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<SpeakerDocument>>
   ) => {
     const { speakerSchema } = request.body;
@@ -69,6 +71,7 @@ const createNewSpeakerController = expressAsyncController(
 const createNewSpeakerBulkController = expressAsyncController(
   async (
     request: CreateNewSpeakerBulkRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<SpeakerDocument>>
   ) => {
     const { speakerSchemas } = request.body;
@@ -116,6 +119,7 @@ const createNewSpeakerBulkController = expressAsyncController(
 const updateSpeakersBulkController = expressAsyncController(
   async (
     request: UpdateSpeakersBulkRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<SpeakerDocument>>
   ) => {
     const { speakerFields } = request.body;
@@ -220,6 +224,7 @@ const getQueriedSpeakersController = expressAsyncController(
 const getSpeakerByIdController = expressAsyncController(
   async (
     request: GetSpeakerByIdRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<SpeakerDocument>>
   ) => {
     const speakerId = request.params.speakerId;
@@ -244,6 +249,7 @@ const getSpeakerByIdController = expressAsyncController(
 const updateSpeakerByIdController = expressAsyncController(
   async (
     request: UpdateSpeakerByIdRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<SpeakerDocument>>
   ) => {
     const { speakerId } = request.params;
@@ -279,6 +285,7 @@ const updateSpeakerByIdController = expressAsyncController(
 const deleteAllSpeakersController = expressAsyncController(
   async (
     _request: DeleteAllSpeakersRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<SpeakerDocument>>
   ) => {
     // grab all speakers file upload ids
@@ -337,6 +344,7 @@ const deleteAllSpeakersController = expressAsyncController(
 const deleteASpeakerController = expressAsyncController(
   async (
     request: DeleteASpeakerRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<SpeakerDocument>>
   ) => {
     const speakerId = request.params.speakerId;

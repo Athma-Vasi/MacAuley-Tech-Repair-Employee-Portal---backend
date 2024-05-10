@@ -1,7 +1,7 @@
 import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewComputerCaseBulkRequest,
@@ -34,6 +34,7 @@ import { deleteFileUploadByIdService } from "../../fileUpload";
 
 import { deleteAProductReviewService } from "../../productReview";
 import { removeUndefinedAndNullValues } from "../../../utils";
+import createHttpError from "http-errors";
 
 // @desc   Create new computerCase
 // @route  POST /api/v1/product-category/computerCase
@@ -41,20 +42,18 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 const createNewComputerCaseController = expressAsyncController(
   async (
     request: CreateNewComputerCaseRequest,
-    response: Response<ResourceRequestServerResponse<ComputerCaseDocument>>
+    response: Response<ResourceRequestServerResponse<ComputerCaseDocument>>,
+    next: NextFunction
   ) => {
     const { computerCaseSchema } = request.body;
 
     const computerCaseDocument: ComputerCaseDocument = await createNewComputerCaseService(
       computerCaseSchema
     );
-
     if (!computerCaseDocument) {
-      response.status(400).json({
-        message: "Could not create new computerCase",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("ComputerCase could not be created")
+      );
     }
 
     response.status(201).json({
@@ -82,12 +81,10 @@ const createNewComputerCaseBulkController = expressAsyncController(
       })
     );
 
-    // filter out any computerCases that were not created
     const successfullyCreatedComputerCases = newComputerCases.filter(
       (computerCase) => computerCase
     );
 
-    // check if any computerCases were created
     if (successfullyCreatedComputerCases.length === computerCaseSchemas.length) {
       response.status(201).json({
         message: `Successfully created ${successfullyCreatedComputerCases.length} computerCases`,
@@ -120,7 +117,8 @@ const createNewComputerCaseBulkController = expressAsyncController(
 const updateComputerCasesBulkController = expressAsyncController(
   async (
     request: UpdateComputerCasesBulkRequest,
-    response: Response<ResourceRequestServerResponse<ComputerCaseDocument>>
+    response: Response<ResourceRequestServerResponse<ComputerCaseDocument>>,
+    next: NextFunction
   ) => {
     const { computerCaseFields } = request.body;
 
@@ -141,26 +139,23 @@ const updateComputerCasesBulkController = expressAsyncController(
       })
     );
 
-    // filter out any computerCases that were not updated
     const successfullyUpdatedComputerCases = updatedComputerCases.filter(
       removeUndefinedAndNullValues
     );
 
-    // check if any computerCases were updated
     if (successfullyUpdatedComputerCases.length === computerCaseFields.length) {
       response.status(201).json({
         message: `Successfully updated ${successfullyUpdatedComputerCases.length} computerCases`,
         resourceData: successfullyUpdatedComputerCases,
       });
+
       return;
     }
 
     if (successfullyUpdatedComputerCases.length === 0) {
-      response.status(400).json({
-        message: "Could not update any computerCases",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Could not update any computerCases")
+      );
     }
 
     response.status(201).json({
@@ -193,12 +188,12 @@ const getQueriedComputerCasesController = expressAsyncController(
       });
     }
 
-    // get all computerCases
     const computerCases = await getQueriedComputerCasesService({
       filter: filter as FilterQuery<ComputerCaseDocument> | undefined,
       projection: projection as QueryOptions<ComputerCaseDocument>,
       options: options as QueryOptions<ComputerCaseDocument>,
     });
+
     if (computerCases.length === 0) {
       response.status(200).json({
         message: "No computerCases that match query parameters were found",
@@ -224,15 +219,14 @@ const getQueriedComputerCasesController = expressAsyncController(
 const getComputerCaseByIdController = expressAsyncController(
   async (
     request: GetComputerCaseByIdRequest,
-    response: Response<ResourceRequestServerResponse<ComputerCaseDocument>>
+    response: Response<ResourceRequestServerResponse<ComputerCaseDocument>>,
+    next: NextFunction
   ) => {
     const computerCaseId = request.params.computerCaseId;
 
-    // get computerCase by id
     const computerCase = await getComputerCaseByIdService(computerCaseId);
     if (!computerCase) {
-      response.status(404).json({ message: "ComputerCase not found", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("ComputerCase does not exist"));
     }
 
     response.status(200).json({
@@ -248,14 +242,14 @@ const getComputerCaseByIdController = expressAsyncController(
 const updateComputerCaseByIdController = expressAsyncController(
   async (
     request: UpdateComputerCaseByIdRequest,
-    response: Response<ResourceRequestServerResponse<ComputerCaseDocument>>
+    response: Response<ResourceRequestServerResponse<ComputerCaseDocument>>,
+    next: NextFunction
   ) => {
     const { computerCaseId } = request.params;
     const {
       documentUpdate: { fields, updateOperator },
     } = request.body;
 
-    // update computerCase
     const updatedComputerCase = await updateComputerCaseByIdService({
       _id: computerCaseId,
       fields,
@@ -263,11 +257,9 @@ const updateComputerCaseByIdController = expressAsyncController(
     });
 
     if (!updatedComputerCase) {
-      response.status(400).json({
-        message: "ComputerCase could not be updated",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("ComputerCase could not be updated")
+      );
     }
 
     response.status(200).json({
@@ -283,12 +275,11 @@ const updateComputerCaseByIdController = expressAsyncController(
 const deleteAllComputerCasesController = expressAsyncController(
   async (
     _request: DeleteAllComputerCasesRequest,
-    response: Response<ResourceRequestServerResponse<ComputerCaseDocument>>
+    response: Response<ResourceRequestServerResponse<ComputerCaseDocument>>,
+    next: NextFunction
   ) => {
-    // grab all computerCases file upload ids
     const uploadedFilesIds = await returnAllComputerCasesUploadedFileIdsService();
 
-    // delete all file uploads associated with all computerCases
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -298,14 +289,13 @@ const deleteAllComputerCasesController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Some File uploads could not be deleted. Please try again."
+        )
+      );
     }
 
-    // delete all reviews associated with all computerCases
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -313,22 +303,21 @@ const deleteAllComputerCasesController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Some reviews could not be deleted. Please try again."
+        )
+      );
     }
 
-    // delete all computerCases
     const deleteComputerCasesResult: DeleteResult = await deleteAllComputerCasesService();
 
     if (deleteComputerCasesResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "All computerCases could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Computer Cases could not be deleted. Please try again."
+        )
+      );
     }
 
     response.status(200).json({ message: "All computerCases deleted", resourceData: [] });
@@ -341,24 +330,18 @@ const deleteAllComputerCasesController = expressAsyncController(
 const deleteAComputerCaseController = expressAsyncController(
   async (
     request: DeleteAComputerCaseRequest,
-    response: Response<ResourceRequestServerResponse<ComputerCaseDocument>>
+    response: Response<ResourceRequestServerResponse<ComputerCaseDocument>>,
+    next: NextFunction
   ) => {
     const computerCaseId = request.params.computerCaseId;
 
-    // check if computerCase exists
     const computerCaseExists = await getComputerCaseByIdService(computerCaseId);
     if (!computerCaseExists) {
-      response
-        .status(404)
-        .json({ message: "Computer Case does not exist", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("ComputerCase does not exist"));
     }
 
-    // find all file uploads associated with this computerCase
-    // if it is not an array, it is made to be an array
     const uploadedFilesIds = [...computerCaseExists.uploadedFilesIds];
 
-    // delete all file uploads associated with all computerCases
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -368,14 +351,13 @@ const deleteAComputerCaseController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Some File uploads could not be deleted. Please try again."
+        )
+      );
     }
 
-    // delete all reviews associated with all computerCases
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -383,24 +365,23 @@ const deleteAComputerCaseController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Some reviews could not be deleted. Please try again."
+        )
+      );
     }
 
-    // delete computerCase by id
     const deleteComputerCaseResult: DeleteResult = await deleteAComputerCaseService(
       computerCaseId
     );
 
     if (deleteComputerCaseResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "Computer Case could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Computer Case could not be deleted. Please try again."
+        )
+      );
     }
 
     response.status(200).json({ message: "Computer Case deleted", resourceData: [] });

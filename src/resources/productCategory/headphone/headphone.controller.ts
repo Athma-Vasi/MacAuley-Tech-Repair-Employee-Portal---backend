@@ -1,7 +1,7 @@
 import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewHeadphoneBulkRequest,
@@ -34,6 +34,7 @@ import { deleteFileUploadByIdService } from "../../fileUpload";
 
 import { deleteAProductReviewService } from "../../productReview";
 import { removeUndefinedAndNullValues } from "../../../utils";
+import createHttpError from "http-errors";
 
 // @desc   Create new headphone
 // @route  POST /api/v1/product-category/headphone
@@ -41,20 +42,16 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 const createNewHeadphoneController = expressAsyncController(
   async (
     request: CreateNewHeadphoneRequest,
-    response: Response<ResourceRequestServerResponse<HeadphoneDocument>>
+    response: Response<ResourceRequestServerResponse<HeadphoneDocument>>,
+    next: NextFunction
   ) => {
     const { headphoneSchema } = request.body;
 
     const headphoneDocument: HeadphoneDocument = await createNewHeadphoneService(
       headphoneSchema
     );
-
     if (!headphoneDocument) {
-      response.status(400).json({
-        message: "Could not create new headphone",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Could not create headphone"));
     }
 
     response.status(201).json({
@@ -71,7 +68,8 @@ const createNewHeadphoneController = expressAsyncController(
 const createNewHeadphoneBulkController = expressAsyncController(
   async (
     request: CreateNewHeadphoneBulkRequest,
-    response: Response<ResourceRequestServerResponse<HeadphoneDocument>>
+    response: Response<ResourceRequestServerResponse<HeadphoneDocument>>,
+    next: NextFunction
   ) => {
     const { headphoneSchemas } = request.body;
 
@@ -82,10 +80,8 @@ const createNewHeadphoneBulkController = expressAsyncController(
       })
     );
 
-    // filter out any headphones that were not created
     const successfullyCreatedHeadphones = newHeadphones.filter((headphone) => headphone);
 
-    // check if any headphones were created
     if (successfullyCreatedHeadphones.length === headphoneSchemas.length) {
       response.status(201).json({
         message: `Successfully created ${successfullyCreatedHeadphones.length} headphones`,
@@ -118,7 +114,8 @@ const createNewHeadphoneBulkController = expressAsyncController(
 const updateHeadphonesBulkController = expressAsyncController(
   async (
     request: UpdateHeadphonesBulkRequest,
-    response: Response<ResourceRequestServerResponse<HeadphoneDocument>>
+    response: Response<ResourceRequestServerResponse<HeadphoneDocument>>,
+    next: NextFunction
   ) => {
     const { headphoneFields } = request.body;
 
@@ -139,12 +136,10 @@ const updateHeadphonesBulkController = expressAsyncController(
       })
     );
 
-    // filter out any headphones that were not updated
     const successfullyUpdatedHeadphones = updatedHeadphones.filter(
       removeUndefinedAndNullValues
     );
 
-    // check if any headphones were updated
     if (successfullyUpdatedHeadphones.length === headphoneFields.length) {
       response.status(201).json({
         message: `Successfully updated ${successfullyUpdatedHeadphones.length} headphones`,
@@ -191,12 +186,12 @@ const getQueriedHeadphonesController = expressAsyncController(
       });
     }
 
-    // get all headphones
     const headphones = await getQueriedHeadphonesService({
       filter: filter as FilterQuery<HeadphoneDocument> | undefined,
       projection: projection as QueryOptions<HeadphoneDocument>,
       options: options as QueryOptions<HeadphoneDocument>,
     });
+
     if (headphones.length === 0) {
       response.status(200).json({
         message: "No headphones that match query parameters were found",
@@ -222,15 +217,14 @@ const getQueriedHeadphonesController = expressAsyncController(
 const getHeadphoneByIdController = expressAsyncController(
   async (
     request: GetHeadphoneByIdRequest,
-    response: Response<ResourceRequestServerResponse<HeadphoneDocument>>
+    response: Response<ResourceRequestServerResponse<HeadphoneDocument>>,
+    next: NextFunction
   ) => {
     const headphoneId = request.params.headphoneId;
 
-    // get headphone by id
     const headphone = await getHeadphoneByIdService(headphoneId);
     if (!headphone) {
-      response.status(404).json({ message: "Headphone not found", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Headphone does not exist"));
     }
 
     response.status(200).json({
@@ -246,14 +240,14 @@ const getHeadphoneByIdController = expressAsyncController(
 const updateHeadphoneByIdController = expressAsyncController(
   async (
     request: UpdateHeadphoneByIdRequest,
-    response: Response<ResourceRequestServerResponse<HeadphoneDocument>>
+    response: Response<ResourceRequestServerResponse<HeadphoneDocument>>,
+    next: NextFunction
   ) => {
     const { headphoneId } = request.params;
     const {
       documentUpdate: { fields, updateOperator },
     } = request.body;
 
-    // update headphone
     const updatedHeadphone = await updateHeadphoneByIdService({
       _id: headphoneId,
       fields,
@@ -261,11 +255,7 @@ const updateHeadphoneByIdController = expressAsyncController(
     });
 
     if (!updatedHeadphone) {
-      response.status(400).json({
-        message: "Headphone could not be updated",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Could not update headphone"));
     }
 
     response.status(200).json({
@@ -281,12 +271,11 @@ const updateHeadphoneByIdController = expressAsyncController(
 const deleteAllHeadphonesController = expressAsyncController(
   async (
     _request: DeleteAllHeadphonesRequest,
-    response: Response<ResourceRequestServerResponse<HeadphoneDocument>>
+    response: Response<ResourceRequestServerResponse<HeadphoneDocument>>,
+    next: NextFunction
   ) => {
-    // grab all headphones file upload ids
     const uploadedFilesIds = await returnAllHeadphonesUploadedFileIdsService();
 
-    // delete all file uploads associated with all headphones
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -296,14 +285,11 @@ const deleteAllHeadphonesController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Could not delete all file uploads")
+      );
     }
 
-    // delete all reviews associated with all headphones
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -311,22 +297,16 @@ const deleteAllHeadphonesController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Could not delete all product reviews")
+      );
     }
 
-    // delete all headphones
     const deleteHeadphonesResult: DeleteResult = await deleteAllHeadphonesService();
-
     if (deleteHeadphonesResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "All headphones could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Could not delete all headphones")
+      );
     }
 
     response.status(200).json({ message: "All headphones deleted", resourceData: [] });
@@ -339,24 +319,18 @@ const deleteAllHeadphonesController = expressAsyncController(
 const deleteAHeadphoneController = expressAsyncController(
   async (
     request: DeleteAHeadphoneRequest,
-    response: Response<ResourceRequestServerResponse<HeadphoneDocument>>
+    response: Response<ResourceRequestServerResponse<HeadphoneDocument>>,
+    next: NextFunction
   ) => {
     const headphoneId = request.params.headphoneId;
 
-    // check if headphone exists
     const headphoneExists = await getHeadphoneByIdService(headphoneId);
     if (!headphoneExists) {
-      response
-        .status(404)
-        .json({ message: "Headphone does not exist", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Headphone does not exist"));
     }
 
-    // find all file uploads associated with this headphone
-    // if it is not an array, it is made to be an array
     const uploadedFilesIds = [...headphoneExists.uploadedFilesIds];
 
-    // delete all file uploads associated with all headphones
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -366,39 +340,28 @@ const deleteAHeadphoneController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Could not delete all file uploads")
+      );
     }
 
-    // delete all reviews associated with all headphones
-    const deletedReviews = await Promise.all(
+    const deletedReviews: DeleteResult[] = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
       )
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Could not delete all product reviews")
+      );
     }
 
-    // delete headphone by id
     const deleteHeadphoneResult: DeleteResult = await deleteAHeadphoneService(
       headphoneId
     );
-
     if (deleteHeadphoneResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "Headphone could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Could not delete headphone"));
     }
 
     response.status(200).json({ message: "Headphone deleted", resourceData: [] });

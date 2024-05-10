@@ -1,129 +1,123 @@
 import { Types } from "mongoose";
 import type { DeleteResult } from "mongodb";
 import {
-	QueriedResourceGetRequestServiceInput,
-	DatabaseResponse,
-	DatabaseResponseNullable,
-	UpdateDocumentByIdServiceInput,
+  QueriedResourceGetRequestServiceInput,
+  DatabaseResponse,
+  DatabaseResponseNullable,
+  UpdateDocumentByIdServiceInput,
 } from "../../../types";
 import { GpuDocument, GpuModel, GpuSchema } from "./gpu.model";
+import createHttpError from "http-errors";
 
 async function createNewGpuService(gpuSchema: GpuSchema): Promise<GpuDocument> {
-	try {
-		const newGpu = await GpuModel.create(gpuSchema);
-		return newGpu;
-	} catch (error: any) {
-		throw new Error(error, { cause: "createNewGpuService" });
-	}
+  try {
+    const newGpu = await GpuModel.create(gpuSchema);
+    return newGpu;
+  } catch (error: any) {
+    throw new createHttpError.InternalServerError("createNewGpuService");
+  }
 }
 
 async function getQueriedGpusService({
-	filter = {},
-	projection = null,
-	options = {},
+  filter = {},
+  projection = null,
+  options = {},
 }: QueriedResourceGetRequestServiceInput<GpuDocument>): DatabaseResponse<GpuDocument> {
-	try {
-		const gpus = await GpuModel.find(filter, projection, options).lean().exec();
-		return gpus;
-	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedGpusService" });
-	}
+  try {
+    const gpus = await GpuModel.find(filter, projection, options).lean().exec();
+    return gpus;
+  } catch (error: any) {
+    throw new createHttpError.InternalServerError("getQueriedGpusService");
+  }
 }
 
 async function getQueriedTotalGpusService({
-	filter = {},
+  filter = {},
 }: QueriedResourceGetRequestServiceInput<GpuDocument>): Promise<number> {
-	try {
-		const totalGpus = await GpuModel.countDocuments(filter).lean().exec();
-		return totalGpus;
-	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedTotalGpusService" });
-	}
+  try {
+    const totalGpus = await GpuModel.countDocuments(filter).lean().exec();
+    return totalGpus;
+  } catch (error: any) {
+    throw new createHttpError.InternalServerError("getQueriedTotalGpusService");
+  }
 }
 
 async function getGpuByIdService(
-	gpuId: Types.ObjectId | string,
+  gpuId: Types.ObjectId | string
 ): DatabaseResponseNullable<GpuDocument> {
-	try {
-		const gpu = await GpuModel.findById(gpuId)
+  try {
+    const gpu = await GpuModel.findById(gpuId)
 
-			.lean()
-			.exec();
-		return gpu;
-	} catch (error: any) {
-		throw new Error(error, { cause: "getGpuByIdService" });
-	}
+      .lean()
+      .exec();
+    return gpu;
+  } catch (error: any) {
+    throw new createHttpError.InternalServerError("getGpuByIdService");
+  }
 }
 
 async function updateGpuByIdService({
-	_id,
-	fields,
-	updateOperator,
+  _id,
+  fields,
+  updateOperator,
 }: UpdateDocumentByIdServiceInput<GpuDocument>): DatabaseResponseNullable<GpuDocument> {
-	const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
-	const updateObject = JSON.parse(updateString);
+  const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
+  const updateObject = JSON.parse(updateString);
 
-	try {
-		const gpu = await GpuModel.findByIdAndUpdate(_id, updateObject, {
-			new: true,
-		})
+  try {
+    const gpu = await GpuModel.findByIdAndUpdate(_id, updateObject, {
+      new: true,
+    })
 
-			.lean()
-			.exec();
-		return gpu;
-	} catch (error: any) {
-		throw new Error(error, { cause: "updateGpuByIdService" });
-	}
+      .lean()
+      .exec();
+    return gpu;
+  } catch (error: any) {
+    throw new createHttpError.InternalServerError("updateGpuByIdService");
+  }
 }
 
 async function deleteAllGpusService(): Promise<DeleteResult> {
-	try {
-		const gpus = await GpuModel.deleteMany({}).lean().exec();
-		return gpus;
-	} catch (error: any) {
-		throw new Error(error, { cause: "deleteAllGpusService" });
-	}
+  try {
+    const gpus = await GpuModel.deleteMany({}).lean().exec();
+    return gpus;
+  } catch (error: any) {
+    throw new createHttpError.InternalServerError("deleteAllGpusService");
+  }
 }
 
-async function returnAllGpusUploadedFileIdsService(): Promise<
-	Types.ObjectId[]
-> {
-	try {
-		const gpus = await GpuModel.find({})
-			.select("uploadedFilesIds")
-			.lean()
-			.exec();
-		const uploadedFileIds = gpus.flatMap((gpu) => gpu.uploadedFilesIds);
-		return uploadedFileIds;
-	} catch (error: any) {
-		throw new Error(error, {
-			cause: "returnAllGpusUploadedFileIdsService",
-		});
-	}
+async function returnAllGpusUploadedFileIdsService(): Promise<Types.ObjectId[]> {
+  try {
+    const gpus = await GpuModel.find({}).select("uploadedFilesIds").lean().exec();
+    const uploadedFileIds = gpus.flatMap((gpu) => gpu.uploadedFilesIds);
+    return uploadedFileIds;
+  } catch (error: any) {
+    throw new Error(error, {
+      cause: "returnAllGpusUploadedFileIdsService",
+    });
+  }
 }
 
-async function deleteAGpuService(
-	gpuId: Types.ObjectId | string,
-): Promise<DeleteResult> {
-	try {
-		const gpu = await GpuModel.deleteOne({
-			_id: gpuId,
-		})
-			.lean()
-			.exec();
-		return gpu;
-	} catch (error: any) {
-		throw new Error(error, { cause: "deleteAGpuService" });
-	}
+async function deleteAGpuService(gpuId: Types.ObjectId | string): Promise<DeleteResult> {
+  try {
+    const gpu = await GpuModel.deleteOne({
+      _id: gpuId,
+    })
+      .lean()
+      .exec();
+    return gpu;
+  } catch (error: any) {
+    throw new createHttpError.InternalServerError("deleteAGpuService");
+  }
 }
 
 export {
-	createNewGpuService,
-	getQueriedGpusService,
-	getQueriedTotalGpusService,
-	getGpuByIdService,
-	updateGpuByIdService,
-	deleteAllGpusService,
-	returnAllGpusUploadedFileIdsService,
-	deleteAGpuService,
+  createNewGpuService,
+  getQueriedGpusService,
+  getQueriedTotalGpusService,
+  getGpuByIdService,
+  updateGpuByIdService,
+  deleteAllGpusService,
+  returnAllGpusUploadedFileIdsService,
+  deleteAGpuService,
 };

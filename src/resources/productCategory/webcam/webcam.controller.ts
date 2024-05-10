@@ -1,7 +1,8 @@
 import expressAsyncController from "express-async-handler";
+import createHttpError from "http-errors";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response } from "express";
+import type { Response, NextFunction } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewWebcamBulkRequest,
@@ -41,6 +42,7 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 const createNewWebcamController = expressAsyncController(
   async (
     request: CreateNewWebcamRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<WebcamDocument>>
   ) => {
     const { webcamSchema } = request.body;
@@ -69,6 +71,7 @@ const createNewWebcamController = expressAsyncController(
 const createNewWebcamBulkController = expressAsyncController(
   async (
     request: CreateNewWebcamBulkRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<WebcamDocument>>
   ) => {
     const { webcamSchemas } = request.body;
@@ -116,6 +119,7 @@ const createNewWebcamBulkController = expressAsyncController(
 const updateWebcamsBulkController = expressAsyncController(
   async (
     request: UpdateWebcamsBulkRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<WebcamDocument>>
   ) => {
     const { webcamFields } = request.body;
@@ -220,6 +224,7 @@ const getQueriedWebcamsController = expressAsyncController(
 const getWebcamByIdController = expressAsyncController(
   async (
     request: GetWebcamByIdRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<WebcamDocument>>
   ) => {
     const webcamId = request.params.webcamId;
@@ -244,6 +249,7 @@ const getWebcamByIdController = expressAsyncController(
 const updateWebcamByIdController = expressAsyncController(
   async (
     request: UpdateWebcamByIdRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<WebcamDocument>>
   ) => {
     const { webcamId } = request.params;
@@ -279,6 +285,7 @@ const updateWebcamByIdController = expressAsyncController(
 const deleteAllWebcamsController = expressAsyncController(
   async (
     _request: DeleteAllWebcamsRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<WebcamDocument>>
   ) => {
     // grab all webcams file upload ids
@@ -337,6 +344,7 @@ const deleteAllWebcamsController = expressAsyncController(
 const deleteAWebcamController = expressAsyncController(
   async (
     request: DeleteAWebcamRequest,
+    next: NextFunction,
     response: Response<ResourceRequestServerResponse<WebcamDocument>>
   ) => {
     const webcamId = request.params.webcamId;

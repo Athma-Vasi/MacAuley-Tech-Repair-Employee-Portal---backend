@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, NextFunction } from "express";
 import { accessoryRouter } from "./accessory";
 import { cpuRouter } from "./cpu";
 import { getQueriedGpusController, gpuRouter } from "./gpu";

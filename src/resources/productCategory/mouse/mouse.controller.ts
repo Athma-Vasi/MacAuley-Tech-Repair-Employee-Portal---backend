@@ -1,7 +1,7 @@
 import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewMouseBulkRequest,
@@ -34,6 +34,7 @@ import { deleteFileUploadByIdService } from "../../fileUpload";
 
 import { deleteAProductReviewService } from "../../productReview";
 import { removeUndefinedAndNullValues } from "../../../utils";
+import createHttpError from "http-errors";
 
 // @desc   Create new mouse
 // @route  POST /api/v1/product-category/mouse
@@ -41,18 +42,14 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 const createNewMouseController = expressAsyncController(
   async (
     request: CreateNewMouseRequest,
-    response: Response<ResourceRequestServerResponse<MouseDocument>>
+    response: Response<ResourceRequestServerResponse<MouseDocument>>,
+    next: NextFunction
   ) => {
     const { mouseSchema } = request.body;
 
     const mouseDocument: MouseDocument = await createNewMouseService(mouseSchema);
-
     if (!mouseDocument) {
-      response.status(400).json({
-        message: "Could not create new mouse",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Mouse could not be created"));
     }
 
     response.status(201).json({
@@ -69,7 +66,8 @@ const createNewMouseController = expressAsyncController(
 const createNewMouseBulkController = expressAsyncController(
   async (
     request: CreateNewMouseBulkRequest,
-    response: Response<ResourceRequestServerResponse<MouseDocument>>
+    response: Response<ResourceRequestServerResponse<MouseDocument>>,
+    next: NextFunction
   ) => {
     const { mouseSchemas } = request.body;
 
@@ -80,10 +78,8 @@ const createNewMouseBulkController = expressAsyncController(
       })
     );
 
-    // filter out any mouses that were not created
     const successfullyCreatedMice = newMice.filter((mouse) => mouse);
 
-    // check if any mouses were created
     if (successfullyCreatedMice.length === mouseSchemas.length) {
       response.status(201).json({
         message: `Successfully created ${successfullyCreatedMice.length} mouses`,
@@ -116,7 +112,8 @@ const createNewMouseBulkController = expressAsyncController(
 const updateMiceBulkController = expressAsyncController(
   async (
     request: UpdateMiceBulkRequest,
-    response: Response<ResourceRequestServerResponse<MouseDocument>>
+    response: Response<ResourceRequestServerResponse<MouseDocument>>,
+    next: NextFunction
   ) => {
     const { mouseFields } = request.body;
 
@@ -137,10 +134,8 @@ const updateMiceBulkController = expressAsyncController(
       })
     );
 
-    // filter out any mouses that were not updated
     const successfullyUpdatedMice = updatedMice.filter(removeUndefinedAndNullValues);
 
-    // check if any mouses were updated
     if (successfullyUpdatedMice.length === mouseFields.length) {
       response.status(201).json({
         message: `Successfully updated ${successfullyUpdatedMice.length} mouses`,
@@ -187,12 +182,12 @@ const getQueriedMiceController = expressAsyncController(
       });
     }
 
-    // get all mouses
     const mouses = await getQueriedMiceService({
       filter: filter as FilterQuery<MouseDocument> | undefined,
       projection: projection as QueryOptions<MouseDocument>,
       options: options as QueryOptions<MouseDocument>,
     });
+
     if (mouses.length === 0) {
       response.status(200).json({
         message: "No mouses that match query parameters were found",
@@ -218,15 +213,14 @@ const getQueriedMiceController = expressAsyncController(
 const getMouseByIdController = expressAsyncController(
   async (
     request: GetMouseByIdRequest,
-    response: Response<ResourceRequestServerResponse<MouseDocument>>
+    response: Response<ResourceRequestServerResponse<MouseDocument>>,
+    next: NextFunction
   ) => {
     const mouseId = request.params.mouseId;
 
-    // get mouse by id
     const mouse = await getMouseByIdService(mouseId);
     if (!mouse) {
-      response.status(404).json({ message: "Mouse not found", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Mouse does not exist"));
     }
 
     response.status(200).json({
@@ -242,14 +236,14 @@ const getMouseByIdController = expressAsyncController(
 const updateMouseByIdController = expressAsyncController(
   async (
     request: UpdateMouseByIdRequest,
-    response: Response<ResourceRequestServerResponse<MouseDocument>>
+    response: Response<ResourceRequestServerResponse<MouseDocument>>,
+    next: NextFunction
   ) => {
     const { mouseId } = request.params;
     const {
       documentUpdate: { fields, updateOperator },
     } = request.body;
 
-    // update mouse
     const updatedMouse = await updateMouseByIdService({
       _id: mouseId,
       fields,
@@ -257,11 +251,7 @@ const updateMouseByIdController = expressAsyncController(
     });
 
     if (!updatedMouse) {
-      response.status(400).json({
-        message: "Mouse could not be updated",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Mouse could not be updated"));
     }
 
     response.status(200).json({
@@ -277,12 +267,11 @@ const updateMouseByIdController = expressAsyncController(
 const deleteAllMiceController = expressAsyncController(
   async (
     _request: DeleteAllMiceRequest,
-    response: Response<ResourceRequestServerResponse<MouseDocument>>
+    response: Response<ResourceRequestServerResponse<MouseDocument>>,
+    next: NextFunction
   ) => {
-    // grab all mouses file upload ids
     const uploadedFilesIds = await returnAllMiceUploadedFileIdsService();
 
-    // delete all file uploads associated with all mouses
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -292,14 +281,11 @@ const deleteAllMiceController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Could not delete all file uploads")
+      );
     }
 
-    // delete all reviews associated with all mouses
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -307,22 +293,14 @@ const deleteAllMiceController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Could not delete all reviews")
+      );
     }
 
-    // delete all mouses
     const deleteMiceResult: DeleteResult = await deleteAllMiceService();
-
     if (deleteMiceResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "All mouses could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Could not delete all mouses"));
     }
 
     response.status(200).json({ message: "All mouses deleted", resourceData: [] });
@@ -335,22 +313,19 @@ const deleteAllMiceController = expressAsyncController(
 const deleteAMouseController = expressAsyncController(
   async (
     request: DeleteAMouseRequest,
-    response: Response<ResourceRequestServerResponse<MouseDocument>>
+    response: Response<ResourceRequestServerResponse<MouseDocument>>,
+    next: NextFunction
   ) => {
     const mouseId = request.params.mouseId;
 
-    // check if mouse exists
     const mouseExists = await getMouseByIdService(mouseId);
     if (!mouseExists) {
       response.status(404).json({ message: "Mouse does not exist", resourceData: [] });
       return;
     }
 
-    // find all file uploads associated with this mouse
-    // if it is not an array, it is made to be an array
     const uploadedFilesIds = [...mouseExists.uploadedFilesIds];
 
-    // delete all file uploads associated with all mouses
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -360,14 +335,11 @@ const deleteAMouseController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Could not delete all file uploads")
+      );
     }
 
-    // delete all reviews associated with all mouses
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -375,22 +347,14 @@ const deleteAMouseController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Could not delete all reviews")
+      );
     }
 
-    // delete mouse by id
     const deleteMouseResult: DeleteResult = await deleteAMouseService(mouseId);
-
     if (deleteMouseResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "Mouse could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Could not delete mouse"));
     }
 
     response.status(200).json({ message: "Mouse deleted", resourceData: [] });

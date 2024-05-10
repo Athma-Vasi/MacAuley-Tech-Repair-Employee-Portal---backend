@@ -1,7 +1,7 @@
 import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewGpuBulkRequest,
@@ -34,6 +34,7 @@ import { deleteFileUploadByIdService } from "../../fileUpload";
 
 import { deleteAProductReviewService } from "../../productReview";
 import { removeUndefinedAndNullValues } from "../../../utils";
+import createHttpError from "http-errors";
 
 // @desc   Create new gpu
 // @route  POST /api/v1/product-category/gpu
@@ -41,18 +42,14 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 const createNewGpuController = expressAsyncController(
   async (
     request: CreateNewGpuRequest,
-    response: Response<ResourceRequestServerResponse<GpuDocument>>
+    response: Response<ResourceRequestServerResponse<GpuDocument>>,
+    next: NextFunction
   ) => {
     const { gpuSchema } = request.body;
 
     const gpuDocument: GpuDocument = await createNewGpuService(gpuSchema);
-
     if (!gpuDocument) {
-      response.status(400).json({
-        message: "Could not create new gpu",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Gpu could not be created"));
     }
 
     response.status(201).json({
@@ -69,7 +66,8 @@ const createNewGpuController = expressAsyncController(
 const createNewGpuBulkController = expressAsyncController(
   async (
     request: CreateNewGpuBulkRequest,
-    response: Response<ResourceRequestServerResponse<GpuDocument>>
+    response: Response<ResourceRequestServerResponse<GpuDocument>>,
+    next: NextFunction
   ) => {
     const { gpuSchemas } = request.body;
 
@@ -80,10 +78,8 @@ const createNewGpuBulkController = expressAsyncController(
       })
     );
 
-    // filter out any gpus that were not created
     const successfullyCreatedGpus = newGpus.filter((gpu) => gpu);
 
-    // check if any gpus were created
     if (successfullyCreatedGpus.length === gpuSchemas.length) {
       response.status(201).json({
         message: `Successfully created ${successfullyCreatedGpus.length} gpus`,
@@ -116,7 +112,8 @@ const createNewGpuBulkController = expressAsyncController(
 const updateGpusBulkController = expressAsyncController(
   async (
     request: UpdateGpusBulkRequest,
-    response: Response<ResourceRequestServerResponse<GpuDocument>>
+    response: Response<ResourceRequestServerResponse<GpuDocument>>,
+    next: NextFunction
   ) => {
     const { gpuFields } = request.body;
 
@@ -137,10 +134,8 @@ const updateGpusBulkController = expressAsyncController(
       })
     );
 
-    // filter out any gpus that were not updated
     const successfullyUpdatedGpus = updatedGpus.filter(removeUndefinedAndNullValues);
 
-    // check if any gpus were updated
     if (successfullyUpdatedGpus.length === gpuFields.length) {
       response.status(201).json({
         message: `Successfully updated ${successfullyUpdatedGpus.length} gpus`,
@@ -187,12 +182,12 @@ const getQueriedGpusController = expressAsyncController(
       });
     }
 
-    // get all gpus
     const gpus = await getQueriedGpusService({
       filter: filter as FilterQuery<GpuDocument> | undefined,
       projection: projection as QueryOptions<GpuDocument>,
       options: options as QueryOptions<GpuDocument>,
     });
+
     if (gpus.length === 0) {
       response.status(200).json({
         message: "No gpus that match query parameters were found",
@@ -218,15 +213,14 @@ const getQueriedGpusController = expressAsyncController(
 const getGpuByIdController = expressAsyncController(
   async (
     request: GetGpuByIdRequest,
-    response: Response<ResourceRequestServerResponse<GpuDocument>>
+    response: Response<ResourceRequestServerResponse<GpuDocument>>,
+    next: NextFunction
   ) => {
     const gpuId = request.params.gpuId;
 
-    // get gpu by id
     const gpu = await getGpuByIdService(gpuId);
     if (!gpu) {
-      response.status(404).json({ message: "Gpu not found", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Gpu does not exist"));
     }
 
     response.status(200).json({
@@ -242,14 +236,14 @@ const getGpuByIdController = expressAsyncController(
 const updateGpuByIdController = expressAsyncController(
   async (
     request: UpdateGpuByIdRequest,
-    response: Response<ResourceRequestServerResponse<GpuDocument>>
+    response: Response<ResourceRequestServerResponse<GpuDocument>>,
+    next: NextFunction
   ) => {
     const { gpuId } = request.params;
     const {
       documentUpdate: { fields, updateOperator },
     } = request.body;
 
-    // update gpu
     const updatedGpu = await updateGpuByIdService({
       _id: gpuId,
       fields,
@@ -257,11 +251,7 @@ const updateGpuByIdController = expressAsyncController(
     });
 
     if (!updatedGpu) {
-      response.status(400).json({
-        message: "Gpu could not be updated",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Gpu could not be updated"));
     }
 
     response.status(200).json({
@@ -277,12 +267,11 @@ const updateGpuByIdController = expressAsyncController(
 const deleteAllGpusController = expressAsyncController(
   async (
     _request: DeleteAllGpusRequest,
-    response: Response<ResourceRequestServerResponse<GpuDocument>>
+    response: Response<ResourceRequestServerResponse<GpuDocument>>,
+    next: NextFunction
   ) => {
-    // grab all gpus file upload ids
     const uploadedFilesIds = await returnAllGpusUploadedFileIdsService();
 
-    // delete all file uploads associated with all gpus
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -292,14 +281,11 @@ const deleteAllGpusController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Some File uploads could not be deleted")
+      );
     }
 
-    // delete all reviews associated with all gpus
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -307,22 +293,15 @@ const deleteAllGpusController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Some reviews could not be deleted")
+      );
     }
 
-    // delete all gpus
     const deleteGpusResult: DeleteResult = await deleteAllGpusService();
 
     if (deleteGpusResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "All gpus could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Gpus could not be deleted"));
     }
 
     response.status(200).json({ message: "All gpus deleted", resourceData: [] });
@@ -335,22 +314,18 @@ const deleteAllGpusController = expressAsyncController(
 const deleteAGpuController = expressAsyncController(
   async (
     request: DeleteAGpuRequest,
-    response: Response<ResourceRequestServerResponse<GpuDocument>>
+    response: Response<ResourceRequestServerResponse<GpuDocument>>,
+    next: NextFunction
   ) => {
     const gpuId = request.params.gpuId;
 
-    // check if gpu exists
     const gpuExists = await getGpuByIdService(gpuId);
     if (!gpuExists) {
-      response.status(404).json({ message: "Gpu does not exist", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Gpu does not exist"));
     }
 
-    // find all file uploads associated with this gpu
-    // if it is not an array, it is made to be an array
     const uploadedFilesIds = [...gpuExists.uploadedFilesIds];
 
-    // delete all file uploads associated with all gpus
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -360,14 +335,11 @@ const deleteAGpuController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Some File uploads could not be deleted")
+      );
     }
 
-    // delete all reviews associated with all gpus
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -375,22 +347,14 @@ const deleteAGpuController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Some reviews could not be deleted")
+      );
     }
 
-    // delete gpu by id
     const deleteGpuResult: DeleteResult = await deleteAGpuService(gpuId);
-
     if (deleteGpuResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "Gpu could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Gpu could not be deleted"));
     }
 
     response.status(200).json({ message: "Gpu deleted", resourceData: [] });

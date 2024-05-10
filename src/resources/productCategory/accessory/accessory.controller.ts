@@ -1,7 +1,7 @@
 import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewAccessoryBulkRequest,
@@ -34,6 +34,7 @@ import { deleteFileUploadByIdService } from "../../fileUpload";
 
 import { deleteAProductReviewService } from "../../productReview";
 import { removeUndefinedAndNullValues } from "../../../utils";
+import createHttpError from "http-errors";
 
 // @desc   Create new accessory
 // @route  POST /api/v1/product-category/accessory
@@ -41,20 +42,18 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 const createNewAccessoryController = expressAsyncController(
   async (
     request: CreateNewAccessoryRequest,
-    response: Response<ResourceRequestServerResponse<AccessoryDocument>>
+    response: Response<ResourceRequestServerResponse<AccessoryDocument>>,
+    next: NextFunction
   ) => {
     const { accessorySchema } = request.body;
 
     const accessoryDocument: AccessoryDocument = await createNewAccessoryService(
       accessorySchema
     );
-
     if (!accessoryDocument) {
-      response.status(400).json({
-        message: "Could not create new accessory",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Accessory could not be created")
+      );
     }
 
     response.status(201).json({
@@ -82,12 +81,10 @@ const createNewAccessoryBulkController = expressAsyncController(
       })
     );
 
-    // filter out any accessories that were not created
     const successfullyCreatedAccessories = newAccessories.filter(
       (accessory) => accessory
     );
 
-    // check if any accessories were created
     if (successfullyCreatedAccessories.length === accessorySchemas.length) {
       response.status(201).json({
         message: `Successfully created ${successfullyCreatedAccessories.length} accessories`,
@@ -120,7 +117,8 @@ const createNewAccessoryBulkController = expressAsyncController(
 const updateAccessoriesBulkController = expressAsyncController(
   async (
     request: UpdateAccessoriesBulkRequest,
-    response: Response<ResourceRequestServerResponse<AccessoryDocument>>
+    response: Response<ResourceRequestServerResponse<AccessoryDocument>>,
+    next: NextFunction
   ) => {
     const { accessoryFields } = request.body;
 
@@ -141,26 +139,23 @@ const updateAccessoriesBulkController = expressAsyncController(
       })
     );
 
-    // filter out any accessories that were not updated
     const successfullyUpdatedAccessories = updatedAccessories.filter(
       removeUndefinedAndNullValues
     );
 
-    // check if any accessories were updated
     if (successfullyUpdatedAccessories.length === accessoryFields.length) {
       response.status(201).json({
         message: `Successfully updated ${successfullyUpdatedAccessories.length} accessories`,
         resourceData: successfullyUpdatedAccessories,
       });
+
       return;
     }
 
     if (successfullyUpdatedAccessories.length === 0) {
-      response.status(400).json({
-        message: "Could not update any accessories",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Could not update any accessories")
+      );
     }
 
     response.status(201).json({
@@ -193,12 +188,12 @@ const getQueriedAccessoriesController = expressAsyncController(
       });
     }
 
-    // get all accessories
     const accessories = await getQueriedAccessoriesService({
       filter: filter as FilterQuery<AccessoryDocument> | undefined,
       projection: projection as QueryOptions<AccessoryDocument>,
       options: options as QueryOptions<AccessoryDocument>,
     });
+
     if (accessories.length === 0) {
       response.status(200).json({
         message: "No accessories that match query parameters were found",
@@ -224,15 +219,14 @@ const getQueriedAccessoriesController = expressAsyncController(
 const getAccessoryByIdController = expressAsyncController(
   async (
     request: GetAccessoryByIdRequest,
-    response: Response<ResourceRequestServerResponse<AccessoryDocument>>
+    response: Response<ResourceRequestServerResponse<AccessoryDocument>>,
+    next: NextFunction
   ) => {
     const { accessoryId } = request.params;
 
-    // get accessory by id
     const accessory = await getAccessoryByIdService(accessoryId);
     if (!accessory) {
-      response.status(404).json({ message: "Accessory not found", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Accessory does not exist"));
     }
 
     response.status(200).json({
@@ -248,14 +242,14 @@ const getAccessoryByIdController = expressAsyncController(
 const updateAccessoryByIdController = expressAsyncController(
   async (
     request: UpdateAccessoryByIdRequest,
-    response: Response<ResourceRequestServerResponse<AccessoryDocument>>
+    response: Response<ResourceRequestServerResponse<AccessoryDocument>>,
+    next: NextFunction
   ) => {
     const { accessoryId } = request.params;
     const {
       documentUpdate: { fields, updateOperator },
     } = request.body;
 
-    // update accessory
     const updatedAccessory = await updateAccessoryByIdService({
       _id: accessoryId,
       fields,
@@ -263,11 +257,9 @@ const updateAccessoryByIdController = expressAsyncController(
     });
 
     if (!updatedAccessory) {
-      response.status(400).json({
-        message: "Accessory could not be updated",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Accessory could not be updated")
+      );
     }
 
     response.status(200).json({
@@ -283,12 +275,11 @@ const updateAccessoryByIdController = expressAsyncController(
 const deleteAllAccessoriesController = expressAsyncController(
   async (
     _request: DeleteAllAccessoriesRequest,
-    response: Response<ResourceRequestServerResponse<AccessoryDocument>>
+    response: Response<ResourceRequestServerResponse<AccessoryDocument>>,
+    next: NextFunction
   ) => {
-    // grab all accessories file upload ids
     const uploadedFilesIds = await returnAllAccessoriesUploadedFileIdsService();
 
-    // delete all file uploads associated with all accessories
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -298,14 +289,13 @@ const deleteAllAccessoriesController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Some file uploads could not be deleted. Please try again."
+        )
+      );
     }
 
-    // delete all reviews associated with all accessories
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -313,22 +303,21 @@ const deleteAllAccessoriesController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Some reviews could not be deleted. Please try again."
+        )
+      );
     }
 
-    // delete all accessories
     const deleteAccessoriesResult: DeleteResult = await deleteAllAccessoriesService();
 
     if (deleteAccessoriesResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "All accessories could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Accessories could not be deleted. Please try again."
+        )
+      );
     }
 
     response.status(200).json({ message: "All accessories deleted", resourceData: [] });
@@ -341,24 +330,18 @@ const deleteAllAccessoriesController = expressAsyncController(
 const deleteAAccessoryController = expressAsyncController(
   async (
     request: DeleteAnAccessoryRequest,
-    response: Response<ResourceRequestServerResponse<AccessoryDocument>>
+    response: Response<ResourceRequestServerResponse<AccessoryDocument>>,
+    next: NextFunction
   ) => {
     const accessoryId = request.params.accessoryId;
 
-    // check if accessory exists
     const accessoryExists = await getAccessoryByIdService(accessoryId);
     if (!accessoryExists) {
-      response
-        .status(404)
-        .json({ message: "Accessory does not exist", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Accessory does not exist"));
     }
 
-    // find all file uploads associated with this accessory
-    // if it is not an array, it is made to be an array
     const uploadedFilesIds = [...accessoryExists.uploadedFilesIds];
 
-    // delete all file uploads associated with all accessories
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -368,14 +351,13 @@ const deleteAAccessoryController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Some file uploads could not be deleted. Please try again."
+        )
+      );
     }
 
-    // delete all reviews associated with all accessories
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -383,24 +365,23 @@ const deleteAAccessoryController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Some reviews could not be deleted. Please try again."
+        )
+      );
     }
 
-    // delete accessory by id
     const deleteAccessoryResult: DeleteResult = await deleteAnAccessoryService(
       accessoryId
     );
 
     if (deleteAccessoryResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "Accessory could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Accessory could not be deleted. Please try again."
+        )
+      );
     }
 
     response.status(200).json({ message: "Accessory deleted", resourceData: [] });
