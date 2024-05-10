@@ -1,8 +1,7 @@
 import expressAsyncController from "express-async-handler";
-import createHttpError from "http-errors";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response, NextFunction } from "express";
+import type { NextFunction, Response } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewSpeakerBulkRequest,
@@ -35,6 +34,7 @@ import { deleteFileUploadByIdService } from "../../fileUpload";
 
 import { deleteAProductReviewService } from "../../productReview";
 import { removeUndefinedAndNullValues } from "../../../utils";
+import createHttpError from "http-errors";
 
 // @desc   Create new speaker
 // @route  POST /api/v1/product-category/speaker
@@ -42,19 +42,16 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 const createNewSpeakerController = expressAsyncController(
   async (
     request: CreateNewSpeakerRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<SpeakerDocument>>
+    response: Response<ResourceRequestServerResponse<SpeakerDocument>>,
+    next: NextFunction
   ) => {
     const { speakerSchema } = request.body;
 
     const speakerDocument: SpeakerDocument = await createNewSpeakerService(speakerSchema);
-
     if (!speakerDocument) {
-      response.status(400).json({
-        message: "Could not create new speaker",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Speaker could not be created")
+      );
     }
 
     response.status(201).json({
@@ -71,8 +68,8 @@ const createNewSpeakerController = expressAsyncController(
 const createNewSpeakerBulkController = expressAsyncController(
   async (
     request: CreateNewSpeakerBulkRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<SpeakerDocument>>
+    response: Response<ResourceRequestServerResponse<SpeakerDocument>>,
+    next: NextFunction
   ) => {
     const { speakerSchemas } = request.body;
 
@@ -83,10 +80,8 @@ const createNewSpeakerBulkController = expressAsyncController(
       })
     );
 
-    // filter out any speakers that were not created
     const successfullyCreatedSpeakers = newSpeakers.filter((speaker) => speaker);
 
-    // check if any speakers were created
     if (successfullyCreatedSpeakers.length === speakerSchemas.length) {
       response.status(201).json({
         message: `Successfully created ${successfullyCreatedSpeakers.length} speakers`,
@@ -119,8 +114,8 @@ const createNewSpeakerBulkController = expressAsyncController(
 const updateSpeakersBulkController = expressAsyncController(
   async (
     request: UpdateSpeakersBulkRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<SpeakerDocument>>
+    response: Response<ResourceRequestServerResponse<SpeakerDocument>>,
+    next: NextFunction
   ) => {
     const { speakerFields } = request.body;
 
@@ -141,12 +136,10 @@ const updateSpeakersBulkController = expressAsyncController(
       })
     );
 
-    // filter out any speakers that were not updated
     const successfullyUpdatedSpeakers = updatedSpeakers.filter(
       removeUndefinedAndNullValues
     );
 
-    // check if any speakers were updated
     if (successfullyUpdatedSpeakers.length === speakerFields.length) {
       response.status(201).json({
         message: `Successfully updated ${successfullyUpdatedSpeakers.length} speakers`,
@@ -193,12 +186,12 @@ const getQueriedSpeakersController = expressAsyncController(
       });
     }
 
-    // get all speakers
     const speakers = await getQueriedSpeakersService({
       filter: filter as FilterQuery<SpeakerDocument> | undefined,
       projection: projection as QueryOptions<SpeakerDocument>,
       options: options as QueryOptions<SpeakerDocument>,
     });
+
     if (speakers.length === 0) {
       response.status(200).json({
         message: "No speakers that match query parameters were found",
@@ -224,16 +217,14 @@ const getQueriedSpeakersController = expressAsyncController(
 const getSpeakerByIdController = expressAsyncController(
   async (
     request: GetSpeakerByIdRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<SpeakerDocument>>
+    response: Response<ResourceRequestServerResponse<SpeakerDocument>>,
+    next: NextFunction
   ) => {
     const speakerId = request.params.speakerId;
 
-    // get speaker by id
     const speaker = await getSpeakerByIdService(speakerId);
     if (!speaker) {
-      response.status(404).json({ message: "Speaker not found", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Speaker does not exist"));
     }
 
     response.status(200).json({
@@ -249,15 +240,14 @@ const getSpeakerByIdController = expressAsyncController(
 const updateSpeakerByIdController = expressAsyncController(
   async (
     request: UpdateSpeakerByIdRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<SpeakerDocument>>
+    response: Response<ResourceRequestServerResponse<SpeakerDocument>>,
+    next: NextFunction
   ) => {
     const { speakerId } = request.params;
     const {
       documentUpdate: { fields, updateOperator },
     } = request.body;
 
-    // update speaker
     const updatedSpeaker = await updateSpeakerByIdService({
       _id: speakerId,
       fields,
@@ -265,11 +255,9 @@ const updateSpeakerByIdController = expressAsyncController(
     });
 
     if (!updatedSpeaker) {
-      response.status(400).json({
-        message: "Speaker could not be updated",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Speaker could not be updated")
+      );
     }
 
     response.status(200).json({
@@ -285,13 +273,11 @@ const updateSpeakerByIdController = expressAsyncController(
 const deleteAllSpeakersController = expressAsyncController(
   async (
     _request: DeleteAllSpeakersRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<SpeakerDocument>>
+    response: Response<ResourceRequestServerResponse<SpeakerDocument>>,
+    next: NextFunction
   ) => {
-    // grab all speakers file upload ids
     const uploadedFilesIds = await returnAllSpeakersUploadedFileIdsService();
 
-    // delete all file uploads associated with all speakers
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -301,14 +287,13 @@ const deleteAllSpeakersController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Some file uploads could not be deleted. Please try again."
+        )
+      );
     }
 
-    // delete all reviews associated with all speakers
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -316,22 +301,20 @@ const deleteAllSpeakersController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Some reviews could not be deleted. Please try again."
+        )
+      );
     }
 
-    // delete all speakers
     const deleteSpeakersResult: DeleteResult = await deleteAllSpeakersService();
-
     if (deleteSpeakersResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "All speakers could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Some speakers could not be deleted. Please try again."
+        )
+      );
     }
 
     response.status(200).json({ message: "All speakers deleted", resourceData: [] });
@@ -344,23 +327,18 @@ const deleteAllSpeakersController = expressAsyncController(
 const deleteASpeakerController = expressAsyncController(
   async (
     request: DeleteASpeakerRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<SpeakerDocument>>
+    response: Response<ResourceRequestServerResponse<SpeakerDocument>>,
+    next: NextFunction
   ) => {
     const speakerId = request.params.speakerId;
 
-    // check if speaker exists
     const speakerExists = await getSpeakerByIdService(speakerId);
     if (!speakerExists) {
-      response.status(404).json({ message: "Speaker does not exist", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Speaker does not exist"));
     }
 
-    // find all file uploads associated with this speaker
-    // if it is not an array, it is made to be an array
     const uploadedFilesIds = [...speakerExists.uploadedFilesIds];
 
-    // delete all file uploads associated with all speakers
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -370,14 +348,13 @@ const deleteASpeakerController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Some file uploads could not be deleted. Please try again."
+        )
+      );
     }
 
-    // delete all reviews associated with all speakers
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -385,22 +362,20 @@ const deleteASpeakerController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Some reviews could not be deleted. Please try again."
+        )
+      );
     }
 
-    // delete speaker by id
     const deleteSpeakerResult: DeleteResult = await deleteASpeakerService(speakerId);
-
     if (deleteSpeakerResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "Speaker could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Speaker could not be deleted. Please try again."
+        )
+      );
     }
 
     response.status(200).json({ message: "Speaker deleted", resourceData: [] });

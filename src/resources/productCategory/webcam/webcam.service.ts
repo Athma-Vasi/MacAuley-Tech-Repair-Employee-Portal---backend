@@ -1,135 +1,127 @@
 import { Types } from "mongoose";
 import type { DeleteResult } from "mongodb";
 import {
-	QueriedResourceGetRequestServiceInput,
-	DatabaseResponse,
-	DatabaseResponseNullable,
-	UpdateDocumentByIdServiceInput,
+  QueriedResourceGetRequestServiceInput,
+  DatabaseResponse,
+  DatabaseResponseNullable,
+  UpdateDocumentByIdServiceInput,
 } from "../../../types";
 import { WebcamDocument, WebcamModel, WebcamSchema } from "./webcam.model";
+import createHttpError from "http-errors";
 
 async function createNewWebcamService(
-	webcamSchema: WebcamSchema,
+  webcamSchema: WebcamSchema
 ): Promise<WebcamDocument> {
-	try {
-		const newWebcam = await WebcamModel.create(webcamSchema);
-		return newWebcam;
-	} catch (error: any) {
-		throw new Error(error, { cause: "createNewWebcamService" });
-	}
+  try {
+    const newWebcam = await WebcamModel.create(webcamSchema);
+    return newWebcam;
+  } catch (error: any) {
+    throw new createHttpError.InternalServerError("createNewWebcamService");
+  }
 }
 
 async function getQueriedWebcamsService({
-	filter = {},
-	projection = null,
-	options = {},
+  filter = {},
+  projection = null,
+  options = {},
 }: QueriedResourceGetRequestServiceInput<WebcamDocument>): DatabaseResponse<WebcamDocument> {
-	try {
-		const webcams = await WebcamModel.find(filter, projection, options)
-			.lean()
-			.exec();
-		return webcams;
-	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedWebcamsService" });
-	}
+  try {
+    const webcams = await WebcamModel.find(filter, projection, options).lean().exec();
+    return webcams;
+  } catch (error: any) {
+    throw new createHttpError.InternalServerError("getQueriedWebcamsService");
+  }
 }
 
 async function getQueriedTotalWebcamsService({
-	filter = {},
+  filter = {},
 }: QueriedResourceGetRequestServiceInput<WebcamDocument>): Promise<number> {
-	try {
-		const totalWebcams = await WebcamModel.countDocuments(filter).lean().exec();
-		return totalWebcams;
-	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedTotalWebcamsService" });
-	}
+  try {
+    const totalWebcams = await WebcamModel.countDocuments(filter).lean().exec();
+    return totalWebcams;
+  } catch (error: any) {
+    throw new createHttpError.InternalServerError("getQueriedTotalWebcamsService");
+  }
 }
 
 async function getWebcamByIdService(
-	webcamId: Types.ObjectId | string,
+  webcamId: Types.ObjectId | string
 ): DatabaseResponseNullable<WebcamDocument> {
-	try {
-		const webcam = await WebcamModel.findById(webcamId)
+  try {
+    const webcam = await WebcamModel.findById(webcamId)
 
-			.lean()
-			.exec();
-		return webcam;
-	} catch (error: any) {
-		throw new Error(error, { cause: "getWebcamByIdService" });
-	}
+      .lean()
+      .exec();
+    return webcam;
+  } catch (error: any) {
+    throw new createHttpError.InternalServerError("getWebcamByIdService");
+  }
 }
 
 async function updateWebcamByIdService({
-	_id,
-	fields,
-	updateOperator,
+  _id,
+  fields,
+  updateOperator,
 }: UpdateDocumentByIdServiceInput<WebcamDocument>): DatabaseResponseNullable<WebcamDocument> {
-	const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
-	const updateObject = JSON.parse(updateString);
+  const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
+  const updateObject = JSON.parse(updateString);
 
-	try {
-		const webcam = await WebcamModel.findByIdAndUpdate(_id, updateObject, {
-			new: true,
-		})
+  try {
+    const webcam = await WebcamModel.findByIdAndUpdate(_id, updateObject, {
+      new: true,
+    })
 
-			.lean()
-			.exec();
-		return webcam;
-	} catch (error: any) {
-		throw new Error(error, { cause: "updateWebcamByIdService" });
-	}
+      .lean()
+      .exec();
+    return webcam;
+  } catch (error: any) {
+    throw new createHttpError.InternalServerError("updateWebcamByIdService");
+  }
 }
 
 async function deleteAllWebcamsService(): Promise<DeleteResult> {
-	try {
-		const webcams = await WebcamModel.deleteMany({}).lean().exec();
-		return webcams;
-	} catch (error: any) {
-		throw new Error(error, { cause: "deleteAllWebcamsService" });
-	}
+  try {
+    const webcams = await WebcamModel.deleteMany({}).lean().exec();
+    return webcams;
+  } catch (error: any) {
+    throw new createHttpError.InternalServerError("deleteAllWebcamsService");
+  }
 }
 
-async function returnAllWebcamsUploadedFileIdsService(): Promise<
-	Types.ObjectId[]
-> {
-	try {
-		const webcams = await WebcamModel.find({})
-			.select("uploadedFilesIds")
-			.lean()
-			.exec();
-		const uploadedFileIds = webcams.flatMap(
-			(webcam) => webcam.uploadedFilesIds,
-		);
-		return uploadedFileIds;
-	} catch (error: any) {
-		throw new Error(error, {
-			cause: "returnAllWebcamsUploadedFileIdsService",
-		});
-	}
+async function returnAllWebcamsUploadedFileIdsService(): Promise<Types.ObjectId[]> {
+  try {
+    const webcams = await WebcamModel.find({}).select("uploadedFilesIds").lean().exec();
+    const uploadedFileIds = webcams.flatMap((webcam) => webcam.uploadedFilesIds);
+    return uploadedFileIds;
+  } catch (error: any) {
+    throw new Error(error, {
+      cause: "returnAllWebcamsUploadedFileIdsService",
+    });
+  }
 }
 
 async function deleteAWebcamService(
-	webcamId: Types.ObjectId | string,
+  webcamId: Types.ObjectId | string
 ): Promise<DeleteResult> {
-	try {
-		const webcam = await WebcamModel.deleteOne({
-			_id: webcamId,
-		})
-			.lean()
-			.exec();
-		return webcam;
-	} catch (error: any) {
-		throw new Error(error, { cause: "deleteAWebcamService" });
-	}
+  try {
+    const webcam = await WebcamModel.deleteOne({
+      _id: webcamId,
+    })
+      .lean()
+      .exec();
+    return webcam;
+  } catch (error: any) {
+    throw new createHttpError.InternalServerError("deleteAWebcamService");
+  }
 }
 
 export {
-	createNewWebcamService,
-	getQueriedWebcamsService,
-	getQueriedTotalWebcamsService,
-	getWebcamByIdService,
-	updateWebcamByIdService,
-	deleteAllWebcamsService,
-	returnAllWebcamsUploadedFileIdsService,
-	deleteAWebcamService,
+  createNewWebcamService,
+  getQueriedWebcamsService,
+  getQueriedTotalWebcamsService,
+  getWebcamByIdService,
+  updateWebcamByIdService,
+  deleteAllWebcamsService,
+  returnAllWebcamsUploadedFileIdsService,
+  deleteAWebcamService,
 };

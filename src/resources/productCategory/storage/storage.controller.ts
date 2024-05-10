@@ -1,8 +1,7 @@
 import expressAsyncController from "express-async-handler";
-import createHttpError from "http-errors";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response, NextFunction } from "express";
+import type { NextFunction, Response } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewStorageBulkRequest,
@@ -35,6 +34,7 @@ import { deleteFileUploadByIdService } from "../../fileUpload";
 
 import { deleteAProductReviewService } from "../../productReview";
 import { removeUndefinedAndNullValues } from "../../../utils";
+import createHttpError from "http-errors";
 
 // @desc   Create new storage
 // @route  POST /api/v1/product-category/storage
@@ -42,19 +42,16 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 const createNewStorageController = expressAsyncController(
   async (
     request: CreateNewStorageRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<StorageDocument>>
+    response: Response<ResourceRequestServerResponse<StorageDocument>>,
+    next: NextFunction
   ) => {
     const { storageSchema } = request.body;
 
     const storageDocument: StorageDocument = await createNewStorageService(storageSchema);
-
     if (!storageDocument) {
-      response.status(400).json({
-        message: "Could not create new storage",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Could not create new storage")
+      );
     }
 
     response.status(201).json({
@@ -71,8 +68,8 @@ const createNewStorageController = expressAsyncController(
 const createNewStorageBulkController = expressAsyncController(
   async (
     request: CreateNewStorageBulkRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<StorageDocument>>
+    response: Response<ResourceRequestServerResponse<StorageDocument>>,
+    next: NextFunction
   ) => {
     const { storageSchemas } = request.body;
 
@@ -83,10 +80,8 @@ const createNewStorageBulkController = expressAsyncController(
       })
     );
 
-    // filter out any storages that were not created
     const successfullyCreatedStorages = newStorages.filter((storage) => storage);
 
-    // check if any storages were created
     if (successfullyCreatedStorages.length === storageSchemas.length) {
       response.status(201).json({
         message: `Successfully created ${successfullyCreatedStorages.length} storages`,
@@ -119,8 +114,8 @@ const createNewStorageBulkController = expressAsyncController(
 const updateStoragesBulkController = expressAsyncController(
   async (
     request: UpdateStoragesBulkRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<StorageDocument>>
+    response: Response<ResourceRequestServerResponse<StorageDocument>>,
+    next: NextFunction
   ) => {
     const { storageFields } = request.body;
 
@@ -141,12 +136,10 @@ const updateStoragesBulkController = expressAsyncController(
       })
     );
 
-    // filter out any storages that were not updated
     const successfullyUpdatedStorages = updatedStorages.filter(
       removeUndefinedAndNullValues
     );
 
-    // check if any storages were updated
     if (successfullyUpdatedStorages.length === storageFields.length) {
       response.status(201).json({
         message: `Successfully updated ${successfullyUpdatedStorages.length} storages`,
@@ -193,12 +186,12 @@ const getQueriedStoragesController = expressAsyncController(
       });
     }
 
-    // get all storages
     const storages = await getQueriedStoragesService({
       filter: filter as FilterQuery<StorageDocument> | undefined,
       projection: projection as QueryOptions<StorageDocument>,
       options: options as QueryOptions<StorageDocument>,
     });
+
     if (storages.length === 0) {
       response.status(200).json({
         message: "No storages that match query parameters were found",
@@ -224,16 +217,14 @@ const getQueriedStoragesController = expressAsyncController(
 const getStorageByIdController = expressAsyncController(
   async (
     request: GetStorageByIdRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<StorageDocument>>
+    response: Response<ResourceRequestServerResponse<StorageDocument>>,
+    next: NextFunction
   ) => {
     const storageId = request.params.storageId;
 
-    // get storage by id
     const storage = await getStorageByIdService(storageId);
     if (!storage) {
-      response.status(404).json({ message: "Storage not found", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Storage does not exist"));
     }
 
     response.status(200).json({
@@ -249,15 +240,14 @@ const getStorageByIdController = expressAsyncController(
 const updateStorageByIdController = expressAsyncController(
   async (
     request: UpdateStorageByIdRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<StorageDocument>>
+    response: Response<ResourceRequestServerResponse<StorageDocument>>,
+    next: NextFunction
   ) => {
     const { storageId } = request.params;
     const {
       documentUpdate: { fields, updateOperator },
     } = request.body;
 
-    // update storage
     const updatedStorage = await updateStorageByIdService({
       _id: storageId,
       fields,
@@ -265,11 +255,7 @@ const updateStorageByIdController = expressAsyncController(
     });
 
     if (!updatedStorage) {
-      response.status(400).json({
-        message: "Storage could not be updated",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Could not update storage"));
     }
 
     response.status(200).json({
@@ -285,13 +271,11 @@ const updateStorageByIdController = expressAsyncController(
 const deleteAllStoragesController = expressAsyncController(
   async (
     _request: DeleteAllStoragesRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<StorageDocument>>
+    response: Response<ResourceRequestServerResponse<StorageDocument>>,
+    next: NextFunction
   ) => {
-    // grab all storages file upload ids
     const uploadedFilesIds = await returnAllStoragesUploadedFileIdsService();
 
-    // delete all file uploads associated with all storages
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -301,14 +285,13 @@ const deleteAllStoragesController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Could not delete all file uploads associated with storages"
+        )
+      );
     }
 
-    // delete all reviews associated with all storages
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -316,22 +299,18 @@ const deleteAllStoragesController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Could not delete all reviews associated with storages"
+        )
+      );
     }
 
-    // delete all storages
     const deleteStoragesResult: DeleteResult = await deleteAllStoragesService();
-
     if (deleteStoragesResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "All storages could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Could not delete all storages")
+      );
     }
 
     response.status(200).json({ message: "All storages deleted", resourceData: [] });
@@ -344,23 +323,18 @@ const deleteAllStoragesController = expressAsyncController(
 const deleteAStorageController = expressAsyncController(
   async (
     request: DeleteAStorageRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<StorageDocument>>
+    response: Response<ResourceRequestServerResponse<StorageDocument>>,
+    next: NextFunction
   ) => {
     const storageId = request.params.storageId;
 
-    // check if storage exists
     const storageExists = await getStorageByIdService(storageId);
     if (!storageExists) {
-      response.status(404).json({ message: "Storage does not exist", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Storage does not exist"));
     }
 
-    // find all file uploads associated with this storage
-    // if it is not an array, it is made to be an array
     const uploadedFilesIds = [...storageExists.uploadedFilesIds];
 
-    // delete all file uploads associated with all storages
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -370,14 +344,13 @@ const deleteAStorageController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Could not delete all file uploads associated with storages"
+        )
+      );
     }
 
-    // delete all reviews associated with all storages
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -385,22 +358,16 @@ const deleteAStorageController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Could not delete all reviews associated with storages"
+        )
+      );
     }
 
-    // delete storage by id
     const deleteStorageResult: DeleteResult = await deleteAStorageService(storageId);
-
     if (deleteStorageResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "Storage could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Could not delete storage"));
     }
 
     response.status(200).json({ message: "Storage deleted", resourceData: [] });

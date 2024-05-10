@@ -1,137 +1,127 @@
 import { Types } from "mongoose";
 import type { DeleteResult } from "mongodb";
 import {
-	QueriedResourceGetRequestServiceInput,
-	DatabaseResponse,
-	DatabaseResponseNullable,
-	UpdateDocumentByIdServiceInput,
+  QueriedResourceGetRequestServiceInput,
+  DatabaseResponse,
+  DatabaseResponseNullable,
+  UpdateDocumentByIdServiceInput,
 } from "../../../types";
 import { SpeakerDocument, SpeakerModel, SpeakerSchema } from "./speaker.model";
+import createHttpError from "http-errors";
 
 async function createNewSpeakerService(
-	speakerSchema: SpeakerSchema,
+  speakerSchema: SpeakerSchema
 ): Promise<SpeakerDocument> {
-	try {
-		const newSpeaker = await SpeakerModel.create(speakerSchema);
-		return newSpeaker;
-	} catch (error: any) {
-		throw new Error(error, { cause: "createNewSpeakerService" });
-	}
+  try {
+    const newSpeaker = await SpeakerModel.create(speakerSchema);
+    return newSpeaker;
+  } catch (error: any) {
+    throw new createHttpError.InternalServerError("createNewSpeakerService");
+  }
 }
 
 async function getQueriedSpeakersService({
-	filter = {},
-	projection = null,
-	options = {},
+  filter = {},
+  projection = null,
+  options = {},
 }: QueriedResourceGetRequestServiceInput<SpeakerDocument>): DatabaseResponse<SpeakerDocument> {
-	try {
-		const speakers = await SpeakerModel.find(filter, projection, options)
-			.lean()
-			.exec();
-		return speakers;
-	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedSpeakersService" });
-	}
+  try {
+    const speakers = await SpeakerModel.find(filter, projection, options).lean().exec();
+    return speakers;
+  } catch (error: any) {
+    throw new createHttpError.InternalServerError("getQueriedSpeakersService");
+  }
 }
 
 async function getQueriedTotalSpeakersService({
-	filter = {},
+  filter = {},
 }: QueriedResourceGetRequestServiceInput<SpeakerDocument>): Promise<number> {
-	try {
-		const totalSpeakers = await SpeakerModel.countDocuments(filter)
-			.lean()
-			.exec();
-		return totalSpeakers;
-	} catch (error: any) {
-		throw new Error(error, { cause: "getQueriedTotalSpeakersService" });
-	}
+  try {
+    const totalSpeakers = await SpeakerModel.countDocuments(filter).lean().exec();
+    return totalSpeakers;
+  } catch (error: any) {
+    throw new createHttpError.InternalServerError("getQueriedTotalSpeakersService");
+  }
 }
 
 async function getSpeakerByIdService(
-	speakerId: Types.ObjectId | string,
+  speakerId: Types.ObjectId | string
 ): DatabaseResponseNullable<SpeakerDocument> {
-	try {
-		const speaker = await SpeakerModel.findById(speakerId)
+  try {
+    const speaker = await SpeakerModel.findById(speakerId)
 
-			.lean()
-			.exec();
-		return speaker;
-	} catch (error: any) {
-		throw new Error(error, { cause: "getSpeakerByIdService" });
-	}
+      .lean()
+      .exec();
+    return speaker;
+  } catch (error: any) {
+    throw new createHttpError.InternalServerError("getSpeakerByIdService");
+  }
 }
 
 async function updateSpeakerByIdService({
-	_id,
-	fields,
-	updateOperator,
+  _id,
+  fields,
+  updateOperator,
 }: UpdateDocumentByIdServiceInput<SpeakerDocument>): DatabaseResponseNullable<SpeakerDocument> {
-	const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
-	const updateObject = JSON.parse(updateString);
+  const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
+  const updateObject = JSON.parse(updateString);
 
-	try {
-		const speaker = await SpeakerModel.findByIdAndUpdate(_id, updateObject, {
-			new: true,
-		})
+  try {
+    const speaker = await SpeakerModel.findByIdAndUpdate(_id, updateObject, {
+      new: true,
+    })
 
-			.lean()
-			.exec();
-		return speaker;
-	} catch (error: any) {
-		throw new Error(error, { cause: "updateSpeakerByIdService" });
-	}
+      .lean()
+      .exec();
+    return speaker;
+  } catch (error: any) {
+    throw new createHttpError.InternalServerError("updateSpeakerByIdService");
+  }
 }
 
 async function deleteAllSpeakersService(): Promise<DeleteResult> {
-	try {
-		const speakers = await SpeakerModel.deleteMany({}).lean().exec();
-		return speakers;
-	} catch (error: any) {
-		throw new Error(error, { cause: "deleteAllSpeakersService" });
-	}
+  try {
+    const speakers = await SpeakerModel.deleteMany({}).lean().exec();
+    return speakers;
+  } catch (error: any) {
+    throw new createHttpError.InternalServerError("deleteAllSpeakersService");
+  }
 }
 
-async function returnAllSpeakersUploadedFileIdsService(): Promise<
-	Types.ObjectId[]
-> {
-	try {
-		const speakers = await SpeakerModel.find({})
-			.select("uploadedFilesIds")
-			.lean()
-			.exec();
-		const uploadedFileIds = speakers.flatMap(
-			(speaker) => speaker.uploadedFilesIds,
-		);
-		return uploadedFileIds;
-	} catch (error: any) {
-		throw new Error(error, {
-			cause: "returnAllSpeakersUploadedFileIdsService",
-		});
-	}
+async function returnAllSpeakersUploadedFileIdsService(): Promise<Types.ObjectId[]> {
+  try {
+    const speakers = await SpeakerModel.find({}).select("uploadedFilesIds").lean().exec();
+    const uploadedFileIds = speakers.flatMap((speaker) => speaker.uploadedFilesIds);
+    return uploadedFileIds;
+  } catch (error: any) {
+    throw new Error(error, {
+      cause: "returnAllSpeakersUploadedFileIdsService",
+    });
+  }
 }
 
 async function deleteASpeakerService(
-	speakerId: Types.ObjectId | string,
+  speakerId: Types.ObjectId | string
 ): Promise<DeleteResult> {
-	try {
-		const speaker = await SpeakerModel.deleteOne({
-			_id: speakerId,
-		})
-			.lean()
-			.exec();
-		return speaker;
-	} catch (error: any) {
-		throw new Error(error, { cause: "deleteASpeakerService" });
-	}
+  try {
+    const speaker = await SpeakerModel.deleteOne({
+      _id: speakerId,
+    })
+      .lean()
+      .exec();
+    return speaker;
+  } catch (error: any) {
+    throw new createHttpError.InternalServerError("deleteASpeakerService");
+  }
 }
 
 export {
-	createNewSpeakerService,
-	getQueriedSpeakersService,
-	getQueriedTotalSpeakersService,
-	getSpeakerByIdService,
-	updateSpeakerByIdService,
-	deleteAllSpeakersService,
-	returnAllSpeakersUploadedFileIdsService,
-	deleteASpeakerService,
+  createNewSpeakerService,
+  getQueriedSpeakersService,
+  getQueriedTotalSpeakersService,
+  getSpeakerByIdService,
+  updateSpeakerByIdService,
+  deleteAllSpeakersService,
+  returnAllSpeakersUploadedFileIdsService,
+  deleteASpeakerService,
 };

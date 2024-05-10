@@ -1,8 +1,7 @@
 import expressAsyncController from "express-async-handler";
-import createHttpError from "http-errors";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response, NextFunction } from "express";
+import type { NextFunction, Response } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewMicrophoneBulkRequest,
@@ -35,6 +34,7 @@ import { deleteFileUploadByIdService } from "../../fileUpload";
 
 import { deleteAProductReviewService } from "../../productReview";
 import { removeUndefinedAndNullValues } from "../../../utils";
+import createHttpError from "http-errors";
 
 // @desc   Create new microphone
 // @route  POST /api/v1/product-category/microphone
@@ -42,21 +42,18 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 const createNewMicrophoneController = expressAsyncController(
   async (
     request: CreateNewMicrophoneRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<MicrophoneDocument>>
+    response: Response<ResourceRequestServerResponse<MicrophoneDocument>>,
+    next: NextFunction
   ) => {
     const { microphoneSchema } = request.body;
 
     const microphoneDocument: MicrophoneDocument = await createNewMicrophoneService(
       microphoneSchema
     );
-
     if (!microphoneDocument) {
-      response.status(400).json({
-        message: "Could not create new microphone",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Microphone could not be created")
+      );
     }
 
     response.status(201).json({
@@ -73,8 +70,8 @@ const createNewMicrophoneController = expressAsyncController(
 const createNewMicrophoneBulkController = expressAsyncController(
   async (
     request: CreateNewMicrophoneBulkRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<MicrophoneDocument>>
+    response: Response<ResourceRequestServerResponse<MicrophoneDocument>>,
+    next: NextFunction
   ) => {
     const { microphoneSchemas } = request.body;
 
@@ -85,12 +82,10 @@ const createNewMicrophoneBulkController = expressAsyncController(
       })
     );
 
-    // filter out any microphones that were not created
     const successfullyCreatedMicrophones = newMicrophones.filter(
       (microphone) => microphone
     );
 
-    // check if any microphones were created
     if (successfullyCreatedMicrophones.length === microphoneSchemas.length) {
       response.status(201).json({
         message: `Successfully created ${successfullyCreatedMicrophones.length} microphones`,
@@ -123,8 +118,8 @@ const createNewMicrophoneBulkController = expressAsyncController(
 const updateMicrophonesBulkController = expressAsyncController(
   async (
     request: UpdateMicrophonesBulkRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<MicrophoneDocument>>
+    response: Response<ResourceRequestServerResponse<MicrophoneDocument>>,
+    next: NextFunction
   ) => {
     const { microphoneFields } = request.body;
 
@@ -145,12 +140,10 @@ const updateMicrophonesBulkController = expressAsyncController(
       })
     );
 
-    // filter out any microphones that were not updated
     const successfullyUpdatedMicrophones = updatedMicrophones.filter(
       removeUndefinedAndNullValues
     );
 
-    // check if any microphones were updated
     if (successfullyUpdatedMicrophones.length === microphoneFields.length) {
       response.status(201).json({
         message: `Successfully updated ${successfullyUpdatedMicrophones.length} microphones`,
@@ -197,12 +190,12 @@ const getQueriedMicrophonesController = expressAsyncController(
       });
     }
 
-    // get all microphones
     const microphones = await getQueriedMicrophonesService({
       filter: filter as FilterQuery<MicrophoneDocument> | undefined,
       projection: projection as QueryOptions<MicrophoneDocument>,
       options: options as QueryOptions<MicrophoneDocument>,
     });
+
     if (microphones.length === 0) {
       response.status(200).json({
         message: "No microphones that match query parameters were found",
@@ -228,8 +221,8 @@ const getQueriedMicrophonesController = expressAsyncController(
 const getMicrophoneByIdController = expressAsyncController(
   async (
     request: GetMicrophoneByIdRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<MicrophoneDocument>>
+    response: Response<ResourceRequestServerResponse<MicrophoneDocument>>,
+    next: NextFunction
   ) => {
     const microphoneId = request.params.microphoneId;
 
@@ -253,15 +246,14 @@ const getMicrophoneByIdController = expressAsyncController(
 const updateMicrophoneByIdController = expressAsyncController(
   async (
     request: UpdateMicrophoneByIdRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<MicrophoneDocument>>
+    response: Response<ResourceRequestServerResponse<MicrophoneDocument>>,
+    next: NextFunction
   ) => {
     const { microphoneId } = request.params;
     const {
       documentUpdate: { fields, updateOperator },
     } = request.body;
 
-    // update microphone
     const updatedMicrophone = await updateMicrophoneByIdService({
       _id: microphoneId,
       fields,
@@ -269,11 +261,9 @@ const updateMicrophoneByIdController = expressAsyncController(
     });
 
     if (!updatedMicrophone) {
-      response.status(400).json({
-        message: "Microphone could not be updated",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Microphone could not be updated")
+      );
     }
 
     response.status(200).json({
@@ -289,13 +279,11 @@ const updateMicrophoneByIdController = expressAsyncController(
 const deleteAllMicrophonesController = expressAsyncController(
   async (
     _request: DeleteAllMicrophonesRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<MicrophoneDocument>>
+    response: Response<ResourceRequestServerResponse<MicrophoneDocument>>,
+    next: NextFunction
   ) => {
-    // grab all microphones file upload ids
     const uploadedFilesIds = await returnAllMicrophonesUploadedFileIdsService();
 
-    // delete all file uploads associated with all microphones
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -305,14 +293,11 @@ const deleteAllMicrophonesController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Some file uploads could not be deleted")
+      );
     }
 
-    // delete all reviews associated with all microphones
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -320,22 +305,16 @@ const deleteAllMicrophonesController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Some reviews could not be deleted")
+      );
     }
 
-    // delete all microphones
     const deleteMicrophonesResult: DeleteResult = await deleteAllMicrophonesService();
-
     if (deleteMicrophonesResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "All microphones could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Microphones could not be deleted")
+      );
     }
 
     response.status(200).json({ message: "All microphones deleted", resourceData: [] });
@@ -348,12 +327,11 @@ const deleteAllMicrophonesController = expressAsyncController(
 const deleteAMicrophoneController = expressAsyncController(
   async (
     request: DeleteAMicrophoneRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<MicrophoneDocument>>
+    response: Response<ResourceRequestServerResponse<MicrophoneDocument>>,
+    next: NextFunction
   ) => {
     const microphoneId = request.params.microphoneId;
 
-    // check if microphone exists
     const microphoneExists = await getMicrophoneByIdService(microphoneId);
     if (!microphoneExists) {
       response
@@ -362,11 +340,8 @@ const deleteAMicrophoneController = expressAsyncController(
       return;
     }
 
-    // find all file uploads associated with this microphone
-    // if it is not an array, it is made to be an array
     const uploadedFilesIds = [...microphoneExists.uploadedFilesIds];
 
-    // delete all file uploads associated with all microphones
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -376,14 +351,11 @@ const deleteAMicrophoneController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Some file uploads could not be deleted")
+      );
     }
 
-    // delete all reviews associated with all microphones
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -391,24 +363,18 @@ const deleteAMicrophoneController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Some reviews could not be deleted")
+      );
     }
 
-    // delete microphone by id
     const deleteMicrophoneResult: DeleteResult = await deleteAMicrophoneService(
       microphoneId
     );
-
     if (deleteMicrophoneResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "Microphone could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Microphone could not be deleted")
+      );
     }
 
     response.status(200).json({ message: "Microphone deleted", resourceData: [] });

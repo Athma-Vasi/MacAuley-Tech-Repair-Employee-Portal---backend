@@ -1,8 +1,7 @@
 import expressAsyncController from "express-async-handler";
-import createHttpError from "http-errors";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response, NextFunction } from "express";
+import type { NextFunction, Response } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewWebcamBulkRequest,
@@ -35,6 +34,7 @@ import { deleteFileUploadByIdService } from "../../fileUpload";
 
 import { deleteAProductReviewService } from "../../productReview";
 import { removeUndefinedAndNullValues } from "../../../utils";
+import createHttpError from "http-errors";
 
 // @desc   Create new webcam
 // @route  POST /api/v1/product-category/webcam
@@ -42,19 +42,14 @@ import { removeUndefinedAndNullValues } from "../../../utils";
 const createNewWebcamController = expressAsyncController(
   async (
     request: CreateNewWebcamRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<WebcamDocument>>
+    response: Response<ResourceRequestServerResponse<WebcamDocument>>,
+    next: NextFunction
   ) => {
     const { webcamSchema } = request.body;
 
     const webcamDocument: WebcamDocument = await createNewWebcamService(webcamSchema);
-
     if (!webcamDocument) {
-      response.status(400).json({
-        message: "Could not create new webcam",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Webcam could not be created"));
     }
 
     response.status(201).json({
@@ -71,8 +66,8 @@ const createNewWebcamController = expressAsyncController(
 const createNewWebcamBulkController = expressAsyncController(
   async (
     request: CreateNewWebcamBulkRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<WebcamDocument>>
+    response: Response<ResourceRequestServerResponse<WebcamDocument>>,
+    next: NextFunction
   ) => {
     const { webcamSchemas } = request.body;
 
@@ -83,10 +78,8 @@ const createNewWebcamBulkController = expressAsyncController(
       })
     );
 
-    // filter out any webcams that were not created
     const successfullyCreatedWebcams = newWebcams.filter((webcam) => webcam);
 
-    // check if any webcams were created
     if (successfullyCreatedWebcams.length === webcamSchemas.length) {
       response.status(201).json({
         message: `Successfully created ${successfullyCreatedWebcams.length} webcams`,
@@ -119,8 +112,8 @@ const createNewWebcamBulkController = expressAsyncController(
 const updateWebcamsBulkController = expressAsyncController(
   async (
     request: UpdateWebcamsBulkRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<WebcamDocument>>
+    response: Response<ResourceRequestServerResponse<WebcamDocument>>,
+    next: NextFunction
   ) => {
     const { webcamFields } = request.body;
 
@@ -141,12 +134,10 @@ const updateWebcamsBulkController = expressAsyncController(
       })
     );
 
-    // filter out any webcams that were not updated
     const successfullyUpdatedWebcams = updatedWebcams.filter(
       removeUndefinedAndNullValues
     );
 
-    // check if any webcams were updated
     if (successfullyUpdatedWebcams.length === webcamFields.length) {
       response.status(201).json({
         message: `Successfully updated ${successfullyUpdatedWebcams.length} webcams`,
@@ -193,12 +184,12 @@ const getQueriedWebcamsController = expressAsyncController(
       });
     }
 
-    // get all webcams
     const webcams = await getQueriedWebcamsService({
       filter: filter as FilterQuery<WebcamDocument> | undefined,
       projection: projection as QueryOptions<WebcamDocument>,
       options: options as QueryOptions<WebcamDocument>,
     });
+
     if (webcams.length === 0) {
       response.status(200).json({
         message: "No webcams that match query parameters were found",
@@ -224,16 +215,14 @@ const getQueriedWebcamsController = expressAsyncController(
 const getWebcamByIdController = expressAsyncController(
   async (
     request: GetWebcamByIdRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<WebcamDocument>>
+    response: Response<ResourceRequestServerResponse<WebcamDocument>>,
+    next: NextFunction
   ) => {
     const webcamId = request.params.webcamId;
 
-    // get webcam by id
     const webcam = await getWebcamByIdService(webcamId);
     if (!webcam) {
-      response.status(404).json({ message: "Webcam not found", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Webcam does not exist"));
     }
 
     response.status(200).json({
@@ -249,15 +238,14 @@ const getWebcamByIdController = expressAsyncController(
 const updateWebcamByIdController = expressAsyncController(
   async (
     request: UpdateWebcamByIdRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<WebcamDocument>>
+    response: Response<ResourceRequestServerResponse<WebcamDocument>>,
+    next: NextFunction
   ) => {
     const { webcamId } = request.params;
     const {
       documentUpdate: { fields, updateOperator },
     } = request.body;
 
-    // update webcam
     const updatedWebcam = await updateWebcamByIdService({
       _id: webcamId,
       fields,
@@ -265,11 +253,7 @@ const updateWebcamByIdController = expressAsyncController(
     });
 
     if (!updatedWebcam) {
-      response.status(400).json({
-        message: "Webcam could not be updated",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Webcam could not be updated"));
     }
 
     response.status(200).json({
@@ -285,13 +269,11 @@ const updateWebcamByIdController = expressAsyncController(
 const deleteAllWebcamsController = expressAsyncController(
   async (
     _request: DeleteAllWebcamsRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<WebcamDocument>>
+    response: Response<ResourceRequestServerResponse<WebcamDocument>>,
+    next: NextFunction
   ) => {
-    // grab all webcams file upload ids
     const uploadedFilesIds = await returnAllWebcamsUploadedFileIdsService();
 
-    // delete all file uploads associated with all webcams
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -301,14 +283,11 @@ const deleteAllWebcamsController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Could not delete all file uploads")
+      );
     }
 
-    // delete all reviews associated with all webcams
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -316,22 +295,16 @@ const deleteAllWebcamsController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Could not delete all reviews")
+      );
     }
 
-    // delete all webcams
     const deleteWebcamsResult: DeleteResult = await deleteAllWebcamsService();
-
     if (deleteWebcamsResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "All webcams could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Could not delete all webcams")
+      );
     }
 
     response.status(200).json({ message: "All webcams deleted", resourceData: [] });
@@ -344,23 +317,19 @@ const deleteAllWebcamsController = expressAsyncController(
 const deleteAWebcamController = expressAsyncController(
   async (
     request: DeleteAWebcamRequest,
-    next: NextFunction,
-    response: Response<ResourceRequestServerResponse<WebcamDocument>>
+    response: Response<ResourceRequestServerResponse<WebcamDocument>>,
+    next: NextFunction
   ) => {
     const webcamId = request.params.webcamId;
 
-    // check if webcam exists
     const webcamExists = await getWebcamByIdService(webcamId);
     if (!webcamExists) {
       response.status(404).json({ message: "Webcam does not exist", resourceData: [] });
       return;
     }
 
-    // find all file uploads associated with this webcam
-    // if it is not an array, it is made to be an array
     const uploadedFilesIds = [...webcamExists.uploadedFilesIds];
 
-    // delete all file uploads associated with all webcams
     const deletedFileUploads = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteFileUploadByIdService(fileUploadId)
@@ -370,14 +339,11 @@ const deleteAWebcamController = expressAsyncController(
     if (
       deletedFileUploads.some((deletedFileUpload) => deletedFileUpload.deletedCount === 0)
     ) {
-      response.status(400).json({
-        message: "Some File uploads could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Could not delete all file uploads")
+      );
     }
 
-    // delete all reviews associated with all webcams
     const deletedReviews = await Promise.all(
       uploadedFilesIds.map(
         async (fileUploadId) => await deleteAProductReviewService(fileUploadId)
@@ -385,22 +351,14 @@ const deleteAWebcamController = expressAsyncController(
     );
 
     if (deletedReviews.some((deletedReview) => deletedReview.deletedCount === 0)) {
-      response.status(400).json({
-        message: "Some reviews could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Could not delete all reviews")
+      );
     }
 
-    // delete webcam by id
     const deleteWebcamResult: DeleteResult = await deleteAWebcamService(webcamId);
-
     if (deleteWebcamResult.deletedCount === 0) {
-      response.status(400).json({
-        message: "Webcam could not be deleted. Please try again.",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Could not delete webcam"));
     }
 
     response.status(200).json({ message: "Webcam deleted", resourceData: [] });
