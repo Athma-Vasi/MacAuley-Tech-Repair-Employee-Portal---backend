@@ -6,19 +6,24 @@ import createHttpError from "http-errors";
 
 // creates a closure that takes in an array of allowed file extensions and returns a middleware function
 const fileExtensionLimiterMiddleware = (allowedExtensionsArray: string[]) => {
-  return (request: Request, response: Response, next: NextFunction) => {
+  return (request: Request, _response: Response, next: NextFunction) => {
     // this middleware only runs if filesPayloadExistsMiddleware and fileSizeLimiterMiddleware has passed - files cannot be undefined
     const files = request.files as unknown as FileUploadObject | FileUploadObject[];
 
-    const filesWithDisallowedExtensions: FileUploadObject[] = [];
+    // just a lil stitious...
+    if (!files || (Array.isArray(files) && files.length === 0)) {
+      return next(new createHttpError.BadRequest("No files found in request object"));
+    }
 
-    Object.entries(files).forEach((file: [string, FileUploadObject]) => {
-      const [_, fileObj] = file;
-      const fileExtension = path.extname(fileObj.name);
+    const filesWithDisallowedExtensions = Object.entries(files).reduce<
+      FileUploadObject[]
+    >((acc, [_, fileObject]) => {
+      const fileExtension = path.extname(fileObject.name);
       if (!allowedExtensionsArray.includes(fileExtension)) {
-        filesWithDisallowedExtensions.push(fileObj);
+        acc.push(fileObject);
       }
-    });
+      return acc;
+    }, []);
 
     console.log("\n");
     console.group("fileExtensionLimiterMiddleware");

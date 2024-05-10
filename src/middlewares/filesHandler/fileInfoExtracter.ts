@@ -1,29 +1,40 @@
-import type { NextFunction, Request, Response } from 'express';
-import { FileExtension } from '../../resources/fileUpload/fileUpload.model';
-import { FileUploadObject } from '../../types';
+import type { NextFunction, Request, Response } from "express";
+import { FileUploadObject } from "../../types";
+import createHttpError from "http-errors";
 
 /**
  * This middleware extracts the file information from the request object and adds it to the request body.
  */
-function fileInfoExtracterMiddleware(request: Request, response: Response, next: NextFunction) {
+function fileInfoExtracterMiddleware(
+  request: Request,
+  _response: Response,
+  next: NextFunction
+) {
   // this middleware only runs if filesPayloadExistsMiddleware, fileSizeLimiterMiddleware, and fileExtensionCheckerMiddleware have passed - files cannot be undefined
   const files = request.files as unknown as FileUploadObject | FileUploadObject[];
 
-  // create a new property on the request body called fileUploads and assign it an empty array
-  Object.defineProperty(request.body, 'fileUploads', {
-    value: [],
+  // just a lil stitious...
+  if (!files || (Array.isArray(files) && files.length === 0)) {
+    return next(new createHttpError.BadRequest("No files found in request object"));
+  }
+
+  const PROPERTY_DESCRIPTOR: PropertyDescriptor = {
     writable: true,
     enumerable: true,
     configurable: true,
+  };
+
+  Object.defineProperty(request.body, "fileUploads", {
+    value: [],
+    ...PROPERTY_DESCRIPTOR,
   });
 
-  // for each file, extract the file information and push it to the fileUploads array
   Object.entries(files).forEach((file: [string, FileUploadObject]) => {
     const [_, { data, name, mimetype, size, encoding }] = file;
     const fileInfoObject = {
       uploadedFile: data,
       fileName: name,
-      fileExtension: mimetype.split('/')[1],
+      fileExtension: mimetype.split("/")[1],
       fileSize: size,
       fileMimeType: mimetype,
       fileEncoding: encoding,
@@ -32,22 +43,18 @@ function fileInfoExtracterMiddleware(request: Request, response: Response, next:
     request.body.fileUploads.push(fileInfoObject);
   });
 
-  // delete the files property from the request object as it is no longer needed
-  Object.defineProperty(request, 'files', {
-    value: undefined,
-    writable: true,
-    enumerable: true,
-    configurable: true,
+  Object.defineProperty(request, "files", {
+    value: void 0,
+    ...PROPERTY_DESCRIPTOR,
   });
 
-  console.log('\n');
-  console.group('fileInfoExtracterMiddleware');
+  console.log("\n");
+  console.group("fileInfoExtracterMiddleware");
   console.log({ files });
   console.log({ fileUploads: request.body.fileUploads });
   console.groupEnd();
 
-  next();
-  return;
+  return next();
 }
 
 export { fileInfoExtracterMiddleware };
