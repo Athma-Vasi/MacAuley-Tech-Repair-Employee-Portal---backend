@@ -1,6 +1,7 @@
 import { Schema, Types, model } from "mongoose";
 
 type ErrorLogSchema = {
+  expireAt: Date;
   userId: string;
   username: string;
   sessionId: string;
@@ -20,6 +21,12 @@ type ErrorLogDocument = ErrorLogSchema & {
 
 const errorLogSchema = new Schema<ErrorLogSchema>(
   {
+    expireAt: {
+      type: Date,
+      required: false,
+      default: Date.now,
+      index: { expires: "30d" }, // document will expire in 30 days
+    },
     userId: {
       type: String,
       required: [true, "User ID is required"],

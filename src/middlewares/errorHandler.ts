@@ -18,6 +18,7 @@ function errorHandler(
   Promise.resolve()
     .then(async () => {
       const errorLogSchema: ErrorLogSchema = {
+        expireAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
         userId,
         username,
         sessionId,
