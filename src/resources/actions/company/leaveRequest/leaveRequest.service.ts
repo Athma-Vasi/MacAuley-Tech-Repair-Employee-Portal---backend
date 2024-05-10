@@ -10,6 +10,7 @@ import {
   QueriedTotalResourceGetRequestServiceInput,
   UpdateDocumentByIdServiceInput,
 } from "../../../../types";
+import createHttpError from "http-errors";
 
 async function getLeaveRequestByIdService(
   leaveRequestId: Types.ObjectId | string
@@ -18,7 +19,7 @@ async function getLeaveRequestByIdService(
     const leaveRequest = await LeaveRequestModel.findById(leaveRequestId).lean().exec();
     return leaveRequest;
   } catch (error: any) {
-    throw new Error(error, { cause: "getLeaveRequestByIdService" });
+    throw new createHttpError.InternalServerError("Error in getLeaveRequestByIdService");
   }
 }
 
@@ -29,7 +30,9 @@ async function createNewLeaveRequestService(
     const leaveRequest = await LeaveRequestModel.create(leaveRequestSchema);
     return leaveRequest;
   } catch (error: any) {
-    throw new Error(error, { cause: "createNewLeaveRequestService" });
+    throw new createHttpError.InternalServerError(
+      "Error in createNewLeaveRequestService"
+    );
   }
 }
 
@@ -44,7 +47,9 @@ async function getQueriedLeaveRequestsService({
       .exec();
     return leaveRequest;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedLeaveRequestsService" });
+    throw new createHttpError.InternalServerError(
+      "Error in getQueriedLeaveRequestsService"
+    );
   }
 }
 
@@ -57,7 +62,9 @@ async function getQueriedTotalLeaveRequestsService({
       .exec();
     return totalLeaveRequests;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedTotalLeaveRequestsService" });
+    throw new createHttpError.InternalServerError(
+      "Error in getQueriedTotalLeaveRequestsService"
+    );
   }
 }
 
@@ -72,7 +79,9 @@ async function getQueriedLeaveRequestsByUserService({
       .exec();
     return leaveRequests;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedLeaveRequestsByUserService" });
+    throw new createHttpError.InternalServerError(
+      "Error in getQueriedLeaveRequestsByUserService"
+    );
   }
 }
 
@@ -92,7 +101,9 @@ async function updateLeaveRequestByIdService({
       .exec();
     return leaveRequest;
   } catch (error: any) {
-    throw new Error(error, { cause: "updateLeaveRequestStatusByIdService" });
+    throw new createHttpError.InternalServerError(
+      "Error in updateLeaveRequestByIdService"
+    );
   }
 }
 
@@ -105,7 +116,9 @@ async function deleteLeaveRequestByIdService(
       .exec();
     return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteLeaveRequestByIdService" });
+    throw new createHttpError.InternalServerError(
+      "Error in deleteLeaveRequestByIdService"
+    );
   }
 }
 
@@ -114,7 +127,9 @@ async function deleteAllLeaveRequestsService(): Promise<DeleteResult> {
     const deletedResult = await LeaveRequestModel.deleteMany({}).lean().exec();
     return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteAllLeaveRequestsService" });
+    throw new createHttpError.InternalServerError(
+      "Error in deleteAllLeaveRequestsService"
+    );
   }
 }
 
