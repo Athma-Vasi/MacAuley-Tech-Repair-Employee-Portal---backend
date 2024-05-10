@@ -38,12 +38,9 @@ function errorHandler(
       return errorLogDocument;
     })
     .then((document) => {
-      // response.status(error.status ?? 500);
-      // response.json({
-      //   message: error.message ?? "Internal Server Error",
-      // });
       response.status(document.status ?? 500).json({
         message: document.message ?? "Internal Server Error",
+        resourceData: document ? [document] : [],
       });
       return;
     });

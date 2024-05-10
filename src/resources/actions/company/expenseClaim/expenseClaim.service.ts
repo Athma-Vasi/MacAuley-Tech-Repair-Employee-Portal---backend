@@ -10,6 +10,7 @@ import {
   QueriedTotalResourceGetRequestServiceInput,
   UpdateDocumentByIdServiceInput,
 } from "../../../../types";
+import createHttpError from "http-errors";
 
 async function getExpenseClaimByIdService(
   expenseClaimId: Types.ObjectId | string
@@ -18,7 +19,7 @@ async function getExpenseClaimByIdService(
     const expenseClaim = await ExpenseClaimModel.findById(expenseClaimId).lean().exec();
     return expenseClaim;
   } catch (error: any) {
-    throw new Error(error, { cause: "getExpenseClaimByIdService" });
+    throw new createHttpError.InternalServerError("Error in getExpenseClaimByIdService");
   }
 }
 
@@ -29,7 +30,9 @@ async function createNewExpenseClaimService(
     const expenseClaim = await ExpenseClaimModel.create(expenseClaimSchema);
     return expenseClaim;
   } catch (error: any) {
-    throw new Error(error, { cause: "createNewExpenseClaimService" });
+    throw new createHttpError.InternalServerError(
+      "Error in createNewExpenseClaimService"
+    );
   }
 }
 
@@ -44,7 +47,9 @@ async function getQueriedExpenseClaimsService({
       .exec();
     return expenseClaim;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedExpenseClaimsService" });
+    throw new createHttpError.InternalServerError(
+      "Error in getQueriedExpenseClaimsService"
+    );
   }
 }
 
@@ -57,7 +62,9 @@ async function getQueriedTotalExpenseClaimsService({
       .exec();
     return totalExpenseClaims;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedTotalExpenseClaimsService" });
+    throw new createHttpError.InternalServerError(
+      "Error in getQueriedTotalExpenseClaimsService"
+    );
   }
 }
 
@@ -72,7 +79,9 @@ async function getQueriedExpenseClaimsByUserService({
       .exec();
     return expenseClaims;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedExpenseClaimsByUserService" });
+    throw new createHttpError.InternalServerError(
+      "Error in getQueriedExpenseClaimsByUserService"
+    );
   }
 }
 
@@ -92,7 +101,9 @@ async function updateExpenseClaimByIdService({
       .exec();
     return expenseClaim;
   } catch (error: any) {
-    throw new Error(error, { cause: "updateExpenseClaimStatusByIdService" });
+    throw new createHttpError.InternalServerError(
+      "Error in updateExpenseClaimByIdService"
+    );
   }
 }
 
@@ -105,7 +116,9 @@ async function deleteExpenseClaimByIdService(
       .exec();
     return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteExpenseClaimByIdService" });
+    throw new createHttpError.InternalServerError(
+      "Error in deleteExpenseClaimByIdService"
+    );
   }
 }
 
@@ -114,7 +127,9 @@ async function deleteAllExpenseClaimsService(): Promise<DeleteResult> {
     const deletedResult = await ExpenseClaimModel.deleteMany({}).lean().exec();
     return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteAllExpenseClaimsService" });
+    throw new createHttpError.InternalServerError(
+      "Error in deleteAllExpenseClaimsService"
+    );
   }
 }
 
@@ -129,7 +144,9 @@ async function returnAllExpenseClaimsUploadedFileIdsService(): Promise<Types.Obj
     );
     return uploadedFileIds;
   } catch (error: any) {
-    throw new Error(error, { cause: "returnAllExpenseClaimsUploadedFileIdsService" });
+    throw new createHttpError.InternalServerError(
+      "Error in returnAllExpenseClaimsUploadedFileIdsService"
+    );
   }
 }
 
