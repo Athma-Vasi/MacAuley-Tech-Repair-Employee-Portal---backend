@@ -10,6 +10,7 @@ import {
   QueriedTotalResourceGetRequestServiceInput,
   UpdateDocumentByIdServiceInput,
 } from "../../../../types";
+import createHttpError from "http-errors";
 
 async function getEndorsementByIdService(
   endorsementId: Types.ObjectId | string
@@ -18,7 +19,7 @@ async function getEndorsementByIdService(
     const endorsement = await EndorsementModel.findById(endorsementId).lean().exec();
     return endorsement;
   } catch (error: any) {
-    throw new Error(error, { cause: "getEndorsementByIdService" });
+    throw new createHttpError.InternalServerError("getEndorsementByIdService");
   }
 }
 
@@ -29,7 +30,7 @@ async function createNewEndorsementService(
     const endorsement = await EndorsementModel.create(endorsementSchema);
     return endorsement;
   } catch (error: any) {
-    throw new Error(error, { cause: "createNewEndorsementService" });
+    throw new createHttpError.InternalServerError("createNewEndorsementService");
   }
 }
 
@@ -44,7 +45,7 @@ async function getQueriedEndorsementsService({
       .exec();
     return endorsement;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedEndorsementsService" });
+    throw new createHttpError.InternalServerError("getQueriedEndorsementsService");
   }
 }
 
@@ -55,7 +56,7 @@ async function getQueriedTotalEndorsementsService({
     const totalEndorsements = await EndorsementModel.countDocuments(filter).lean().exec();
     return totalEndorsements;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedTotalEndorsementsService" });
+    throw new createHttpError.InternalServerError("getQueriedTotalEndorsementsService");
   }
 }
 
@@ -70,7 +71,7 @@ async function getQueriedEndorsementsByUserService({
       .exec();
     return endorsements;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedEndorsementsByUserService" });
+    throw new createHttpError.InternalServerError("getQueriedEndorsementsByUserService");
   }
 }
 
@@ -90,7 +91,7 @@ async function updateEndorsementByIdService({
       .exec();
     return endorsement;
   } catch (error: any) {
-    throw new Error(error, { cause: "updateEndorsementStatusByIdService" });
+    throw new createHttpError.InternalServerError("updateEndorsementStatusByIdService");
   }
 }
 
@@ -105,7 +106,7 @@ async function deleteEndorsementByIdService(
       .exec();
     return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteEndorsementByIdService" });
+    throw new createHttpError.InternalServerError("deleteEndorsementByIdService");
   }
 }
 
@@ -114,7 +115,7 @@ async function deleteAllEndorsementsService(): Promise<DeleteResult> {
     const deletedResult = await EndorsementModel.deleteMany({}).lean().exec();
     return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteAllEndorsementsService" });
+    throw new createHttpError.InternalServerError("deleteAllEndorsementsService");
   }
 }
 

@@ -1,7 +1,7 @@
 import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewEndorsementRequest,
@@ -33,6 +33,8 @@ import {
 } from "./endorsement.service";
 import { removeUndefinedAndNullValues } from "../../../../utils";
 import { getUserByIdService } from "../../../user";
+import { create } from "domain";
+import createHttpError from "http-errors";
 
 // @desc   Create a new endorsement
 // @route  POST api/v1/actions/general/endorsement
@@ -40,18 +42,14 @@ import { getUserByIdService } from "../../../user";
 const createNewEndorsementController = expressAsyncController(
   async (
     request: CreateNewEndorsementRequest,
-    response: Response<ResourceRequestServerResponse<EndorsementDocument>>
+    response: Response<ResourceRequestServerResponse<EndorsementDocument>>,
+    next: NextFunction
   ) => {
     const { endorsementSchema } = request.body;
 
     const endorsementDocument = await createNewEndorsementService(endorsementSchema);
-
     if (!endorsementDocument) {
-      response.status(400).json({
-        message: "New endorsement could not be created",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Endorsement creation failed"));
     }
 
     response.status(201).json({
@@ -81,7 +79,6 @@ const getQueriedEndorsementsController = expressAsyncController(
       });
     }
 
-    // get all endorsements
     const endorsement = await getQueriedEndorsementsService({
       filter: filter as FilterQuery<EndorsementDocument> | undefined,
       projection: projection as QueryOptions<EndorsementDocument>,
@@ -115,7 +112,6 @@ const getEndorsementsByUserController = expressAsyncController(
     request: GetQueriedEndorsementsByUserRequest,
     response: Response<GetQueriedResourceRequestServerResponse<EndorsementDocument>>
   ) => {
-    // anyone can view their own endorsement requests
     const {
       userInfo: { userId },
     } = request.body;
@@ -125,7 +121,6 @@ const getEndorsementsByUserController = expressAsyncController(
     const { filter, projection, options } =
       request.query as QueryObjectParsedWithDefaults;
 
-    // assign userId to filter
     const filterWithUserId = { ...filter, userId };
 
     // only perform a countDocuments scan if a new query is being made
@@ -135,7 +130,6 @@ const getEndorsementsByUserController = expressAsyncController(
       });
     }
 
-    // get all endorsement requests by user
     const endorsements = await getQueriedEndorsementsByUserService({
       filter: filterWithUserId as FilterQuery<EndorsementDocument> | undefined,
       projection: projection as QueryOptions<EndorsementDocument>,
@@ -167,7 +161,8 @@ const getEndorsementsByUserController = expressAsyncController(
 const updateEndorsementByIdController = expressAsyncController(
   async (
     request: UpdateEndorsementByIdRequest,
-    response: Response<ResourceRequestServerResponse<EndorsementDocument>>
+    response: Response<ResourceRequestServerResponse<EndorsementDocument>>,
+    next: NextFunction
   ) => {
     const { endorsementId } = request.params;
     const {
@@ -175,14 +170,11 @@ const updateEndorsementByIdController = expressAsyncController(
       userInfo: { userId },
     } = request.body;
 
-    // check if user exists
     const userExists = await getUserByIdService(userId);
     if (!userExists) {
-      response.status(404).json({ message: "User does not exist", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("User not found"));
     }
 
-    // update endorsement request status
     const updatedEndorsement = await updateEndorsementByIdService({
       _id: endorsementId,
       fields,
@@ -190,11 +182,9 @@ const updateEndorsementByIdController = expressAsyncController(
     });
 
     if (!updatedEndorsement) {
-      response.status(400).json({
-        message: "Endorsement request status update failed. Please try again!",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Endorsement request update failed")
+      );
     }
 
     response.status(200).json({
@@ -210,15 +200,13 @@ const updateEndorsementByIdController = expressAsyncController(
 const getEndorsementByIdController = expressAsyncController(
   async (
     request: GetEndorsementByIdRequest,
-    response: Response<ResourceRequestServerResponse<EndorsementDocument>>
+    response: Response<ResourceRequestServerResponse<EndorsementDocument>>,
+    next: NextFunction
   ) => {
     const { endorsementId } = request.params;
     const endorsement = await getEndorsementByIdService(endorsementId);
     if (!endorsement) {
-      response
-        .status(404)
-        .json({ message: "Endorsement request not found", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Endorsement request not found"));
     }
 
     response.status(200).json({
@@ -232,18 +220,14 @@ const getEndorsementByIdController = expressAsyncController(
 // @route  DELETE api/v1/actions/general/endorsement
 // @access Private
 const deleteEndorsementController = expressAsyncController(
-  async (request: DeleteEndorsementRequest, response: Response) => {
+  async (request: DeleteEndorsementRequest, response: Response, next: NextFunction) => {
     const { endorsementId } = request.params;
 
-    // delete endorsement request by id
     const deletedResult: DeleteResult = await deleteEndorsementByIdService(endorsementId);
-
     if (!deletedResult.deletedCount) {
-      response.status(400).json({
-        message: "Endorsement request could not be deleted",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Endorsement request deletion failed")
+      );
     }
 
     response.status(200).json({
@@ -257,15 +241,16 @@ const deleteEndorsementController = expressAsyncController(
 // @route   DELETE api/v1/actions/general/request-resource/endorsement
 // @access  Private
 const deleteAllEndorsementsController = expressAsyncController(
-  async (_request: DeleteAllEndorsementsRequest, response: Response) => {
+  async (
+    _request: DeleteAllEndorsementsRequest,
+    response: Response,
+    next: NextFunction
+  ) => {
     const deletedResult: DeleteResult = await deleteAllEndorsementsService();
-
     if (!deletedResult.deletedCount) {
-      response.status(400).json({
-        message: "All endorsement requests could not be deleted",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Endorsement requests deletion failed")
+      );
     }
 
     response.status(200).json({
@@ -293,12 +278,10 @@ const createNewEndorsementsBulkController = expressAsyncController(
       })
     );
 
-    // filter out any null documents
     const filteredEndorsementDocuments = endorsementDocuments.filter(
       removeUndefinedAndNullValues
     );
 
-    // check if any documents were created
     if (filteredEndorsementDocuments.length === 0) {
       response.status(400).json({
         message: "Endorsement requests creation failed",
@@ -351,7 +334,6 @@ const updateEndorsementsBulkController = expressAsyncController(
       })
     );
 
-    // filter out any endorsements that were not created
     const successfullyCreatedEndorsements = updatedEndorsements.filter(
       removeUndefinedAndNullValues
     );
