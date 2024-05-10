@@ -457,8 +457,7 @@ const deleteExpenseClaimController = expressAsyncController(
 const createNewExpenseClaimsBulkController = expressAsyncController(
   async (
     request: CreateNewExpenseClaimsBulkRequest,
-    response: Response<ResourceRequestServerResponse<ExpenseClaimDocument>>,
-    next: NextFunction
+    response: Response<ResourceRequestServerResponse<ExpenseClaimDocument>>
   ) => {
     const { expenseClaimSchemas } = request.body;
 
@@ -476,11 +475,12 @@ const createNewExpenseClaimsBulkController = expressAsyncController(
     );
 
     if (filteredExpenseClaimDocuments.length === 0) {
-      return next(
-        new createHttpError.InternalServerError(
-          "Expense claims creation failed. Please try again!"
-        )
-      );
+      response.status(500).json({
+        message: "Expense claims could not be created. Please try again!",
+        resourceData: [],
+      });
+
+      return;
     }
 
     const uncreatedDocumentsAmount =
@@ -506,8 +506,7 @@ const createNewExpenseClaimsBulkController = expressAsyncController(
 const updateExpenseClaimsBulkController = expressAsyncController(
   async (
     request: UpdateExpenseClaimsBulkRequest,
-    response: Response<ResourceRequestServerResponse<ExpenseClaimDocument>>,
-    next: NextFunction
+    response: Response<ResourceRequestServerResponse<ExpenseClaimDocument>>
   ) => {
     const { expenseClaimFields } = request.body;
 
@@ -533,11 +532,12 @@ const updateExpenseClaimsBulkController = expressAsyncController(
     );
 
     if (successfullyCreatedExpenseClaims.length === 0) {
-      return next(
-        new createHttpError.InternalServerError(
-          "Expense claims update failed. Please try again!"
-        )
-      );
+      response.status(500).json({
+        message: "Expense claims could not be updated. Please try again!",
+        resourceData: [],
+      });
+
+      return;
     }
 
     response.status(201).json({

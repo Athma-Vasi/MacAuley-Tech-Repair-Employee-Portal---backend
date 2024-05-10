@@ -302,8 +302,7 @@ const deleteAllRequestResourcesController = expressAsyncController(
 const createNewRequestResourcesBulkController = expressAsyncController(
   async (
     request: CreateNewRequestResourcesBulkRequest,
-    response: Response<ResourceRequestServerResponse<RequestResourceDocument>>,
-    next: NextFunction
+    response: Response<ResourceRequestServerResponse<RequestResourceDocument>>
   ) => {
     const { requestResourceSchemas } = request.body;
 
@@ -321,11 +320,12 @@ const createNewRequestResourcesBulkController = expressAsyncController(
     );
 
     if (filteredRequestResourceDocuments.length === 0) {
-      return next(
-        new createHttpError.InternalServerError(
-          "Request Resource documents could not be created. Please try again!"
-        )
-      );
+      response.status(500).json({
+        message: `Failed to create ${requestResourceSchemas.length} Request Resource requests. Please try again.`,
+        resourceData: [],
+      });
+
+      return;
     }
 
     const uncreatedDocumentsAmount =
@@ -351,8 +351,7 @@ const createNewRequestResourcesBulkController = expressAsyncController(
 const updateRequestResourcesBulkController = expressAsyncController(
   async (
     request: UpdateRequestResourcesBulkRequest,
-    response: Response<ResourceRequestServerResponse<RequestResourceDocument>>,
-    next: NextFunction
+    response: Response<ResourceRequestServerResponse<RequestResourceDocument>>
   ) => {
     const { requestResourceFields } = request.body;
 
@@ -378,11 +377,12 @@ const updateRequestResourcesBulkController = expressAsyncController(
     );
 
     if (successfullyCreatedRequestResources.length === 0) {
-      return next(
-        new createHttpError.InternalServerError(
-          "Request Resources could not be updated. Please try again!"
-        )
-      );
+      response.status(500).json({
+        message: `Failed to update ${requestResourceFields.length} Request Resources. Please try again.`,
+        resourceData: [],
+      });
+
+      return;
     }
 
     response.status(201).json({

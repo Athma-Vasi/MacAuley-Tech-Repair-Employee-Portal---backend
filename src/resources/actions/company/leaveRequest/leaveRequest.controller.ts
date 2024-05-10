@@ -299,8 +299,7 @@ const deleteAllLeaveRequestsController = expressAsyncController(
 const createNewLeaveRequestsBulkController = expressAsyncController(
   async (
     request: CreateNewLeaveRequestsBulkRequest,
-    response: Response<ResourceRequestServerResponse<LeaveRequestDocument>>,
-    next: NextFunction
+    response: Response<ResourceRequestServerResponse<LeaveRequestDocument>>
   ) => {
     const { leaveRequestSchemas } = request.body;
 
@@ -318,11 +317,12 @@ const createNewLeaveRequestsBulkController = expressAsyncController(
     );
 
     if (filteredLeaveRequestDocuments.length === 0) {
-      return next(
-        new createHttpError.InternalServerError(
-          "Leave Request requests creation failed. Please try again!"
-        )
-      );
+      response.status(500).json({
+        message: "Leave Requests failed to be created. Please try again!",
+        resourceData: [],
+      });
+
+      return;
     }
 
     const uncreatedDocumentsAmount =
@@ -348,8 +348,7 @@ const createNewLeaveRequestsBulkController = expressAsyncController(
 const updateLeaveRequestsBulkController = expressAsyncController(
   async (
     request: UpdateLeaveRequestsBulkRequest,
-    response: Response<ResourceRequestServerResponse<LeaveRequestDocument>>,
-    next: NextFunction
+    response: Response<ResourceRequestServerResponse<LeaveRequestDocument>>
   ) => {
     const { leaveRequestFields } = request.body;
 
@@ -370,17 +369,17 @@ const updateLeaveRequestsBulkController = expressAsyncController(
       })
     );
 
-    // filter out any leaveRequests that were not created
     const successfullyCreatedLeaveRequests = updatedLeaveRequests.filter(
       removeUndefinedAndNullValues
     );
 
     if (successfullyCreatedLeaveRequests.length === 0) {
-      return next(
-        new createHttpError.InternalServerError(
-          "Leave Request requests update failed. Please try again!"
-        )
-      );
+      response.status(500).json({
+        message: "Leave Requests failed to be updated. Please try again!",
+        resourceData: [],
+      });
+
+      return;
     }
 
     response.status(201).json({

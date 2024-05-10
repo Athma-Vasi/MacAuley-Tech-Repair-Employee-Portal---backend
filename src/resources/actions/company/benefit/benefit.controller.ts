@@ -301,9 +301,12 @@ const createNewBenefitsBulkController = expressAsyncController(
     );
 
     if (filteredBenefitDocuments.length === 0) {
-      throw new createHttpError.InternalServerError(
-        "No Benefit Requests were created. Please try again!"
-      );
+      response.status(500).json({
+        message: "No Benefit Requests were created. Please try again!",
+        resourceData: [],
+      });
+
+      return;
     }
 
     const uncreatedDocumentsAmount =
@@ -355,9 +358,12 @@ const updateBenefitsBulkController = expressAsyncController(
     );
 
     if (successfullyCreatedBenefits.length === 0) {
-      throw new createHttpError.InternalServerError(
-        "No Benefit Requests were updated. Please try again!"
-      );
+      response.status(500).json({
+        message: "No Benefits were updated. Please try again!",
+        resourceData: [],
+      });
+
+      return;
     }
 
     response.status(201).json({

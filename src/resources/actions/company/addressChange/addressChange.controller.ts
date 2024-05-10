@@ -326,8 +326,7 @@ const deleteAllAddressChangesController = expressAsyncController(
 const createNewAddressChangesBulkController = expressAsyncController(
   async (
     request: CreateNewAddressChangesBulkRequest,
-    response: Response<ResourceRequestServerResponse<AddressChangeDocument>>,
-    next: NextFunction
+    response: Response<ResourceRequestServerResponse<AddressChangeDocument>>
   ) => {
     const { addressChangeSchemas } = request.body;
 
@@ -345,11 +344,12 @@ const createNewAddressChangesBulkController = expressAsyncController(
     );
 
     if (filteredAddressChangeDocuments.length === 0) {
-      return next(
-        new createHttpError.InternalServerError(
-          "Address change documents could not be created. Please try again."
-        )
-      );
+      response.status(500).json({
+        message: "Address Change Requests could not be created. Please try again.",
+        resourceData: [],
+      });
+
+      return;
     }
 
     const uncreatedDocumentsAmount =
@@ -375,8 +375,7 @@ const createNewAddressChangesBulkController = expressAsyncController(
 const updateAddressChangesBulkController = expressAsyncController(
   async (
     request: UpdateAddressChangesBulkRequest,
-    response: Response<ResourceRequestServerResponse<AddressChangeDocument>>,
-    next: NextFunction
+    response: Response<ResourceRequestServerResponse<AddressChangeDocument>>
   ) => {
     const { addressChangeFields } = request.body;
 
@@ -402,11 +401,12 @@ const updateAddressChangesBulkController = expressAsyncController(
     );
 
     if (successfullyCreatedAddressChanges.length === 0) {
-      return next(
-        new createHttpError.InternalServerError(
-          "Address changes document could not be updated. Please try again."
-        )
-      );
+      response.status(500).json({
+        message: "Address Changes could not be updated. Please try again.",
+        resourceData: [],
+      });
+
+      return;
     }
 
     response.status(201).json({
