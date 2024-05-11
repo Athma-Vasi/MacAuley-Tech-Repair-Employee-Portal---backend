@@ -10,6 +10,7 @@ import type {
 } from "../../types";
 
 import { ProductReviewModel } from "./productReview.model";
+import createHttpError from "http-errors";
 
 async function createNewProductReviewService(
   productReviewSchema: ProductReviewSchema
@@ -18,7 +19,7 @@ async function createNewProductReviewService(
     const productReview = await ProductReviewModel.create(productReviewSchema);
     return productReview;
   } catch (error: any) {
-    throw new Error(error, { cause: "createNewProductReviewService" });
+    throw new createHttpError.InternalServerError("createNewProductReviewService");
   }
 }
 
@@ -27,7 +28,7 @@ async function getAllProductReviewsService(): DatabaseResponse<ProductReviewDocu
     const productReviews = await ProductReviewModel.find({}).lean().exec();
     return productReviews;
   } catch (error: any) {
-    throw new Error(error, { cause: "getAllProductReviewsService" });
+    throw new createHttpError.InternalServerError("getAllProductReviewsService");
   }
 }
 
@@ -42,7 +43,7 @@ async function getQueriedProductReviewsService({
       .exec();
     return productReviews;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedProductReviewsService" });
+    throw new createHttpError.InternalServerError("getQueriedProductReviewsService");
   }
 }
 
@@ -55,7 +56,7 @@ async function getQueriedTotalProductReviewsService({
       .exec();
     return totalProductReviews;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedTotalProductReviewsService" });
+    throw new createHttpError.InternalServerError("getQueriedTotalProductReviewsService");
   }
 }
 
@@ -70,7 +71,9 @@ async function getQueriedProductReviewsByUserService({
       .exec();
     return productReviews;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedProductReviewsByUserService" });
+    throw new createHttpError.InternalServerError(
+      "getQueriedProductReviewsByUserService"
+    );
   }
 }
 
@@ -83,7 +86,7 @@ async function getProductReviewByIdService(
       .exec();
     return productReview;
   } catch (error: any) {
-    throw new Error(error, { cause: "getProductReviewByIdService" });
+    throw new createHttpError.InternalServerError("getProductReviewByIdService");
   }
 }
 
@@ -103,7 +106,7 @@ async function updateProductReviewByIdService({
       .exec();
     return productReview;
   } catch (error: any) {
-    throw new Error(error, { cause: "updateProductReviewByIdService" });
+    throw new createHttpError.InternalServerError("updateProductReviewByIdService");
   }
 }
 
@@ -118,7 +121,7 @@ async function deleteAProductReviewService(
       .exec();
     return productReview;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteAProductReviewService" });
+    throw new createHttpError.InternalServerError("deleteAProductReviewService");
   }
 }
 
@@ -127,7 +130,7 @@ async function deleteAllProductReviewsService(): Promise<DeleteResult> {
     const productReviews = await ProductReviewModel.deleteMany({}).lean().exec();
     return productReviews;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteAllProductReviewsService" });
+    throw new createHttpError.InternalServerError("deleteAllProductReviewsService");
   }
 }
 

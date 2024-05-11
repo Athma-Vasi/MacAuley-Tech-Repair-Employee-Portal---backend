@@ -10,13 +10,14 @@ import type {
 } from "../../types";
 
 import { RMAModel } from "./rma.model";
+import createHttpError from "http-errors";
 
 async function createNewRMAService(rmaSchema: RMASchema): Promise<RMADocument> {
   try {
     const rma = await RMAModel.create(rmaSchema);
     return rma;
   } catch (error: any) {
-    throw new Error(error, { cause: "createNewRMAService" });
+    throw new createHttpError.InternalServerError("createNewRMAService");
   }
 }
 
@@ -28,7 +29,7 @@ async function getAllRMAsService(): DatabaseResponse<RMADocument> {
       .exec();
     return rmas;
   } catch (error: any) {
-    throw new Error(error, { cause: "getAllRMAsService" });
+    throw new createHttpError.InternalServerError("getAllRMAsService");
   }
 }
 
@@ -44,7 +45,7 @@ async function getQueriedRMAsService({
       .exec();
     return rmas;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedRMAsService" });
+    throw new createHttpError.InternalServerError("getQueriedRMAsService");
   }
 }
 
@@ -55,7 +56,7 @@ async function getQueriedTotalRMAsService({
     const totalRMAs = await RMAModel.countDocuments(filter).lean().exec();
     return totalRMAs;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedTotalRMAsService" });
+    throw new createHttpError.InternalServerError("getQueriedTotalRMAsService");
   }
 }
 
@@ -87,7 +88,7 @@ async function getRMAByIdService(
       .exec();
     return rma;
   } catch (error: any) {
-    throw new Error(error, { cause: "getRMAByIdService" });
+    throw new createHttpError.InternalServerError("getRMAByIdService");
   }
 }
 
@@ -108,7 +109,7 @@ async function updateRMAByIdService({
       .exec();
     return rma;
   } catch (error: any) {
-    throw new Error(error, { cause: "updateRMAByIdService" });
+    throw new createHttpError.InternalServerError("updateRMAByIdService");
   }
 }
 
@@ -121,7 +122,7 @@ async function deleteARMAService(rmaId: string | Types.ObjectId): Promise<Delete
       .exec();
     return rma;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteARMAService" });
+    throw new createHttpError.InternalServerError("deleteARMAService");
   }
 }
 
@@ -130,7 +131,7 @@ async function deleteAllRMAsService(): Promise<DeleteResult> {
     const rmas = await RMAModel.deleteMany({}).lean().exec();
     return rmas;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteAllRMAsService" });
+    throw new createHttpError.InternalServerError("deleteAllRMAsService");
   }
 }
 

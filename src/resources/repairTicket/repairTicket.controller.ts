@@ -1,7 +1,7 @@
 import expressAsyncController from "express-async-handler";
 
 import type { FilterQuery, QueryOptions } from "mongoose";
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
 import type { DeleteResult } from "mongodb";
 import type {
   CreateNewRepairTicketRequest,
@@ -33,6 +33,7 @@ import {
 } from "./repairTicket.service";
 import { removeUndefinedAndNullValues } from "../../utils";
 import { getUserByIdService } from "../user";
+import createHttpError from "http-errors";
 
 // @desc   Create a new repair note
 // @route  POST /repair-ticket
@@ -40,30 +41,25 @@ import { getUserByIdService } from "../user";
 const createNewRepairTicketController = expressAsyncController(
   async (
     request: CreateNewRepairTicketRequest,
-    response: Response<ResourceRequestServerResponse<RepairTicketDocument>>
+    response: Response<ResourceRequestServerResponse<RepairTicketDocument>>,
+    next: NextFunction
   ) => {
     const {
       userInfo: { userId, username },
       repairTicketSchema,
     } = request.body;
 
-    // create new repair note object
     const newRepairTicketSchema: RepairTicketSchema = {
       ...repairTicketSchema,
       userId,
       username,
     };
 
-    // create new repair note
     const repairTicketDocument = await createNewRepairTicketService(
       newRepairTicketSchema
     );
     if (!repairTicketDocument) {
-      response.status(400).json({
-        message: "New repair note could not be created",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Repair note creation failed"));
     }
 
     response.status(201).json({
@@ -93,7 +89,6 @@ const getQueriedRepairTicketsController = expressAsyncController(
       });
     }
 
-    // get all repairTickets
     const repairTicket = await getQueriedRepairTicketsService({
       filter: filter as FilterQuery<RepairTicketDocument> | undefined,
       projection: projection as QueryOptions<RepairTicketDocument>,
@@ -111,7 +106,7 @@ const getQueriedRepairTicketsController = expressAsyncController(
     }
 
     response.status(200).json({
-      message: "RepairTickets found successfully",
+      message: "Repair tickets found successfully",
       pages: Math.ceil(totalDocuments / Number(options?.limit)),
       totalDocuments,
       resourceData: repairTicket,
@@ -119,7 +114,7 @@ const getQueriedRepairTicketsController = expressAsyncController(
   }
 );
 
-// @desc   Get all repairTicket requests by user
+// @desc   Get all repair ticket requests by user
 // @route  GET api/v1/repairTicket
 // @access Private
 const getRepairTicketsByUserController = expressAsyncController(
@@ -127,7 +122,6 @@ const getRepairTicketsByUserController = expressAsyncController(
     request: GetQueriedRepairTicketsByUserRequest,
     response: Response<GetQueriedResourceRequestServerResponse<RepairTicketDocument>>
   ) => {
-    // anyone can view their own repairTicket requests
     const {
       userInfo: { userId },
     } = request.body;
@@ -146,7 +140,6 @@ const getRepairTicketsByUserController = expressAsyncController(
       });
     }
 
-    // get all repairTicket requests by user
     const repairTickets = await getQueriedRepairTicketsByUserService({
       filter: filterWithUserId as FilterQuery<RepairTicketDocument> | undefined,
       projection: projection as QueryOptions<RepairTicketDocument>,
@@ -155,7 +148,7 @@ const getRepairTicketsByUserController = expressAsyncController(
 
     if (!repairTickets.length) {
       response.status(200).json({
-        message: "No repairTicket requests found",
+        message: "No repair ticket requests found",
         pages: 0,
         totalDocuments: 0,
         resourceData: [],
@@ -164,7 +157,7 @@ const getRepairTicketsByUserController = expressAsyncController(
     }
 
     response.status(200).json({
-      message: "RepairTicket requests found successfully",
+      message: "Repair ticket requests found successfully",
       pages: Math.ceil(totalDocuments / Number(options?.limit)),
       totalDocuments,
       resourceData: repairTickets,
@@ -172,13 +165,14 @@ const getRepairTicketsByUserController = expressAsyncController(
   }
 );
 
-// @desc   Update repairTicket status
+// @desc   Update repair ticket status
 // @route  PATCH api/v1/repairTicket
 // @access Private/Admin/Manager
 const updateRepairTicketByIdController = expressAsyncController(
   async (
     request: UpdateRepairTicketByIdRequest,
-    response: Response<ResourceRequestServerResponse<RepairTicketDocument>>
+    response: Response<ResourceRequestServerResponse<RepairTicketDocument>>,
+    next: NextFunction
   ) => {
     const { repairTicketId } = request.params;
     const {
@@ -188,11 +182,9 @@ const updateRepairTicketByIdController = expressAsyncController(
 
     const userExists = await getUserByIdService(userId);
     if (!userExists) {
-      response.status(404).json({ message: "User does not exist", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("User not found"));
     }
 
-    // update repairTicket request status
     const updatedRepairTicket = await updateRepairTicketByIdService({
       _id: repairTicketId,
       fields,
@@ -200,101 +192,99 @@ const updateRepairTicketByIdController = expressAsyncController(
     });
 
     if (!updatedRepairTicket) {
-      response.status(400).json({
-        message: "RepairTicket request status update failed",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "Repair ticket request status update failed"
+        )
+      );
     }
 
     response.status(200).json({
-      message: "RepairTicket request status updated successfully",
+      message: "Repair ticket request status updated successfully",
       resourceData: [updatedRepairTicket],
     });
   }
 );
 
-// @desc   Get an repairTicket request
+// @desc   Get an repair ticket request
 // @route  GET api/v1/repairTicket
 // @access Private
 const getRepairTicketByIdController = expressAsyncController(
   async (
     request: GetRepairTicketByIdRequest,
-    response: Response<ResourceRequestServerResponse<RepairTicketDocument>>
+    response: Response<ResourceRequestServerResponse<RepairTicketDocument>>,
+    next: NextFunction
   ) => {
     const { repairTicketId } = request.params;
     const repairTicket = await getRepairTicketByIdService(repairTicketId);
     if (!repairTicket) {
-      response
-        .status(404)
-        .json({ message: "RepairTicket request not found", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Repair ticket request not found"));
     }
 
     response.status(200).json({
-      message: "RepairTicket request found successfully",
+      message: "Repair ticket request found successfully",
       resourceData: [repairTicket],
     });
   }
 );
 
-// @desc   Delete an repairTicket request by its id
+// @desc   Delete an repair ticket request by its id
 // @route  DELETE api/v1/repairTicket
 // @access Private
 const deleteRepairTicketController = expressAsyncController(
-  async (request: DeleteRepairTicketRequest, response: Response) => {
+  async (request: DeleteRepairTicketRequest, response: Response, next: NextFunction) => {
     const { repairTicketId } = request.params;
 
-    // delete repairTicket request by id
     const deletedResult: DeleteResult = await deleteRepairTicketByIdService(
       repairTicketId
     );
-
     if (!deletedResult.deletedCount) {
-      response.status(400).json({
-        message: "RepairTicket request could not be deleted",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Repair ticket request deletion failed")
+      );
     }
 
     response.status(200).json({
-      message: "RepairTicket request deleted successfully",
+      message: "Repair ticket request deleted successfully",
       resourceData: [],
     });
   }
 );
 
-// @desc    Delete all repairTicket requests
+// @desc    Delete all repair ticket requests
 // @route   DELETE api/v1/request-resource/repairTicket
 // @access  Private
 const deleteAllRepairTicketsController = expressAsyncController(
-  async (_request: DeleteAllRepairTicketsRequest, response: Response) => {
+  async (
+    _request: DeleteAllRepairTicketsRequest,
+    response: Response,
+    next: NextFunction
+  ) => {
     const deletedResult: DeleteResult = await deleteAllRepairTicketsService();
-
     if (!deletedResult.deletedCount) {
-      response.status(400).json({
-        message: "All repairTicket requests could not be deleted",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError(
+          "All repair ticket requests deletion failed"
+        )
+      );
     }
 
     response.status(200).json({
-      message: "All repairTicket requests deleted successfully",
+      message: "All repair ticket requests deleted successfully",
       resourceData: [],
     });
   }
 );
 
 // DEV ROUTE
-// @desc   Create new repairTicket requests in bulk
+// @desc   Create new repair ticket requests in bulk
 // @route  POST api/v1/repairTicket
 // @access Private
 const createNewRepairTicketsBulkController = expressAsyncController(
   async (
     request: CreateNewRepairTicketsBulkRequest,
-    response: Response<ResourceRequestServerResponse<RepairTicketDocument>>
+    response: Response<ResourceRequestServerResponse<RepairTicketDocument>>,
+    next: NextFunction
   ) => {
     const { repairTicketSchemas } = request.body;
 
@@ -313,7 +303,7 @@ const createNewRepairTicketsBulkController = expressAsyncController(
 
     if (filteredRepairTicketDocuments.length === 0) {
       response.status(400).json({
-        message: "RepairTicket requests creation failed",
+        message: "Repair ticket requests creation failed",
         resourceData: [],
       });
       return;
@@ -342,7 +332,8 @@ const createNewRepairTicketsBulkController = expressAsyncController(
 const updateRepairTicketsBulkController = expressAsyncController(
   async (
     request: UpdateRepairTicketsBulkRequest,
-    response: Response<ResourceRequestServerResponse<RepairTicketDocument>>
+    response: Response<ResourceRequestServerResponse<RepairTicketDocument>>,
+    next: NextFunction
   ) => {
     const { repairTicketFields } = request.body;
 
@@ -363,7 +354,6 @@ const updateRepairTicketsBulkController = expressAsyncController(
       })
     );
 
-    // filter out any repairTickets that were not created
     const successfullyCreatedRepairTickets = updatedRepairTickets.filter(
       removeUndefinedAndNullValues
     );

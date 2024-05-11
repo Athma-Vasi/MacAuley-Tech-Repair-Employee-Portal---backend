@@ -10,6 +10,7 @@ import {
   QueriedTotalResourceGetRequestServiceInput,
   UpdateDocumentByIdServiceInput,
 } from "../../types";
+import createHttpError from "http-errors";
 
 async function getRepairTicketByIdService(
   repairTicketId: Types.ObjectId | string
@@ -18,7 +19,7 @@ async function getRepairTicketByIdService(
     const repairTicket = await RepairTicketModel.findById(repairTicketId).lean().exec();
     return repairTicket;
   } catch (error: any) {
-    throw new Error(error, { cause: "getRepairTicketByIdService" });
+    throw new createHttpError.InternalServerError("getRepairTicketByIdService");
   }
 }
 
@@ -29,7 +30,7 @@ async function createNewRepairTicketService(
     const repairTicket = await RepairTicketModel.create(repairTicketSchema);
     return repairTicket;
   } catch (error: any) {
-    throw new Error(error, { cause: "createNewRepairTicketService" });
+    throw new createHttpError.InternalServerError("createNewRepairTicketService");
   }
 }
 
@@ -46,7 +47,7 @@ async function getQueriedRepairTicketsService({
     console.log("repairTicket", repairTicket);
     return repairTicket;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedRepairTicketsService" });
+    throw new createHttpError.InternalServerError("getQueriedRepairTicketsService");
   }
 }
 
@@ -59,7 +60,7 @@ async function getQueriedTotalRepairTicketsService({
       .exec();
     return totalRepairTickets;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedTotalRepairTicketsService" });
+    throw new createHttpError.InternalServerError("getQueriedTotalRepairTicketsService");
   }
 }
 
@@ -74,7 +75,7 @@ async function getQueriedRepairTicketsByUserService({
       .exec();
     return repairTickets;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedRepairTicketsByUserService" });
+    throw new createHttpError.InternalServerError("getQueriedRepairTicketsByUserService");
   }
 }
 
@@ -94,7 +95,7 @@ async function updateRepairTicketByIdService({
       .exec();
     return repairTicket;
   } catch (error: any) {
-    throw new Error(error, { cause: "updateRepairTicketStatusByIdService" });
+    throw new createHttpError.InternalServerError("updateRepairTicketStatusByIdService");
   }
 }
 
@@ -109,7 +110,7 @@ async function deleteRepairTicketByIdService(
       .exec();
     return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteRepairTicketByIdService" });
+    throw new createHttpError.InternalServerError("deleteRepairTicketByIdService");
   }
 }
 
@@ -118,7 +119,7 @@ async function deleteAllRepairTicketsService(): Promise<DeleteResult> {
     const deletedResult = await RepairTicketModel.deleteMany({}).lean().exec();
     return deletedResult;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteAllRepairTicketsService" });
+    throw new createHttpError.InternalServerError("deleteAllRepairTicketsService");
   }
 }
 

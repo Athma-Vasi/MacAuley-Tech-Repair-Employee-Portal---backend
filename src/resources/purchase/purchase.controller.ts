@@ -1,6 +1,6 @@
 import expressAsyncController from "express-async-handler";
 
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
 import type {
   CreateNewPurchasesBulkRequest,
   CreateNewPurchaseRequest,
@@ -21,7 +21,6 @@ import {
   deleteAllPurchasesService,
   getAllPurchasesService,
   getPurchaseByIdService,
-  getQueriedPurchasesByUserService,
   getQueriedPurchasesService,
   getQueriedTotalPurchasesService,
   updatePurchaseByIdService,
@@ -35,6 +34,7 @@ import type {
 import type { FilterQuery, QueryOptions } from "mongoose";
 import { removeUndefinedAndNullValues } from "../../utils";
 import { PRODUCT_CATEGORY_SERVICE_MAP } from "../../constants";
+import createHttpError from "http-errors";
 
 // @desc   Create new user
 // @route  POST /api/v1/purchase
@@ -42,7 +42,8 @@ import { PRODUCT_CATEGORY_SERVICE_MAP } from "../../constants";
 const createNewPurchaseController = expressAsyncController(
   async (
     request: CreateNewPurchaseRequest,
-    response: Response<ResourceRequestServerResponse<PurchaseDocument>>
+    response: Response<ResourceRequestServerResponse<PurchaseDocument>>,
+    next: NextFunction
   ) => {
     const {
       userInfo: { userId },
@@ -58,11 +59,9 @@ const createNewPurchaseController = expressAsyncController(
       purchaseSchema
     );
     if (!purchaseDocument) {
-      response.status(400).json({
-        message: "Purchase creation failed",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Failed to create new purchase")
+      );
     }
 
     response.status(201).json({
@@ -79,7 +78,8 @@ const createNewPurchaseController = expressAsyncController(
 const createNewPurchasesBulkController = expressAsyncController(
   async (
     request: CreateNewPurchasesBulkRequest,
-    response: Response<ResourceRequestServerResponse<PurchaseDocument>>
+    response: Response<ResourceRequestServerResponse<PurchaseDocument>>,
+    next: NextFunction
   ) => {
     const { purchaseSchemas } = request.body;
 
@@ -92,12 +92,10 @@ const createNewPurchasesBulkController = expressAsyncController(
       })
     );
 
-    // filter out any purchase that were not created
     const successfullyCreatedPurchases = purchaseDocuments.filter(
       removeUndefinedAndNullValues
     );
 
-    // check if any purchase were created
     if (successfullyCreatedPurchases.length === purchaseSchemas.length) {
       response.status(201).json({
         message: `Successfully created ${successfullyCreatedPurchases.length} Purchases`,
@@ -131,7 +129,8 @@ const createNewPurchasesBulkController = expressAsyncController(
 const updatePurchasesBulkController = expressAsyncController(
   async (
     request: UpdatePurchasesBulkRequest,
-    response: Response<ResourceRequestServerResponse<PurchaseDocument>>
+    response: Response<ResourceRequestServerResponse<PurchaseDocument>>,
+    next: NextFunction
   ) => {
     const { purchaseFields } = request.body;
 
@@ -152,12 +151,10 @@ const updatePurchasesBulkController = expressAsyncController(
       })
     );
 
-    // filter out any purchase that were not created
     const successfullyCreatedPurchases = updatedPurchases.filter(
       removeUndefinedAndNullValues
     );
 
-    // check if any purchase were created
     if (successfullyCreatedPurchases.length === purchaseFields.length) {
       response.status(201).json({
         message: `Successfully created ${successfullyCreatedPurchases.length} Purchases`,
@@ -191,7 +188,8 @@ const updatePurchasesBulkController = expressAsyncController(
 const getAllPurchasesBulkController = expressAsyncController(
   async (
     request: GetAllPurchasesBulkRequest,
-    response: Response<ResourceRequestServerResponse<PurchaseDocument>>
+    response: Response<ResourceRequestServerResponse<PurchaseDocument>>,
+    next: NextFunction
   ) => {
     const purchases = await getAllPurchasesService();
 
@@ -232,12 +230,12 @@ const getQueriedPurchasesController = expressAsyncController(
       });
     }
 
-    // get all purchase
     const purchases = await getQueriedPurchasesService({
       filter: filter as FilterQuery<PurchaseDocument> | undefined,
       projection: projection as QueryOptions<PurchaseDocument>,
       options: options as QueryOptions<PurchaseDocument>,
     });
+
     if (!purchases.length) {
       response.status(200).json({
         message: "No purchases that match query parameters were found",
@@ -302,7 +300,6 @@ const getQueriedPurchasesByUserController = expressAsyncController(
 
     let { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
 
-    // assign userToBeQueriedId to filter
     filter = { ...filter, userId: userToBeQueriedId };
 
     // only perform a countDocuments scan if a new query is being made
@@ -312,12 +309,12 @@ const getQueriedPurchasesByUserController = expressAsyncController(
       });
     }
 
-    // get all purchase
     const purchases = await getQueriedPurchasesService({
       filter: filter as FilterQuery<PurchaseDocument> | undefined,
       projection: projection as QueryOptions<PurchaseDocument>,
       options: options as QueryOptions<PurchaseDocument>,
     });
+
     if (!purchases.length) {
       response.status(200).json({
         message: "No purchases that match query parameters were found",
@@ -374,15 +371,14 @@ const getQueriedPurchasesByUserController = expressAsyncController(
 const getPurchaseByIdController = expressAsyncController(
   async (
     request: GetPurchaseByIdRequest,
-    response: Response<ResourceRequestServerResponse<PurchaseServerResponseDocument>>
+    response: Response<ResourceRequestServerResponse<PurchaseServerResponseDocument>>,
+    next: NextFunction
   ) => {
     const { purchaseId } = request.params;
 
     const purchaseDocument = await getPurchaseByIdService(purchaseId);
-
     if (!purchaseDocument) {
-      response.status(404).json({ message: "Purchase not found.", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Purchase not found"));
     }
 
     const productCategoryDocs = await Promise.all(
@@ -414,18 +410,14 @@ const getPurchaseByIdController = expressAsyncController(
 const deletePurchaseController = expressAsyncController(
   async (
     request: DeleteAPurchaseRequest,
-    response: Response<ResourceRequestServerResponse<PurchaseDocument>>
+    response: Response<ResourceRequestServerResponse<PurchaseDocument>>,
+    next: NextFunction
   ) => {
     const { purchaseId } = request.params;
 
     const deletedPurchase = await deleteAPurchaseService(purchaseId);
-
-    if (!deletedPurchase.acknowledged) {
-      response.status(400).json({
-        message: "Failed to delete product review",
-        resourceData: [],
-      });
-      return;
+    if (!deletedPurchase.deletedCount) {
+      return next(new createHttpError.InternalServerError("Failed to delete purchase"));
     }
 
     response.status(200).json({
@@ -441,7 +433,8 @@ const deletePurchaseController = expressAsyncController(
 const updatePurchaseByIdController = expressAsyncController(
   async (
     request: UpdatePurchaseByIdRequest,
-    response: Response<ResourceRequestServerResponse<PurchaseServerResponseDocument>>
+    response: Response<ResourceRequestServerResponse<PurchaseServerResponseDocument>>,
+    next: NextFunction
   ) => {
     const { purchaseId } = request.params;
     const {
@@ -455,8 +448,7 @@ const updatePurchaseByIdController = expressAsyncController(
     });
 
     if (!updatedPurchase) {
-      response.status(400).json({ message: "Purchase update failed", resourceData: [] });
-      return;
+      return next(new createHttpError.InternalServerError("Failed to update purchase"));
     }
 
     const productCategoryDocs = await Promise.all(
@@ -488,16 +480,12 @@ const updatePurchaseByIdController = expressAsyncController(
 const deleteAllPurchasesController = expressAsyncController(
   async (
     request: DeleteAllPurchasesRequest,
-    response: Response<ResourceRequestServerResponse<PurchaseDocument>>
+    response: Response<ResourceRequestServerResponse<PurchaseDocument>>,
+    next: NextFunction
   ) => {
     const deletedPurchases = await deleteAllPurchasesService();
-
-    if (!deletedPurchases.acknowledged) {
-      response.status(400).json({
-        message: "Failed to delete purchases",
-        resourceData: [],
-      });
-      return;
+    if (!deletedPurchases.deletedCount) {
+      return next(new createHttpError.InternalServerError("Failed to delete purchases"));
     }
 
     response.status(200).json({

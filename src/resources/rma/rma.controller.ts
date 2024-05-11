@@ -1,6 +1,6 @@
 import expressAsyncController from "express-async-handler";
 
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
 import type {
   CreateNewRMAsBulkRequest,
   CreateNewRMARequest,
@@ -21,7 +21,6 @@ import {
   deleteAllRMAsService,
   getAllRMAsService,
   getRMAByIdService,
-  getQueriedRMAsByUserService,
   getQueriedRMAsService,
   getQueriedTotalRMAsService,
   updateRMAByIdService,
@@ -35,6 +34,7 @@ import type {
 import type { FilterQuery, QueryOptions } from "mongoose";
 import { removeUndefinedAndNullValues } from "../../utils";
 import { PRODUCT_CATEGORY_SERVICE_MAP } from "../../constants";
+import createHttpError from "http-errors";
 
 // @desc   Create new user
 // @route  POST /api/v1/rma
@@ -42,7 +42,8 @@ import { PRODUCT_CATEGORY_SERVICE_MAP } from "../../constants";
 const createNewRMAController = expressAsyncController(
   async (
     request: CreateNewRMARequest,
-    response: Response<ResourceRequestServerResponse<RMADocument>>
+    response: Response<ResourceRequestServerResponse<RMADocument>>,
+    next: NextFunction
   ) => {
     const {
       userInfo: { userId },
@@ -56,11 +57,7 @@ const createNewRMAController = expressAsyncController(
 
     const rmaDocument: RMADocument = await createNewRMAService(rmaSchema);
     if (!rmaDocument) {
-      response.status(400).json({
-        message: "RMA creation failed",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Failed to create new rma"));
     }
 
     response.status(201).json({
@@ -77,7 +74,8 @@ const createNewRMAController = expressAsyncController(
 const createNewRMAsBulkController = expressAsyncController(
   async (
     request: CreateNewRMAsBulkRequest,
-    response: Response<ResourceRequestServerResponse<RMADocument>>
+    response: Response<ResourceRequestServerResponse<RMADocument>>,
+    next: NextFunction
   ) => {
     const { rmaSchemas } = request.body;
 
@@ -88,10 +86,8 @@ const createNewRMAsBulkController = expressAsyncController(
       })
     );
 
-    // filter out any rma that were not created
     const successfullyCreatedRMAs = rmaDocuments.filter(removeUndefinedAndNullValues);
 
-    // check if any rma were created
     if (successfullyCreatedRMAs.length === rmaSchemas.length) {
       response.status(201).json({
         message: `Successfully created ${successfullyCreatedRMAs.length} RMAs`,
@@ -125,7 +121,8 @@ const createNewRMAsBulkController = expressAsyncController(
 const updateRMAsBulkController = expressAsyncController(
   async (
     request: UpdateRMAsBulkRequest,
-    response: Response<ResourceRequestServerResponse<RMADocument>>
+    response: Response<ResourceRequestServerResponse<RMADocument>>,
+    next: NextFunction
   ) => {
     const { rmaFields } = request.body;
 
@@ -146,10 +143,8 @@ const updateRMAsBulkController = expressAsyncController(
       })
     );
 
-    // filter out any rma that were not created
     const successfullyCreatedRMAs = updatedRMAs.filter(removeUndefinedAndNullValues);
 
-    // check if any rma were created
     if (successfullyCreatedRMAs.length === rmaFields.length) {
       response.status(201).json({
         message: `Successfully created ${successfullyCreatedRMAs.length} RMAs`,
@@ -183,7 +178,8 @@ const updateRMAsBulkController = expressAsyncController(
 const getAllRMAsBulkController = expressAsyncController(
   async (
     request: GetAllRMAsBulkRequest,
-    response: Response<ResourceRequestServerResponse<RMADocument>>
+    response: Response<ResourceRequestServerResponse<RMADocument>>,
+    next: NextFunction
   ) => {
     const rma = await getAllRMAsService();
 
@@ -222,12 +218,12 @@ const getQueriedRMAsController = expressAsyncController(
       });
     }
 
-    // get all rma
     const rmas = await getQueriedRMAsService({
       filter: filter as FilterQuery<RMADocument> | undefined,
       projection: projection as QueryOptions<RMADocument>,
       options: options as QueryOptions<RMADocument>,
     });
+
     if (!rmas.length) {
       response.status(200).json({
         message: "No rmas that match query parameters were found",
@@ -280,7 +276,6 @@ const getQueriedRMAsByUserController = expressAsyncController(
 
     let { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
 
-    // assign userToBeQueriedId to filter
     filter = { ...filter, userId: userToBeQueriedId };
 
     // only perform a countDocuments scan if a new query is being made
@@ -290,12 +285,12 @@ const getQueriedRMAsByUserController = expressAsyncController(
       });
     }
 
-    // get all rma
     const rmas = await getQueriedRMAsService({
       filter: filter as FilterQuery<RMADocument> | undefined,
       projection: projection as QueryOptions<RMADocument>,
       options: options as QueryOptions<RMADocument>,
     });
+
     if (!rmas.length) {
       response.status(200).json({
         message: "No rmas that match query parameters were found",
@@ -342,15 +337,14 @@ const getQueriedRMAsByUserController = expressAsyncController(
 const getRMAByIdController = expressAsyncController(
   async (
     request: GetRMAByIdRequest,
-    response: Response<ResourceRequestServerResponse<RMAServerResponseDocument>>
+    response: Response<ResourceRequestServerResponse<RMAServerResponseDocument>>,
+    next: NextFunction
   ) => {
     const { rmaId } = request.params;
 
     const rmaDocument = await getRMAByIdService(rmaId);
-
     if (!rmaDocument) {
-      response.status(404).json({ message: "RMA not found.", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("RMA not found"));
     }
 
     const { productCategory, productId } = rmaDocument;
@@ -377,18 +371,14 @@ const getRMAByIdController = expressAsyncController(
 const deleteRMAController = expressAsyncController(
   async (
     request: DeleteARMARequest,
-    response: Response<ResourceRequestServerResponse<RMADocument>>
+    response: Response<ResourceRequestServerResponse<RMADocument>>,
+    next: NextFunction
   ) => {
     const { rmaId } = request.params;
 
     const deletedRMA = await deleteARMAService(rmaId);
-
-    if (!deletedRMA.acknowledged) {
-      response.status(400).json({
-        message: "Failed to delete product review",
-        resourceData: [],
-      });
-      return;
+    if (!deletedRMA.deletedCount) {
+      return next(new createHttpError.InternalServerError("Failed to delete rma"));
     }
 
     response.status(200).json({
@@ -404,7 +394,8 @@ const deleteRMAController = expressAsyncController(
 const updateRMAByIdController = expressAsyncController(
   async (
     request: UpdateRMAByIdRequest,
-    response: Response<ResourceRequestServerResponse<RMAServerResponseDocument>>
+    response: Response<ResourceRequestServerResponse<RMAServerResponseDocument>>,
+    next: NextFunction
   ) => {
     const { rmaId } = request.params;
     const {
@@ -418,8 +409,7 @@ const updateRMAByIdController = expressAsyncController(
     });
 
     if (!updatedRMA) {
-      response.status(400).json({ message: "RMA update failed", resourceData: [] });
-      return;
+      return next(new createHttpError.InternalServerError("Failed to update rma"));
     }
 
     const { productCategory, productId } = updatedRMA;
@@ -445,17 +435,13 @@ const updateRMAByIdController = expressAsyncController(
 // @access Private
 const deleteAllRMAsController = expressAsyncController(
   async (
-    request: DeleteAllRMAsRequest,
-    response: Response<ResourceRequestServerResponse<RMADocument>>
+    _request: DeleteAllRMAsRequest,
+    response: Response<ResourceRequestServerResponse<RMADocument>>,
+    next: NextFunction
   ) => {
     const deletedRMAs = await deleteAllRMAsService();
-
-    if (!deletedRMAs.acknowledged) {
-      response.status(400).json({
-        message: "Failed to delete rmas",
-        resourceData: [],
-      });
-      return;
+    if (!deletedRMAs.deletedCount) {
+      return next(new createHttpError.InternalServerError("Failed to delete rmas"));
     }
 
     response.status(200).json({

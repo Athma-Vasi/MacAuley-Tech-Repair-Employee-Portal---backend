@@ -10,6 +10,7 @@ import type {
 } from "../../types";
 
 import { PurchaseModel } from "./purchase.model";
+import createHttpError from "http-errors";
 
 async function createNewPurchaseService(
   purchaseSchema: PurchaseSchema
@@ -18,7 +19,7 @@ async function createNewPurchaseService(
     const purchase = await PurchaseModel.create(purchaseSchema);
     return purchase;
   } catch (error: any) {
-    throw new Error(error, { cause: "createNewPurchaseService" });
+    throw new createHttpError.InternalServerError("createNewPurchaseService");
   }
 }
 
@@ -30,7 +31,7 @@ async function getAllPurchasesService(): DatabaseResponse<PurchaseDocument> {
       .exec();
     return purchases;
   } catch (error: any) {
-    throw new Error(error, { cause: "getAllPurchasesService" });
+    throw new createHttpError.InternalServerError("getAllPurchasesService");
   }
 }
 
@@ -46,7 +47,7 @@ async function getQueriedPurchasesService({
       .exec();
     return purchases;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedPurchasesService" });
+    throw new createHttpError.InternalServerError("getQueriedPurchasesService");
   }
 }
 
@@ -57,7 +58,7 @@ async function getQueriedTotalPurchasesService({
     const totalPurchases = await PurchaseModel.countDocuments(filter).lean().exec();
     return totalPurchases;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedTotalPurchasesService" });
+    throw new createHttpError.InternalServerError("getQueriedTotalPurchasesService");
   }
 }
 
@@ -89,7 +90,7 @@ async function getPurchaseByIdService(
       .exec();
     return purchase;
   } catch (error: any) {
-    throw new Error(error, { cause: "getPurchaseByIdService" });
+    throw new createHttpError.InternalServerError("getPurchaseByIdService");
   }
 }
 
@@ -110,7 +111,7 @@ async function updatePurchaseByIdService({
       .exec();
     return purchase;
   } catch (error: any) {
-    throw new Error(error, { cause: "updatePurchaseByIdService" });
+    throw new createHttpError.InternalServerError("updatePurchaseByIdService");
   }
 }
 
@@ -126,7 +127,7 @@ async function deleteAPurchaseService(
       .exec();
     return purchase;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteAPurchaseService" });
+    throw new createHttpError.InternalServerError("deleteAPurchaseService");
   }
 }
 
@@ -135,7 +136,7 @@ async function deleteAllPurchasesService(): Promise<DeleteResult> {
     const purchases = await PurchaseModel.deleteMany({}).lean().exec();
     return purchases;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteAllPurchasesService" });
+    throw new createHttpError.InternalServerError("deleteAllPurchasesService");
   }
 }
 

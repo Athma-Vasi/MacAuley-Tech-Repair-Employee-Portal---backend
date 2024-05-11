@@ -1,9 +1,5 @@
-import { NextFunction, Request, Response, Router, NextFunction } from "express";
-import {
-  assignQueryDefaults,
-  verifyJWTMiddleware,
-  verifyRoles,
-} from "../../../middlewares";
+import { Router } from "express";
+
 import {
   createNewAccessoryBulkController,
   createNewAccessoryController,
@@ -36,7 +32,6 @@ accessoryRouter
     updateAccessoriesBulkController
   );
 
-// single document routes
 accessoryRouter
   .route("/:accessoryId")
   .get(getAccessoryByIdController)

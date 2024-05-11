@@ -1,6 +1,6 @@
 import expressAsyncController from "express-async-handler";
 
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
 import type {
   CreateNewProductReviewsBulkRequest,
   CreateNewProductReviewRequest,
@@ -21,7 +21,6 @@ import {
   deleteAllProductReviewsService,
   getAllProductReviewsService,
   getProductReviewByIdService,
-  getQueriedProductReviewsByUserService,
   getQueriedProductReviewsService,
   getQueriedTotalProductReviewsService,
   updateProductReviewByIdService,
@@ -35,6 +34,7 @@ import type {
 import type { FilterQuery, QueryOptions } from "mongoose";
 import { removeUndefinedAndNullValues } from "../../utils";
 import { PRODUCT_CATEGORY_SERVICE_MAP } from "../../constants";
+import createHttpError from "http-errors";
 
 // @desc   Create new user
 // @route  POST /api/v1/product-review
@@ -42,7 +42,8 @@ import { PRODUCT_CATEGORY_SERVICE_MAP } from "../../constants";
 const createNewProductReviewController = expressAsyncController(
   async (
     request: CreateNewProductReviewRequest,
-    response: Response<ResourceRequestServerResponse<ProductReviewDocument>>
+    response: Response<ResourceRequestServerResponse<ProductReviewDocument>>,
+    next: NextFunction
   ) => {
     const {
       userInfo: { userId, username },
@@ -58,10 +59,9 @@ const createNewProductReviewController = expressAsyncController(
     const productReviewDocument: ProductReviewDocument =
       await createNewProductReviewService(productReviewSchema);
     if (!productReviewDocument) {
-      response
-        .status(400)
-        .json({ message: "Product review creation failed", resourceData: [] });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Failed to create product review")
+      );
     }
 
     response.status(201).json({
@@ -78,7 +78,8 @@ const createNewProductReviewController = expressAsyncController(
 const createNewProductReviewsBulkController = expressAsyncController(
   async (
     request: CreateNewProductReviewsBulkRequest,
-    response: Response<ResourceRequestServerResponse<ProductReviewDocument>>
+    response: Response<ResourceRequestServerResponse<ProductReviewDocument>>,
+    next: NextFunction
   ) => {
     const { productReviewSchemas } = request.body;
 
@@ -90,7 +91,6 @@ const createNewProductReviewsBulkController = expressAsyncController(
       })
     );
 
-    // filter out any productReviews that were not created
     const successfullyCreatedProductReviews = productReviewDocuments.filter(
       removeUndefinedAndNullValues
     );
@@ -122,7 +122,8 @@ const createNewProductReviewsBulkController = expressAsyncController(
 const updateProductReviewsBulkController = expressAsyncController(
   async (
     request: UpdateProductReviewsBulkRequest,
-    response: Response<ResourceRequestServerResponse<ProductReviewDocument>>
+    response: Response<ResourceRequestServerResponse<ProductReviewDocument>>,
+    next: NextFunction
   ) => {
     const { productReviewFields } = request.body;
 
@@ -143,7 +144,6 @@ const updateProductReviewsBulkController = expressAsyncController(
       })
     );
 
-    // filter out any productReviews that were not created
     const successfullyCreatedProductReviews = updatedProductReviews.filter(
       removeUndefinedAndNullValues
     );
@@ -174,10 +174,10 @@ const updateProductReviewsBulkController = expressAsyncController(
 const getAllProductReviewsBulkController = expressAsyncController(
   async (
     request: GetAllProductReviewsBulkRequest,
-    response: Response<ResourceRequestServerResponse<ProductReviewDocument>>
+    response: Response<ResourceRequestServerResponse<ProductReviewDocument>>,
+    next: NextFunction
   ) => {
     const productReviews = await getAllProductReviewsService();
-
     if (!productReviews.length) {
       response.status(200).json({
         message: "Unable to find any product reviews",
@@ -210,19 +210,17 @@ const getQueriedProductReviewsController = expressAsyncController(
 
     // only perform a countDocuments scan if a new query is being made
     if (newQueryFlag) {
-      console.log("filter in getQueriedProductReviewsController", filter);
-
       totalDocuments = await getQueriedTotalProductReviewsService({
         filter: filter as FilterQuery<ProductReviewDocument> | undefined,
       });
     }
 
-    // get all productReviews
     const productReviews = await getQueriedProductReviewsService({
       filter: filter as FilterQuery<ProductReviewDocument> | undefined,
       projection: projection as QueryOptions<ProductReviewDocument>,
       options: options as QueryOptions<ProductReviewDocument>,
     });
+
     if (!productReviews.length) {
       response.status(200).json({
         message: "No product reviews that match query parameters were found",
@@ -277,7 +275,6 @@ const getQueriedProductReviewsByUserController = expressAsyncController(
 
     let { filter, projection, options } = request.query as QueryObjectParsedWithDefaults;
 
-    // assign userToBeQueriedId to filter
     filter = { ...filter, userId: userToBeQueriedId };
 
     // only perform a countDocuments scan if a new query is being made
@@ -287,12 +284,12 @@ const getQueriedProductReviewsByUserController = expressAsyncController(
       });
     }
 
-    // get all productReviews
     const productReviews = await getQueriedProductReviewsService({
       filter: filter as FilterQuery<ProductReviewDocument> | undefined,
       projection: projection as QueryOptions<ProductReviewDocument>,
       options: options as QueryOptions<ProductReviewDocument>,
     });
+
     if (!productReviews.length) {
       response.status(200).json({
         message: "No product reviews that match query parameters were found",
@@ -339,20 +336,18 @@ const getQueriedProductReviewsByUserController = expressAsyncController(
 const getProductReviewByIdController = expressAsyncController(
   async (
     request: GetProductReviewByIdRequest,
-    response: Response<ResourceRequestServerResponse<ProductReviewServerResponseDocument>>
+    response: Response<
+      ResourceRequestServerResponse<ProductReviewServerResponseDocument>
+    >,
+    next: NextFunction
   ) => {
     const { productReviewId } = request.params;
 
     const productReviewDocument = await getProductReviewByIdService(productReviewId);
-
     if (!productReviewDocument) {
-      response
-        .status(404)
-        .json({ message: "Product review not found.", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("Product review not found"));
     }
 
-    // grab product category document
     const { productCategory, productId } = productReviewDocument;
     const productCategoryDocument = await PRODUCT_CATEGORY_SERVICE_MAP[productCategory](
       productId
@@ -376,18 +371,16 @@ const getProductReviewByIdController = expressAsyncController(
 const deleteProductReviewController = expressAsyncController(
   async (
     request: DeleteAProductReviewRequest,
-    response: Response<ResourceRequestServerResponse<ProductReviewDocument>>
+    response: Response<ResourceRequestServerResponse<ProductReviewDocument>>,
+    next: NextFunction
   ) => {
     const { productReviewId } = request.params;
 
     const deletedProductReview = await deleteAProductReviewService(productReviewId);
-
-    if (!deletedProductReview.acknowledged) {
-      response.status(400).json({
-        message: "Failed to delete product review",
-        resourceData: [],
-      });
-      return;
+    if (!deletedProductReview.deletedCount) {
+      return next(
+        new createHttpError.InternalServerError("Failed to delete product review")
+      );
     }
 
     response.status(200).json({
@@ -403,7 +396,10 @@ const deleteProductReviewController = expressAsyncController(
 const updateProductReviewByIdController = expressAsyncController(
   async (
     request: UpdateProductReviewByIdRequest,
-    response: Response<ResourceRequestServerResponse<ProductReviewServerResponseDocument>>
+    response: Response<
+      ResourceRequestServerResponse<ProductReviewServerResponseDocument>
+    >,
+    next: NextFunction
   ) => {
     const { productReviewId } = request.params;
     const {
@@ -417,13 +413,11 @@ const updateProductReviewByIdController = expressAsyncController(
     });
 
     if (!updatedProductReview) {
-      response
-        .status(400)
-        .json({ message: "Product review update failed", resourceData: [] });
-      return;
+      return next(
+        new createHttpError.InternalServerError("Failed to update product review")
+      );
     }
 
-    // grab product category document
     const { productCategory, productId } = updatedProductReview;
     const productCategoryDocument = await PRODUCT_CATEGORY_SERVICE_MAP[productCategory](
       productId
@@ -447,20 +441,19 @@ const updateProductReviewByIdController = expressAsyncController(
 const deleteAllProductReviewsController = expressAsyncController(
   async (
     request: DeleteAllProductReviewsRequest,
-    response: Response<ResourceRequestServerResponse<ProductReviewDocument>>
+    response: Response<ResourceRequestServerResponse<ProductReviewDocument>>,
+    next: NextFunction
   ) => {
     const deletedProductReviews = await deleteAllProductReviewsService();
 
-    if (!deletedProductReviews.acknowledged) {
-      response.status(400).json({
-        message: "Failed to delete product reviews",
-        resourceData: [],
-      });
-      return;
+    if (!deletedProductReviews.deletedCount) {
+      return next(
+        new createHttpError.InternalServerError("Failed to delete product reviews")
+      );
     }
 
     response.status(200).json({
-      message: "Successfully deleted product reviews!",
+      message: "Successfully deleted product reviews",
       resourceData: [],
     });
   }
