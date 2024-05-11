@@ -1,6 +1,6 @@
 import expressAsyncController from "express-async-handler";
 
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
 import type {
   CreateNewUserRequest,
   CreateNewUsersBulkRequest,
@@ -25,7 +25,7 @@ import {
   updateUserByIdService,
   updateUserPasswordService,
 } from "./user.service";
-import { DirectoryUserDocument, UserDocument } from "./user.model";
+import { UserDocument } from "./user.model";
 import {
   GetQueriedResourceRequestServerResponse,
   QueryObjectParsedWithDefaults,
@@ -39,6 +39,7 @@ import {
   updateUsernameEmailSetWithEmailService,
   updateUsernameEmailSetWithUsernameService,
 } from "../usernameEmailSet";
+import createHttpError from "http-errors";
 
 // @desc   Create new user
 // @route  POST /user
@@ -46,54 +47,42 @@ import {
 const createNewUserController = expressAsyncController(
   async (
     request: CreateNewUserRequest,
-    response: Response<ResourceRequestServerResponse<UserDocument>>
+    response: Response<ResourceRequestServerResponse<UserDocument>>,
+    next: NextFunction
   ) => {
     const { userSchema } = request.body;
     const { email, address, username } = userSchema;
     const { province, state } = address;
 
-    // both state and province cannot be undefined (one is required)
     if (!state && !province) {
-      response.status(400).json({
-        message: "State or province is required",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.BadRequest("State or Province is required"));
     }
 
-    // check for duplicate email
     const isDuplicateEmail = await checkEmailExistsService({ email: { $in: [email] } });
     if (isDuplicateEmail) {
-      response.status(409).json({ message: "Email already exists", resourceData: [] });
-      return;
+      return next(new createHttpError.Conflict("Email already exists"));
     }
 
-    // check for duplicate username
     const isDuplicateUser = await checkUsernameExistsService({
       username: {
         $in: [username],
       },
     });
     if (isDuplicateUser) {
-      response.status(409).json({ message: "Username already exists", resourceData: [] });
-      return;
+      return next(new createHttpError.Conflict("Username already exists"));
     }
 
-    // create new user if all checks pass successfully
     const userDocument = await createNewUserService(userSchema);
     if (!userDocument) {
-      response.status(400).json({ message: "User creation failed", resourceData: [] });
-      return;
+      return next(new createHttpError.InternalServerError("User creation failed"));
     }
 
-    // add new username and email to usernameEmailSet collection
     const updatedUsernameEmailSet = await Promise.all([
       updateUsernameEmailSetWithUsernameService(username),
       updateUsernameEmailSetWithEmailService(email),
     ]);
     if (updatedUsernameEmailSet.some((value) => !value)) {
-      response.status(400).json({ message: "User creation failed", resourceData: [] });
-      return;
+      return next(new createHttpError.InternalServerError("User creation failed"));
     }
 
     response.status(201).json({
@@ -123,12 +112,12 @@ const getQueriedUsersController = expressAsyncController(
       });
     }
 
-    // get all users
     const users = await getQueriedUsersService({
       filter: filter as FilterQuery<UserDocument> | undefined,
       projection: projection as QueryOptions<UserDocument>,
       options: options as QueryOptions<UserDocument>,
     });
+
     if (!users.length) {
       response.status(200).json({
         message: "No users that match query parameters were found",
@@ -154,15 +143,14 @@ const getQueriedUsersController = expressAsyncController(
 const getUserByIdController = expressAsyncController(
   async (
     request: GetUserByIdRequest,
-    response: Response<ResourceRequestServerResponse<UserDocument>>
+    response: Response<ResourceRequestServerResponse<UserDocument>>,
+    next: NextFunction
   ) => {
     const { userId } = request.params;
 
     const user = await getUserByIdService(userId);
-
     if (!user) {
-      response.status(404).json({ message: "User not found.", resourceData: [] });
-      return;
+      return next(new createHttpError.NotFound("User not found"));
     }
 
     response
@@ -177,27 +165,17 @@ const getUserByIdController = expressAsyncController(
 const deleteUserController = expressAsyncController(
   async (
     request: DeleteUserRequest,
-    response: Response<ResourceRequestServerResponse<UserDocument>>
+    response: Response<ResourceRequestServerResponse<UserDocument>>,
+    next: NextFunction
   ) => {
-    // only managers/admin are allowed to delete users
     const { userToBeDeletedId } = request.params;
-
     if (!userToBeDeletedId) {
-      response
-        .status(400)
-        .json({ message: "userToBeDeletedId is required", resourceData: [] });
-      return;
+      return next(new createHttpError.BadRequest("User ID is required"));
     }
 
-    // delete user if all checks pass successfully
     const deletedUser = await deleteUserService(userToBeDeletedId);
-
     if (!deletedUser.acknowledged) {
-      response.status(400).json({
-        message: "Failed to delete user",
-        resourceData: [],
-      });
-      return;
+      return next(new createHttpError.InternalServerError("Failed to delete user"));
     }
 
     response
@@ -212,7 +190,8 @@ const deleteUserController = expressAsyncController(
 const updateUserByIdController = expressAsyncController(
   async (
     request: UpdateUserRequest,
-    response: Response<ResourceRequestServerResponse<UserDocument>>
+    response: Response<ResourceRequestServerResponse<UserDocument>>,
+    next: NextFunction
   ) => {
     const {
       documentUpdate: { fields, updateOperator },
@@ -226,13 +205,7 @@ const updateUserByIdController = expressAsyncController(
     });
 
     if (!updatedUser) {
-      response.status(400).json({ message: "User update failed", resourceData: [] });
-      return;
-    }
-
-    if (!updatedUser) {
-      response.status(400).json({ message: "User update failed", resourceData: [] });
-      return;
+      return next(new createHttpError.InternalServerError("User update failed"));
     }
 
     response.status(200).json({
@@ -248,7 +221,8 @@ const updateUserByIdController = expressAsyncController(
 const updateUserPasswordController = expressAsyncController(
   async (
     request: UpdateUserPasswordRequest,
-    response: Response<ResourceRequestServerResponse<UserDocument>>
+    response: Response<ResourceRequestServerResponse<UserDocument>>,
+    next: NextFunction
   ) => {
     const {
       userInfo: { userId },
@@ -256,36 +230,30 @@ const updateUserPasswordController = expressAsyncController(
       newPassword,
     } = request.body;
 
-    // check if current password is correct
     const isCurrentPasswordCorrect = await checkUserPasswordService({
       userId,
       password: currentPassword,
     });
+
     if (!isCurrentPasswordCorrect) {
-      response
-        .status(400)
-        .json({ message: "Current password is incorrect", resourceData: [] });
-      return;
+      return next(new createHttpError.BadRequest("Current password is incorrect"));
     }
 
-    // check if new password is the same as current password
     if (currentPassword === newPassword) {
-      response.status(400).json({
-        message: "New password cannot be the same as current password",
-        resourceData: [],
-      });
-      return;
+      return next(
+        new createHttpError.BadRequest(
+          "New password cannot be the same as the current password"
+        )
+      );
     }
 
-    // update user password if all checks pass successfully
     const updatedUser = await updateUserPasswordService({
       userId,
       newPassword,
     });
 
     if (!updatedUser) {
-      response.status(400).json({ message: "Password update failed", resourceData: [] });
-      return;
+      return next(new createHttpError.InternalServerError("Password update failed"));
     }
 
     response.status(200).json({
@@ -300,17 +268,13 @@ const updateUserPasswordController = expressAsyncController(
 // @access Private
 const deleteAllUsersController = expressAsyncController(
   async (
-    request: DeleteUserRequest,
-    response: Response<ResourceRequestServerResponse<UserDocument>>
+    _request: DeleteUserRequest,
+    response: Response<ResourceRequestServerResponse<UserDocument>>,
+    next: NextFunction
   ) => {
-    const deletedUser = await deleteAllUsersService();
-
-    if (!deletedUser.acknowledged) {
-      response.status(400).json({
-        message: "Failed to delete user",
-        resourceData: [],
-      });
-      return;
+    const deletedUsers = await deleteAllUsersService();
+    if (!deletedUsers.deletedCount) {
+      return next(new createHttpError.InternalServerError("Failed to delete all users"));
     }
 
     response
@@ -326,7 +290,8 @@ const deleteAllUsersController = expressAsyncController(
 const createNewUsersBulkController = expressAsyncController(
   async (
     request: CreateNewUsersBulkRequest,
-    response: Response<ResourceRequestServerResponse<UserDocument>>
+    response: Response<ResourceRequestServerResponse<UserDocument>>,
+    next: NextFunction
   ) => {
     const { userSchemas } = request.body;
 
@@ -335,7 +300,6 @@ const createNewUsersBulkController = expressAsyncController(
         const { email, address, username } = userSchema;
         const { province, state } = address;
 
-        // both state and province cannot be undefined (one is required)
         if (!state && !province) {
           response.status(400).json({
             message: "State or Province is required",
@@ -344,7 +308,6 @@ const createNewUsersBulkController = expressAsyncController(
           return;
         }
 
-        // check for duplicate email
         const isDuplicateEmail = await checkEmailExistsService({
           email: { $in: [email] },
         });
@@ -355,7 +318,6 @@ const createNewUsersBulkController = expressAsyncController(
           return;
         }
 
-        // check for duplicate username
         const isDuplicateUser = await checkUsernameExistsService({
           username: {
             $in: [username],
@@ -368,10 +330,8 @@ const createNewUsersBulkController = expressAsyncController(
           return;
         }
 
-        // create new user if all checks pass successfully
         const userDocument: UserDocument = await createNewUserService(userSchema);
 
-        // add new username and email to usernameEmailSet collection
         const updatedUsernameEmailSet = await Promise.all([
           updateUsernameEmailSetWithUsernameService(username),
           updateUsernameEmailSetWithEmailService(email),
@@ -387,10 +347,8 @@ const createNewUsersBulkController = expressAsyncController(
       })
     );
 
-    // filter out undefined values
     const userDocumentsFiltered = userDocuments.filter(removeUndefinedAndNullValues);
 
-    // check if any users were created
     if (userDocumentsFiltered.length === userSchemas.length) {
       response.status(201).json({
         message: `Successfully created ${userDocumentsFiltered.length} users`,
@@ -416,7 +374,8 @@ const createNewUsersBulkController = expressAsyncController(
 const updateUserFieldsBulkController = expressAsyncController(
   async (
     request: UpdateUserFieldsBulkRequest,
-    response: Response<ResourceRequestServerResponse<UserDocument>>
+    response: Response<ResourceRequestServerResponse<UserDocument>>,
+    next: NextFunction
   ) => {
     const { userFields } = request.body;
 
@@ -437,10 +396,8 @@ const updateUserFieldsBulkController = expressAsyncController(
       })
     );
 
-    // filter out undefined values
     const updatedUsersFiltered = updatedUsers.filter(removeUndefinedAndNullValues);
 
-    // check if any users were updated
     if (updatedUsersFiltered.length === userFields.length) {
       response.status(201).json({
         message: `Successfully updated ${updatedUsersFiltered.length} users`,
@@ -466,7 +423,8 @@ const updateUserFieldsBulkController = expressAsyncController(
 const getAllUsersBulkController = expressAsyncController(
   async (
     request: GetAllUsersBulkRequest,
-    response: Response<ResourceRequestServerResponse<UserDocument>>
+    response: Response<ResourceRequestServerResponse<UserDocument>>,
+    next: NextFunction
   ) => {
     const users = await getAllUsersService();
 

@@ -11,39 +11,7 @@ import {
   QueriedTotalResourceGetRequestServiceInput,
   UpdateDocumentByIdServiceInput,
 } from "../../types";
-
-type CheckUserExistsServiceInput = {
-  email?: string | undefined;
-  username?: string | undefined;
-  userId?: Types.ObjectId | undefined;
-};
-
-// async function checkUserExistsService({
-//   email,
-//   username,
-//   userId,
-// }: CheckUserExistsServiceInput): Promise<boolean> {
-//   try {
-//     if (userId) {
-//       const userCount = await UserModel.countDocuments().lean().exec();
-//       return userCount ? true : false;
-//     }
-
-//     if (email) {
-//       const userCount = await UserModel.countDocuments({ email }).lean().exec();
-//       return userCount ? true : false;
-//     }
-
-//     if (username) {
-//       const userCount = await UserModel.countDocuments({ username }).lean().exec();
-//       return userCount ? true : false;
-//     }
-
-//     return false;
-//   } catch (error: any) {
-//     throw new Error(error, { cause: "checkUserExistsService" });
-//   }
-// }
+import createHttpError from "http-errors";
 
 type CheckUserIsActiveServiceInput = {
   username?: string | undefined;
@@ -67,7 +35,7 @@ async function checkUserIsActiveService({
 
     return false;
   } catch (error: any) {
-    throw new Error(error, { cause: "checkUserExistsService" });
+    throw new createHttpError.InternalServerError("checkUserExistsService");
   }
 }
 
@@ -86,7 +54,7 @@ async function createNewUserService(inputObj: UserSchema) {
     const newUser = await UserModel.create(newUserObj);
     return newUser;
   } catch (error: any) {
-    throw new Error(error, { cause: "createNewUserService" });
+    throw new createHttpError.InternalServerError("createNewUserService");
   }
 }
 
@@ -95,7 +63,7 @@ async function deleteUserService(userId: Types.ObjectId | string): Promise<Delet
     const deletedUser = await UserModel.deleteOne({ _id: userId }).lean().exec();
     return deletedUser;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteUserService" });
+    throw new createHttpError.InternalServerError("deleteUserService");
   }
 }
 
@@ -104,7 +72,7 @@ async function deleteAllUsersService(): Promise<DeleteResult> {
     const users = await UserModel.deleteMany({}).lean().exec();
     return users;
   } catch (error: any) {
-    throw new Error(error, { cause: "deleteAllUsersService" });
+    throw new createHttpError.InternalServerError("deleteAllUsersService");
   }
 }
 
@@ -115,7 +83,7 @@ async function getUserByIdService(
     const user = await UserModel.findById(userId).select("-password").lean().exec();
     return user;
   } catch (error: any) {
-    throw new Error(error, { cause: "getUserByIdService" });
+    throw new createHttpError.InternalServerError("getUserByIdService");
   }
 }
 
@@ -126,7 +94,7 @@ async function getUserByUsernameService(
     const user = await UserModel.findOne({ username }).select("-password").lean().exec();
     return user;
   } catch (error: any) {
-    throw new Error(error, { cause: "getUserByUsernameService" });
+    throw new createHttpError.InternalServerError("getUserByUsernameService");
   }
 }
 
@@ -137,7 +105,7 @@ async function getUserWithPasswordService(
     const userWithPassword = await UserModel.findOne({ username }).lean().exec();
     return userWithPassword;
   } catch (error: any) {
-    throw new Error(error, { cause: "getUserWithPasswordService" });
+    throw new createHttpError.InternalServerError("getUserWithPasswordService");
   }
 }
 
@@ -146,7 +114,7 @@ async function getAllUsersService() {
     const users = await UserModel.find().select("-password").lean().exec();
     return users;
   } catch (error: any) {
-    throw new Error(error, { cause: "getAllUsersService" });
+    throw new createHttpError.InternalServerError("getAllUsersService");
   }
 }
 
@@ -162,7 +130,7 @@ async function getQueriedUsersService({
       .exec();
     return users;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedUsersService" });
+    throw new createHttpError.InternalServerError("getQueriedUsersService");
   }
 }
 
@@ -173,7 +141,7 @@ async function getQueriedTotalUsersService({
     const totalUsers = await UserModel.countDocuments(filter).lean().exec();
     return totalUsers;
   } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedTotalUsersService" });
+    throw new createHttpError.InternalServerError("getQueriedTotalUsersService");
   }
 }
 
@@ -194,7 +162,7 @@ async function updateUserByIdService({
       .exec();
     return updatedUser;
   } catch (error: any) {
-    throw new Error(error, { cause: "updateUserByIdService" });
+    throw new createHttpError.InternalServerError("updateUserByIdService");
   }
 }
 
@@ -215,7 +183,7 @@ async function checkUserPasswordService({
     const isPasswordMatch = await bcrypt.compare(password, user.password);
     return isPasswordMatch;
   } catch (error: any) {
-    throw new Error(error, { cause: "checkUserPasswordService" });
+    throw new createHttpError.InternalServerError("checkUserPasswordService");
   }
 }
 
@@ -241,7 +209,7 @@ async function updateUserPasswordService({
       .exec();
     return updatedUser;
   } catch (error: any) {
-    throw new Error(error, { cause: "updateUserPasswordService" });
+    throw new createHttpError.InternalServerError("updateUserPasswordService");
   }
 }
 

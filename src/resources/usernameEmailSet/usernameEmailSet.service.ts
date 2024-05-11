@@ -1,3 +1,4 @@
+import createHttpError from "http-errors";
 import { UsernameEmailSetModel } from "./usernameEmailSet.model";
 
 async function checkUsernameExistsService(filter: { username: { $in: string[] } }) {
@@ -5,7 +6,7 @@ async function checkUsernameExistsService(filter: { username: { $in: string[] } 
     const count = await UsernameEmailSetModel.countDocuments(filter).lean().exec();
     return count ? true : false;
   } catch (error: any) {
-    throw new Error(error, { cause: "checkUsernameExistsService" });
+    throw new createHttpError.InternalServerError("checkUsernameExistsService");
   }
 }
 
@@ -14,7 +15,7 @@ async function checkEmailExistsService(filter: { email: { $in: string[] } }) {
     const count = await UsernameEmailSetModel.countDocuments(filter).lean().exec();
     return count ? true : false;
   } catch (error: any) {
-    throw new Error(error, { cause: "checkEmailExistsService" });
+    throw new createHttpError.InternalServerError("checkEmailExistsService");
   }
 }
 
@@ -36,7 +37,7 @@ async function createUsernameEmailSetService({
     });
     return usernameEmailSet;
   } catch (error: any) {
-    throw new Error(error, { cause: "createUsernameEmailSetService" });
+    throw new createHttpError.InternalServerError("createUsernameEmailSetService");
   }
 }
 
@@ -55,7 +56,9 @@ async function updateUsernameEmailSetWithUsernameService(username: string) {
       .exec();
     return usernameEmailSet;
   } catch (error: any) {
-    throw new Error(error, { cause: "updateUsernameEmailSetWithUsernameService" });
+    throw new createHttpError.InternalServerError(
+      "updateUsernameEmailSetWithUsernameService"
+    );
   }
 }
 
@@ -74,7 +77,9 @@ async function updateUsernameEmailSetWithEmailService(email: string) {
       .exec();
     return usernameEmailSet;
   } catch (error: any) {
-    throw new Error(error, { cause: "updateUsernameEmailSetWithEmailService" });
+    throw new createHttpError.InternalServerError(
+      "updateUsernameEmailSetWithEmailService"
+    );
   }
 }
 

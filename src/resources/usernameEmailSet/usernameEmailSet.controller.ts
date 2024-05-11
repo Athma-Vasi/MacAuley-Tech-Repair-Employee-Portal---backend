@@ -1,6 +1,6 @@
 import expressAsyncController from "express-async-handler";
 
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
 
 import {
   checkEmailExistsService,
@@ -12,6 +12,7 @@ import {
   PostUsernameEmailSetRequest,
   UsernameEmailSetResponse,
 } from "./usernameEmailSet.types";
+import createHttpError from "http-errors";
 
 // @desc   create usernameEmailSet document
 // @route  POST /api/v1/username-email-set
@@ -22,7 +23,8 @@ import {
 const postUsernameEmailSetController = expressAsyncController(
   async (
     request: PostUsernameEmailSetRequest,
-    response: Response<UsernameEmailSetResponse>
+    response: Response<UsernameEmailSetResponse>,
+    next: NextFunction
   ) => {
     const { username, email } = request.body;
 
@@ -32,11 +34,9 @@ const postUsernameEmailSetController = expressAsyncController(
     });
 
     if (!usernameEmailSet) {
-      response.status(400).json({
-        status: "error",
-        message: "UsernameEmailSet not created",
-      });
-      return;
+      return next(
+        new createHttpError.InternalServerError("UsernameEmailSet not created")
+      );
     }
 
     response.status(201).json({
@@ -52,7 +52,8 @@ const postUsernameEmailSetController = expressAsyncController(
 const checkUsernameEmailExistsController = expressAsyncController(
   async (
     request: GetUsernameEmailExistsRequest,
-    response: Response<UsernameEmailSetResponse>
+    response: Response<UsernameEmailSetResponse>,
+    next: NextFunction
   ) => {
     const { email, username } = request.body.fields;
 
