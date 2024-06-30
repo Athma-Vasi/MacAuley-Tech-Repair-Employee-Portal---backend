@@ -11,21 +11,21 @@ type BenefitsPlanKind =
   | "Education"
   | "Other";
 
-type Currency = "USD" | "EUR" | "GBP" | "CAD" | "AUD" | "JPY" | "CNY";
+type Currency = "USD" | "CAD";
 
 type BenefitSchema = {
-  benefitUserId: Types.ObjectId;
-  username: string;
-  planName: string;
+  currency: Currency;
+  employeeContribution: number;
+  employerContribution: number;
+  isPlanActive: boolean;
+  monthlyPremium: number;
   planDescription: string;
   planKind: BenefitsPlanKind;
+  planName: string;
   planStartDate: string;
-  isPlanActive: boolean;
-  currency: Currency;
-  monthlyPremium: number;
-  employerContribution: number;
-  employeeContribution: number;
   requestStatus: RequestStatus;
+  userId: Types.ObjectId;
+  username: string;
 };
 
 type BenefitDocument = BenefitSchema & {
@@ -37,7 +37,7 @@ type BenefitDocument = BenefitSchema & {
 
 const benefitsSchema = new Schema<BenefitSchema>(
   {
-    benefitUserId: {
+    userId: {
       type: Schema.Types.ObjectId,
       required: [true, "User ID is required"],
       ref: "User",

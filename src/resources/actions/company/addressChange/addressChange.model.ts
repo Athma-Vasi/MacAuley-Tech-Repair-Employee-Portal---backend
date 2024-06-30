@@ -9,8 +9,8 @@ type AddressChangeSchema = {
   contactNumber: PhoneNumber;
   addressLine: string;
   city: string;
-  province: Province;
-  state: StatesUS;
+  province: Province | "Not Applicable";
+  state: StatesUS | "Not Applicable";
   postalCode: PostalCode;
   country: Country;
   acknowledgement: boolean;
@@ -51,11 +51,13 @@ const addressChangeSchema = new Schema<AddressChangeSchema>(
     province: {
       type: String,
       required: [true, "Province is required"],
+      default: "Not Applicable",
       index: true,
     },
     state: {
       type: String,
       required: [true, "State is required"],
+      default: "Not Applicable",
       index: true,
     },
     postalCode: {

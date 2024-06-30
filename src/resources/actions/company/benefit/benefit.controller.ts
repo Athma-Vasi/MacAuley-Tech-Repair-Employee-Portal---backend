@@ -58,11 +58,10 @@ const createNewBenefitController = expressAsyncController(
       return next(new createHttpError.NotFound("User not found"));
     }
 
-    const benefitUserId = benefitUser._id;
     const newBenefitSchema: BenefitSchema = {
       ...benefitSchema,
-      benefitUserId,
-      username,
+      userId: benefitUser._id,
+      username: benefitSchema.username,
     };
 
     const benefitDocument = await createNewBenefitService(newBenefitSchema);

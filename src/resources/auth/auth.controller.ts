@@ -34,8 +34,12 @@ const loginUserController = expressAsyncController(
   async (request: LoginUserRequest, response: Response, next: NextFunction) => {
     const { username, password } = request.body;
 
-    if (!username || !password) {
-      return next(new createHttpError.BadRequest("Username and password are required"));
+    if (!username) {
+      return next(new createHttpError.BadRequest("Username is required"));
+    }
+
+    if (!password) {
+      return next(new createHttpError.BadRequest("Password is required"));
     }
 
     const foundUser = await getUserWithPasswordService(username);
@@ -49,7 +53,7 @@ const loginUserController = expressAsyncController(
 
     const isPasswordCorrect = await bcrypt.compare(password, foundUser.password);
     if (!isPasswordCorrect) {
-      return next(new createHttpError.Unauthorized("Invalid password"));
+      return next(new createHttpError.Unauthorized("Unauthorized"));
     }
 
     const { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } = config;
@@ -63,7 +67,7 @@ const loginUserController = expressAsyncController(
     };
     const newAuthSession = await createNewAuthSessionService(authSessionSchema);
     if (!newAuthSession) {
-      return next(new createHttpError.InternalServerError("Error creating session"));
+      return next(new createHttpError.Unauthorized("Unauthorized"));
     }
 
     const sessionId = newAuthSession._id;
@@ -147,9 +151,7 @@ const refreshTokenController = expressAsyncController(
         sameSite: "none",
       });
 
-      return next(
-        new createHttpError.Unauthorized("Unauthorized: No refresh token found")
-      );
+      return next(new createHttpError.Unauthorized("Unauthorized"));
     }
 
     const { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } = config;
@@ -166,9 +168,7 @@ const refreshTokenController = expressAsyncController(
             sameSite: "none",
           });
 
-          return next(
-            new createHttpError.Unauthorized("Unauthorized: Invalid refresh token")
-          );
+          return next(new createHttpError.Unauthorized("Unauthorized"));
         }
 
         const {
@@ -188,9 +188,7 @@ const refreshTokenController = expressAsyncController(
             sameSite: "none",
           });
 
-          return next(
-            new createHttpError.Unauthorized("Unauthorized: Invalid refresh token")
-          );
+          return next(new createHttpError.Unauthorized("Unauthorized"));
         }
 
         const existingSession = await findSessionByIdService(sessionId);
@@ -201,9 +199,7 @@ const refreshTokenController = expressAsyncController(
             sameSite: "none",
           });
 
-          return next(
-            new createHttpError.Unauthorized("Unauthorized: Session not found")
-          );
+          return next(new createHttpError.Unauthorized("Unauthorized"));
         }
 
         const isRefreshTokenInDenyList =
@@ -218,11 +214,7 @@ const refreshTokenController = expressAsyncController(
             sameSite: "none",
           });
 
-          return next(
-            new createHttpError.Unauthorized(
-              "Unauthorized: Refresh token has been invalidated"
-            )
-          );
+          return next(new createHttpError.Unauthorized("Unauthorized"));
         }
 
         // if refresh token has not been used and session exists,
@@ -292,9 +284,7 @@ const logoutUserController = expressAsyncController(
         sameSite: "none",
       });
 
-      return next(
-        new createHttpError.Unauthorized("Unauthorized: No refresh token found")
-      );
+      return next(new createHttpError.Unauthorized("Unauthorized"));
     }
 
     const { REFRESH_TOKEN_SECRET } = config;
@@ -306,9 +296,7 @@ const logoutUserController = expressAsyncController(
           sameSite: "none",
         });
 
-        return next(
-          new createHttpError.Unauthorized("Unauthorized: Invalid refresh token")
-        );
+        return next(new createHttpError.Unauthorized("Unauthorized"));
       }
 
       const { jti, sessionId } = decoded as RefreshTokenDecoded;
@@ -319,9 +307,7 @@ const logoutUserController = expressAsyncController(
           sameSite: "none",
         });
 
-        return next(
-          new createHttpError.Unauthorized("Unauthorized: Invalid refresh token")
-        );
+        return next(new createHttpError.Unauthorized("Unauthorized"));
       }
 
       // invalidate session

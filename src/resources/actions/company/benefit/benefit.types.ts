@@ -17,7 +17,7 @@ interface CreateNewBenefitRequest extends RequestAfterJWTVerification {
       roles: UserRoles;
     };
     sessionId: Types.ObjectId;
-    benefitSchema: Omit<BenefitSchema, "userId" | "username">;
+    benefitSchema: BenefitSchema;
   };
 }
 

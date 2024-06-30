@@ -1,10 +1,129 @@
 import { NextFunction, Request, Response } from "express";
+import { ParsedQs } from "qs";
 
-/**
- * - This middleware uses closure to pass in the keywords that are used to determine if a query parameter is a find query option and sets default values for sorting and projection options when querying a MongoDB database
- * - Queries must be of the form:
- * /resource?filter1[operator]=value1&filter2[operator]=value2&projection=-field1ToExclude&projection=-field2ToExclude&sort[sortField1]=number&skip=number&limit=number  and so on
- */
+function createMongoDbQueryObject(
+  request: Request,
+  _response: Response,
+  next: NextFunction
+) {
+  const FIND_QUERY_OPTIONS_KEYWORDS = new Set([
+    "tailable",
+    "limit",
+    "skip",
+    "allowDiskUse",
+    "batchSize",
+    "readPreference",
+    "hint",
+    "comment",
+    "lean",
+    "populate",
+    "maxTimeMS",
+    "sort",
+    "strict",
+    "collation",
+    "session",
+    "explain",
+  ]);
+
+  const { query } = request;
+
+  if (query === undefined) {
+    Object.defineProperty(request, "query", {
+      value: {
+        projection: "",
+        options: { sort: { createdAt: -1, _id: -1 }, limit: 10, skip: 0 },
+        filter: {},
+      },
+    });
+    next();
+    return;
+  }
+
+  const EXCLUDED_SET = new Set(["page", "fields", "newQueryFlag", "totalDocuments"]);
+  const modifiedQuery = Object.entries(query).reduce((acc, tuple) => {
+    const [key, value] = tuple as [
+      string,
+      string | ParsedQs | string[] | ParsedQs[] | undefined
+    ];
+
+    if (value === undefined || EXCLUDED_SET.has(key)) {
+      return acc;
+    }
+
+    Object.defineProperty(acc, key, { value });
+
+    return acc;
+  }, Object.create(null));
+
+  const { newQueryFlag, totalDocuments, projection, ...rest } = modifiedQuery;
+
+  const [options, filter] = Object.entries(rest).reduce(
+    (acc, tuple) => {
+      const [optionsAcc, filterAcc] = acc;
+      const [key, value] = tuple as [
+        string,
+        string | ParsedQs | string[] | ParsedQs[] | undefined
+      ];
+
+      if (value === undefined) {
+        return acc;
+      }
+
+      if (FIND_QUERY_OPTIONS_KEYWORDS.has(key)) {
+        Object.defineProperty(optionsAcc, key, { value });
+      }
+
+      // general text search of entire collection (with fields that have a 'text' index)
+      // ex: { $text: { $search: 'searchTerm1 -searchTerm2', $caseSensitive: "true" } }
+      if (key === "text") {
+        Object.defineProperty(filterAcc, "$text", { value });
+      }
+
+      // convert string array into regex array for case insensitive search per field
+      // ex: { field: { $in: [/searchTerm1/i, /searchTerm2/i] } }
+      if (typeof value === "object" && value !== null) {
+        const isInOperatorPresent = Object.hasOwn(value, "$in");
+
+        if (isInOperatorPresent) {
+          let inValue = Object.getOwnPropertyDescriptor(value, "$in")?.value;
+
+          if (typeof inValue === "string") {
+            inValue = new RegExp(inValue, "i");
+          } else if (Array.isArray(inValue)) {
+            inValue = inValue.flatMap((val) => new RegExp(val, "i"));
+          }
+
+          Object.defineProperty(filterAcc, key, { value: { $in: inValue } });
+        } else {
+          Object.defineProperty(filterAcc, key, { value });
+        }
+      }
+
+      return acc;
+    },
+    [Object.create(null), Object.create(null)]
+  );
+
+  Object.hasOwn(options, "sort")
+    ? Object.defineProperty(options, "sort", { value: { ...options.sort, _id: -1 } })
+    : Object.defineProperty(options, "sort", { value: { createdAt: -1, _id: -1 } });
+
+  // set pagination default values for limit and skip
+  const page = Number(query.page) || 1;
+  let limit = Number(query.limit) || 10;
+  limit = limit < 1 ? 10 : limit > 25 ? 25 : limit;
+  Object.defineProperty(options, "limit", { value: limit });
+
+  let skip = query.skip ? Number(query.skip) : (page - 1) * limit; // offset
+  skip = skip < 1 ? 0 : skip;
+  Object.defineProperty(options, "skip", { value: skip });
+
+  Object.defineProperty(request, "query", { value: { projection, options, filter } });
+  Object.defineProperty(request, "body", {
+    value: { ...request.body, newQueryFlag, totalDocuments },
+  });
+}
+
 function assignQueryDefaults(request: Request, _response: Response, next: NextFunction) {
   const FIND_QUERY_OPTIONS_KEYWORDS = new Set([
     "tailable",
