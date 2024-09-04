@@ -48,6 +48,7 @@
     "mongoose-sequence": "^5.3.1",
     "morgan": "^1.10.0",
     "nanoid": "^5.0.1",
+    "ts-results": "^3.3.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
@@ -69,6 +70,7 @@
     "@types/nanoid": "^3.0.0",
     "@types/node": "^20.2.5",
     "@types/uuid": "^9.0.1",
+    "nodemon": "^3.1.4",
     "ts-node-dev": "^2.0.0"
   }
 }
