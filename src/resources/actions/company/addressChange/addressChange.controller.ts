@@ -8,17 +8,6 @@ import {
 import type { Response } from "express";
 
 import { UserDocument, UserModel } from "../../../user";
-import {
-  createNewAddressChangeService,
-  deleteAddressChangeByIdService,
-  deleteAllAddressChangesService,
-  getAddressChangeByIdService,
-  getQueriedAddressChangesByUserService,
-  getQueriedAddressChangesService,
-  getQueriedTotalAddressChangesService,
-  updateAddressChangeByIdService,
-} from "./addressChange.service";
-import { FilterQuery, QueryOptions } from "mongoose";
 
 import {
   CreateNewResourceRequest,
@@ -41,6 +30,7 @@ import {
   deleteAllResourcesService,
   deleteResourceByIdService,
   getQueriedResourcesByUserService,
+  getQueriedResourcesService,
   getQueriedTotalResourcesService,
   getResourceByIdService,
   updateResourceByIdService,
@@ -179,10 +169,11 @@ const getQueriedAddressChangesController = expressAsyncController(
       totalDocuments = totalResult.safeUnwrap().data?.[0] ?? 0;
     }
 
-    const getResourcesResult = await getQueriedAddressChangesService({
+    const getResourcesResult = await getQueriedResourcesService({
       filter,
-      projection,
       options,
+      projection,
+      resourceModel: AddressChangeModel,
     });
 
     if (getResourcesResult.err) {

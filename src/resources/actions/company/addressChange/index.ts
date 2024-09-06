@@ -16,16 +16,6 @@ import {
   getQueriedAddressChangesController,
   updateAddressChangeByIdController,
 } from "./addressChange.controller";
-import {
-  createNewAddressChangeService,
-  deleteAddressChangeByIdService,
-  deleteAllAddressChangesService,
-  getAddressChangeByIdService,
-  getQueriedAddressChangesByUserService,
-  getQueriedAddressChangesService,
-  getQueriedTotalAddressChangesService,
-  updateAddressChangeByIdService,
-} from "./addressChange.service";
 
 import type {
   AddressChangeDocument,
@@ -39,20 +29,12 @@ export {
   AddressChangeModel,
   addressChangeRouter,
   createNewAddressChangeController,
-  createNewAddressChangeService,
-  deleteAddressChangeByIdService,
   deleteAllAddressChangesController,
-  deleteAllAddressChangesService,
   deleteAnAddressChangeController,
   getAddressChangeByIdController,
-  getAddressChangeByIdService,
   getAddressChangesByUserController,
-  getQueriedAddressChangesByUserService,
   getQueriedAddressChangesController,
-  getQueriedAddressChangesService,
-  getQueriedTotalAddressChangesService,
   updateAddressChangeByIdController,
-  updateAddressChangeByIdService,
 };
 
 export type { AddressChangeDocument, AddressChangeSchema };
