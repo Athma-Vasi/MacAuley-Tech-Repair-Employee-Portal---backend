@@ -4,32 +4,50 @@ import type { ErrorLogDocument, ErrorLogSchema } from "./errorLog.model";
 
 import { ErrorLogModel } from "./errorLog.model";
 import {
+  DatabaseResponse,
   DatabaseResponseNullable,
   QueriedResourceGetRequestServiceInput,
-  DatabaseResponse,
   QueriedTotalResourceGetRequestServiceInput,
   UpdateDocumentByIdServiceInput,
 } from "../../types";
+import { createHttpResultError, createHttpResultSuccess } from "../../utils";
+import { Err, Ok } from "ts-results";
 
 async function getErrorLogByIdService(
-  errorLogId: Types.ObjectId | string
-): DatabaseResponseNullable<ErrorLogDocument> {
+  errorLogId: Types.ObjectId | string,
+) {
   try {
     const errorLog = await ErrorLogModel.findById(errorLogId).lean().exec();
-    return errorLog;
-  } catch (error: any) {
-    throw new Error(error, { cause: "getErrorLogByIdService" });
+    if (errorLog === null || errorLog === undefined) {
+      return new Ok(
+        createHttpResultSuccess({ message: "Error log not found" }),
+      );
+    }
+
+    return new Ok(createHttpResultSuccess({ data: [errorLog] }));
+  } catch (error: unknown) {
+    return new Err(
+      createHttpResultError({
+        data: [error],
+        message: "Error getting error log by id",
+      }),
+    );
   }
 }
 
 async function createNewErrorLogService(
-  errorLogSchema: ErrorLogSchema
-): Promise<ErrorLogDocument> {
+  errorLogSchema: ErrorLogSchema,
+) {
   try {
     const errorLog = await ErrorLogModel.create(errorLogSchema);
-    return errorLog;
-  } catch (error: any) {
-    throw new Error(error, { cause: "createNewErrorLogService" });
+    return new Ok(createHttpResultSuccess({ data: [errorLog] }));
+  } catch (error: unknown) {
+    return new Err(
+      createHttpResultError({
+        data: [error],
+        message: "Error creating new error log",
+      }),
+    );
   }
 }
 
@@ -37,23 +55,35 @@ async function getQueriedErrorLogsService({
   filter = {},
   projection = null,
   options = {},
-}: QueriedResourceGetRequestServiceInput<ErrorLogDocument>): DatabaseResponse<ErrorLogDocument> {
+}: QueriedResourceGetRequestServiceInput<ErrorLogDocument>) {
   try {
-    const errorLog = await ErrorLogModel.find(filter, projection, options).lean().exec();
-    return errorLog;
-  } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedErrorLogsService" });
+    const errorLogs = await ErrorLogModel.find(filter, projection, options)
+      .lean().exec();
+    return new Ok(createHttpResultSuccess({ data: errorLogs }));
+  } catch (error: unknown) {
+    return new Err(
+      createHttpResultError({
+        data: [error],
+        message: "Error getting queried error logs",
+      }),
+    );
   }
 }
 
 async function getQueriedTotalErrorLogsService({
   filter = {},
-}: QueriedTotalResourceGetRequestServiceInput<ErrorLogDocument>): Promise<number> {
+}: QueriedTotalResourceGetRequestServiceInput<ErrorLogDocument>) {
   try {
-    const totalErrorLogs = await ErrorLogModel.countDocuments(filter).lean().exec();
-    return totalErrorLogs;
-  } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedTotalErrorLogsService" });
+    const totalErrorLogs = await ErrorLogModel.countDocuments(filter).lean()
+      .exec();
+    return new Ok(createHttpResultSuccess({ data: [totalErrorLogs] }));
+  } catch (error: unknown) {
+    return new Err(
+      createHttpResultError({
+        data: [error],
+        message: "Error getting queried total error logs",
+      }),
+    );
   }
 }
 
@@ -61,12 +91,18 @@ async function getQueriedErrorLogsByUserService({
   filter = {},
   projection = null,
   options = {},
-}: QueriedResourceGetRequestServiceInput<ErrorLogDocument>): DatabaseResponse<ErrorLogDocument> {
+}: QueriedResourceGetRequestServiceInput<ErrorLogDocument>) {
   try {
-    const errorLogs = await ErrorLogModel.find(filter, projection, options).lean().exec();
-    return errorLogs;
-  } catch (error: any) {
-    throw new Error(error, { cause: "getQueriedErrorLogsByUserService" });
+    const errorLogs = await ErrorLogModel.find(filter, projection, options)
+      .lean().exec();
+    return new Ok(createHttpResultSuccess({ data: errorLogs }));
+  } catch (error: unknown) {
+    return new Err(
+      createHttpResultError({
+        data: [error],
+        message: "Error getting queried error logs by user",
+      }),
+    );
   }
 }
 
@@ -84,41 +120,56 @@ async function updateErrorLogByIdService({
     })
       .lean()
       .exec();
-    return errorLog;
-  } catch (error: any) {
-    throw new Error(error, { cause: "updateErrorLogStatusByIdService" });
+    return new Ok(createHttpResultSuccess({ data: [errorLog] }));
+  } catch (error: unknown) {
+    return new Err(
+      createHttpResultError({
+        data: [error],
+        message: "Error updating error log by id",
+      }),
+    );
   }
 }
 
 async function deleteErrorLogByIdService(
-  errorLogId: Types.ObjectId | string
-): Promise<DeleteResult> {
+  errorLogId: Types.ObjectId | string,
+) {
   try {
     const deletedResult = await ErrorLogModel.deleteOne({ _id: errorLogId })
       .lean()
       .exec();
-    return deletedResult;
-  } catch (error: any) {
-    throw new Error(error, { cause: "deleteErrorLogByIdService" });
+    return new Ok(createHttpResultSuccess({ data: [deletedResult] }));
+  } catch (error: unknown) {
+    return new Err(
+      createHttpResultError({
+        data: [error],
+        message: "Error deleting error log by id",
+      }),
+    );
   }
 }
 
-async function deleteAllErrorLogsService(): Promise<DeleteResult> {
+async function deleteAllErrorLogsService() {
   try {
     const deletedResult = await ErrorLogModel.deleteMany({}).lean().exec();
-    return deletedResult;
-  } catch (error: any) {
-    throw new Error(error, { cause: "deleteAllErrorLogsService" });
+    return new Ok(createHttpResultSuccess({ data: [deletedResult] }));
+  } catch (error: unknown) {
+    return new Err(
+      createHttpResultError({
+        data: [error],
+        message: "Error deleting all error logs",
+      }),
+    );
   }
 }
 
 export {
-  getErrorLogByIdService,
   createNewErrorLogService,
+  deleteAllErrorLogsService,
+  deleteErrorLogByIdService,
+  getErrorLogByIdService,
+  getQueriedErrorLogsByUserService,
   getQueriedErrorLogsService,
   getQueriedTotalErrorLogsService,
-  getQueriedErrorLogsByUserService,
-  deleteErrorLogByIdService,
-  deleteAllErrorLogsService,
   updateErrorLogByIdService,
 };
