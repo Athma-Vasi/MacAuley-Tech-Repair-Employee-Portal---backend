@@ -120,6 +120,16 @@ async function updateErrorLogByIdService({
     })
       .lean()
       .exec();
+
+    if (errorLog === null || errorLog === undefined) {
+      return new Ok(
+        createHttpResultError({
+          message: "Error log not found",
+          status: 404,
+        }),
+      );
+    }
+
     return new Ok(createHttpResultSuccess({ data: [errorLog] }));
   } catch (error: unknown) {
     return new Err(
@@ -138,7 +148,15 @@ async function deleteErrorLogByIdService(
     const deletedResult = await ErrorLogModel.deleteOne({ _id: errorLogId })
       .lean()
       .exec();
-    return new Ok(createHttpResultSuccess({ data: [deletedResult] }));
+
+    return deletedResult.deletedCount === 0
+      ? new Ok(
+        createHttpResultError({
+          message: "Unable to delete error log",
+          status: 404,
+        }),
+      )
+      : new Ok(createHttpResultSuccess({}));
   } catch (error: unknown) {
     return new Err(
       createHttpResultError({
@@ -152,7 +170,15 @@ async function deleteErrorLogByIdService(
 async function deleteAllErrorLogsService() {
   try {
     const deletedResult = await ErrorLogModel.deleteMany({}).lean().exec();
-    return new Ok(createHttpResultSuccess({ data: [deletedResult] }));
+
+    return deletedResult.deletedCount < 1
+      ? new Ok(
+        createHttpResultError({
+          message: "Unable to delete all error logs",
+          status: 404,
+        }),
+      )
+      : new Ok(createHttpResultSuccess({}));
   } catch (error: unknown) {
     return new Err(
       createHttpResultError({

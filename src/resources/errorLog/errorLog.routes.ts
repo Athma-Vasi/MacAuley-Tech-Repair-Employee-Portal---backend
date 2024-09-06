@@ -1,14 +1,12 @@
 import { Router } from "express";
 import {
   createNewErrorLogController,
-  getQueriedErrorLogsController,
-  getErrorLogsByUserController,
-  getErrorLogByIdController,
-  deleteAnErrorLogController,
   deleteAllErrorLogsController,
+  deleteAnErrorLogController,
+  getErrorLogByIdController,
+  getErrorLogsByUserController,
+  getQueriedErrorLogsController,
   updateErrorLogByIdController,
-  createNewErrorLogsBulkController,
-  updateErrorLogsBulkController,
 } from "./errorLog.controller";
 
 const errorLogRouter = Router();
@@ -21,12 +19,6 @@ errorLogRouter
 errorLogRouter.route("/delete-all").delete(deleteAllErrorLogsController);
 
 errorLogRouter.route("/user").get(getErrorLogsByUserController);
-
-// DEV ROUTES
-errorLogRouter
-  .route("/dev")
-  .post(createNewErrorLogsBulkController)
-  .patch(updateErrorLogsBulkController);
 
 errorLogRouter
   .route("/:errorLogId")

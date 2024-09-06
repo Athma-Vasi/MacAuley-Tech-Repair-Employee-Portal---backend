@@ -271,7 +271,7 @@ const getAddressChangesByUserController = expressAsyncController(
 );
 
 // @desc   Update address change status
-// @route  PATCH api/v1/actions/company/address-change/:addressChangeId
+// @route  PATCH api/v1/actions/company/address-change/:resourceId
 // @access Private/Admin/Manager
 const updateAddressChangeByIdController = expressAsyncController(
   async (
@@ -313,7 +313,7 @@ const updateAddressChangeByIdController = expressAsyncController(
 );
 
 // @desc   Get an address change request
-// @route  GET api/v1/actions/company/address-change/:addressChangeId
+// @route  GET api/v1/actions/company/address-change/:resourceId
 // @access Private
 const getAddressChangeByIdController = expressAsyncController(
   async (
@@ -348,7 +348,7 @@ const getAddressChangeByIdController = expressAsyncController(
 );
 
 // @desc   Delete an address change request by its id
-// @route  DELETE api/v1/actions/company/address-change/:addressChangeId
+// @route  DELETE api/v1/actions/company/address-change/:resourceId
 // @access Private
 const deleteAnAddressChangeController = expressAsyncController(
   async (

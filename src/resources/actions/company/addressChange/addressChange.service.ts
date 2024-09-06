@@ -19,40 +19,40 @@ import {
 import { Err, Ok } from "ts-results";
 
 async function getAddressChangeByIdService(
-  addressChangeId: Types.ObjectId | string,
+  resourceId: Types.ObjectId | string,
 ) {
   try {
-    const addressChange = await AddressChangeModel.findById(addressChangeId)
+    const resource = await AddressChangeModel.findById(resourceId)
       .lean()
       .exec();
-    if (addressChange === null || addressChange === undefined) {
+    if (resource === null || resource === undefined) {
       return new Ok(
-        createHttpResultSuccess({ message: "Address change not found" }),
+        createHttpResultSuccess({ message: "Resource not found" }),
       );
     }
 
-    return new Ok(createHttpResultSuccess({ data: [addressChange] }));
+    return new Ok(createHttpResultSuccess({ data: [resource] }));
   } catch (error: unknown) {
     return new Err(
       createHttpResultError({
         data: [error],
-        message: "Error getting address change by id",
+        message: "Error getting resource by id",
       }),
     );
   }
 }
 
 async function createNewAddressChangeService(
-  addressChangeSchema: AddressChangeSchema,
+  schema: AddressChangeSchema,
 ) {
   try {
-    const addressChange = await AddressChangeModel.create(addressChangeSchema);
-    return new Ok(createHttpResultSuccess({ data: [addressChange] }));
+    const resource = await AddressChangeModel.create(schema);
+    return new Ok(createHttpResultSuccess({ data: [resource] }));
   } catch (error: unknown) {
     return new Err(
       createHttpResultError({
         data: [error],
-        message: "Error creating new address change",
+        message: "Error creating new resource",
       }),
     );
   }
@@ -64,19 +64,19 @@ async function getQueriedAddressChangesService({
   options = {},
 }: QueriedResourceGetRequestServiceInput<AddressChangeDocument>) {
   try {
-    const addressChange = await AddressChangeModel.find(
+    const resources = await AddressChangeModel.find(
       filter,
       projection,
       options,
     )
       .lean()
       .exec();
-    return new Ok(createHttpResultSuccess({ data: addressChange }));
+    return new Ok(createHttpResultSuccess({ data: resources }));
   } catch (error: unknown) {
     return new Err(
       createHttpResultError({
         data: [error],
-        message: "Error getting queried address changes",
+        message: "Error getting queried resources",
       }),
     );
   }
@@ -86,15 +86,17 @@ async function getQueriedTotalAddressChangesService({
   filter = {},
 }: QueriedTotalResourceGetRequestServiceInput<AddressChangeDocument>) {
   try {
-    const totalAddressChanges = await AddressChangeModel.countDocuments(filter)
+    const totalQueriedResources = await AddressChangeModel.countDocuments(
+      filter,
+    )
       .lean()
       .exec();
-    return new Ok(createHttpResultSuccess({ data: [totalAddressChanges] }));
+    return new Ok(createHttpResultSuccess({ data: [totalQueriedResources] }));
   } catch (error: unknown) {
     return new Err(
       createHttpResultError({
         data: [error],
-        message: "Error getting total address changes",
+        message: "Error getting total resources",
       }),
     );
   }
@@ -106,19 +108,19 @@ async function getQueriedAddressChangesByUserService({
   options = {},
 }: QueriedResourceGetRequestServiceInput<AddressChangeDocument>) {
   try {
-    const addressChanges = await AddressChangeModel.find(
+    const resources = await AddressChangeModel.find(
       filter,
       projection,
       options,
     )
       .lean()
       .exec();
-    return new Ok(createHttpResultSuccess({ data: addressChanges }));
+    return new Ok(createHttpResultSuccess({ data: resources }));
   } catch (error: unknown) {
     return new Err(
       createHttpResultError({
         data: [error],
-        message: "Error getting address changes by user",
+        message: "Error getting resources by user",
       }),
     );
   }
@@ -132,7 +134,7 @@ async function updateAddressChangeByIdService({
   try {
     const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
     const updateObject = JSON.parse(updateString);
-    const addressChange = await AddressChangeModel.findByIdAndUpdate(
+    const resource = await AddressChangeModel.findByIdAndUpdate(
       _id,
       updateObject,
       {
@@ -142,39 +144,45 @@ async function updateAddressChangeByIdService({
       .lean()
       .exec();
 
-    if (addressChange === null || addressChange === undefined) {
+    if (resource === null || resource === undefined) {
       return new Ok(
-        createHttpResultSuccess({ message: "Address change not found" }),
+        createHttpResultSuccess({ message: "Resource not found" }),
       );
     }
 
-    return new Ok(createHttpResultSuccess({ data: [addressChange] }));
+    return new Ok(createHttpResultSuccess({ data: [resource] }));
   } catch (error: unknown) {
     return new Err(
       createHttpResultError({
         data: [error],
-        message: "Error updating address change by id",
+        message: "Error updating resource by id",
       }),
     );
   }
 }
 
 async function deleteAddressChangeByIdService(
-  addressChangeId: Types.ObjectId | string,
+  resourceId: Types.ObjectId | string,
 ) {
   try {
-    const deletedResult = await AddressChangeModel.deleteOne({
-      _id: addressChangeId,
+    const { acknowledged, deletedCount } = await AddressChangeModel.deleteOne({
+      _id: resourceId,
     })
       .lean()
       .exec();
 
-    return new Ok(createHttpResultSuccess({ data: [deletedResult] }));
+    return acknowledged && deletedCount === 1
+      ? new Ok(createHttpResultSuccess({}))
+      : new Ok(
+        createHttpResultError({
+          message: "Unable to delete resource",
+        }),
+      );
   } catch (error: unknown) {
     return new Err(
       createHttpResultError({
         data: [error],
-        message: "Error deleting address change by id",
+        message: "Error deleting resource by id",
       }),
     );
   }
@@ -182,14 +190,24 @@ async function deleteAddressChangeByIdService(
 
 async function deleteAllAddressChangesService() {
   try {
-    const deletedResult = await AddressChangeModel.deleteMany({}).lean()
+    const totalResources = await AddressChangeModel.countDocuments({});
+    const { acknowledged, deletedCount } = await AddressChangeModel.deleteMany(
+      {},
+    ).lean()
       .exec();
-    return new Ok(createHttpResultSuccess({ data: [deletedResult] }));
+
+    return acknowledged && deletedCount === totalResources
+      ? new Ok(createHttpResultSuccess({}))
+      : new Ok(
+        createHttpResultError({
+          message: "Unable to delete all resources",
+        }),
+      );
   } catch (error: unknown) {
     return new Err(
       createHttpResultError({
         data: [error],
-        message: "Error deleting all address changes",
+        message: "Error deleting all resources",
       }),
     );
   }

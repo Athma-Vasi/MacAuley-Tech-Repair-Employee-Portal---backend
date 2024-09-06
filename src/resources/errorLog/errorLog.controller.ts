@@ -5,59 +5,60 @@ import type { ErrorLogDocument, ErrorLogSchema } from "./errorLog.model";
 import type { Response } from "express";
 import type {
   CreateNewErrorLogRequest,
-  DeleteAnErrorLogRequest,
-  DeleteAllErrorLogsRequest,
-  GetQueriedErrorLogsByUserRequest,
-  GetErrorLogByIdRequest,
-  UpdateErrorLogByIdRequest,
   CreateNewErrorLogsBulkRequest,
-  UpdateErrorLogsBulkRequest,
+  DeleteAllErrorLogsRequest,
+  DeleteAnErrorLogRequest,
+  GetErrorLogByIdRequest,
+  GetQueriedErrorLogsByUserRequest,
   GetQueriedErrorLogsRequest,
+  UpdateErrorLogByIdRequest,
+  UpdateErrorLogsBulkRequest,
 } from "./errorLog.types";
 
 import {
   createNewErrorLogService,
-  deleteErrorLogByIdService,
   deleteAllErrorLogsService,
+  deleteErrorLogByIdService,
   getErrorLogByIdService,
   getQueriedErrorLogsByUserService,
-  getQueriedTotalErrorLogsService,
   getQueriedErrorLogsService,
+  getQueriedTotalErrorLogsService,
   updateErrorLogByIdService,
 } from "./errorLog.service";
 import { FilterQuery, QueryOptions } from "mongoose";
 import {
-  ResourceRequestServerResponse,
-  GetQueriedResourceRequestServerResponse,
+  CreateNewResourceRequest,
+  DeleteResourceRequest,
+  GetQueriedResourceByUserRequest,
+  GetQueriedResourceRequest,
+  GetResourceByIdRequest,
+  HttpResult,
   QueryObjectParsedWithDefaults,
+  UpdateResourceByIdRequest,
 } from "../../types";
-import { removeUndefinedAndNullValues } from "../../utils";
+import {
+  createHttpResultError,
+  createHttpResultSuccess,
+  removeUndefinedAndNullValues,
+} from "../../utils";
 import { getUserByIdService } from "../user";
+import { error } from "console";
 
 // @desc   Create a new error log request
 // @route  POST api/v1/error-log
 // @access Private
 const createNewErrorLogController = expressAsyncController(
   async (
-    request: CreateNewErrorLogRequest,
-    response: Response<ResourceRequestServerResponse<ErrorLogDocument>>
+    request: CreateNewResourceRequest<ErrorLogSchema>,
+    response: Response<HttpResult>,
   ) => {
-    const { errorLogShema } = request.body;
+    const { schema } = request.body;
+    const errorLogResult = await createNewErrorLogService(schema);
 
-    // create new errorLog request
-    const errorLogDocument = await createNewErrorLogService(errorLogShema);
-    if (!errorLogDocument) {
-      response
-        .status(400)
-        .json({ message: "Error creating error log", resourceData: [] });
-      return;
-    }
-
-    response.status(201).json({
-      message: "Error log created successfully",
-      resourceData: [errorLogDocument],
-    });
-  }
+    errorLogResult.err
+      ? response.status(200).json(errorLogResult.val)
+      : response.status(201).json(errorLogResult.safeUnwrap());
+  },
 );
 
 // @desc   Get all error logs
@@ -65,45 +66,46 @@ const createNewErrorLogController = expressAsyncController(
 // @access Private/Admin/Manager
 const getQueriedErrorLogsController = expressAsyncController(
   async (
-    request: GetQueriedErrorLogsRequest,
-    response: Response<GetQueriedResourceRequestServerResponse<ErrorLogDocument>>
+    request: GetQueriedResourceRequest,
+    response: Response<HttpResult>,
   ) => {
     let { newQueryFlag, totalDocuments } = request.body;
 
-    const { filter, projection, options } =
-      request.query as QueryObjectParsedWithDefaults;
+    const { filter, projection, options } = request.query;
 
     // only perform a countDocuments scan if a new query is being made
     if (newQueryFlag) {
-      totalDocuments = await getQueriedTotalErrorLogsService({
+      const totalResult = await getQueriedTotalErrorLogsService({
         filter: filter as FilterQuery<ErrorLogDocument> | undefined,
       });
+
+      if (totalResult.err) {
+        response.status(200).json(totalResult.val);
+        return;
+      }
+
+      totalDocuments = totalResult.safeUnwrap().data[0];
     }
 
-    // get all error logs
-    const errorLog = await getQueriedErrorLogsService({
-      filter: filter as FilterQuery<ErrorLogDocument> | undefined,
-      projection: projection as QueryOptions<ErrorLogDocument>,
-      options: options as QueryOptions<ErrorLogDocument>,
+    const errorLogsResult = await getQueriedErrorLogsService({
+      filter,
+      projection,
+      options,
     });
 
-    if (!errorLog.length) {
-      response.status(200).json({
-        message: "No error logs that match query parameters were found",
-        pages: 0,
-        totalDocuments: 0,
-        resourceData: [],
-      });
+    if (errorLogsResult.err) {
+      response.status(200).json(errorLogsResult.val);
       return;
     }
 
-    response.status(200).json({
-      message: "Address logs found successfully",
-      pages: Math.ceil(totalDocuments / Number(options?.limit)),
-      totalDocuments,
-      resourceData: errorLog,
-    });
-  }
+    response.status(200).json(
+      createHttpResultSuccess({
+        ...errorLogsResult.safeUnwrap(),
+        pages: Math.ceil(totalDocuments / Number(options?.limit ?? 10)),
+        totalDocuments,
+      }),
+    );
+  },
 );
 
 // @desc   Get all error log requests by user
@@ -111,8 +113,8 @@ const getQueriedErrorLogsController = expressAsyncController(
 // @access Private
 const getErrorLogsByUserController = expressAsyncController(
   async (
-    request: GetQueriedErrorLogsByUserRequest,
-    response: Response<GetQueriedResourceRequestServerResponse<ErrorLogDocument>>
+    request: GetQueriedResourceByUserRequest,
+    response: Response<HttpResult>,
   ) => {
     // anyone can view their own errorLog requests
     const {
@@ -121,118 +123,97 @@ const getErrorLogsByUserController = expressAsyncController(
 
     let { newQueryFlag, totalDocuments } = request.body;
 
-    const { filter, projection, options } =
-      request.query as QueryObjectParsedWithDefaults;
+    const { filter, projection, options } = request.query;
 
     const filterWithUserId = { ...filter, userId };
 
     // only perform a countDocuments scan if a new query is being made
     if (newQueryFlag) {
-      totalDocuments = await getQueriedTotalErrorLogsService({
+      const totalResult = await getQueriedTotalErrorLogsService({
         filter: filterWithUserId,
       });
+
+      if (totalResult.err) {
+        response.status(200).json(totalResult.val);
+        return;
+      }
+
+      totalDocuments = totalResult.safeUnwrap().data[0];
     }
 
-    // get all errorLog requests by user
     const errorLogs = await getQueriedErrorLogsByUserService({
-      filter: filterWithUserId as FilterQuery<ErrorLogDocument> | undefined,
-      projection: projection as QueryOptions<ErrorLogDocument>,
-      options: options as QueryOptions<ErrorLogDocument>,
+      filter,
+      projection,
+      options,
     });
-    if (errorLogs.length === 0) {
-      response.status(200).json({
-        message: "No error log requests found",
-        pages: 0,
-        totalDocuments: 0,
-        resourceData: [],
-      });
-    } else {
-      response.status(200).json({
-        message: "Address log requests found successfully",
-        pages: Math.ceil(totalDocuments / Number(options?.limit)),
-        totalDocuments,
-        resourceData: errorLogs,
-      });
-    }
-  }
-);
 
-// @desc   Update error log status
-// @route  PATCH api/v1/error-log/:errorLogId
-// @access Private/Admin/Manager
-const updateErrorLogByIdController = expressAsyncController(
-  async (
-    request: UpdateErrorLogByIdRequest,
-    response: Response<ResourceRequestServerResponse<ErrorLogDocument>>
-  ) => {
-    const { errorLogId } = request.params;
-    const {
-      documentUpdate: { fields, updateOperator },
-      userInfo: { userId },
-    } = request.body;
-
-    const userExists = await getUserByIdService(userId);
-    if (!userExists) {
-      response.status(404).json({ message: "User does not exist", resourceData: [] });
+    if (errorLogs.err) {
+      response.status(200).json(errorLogs.val);
       return;
     }
 
-    // update errorLog request status
-    const updatedErrorLog = await updateErrorLogByIdService({
-      _id: errorLogId,
+    response.status(200).json(
+      createHttpResultSuccess({
+        ...errorLogs.safeUnwrap(),
+        pages: Math.ceil(totalDocuments / Number(options?.limit ?? 10)),
+        totalDocuments,
+      }),
+    );
+  },
+);
+
+// @desc   Update error log status
+// @route  PATCH api/v1/error-log/:resourceId
+// @access Private/Admin/Manager
+const updateErrorLogByIdController = expressAsyncController(
+  async (
+    request: UpdateResourceByIdRequest,
+    response: Response<HttpResult>,
+  ) => {
+    const { resourceId } = request.params;
+    const {
+      documentUpdate: { fields, updateOperator },
+    } = request.body;
+
+    const updatedErrorLogResult = await updateErrorLogByIdService({
+      _id: resourceId,
       fields,
       updateOperator,
     });
 
-    if (!updatedErrorLog) {
-      response.status(400).json({
-        message: "Address log request status update failed",
-        resourceData: [],
-      });
-      return;
-    }
-
-    response.status(200).json({
-      message: "Address log request status updated successfully",
-      resourceData: [updatedErrorLog],
-    });
-  }
+    updatedErrorLogResult.err
+      ? response.status(200).json(updatedErrorLogResult.val)
+      : response.status(201).json(updatedErrorLogResult.safeUnwrap());
+  },
 );
 
 // @desc   Get an error log request
-// @route  GET api/v1/error-log/:errorLogId
+// @route  GET api/v1/error-log/:resourceId
 // @access Private
 const getErrorLogByIdController = expressAsyncController(
   async (
-    request: GetErrorLogByIdRequest,
-    response: Response<ResourceRequestServerResponse<ErrorLogDocument>>
+    request: GetResourceByIdRequest,
+    response: Response<HttpResult>,
   ) => {
-    const { errorLogId } = request.params;
-    // get errorLog request by id
-    const errorLog = await getErrorLogByIdService(errorLogId);
-    if (!errorLog) {
-      response
-        .status(404)
-        .json({ message: "ErrorLog request not found", resourceData: [] });
-      return;
-    }
+    const { resourceId } = request.params;
+    const errorLogResult = await getErrorLogByIdService(resourceId);
 
-    response.status(200).json({
-      message: "Address log request found successfully",
-      resourceData: [errorLog],
-    });
-  }
+    errorLogResult.err
+      ? response.status(200).json(errorLogResult.val)
+      : response.status(200).json(errorLogResult.safeUnwrap());
+  },
 );
 
 // @desc   Delete an error log request by its id
-// @route  DELETE api/v1/error-log/:errorLogId
+// @route  DELETE api/v1/error-log/:resourceId
 // @access Private
 const deleteAnErrorLogController = expressAsyncController(
-  async (request: DeleteAnErrorLogRequest, response: Response) => {
-    const { errorLogId } = request.params;
+  async (request: DeleteResourceRequest, response: Response<HttpResult>) => {
+    const { resourceId } = request.params;
 
-    // delete errorLog request by id
-    const deletedResult: DeleteResult = await deleteErrorLogByIdService(errorLogId);
+    const deletedResult = await deleteErrorLogByIdService(
+      resourceId,
+    );
 
     if (!deletedResult.deletedCount) {
       response.status(400).json({
@@ -246,7 +227,7 @@ const deleteAnErrorLogController = expressAsyncController(
       message: "ErrorLog request deleted successfully",
       resourceData: [],
     });
-  }
+  },
 );
 
 // @desc    Delete all error log requests
@@ -268,7 +249,7 @@ const deleteAllErrorLogsController = expressAsyncController(
       message: "All error log requests deleted successfully",
       resourceData: [],
     });
-  }
+  },
 );
 
 // DEV ROUTE
@@ -278,7 +259,7 @@ const deleteAllErrorLogsController = expressAsyncController(
 const createNewErrorLogsBulkController = expressAsyncController(
   async (
     request: CreateNewErrorLogsBulkRequest,
-    response: Response<ResourceRequestServerResponse<ErrorLogDocument>>
+    response: Response<ResourceRequestServerResponse<ErrorLogDocument>>,
   ) => {
     const { errorLogSchemas } = request.body;
 
@@ -286,11 +267,11 @@ const createNewErrorLogsBulkController = expressAsyncController(
       errorLogSchemas.map(async (errorLogSchema) => {
         const errorLogDocument = await createNewErrorLogService(errorLogSchema);
         return errorLogDocument;
-      })
+      }),
     );
 
     const filteredErrorLogDocuments = errorLogDocuments.filter(
-      removeUndefinedAndNullValues
+      removeUndefinedAndNullValues,
     );
 
     if (filteredErrorLogDocuments.length === 0) {
@@ -301,20 +282,19 @@ const createNewErrorLogsBulkController = expressAsyncController(
       return;
     }
 
-    const uncreatedDocumentsAmount =
-      errorLogSchemas.length - filteredErrorLogDocuments.length;
+    const uncreatedDocumentsAmount = errorLogSchemas.length -
+      filteredErrorLogDocuments.length;
 
     response.status(201).json({
-      message: `Successfully created ${
-        filteredErrorLogDocuments.length
-      } Address Change Requests.${
-        uncreatedDocumentsAmount
-          ? ` ${uncreatedDocumentsAmount} documents were not created.`
-          : ""
-      }}`,
+      message:
+        `Successfully created ${filteredErrorLogDocuments.length} Address Change Requests.${
+          uncreatedDocumentsAmount
+            ? ` ${uncreatedDocumentsAmount} documents were not created.`
+            : ""
+        }}`,
       resourceData: filteredErrorLogDocuments,
     });
-  }
+  },
 );
 
 // DEV ROUTE
@@ -324,7 +304,7 @@ const createNewErrorLogsBulkController = expressAsyncController(
 const updateErrorLogsBulkController = expressAsyncController(
   async (
     request: UpdateErrorLogsBulkRequest,
-    response: Response<ResourceRequestServerResponse<ErrorLogDocument>>
+    response: Response<ResourceRequestServerResponse<ErrorLogDocument>>,
   ) => {
     const { errorLogFields } = request.body;
 
@@ -332,22 +312,22 @@ const updateErrorLogsBulkController = expressAsyncController(
       errorLogFields.map(async (errorLogField) => {
         const {
           documentUpdate: { fields, updateOperator },
-          errorLogId,
+          resourceId,
         } = errorLogField;
 
         const updatedErrorLog = await updateErrorLogByIdService({
-          _id: errorLogId,
+          _id: resourceId,
           fields,
           updateOperator,
         });
 
         return updatedErrorLog;
-      })
+      }),
     );
 
     // filter out any errorLogs that were not created
     const successfullyCreatedErrorLogs = updatedErrorLogs.filter(
-      removeUndefinedAndNullValues
+      removeUndefinedAndNullValues,
     );
 
     if (successfullyCreatedErrorLogs.length === 0) {
@@ -359,24 +339,23 @@ const updateErrorLogsBulkController = expressAsyncController(
     }
 
     response.status(201).json({
-      message: `Successfully created ${
-        successfullyCreatedErrorLogs.length
-      } Address Changes. ${
-        errorLogFields.length - successfullyCreatedErrorLogs.length
-      } Address Changes failed to be created.`,
+      message:
+        `Successfully created ${successfullyCreatedErrorLogs.length} Address Changes. ${
+          errorLogFields.length - successfullyCreatedErrorLogs.length
+        } Address Changes failed to be created.`,
       resourceData: successfullyCreatedErrorLogs,
     });
-  }
+  },
 );
 
 export {
   createNewErrorLogController,
-  getQueriedErrorLogsController,
-  getErrorLogsByUserController,
-  getErrorLogByIdController,
-  deleteAnErrorLogController,
-  deleteAllErrorLogsController,
-  updateErrorLogByIdController,
   createNewErrorLogsBulkController,
+  deleteAllErrorLogsController,
+  deleteAnErrorLogController,
+  getErrorLogByIdController,
+  getErrorLogsByUserController,
+  getQueriedErrorLogsController,
+  updateErrorLogByIdController,
   updateErrorLogsBulkController,
 };
