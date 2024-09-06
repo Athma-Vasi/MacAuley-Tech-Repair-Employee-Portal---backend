@@ -8,7 +8,7 @@ import { Types } from "mongoose";
 import { FileExtension } from "../resources/fileUpload";
 import type { ParsedQs } from "qs";
 import { UserRoles } from "../resources/user";
-import { Request } from "express";
+import { Request, Response } from "express";
 import { ErrImpl, OkImpl } from "ts-results";
 
 /**
@@ -117,20 +117,8 @@ type DatabaseResponse<
   | ErrImpl<HttpResult<unknown>>
 >;
 
-/**
- * - where generic type parameter Document = ${resource}Schema & {_id, createdAt, updatedAt, __v}
- * - used in service functions that call ${Model}.findOne() or ${Model}.findById() functions
- */
-type DatabaseResponseNullable<
-  Document extends Record<string, unknown> = Record<string, unknown>,
-> = Promise<
-  | (
-    & FlattenMaps<Document>
-    & Required<{
-      _id: Types.ObjectId;
-    }>
-  )
-  | null
+type HttpServerResponse<Data = unknown> = Response<
+  Awaited<HttpResult<Require_id<FlattenMaps<Data>>>>
 >;
 
 /**
@@ -244,7 +232,6 @@ export type {
   ArrayOperators,
   CreateNewResourceRequest,
   DatabaseResponse,
-  DatabaseResponseNullable,
   DeleteAllResourcesRequest,
   DeleteResourceRequest,
   DocumentUpdateOperation,
@@ -255,6 +242,7 @@ export type {
   GetQueriedResourceRequest,
   GetResourceByIdRequest,
   HttpResult,
+  HttpServerResponse,
   QueriedResourceGetRequestServiceInput,
   QueriedTotalResourceGetRequestServiceInput,
   QueryObjectParsed,

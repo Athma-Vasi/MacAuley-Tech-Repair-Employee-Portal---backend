@@ -36,6 +36,7 @@ import {
   updateResourceByIdService,
 } from "../../../../services";
 import { de } from "date-fns/locale";
+import { getQueriedResourcesHandler } from "../../../../handlers";
 
 // @desc   Create a new address change request
 // @route  POST api/v1/actions/company/address-change
@@ -136,65 +137,8 @@ const createNewAddressChangeController = expressAsyncController(
 // @desc   Get all address changes
 // @route  GET api/v1/actions/company/address-change
 // @access Private/Admin/Manager
-const getQueriedAddressChangesController = expressAsyncController(
-  async (
-    request: GetQueriedResourceRequest,
-    response: Response<HttpResult<AddressChangeDocument>>,
-  ) => {
-    let {
-      newQueryFlag,
-      totalDocuments,
-    } = request.body;
-
-    const { filter = {}, projection = null, options = {} } = request.query;
-
-    // only perform a countDocuments scan if a new query is being made
-    if (newQueryFlag) {
-      const totalResult = await getQueriedTotalResourcesService(
-        filter,
-        AddressChangeModel,
-      );
-
-      if (totalResult.err) {
-        await createNewErrorLogService(
-          createErrorLogSchema(totalResult.val, request.body),
-        );
-
-        response.status(200).json(
-          createHttpResultError({ status: 400 }),
-        );
-        return;
-      }
-
-      totalDocuments = totalResult.safeUnwrap().data?.[0] ?? 0;
-    }
-
-    const getResourcesResult = await getQueriedResourcesService({
-      filter,
-      options,
-      projection,
-      resourceModel: AddressChangeModel,
-    });
-
-    if (getResourcesResult.err) {
-      await createNewErrorLogService(
-        createErrorLogSchema(getResourcesResult.val, request.body),
-      );
-
-      response.status(200).json(
-        createHttpResultError({ message: getResourcesResult.val.message }),
-      );
-      return;
-    }
-
-    response.status(200).json(
-      createHttpResultSuccess({
-        data: getResourcesResult.safeUnwrap().data,
-        pages: Math.ceil(totalDocuments / Number(options?.limit ?? 10)),
-        totalDocuments,
-      }),
-    );
-  },
+const getQueriedAddressChangesController = getQueriedResourcesHandler(
+  AddressChangeModel,
 );
 
 // @desc   Get all address change requests by user
