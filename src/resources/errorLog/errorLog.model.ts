@@ -1,15 +1,16 @@
-import { Schema, Types, model } from "mongoose";
+import { model, Schema, Types } from "mongoose";
 
 type ErrorLogSchema = {
   expireAt: Date;
-  userId: string;
-  username: string;
-  sessionId: string;
   message: string;
-  stack: string;
+  name: string;
   requestBody: string;
+  sessionId: string;
+  stack: string;
   status: number;
   timestamp: Date;
+  userId: string;
+  username: string;
 };
 
 type ErrorLogDocument = ErrorLogSchema & {
@@ -49,6 +50,11 @@ const errorLogSchema = new Schema<ErrorLogSchema>(
       required: false,
       default: "Message was not provided",
     },
+    name: {
+      type: String,
+      required: false,
+      default: "Error name was not provided",
+    },
     stack: {
       type: String,
       required: false,
@@ -70,7 +76,7 @@ const errorLogSchema = new Schema<ErrorLogSchema>(
       default: Date.now(),
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 errorLogSchema.index({
@@ -83,4 +89,4 @@ errorLogSchema.index({
 
 const ErrorLogModel = model<ErrorLogDocument>("ErrorLog", errorLogSchema);
 
-export { ErrorLogModel, ErrorLogSchema, ErrorLogDocument };
+export { ErrorLogDocument, ErrorLogModel, ErrorLogSchema };

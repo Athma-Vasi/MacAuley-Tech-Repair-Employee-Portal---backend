@@ -1,4 +1,5 @@
 import { RequestAfterJWTVerification } from "../resources/auth";
+import { ErrorLogSchema } from "../resources/errorLog";
 import { HttpResult } from "../types";
 
 function createHttpResultError<Data = unknown>({
@@ -58,18 +59,26 @@ function createHttpResultSuccess<Data = unknown>({
 }
 
 function createErrorLogSchema(
-  httpResult: HttpResult<Error>,
+  httpResult: HttpResult<unknown>,
   requestBody: RequestAfterJWTVerification["body"],
-) {
+): ErrorLogSchema {
   const {
     userInfo: { userId, username },
     sessionId,
   } = requestBody;
 
+  let stack = httpResult.data?.[0] instanceof Error
+    ? httpResult.data?.[0].stack
+    : "Unknown error";
+  stack = stack ?? "Unknown error";
+
   return {
     expireAt: new Date(Date.now() + 1000 * 60 * 60 * 24), // 24 hours
     message: httpResult.message,
-    stack: httpResult.data?.[0]?.stack ?? "",
+    name: httpResult.data?.[0] instanceof Error
+      ? httpResult.data?.[0].name
+      : "Unknown error",
+    stack,
     requestBody: JSON.stringify(requestBody),
     sessionId: sessionId.toString(),
     status: httpResult.status,
