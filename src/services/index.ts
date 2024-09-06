@@ -1,13 +1,20 @@
-import { Model } from "mongoose";
-import { Err, Ok } from "ts-results";
+import { FlattenMaps, Model, Require_id } from "mongoose";
+import { Err, ErrImpl, Ok, OkImpl } from "ts-results";
 import { createHttpResultError, createHttpResultSuccess } from "../utils";
-import { QueryObjectParsedWithDefaults } from "../types";
+import {
+    DatabaseResponse,
+    HttpResult,
+    QueryObjectParsedWithDefaults,
+} from "../types";
 
 async function getResourceByIdService<
     Doc extends Record<string, unknown> = Record<string, unknown>,
->(resourceId: string, resourceModel: Model<Doc>) {
+>(
+    resourceId: string,
+    model: Model<Doc>,
+) {
     try {
-        const resource = await resourceModel.findById(resourceId)
+        const resource = await model.findById(resourceId)
             .lean()
             .exec();
         if (resource === null || resource === undefined) {
@@ -30,9 +37,9 @@ async function getResourceByIdService<
 async function createNewResourceService<
     Schema extends Record<string, unknown> = Record<string, unknown>,
     Doc extends Record<string, unknown> = Record<string, unknown>,
->(resourceSchema: Schema, resourceModel: Model<Doc>) {
+>(resourceSchema: Schema, model: Model<Doc>) {
     try {
-        const resource = await resourceModel.create(resourceSchema);
+        const resource = await model.create(resourceSchema);
         return new Ok(createHttpResultSuccess({ data: [resource] }));
     } catch (error: unknown) {
         return new Err(
@@ -48,14 +55,14 @@ async function getQueriedResourcesService<
     Doc extends Record<string, unknown> = Record<string, unknown>,
 >({
     filter = {},
+    model,
     options = {},
     projection = null,
-    resourceModel,
 }: QueryObjectParsedWithDefaults & {
-    resourceModel: Model<Doc>;
-}) {
+    model: Model<Doc>;
+}): DatabaseResponse<Doc> {
     try {
-        const resources = await resourceModel.find(filter, projection, options)
+        const resources = await model.find(filter, projection, options)
             .lean()
             .exec();
         return new Ok(createHttpResultSuccess({ data: resources }));
@@ -73,10 +80,13 @@ async function getQueriedTotalResourcesService<
     Doc extends Record<string, unknown> = Record<string, unknown>,
 >(
     filter: Record<string, unknown>,
-    resourceModel: Model<Doc>,
-) {
+    model: Model<Doc>,
+): Promise<
+    | OkImpl<HttpResult<number>>
+    | ErrImpl<HttpResult<unknown>>
+> {
     try {
-        const totalQueriedResources = await resourceModel.countDocuments(filter)
+        const totalQueriedResources = await model.countDocuments(filter)
             .lean()
             .exec();
         return new Ok(
@@ -96,14 +106,14 @@ async function getQueriedResourcesByUserService<
     Doc extends Record<string, unknown> = Record<string, unknown>,
 >({
     filter = {},
+    model,
     options = {},
     projection = null,
-    resourceModel,
 }: QueryObjectParsedWithDefaults & {
-    resourceModel: Model<Doc>;
-}) {
+    model: Model<Doc>;
+}): DatabaseResponse<Doc> {
     try {
-        const resources = await resourceModel.find(filter, projection, options)
+        const resources = await model.find(filter, projection, options)
             .lean()
             .exec();
         return new Ok(createHttpResultSuccess({ data: resources }));
@@ -123,11 +133,11 @@ async function updateResourceByIdService<
     resourceId,
     fields,
     updateOperator,
-    resourceModel,
+    model,
 }: {
     resourceId: string;
     fields: Record<string, unknown>;
-    resourceModel: Model<Doc>;
+    model: Model<Doc>;
     updateOperator: string;
 }) {
     try {
@@ -136,7 +146,7 @@ async function updateResourceByIdService<
         } }`;
         const updateObject = JSON.parse(updateString);
 
-        const resource = await resourceModel.findByIdAndUpdate(
+        const resource = await model.findByIdAndUpdate(
             resourceId,
             updateObject,
             { new: true },
@@ -165,9 +175,9 @@ async function updateResourceByIdService<
 
 async function deleteResourceByIdService<
     Doc extends Record<string, unknown> = Record<string, unknown>,
->(resourceId: string, resourceModel: Model<Doc>) {
+>(resourceId: string, model: Model<Doc>): DatabaseResponse {
     try {
-        const { acknowledged, deletedCount } = await resourceModel.deleteOne({
+        const { acknowledged, deletedCount } = await model.deleteOne({
             _id: resourceId,
         })
             .lean()
@@ -192,10 +202,10 @@ async function deleteResourceByIdService<
 
 async function deleteAllResourcesService<
     Doc extends Record<string, unknown> = Record<string, unknown>,
->(resourceModel: Model<Doc>) {
+>(model: Model<Doc>): DatabaseResponse {
     try {
-        const totalResources = await resourceModel.countDocuments({});
-        const { acknowledged, deletedCount } = await resourceModel.deleteMany(
+        const totalResources = await model.countDocuments({});
+        const { acknowledged, deletedCount } = await model.deleteMany(
             {},
         )
             .lean()

@@ -1,9 +1,15 @@
-import type { FilterQuery, FlattenMaps, QueryOptions } from "mongoose";
+import type {
+  FilterQuery,
+  FlattenMaps,
+  QueryOptions,
+  Require_id,
+} from "mongoose";
 import { Types } from "mongoose";
 import { FileExtension } from "../resources/fileUpload";
 import type { ParsedQs } from "qs";
 import { UserRoles } from "../resources/user";
 import { Request } from "express";
+import { ErrImpl, OkImpl } from "ts-results";
 
 /**
  * type signature of query object created by express
@@ -105,14 +111,10 @@ type HttpResult<Data = unknown> = {
  * - used in service functions that call ${Model}.find() functions
  */
 type DatabaseResponse<
-  Document extends Record<string, unknown> = Record<string, unknown>,
+  Doc extends Record<string, unknown> = Record<string, unknown>,
 > = Promise<
-  (
-    & FlattenMaps<Document>
-    & Required<{
-      _id: Types.ObjectId;
-    }>
-  )[]
+  | OkImpl<HttpResult<Require_id<FlattenMaps<Doc>>>>
+  | ErrImpl<HttpResult<unknown>>
 >;
 
 /**

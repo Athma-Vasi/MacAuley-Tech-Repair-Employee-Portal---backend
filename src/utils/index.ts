@@ -68,7 +68,9 @@ function createHttpResultError<Data = unknown>({
   };
 }
 
-function createHttpResultSuccess<Data = unknown>({
+function createHttpResultSuccess<
+  Data = unknown,
+>({
   data = [],
   kind = "success",
   message = "Successful operation",
@@ -105,18 +107,24 @@ function createErrorLogSchema(
     sessionId,
   } = requestBody;
 
+  const unknownError = "Unknown error";
+
+  const message = httpResult.data?.[0] instanceof Error
+    ? httpResult.data?.[0].message
+    : httpResult.message ?? unknownError;
+
   const name = httpResult.data?.[0] instanceof Error
     ? httpResult.data?.[0].name
-    : "Unknown error";
+    : unknownError;
 
   let stack = httpResult.data?.[0] instanceof Error
     ? httpResult.data?.[0].stack
-    : "Unknown error";
-  stack = stack ?? "Unknown error";
+    : unknownError;
+  stack = stack ?? unknownError;
 
   return {
     expireAt: new Date(Date.now() + 1000 * 60 * 60 * 24), // 24 hours
-    message: httpResult.message,
+    message,
     name,
     stack,
     requestBody: JSON.stringify(requestBody),
