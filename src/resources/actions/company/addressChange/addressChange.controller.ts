@@ -36,7 +36,11 @@ import {
   updateResourceByIdService,
 } from "../../../../services";
 import { de } from "date-fns/locale";
-import { getQueriedResourcesHandler } from "../../../../handlers";
+import {
+  getQueriedResourcesByUserHandler,
+  getQueriedResourcesHandler,
+  updateResourceByIdHandler,
+} from "../../../../handlers";
 
 // @desc   Create a new address change request
 // @route  POST api/v1/actions/company/address-change
@@ -144,110 +148,15 @@ const getQueriedAddressChangesController = getQueriedResourcesHandler(
 // @desc   Get all address change requests by user
 // @route  GET api/v1/actions/company/address-change/user
 // @access Private
-const getAddressChangesByUserController = expressAsyncController(
-  async (
-    request: GetQueriedResourceByUserRequest,
-    response: Response<HttpResult<AddressChangeDocument>>,
-  ) => {
-    const {
-      userInfo: { userId },
-      newQueryFlag,
-    } = request.body;
-    let { totalDocuments } = request.body;
-
-    const { filter = {}, projection = null, options = {} } = request.query;
-    const filterWithUserId = { ...filter, userId };
-
-    // only perform a countDocuments scan if a new query is being made
-    if (newQueryFlag) {
-      const totalResult = await getQueriedTotalResourcesService(
-        filterWithUserId,
-        AddressChangeModel,
-      );
-
-      if (totalResult.err) {
-        await createNewErrorLogService(
-          createErrorLogSchema(totalResult.val, request.body),
-        );
-
-        response.status(200).json(
-          createHttpResultError({ status: 400 }),
-        );
-        return;
-      }
-
-      totalDocuments = totalResult.safeUnwrap().data?.[0] ?? 0;
-    }
-
-    const getResourcesResult = await getQueriedResourcesByUserService({
-      filter,
-      options,
-      projection,
-      resourceModel: AddressChangeModel,
-    });
-
-    if (getResourcesResult.err) {
-      await createNewErrorLogService(
-        createErrorLogSchema(getResourcesResult.val, request.body),
-      );
-
-      response.status(200).json(
-        createHttpResultError({ message: getResourcesResult.val.message }),
-      );
-      return;
-    }
-
-    response.status(200).json(
-      createHttpResultSuccess({
-        data: getResourcesResult.safeUnwrap().data,
-        pages: Math.ceil(totalDocuments / Number(options?.limit ?? 10)),
-        totalDocuments,
-      }),
-    );
-  },
+const getAddressChangesByUserController = getQueriedResourcesByUserHandler(
+  AddressChangeModel,
 );
 
 // @desc   Update address change status
 // @route  PATCH api/v1/actions/company/address-change/:resourceId
 // @access Private/Admin/Manager
-const updateAddressChangeByIdController = expressAsyncController(
-  async (
-    request: UpdateResourceByIdRequest<AddressChangeDocument>,
-    response: Response<HttpResult<AddressChangeDocument>>,
-  ) => {
-    const { resourceId } = request.params;
-    const {
-      documentUpdate: { fields, updateOperator },
-    } = request.body;
-
-    const updateResourceResult = await updateResourceByIdService({
-      resourceId,
-      fields,
-      resourceModel: AddressChangeModel,
-      updateOperator,
-    });
-
-    if (updateResourceResult.err) {
-      await createNewErrorLogService(
-        createErrorLogSchema(updateResourceResult.val, request.body),
-      );
-
-      response.status(200).json(
-        createHttpResultError({
-          message: updateResourceResult.val.message,
-        }),
-      );
-      return;
-    }
-
-    response
-      .status(200)
-      .json(
-        updateResourceResult.safeUnwrap() as HttpResult<
-          AddressChangeDocument
-        >,
-      );
-  },
+const updateAddressChangeByIdController = updateResourceByIdHandler(
+  AddressChangeModel,
 );
 
 // @desc   Get an address change request

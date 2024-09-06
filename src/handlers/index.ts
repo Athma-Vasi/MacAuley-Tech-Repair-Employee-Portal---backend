@@ -1,14 +1,15 @@
-import { NextFunction, Response } from "express";
 import {
     GetQueriedResourceRequest,
     HttpResult,
     HttpServerResponse,
+    UpdateResourceByIdRequest,
 } from "../types";
 import { FlattenMaps, Model, Require_id } from "mongoose";
 import {
     getQueriedResourcesByUserService,
     getQueriedResourcesService,
     getQueriedTotalResourcesService,
+    updateResourceByIdService,
 } from "../services";
 import { createNewErrorLogService } from "../resources/errorLog";
 import {
@@ -17,7 +18,7 @@ import {
     createHttpResultSuccess,
 } from "../utils";
 
-async function getQueriedResourcesHandler<
+function getQueriedResourcesHandler<
     Doc extends Record<string, unknown> = Record<string, unknown>,
 >(
     model: Model<Doc>,
@@ -25,7 +26,6 @@ async function getQueriedResourcesHandler<
     return async (
         request: GetQueriedResourceRequest,
         response: HttpServerResponse<Doc>,
-        next: NextFunction,
     ) => {
         try {
             let { newQueryFlag, totalDocuments } = request.body;
@@ -92,12 +92,12 @@ async function getQueriedResourcesHandler<
                 ),
             );
 
-            next();
+            response.status(200).json(createHttpResultError({}));
         }
     };
 }
 
-async function getQueriedResourcesByUserHandler<
+function getQueriedResourcesByUserHandler<
     Doc extends Record<string, unknown> = Record<string, unknown>,
 >(
     model: Model<Doc>,
@@ -105,7 +105,6 @@ async function getQueriedResourcesByUserHandler<
     return async (
         request: GetQueriedResourceRequest,
         response: HttpServerResponse,
-        next: NextFunction,
     ) => {
         try {
             const {
@@ -174,9 +173,69 @@ async function getQueriedResourcesByUserHandler<
                 ),
             );
 
-            next();
+            response.status(200).json(createHttpResultError({}));
         }
     };
 }
 
-export { getQueriedResourcesByUserHandler, getQueriedResourcesHandler };
+function updateResourceByIdHandler<
+    Doc extends Record<string, unknown> = Record<string, unknown>,
+>(
+    model: Model<Doc>,
+) {
+    return async (
+        request: UpdateResourceByIdRequest<Doc>,
+        response: HttpServerResponse<Doc>,
+    ) => {
+        try {
+            const { resourceId } = request.params;
+            const {
+                documentUpdate: { fields, updateOperator },
+            } = request.body;
+
+            const updateResourceResult = await updateResourceByIdService({
+                fields,
+                model,
+                resourceId,
+                updateOperator,
+            });
+
+            if (updateResourceResult.err) {
+                await createNewErrorLogService(
+                    createErrorLogSchema(
+                        updateResourceResult.val,
+                        request.body,
+                    ),
+                );
+
+                response.status(200).json(
+                    createHttpResultError({ status: 400 }),
+                );
+                return;
+            }
+
+            response
+                .status(200)
+                .json(
+                    updateResourceResult.safeUnwrap() as HttpResult<
+                        Require_id<FlattenMaps<Doc>>
+                    >,
+                );
+        } catch (error: unknown) {
+            await createNewErrorLogService(
+                createErrorLogSchema(
+                    createHttpResultError({ data: [error] }),
+                    request.body,
+                ),
+            );
+
+            response.status(200).json(createHttpResultError({}));
+        }
+    };
+}
+
+export {
+    getQueriedResourcesByUserHandler,
+    getQueriedResourcesHandler,
+    updateResourceByIdHandler,
+};
