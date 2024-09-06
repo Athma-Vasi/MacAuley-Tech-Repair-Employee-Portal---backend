@@ -1,6 +1,10 @@
 import { NextFunction, Response } from "express";
-import { GetQueriedResourceRequest, HttpResult } from "../types";
-import { Model } from "mongoose";
+import {
+    DatabaseResponse,
+    GetQueriedResourceRequest,
+    HttpResult,
+} from "../types";
+import { FlattenMaps, Model, Require_id } from "mongoose";
 import {
     getQueriedResourcesService,
     getQueriedTotalResourcesService,
@@ -19,7 +23,7 @@ async function getQueriedResourcesHandler<
 ) {
     return async (
         request: GetQueriedResourceRequest,
-        response: Response<HttpResult<Doc>>,
+        response: Response<Awaited<HttpResult<Require_id<FlattenMaps<Doc>>>>>,
         next: NextFunction,
     ) => {
         try {
@@ -86,66 +90,3 @@ async function getQueriedResourcesHandler<
         } catch (error: unknown) {}
     };
 }
-
-/**
- * const getQueriedAddressChangesController = expressAsyncController(
-  async (
-    request: GetQueriedResourceRequest,
-    response: Response<HttpResult<AddressChangeDocument>>,
-  ) => {
-    let {
-      newQueryFlag,
-      totalDocuments,
-    } = request.body;
-
-    const { filter = {}, projection = null, options = {} } = request.query;
-
-    // only perform a countDocuments scan if a new query is being made
-    if (newQueryFlag) {
-      const totalResult = await getQueriedTotalResourcesService(
-        filter,
-        AddressChangeModel,
-      );
-
-      if (totalResult.err) {
-        await createNewErrorLogService(
-          createErrorLogSchema(totalResult.val, request.body),
-        );
-
-        response.status(200).json(
-          createHttpResultError({ status: 400 }),
-        );
-        return;
-      }
-
-      totalDocuments = totalResult.safeUnwrap().data?.[0] ?? 0;
-    }
-
-    const getResourcesResult = await getQueriedResourcesService({
-      filter,
-      options,
-      projection,
-      resourceModel: AddressChangeModel,
-    });
-
-    if (getResourcesResult.err) {
-      await createNewErrorLogService(
-        createErrorLogSchema(getResourcesResult.val, request.body),
-      );
-
-      response.status(200).json(
-        createHttpResultError({ message: getResourcesResult.val.message }),
-      );
-      return;
-    }
-
-    response.status(200).json(
-      createHttpResultSuccess({
-        data: getResourcesResult.safeUnwrap().data,
-        pages: Math.ceil(totalDocuments / Number(options?.limit ?? 10)),
-        totalDocuments,
-      }),
-    );
-  },
-);
- */
