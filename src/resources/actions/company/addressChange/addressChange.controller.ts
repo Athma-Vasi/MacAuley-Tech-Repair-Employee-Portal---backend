@@ -1,21 +1,13 @@
 import expressAsyncController from "express-async-handler";
 
-import type {
-  AddressChangeDocument,
-  AddressChangeSchema,
+import {
+  type AddressChangeDocument,
+  AddressChangeModel,
+  type AddressChangeSchema,
 } from "./addressChange.model";
 import type { Response } from "express";
-import type {
-  CreateNewAddressChangeRequest,
-  DeleteAllAddressChangesRequest,
-  DeleteAnAddressChangeRequest,
-  GetAddressChangeByIdRequest,
-  GetQueriedAddressChangesByUserRequest,
-  GetQueriedAddressChangesRequest,
-  UpdateAddressChangeByIdRequest,
-} from "./addressChange.types";
 
-import { getUserByIdService } from "../../../user";
+import { UserDocument, UserModel } from "../../../user";
 import {
   createNewAddressChangeService,
   deleteAddressChangeByIdService,
@@ -36,7 +28,6 @@ import {
   GetQueriedResourceRequest,
   GetResourceByIdRequest,
   HttpResult,
-  QueryObjectParsedWithDefaults,
   UpdateResourceByIdRequest,
 } from "../../../../types";
 import {
@@ -45,7 +36,16 @@ import {
   createHttpResultSuccess,
 } from "../../../../utils";
 import { createNewErrorLogService } from "../../../errorLog";
-import { RequestAfterJWTVerification } from "../../../auth";
+import {
+  createNewResourceService,
+  deleteAllResourcesService,
+  deleteResourceByIdService,
+  getQueriedResourcesByUserService,
+  getQueriedTotalResourcesService,
+  getResourceByIdService,
+  updateResourceByIdService,
+} from "../../../../services";
+import { de } from "date-fns/locale";
 
 // @desc   Create a new address change request
 // @route  POST api/v1/actions/company/address-change
@@ -69,18 +69,30 @@ const createNewAddressChangeController = expressAsyncController(
       },
     } = request.body;
 
-    const userExists = await getUserByIdService(userId);
-    if (userExists === null || userExists === undefined) {
+    const getUserResult = await getResourceByIdService(
+      userId,
+      UserModel,
+    );
+    if (getUserResult.err) {
+      await createNewErrorLogService(
+        createErrorLogSchema(getUserResult.val, request.body),
+      );
+
       response.status(200).json(
-        createHttpResultError({
-          message: "User does not exist",
-          status: 404,
-        }),
+        createHttpResultError({ message: getUserResult.val.message }),
       );
       return;
     }
 
-    const { address: oldAddress } = userExists;
+    const unwrappedResult = getUserResult.safeUnwrap().data;
+    if (unwrappedResult.length === 0) {
+      response.status(200).json(
+        createHttpResultError({ message: "User not found" }),
+      );
+      return;
+    }
+
+    const { address: oldAddress } = unwrappedResult[0] as UserDocument;
     const newAddress = {
       contactNumber,
       addressLine,
@@ -92,10 +104,7 @@ const createNewAddressChangeController = expressAsyncController(
     };
     if (JSON.stringify(newAddress) === JSON.stringify(oldAddress)) {
       response.status(200).json(
-        createHttpResultError({
-          message: "New address is the same as the old address",
-          status: 400,
-        }),
+        createHttpResultError({ message: "No changes detected" }),
       );
       return;
     }
@@ -114,24 +123,23 @@ const createNewAddressChangeController = expressAsyncController(
       requestStatus: "pending",
     };
 
-    const addressChangeDocumentResult = await createNewAddressChangeService(
+    const createResourceResult = await createNewResourceService(
       addressChangeSchema,
+      AddressChangeModel,
     );
 
-    if (addressChangeDocumentResult.err) {
+    if (createResourceResult.err) {
       await createNewErrorLogService(
-        createErrorLogSchema(addressChangeDocumentResult.val, request.body),
+        createErrorLogSchema(createResourceResult.val, request.body),
       );
 
       response.status(200).json(
-        createHttpResultError({
-          message: "Address change document could not be created",
-          status: 400,
-        }),
+        createHttpResultError({ message: createResourceResult.val.message }),
       );
-    } else {
-      response.status(201).json(addressChangeDocumentResult.safeUnwrap());
+      return;
     }
+
+    response.status(201).json(createResourceResult.safeUnwrap());
   },
 );
 
@@ -148,55 +156,53 @@ const getQueriedAddressChangesController = expressAsyncController(
       totalDocuments,
     } = request.body;
 
-    const { filter, projection, options } = request.query;
+    const { filter = {}, projection = null, options = {} } = request.query;
 
     // only perform a countDocuments scan if a new query is being made
     if (newQueryFlag) {
-      const totalResult = await getQueriedTotalAddressChangesService({
-        filter: filter as FilterQuery<AddressChangeDocument> | undefined,
-      });
+      const totalResult = await getQueriedTotalResourcesService(
+        filter,
+        AddressChangeModel,
+      );
+
       if (totalResult.err) {
         await createNewErrorLogService(
           createErrorLogSchema(totalResult.val, request.body),
         );
 
         response.status(200).json(
-          createHttpResultError({
-            message: "Error getting total address changes",
-            status: 400,
-          }),
+          createHttpResultError({ status: 400 }),
         );
         return;
       }
+
       totalDocuments = totalResult.safeUnwrap().data?.[0] ?? 0;
     }
 
-    const addressChangesResult = await getQueriedAddressChangesService({
+    const getResourcesResult = await getQueriedAddressChangesService({
       filter,
       projection,
       options,
     });
 
-    if (addressChangesResult.err) {
+    if (getResourcesResult.err) {
       await createNewErrorLogService(
-        createErrorLogSchema(addressChangesResult.val, request.body),
+        createErrorLogSchema(getResourcesResult.val, request.body),
       );
 
       response.status(200).json(
-        createHttpResultError({
-          message: "Error getting queried address changes",
-          status: 400,
-        }),
+        createHttpResultError({ message: getResourcesResult.val.message }),
       );
-    } else {
-      response.status(200).json(
-        createHttpResultSuccess({
-          data: addressChangesResult.safeUnwrap().data,
-          pages: Math.ceil(totalDocuments / Number(options?.limit ?? 10)),
-          totalDocuments,
-        }),
-      );
+      return;
     }
+
+    response.status(200).json(
+      createHttpResultSuccess({
+        data: getResourcesResult.safeUnwrap().data,
+        pages: Math.ceil(totalDocuments / Number(options?.limit ?? 10)),
+        totalDocuments,
+      }),
+    );
   },
 );
 
@@ -210,19 +216,19 @@ const getAddressChangesByUserController = expressAsyncController(
   ) => {
     const {
       userInfo: { userId },
+      newQueryFlag,
     } = request.body;
+    let { totalDocuments } = request.body;
 
-    let { newQueryFlag, totalDocuments } = request.body;
-
-    const { filter, projection, options } = request.query;
-
+    const { filter = {}, projection = null, options = {} } = request.query;
     const filterWithUserId = { ...filter, userId };
 
     // only perform a countDocuments scan if a new query is being made
     if (newQueryFlag) {
-      const totalResult = await getQueriedTotalAddressChangesService({
-        filter: filterWithUserId,
-      });
+      const totalResult = await getQueriedTotalResourcesService(
+        filterWithUserId,
+        AddressChangeModel,
+      );
 
       if (totalResult.err) {
         await createNewErrorLogService(
@@ -230,43 +236,39 @@ const getAddressChangesByUserController = expressAsyncController(
         );
 
         response.status(200).json(
-          createHttpResultError({
-            message: "Error getting total address changes",
-            status: 400,
-          }),
+          createHttpResultError({ status: 400 }),
         );
-
         return;
       }
+
       totalDocuments = totalResult.safeUnwrap().data?.[0] ?? 0;
     }
 
-    const addressChangesResult = await getQueriedAddressChangesByUserService({
+    const getResourcesResult = await getQueriedResourcesByUserService({
       filter,
-      projection,
       options,
+      projection,
+      resourceModel: AddressChangeModel,
     });
 
-    if (addressChangesResult.err) {
+    if (getResourcesResult.err) {
       await createNewErrorLogService(
-        createErrorLogSchema(addressChangesResult.val, request.body),
+        createErrorLogSchema(getResourcesResult.val, request.body),
       );
 
       response.status(200).json(
-        createHttpResultError({
-          message: "Error getting address changes by user",
-          status: 400,
-        }),
+        createHttpResultError({ message: getResourcesResult.val.message }),
       );
-    } else {
-      response.status(200).json(
-        createHttpResultSuccess({
-          data: addressChangesResult.safeUnwrap().data,
-          pages: Math.ceil(totalDocuments / Number(options?.limit ?? 10)),
-          totalDocuments,
-        }),
-      );
+      return;
     }
+
+    response.status(200).json(
+      createHttpResultSuccess({
+        data: getResourcesResult.safeUnwrap().data,
+        pages: Math.ceil(totalDocuments / Number(options?.limit ?? 10)),
+        totalDocuments,
+      }),
+    );
   },
 );
 
@@ -283,32 +285,33 @@ const updateAddressChangeByIdController = expressAsyncController(
       documentUpdate: { fields, updateOperator },
     } = request.body;
 
-    const updatedAddressChangeResult = await updateAddressChangeByIdService({
-      _id: resourceId,
+    const updateResourceResult = await updateResourceByIdService({
+      resourceId,
       fields,
+      resourceModel: AddressChangeModel,
       updateOperator,
     });
 
-    if (updatedAddressChangeResult.err) {
+    if (updateResourceResult.err) {
       await createNewErrorLogService(
-        createErrorLogSchema(updatedAddressChangeResult.val, request.body),
+        createErrorLogSchema(updateResourceResult.val, request.body),
       );
 
       response.status(200).json(
         createHttpResultError({
-          message: "Address change document status update failed",
-          status: 400,
+          message: updateResourceResult.val.message,
         }),
       );
-    } else {
-      response
-        .status(200)
-        .json(
-          updatedAddressChangeResult.safeUnwrap() as HttpResult<
-            AddressChangeDocument
-          >,
-        );
+      return;
     }
+
+    response
+      .status(200)
+      .json(
+        updateResourceResult.safeUnwrap() as HttpResult<
+          AddressChangeDocument
+        >,
+      );
   },
 );
 
@@ -322,28 +325,27 @@ const getAddressChangeByIdController = expressAsyncController(
   ) => {
     const { resourceId } = request.params;
 
-    const addressChangeResult = await getAddressChangeByIdService(
+    const getResourceResult = await getResourceByIdService(
       resourceId,
+      AddressChangeModel,
     );
 
-    if (addressChangeResult.err) {
+    if (getResourceResult.err) {
       await createNewErrorLogService(
-        createErrorLogSchema(addressChangeResult.val, request.body),
+        createErrorLogSchema(getResourceResult.val, request.body),
       );
 
       response.status(200).json(
-        createHttpResultError({
-          message: "Address change document could not be found",
-          status: 404,
-        }),
+        createHttpResultError({ message: getResourceResult.val.message }),
       );
-    } else {
-      response
-        .status(200)
-        .json(
-          addressChangeResult.safeUnwrap() as HttpResult<AddressChangeDocument>,
-        );
+      return;
     }
+
+    response
+      .status(200)
+      .json(
+        getResourceResult.safeUnwrap() as HttpResult<AddressChangeDocument>,
+      );
   },
 );
 
@@ -357,7 +359,10 @@ const deleteAnAddressChangeController = expressAsyncController(
   ) => {
     const { resourceId } = request.params;
 
-    const deletedResult = await deleteAddressChangeByIdService(resourceId);
+    const deletedResult = await deleteResourceByIdService(
+      resourceId,
+      AddressChangeModel,
+    );
 
     if (deletedResult.err) {
       await createNewErrorLogService(
@@ -365,14 +370,12 @@ const deleteAnAddressChangeController = expressAsyncController(
       );
 
       response.status(200).json(
-        createHttpResultError({
-          message: "Address change document could not be deleted",
-          status: 400,
-        }),
+        createHttpResultError({ message: deletedResult.val.message }),
       );
-    } else {
-      response.status(200).json(createHttpResultSuccess({}));
+      return;
     }
+
+    response.status(200).json(createHttpResultSuccess({}));
   },
 );
 
@@ -384,7 +387,7 @@ const deleteAllAddressChangesController = expressAsyncController(
     request: DeleteAllResourcesRequest,
     response: Response<HttpResult>,
   ) => {
-    const deletedResult = await deleteAllAddressChangesService();
+    const deletedResult = await deleteAllResourcesService(AddressChangeModel);
 
     if (deletedResult.err) {
       await createNewErrorLogService(
@@ -392,14 +395,12 @@ const deleteAllAddressChangesController = expressAsyncController(
       );
 
       response.status(200).json(
-        createHttpResultError({
-          message: "Address change documents could not be deleted",
-          status: 400,
-        }),
+        createHttpResultError({ message: deletedResult.val.message }),
       );
-    } else {
-      response.status(200).json(createHttpResultSuccess({}));
+      return;
     }
+
+    response.status(200).json(createHttpResultSuccess({}));
   },
 );
 

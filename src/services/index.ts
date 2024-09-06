@@ -12,7 +12,7 @@ async function getResourceByIdService<
             .exec();
         if (resource === null || resource === undefined) {
             return new Ok(
-                createHttpResultSuccess({ message: "Resource not found" }),
+                createHttpResultError({ message: "Resource not found" }),
             );
         }
 
@@ -28,8 +28,9 @@ async function getResourceByIdService<
 }
 
 async function createNewResourceService<
+    Schema extends Record<string, unknown> = Record<string, unknown>,
     Doc extends Record<string, unknown> = Record<string, unknown>,
->(resourceSchema: Doc, resourceModel: Model<Doc>) {
+>(resourceSchema: Schema, resourceModel: Model<Doc>) {
     try {
         const resource = await resourceModel.create(resourceSchema);
         return new Ok(createHttpResultSuccess({ data: [resource] }));
@@ -47,8 +48,8 @@ async function getQueriedResourcesService<
     Doc extends Record<string, unknown> = Record<string, unknown>,
 >({
     filter = {},
-    projection = null,
     options = {},
+    projection = null,
     resourceModel,
 }: QueryObjectParsedWithDefaults & {
     resourceModel: Model<Doc>;
@@ -70,13 +71,10 @@ async function getQueriedResourcesService<
 
 async function getQueriedTotalResourcesService<
     Doc extends Record<string, unknown> = Record<string, unknown>,
->({
-    filter = {},
-    resourceModel,
-}: {
-    filter: Record<string, unknown>;
-    resourceModel: Model<Doc>;
-}) {
+>(
+    filter: Record<string, unknown>,
+    resourceModel: Model<Doc>,
+) {
     try {
         const totalQueriedResources = await resourceModel.countDocuments(filter)
             .lean()
@@ -98,8 +96,8 @@ async function getQueriedResourcesByUserService<
     Doc extends Record<string, unknown> = Record<string, unknown>,
 >({
     filter = {},
-    projection = null,
     options = {},
+    projection = null,
     resourceModel,
 }: QueryObjectParsedWithDefaults & {
     resourceModel: Model<Doc>;
@@ -122,23 +120,24 @@ async function getQueriedResourcesByUserService<
 async function updateResourceByIdService<
     Doc extends Record<string, unknown> = Record<string, unknown>,
 >({
-    _id,
+    resourceId,
     fields,
     updateOperator,
     resourceModel,
 }: {
-    _id: string;
+    resourceId: string;
     fields: Record<string, unknown>;
-    updateOperator: string;
     resourceModel: Model<Doc>;
+    updateOperator: string;
 }) {
     try {
         const updateString = `{ "${updateOperator}":  ${
             JSON.stringify(fields)
         } }`;
         const updateObject = JSON.parse(updateString);
+
         const resource = await resourceModel.findByIdAndUpdate(
-            _id,
+            resourceId,
             updateObject,
             { new: true },
         )
@@ -147,7 +146,9 @@ async function updateResourceByIdService<
 
         if (resource === null || resource === undefined) {
             return new Ok(
-                createHttpResultSuccess({ message: "Resource not found" }),
+                createHttpResultSuccess({
+                    message: "Unable to update resource",
+                }),
             );
         }
 

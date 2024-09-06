@@ -31,15 +31,6 @@ import type {
   AddressChangeDocument,
   AddressChangeSchema,
 } from "./addressChange.model";
-import type {
-  CreateNewAddressChangeRequest,
-  DeleteAllAddressChangesRequest,
-  DeleteAnAddressChangeRequest,
-  GetAddressChangeByIdRequest,
-  GetQueriedAddressChangesByUserRequest,
-  GetQueriedAddressChangesRequest,
-  UpdateAddressChangeByIdRequest,
-} from "./addressChange.types";
 
 /**
  * Exports
@@ -64,14 +55,4 @@ export {
   updateAddressChangeByIdService,
 };
 
-export type {
-  AddressChangeDocument,
-  AddressChangeSchema,
-  CreateNewAddressChangeRequest,
-  DeleteAllAddressChangesRequest,
-  DeleteAnAddressChangeRequest,
-  GetAddressChangeByIdRequest,
-  GetQueriedAddressChangesByUserRequest,
-  GetQueriedAddressChangesRequest,
-  UpdateAddressChangeByIdRequest,
-};
+export type { AddressChangeDocument, AddressChangeSchema };

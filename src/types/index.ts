@@ -2,7 +2,8 @@ import type { FilterQuery, FlattenMaps, QueryOptions } from "mongoose";
 import { Types } from "mongoose";
 import { FileExtension } from "../resources/fileUpload";
 import type { ParsedQs } from "qs";
-import { RequestAfterJWTVerification } from "../resources/auth";
+import { UserRoles } from "../resources/user";
+import { Request } from "express";
 
 /**
  * type signature of query object created by express
@@ -21,6 +22,21 @@ type QueryObjectParsedWithDefaults<
   filter?: FilterQuery<Doc>;
   projection?: QueryOptions<Doc> | null;
   options?: QueryOptions<Doc>;
+};
+
+/**
+ * - adds the decoded JWT (which is the userInfo object) from verifyJWTMiddleware to the request body.
+ * - All routes' (except user, customer registration POST) subsequent middleware and controller functions will have access to the decoded JWT.
+ */
+type RequestAfterJWTVerification = Request & {
+  body: {
+    userInfo: {
+      userId: string;
+      username: string;
+      roles: UserRoles;
+    };
+    sessionId: string;
+  };
 };
 
 /**
