@@ -1,39 +1,59 @@
 import type { Types } from "mongoose";
-import type { DeleteResult } from "mongodb";
-import type { AddressChangeDocument, AddressChangeSchema } from "./addressChange.model";
+
+import type {
+  AddressChangeDocument,
+  AddressChangeSchema,
+} from "./addressChange.model";
 
 import { AddressChangeModel } from "./addressChange.model";
 import {
-  DatabaseResponse,
-  DatabaseResponseNullable,
   QueriedResourceGetRequestServiceInput,
   QueriedTotalResourceGetRequestServiceInput,
   UpdateDocumentByIdServiceInput,
 } from "../../../../types";
-import createHttpError from "http-errors";
+
+import {
+  createHttpResultError,
+  createHttpResultSuccess,
+} from "../../../../utils";
+import { Err, Ok } from "ts-results";
 
 async function getAddressChangeByIdService(
-  addressChangeId: Types.ObjectId | string
-): DatabaseResponseNullable<AddressChangeDocument> {
+  addressChangeId: Types.ObjectId | string,
+) {
   try {
     const addressChange = await AddressChangeModel.findById(addressChangeId)
       .lean()
       .exec();
-    return addressChange;
-  } catch (error: any) {
-    throw new createHttpError.InternalServerError("getAddressChangeByIdService");
+    if (addressChange === null || addressChange === undefined) {
+      return new Ok(
+        createHttpResultSuccess({ message: "Address change not found" }),
+      );
+    }
+
+    return new Ok(createHttpResultSuccess({ data: [addressChange] }));
+  } catch (error: unknown) {
+    return new Err(
+      createHttpResultError({
+        data: [error],
+        message: "Error getting address change by id",
+      }),
+    );
   }
 }
 
 async function createNewAddressChangeService(
-  addressChangeSchema: AddressChangeSchema
-): Promise<AddressChangeDocument> {
+  addressChangeSchema: AddressChangeSchema,
+) {
   try {
     const addressChange = await AddressChangeModel.create(addressChangeSchema);
-    return addressChange;
-  } catch (error: any) {
-    throw new createHttpError.InternalServerError(
-      "Error in createNewAddressChangeService"
+    return new Ok(createHttpResultSuccess({ data: [addressChange] }));
+  } catch (error: unknown) {
+    return new Err(
+      createHttpResultError({
+        data: [error],
+        message: "Error creating new address change",
+      }),
     );
   }
 }
@@ -42,30 +62,40 @@ async function getQueriedAddressChangesService({
   filter = {},
   projection = null,
   options = {},
-}: QueriedResourceGetRequestServiceInput<AddressChangeDocument>): DatabaseResponse<AddressChangeDocument> {
+}: QueriedResourceGetRequestServiceInput<AddressChangeDocument>) {
   try {
-    const addressChange = await AddressChangeModel.find(filter, projection, options)
+    const addressChange = await AddressChangeModel.find(
+      filter,
+      projection,
+      options,
+    )
       .lean()
       .exec();
-    return addressChange;
-  } catch (error: any) {
-    throw new createHttpError.InternalServerError(
-      "Error in getQueriedAddressChangesService"
+    return new Ok(createHttpResultSuccess({ data: addressChange }));
+  } catch (error: unknown) {
+    return new Err(
+      createHttpResultError({
+        data: [error],
+        message: "Error getting queried address changes",
+      }),
     );
   }
 }
 
 async function getQueriedTotalAddressChangesService({
   filter = {},
-}: QueriedTotalResourceGetRequestServiceInput<AddressChangeDocument>): Promise<number> {
+}: QueriedTotalResourceGetRequestServiceInput<AddressChangeDocument>) {
   try {
     const totalAddressChanges = await AddressChangeModel.countDocuments(filter)
       .lean()
       .exec();
-    return totalAddressChanges;
-  } catch (error: any) {
-    throw new createHttpError.InternalServerError(
-      "Error in getQueriedTotalAddressChangesService"
+    return new Ok(createHttpResultSuccess({ data: [totalAddressChanges] }));
+  } catch (error: unknown) {
+    return new Err(
+      createHttpResultError({
+        data: [error],
+        message: "Error getting total address changes",
+      }),
     );
   }
 }
@@ -74,15 +104,22 @@ async function getQueriedAddressChangesByUserService({
   filter = {},
   projection = null,
   options = {},
-}: QueriedResourceGetRequestServiceInput<AddressChangeDocument>): DatabaseResponse<AddressChangeDocument> {
+}: QueriedResourceGetRequestServiceInput<AddressChangeDocument>) {
   try {
-    const addressChanges = await AddressChangeModel.find(filter, projection, options)
+    const addressChanges = await AddressChangeModel.find(
+      filter,
+      projection,
+      options,
+    )
       .lean()
       .exec();
-    return addressChanges;
-  } catch (error: any) {
-    throw new createHttpError.InternalServerError(
-      "Error in getQueriedAddressChangesByUserService"
+    return new Ok(createHttpResultSuccess({ data: addressChanges }));
+  } catch (error: unknown) {
+    return new Err(
+      createHttpResultError({
+        data: [error],
+        message: "Error getting address changes by user",
+      }),
     );
   }
 }
@@ -92,56 +129,79 @@ async function updateAddressChangeByIdService({
   fields,
   updateOperator,
 }: UpdateDocumentByIdServiceInput<AddressChangeDocument>) {
-  const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
-  const updateObject = JSON.parse(updateString);
-
   try {
-    const addressChange = await AddressChangeModel.findByIdAndUpdate(_id, updateObject, {
-      new: true,
-    })
+    const updateString = `{ "${updateOperator}":  ${JSON.stringify(fields)} }`;
+    const updateObject = JSON.parse(updateString);
+    const addressChange = await AddressChangeModel.findByIdAndUpdate(
+      _id,
+      updateObject,
+      {
+        new: true,
+      },
+    )
       .lean()
       .exec();
-    return addressChange;
-  } catch (error: any) {
-    throw new createHttpError.InternalServerError(
-      "Error in updateAddressChangeByIdService"
+
+    if (addressChange === null || addressChange === undefined) {
+      return new Ok(
+        createHttpResultSuccess({ message: "Address change not found" }),
+      );
+    }
+
+    return new Ok(createHttpResultSuccess({ data: [addressChange] }));
+  } catch (error: unknown) {
+    return new Err(
+      createHttpResultError({
+        data: [error],
+        message: "Error updating address change by id",
+      }),
     );
   }
 }
 
 async function deleteAddressChangeByIdService(
-  addressChangeId: Types.ObjectId | string
-): Promise<DeleteResult> {
+  addressChangeId: Types.ObjectId | string,
+) {
   try {
-    const deletedResult = await AddressChangeModel.deleteOne({ _id: addressChangeId })
+    const deletedResult = await AddressChangeModel.deleteOne({
+      _id: addressChangeId,
+    })
       .lean()
       .exec();
-    return deletedResult;
-  } catch (error: any) {
-    throw new createHttpError.InternalServerError(
-      "Error in deleteAddressChangeByIdService"
+
+    return new Ok(createHttpResultSuccess({ data: [deletedResult] }));
+  } catch (error: unknown) {
+    return new Err(
+      createHttpResultError({
+        data: [error],
+        message: "Error deleting address change by id",
+      }),
     );
   }
 }
 
-async function deleteAllAddressChangesService(): Promise<DeleteResult> {
+async function deleteAllAddressChangesService() {
   try {
-    const deletedResult = await AddressChangeModel.deleteMany({}).lean().exec();
-    return deletedResult;
-  } catch (error: any) {
-    throw new createHttpError.InternalServerError(
-      "Error in deleteAllAddressChangesService"
+    const deletedResult = await AddressChangeModel.deleteMany({}).lean()
+      .exec();
+    return new Ok(createHttpResultSuccess({ data: [deletedResult] }));
+  } catch (error: unknown) {
+    return new Err(
+      createHttpResultError({
+        data: [error],
+        message: "Error deleting all address changes",
+      }),
     );
   }
 }
 
 export {
-  getAddressChangeByIdService,
   createNewAddressChangeService,
-  getQueriedAddressChangesService,
-  getQueriedTotalAddressChangesService,
-  getQueriedAddressChangesByUserService,
   deleteAddressChangeByIdService,
   deleteAllAddressChangesService,
+  getAddressChangeByIdService,
+  getQueriedAddressChangesByUserService,
+  getQueriedAddressChangesService,
+  getQueriedTotalAddressChangesService,
   updateAddressChangeByIdService,
 };

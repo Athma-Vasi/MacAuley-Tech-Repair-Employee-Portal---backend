@@ -9,14 +9,12 @@ import { AddressChangeModel } from "./addressChange.model";
 import { addressChangeRouter } from "./addressChange.routes";
 import {
   createNewAddressChangeController,
-  createNewAddressChangesBulkController,
   deleteAllAddressChangesController,
   deleteAnAddressChangeController,
   getAddressChangeByIdController,
   getAddressChangesByUserController,
   getQueriedAddressChangesController,
   updateAddressChangeByIdController,
-  updateAddressChangesBulkController,
 } from "./addressChange.controller";
 import {
   createNewAddressChangeService,
@@ -29,17 +27,18 @@ import {
   updateAddressChangeByIdService,
 } from "./addressChange.service";
 
-import type { AddressChangeDocument, AddressChangeSchema } from "./addressChange.model";
+import type {
+  AddressChangeDocument,
+  AddressChangeSchema,
+} from "./addressChange.model";
 import type {
   CreateNewAddressChangeRequest,
-  CreateNewAddressChangesBulkRequest,
   DeleteAllAddressChangesRequest,
   DeleteAnAddressChangeRequest,
   GetAddressChangeByIdRequest,
   GetQueriedAddressChangesByUserRequest,
   GetQueriedAddressChangesRequest,
   UpdateAddressChangeByIdRequest,
-  UpdateAddressChangesBulkRequest,
 } from "./addressChange.types";
 
 /**
@@ -50,7 +49,6 @@ export {
   addressChangeRouter,
   createNewAddressChangeController,
   createNewAddressChangeService,
-  createNewAddressChangesBulkController,
   deleteAddressChangeByIdService,
   deleteAllAddressChangesController,
   deleteAllAddressChangesService,
@@ -62,21 +60,18 @@ export {
   getQueriedAddressChangesController,
   getQueriedAddressChangesService,
   getQueriedTotalAddressChangesService,
-  updateAddressChangeByIdService,
   updateAddressChangeByIdController,
-  updateAddressChangesBulkController,
+  updateAddressChangeByIdService,
 };
 
 export type {
   AddressChangeDocument,
   AddressChangeSchema,
   CreateNewAddressChangeRequest,
-  CreateNewAddressChangesBulkRequest,
   DeleteAllAddressChangesRequest,
   DeleteAnAddressChangeRequest,
   GetAddressChangeByIdRequest,
   GetQueriedAddressChangesByUserRequest,
   GetQueriedAddressChangesRequest,
   UpdateAddressChangeByIdRequest,
-  UpdateAddressChangesBulkRequest,
 };

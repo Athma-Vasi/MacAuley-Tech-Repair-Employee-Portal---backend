@@ -51,7 +51,8 @@ type RefreshTokenDecoded = {
 };
 
 /**
- * - RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT (which is the userInfo object) from verifyJWTMiddleware to the request body.
+ * - RequestAfterJWTVerification extends Request interface from express and adds the decoded JWT
+ *   (which is the userInfo object) from verifyJWTMiddleware to the request body.
  * - This is the type signature of the transformed request object after the verifyJWTMiddleware is executed.
  * - All routes' (except user, customer registration POST) subsequent middleware and controller functions will have access to the decoded JWT.
  */
@@ -67,7 +68,6 @@ interface RequestAfterJWTVerification extends Request {
 }
 
 /**
- * - RequestAfterJWTVerificationWithQuery is an Union type of RequestAfterJWTVerification and Request types.
  * - It is the shape of the Express Request object after assignQueryDefaults middleware runs.
  * - verifyJWTMiddleware => verifyRoles => assignQueryDefaults => controller function
  * - Typically used in GET requests (all requests routes for some resources).

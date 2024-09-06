@@ -18,14 +18,14 @@ import {
   getQueriedExpenseClaimsService,
 } from "./company/expenseClaim";
 import {
-  RequestResourceDocument,
   getQueriedRequestResourcesByUserService,
   getQueriedRequestResourcesService,
+  RequestResourceDocument,
 } from "./company/requestResource";
 import {
-  LeaveRequestDocument,
   getQueriedLeaveRequestsByUserService,
   getQueriedLeaveRequestsService,
+  LeaveRequestDocument,
 } from "./company/leaveRequest";
 import {
   BenefitDocument,
@@ -38,35 +38,38 @@ import {
   getQueriedEndorsementsService,
 } from "./general/endorsement";
 import {
-  PrinterIssueDocument,
   getQueriedPrinterIssuesByUserService,
   getQueriedPrinterIssuesService,
+  PrinterIssueDocument,
 } from "./general/printerIssue";
 import {
   AnonymousRequestDocument,
   getQueriedAnonymousRequestsService,
 } from "./general/anonymousRequest";
 import {
-  RefermentDocument,
   getQueriedRefermentsByUserService,
   getQueriedRefermentsService,
+  RefermentDocument,
 } from "./general/referment";
 import {
   AnnouncementDocument,
   getQueriedAnnouncementsService,
 } from "./outreach/announcement";
 import {
-  SurveyDocument,
   getQueriedSurveysByUserService,
   getQueriedSurveysService,
+  SurveyDocument,
 } from "./outreach/survey";
 import {
   EventDocument,
   getQueriedEventsByUserService,
   getQueriedEventsService,
 } from "./outreach/event";
-import { RepairTicketDocument, getQueriedRepairTicketsService } from "../repairTicket";
-import { UserDocument, getQueriedUsersService } from "../user";
+import {
+  getQueriedRepairTicketsService,
+  RepairTicketDocument,
+} from "../repairTicket";
+import { getQueriedUsersService, UserDocument } from "../user";
 import { getAllUsersService } from "../user/user.service";
 import { getAllCustomersService } from "../customer";
 
@@ -76,10 +79,10 @@ import { getAllCustomersService } from "../customer";
 const getAllActionsDocumentsController = expressAsyncController(
   async (
     request: GetAllActionsResourceRequest,
-    response: Response<ActionsResourceRequestServerResponse>
+    response: Response<ActionsResourceRequestServerResponse>,
   ) => {
-    const { filter, projection, options } =
-      request.query as QueryObjectParsedWithDefaults;
+    const { filter, projection, options } = request
+      .query as QueryObjectParsedWithDefaults;
 
     const awaitingApprovalFilter = {
       ...filter,
@@ -102,7 +105,9 @@ const getAllActionsDocumentsController = expressAsyncController(
 
     const actionsData = await Promise.all([
       getQueriedRepairTicketsService({
-        filter: awaitingApprovalFilter as FilterQuery<RepairTicketDocument> | undefined,
+        filter: awaitingApprovalFilter as
+          | FilterQuery<RepairTicketDocument>
+          | undefined,
         projection: projection as QueryOptions<RepairTicketDocument>,
         options: options as QueryOptions<RepairTicketDocument>,
       }),
@@ -120,7 +125,9 @@ const getAllActionsDocumentsController = expressAsyncController(
       }),
 
       getQueriedRequestResourcesService({
-        filter: pendingFilter as FilterQuery<RequestResourceDocument> | undefined,
+        filter: pendingFilter as
+          | FilterQuery<RequestResourceDocument>
+          | undefined,
         projection: projection as QueryOptions<RequestResourceDocument>,
         options: options as QueryOptions<RequestResourceDocument>,
       }),
@@ -150,7 +157,9 @@ const getAllActionsDocumentsController = expressAsyncController(
       }),
 
       getQueriedAnonymousRequestsService({
-        filter: pendingFilter as FilterQuery<AnonymousRequestDocument> | undefined,
+        filter: pendingFilter as
+          | FilterQuery<AnonymousRequestDocument>
+          | undefined,
         projection: projection as QueryOptions<AnonymousRequestDocument>,
         options: options as QueryOptions<AnonymousRequestDocument>,
       }),
@@ -211,7 +220,8 @@ const getAllActionsDocumentsController = expressAsyncController(
       message: "Successfully retrieved all actions data",
       repairTicketData: repairTicketData.filter((data) => data),
       companyData: {
-        addressChangeData: addressChangeData.filter((data) => data),
+        // addressChangeData: addressChangeData.filter((data) => data),
+        addressChangeData: [],
         expenseClaimData: expenseClaimData.filter((data) => data),
         requestResourceData: requestResourceData.filter((data) => data),
         leaveRequestData: leaveRequestData.filter((data) => data),
@@ -233,7 +243,7 @@ const getAllActionsDocumentsController = expressAsyncController(
     });
 
     return;
-  }
+  },
 );
 
 // @desc   get employee's actions company data
@@ -242,13 +252,13 @@ const getAllActionsDocumentsController = expressAsyncController(
 const getUsersActionsDocumentsController = expressAsyncController(
   async (
     request: GetUsersActionsResourceRequest,
-    response: Response<ActionsResourceRequestServerResponse>
+    response: Response<ActionsResourceRequestServerResponse>,
   ) => {
     const {
       userInfo: { userId },
     } = request.body;
-    const { filter, projection, options } =
-      request.query as QueryObjectParsedWithDefaults;
+    const { filter, projection, options } = request
+      .query as QueryObjectParsedWithDefaults;
 
     const filterWithUserId = { ...filter, userId };
     const pendingFilter = {
@@ -287,7 +297,9 @@ const getUsersActionsDocumentsController = expressAsyncController(
       }),
 
       getQueriedRequestResourcesByUserService({
-        filter: pendingFilter as FilterQuery<RequestResourceDocument> | undefined,
+        filter: pendingFilter as
+          | FilterQuery<RequestResourceDocument>
+          | undefined,
         projection: projection as QueryOptions<RequestResourceDocument>,
         options: options as QueryOptions<RequestResourceDocument>,
       }),
@@ -305,7 +317,9 @@ const getUsersActionsDocumentsController = expressAsyncController(
       }),
 
       getQueriedEndorsementsByUserService({
-        filter: filterWithUserId as FilterQuery<EndorsementDocument> | undefined,
+        filter: filterWithUserId as
+          | FilterQuery<EndorsementDocument>
+          | undefined,
         projection: projection as QueryOptions<EndorsementDocument>,
         options: options as QueryOptions<EndorsementDocument>,
       }),
@@ -371,7 +385,8 @@ const getUsersActionsDocumentsController = expressAsyncController(
       message: "Successfully retrieved all company data",
       repairTicketData: repairTicketData.filter((data) => data),
       companyData: {
-        addressChangeData: addressChangeData.filter((data) => data),
+        // addressChangeData: addressChangeData.filter((data) => data),
+        addressChangeData: [],
         expenseClaimData: expenseClaimData.filter((data) => data),
         requestResourceData: requestResourceData.filter((data) => data),
         leaveRequestData: leaveRequestData.filter((data) => data),
@@ -389,7 +404,7 @@ const getUsersActionsDocumentsController = expressAsyncController(
       },
       employeeData: employeeData.filter((data) => data),
     });
-  }
+  },
 );
 
 export { getAllActionsDocumentsController, getUsersActionsDocumentsController };
