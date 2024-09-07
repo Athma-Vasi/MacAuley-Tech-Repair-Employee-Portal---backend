@@ -1,48 +1,66 @@
 import { Router } from "express";
-import {
-  createNewAnnouncementController,
-  getQueriedAnnouncementsController,
-  getAnnouncementsByUserController,
-  getAnnouncementByIdController,
-  deleteAnnouncementController,
-  deleteAllAnnouncementsController,
-  updateAnnouncementByIdController,
-  createNewAnnouncementsBulkController,
-  updateAnnouncementsBulkController,
-} from "./announcement.controller";
 import { validateSchemaMiddleware } from "../../../../middlewares/validateSchema";
 import {
   createAnnouncementJoiSchema,
   updateAnnouncementJoiSchema,
 } from "./announcement.validation";
+import {
+  createNewResourceHandler,
+  deleteAllResourcesHandler,
+  deleteResourceByIdHandler,
+  getQueriedResourcesByUserHandler,
+  getQueriedResourcesHandler,
+  getResourceByIdHandler,
+  updateResourceByIdHandler,
+} from "../../../../handlers";
+import { AnnouncementModel } from "./announcement.model";
 
 const announcementRouter = Router();
 
 announcementRouter
   .route("/")
-  .get(getQueriedAnnouncementsController)
+  // @desc   Get all announcements
+  // @route  GET api/v1/actions/outreach/announcement
+  // @access Private/Admin/Manager
+  .get(getQueriedResourcesHandler(AnnouncementModel))
+  // @desc   Create a new announcement
+  // @route  POST api/v1/actions/outreach/announcement
+  // @access Private/Admin/Manager
   .post(
-    validateSchemaMiddleware(createAnnouncementJoiSchema, "announcementSchema"),
-    createNewAnnouncementController
+    validateSchemaMiddleware(createAnnouncementJoiSchema, "schema"),
+    createNewResourceHandler(AnnouncementModel),
   );
 
-announcementRouter.route("/delete-all").delete(deleteAllAnnouncementsController);
+// @desc   Delete all announcements
+// @route  DELETE api/v1/actions/outreach/announcement/delete-all
+// @access Private/Admin/Manager
+announcementRouter.route("/delete-all").delete(
+  deleteAllResourcesHandler(AnnouncementModel),
+);
 
-announcementRouter.route("/user").get(getAnnouncementsByUserController);
+// @desc   Get all announcements by user
+// @route  GET api/v1/actions/outreach/announcement/user
+// @access Private/Admin/Manager
+announcementRouter.route("/user").get(
+  getQueriedResourcesByUserHandler(AnnouncementModel),
+);
 
-// DEV ROUTES
 announcementRouter
-  .route("/dev")
-  .post(createNewAnnouncementsBulkController)
-  .patch(updateAnnouncementsBulkController);
-
-announcementRouter
-  .route("/:announcementId")
-  .get(getAnnouncementByIdController)
-  .delete(deleteAnnouncementController)
+  .route("/:resourceId")
+  // @desc   Get an announcement by ID
+  // @route  GET api/v1/actions/outreach/announcement/:resourceId
+  // @access Private/Admin/Manager
+  .get(getResourceByIdHandler(AnnouncementModel))
+  // @desc   Delete an announcement by ID
+  // @route  DELETE api/v1/actions/outreach/announcement/:resourceId
+  // @access Private/Admin/Manager
+  .delete(deleteResourceByIdHandler(AnnouncementModel))
+  // @desc   Update an announcement by ID
+  // @route  PATCH api/v1/actions/outreach/announcement/:resourceId
+  // @access Private/Admin/Manager
   .patch(
     validateSchemaMiddleware(updateAnnouncementJoiSchema),
-    updateAnnouncementByIdController
+    updateResourceByIdHandler(AnnouncementModel),
   );
 
 export { announcementRouter };

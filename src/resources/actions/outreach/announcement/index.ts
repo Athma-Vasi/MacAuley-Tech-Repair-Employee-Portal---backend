@@ -7,27 +7,6 @@
  */
 import { AnnouncementModel } from "./announcement.model";
 import { announcementRouter } from "./announcement.routes";
-import {
-  createNewAnnouncementController,
-  createNewAnnouncementsBulkController,
-  deleteAllAnnouncementsController,
-  deleteAnnouncementController,
-  getAnnouncementByIdController,
-  getAnnouncementsByUserController,
-  getQueriedAnnouncementsController,
-  updateAnnouncementByIdController,
-  updateAnnouncementsBulkController,
-} from "./announcement.controller";
-import {
-  createNewAnnouncementService,
-  deleteAllAnnouncementsService,
-  deleteAnnouncementByIdService,
-  getAnnouncementByIdService,
-  getQueriedAnnouncementsByUserService,
-  getQueriedAnnouncementsService,
-  getQueriedTotalAnnouncementsService,
-  updateAnnouncementByIdService,
-} from "./announcement.service";
 
 import type {
   AnnouncementDocument,
@@ -35,55 +14,15 @@ import type {
   RatingEmotion,
   RatingResponse,
 } from "./announcement.model";
-import type {
-  CreateNewAnnouncementRequest,
-  CreateNewAnnouncementsBulkRequest,
-  DeleteAllAnnouncementsRequest,
-  DeleteAnnouncementRequest,
-  GetAnnouncementByIdRequest,
-  GetQueriedAnnouncementsByUserRequest,
-  GetQueriedAnnouncementsRequest,
-  UpdateAnnouncementByIdRequest,
-  UpdateAnnouncementsBulkRequest,
-} from "./announcement.types";
 
 /**
  * Exports
  */
-export {
-  AnnouncementModel,
-  announcementRouter,
-  createNewAnnouncementController,
-  createNewAnnouncementService,
-  createNewAnnouncementsBulkController,
-  deleteAllAnnouncementsController,
-  deleteAllAnnouncementsService,
-  deleteAnnouncementByIdService,
-  deleteAnnouncementController,
-  getAnnouncementByIdController,
-  getAnnouncementByIdService,
-  getAnnouncementsByUserController,
-  getQueriedAnnouncementsByUserService,
-  getQueriedAnnouncementsController,
-  getQueriedAnnouncementsService,
-  getQueriedTotalAnnouncementsService,
-  updateAnnouncementByIdService,
-  updateAnnouncementByIdController,
-  updateAnnouncementsBulkController,
-};
+export { AnnouncementModel, announcementRouter };
 
 export type {
-  AnnouncementSchema,
   AnnouncementDocument,
+  AnnouncementSchema,
   RatingEmotion,
   RatingResponse,
-  CreateNewAnnouncementRequest,
-  CreateNewAnnouncementsBulkRequest,
-  DeleteAllAnnouncementsRequest,
-  DeleteAnnouncementRequest,
-  GetAnnouncementByIdRequest,
-  GetQueriedAnnouncementsByUserRequest,
-  GetQueriedAnnouncementsRequest,
-  UpdateAnnouncementByIdRequest,
-  UpdateAnnouncementsBulkRequest,
 };
