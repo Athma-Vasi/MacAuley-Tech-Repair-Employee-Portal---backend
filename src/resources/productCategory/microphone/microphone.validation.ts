@@ -1,15 +1,3 @@
-/**
- *   microphoneType: MicrophoneType; // Condenser, Dynamic, etc.
-  microphonePolarPattern: MicrophonePolarPattern; // Cardioid, etc.
-  microphoneFrequencyResponse: string; // 20Hz-20kHz, etc.
-  microphoneColor: string; // Black, White, etc.
-  microphoneInterface: MicrophoneInterface; // XLR, USB, etc.
-  additionalFields: {
-    [key: string]: string;
-  };
-
- */
-
 import Joi from "joi";
 import {
   BRAND_REGEX,
@@ -43,13 +31,17 @@ const createMicrophoneJoiSchema = Joi.object({
   widthUnit: Joi.string().regex(DIMENSION_UNIT_REGEX).required(),
   height: Joi.number().required(),
   heightUnit: Joi.string().regex(DIMENSION_UNIT_REGEX).required(),
-  additionalComments: Joi.string().regex(GRAMMAR_TEXTAREA_INPUT_REGEX).required(),
+  additionalComments: Joi.string().regex(GRAMMAR_TEXTAREA_INPUT_REGEX)
+    .required(),
 
   microphoneType: Joi.string().regex(MICROPHONE_TYPE_REGEX).required(),
-  microphonePolarPattern: Joi.string().regex(MICROPHONE_POLAR_PATTERN_REGEX).required(),
-  microphoneFrequencyResponse: Joi.string().regex(FREQUENCY_RESPONSE_REGEX).required(),
+  microphonePolarPattern: Joi.string().regex(MICROPHONE_POLAR_PATTERN_REGEX)
+    .required(),
+  microphoneFrequencyResponse: Joi.string().regex(FREQUENCY_RESPONSE_REGEX)
+    .required(),
   microphoneColor: Joi.string().regex(COLOR_VARIANT_REGEX).required(),
-  microphoneInterface: Joi.string().regex(MICROPHONE_INTERFACE_REGEX).required(),
+  microphoneInterface: Joi.string().regex(MICROPHONE_INTERFACE_REGEX)
+    .required(),
   additionalFields: Joi.object().required(),
 
   starRatingsCount: Joi.object({

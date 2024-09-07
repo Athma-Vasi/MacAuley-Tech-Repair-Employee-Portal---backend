@@ -8,74 +8,15 @@
 import { motherboardRouter } from "./motherboard.routes";
 import { MotherboardModel } from "./motherboard.model";
 
-import {
-  createNewMotherboardBulkController,
-  createNewMotherboardController,
-  deleteAMotherboardController,
-  deleteAllMotherboardsController,
-  getMotherboardByIdController,
-  getQueriedMotherboardsController,
-  updateMotherboardByIdController,
-  updateMotherboardsBulkController,
-} from "./motherboard.controller";
-
-import {
-  createNewMotherboardService,
-  deleteAMotherboardService,
-  deleteAllMotherboardsService,
-  getMotherboardByIdService,
-  getQueriedMotherboardsService,
-  getQueriedTotalMotherboardsService,
-  returnAllMotherboardsUploadedFileIdsService,
-  updateMotherboardByIdService,
-} from "./motherboard.service";
-
-import type { MotherboardDocument, MotherboardSchema } from "./motherboard.model";
 import type {
-  CreateNewMotherboardBulkRequest,
-  CreateNewMotherboardRequest,
-  DeleteAMotherboardRequest,
-  DeleteAllMotherboardsRequest,
-  GetMotherboardByIdRequest,
-  GetQueriedMotherboardsRequest,
-  UpdateMotherboardByIdRequest,
-  UpdateMotherboardsBulkRequest,
-} from "./motherboard.types";
+  MotherboardDocument,
+  MotherboardSchema,
+} from "./motherboard.model";
 
 /**
  * Exports
  */
 
-export {
-  MotherboardModel,
-  motherboardRouter,
-  createNewMotherboardBulkController,
-  createNewMotherboardController,
-  createNewMotherboardService,
-  deleteAMotherboardController,
-  deleteAMotherboardService,
-  deleteAllMotherboardsController,
-  deleteAllMotherboardsService,
-  getMotherboardByIdController,
-  getMotherboardByIdService,
-  getQueriedMotherboardsController,
-  getQueriedMotherboardsService,
-  getQueriedTotalMotherboardsService,
-  returnAllMotherboardsUploadedFileIdsService,
-  updateMotherboardByIdController,
-  updateMotherboardByIdService,
-  updateMotherboardsBulkController,
-};
+export { MotherboardModel, motherboardRouter };
 
-export type {
-  MotherboardDocument,
-  MotherboardSchema,
-  CreateNewMotherboardBulkRequest,
-  CreateNewMotherboardRequest,
-  DeleteAMotherboardRequest,
-  DeleteAllMotherboardsRequest,
-  GetMotherboardByIdRequest,
-  GetQueriedMotherboardsRequest,
-  UpdateMotherboardByIdRequest,
-  UpdateMotherboardsBulkRequest,
-};
+export type { MotherboardDocument, MotherboardSchema };

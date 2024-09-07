@@ -1,22 +1,3 @@
-/**
- *   motherboardSocket: string; // LGA 1200, AM4, etc.
-  motherboardChipset: string; // Intel Z490, AMD B550, etc.
-  motherboardFormFactor: MotherboardFormFactor; // ATX, Micro ATX, etc.
-  motherboardMemoryMax: number; // 128, 256, etc.
-  motherboardMemoryMaxUnit: MemoryUnit; // GB, etc.
-  motherboardMemorySlots: number; // 4, 8, etc.
-  motherboardMemoryType: MemoryType; // DDR4, etc.
-  motherboardSataPorts: number; // 6, 8, etc.
-  motherboardM2Slots: number; // 2, 3, etc.
-  motherboardPcie3Slots: number; // 2, 3, etc.
-  motherboardPcie4Slots: number; // 1, 2, etc.
-  motherboardPcie5Slots: number; // 0, 1, etc.
-  additionalFields: {
-    [key: string]: string;
-  };
-
- */
-
 import Joi from "joi";
 import {
   BRAND_REGEX,
@@ -50,11 +31,13 @@ const createMotherboardJoiSchema = Joi.object({
   widthUnit: Joi.string().regex(DIMENSION_UNIT_REGEX).required(),
   height: Joi.number().required(),
   heightUnit: Joi.string().regex(DIMENSION_UNIT_REGEX).required(),
-  additionalComments: Joi.string().regex(GRAMMAR_TEXTAREA_INPUT_REGEX).required(),
+  additionalComments: Joi.string().regex(GRAMMAR_TEXTAREA_INPUT_REGEX)
+    .required(),
 
   motherboardSocket: Joi.string().regex(MOTHERBOARD_SOCKET_REGEX).required(),
   motherboardChipset: Joi.string().regex(MOTHERBOARD_CHIPSET_REGEX).required(),
-  motherboardFormFactor: Joi.string().regex(MOTHERBOARD_FORM_FACTOR_REGEX).required(),
+  motherboardFormFactor: Joi.string().regex(MOTHERBOARD_FORM_FACTOR_REGEX)
+    .required(),
   motherboardMemoryMax: Joi.number().required(),
   motherboardMemoryMaxUnit: Joi.string().regex(MEMORY_UNIT_REGEX).required(),
   motherboardMemorySlots: Joi.number().required(),
