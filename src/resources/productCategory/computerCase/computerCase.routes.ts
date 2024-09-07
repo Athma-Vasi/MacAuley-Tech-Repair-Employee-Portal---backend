@@ -1,47 +1,66 @@
 import { Router } from "express";
-import {
-  createNewComputerCaseBulkController,
-  createNewComputerCaseController,
-  deleteAComputerCaseController,
-  deleteAllComputerCasesController,
-  getComputerCaseByIdController,
-  getQueriedComputerCasesController,
-  updateComputerCaseByIdController,
-  updateComputerCasesBulkController,
-} from "./computerCase.controller";
 import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
 import {
   createComputerCaseJoiSchema,
   updateComputerCaseJoiSchema,
 } from "./computerCase.validation";
+import {
+  createNewResourceHandler,
+  deleteAllResourcesHandler,
+  deleteResourceByIdHandler,
+  getQueriedResourcesByUserHandler,
+  getQueriedResourcesHandler,
+  getResourceByIdHandler,
+  updateResourceByIdHandler,
+} from "../../../handlers";
+import { ComputerCaseModel } from "./computerCase.model";
 
 const computerCaseRouter = Router();
 
 computerCaseRouter
   .route("/")
-  .get(getQueriedComputerCasesController)
+  // @desc   Get all computerCases
+  // @route  GET api/v1/product-category/computer-case
+  // @access Private/Admin/Manager
+  .get(getQueriedResourcesHandler(ComputerCaseModel))
+  // @desc   Create a new computerCase
+  // @route  POST api/v1/product-category/computer-case
+  // @access Private/Admin/Manager
   .post(
-    validateSchemaMiddleware(createComputerCaseJoiSchema, "computerCaseSchema"),
-    createNewComputerCaseController
+    validateSchemaMiddleware(createComputerCaseJoiSchema, "schema"),
+    createNewResourceHandler(ComputerCaseModel),
   );
 
-// separate route for safety reasons (as it deletes all documents in the collection)
-computerCaseRouter.route("/delete-all").delete(deleteAllComputerCasesController);
+// @desc   Delete all computerCases
+// @route  DELETE api/v1/product-category/computer-case/delete-all
+// @access Private/Admin/Manager
+computerCaseRouter.route("/delete-all").delete(
+  deleteAllResourcesHandler(ComputerCaseModel),
+);
 
-// DEV ROUTE
-computerCaseRouter
-  .route("/dev")
-  .post(createNewComputerCaseBulkController)
-  .patch(updateComputerCasesBulkController);
+// @desc   Get all computerCases by user
+// @route  GET api/v1/product-category/computer-case/user
+// @access Private/Admin/Manager
+computerCaseRouter.route("/user").get(
+  getQueriedResourcesByUserHandler(ComputerCaseModel),
+);
 
-// single document routes
 computerCaseRouter
-  .route("/:computerCaseId")
-  .get(getComputerCaseByIdController)
-  .delete(deleteAComputerCaseController)
+  .route("/:resourceId")
+  // @desc   Get a computerCase by its ID
+  // @route  GET api/v1/product-category/computer-case/:resourceId
+  // @access Private/Admin/Manager
+  .get(getResourceByIdHandler(ComputerCaseModel))
+  // @desc   Delete a computerCase by its ID
+  // @route  DELETE api/v1/product-category/computer-case/:resourceId
+  // @access Private/Admin/Manager
+  .delete(deleteResourceByIdHandler(ComputerCaseModel))
+  // @desc   Update a computerCase by its ID
+  // @route  PATCH api/v1/product-category/computer-case/:resourceId
+  // @access Private/Admin/Manager
   .patch(
     validateSchemaMiddleware(updateComputerCaseJoiSchema),
-    updateComputerCaseByIdController
+    updateResourceByIdHandler(ComputerCaseModel),
   );
 
 export { computerCaseRouter };
