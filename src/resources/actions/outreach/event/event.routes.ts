@@ -1,42 +1,63 @@
 import { Router } from "express";
-import {
-  createNewEventController,
-  getQueriedEventsController,
-  getEventsByUserController,
-  getEventByIdController,
-  deleteEventController,
-  deleteAllEventsController,
-  updateEventByIdController,
-  createNewEventsBulkController,
-  updateEventsBulkController,
-} from "./event.controller";
 import { validateSchemaMiddleware } from "../../../../middlewares/validateSchema";
 import { createEventJoiSchema, updateEventJoiSchema } from "./event.validation";
+import {
+  createNewResourceHandler,
+  deleteAllResourcesHandler,
+  deleteResourceByIdHandler,
+  getQueriedResourcesByUserHandler,
+  getQueriedResourcesHandler,
+  getResourceByIdHandler,
+  updateResourceByIdHandler,
+} from "../../../../handlers";
+import { EventModel } from "./event.model";
 
 const eventRouter = Router();
 
 eventRouter
   .route("/")
-  .get(getQueriedEventsController)
+  // @desc   Get all events
+  // @route  GET api/v1/actions/outreach/event
+  // @access Private/Admin/Manager
+  .get(getQueriedResourcesHandler(EventModel))
+  // @desc   Create a new event
+  // @route  POST api/v1/actions/outreach/event
+  // @access Private/Admin/Manager
   .post(
-    validateSchemaMiddleware(createEventJoiSchema, "eventSchema"),
-    createNewEventController
+    validateSchemaMiddleware(createEventJoiSchema, "schema"),
+    createNewResourceHandler(EventModel),
   );
 
-eventRouter.route("/delete-all").delete(deleteAllEventsController);
+// @desc   Delete all events
+// @route  DELETE api/v1/actions/outreach/event/delete-all
+// @access Private/Admin/Manager
+eventRouter.route("/delete-all").delete(
+  deleteAllResourcesHandler(EventModel),
+);
 
-eventRouter.route("/user").get(getEventsByUserController);
+// @desc   Get all events by user
+// @route  GET api/v1/actions/outreach/event/user
+// @access Private/Admin/Manager
+eventRouter.route("/user").get(
+  getQueriedResourcesByUserHandler(EventModel),
+);
 
-// DEV ROUTES
 eventRouter
-  .route("/dev")
-  .post(createNewEventsBulkController)
-  .patch(updateEventsBulkController);
-
-eventRouter
-  .route("/:eventId")
-  .get(getEventByIdController)
-  .delete(deleteEventController)
-  .patch(validateSchemaMiddleware(updateEventJoiSchema), updateEventByIdController);
+  .route("/:resourceId")
+  // @desc   Get an event by its ID
+  // @route  GET api/v1/actions/outreach/event/:resourceId
+  // @access Private/Admin/Manager
+  .get(getResourceByIdHandler(EventModel))
+  // @desc   Delete an event by its ID
+  // @route  DELETE api/v1/actions/outreach/event/:resourceId
+  // @access Private/Admin/Manager
+  .delete(deleteResourceByIdHandler(EventModel))
+  // @desc   Update an event by its ID
+  // @route  PATCH api/v1/actions/outreach/event/:resourceId
+  // @access Private/Admin/Manager
+  .patch(
+    validateSchemaMiddleware(updateEventJoiSchema),
+    updateResourceByIdHandler(EventModel),
+  );
 
 export { eventRouter };
