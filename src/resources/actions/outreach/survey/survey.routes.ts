@@ -1,42 +1,66 @@
 import { Router } from "express";
-import {
-  createNewSurveyController,
-  getQueriedSurveysController,
-  getSurveysByUserController,
-  getSurveyByIdController,
-  deleteSurveyController,
-  deleteAllSurveysController,
-  updateSurveyByIdController,
-  createNewSurveysBulkController,
-  updateSurveysBulkController,
-} from "./survey.controller";
 import { validateSchemaMiddleware } from "../../../../middlewares/validateSchema";
-import { createSurveyJoiSchema, updateSurveyJoiSchema } from "./survey.validation";
+import {
+  createSurveyJoiSchema,
+  updateSurveyJoiSchema,
+} from "./survey.validation";
+import {
+  createNewResourceHandler,
+  deleteAllResourcesHandler,
+  deleteResourceByIdHandler,
+  getQueriedResourcesByUserHandler,
+  getQueriedResourcesHandler,
+  getResourceByIdHandler,
+  updateResourceByIdHandler,
+} from "../../../../handlers";
+import { SurveyModel } from "./survey.model";
 
 const surveyRouter = Router();
 
 surveyRouter
   .route("/")
-  .get(getQueriedSurveysController)
+  // @desc   Get all surveys
+  // @route  GET api/v1/actions/outreach/survey
+  // @access Private/Admin/Manager
+  .get(getQueriedResourcesHandler(SurveyModel))
+  // @desc   Create a new survey
+  // @route  POST api/v1/actions/outreach/survey
+  // @access Private/Admin/Manager
   .post(
-    validateSchemaMiddleware(createSurveyJoiSchema, "surveySchema"),
-    createNewSurveyController
+    validateSchemaMiddleware(createSurveyJoiSchema, "schema"),
+    createNewResourceHandler(SurveyModel),
   );
 
-surveyRouter.route("/delete-all").delete(deleteAllSurveysController);
+// @desc   Delete all surveys
+// @route  DELETE api/v1/actions/outreach/survey/delete-all
+// @access Private/Admin/Manager
+surveyRouter.route("/delete-all").delete(
+  deleteAllResourcesHandler(SurveyModel),
+);
 
-surveyRouter.route("/user").get(getSurveysByUserController);
+// @desc   Get all surveys by user
+// @route  GET api/v1/actions/outreach/survey/user
+// @access Private/Admin/Manager
+surveyRouter.route("/user").get(
+  getQueriedResourcesByUserHandler(SurveyModel),
+);
 
-// DEV ROUTES
 surveyRouter
-  .route("/dev")
-  .post(createNewSurveysBulkController)
-  .patch(updateSurveysBulkController);
-
-surveyRouter
-  .route("/:surveyId")
-  .get(getSurveyByIdController)
-  .delete(deleteSurveyController)
-  .patch(validateSchemaMiddleware(updateSurveyJoiSchema), updateSurveyByIdController);
+  .route("/:resourceId")
+  // @desc   Get a survey by its ID
+  // @route  GET api/v1/actions/outreach/survey/:resourceId
+  // @access Private/Admin/Manager
+  .get(getResourceByIdHandler(SurveyModel))
+  // @desc   Delete a survey by its ID
+  // @route  DELETE api/v1/actions/outreach/survey/:resourceId
+  // @access Private/Admin/Manager
+  .delete(deleteResourceByIdHandler(SurveyModel))
+  // @desc   Update a survey by its ID
+  // @route  PATCH api/v1/actions/outreach/survey/:resourceId
+  // @access Private/Admin/Manager
+  .patch(
+    validateSchemaMiddleware(updateSurveyJoiSchema),
+    updateResourceByIdHandler(SurveyModel),
+  );
 
 export { surveyRouter };
