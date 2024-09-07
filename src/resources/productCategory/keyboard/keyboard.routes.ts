@@ -1,41 +1,66 @@
-import { Router, NextFunction } from "express";
-import {
-  createNewKeyboardBulkController,
-  createNewKeyboardController,
-  deleteAKeyboardController,
-  deleteAllKeyboardsController,
-  getKeyboardByIdController,
-  getQueriedKeyboardsController,
-  updateKeyboardByIdController,
-  updateKeyboardsBulkController,
-} from "./keyboard.controller";
+import { Router } from "express";
 import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
-import { createKeyboardJoiSchema, updateKeyboardJoiSchema } from "./keyboard.validation";
+import {
+  createKeyboardJoiSchema,
+  updateKeyboardJoiSchema,
+} from "./keyboard.validation";
+import {
+  createNewResourceHandler,
+  deleteAllResourcesHandler,
+  deleteResourceByIdHandler,
+  getQueriedResourcesByUserHandler,
+  getQueriedResourcesHandler,
+  getResourceByIdHandler,
+  updateResourceByIdHandler,
+} from "../../../handlers";
+import { KeyboardModel } from "./keyboard.model";
 
 const keyboardRouter = Router();
 
 keyboardRouter
   .route("/")
-  .get(getQueriedKeyboardsController)
+  // @desc   Get all keyboards
+  // @route  GET api/v1/product-category/keyboard
+  // @access Private/Admin/Manager
+  .get(getQueriedResourcesHandler(KeyboardModel))
+  // @desc   Create a new keyboard
+  // @route  POST api/v1/product-category/keyboard
+  // @access Private/Admin/Manager
   .post(
-    validateSchemaMiddleware(createKeyboardJoiSchema, "keyboardSchema"),
-    createNewKeyboardController
+    validateSchemaMiddleware(createKeyboardJoiSchema, "schema"),
+    createNewResourceHandler(KeyboardModel),
   );
 
-// separate route for safety reasons (as it deletes all documents in the collection)
-keyboardRouter.route("/delete-all").delete(deleteAllKeyboardsController);
+// @desc   Delete all keyboards
+// @route  DELETE api/v1/product-category/keyboard/delete-all
+// @access Private/Admin/Manager
+keyboardRouter.route("/delete-all").delete(
+  deleteAllResourcesHandler(KeyboardModel),
+);
 
-// DEV ROUTE
-keyboardRouter
-  .route("/dev")
-  .post(createNewKeyboardBulkController)
-  .patch(updateKeyboardsBulkController);
+// @desc   Get all keyboards by user
+// @route  GET api/v1/product-category/keyboard/user
+// @access Private/Admin/Manager
+keyboardRouter.route("/user").get(
+  getQueriedResourcesByUserHandler(KeyboardModel),
+);
 
-// single document routes
 keyboardRouter
-  .route("/:keyboardId")
-  .get(getKeyboardByIdController)
-  .delete(deleteAKeyboardController)
-  .patch(validateSchemaMiddleware(updateKeyboardJoiSchema), updateKeyboardByIdController);
+  .route("/:resourceId")
+  // @desc   Get a keyboard by its ID
+  // @route  GET api/v1/product-category/keyboard/:resourceId
+  // @access Private/Admin/Manager
+  .get(getResourceByIdHandler(KeyboardModel))
+  // @desc   Delete a keyboard by its ID
+  // @route  DELETE api/v1/product-category/keyboard/:resourceId
+  // @access Private/Admin/Manager
+  .delete(deleteResourceByIdHandler(KeyboardModel))
+  // @desc   Update a keyboard by its ID
+  // @route  PATCH api/v1/product-category/keyboard/:resourceId
+  // @access Private/Admin/Manager
+  .patch(
+    validateSchemaMiddleware(updateKeyboardJoiSchema),
+    updateResourceByIdHandler(KeyboardModel),
+  );
 
 export { keyboardRouter };

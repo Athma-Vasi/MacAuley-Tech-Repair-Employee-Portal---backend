@@ -1,27 +1,16 @@
-/**
- *
- keyboardSwitch: KeyboardSwitch; // Cherry MX Red, Cherry MX Blue, etc.
- keyboardLayout: KeyboardLayout; // ANSI, ISO, etc.
- keyboardBacklight: KeyboardBacklight; // RGB, etc.
- keyboardInterface: PeripheralsInterface; // USB, Bluetooth, etc.
- additionalFields: {
-   [key: string]: string;
- };
- */
-
 import Joi from "joi";
 import {
   BRAND_REGEX,
-  SERIAL_ID_REGEX,
-  GRAMMAR_TEXTAREA_INPUT_REGEX,
   CURRENCY_REGEX,
-  PRODUCT_AVAILABILITY_REGEX,
-  WEIGHT_UNIT_REGEX,
   DIMENSION_UNIT_REGEX,
-  KEYBOARD_SWITCH_REGEX,
-  KEYBOARD_LAYOUT_REGEX,
+  GRAMMAR_TEXTAREA_INPUT_REGEX,
   KEYBOARD_BACKLIGHT_REGEX,
+  KEYBOARD_LAYOUT_REGEX,
+  KEYBOARD_SWITCH_REGEX,
   PERIPHERALS_INTERFACE_REGEX,
+  PRODUCT_AVAILABILITY_REGEX,
+  SERIAL_ID_REGEX,
+  WEIGHT_UNIT_REGEX,
 } from "../../../regex";
 
 const createKeyboardJoiSchema = Joi.object({
@@ -41,7 +30,8 @@ const createKeyboardJoiSchema = Joi.object({
   widthUnit: Joi.string().regex(DIMENSION_UNIT_REGEX).required(),
   height: Joi.number().required(),
   heightUnit: Joi.string().regex(DIMENSION_UNIT_REGEX).required(),
-  additionalComments: Joi.string().regex(GRAMMAR_TEXTAREA_INPUT_REGEX).required(),
+  additionalComments: Joi.string().regex(GRAMMAR_TEXTAREA_INPUT_REGEX)
+    .required(),
 
   keyboardSwitch: Joi.string().regex(KEYBOARD_SWITCH_REGEX).required(),
   keyboardLayout: Joi.string().regex(KEYBOARD_LAYOUT_REGEX).required(),
