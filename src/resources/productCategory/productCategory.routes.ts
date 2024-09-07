@@ -1,4 +1,4 @@
-import { Router, NextFunction } from "express";
+import { NextFunction, Router } from "express";
 import { accessoryRouter } from "./accessory";
 import { cpuRouter } from "./cpu";
 import { getQueriedGpusController, gpuRouter } from "./gpu";
@@ -18,17 +18,25 @@ import { smartphoneRouter } from "./smartphone";
 import { speakerRouter } from "./speaker";
 import { tabletRouter } from "./tablet";
 import { webcamRouter } from "./webcam";
-import { assignQueryDefaults, verifyJWTMiddleware, verifyRoles } from "../../middlewares";
+import {
+  createMongoDbQueryObject,
+  verifyJWTMiddleware,
+  verifyRoles,
+} from "../../middlewares";
 
 const productCategoryRouter = Router({
   strict: true,
 });
-productCategoryRouter.use(verifyJWTMiddleware, verifyRoles, assignQueryDefaults);
-// productCategoryRouter.route("/").get(assignQueryDefaults);
+productCategoryRouter.use(
+  verifyJWTMiddleware,
+  verifyRoles,
+  createMongoDbQueryObject,
+);
+// productCategoryRouter.route("/").get(createMongoDbQueryObject);
 
 // productCategoryRouter
 //   .route("/gpu")
-//   .get(assignQueryDefaults, getQueriedGpusController);
+//   .get(createMongoDbQueryObject, getQueriedGpusController);
 
 productCategoryRouter.use("/accessory", accessoryRouter);
 productCategoryRouter.use("/cpu", cpuRouter);
