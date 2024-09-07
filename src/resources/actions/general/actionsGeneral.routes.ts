@@ -4,13 +4,17 @@ import { printerIssueRouter } from "./printerIssue";
 import { anonymousRequestRouter } from "./anonymousRequest";
 import { refermentRouter } from "./referment";
 import {
-  assignQueryDefaults,
+  createMongoDbQueryObject,
   verifyJWTMiddleware,
   verifyRoles,
 } from "../../../middlewares";
 
 const actionsGeneralRouter = Router();
-actionsGeneralRouter.use(verifyJWTMiddleware, verifyRoles, assignQueryDefaults);
+actionsGeneralRouter.use(
+  verifyJWTMiddleware,
+  verifyRoles,
+  createMongoDbQueryObject,
+);
 
 actionsGeneralRouter.use("/endorsement", endorsementRouter);
 actionsGeneralRouter.use("/printer-issue", printerIssueRouter);

@@ -5,14 +5,18 @@ import { expenseClaimRouter } from "./expenseClaim";
 import { requestResourceRouter } from "./requestResource";
 import { benefitRouter } from "./benefit";
 import {
-  assignQueryDefaults,
+  createMongoDbQueryObject,
   verifyJWTMiddleware,
   verifyRoles,
 } from "../../../middlewares";
 
 const actionsCompanyRouter = Router();
 
-actionsCompanyRouter.use(verifyJWTMiddleware, verifyRoles, assignQueryDefaults);
+actionsCompanyRouter.use(
+  verifyJWTMiddleware,
+  verifyRoles,
+  createMongoDbQueryObject,
+);
 
 actionsCompanyRouter.use("/address-change", addressChangeRouter);
 actionsCompanyRouter.use("/leave-request", leaveRequestRouter);
