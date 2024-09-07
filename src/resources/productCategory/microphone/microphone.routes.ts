@@ -1,47 +1,66 @@
-import { Router, NextFunction } from "express";
-import {
-  createNewMicrophoneBulkController,
-  createNewMicrophoneController,
-  deleteAMicrophoneController,
-  deleteAllMicrophonesController,
-  getMicrophoneByIdController,
-  getQueriedMicrophonesController,
-  updateMicrophoneByIdController,
-  updateMicrophonesBulkController,
-} from "./microphone.controller";
+import { Router } from "express";
 import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
 import {
   createMicrophoneJoiSchema,
   updateMicrophoneJoiSchema,
 } from "./microphone.validation";
+import {
+  createNewResourceHandler,
+  deleteAllResourcesHandler,
+  deleteResourceByIdHandler,
+  getQueriedResourcesByUserHandler,
+  getQueriedResourcesHandler,
+  getResourceByIdHandler,
+  updateResourceByIdHandler,
+} from "../../../handlers";
+import { MicrophoneModel } from "./microphone.model";
 
 const microphoneRouter = Router();
 
 microphoneRouter
   .route("/")
-  .get(getQueriedMicrophonesController)
+  // @desc   Get all microphones
+  // @route  GET api/v1/product-category/microphone
+  // @access Private/Admin/Manager
+  .get(getQueriedResourcesHandler(MicrophoneModel))
+  // @desc   Create a new microphone
+  // @route  POST api/v1/product-category/microphone
+  // @access Private/Admin/Manager
   .post(
-    validateSchemaMiddleware(createMicrophoneJoiSchema, "microphoneSchema"),
-    createNewMicrophoneController
+    validateSchemaMiddleware(createMicrophoneJoiSchema, "schema"),
+    createNewResourceHandler(MicrophoneModel),
   );
 
-// separate route for safety reasons (as it deletes all documents in the collection)
-microphoneRouter.route("/delete-all").delete(deleteAllMicrophonesController);
+// @desc   Delete all microphones
+// @route  DELETE api/v1/product-category/microphone/delete-all
+// @access Private/Admin/Manager
+microphoneRouter.route("/delete-all").delete(
+  deleteAllResourcesHandler(MicrophoneModel),
+);
 
-// DEV ROUTE
-microphoneRouter
-  .route("/dev")
-  .post(createNewMicrophoneBulkController)
-  .patch(updateMicrophonesBulkController);
+// @desc   Get all microphones by user
+// @route  GET api/v1/product-category/microphone/user
+// @access Private/Admin/Manager
+microphoneRouter.route("/user").get(
+  getQueriedResourcesByUserHandler(MicrophoneModel),
+);
 
-// single document routes
 microphoneRouter
-  .route("/:microphoneId")
-  .get(getMicrophoneByIdController)
-  .delete(deleteAMicrophoneController)
+  .route("/:resourceId")
+  // @desc   Get a microphone by its ID
+  // @route  GET api/v1/product-category/microphone/:resourceId
+  // @access Private/Admin/Manager
+  .get(getResourceByIdHandler(MicrophoneModel))
+  // @desc   Delete a microphone by its ID
+  // @route  DELETE api/v1/product-category/microphone/:resourceId
+  // @access Private/Admin/Manager
+  .delete(deleteResourceByIdHandler(MicrophoneModel))
+  // @desc   Update a microphone by its ID
+  // @route  PATCH api/v1/product-category/microphone/:resourceId
+  // @access Private/Admin/Manager
   .patch(
     validateSchemaMiddleware(updateMicrophoneJoiSchema),
-    updateMicrophoneByIdController
+    updateResourceByIdHandler(MicrophoneModel),
   );
 
 export { microphoneRouter };
