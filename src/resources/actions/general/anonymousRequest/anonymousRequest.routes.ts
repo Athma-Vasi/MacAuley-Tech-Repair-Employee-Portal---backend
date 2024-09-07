@@ -19,11 +19,11 @@ const anonymousRequestRouter = Router();
 
 anonymousRequestRouter
   .route("/")
-  // @desc   Get all anonymousRequests plans
+  // @desc   Get all anonymousRequests
   // @route  GET api/v1/actions/general/anonymous-request
   // @access Private/Admin/Manager
   .get(getQueriedResourcesHandler(AnonymousRequestModel))
-  // @desc   Create a new anonymousRequests plan
+  // @desc   Create a new anonymousRequest
   // @route  POST api/v1/actions/general/anonymous-request
   // @access Private/Admin/Manager
   .post(
@@ -31,14 +31,14 @@ anonymousRequestRouter
     createNewResourceHandler(AnonymousRequestModel),
   );
 
-// @desc   Delete all anonymousRequests plans
+// @desc   Delete all anonymousRequests
 // @route  DELETE api/v1/actions/general/anonymous-request/delete-all
 // @access Private/Admin/Manager
 anonymousRequestRouter.route("/delete-all").delete(
   deleteAllResourcesHandler(AnonymousRequestModel),
 );
 
-// @desc   Get all anonymousRequests plans by user
+// @desc   Get all anonymousRequests by user
 // @route  GET api/v1/actions/general/anonymous-request/user
 // @access Private/Admin/Manager
 anonymousRequestRouter.route("/user").get(
@@ -47,15 +47,15 @@ anonymousRequestRouter.route("/user").get(
 
 anonymousRequestRouter
   .route("/:resourceId")
-  // @desc   Get a anonymousRequests plan by ID
+  // @desc   Get an anonymousRequest by its ID
   // @route  GET api/v1/actions/general/anonymous-request/:resourceId
   // @access Private/Admin/Manager
   .get(getResourceByIdHandler(AnonymousRequestModel))
-  // @desc   Delete a anonymousRequests plan by ID
+  // @desc   Delete an anonymousRequest by its ID
   // @route  DELETE api/v1/actions/general/anonymous-request/:resourceId
   // @access Private/Admin/Manager
   .delete(deleteResourceByIdHandler(AnonymousRequestModel))
-  // @desc   Update a anonymousRequests plan by ID
+  // @desc   Update an anonymousRequest by its ID
   // @route  PATCH api/v1/actions/general/anonymous-request/:resourceId
   // @access Private/Admin/Manager
   .patch(

@@ -47,15 +47,15 @@ announcementRouter.route("/user").get(
 
 announcementRouter
   .route("/:resourceId")
-  // @desc   Get an announcement by ID
+  // @desc   Get an announcement by its ID
   // @route  GET api/v1/actions/outreach/announcement/:resourceId
   // @access Private/Admin/Manager
   .get(getResourceByIdHandler(AnnouncementModel))
-  // @desc   Delete an announcement by ID
+  // @desc   Delete an announcement by its ID
   // @route  DELETE api/v1/actions/outreach/announcement/:resourceId
   // @access Private/Admin/Manager
   .delete(deleteResourceByIdHandler(AnnouncementModel))
-  // @desc   Update an announcement by ID
+  // @desc   Update an announcement by its ID
   // @route  PATCH api/v1/actions/outreach/announcement/:resourceId
   // @access Private/Admin/Manager
   .patch(

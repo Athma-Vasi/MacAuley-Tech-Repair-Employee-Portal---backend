@@ -19,11 +19,11 @@ const printerIssueRouter = Router();
 
 printerIssueRouter
   .route("/")
-  // @desc   Get all printerIssues plans
+  // @desc   Get all printerIssues
   // @route  GET api/v1/actions/general/printer-issue
   // @access Private/Admin/Manager
   .get(getQueriedResourcesHandler(PrinterIssueModel))
-  // @desc   Create a new printerIssue plan
+  // @desc   Create a new printerIssue
   // @route  POST api/v1/actions/general/printer-issue
   // @access Private/Admin/Manager
   .post(
@@ -31,14 +31,14 @@ printerIssueRouter
     createNewResourceHandler(PrinterIssueModel),
   );
 
-// @desc   Delete all printerIssues plans
+// @desc   Delete all printerIssues
 // @route  DELETE api/v1/actions/general/printer-issue/delete-all
 // @access Private/Admin/Manager
 printerIssueRouter.route("/delete-all").delete(
   deleteAllResourcesHandler(PrinterIssueModel),
 );
 
-// @desc   Get all printerIssues plans by user
+// @desc   Get all printerIssues by user
 // @route  GET api/v1/actions/general/printer-issue/user
 // @access Private/Admin/Manager
 printerIssueRouter.route("/user").get(
@@ -47,15 +47,15 @@ printerIssueRouter.route("/user").get(
 
 printerIssueRouter
   .route("/:resourceId")
-  // @desc   Get a printerIssue plan by ID
+  // @desc   Get a printerIssue by its ID
   // @route  GET api/v1/actions/general/printer-issue/:resourceId
   // @access Private/Admin/Manager
   .get(getResourceByIdHandler(PrinterIssueModel))
-  // @desc   Delete a printerIssue plan by ID
+  // @desc   Delete a printerIssue by its ID
   // @route  DELETE api/v1/actions/general/printer-issue/:resourceId
   // @access Private/Admin/Manager
   .delete(deleteResourceByIdHandler(PrinterIssueModel))
-  // @desc   Update a printerIssues plan by ID
+  // @desc   Update a printerIssue by its ID
   // @route  PATCH api/v1/actions/general/printer-issue/:resourceId
   // @access Private/Admin/Manager
   .patch(

@@ -19,11 +19,11 @@ const endorsementRouter = Router();
 
 endorsementRouter
   .route("/")
-  // @desc   Get all endorsements plans
+  // @desc   Get all endorsements
   // @route  GET api/v1/actions/general/endorsement
   // @access Private/Admin/Manager
   .get(getQueriedResourcesHandler(EndorsementModel))
-  // @desc   Create a new endorsement plan
+  // @desc   Create a new endorsement
   // @route  POST api/v1/actions/general/endorsement
   // @access Private/Admin/Manager
   .post(
@@ -31,14 +31,14 @@ endorsementRouter
     createNewResourceHandler(EndorsementModel),
   );
 
-// @desc   Delete all endorsements plans
+// @desc   Delete all endorsements
 // @route  DELETE api/v1/actions/general/endorsement/delete-all
 // @access Private/Admin/Manager
 endorsementRouter.route("/delete-all").delete(
   deleteAllResourcesHandler(EndorsementModel),
 );
 
-// @desc   Get all endorsements plans by user
+// @desc   Get all endorsements by user
 // @route  GET api/v1/actions/general/endorsement/user
 // @access Private/Admin/Manager
 endorsementRouter.route("/user").get(
@@ -47,15 +47,15 @@ endorsementRouter.route("/user").get(
 
 endorsementRouter
   .route("/:resourceId")
-  // @desc   Get an endorsement plan by ID
+  // @desc   Get an endorsement by its ID
   // @route  GET api/v1/actions/general/endorsement/:resourceId
   // @access Private/Admin/Manager
   .get(getResourceByIdHandler(EndorsementModel))
-  // @desc   Delete an endorsement plan by ID
+  // @desc   Delete an endorsement by its ID
   // @route  DELETE api/v1/actions/general/endorsement/:resourceId
   // @access Private/Admin/Manager
   .delete(deleteResourceByIdHandler(EndorsementModel))
-  // @desc   Update an endorsements plan by ID
+  // @desc   Update an endorsement by its ID
   // @route  PATCH api/v1/actions/general/endorsement/:resourceId
   // @access Private/Admin/Manager
   .patch(

@@ -19,11 +19,11 @@ const benefitRouter = Router();
 
 benefitRouter
   .route("/")
-  // @desc   Get all benefits plans
+  // @desc   Get all benefits
   // @route  GET api/v1/actions/company/benefits
   // @access Private/Admin/Manager
   .get(getQueriedResourcesHandler(BenefitModel))
-  // @desc   Create a new benefits plan
+  // @desc   Create a new benefit
   // @route  POST api/v1/actions/company/benefits
   // @access Private/Admin/Manager
   .post(
@@ -31,14 +31,14 @@ benefitRouter
     createNewResourceHandler(BenefitModel),
   );
 
-// @desc   Delete all benefits plans
+// @desc   Delete all benefits
 // @route  DELETE api/v1/actions/company/benefits/delete-all
 // @access Private/Admin/Manager
 benefitRouter.route("/delete-all").delete(
   deleteAllResourcesHandler(BenefitModel),
 );
 
-// @desc   Get all benefits plans by user
+// @desc   Get all benefits by user
 // @route  GET api/v1/actions/company/benefits/user
 // @access Private/Admin/Manager
 benefitRouter.route("/user").get(
@@ -47,15 +47,15 @@ benefitRouter.route("/user").get(
 
 benefitRouter
   .route("/:resourceId")
-  // @desc   Get a benefits plan by ID
+  // @desc   Get a benefit by ID
   // @route  GET api/v1/actions/company/benefits/:resourceId
   // @access Private/Admin/Manager
   .get(getResourceByIdHandler(BenefitModel))
-  // @desc   Delete a benefits plan by ID
+  // @desc   Delete a benefit by ID
   // @route  DELETE api/v1/actions/company/benefits/:resourceId
   // @access Private/Admin/Manager
   .delete(deleteResourceByIdHandler(BenefitModel))
-  // @desc   Update a benefits plan by ID
+  // @desc   Update a benefit by ID
   // @route  PATCH api/v1/actions/company/benefits/:resourceId
   // @access Private/Admin/Manager
   .patch(
