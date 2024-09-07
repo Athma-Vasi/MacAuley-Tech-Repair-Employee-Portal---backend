@@ -1,26 +1,15 @@
-/**
- * mouseSensor: MouseSensor; // Optical, Laser, etc.
-  mouseDpi: number; // 800, 1600, etc.
-  mouseButtons: number; // 6, 8, etc.
-  mouseColor: string; // Black, White, etc.
-  mouseInterface: PeripheralsInterface; // USB, Bluetooth, etc.
-  additionalFields: {
-    [key: string]: string;
-  };
- */
-
 import Joi from "joi";
 import {
   BRAND_REGEX,
-  SERIAL_ID_REGEX,
-  GRAMMAR_TEXTAREA_INPUT_REGEX,
-  CURRENCY_REGEX,
-  PRODUCT_AVAILABILITY_REGEX,
-  WEIGHT_UNIT_REGEX,
-  DIMENSION_UNIT_REGEX,
-  MOUSE_SENSOR_REGEX,
   COLOR_VARIANT_REGEX,
+  CURRENCY_REGEX,
+  DIMENSION_UNIT_REGEX,
+  GRAMMAR_TEXTAREA_INPUT_REGEX,
+  MOUSE_SENSOR_REGEX,
   PERIPHERALS_INTERFACE_REGEX,
+  PRODUCT_AVAILABILITY_REGEX,
+  SERIAL_ID_REGEX,
+  WEIGHT_UNIT_REGEX,
 } from "../../../regex";
 
 const createMouseJoiSchema = Joi.object({
@@ -40,7 +29,8 @@ const createMouseJoiSchema = Joi.object({
   widthUnit: Joi.string().regex(DIMENSION_UNIT_REGEX).required(),
   height: Joi.number().required(),
   heightUnit: Joi.string().regex(DIMENSION_UNIT_REGEX).required(),
-  additionalComments: Joi.string().regex(GRAMMAR_TEXTAREA_INPUT_REGEX).required(),
+  additionalComments: Joi.string().regex(GRAMMAR_TEXTAREA_INPUT_REGEX)
+    .required(),
 
   mouseSensor: Joi.string().regex(MOUSE_SENSOR_REGEX).required(),
   mouseDpi: Joi.number().required(),
