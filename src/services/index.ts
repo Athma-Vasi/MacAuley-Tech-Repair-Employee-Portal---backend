@@ -34,6 +34,39 @@ async function getResourceByIdService<
     }
 }
 
+async function getResourceByFieldService<
+    Doc extends Record<string, unknown> = Record<string, unknown>,
+>({
+    field,
+    value,
+    model,
+}: {
+    field: string;
+    value: unknown;
+    model: Model<Doc>;
+}) {
+    try {
+        const filter = { [field]: { $eq: value } };
+        const resource = await model.findOne({ filter })
+            .lean()
+            .exec();
+        if (resource === null || resource === undefined) {
+            return new Ok(
+                createHttpResultError({ status: 404 }),
+            );
+        }
+
+        return new Ok(createHttpResultSuccess({ data: [resource] }));
+    } catch (error: unknown) {
+        return new Err(
+            createHttpResultError({
+                data: [error],
+                message: "Error getting resource by field",
+            }),
+        );
+    }
+}
+
 async function createNewResourceService<
     Schema extends Record<string, unknown> = Record<string, unknown>,
     Doc extends Record<string, unknown> = Record<string, unknown>,
@@ -235,6 +268,7 @@ export {
     getQueriedResourcesByUserService,
     getQueriedResourcesService,
     getQueriedTotalResourcesService,
+    getResourceByFieldService,
     getResourceByIdService,
     updateResourceByIdService,
 };

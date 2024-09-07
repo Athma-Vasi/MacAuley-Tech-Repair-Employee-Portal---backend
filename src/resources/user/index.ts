@@ -7,28 +7,8 @@
  */
 import { UserModel } from "./user.model";
 import { userRouter } from "./user.routes";
-import {
-  createNewUserController,
-  deleteUserController,
-  getQueriedUsersController,
-  updateUserByIdController,
-} from "./user.controller";
-import {
-  createNewUserService,
-  checkUserIsActiveService,
-  deleteUserService,
-  getQueriedUsersService,
-  getUserByIdService,
-  getUserByUsernameService,
-  updateUserByIdService,
-  checkUserPasswordService,
-  updateUserPasswordService,
-} from "./user.service";
 
 import type {
-  UserDocument,
-  UserSchema,
-  UserRoles,
   Country,
   Department,
   JobPosition,
@@ -37,38 +17,16 @@ import type {
   PreferredPronouns,
   Province,
   StatesUS,
+  UserDocument,
+  UserRoles,
+  UserSchema,
 } from "./user.model";
-import type {
-  CreateNewUserRequest,
-  DeleteUserRequest,
-  GetAllUsersRequest,
-  UpdateUserRequest,
-  UpdateUserPasswordRequest,
-} from "./user.types";
 
 /**
  * Exports
  */
-export {
-  UserModel,
-  userRouter,
-  createNewUserController,
-  deleteUserController,
-  getQueriedUsersController,
-  updateUserByIdController,
-  createNewUserService,
-  checkUserIsActiveService,
-  deleteUserService,
-  getQueriedUsersService,
-  getUserByIdService,
-  getUserByUsernameService,
-  updateUserByIdService,
-  checkUserPasswordService,
-  updateUserPasswordService,
-};
+export { UserModel, userRouter };
 export type {
-  UserDocument,
-  UserSchema,
   Country,
   Department,
   JobPosition,
@@ -77,10 +35,7 @@ export type {
   PreferredPronouns,
   Province,
   StatesUS,
+  UserDocument,
   UserRoles,
-  CreateNewUserRequest,
-  DeleteUserRequest,
-  GetAllUsersRequest,
-  UpdateUserRequest,
-  UpdateUserPasswordRequest,
+  UserSchema,
 };

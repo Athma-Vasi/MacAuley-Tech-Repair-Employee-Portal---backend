@@ -1,45 +1,14 @@
-/**
- * type UserSchema = {
-  username: string;
-  password: string;
-  email: string;
-
-  firstName: string;
-  middleName: string;
-  lastName: string;
-  preferredName: string;
-  preferredPronouns: PreferredPronouns;
-  profilePictureUrl: string;
-  dateOfBirth: NativeDate;
-
-  contactNumber: PhoneNumber;
-  address: Address;
-
-  jobPosition: JobPosition;
-  department: Department;
-  storeLocation: StoreLocation | null;
-
-  emergencyContact: { fullName: string; contactNumber: PhoneNumber };
-  startDate: NativeDate;
-  roles: UserRoles;
-  active: boolean;
-
-  completedSurveys: (Types.ObjectId | string)[];
-  isPrefersReducedMotion: boolean;
-};
- */
-
 import Joi from "joi";
 import {
-  USERNAME_REGEX,
-  PASSWORD_REGEX,
-  NAME_REGEX,
-  PREFERRED_PRONOUNS_REGEX,
-  PHONE_NUMBER_REGEX,
+  DEPARTMENT_REGEX,
   FULL_NAME_REGEX,
   JOB_POSITION_REGEX,
-  DEPARTMENT_REGEX,
+  NAME_REGEX,
+  PASSWORD_REGEX,
+  PHONE_NUMBER_REGEX,
+  PREFERRED_PRONOUNS_REGEX,
   USER_ROLES_REGEX,
+  USERNAME_REGEX,
 } from "../../regex";
 import { ADDRESS_SCHEMA } from "../customer/customer.validation";
 
