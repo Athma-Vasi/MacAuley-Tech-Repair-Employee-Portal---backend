@@ -1,51 +1,66 @@
 import { Router } from "express";
-import {
-  createNewCommentController,
-  getQueriedCommentsController,
-  getCommentsByUserController,
-  getCommentByIdController,
-  deleteCommentController,
-  deleteAllCommentsController,
-  updateCommentByIdController,
-  createNewCommentsBulkController,
-  updateCommentsBulkController,
-  getQueriedCommentsByParentResourceIdController,
-} from "./comment.controller";
-
-import { verifyJWTMiddleware, verifyRoles, assignQueryDefaults } from "../../middlewares";
 import { validateSchemaMiddleware } from "../../middlewares/validateSchema";
-import { createCommentJoiSchema, updateCommentJoiSchema } from "./comment.validation";
+import {
+  createCommentJoiSchema,
+  updateCommentJoiSchema,
+} from "./comment.validation";
+import {
+  createNewResourceHandler,
+  deleteAllResourcesHandler,
+  deleteResourceByIdHandler,
+  getQueriedResourcesByUserHandler,
+  getQueriedResourcesHandler,
+  getResourceByIdHandler,
+  updateResourceByIdHandler,
+} from "../../handlers";
+import { CommentModel } from "./comment.model";
 
 const commentRouter = Router();
 
-commentRouter.use(verifyJWTMiddleware, verifyRoles, assignQueryDefaults);
-
 commentRouter
   .route("/")
-  .get(getQueriedCommentsController)
+  // @desc   Get all comments
+  // @route  GET api/v1/comment
+  // @access Private/Admin/Manager
+  .get(getQueriedResourcesHandler(CommentModel))
+  // @desc   Create a new comment
+  // @route  POST api/v1/comment
+  // @access Private/Admin/Manager
   .post(
-    validateSchemaMiddleware(createCommentJoiSchema, "commentSchema"),
-    createNewCommentController
+    validateSchemaMiddleware(createCommentJoiSchema, "schema"),
+    createNewResourceHandler(CommentModel),
   );
 
-commentRouter.route("/delete-all").delete(deleteAllCommentsController);
+// @desc   Delete all comments
+// @route  DELETE api/v1/comment/delete-all
+// @access Private/Admin/Manager
+commentRouter.route("/delete-all").delete(
+  deleteAllResourcesHandler(CommentModel),
+);
 
-commentRouter.route("/user").get(getCommentsByUserController);
+// @desc   Get all comments by user
+// @route  GET api/v1/comment/user
+// @access Private/Admin/Manager
+commentRouter.route("/user").get(
+  getQueriedResourcesByUserHandler(CommentModel),
+);
 
 commentRouter
-  .route("/parentResource/:parentResourceId")
-  .get(getQueriedCommentsByParentResourceIdController);
-
-// DEV ROUTES
-commentRouter
-  .route("/dev")
-  .post(createNewCommentsBulkController)
-  .patch(updateCommentsBulkController);
-
-commentRouter
-  .route("/:commentId")
-  .get(getCommentByIdController)
-  .delete(deleteCommentController)
-  .patch(validateSchemaMiddleware(updateCommentJoiSchema), updateCommentByIdController);
+  .route("/:resourceId")
+  // @desc   Get a comment by its ID
+  // @route  GET api/v1/comment/:resourceId
+  // @access Private/Admin/Manager
+  .get(getResourceByIdHandler(CommentModel))
+  // @desc   Delete a comment by its ID
+  // @route  DELETE api/v1/comment/:resourceId
+  // @access Private/Admin/Manager
+  .delete(deleteResourceByIdHandler(CommentModel))
+  // @desc   Update a comment by its ID
+  // @route  PATCH api/v1/comment/:resourceId
+  // @access Private/Admin/Manager
+  .patch(
+    validateSchemaMiddleware(updateCommentJoiSchema),
+    updateResourceByIdHandler(CommentModel),
+  );
 
 export { commentRouter };
