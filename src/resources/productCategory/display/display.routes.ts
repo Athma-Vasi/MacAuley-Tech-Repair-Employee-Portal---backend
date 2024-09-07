@@ -1,41 +1,66 @@
-import { Router, NextFunction } from "express";
-import {
-  createNewDisplayBulkController,
-  createNewDisplayController,
-  deleteADisplayController,
-  deleteAllDisplaysController,
-  getDisplayByIdController,
-  getQueriedDisplaysController,
-  updateDisplayByIdController,
-  updateDisplaysBulkController,
-} from "./display.controller";
+import { Router } from "express";
 import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
-import { createDisplayJoiSchema, updateDisplayJoiSchema } from "./display.validation";
+import {
+  createDisplayJoiSchema,
+  updateDisplayJoiSchema,
+} from "./display.validation";
+import {
+  createNewResourceHandler,
+  deleteAllResourcesHandler,
+  deleteResourceByIdHandler,
+  getQueriedResourcesByUserHandler,
+  getQueriedResourcesHandler,
+  getResourceByIdHandler,
+  updateResourceByIdHandler,
+} from "../../../handlers";
+import { DisplayModel } from "./display.model";
 
 const displayRouter = Router();
 
 displayRouter
   .route("/")
-  .get(getQueriedDisplaysController)
+  // @desc   Get all displays
+  // @route  GET api/v1/product-category/display
+  // @access Private/Admin/Manager
+  .get(getQueriedResourcesHandler(DisplayModel))
+  // @desc   Create a new display
+  // @route  POST api/v1/product-category/display
+  // @access Private/Admin/Manager
   .post(
-    validateSchemaMiddleware(createDisplayJoiSchema, "displaySchema"),
-    createNewDisplayController
+    validateSchemaMiddleware(createDisplayJoiSchema, "schema"),
+    createNewResourceHandler(DisplayModel),
   );
 
-// separate route for safety reasons (as it deletes all documents in the collection)
-displayRouter.route("/delete-all").delete(deleteAllDisplaysController);
+// @desc   Delete all displays
+// @route  DELETE api/v1/product-category/display/delete-all
+// @access Private/Admin/Manager
+displayRouter.route("/delete-all").delete(
+  deleteAllResourcesHandler(DisplayModel),
+);
 
-// DEV ROUTE
-displayRouter
-  .route("/dev")
-  .post(createNewDisplayBulkController)
-  .patch(updateDisplaysBulkController);
+// @desc   Get all displays by user
+// @route  GET api/v1/product-category/display/user
+// @access Private/Admin/Manager
+displayRouter.route("/user").get(
+  getQueriedResourcesByUserHandler(DisplayModel),
+);
 
-// single document routes
 displayRouter
-  .route("/:displayId")
-  .get(getDisplayByIdController)
-  .delete(deleteADisplayController)
-  .patch(validateSchemaMiddleware(updateDisplayJoiSchema), updateDisplayByIdController);
+  .route("/:resourceId")
+  // @desc   Get a display by its ID
+  // @route  GET api/v1/product-category/display/:resourceId
+  // @access Private/Admin/Manager
+  .get(getResourceByIdHandler(DisplayModel))
+  // @desc   Delete a display by its ID
+  // @route  DELETE api/v1/product-category/display/:resourceId
+  // @access Private/Admin/Manager
+  .delete(deleteResourceByIdHandler(DisplayModel))
+  // @desc   Update a display by its ID
+  // @route  PATCH api/v1/product-category/display/:resourceId
+  // @access Private/Admin/Manager
+  .patch(
+    validateSchemaMiddleware(updateDisplayJoiSchema),
+    updateResourceByIdHandler(DisplayModel),
+  );
 
 export { displayRouter };

@@ -1,28 +1,14 @@
-/**
- * // page 2
-  displaySize: number; // 24", 27", etc.
-  displayHorizontalResolution: number;
-  displayVerticalResolution: number;
-  displayRefreshRate: number; // 144 Hz, 165 Hz, etc.
-  displayPanelType: DisplayPanelType; // IPS, TN, etc.
-  displayResponseTime: number; // 1 ms, 4 ms, etc.
-  displayAspectRatio: string; // 16:9, 21:9, etc.
-  additionalFields: {
-    [key: string]: string;
-  };
- */
-
 import Joi from "joi";
 import {
   BRAND_REGEX,
-  SERIAL_ID_REGEX,
-  GRAMMAR_TEXTAREA_INPUT_REGEX,
   CURRENCY_REGEX,
-  PRODUCT_AVAILABILITY_REGEX,
-  WEIGHT_UNIT_REGEX,
   DIMENSION_UNIT_REGEX,
-  DISPLAY_PANEL_TYPE_REGEX,
   DISPLAY_ASPECT_RATIO_REGEX,
+  DISPLAY_PANEL_TYPE_REGEX,
+  GRAMMAR_TEXTAREA_INPUT_REGEX,
+  PRODUCT_AVAILABILITY_REGEX,
+  SERIAL_ID_REGEX,
+  WEIGHT_UNIT_REGEX,
 } from "../../../regex";
 
 const createDisplayJoiSchema = Joi.object({
@@ -42,7 +28,8 @@ const createDisplayJoiSchema = Joi.object({
   widthUnit: Joi.string().regex(DIMENSION_UNIT_REGEX).required(),
   height: Joi.number().required(),
   heightUnit: Joi.string().regex(DIMENSION_UNIT_REGEX).required(),
-  additionalComments: Joi.string().regex(GRAMMAR_TEXTAREA_INPUT_REGEX).required(),
+  additionalComments: Joi.string().regex(GRAMMAR_TEXTAREA_INPUT_REGEX)
+    .required(),
 
   displaySize: Joi.number().required(),
   displayHorizontalResolution: Joi.number().required(),
