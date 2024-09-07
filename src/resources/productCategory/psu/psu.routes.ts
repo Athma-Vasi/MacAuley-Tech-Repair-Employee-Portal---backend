@@ -1,38 +1,63 @@
-import { Router, NextFunction } from "express";
-import {
-  createNewPsuBulkController,
-  createNewPsuController,
-  deleteAPsuController,
-  deleteAllPsusController,
-  getPsuByIdController,
-  getQueriedPsusController,
-  updatePsuByIdController,
-  updatePsusBulkController,
-} from "./psu.controller";
+import { Router } from "express";
 import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
 import { createPsuJoiSchema, updatePsuJoiSchema } from "./psu.validation";
+import {
+  createNewResourceHandler,
+  deleteAllResourcesHandler,
+  deleteResourceByIdHandler,
+  getQueriedResourcesByUserHandler,
+  getQueriedResourcesHandler,
+  getResourceByIdHandler,
+  updateResourceByIdHandler,
+} from "../../../handlers";
+import { PsuModel } from "./psu.model";
 
 const psuRouter = Router();
 
 psuRouter
   .route("/")
-  .get(getQueriedPsusController)
+  // @desc   Get all psus
+  // @route  GET api/v1/product-category/psu
+  // @access Private/Admin/Manager
+  .get(getQueriedResourcesHandler(PsuModel))
+  // @desc   Create a new psu
+  // @route  POST api/v1/product-category/psu
+  // @access Private/Admin/Manager
   .post(
-    validateSchemaMiddleware(createPsuJoiSchema, "psuSchema"),
-    createNewPsuController
+    validateSchemaMiddleware(createPsuJoiSchema, "schema"),
+    createNewResourceHandler(PsuModel),
   );
 
-// separate route for safety reasons (as it deletes all documents in the collection)
-psuRouter.route("/delete-all").delete(deleteAllPsusController);
+// @desc   Delete all psus
+// @route  DELETE api/v1/product-category/psu/delete-all
+// @access Private/Admin/Manager
+psuRouter.route("/delete-all").delete(
+  deleteAllResourcesHandler(PsuModel),
+);
 
-// DEV ROUTE
-psuRouter.route("/dev").post(createNewPsuBulkController).patch(updatePsusBulkController);
+// @desc   Get all psus by user
+// @route  GET api/v1/product-category/psu/user
+// @access Private/Admin/Manager
+psuRouter.route("/user").get(
+  getQueriedResourcesByUserHandler(PsuModel),
+);
 
-// single document routes
 psuRouter
-  .route("/:psuId")
-  .get(getPsuByIdController)
-  .delete(deleteAPsuController)
-  .patch(validateSchemaMiddleware(updatePsuJoiSchema), updatePsuByIdController);
+  .route("/:resourceId")
+  // @desc   Get a psu by its ID
+  // @route  GET api/v1/product-category/psu/:resourceId
+  // @access Private/Admin/Manager
+  .get(getResourceByIdHandler(PsuModel))
+  // @desc   Delete a psu by its ID
+  // @route  DELETE api/v1/product-category/psu/:resourceId
+  // @access Private/Admin/Manager
+  .delete(deleteResourceByIdHandler(PsuModel))
+  // @desc   Update a psu by its ID
+  // @route  PATCH api/v1/product-category/psu/:resourceId
+  // @access Private/Admin/Manager
+  .patch(
+    validateSchemaMiddleware(updatePsuJoiSchema),
+    updateResourceByIdHandler(PsuModel),
+  );
 
 export { psuRouter };

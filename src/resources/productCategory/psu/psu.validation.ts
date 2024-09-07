@@ -1,13 +1,3 @@
-/**
- * psuWattage: number; // 650 W, 750 W, etc.
-  psuEfficiency: PsuEfficiency; // 80+ Gold, 80+ Platinum, etc.
-  psuFormFactor: PsuFormFactor; // ATX, SFX, etc.
-  psuModularity: PsuModularity; // Full, Semi, etc.
-  additionalFields: {
-    [key: string]: string;
-  };
- */
-
 import Joi from "joi";
 import {
   BRAND_REGEX,
@@ -39,7 +29,8 @@ const createPsuJoiSchema = Joi.object({
   widthUnit: Joi.string().regex(DIMENSION_UNIT_REGEX).required(),
   height: Joi.number().required(),
   heightUnit: Joi.string().regex(DIMENSION_UNIT_REGEX).required(),
-  additionalComments: Joi.string().regex(GRAMMAR_TEXTAREA_INPUT_REGEX).required(),
+  additionalComments: Joi.string().regex(GRAMMAR_TEXTAREA_INPUT_REGEX)
+    .required(),
 
   psuWattage: Joi.number().required(),
   psuEfficiency: Joi.string().regex(PSU_EFFICIENCY_REGEX).required(),
