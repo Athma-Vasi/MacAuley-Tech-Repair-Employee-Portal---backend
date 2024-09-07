@@ -1,28 +1,16 @@
-/**
- *   speakerType: SpeakerType; // 2.0, 2.1, etc.
-  speakerTotalWattage: number; // 10 W, 20 W, etc.
-  speakerFrequencyResponse: string; // 20 Hz - 20 kHz, etc.
-  speakerColor: string; // Black, White, etc.
-  speakerInterface: SpeakerInterface; // USB, Bluetooth, etc.
-  additionalFields: {
-    [key: string]: string;
-  };
-
- */
-
 import Joi from "joi";
 import {
   BRAND_REGEX,
-  SERIAL_ID_REGEX,
-  GRAMMAR_TEXTAREA_INPUT_REGEX,
-  CURRENCY_REGEX,
-  PRODUCT_AVAILABILITY_REGEX,
-  WEIGHT_UNIT_REGEX,
-  DIMENSION_UNIT_REGEX,
-  SPEAKER_TYPE_REGEX,
-  FREQUENCY_RESPONSE_REGEX,
   COLOR_VARIANT_REGEX,
+  CURRENCY_REGEX,
+  DIMENSION_UNIT_REGEX,
+  FREQUENCY_RESPONSE_REGEX,
+  GRAMMAR_TEXTAREA_INPUT_REGEX,
+  PRODUCT_AVAILABILITY_REGEX,
+  SERIAL_ID_REGEX,
   SPEAKER_INTERFACE_REGEX,
+  SPEAKER_TYPE_REGEX,
+  WEIGHT_UNIT_REGEX,
 } from "../../../regex";
 
 const createSpeakerJoiSchema = Joi.object({
@@ -42,11 +30,13 @@ const createSpeakerJoiSchema = Joi.object({
   widthUnit: Joi.string().regex(DIMENSION_UNIT_REGEX).required(),
   height: Joi.number().required(),
   heightUnit: Joi.string().regex(DIMENSION_UNIT_REGEX).required(),
-  additionalComments: Joi.string().regex(GRAMMAR_TEXTAREA_INPUT_REGEX).required(),
+  additionalComments: Joi.string().regex(GRAMMAR_TEXTAREA_INPUT_REGEX)
+    .required(),
 
   speakerType: Joi.string().regex(SPEAKER_TYPE_REGEX).required(),
   speakerTotalWattage: Joi.number().required(),
-  speakerFrequencyResponse: Joi.string().regex(FREQUENCY_RESPONSE_REGEX).required(),
+  speakerFrequencyResponse: Joi.string().regex(FREQUENCY_RESPONSE_REGEX)
+    .required(),
   speakerColor: Joi.string().regex(COLOR_VARIANT_REGEX).required(),
   speakerInterface: Joi.string().regex(SPEAKER_INTERFACE_REGEX).required(),
   additionalFields: Joi.object().required(),

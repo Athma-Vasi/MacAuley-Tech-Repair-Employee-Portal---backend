@@ -1,41 +1,66 @@
-import { Router, NextFunction } from "express";
-import {
-  createNewSpeakerBulkController,
-  createNewSpeakerController,
-  deleteASpeakerController,
-  deleteAllSpeakersController,
-  getSpeakerByIdController,
-  getQueriedSpeakersController,
-  updateSpeakerByIdController,
-  updateSpeakersBulkController,
-} from "./speaker.controller";
+import { Router } from "express";
 import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
-import { createSpeakerJoiSchema, updateSpeakerJoiSchema } from "./speaker.validation";
+import {
+  createSpeakerJoiSchema,
+  updateSpeakerJoiSchema,
+} from "./speaker.validation";
+import {
+  createNewResourceHandler,
+  deleteAllResourcesHandler,
+  deleteResourceByIdHandler,
+  getQueriedResourcesByUserHandler,
+  getQueriedResourcesHandler,
+  getResourceByIdHandler,
+  updateResourceByIdHandler,
+} from "../../../handlers";
+import { SpeakerModel } from "./speaker.model";
 
 const speakerRouter = Router();
 
 speakerRouter
   .route("/")
-  .get(getQueriedSpeakersController)
+  // @desc   Get all speakers
+  // @route  GET api/v1/product-category/speaker
+  // @access Private/Admin/Manager
+  .get(getQueriedResourcesHandler(SpeakerModel))
+  // @desc   Create a new speaker
+  // @route  POST api/v1/product-category/speaker
+  // @access Private/Admin/Manager
   .post(
-    validateSchemaMiddleware(createSpeakerJoiSchema, "speakerSchema"),
-    createNewSpeakerController
+    validateSchemaMiddleware(createSpeakerJoiSchema, "schema"),
+    createNewResourceHandler(SpeakerModel),
   );
 
-// separate route for safety reasons (as it deletes all documents in the collection)
-speakerRouter.route("/delete-all").delete(deleteAllSpeakersController);
+// @desc   Delete all speakers
+// @route  DELETE api/v1/product-category/speaker/delete-all
+// @access Private/Admin/Manager
+speakerRouter.route("/delete-all").delete(
+  deleteAllResourcesHandler(SpeakerModel),
+);
 
-// DEV ROUTE
-speakerRouter
-  .route("/dev")
-  .post(createNewSpeakerBulkController)
-  .patch(updateSpeakersBulkController);
+// @desc   Get all speakers by user
+// @route  GET api/v1/product-category/speaker/user
+// @access Private/Admin/Manager
+speakerRouter.route("/user").get(
+  getQueriedResourcesByUserHandler(SpeakerModel),
+);
 
-// single document routes
 speakerRouter
-  .route("/:speakerId")
-  .get(getSpeakerByIdController)
-  .delete(deleteASpeakerController)
-  .patch(validateSchemaMiddleware(updateSpeakerJoiSchema), updateSpeakerByIdController);
+  .route("/:resourceId")
+  // @desc   Get a speaker by its ID
+  // @route  GET api/v1/product-category/speaker/:resourceId
+  // @access Private/Admin/Manager
+  .get(getResourceByIdHandler(SpeakerModel))
+  // @desc   Delete a speaker by its ID
+  // @route  DELETE api/v1/product-category/speaker/:resourceId
+  // @access Private/Admin/Manager
+  .delete(deleteResourceByIdHandler(SpeakerModel))
+  // @desc   Update a speaker by its ID
+  // @route  PATCH api/v1/product-category/speaker/:resourceId
+  // @access Private/Admin/Manager
+  .patch(
+    validateSchemaMiddleware(updateSpeakerJoiSchema),
+    updateResourceByIdHandler(SpeakerModel),
+  );
 
 export { speakerRouter };
