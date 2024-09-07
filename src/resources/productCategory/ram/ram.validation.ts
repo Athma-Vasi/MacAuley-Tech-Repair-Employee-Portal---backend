@@ -1,18 +1,3 @@
-/**
- *   ramDataRate: number; // 3200 MT/s, 3600 MT/s, etc.
-  ramModulesQuantity: number;
-  ramModulesCapacity: number;
-  ramModulesCapacityUnit: MemoryUnit; // GB, etc.
-  ramType: MemoryType; // DDR4, etc.
-  ramColor: string; // Black, White, etc.
-  ramVoltage: number; // 1.35 V, etc.
-  ramTiming: string; // 16-18-18-38, etc.
-  additionalFields: {
-    [key: string]: string;
-  };
-
- */
-
 import Joi from "joi";
 import {
   BRAND_REGEX,
@@ -45,7 +30,8 @@ const createRamJoiSchema = Joi.object({
   widthUnit: Joi.string().regex(DIMENSION_UNIT_REGEX).required(),
   height: Joi.number().required(),
   heightUnit: Joi.string().regex(DIMENSION_UNIT_REGEX).required(),
-  additionalComments: Joi.string().regex(GRAMMAR_TEXTAREA_INPUT_REGEX).required(),
+  additionalComments: Joi.string().regex(GRAMMAR_TEXTAREA_INPUT_REGEX)
+    .required(),
 
   ramDataRate: Joi.number().required(),
   ramModulesQuantity: Joi.number().required(),
