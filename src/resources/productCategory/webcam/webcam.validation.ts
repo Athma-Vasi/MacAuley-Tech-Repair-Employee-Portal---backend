@@ -1,29 +1,17 @@
-/**
- *   webcamResolution: WebcamResolution; // 720p, 1080p, etc.
-  webcamInterface: WebcamInterface; // USB, Bluetooth, etc.
-  webcamMicrophone: WebcamMicrophone; // Yes, No
-  webcamFrameRate: WebcamFrameRate; // 30 fps, 60 fps, etc.
-  webcamColor: string; // Black, White, etc.
-  additionalFields: {
-    [key: string]: string;
-  };
-
- */
-
 import Joi from "joi";
 import {
   BRAND_REGEX,
-  SERIAL_ID_REGEX,
-  GRAMMAR_TEXTAREA_INPUT_REGEX,
+  COLOR_VARIANT_REGEX,
   CURRENCY_REGEX,
-  PRODUCT_AVAILABILITY_REGEX,
-  WEIGHT_UNIT_REGEX,
   DIMENSION_UNIT_REGEX,
-  WEBCAM_RESOLUTION_REGEX,
+  GRAMMAR_TEXTAREA_INPUT_REGEX,
+  PRODUCT_AVAILABILITY_REGEX,
+  SERIAL_ID_REGEX,
+  WEBCAM_FRAME_RATE_REGEX,
   WEBCAM_INTERFACE_REGEX,
   WEBCAM_MICROPHONE_REGEX,
-  WEBCAM_FRAME_RATE_REGEX,
-  COLOR_VARIANT_REGEX,
+  WEBCAM_RESOLUTION_REGEX,
+  WEIGHT_UNIT_REGEX,
 } from "../../../regex";
 
 const createWebcamJoiSchema = Joi.object({
@@ -43,7 +31,8 @@ const createWebcamJoiSchema = Joi.object({
   widthUnit: Joi.string().regex(DIMENSION_UNIT_REGEX).required(),
   height: Joi.number().required(),
   heightUnit: Joi.string().regex(DIMENSION_UNIT_REGEX).required(),
-  additionalComments: Joi.string().regex(GRAMMAR_TEXTAREA_INPUT_REGEX).required(),
+  additionalComments: Joi.string().regex(GRAMMAR_TEXTAREA_INPUT_REGEX)
+    .required(),
 
   webcamResolution: Joi.string().regex(WEBCAM_RESOLUTION_REGEX).required(),
   webcamInterface: Joi.string().regex(WEBCAM_INTERFACE_REGEX).required(),

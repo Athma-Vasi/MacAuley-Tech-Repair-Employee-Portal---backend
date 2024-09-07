@@ -1,41 +1,66 @@
-import { Router, NextFunction } from "express";
-import {
-  createNewWebcamBulkController,
-  createNewWebcamController,
-  deleteAWebcamController,
-  deleteAllWebcamsController,
-  getWebcamByIdController,
-  getQueriedWebcamsController,
-  updateWebcamByIdController,
-  updateWebcamsBulkController,
-} from "./webcam.controller";
+import { Router } from "express";
 import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
-import { createWebcamJoiSchema, updateWebcamJoiSchema } from "./webcam.validation";
+import {
+  createWebcamJoiSchema,
+  updateWebcamJoiSchema,
+} from "./webcam.validation";
+import {
+  createNewResourceHandler,
+  deleteAllResourcesHandler,
+  deleteResourceByIdHandler,
+  getQueriedResourcesByUserHandler,
+  getQueriedResourcesHandler,
+  getResourceByIdHandler,
+  updateResourceByIdHandler,
+} from "../../../handlers";
+import { WebcamModel } from "./webcam.model";
 
 const webcamRouter = Router();
 
 webcamRouter
   .route("/")
-  .get(getQueriedWebcamsController)
+  // @desc   Get all webcams
+  // @route  GET api/v1/product-category/webcam
+  // @access Private/Admin/Manager
+  .get(getQueriedResourcesHandler(WebcamModel))
+  // @desc   Create a new webcam
+  // @route  POST api/v1/product-category/webcam
+  // @access Private/Admin/Manager
   .post(
-    validateSchemaMiddleware(createWebcamJoiSchema, "webcamSchema"),
-    createNewWebcamController
+    validateSchemaMiddleware(createWebcamJoiSchema, "schema"),
+    createNewResourceHandler(WebcamModel),
   );
 
-// separate route for safety reasons (as it deletes all documents in the collection)
-webcamRouter.route("/delete-all").delete(deleteAllWebcamsController);
+// @desc   Delete all webcams
+// @route  DELETE api/v1/product-category/webcam/delete-all
+// @access Private/Admin/Manager
+webcamRouter.route("/delete-all").delete(
+  deleteAllResourcesHandler(WebcamModel),
+);
 
-// DEV ROUTE
-webcamRouter
-  .route("/dev")
-  .post(createNewWebcamBulkController)
-  .patch(updateWebcamsBulkController);
+// @desc   Get all webcams by user
+// @route  GET api/v1/product-category/webcam/user
+// @access Private/Admin/Manager
+webcamRouter.route("/user").get(
+  getQueriedResourcesByUserHandler(WebcamModel),
+);
 
-// single document routes
 webcamRouter
-  .route("/:webcamId")
-  .get(getWebcamByIdController)
-  .delete(deleteAWebcamController)
-  .patch(validateSchemaMiddleware(updateWebcamJoiSchema), updateWebcamByIdController);
+  .route("/:resourceId")
+  // @desc   Get a webcam by its ID
+  // @route  GET api/v1/product-category/webcam/:resourceId
+  // @access Private/Admin/Manager
+  .get(getResourceByIdHandler(WebcamModel))
+  // @desc   Delete a webcam by its ID
+  // @route  DELETE api/v1/product-category/webcam/:resourceId
+  // @access Private/Admin/Manager
+  .delete(deleteResourceByIdHandler(WebcamModel))
+  // @desc   Update a webcam by its ID
+  // @route  PATCH api/v1/product-category/webcam/:resourceId
+  // @access Private/Admin/Manager
+  .patch(
+    validateSchemaMiddleware(updateWebcamJoiSchema),
+    updateResourceByIdHandler(WebcamModel),
+  );
 
 export { webcamRouter };
