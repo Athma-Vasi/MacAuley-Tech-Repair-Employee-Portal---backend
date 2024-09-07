@@ -27,7 +27,7 @@ benefitRouter
   // @route  POST api/v1/actions/company/benefits
   // @access Private/Admin/Manager
   .post(
-    validateSchemaMiddleware(createBenefitJoiSchema, "benefitSchema"),
+    validateSchemaMiddleware(createBenefitJoiSchema, "schema"),
     createNewResourceHandler(BenefitModel),
   );
 
@@ -46,17 +46,17 @@ benefitRouter.route("/user").get(
 );
 
 benefitRouter
-  .route("/:benefitId")
+  .route("/:resourceId")
   // @desc   Get a benefits plan by ID
-  // @route  GET api/v1/actions/company/benefits/:benefitId
+  // @route  GET api/v1/actions/company/benefits/:resourceId
   // @access Private/Admin/Manager
   .get(getResourceByIdHandler(BenefitModel))
   // @desc   Delete a benefits plan by ID
-  // @route  DELETE api/v1/actions/company/benefits/:benefitId
+  // @route  DELETE api/v1/actions/company/benefits/:resourceId
   // @access Private/Admin/Manager
   .delete(deleteResourceByIdHandler(BenefitModel))
   // @desc   Update a benefits plan by ID
-  // @route  PATCH api/v1/actions/company/benefits/:benefitId
+  // @route  PATCH api/v1/actions/company/benefits/:resourceId
   // @access Private/Admin/Manager
   .patch(
     validateSchemaMiddleware(updateBenefitJoiSchema),
