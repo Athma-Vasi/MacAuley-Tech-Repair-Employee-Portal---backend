@@ -1,16 +1,3 @@
-/**
- * // page 2
-  headphoneType: HeadphoneType; // Over-ear, On-ear, etc.
-  headphoneDriver: number; // 50 mm, 53 mm, etc.
-  headphoneFrequencyResponse: string; // 20 Hz - 20 kHz, etc.
-  headphoneImpedance: number; // 32 Ohm, 64 Ohm, etc.
-  headphoneColor: string; // Black, White, etc.
-  headphoneInterface: HeadphoneInterface; // USB, Bluetooth, etc.
-  additionalFields: {
-    [key: string]: string;
-  };
- */
-
 import Joi from "joi";
 import {
   BRAND_REGEX,
@@ -43,11 +30,13 @@ const createHeadphoneJoiSchema = Joi.object({
   widthUnit: Joi.string().regex(DIMENSION_UNIT_REGEX).required(),
   height: Joi.number().required(),
   heightUnit: Joi.string().regex(DIMENSION_UNIT_REGEX).required(),
-  additionalComments: Joi.string().regex(GRAMMAR_TEXTAREA_INPUT_REGEX).required(),
+  additionalComments: Joi.string().regex(GRAMMAR_TEXTAREA_INPUT_REGEX)
+    .required(),
 
   headphoneType: Joi.string().regex(HEADPHONE_TYPE_REGEX).required(),
   headphoneDriver: Joi.number().required(),
-  headphoneFrequencyResponse: Joi.string().regex(FREQUENCY_RESPONSE_REGEX).required(),
+  headphoneFrequencyResponse: Joi.string().regex(FREQUENCY_RESPONSE_REGEX)
+    .required(),
   headphoneImpedance: Joi.number().required(),
   headphoneColor: Joi.string().regex(COLOR_VARIANT_REGEX).required(),
   headphoneInterface: Joi.string().regex(HEADPHONE_INTERFACE_REGEX).required(),
