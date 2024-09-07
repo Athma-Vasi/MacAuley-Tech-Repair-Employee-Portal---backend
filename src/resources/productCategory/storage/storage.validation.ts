@@ -1,30 +1,16 @@
-/**
- *   storageType: StorageType; // SSD, HDD, etc.
-  storageCapacity: number; // 1, 2, etc.
-  storageCapacityUnit: MemoryUnit; // TB, etc.
-  storageCache: number; // 64 MB, 128 MB, etc.
-  storageCacheUnit: MemoryUnit; // MB, etc.
-  storageFormFactor: StorageFormFactor; // 2.5", M.2 2280, etc.
-  storageInterface: StorageInterface; // SATA III, PCIe 3.0 x4, etc.
-  additionalFields: {
-    [key: string]: string;
-  };
-
- */
-
 import Joi from "joi";
 import {
   BRAND_REGEX,
-  SERIAL_ID_REGEX,
-  GRAMMAR_TEXTAREA_INPUT_REGEX,
   CURRENCY_REGEX,
-  PRODUCT_AVAILABILITY_REGEX,
-  WEIGHT_UNIT_REGEX,
   DIMENSION_UNIT_REGEX,
-  STORAGE_TYPE_REGEX,
+  GRAMMAR_TEXTAREA_INPUT_REGEX,
   MEMORY_UNIT_REGEX,
+  PRODUCT_AVAILABILITY_REGEX,
+  SERIAL_ID_REGEX,
   STORAGE_FORM_FACTOR_REGEX,
   STORAGE_INTERFACE_REGEX,
+  STORAGE_TYPE_REGEX,
+  WEIGHT_UNIT_REGEX,
 } from "../../../regex";
 
 const createStorageJoiSchema = Joi.object({
@@ -44,7 +30,8 @@ const createStorageJoiSchema = Joi.object({
   widthUnit: Joi.string().regex(DIMENSION_UNIT_REGEX).required(),
   height: Joi.number().required(),
   heightUnit: Joi.string().regex(DIMENSION_UNIT_REGEX).required(),
-  additionalComments: Joi.string().regex(GRAMMAR_TEXTAREA_INPUT_REGEX).required(),
+  additionalComments: Joi.string().regex(GRAMMAR_TEXTAREA_INPUT_REGEX)
+    .required(),
 
   storageType: Joi.string().regex(STORAGE_TYPE_REGEX).required(),
   storageCapacity: Joi.number().required(),

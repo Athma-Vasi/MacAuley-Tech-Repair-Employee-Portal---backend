@@ -1,41 +1,66 @@
-import { Router, NextFunction } from "express";
-import {
-  createNewStorageBulkController,
-  createNewStorageController,
-  deleteAStorageController,
-  deleteAllStoragesController,
-  getStorageByIdController,
-  getQueriedStoragesController,
-  updateStorageByIdController,
-  updateStoragesBulkController,
-} from "./storage.controller";
+import { Router } from "express";
 import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
-import { createStorageJoiSchema, updateStorageJoiSchema } from "./storage.validation";
+import {
+  createStorageJoiSchema,
+  updateStorageJoiSchema,
+} from "./storage.validation";
+import {
+  createNewResourceHandler,
+  deleteAllResourcesHandler,
+  deleteResourceByIdHandler,
+  getQueriedResourcesByUserHandler,
+  getQueriedResourcesHandler,
+  getResourceByIdHandler,
+  updateResourceByIdHandler,
+} from "../../../handlers";
+import { StorageModel } from "./storage.model";
 
 const storageRouter = Router();
 
 storageRouter
   .route("/")
-  .get(getQueriedStoragesController)
+  // @desc   Get all storages
+  // @route  GET api/v1/product-category/storage
+  // @access Private/Admin/Manager
+  .get(getQueriedResourcesHandler(StorageModel))
+  // @desc   Create a new storage
+  // @route  POST api/v1/product-category/storage
+  // @access Private/Admin/Manager
   .post(
-    validateSchemaMiddleware(createStorageJoiSchema, "storageSchema"),
-    createNewStorageController
+    validateSchemaMiddleware(createStorageJoiSchema, "schema"),
+    createNewResourceHandler(StorageModel),
   );
 
-// separate route for safety reasons (as it deletes all documents in the collection)
-storageRouter.route("/delete-all").delete(deleteAllStoragesController);
+// @desc   Delete all storages
+// @route  DELETE api/v1/product-category/storage/delete-all
+// @access Private/Admin/Manager
+storageRouter.route("/delete-all").delete(
+  deleteAllResourcesHandler(StorageModel),
+);
 
-// DEV ROUTE
-storageRouter
-  .route("/dev")
-  .post(createNewStorageBulkController)
-  .patch(updateStoragesBulkController);
+// @desc   Get all storages by user
+// @route  GET api/v1/product-category/storage/user
+// @access Private/Admin/Manager
+storageRouter.route("/user").get(
+  getQueriedResourcesByUserHandler(StorageModel),
+);
 
-// single document routes
 storageRouter
-  .route("/:storageId")
-  .get(getStorageByIdController)
-  .delete(deleteAStorageController)
-  .patch(validateSchemaMiddleware(updateStorageJoiSchema), updateStorageByIdController);
+  .route("/:resourceId")
+  // @desc   Get a storage by its ID
+  // @route  GET api/v1/product-category/storage/:resourceId
+  // @access Private/Admin/Manager
+  .get(getResourceByIdHandler(StorageModel))
+  // @desc   Delete a storage by its ID
+  // @route  DELETE api/v1/product-category/storage/:resourceId
+  // @access Private/Admin/Manager
+  .delete(deleteResourceByIdHandler(StorageModel))
+  // @desc   Update a storage by its ID
+  // @route  PATCH api/v1/product-category/storage/:resourceId
+  // @access Private/Admin/Manager
+  .patch(
+    validateSchemaMiddleware(updateStorageJoiSchema),
+    updateResourceByIdHandler(StorageModel),
+  );
 
 export { storageRouter };
