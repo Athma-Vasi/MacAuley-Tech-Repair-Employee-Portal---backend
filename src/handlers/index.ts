@@ -1,4 +1,5 @@
 import {
+    CreateNewResourceRequest,
     GetQueriedResourceRequest,
     GetResourceByIdRequest,
     HttpResult,
@@ -7,6 +8,7 @@ import {
 } from "../types";
 import { FlattenMaps, Model, Require_id } from "mongoose";
 import {
+    createNewResourceService,
     deleteAllResourcesService,
     deleteResourceByIdService,
     getQueriedResourcesByUserService,
@@ -21,6 +23,56 @@ import {
     createHttpResultError,
     createHttpResultSuccess,
 } from "../utils";
+import { Response } from "express";
+
+function createNewResourceHandler<
+    Doc extends Record<string, unknown> = Record<string, unknown>,
+>(
+    model: Model<Doc>,
+) {
+    return async (
+        request: CreateNewResourceRequest<Doc>,
+        response: Response<HttpResult>,
+    ) => {
+        try {
+            const { schema } = request.body;
+
+            const createResourceResult = await createNewResourceService(
+                schema,
+                model,
+            );
+
+            if (createResourceResult.err) {
+                await createNewErrorLogService(
+                    createErrorLogSchema(
+                        createResourceResult.val,
+                        request.body,
+                    ),
+                );
+
+                response.status(200).json(
+                    createHttpResultError({ status: 400 }),
+                );
+                return;
+            }
+
+            response
+                .status(201)
+                .json(
+                    createResourceResult.safeUnwrap(),
+                );
+        } catch (error: unknown) {
+            await createNewErrorLogService(
+                createErrorLogSchema(
+                    createHttpResultError({ data: [error] }),
+                    request.body,
+                ),
+            );
+
+            response.status(200).json(createHttpResultError({}));
+        }
+    };
+}
 
 function getQueriedResourcesHandler<
     Doc extends Record<string, unknown> = Record<string, unknown>,
@@ -367,6 +419,7 @@ function deleteAllResourcesHandler<
 }
 
 export {
+    createNewResourceHandler,
     deleteAllResourcesHandler,
     deleteResourceByIdHandler,
     getQueriedResourcesByUserHandler,
