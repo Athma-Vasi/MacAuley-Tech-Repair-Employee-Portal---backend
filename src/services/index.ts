@@ -1,7 +1,7 @@
-import { FlattenMaps, Model, Require_id } from "mongoose";
+import type { Model } from "mongoose";
 import { Err, ErrImpl, Ok, OkImpl } from "ts-results";
 import { createHttpResultError, createHttpResultSuccess } from "../utils";
-import {
+import type {
     DatabaseResponse,
     HttpResult,
     QueryObjectParsedWithDefaults,

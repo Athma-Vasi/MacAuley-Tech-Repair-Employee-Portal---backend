@@ -1,42 +1,66 @@
 import { Router } from "express";
-import {
-  createNewBenefitController,
-  getQueriedBenefitsController,
-  getBenefitsByUserController,
-  getBenefitByIdController,
-  deleteBenefitController,
-  deleteAllBenefitsController,
-  updateBenefitByIdController,
-  createNewBenefitsBulkController,
-  updateBenefitsBulkController,
-} from "./benefit.controller";
 import { validateSchemaMiddleware } from "../../../../middlewares/validateSchema";
-import { createBenefitJoiSchema, updateBenefitJoiSchema } from "./benefit.validation";
+import {
+  createBenefitJoiSchema,
+  updateBenefitJoiSchema,
+} from "./benefit.validation";
+import {
+  createNewResourceHandler,
+  deleteAllResourcesHandler,
+  deleteResourceByIdHandler,
+  getQueriedResourcesByUserHandler,
+  getQueriedResourcesHandler,
+  getResourceByIdHandler,
+  updateResourceByIdHandler,
+} from "../../../../handlers";
+import { BenefitModel } from "./benefit.model";
 
 const benefitRouter = Router();
 
 benefitRouter
   .route("/")
-  .get(getQueriedBenefitsController)
+  // @desc   Get all benefits plans
+  // @route  GET api/v1/actions/company/benefits
+  // @access Private/Admin/Manager
+  .get(getQueriedResourcesHandler(BenefitModel))
+  // @desc   Create a new benefits plan
+  // @route  POST api/v1/actions/company/benefits
+  // @access Private/Admin/Manager
   .post(
     validateSchemaMiddleware(createBenefitJoiSchema, "benefitSchema"),
-    createNewBenefitController
+    createNewResourceHandler(BenefitModel),
   );
 
-benefitRouter.route("/delete-all").delete(deleteAllBenefitsController);
+// @desc   Delete all benefits plans
+// @route  DELETE api/v1/actions/company/benefits/delete-all
+// @access Private/Admin/Manager
+benefitRouter.route("/delete-all").delete(
+  deleteAllResourcesHandler(BenefitModel),
+);
 
-benefitRouter.route("/user").get(getBenefitsByUserController);
-
-// DEV ROUTES
-benefitRouter
-  .route("/dev")
-  .post(createNewBenefitsBulkController)
-  .patch(updateBenefitsBulkController);
+// @desc   Get all benefits plans by user
+// @route  GET api/v1/actions/company/benefits/user
+// @access Private/Admin/Manager
+benefitRouter.route("/user").get(
+  getQueriedResourcesByUserHandler(BenefitModel),
+);
 
 benefitRouter
   .route("/:benefitId")
-  .get(getBenefitByIdController)
-  .delete(deleteBenefitController)
-  .patch(validateSchemaMiddleware(updateBenefitJoiSchema), updateBenefitByIdController);
+  // @desc   Get a benefits plan by ID
+  // @route  GET api/v1/actions/company/benefits/:benefitId
+  // @access Private/Admin/Manager
+  .get(getResourceByIdHandler(BenefitModel))
+  // @desc   Delete a benefits plan by ID
+  // @route  DELETE api/v1/actions/company/benefits/:benefitId
+  // @access Private/Admin/Manager
+  .delete(deleteResourceByIdHandler(BenefitModel))
+  // @desc   Update a benefits plan by ID
+  // @route  PATCH api/v1/actions/company/benefits/:benefitId
+  // @access Private/Admin/Manager
+  .patch(
+    validateSchemaMiddleware(updateBenefitJoiSchema),
+    updateResourceByIdHandler(BenefitModel),
+  );
 
 export { benefitRouter };

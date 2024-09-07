@@ -1,4 +1,4 @@
-import {
+import type {
     CreateNewResourceRequest,
     GetQueriedResourceRequest,
     GetResourceByIdRequest,
@@ -6,7 +6,7 @@ import {
     HttpServerResponse,
     UpdateResourceByIdRequest,
 } from "../types";
-import { FlattenMaps, Model, Require_id } from "mongoose";
+import type { FlattenMaps, Model, Require_id } from "mongoose";
 import {
     createNewResourceService,
     deleteAllResourcesService,
@@ -23,7 +23,7 @@ import {
     createHttpResultError,
     createHttpResultSuccess,
 } from "../utils";
-import { Response } from "express";
+import type { Response } from "express";
 
 function createNewResourceHandler<
     Doc extends Record<string, unknown> = Record<string, unknown>,
