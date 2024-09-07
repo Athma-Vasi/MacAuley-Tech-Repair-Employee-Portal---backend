@@ -4,62 +4,50 @@ import { AccessoryDocument } from "./accessory";
 import { CpuDocument } from "./cpu";
 import { ComputerCaseDocument } from "./computerCase";
 import { RamDocument } from "./ram";
-import { DesktopComputerDocument } from "./desktopComputer";
 import { DisplayDocument } from "./display";
 import { GpuDocument } from "./gpu";
 import { HeadphoneDocument } from "./headphone";
 import { KeyboardDocument } from "./keyboard";
-import { LaptopDocument } from "./laptop";
 import { MicrophoneDocument } from "./microphone";
 import { MotherboardDocument } from "./motherboard";
 import { MouseDocument } from "./mouse";
 import { PsuDocument } from "./psu";
-import { SmartphoneDocument } from "./smartphone";
 import { SpeakerDocument } from "./speaker";
 import { StorageDocument } from "./storage";
-import { TabletDocument } from "./tablet";
 import { WebcamDocument } from "./webcam";
 
 type ProductCategoryDocument =
   | AccessoryDocument
   | CpuDocument
   | ComputerCaseDocument
-  | DesktopComputerDocument
   | DisplayDocument
   | GpuDocument
   | HeadphoneDocument
   | KeyboardDocument
-  | LaptopDocument
   | RamDocument
   | MicrophoneDocument
   | MotherboardDocument
   | MouseDocument
   | PsuDocument
-  | SmartphoneDocument
   | SpeakerDocument
   | StorageDocument
-  | TabletDocument
   | WebcamDocument;
 
 type ProductCategory =
   | "Accessory"
   | "Central Processing Unit (CPU)"
   | "Computer Case"
-  | "Desktop Computer"
   | "Display"
   | "Graphics Processing Unit (GPU)"
   | "Headphone"
   | "Keyboard"
-  | "Laptop"
   | "Memory (RAM)"
   | "Microphone"
   | "Motherboard"
   | "Mouse"
   | "Power Supply Unit (PSU)"
-  | "Smartphone"
   | "Speaker"
   | "Storage"
-  | "Tablet"
   | "Webcam";
 
 type DimensionUnit = "mm" | "cm" | "m" | "in" | "ft";
@@ -69,8 +57,6 @@ type MemoryType = "DDR5" | "DDR4" | "DDR3" | "DDR2" | "DDR";
 type MemoryUnit = "KB" | "MB" | "GB" | "TB";
 
 type PeripheralsInterface = "USB" | "Bluetooth" | "PS/2" | "Wi-Fi" | "Other";
-
-type MobileOs = "Android" | "iOS" | "Windows" | "Linux" | "Other";
 
 type ProductAvailability =
   | "In Stock"
@@ -86,7 +72,12 @@ type ProductReview = {
   review: string;
 };
 
-type MotherboardFormFactor = "ATX" | "Micro ATX" | "Mini ITX" | "E-ATX" | "XL-ATX";
+type MotherboardFormFactor =
+  | "ATX"
+  | "Micro ATX"
+  | "Mini ITX"
+  | "E-ATX"
+  | "XL-ATX";
 
 type StorageType = "SSD" | "HDD" | "SSHD" | "Other";
 type StorageFormFactor =
@@ -154,7 +145,13 @@ type KeyboardBacklight = "RGB" | "Single Color" | "None";
 type MouseSensor = "Optical" | "Laser" | "Infrared" | "Other";
 
 type HeadphoneType = "Over-ear" | "On-ear" | "In-ear" | "Other";
-type HeadphoneInterface = "USB" | "Bluetooth" | "3.5 mm" | "2.5 mm" | "MMCX" | "Other";
+type HeadphoneInterface =
+  | "USB"
+  | "Bluetooth"
+  | "3.5 mm"
+  | "2.5 mm"
+  | "MMCX"
+  | "Other";
 
 type SpeakerType = "2.0" | "2.1" | "3.1" | "4.1" | "5.1" | "7.1" | "Other";
 type SpeakerInterface =
@@ -172,7 +169,13 @@ type WebcamFrameRate = "30 fps" | "60 fps" | "120 fps" | "240 fps" | "Other";
 type WebcamInterface = "USB" | "Bluetooth" | "Wi-Fi" | "Other";
 type WebcamMicrophone = "Yes" | "No";
 
-type MicrophoneType = "Condenser" | "Dynamic" | "Ribbon" | "USB" | "Wireless" | "Other";
+type MicrophoneType =
+  | "Condenser"
+  | "Dynamic"
+  | "Ribbon"
+  | "USB"
+  | "Wireless"
+  | "Other";
 type MicrophonePolarPattern =
   | "Cardioid"
   | "Supercardioid"
@@ -195,10 +198,11 @@ type StarRatingsCount = {
   fiveStars: number;
 };
 
-type ProductServerResponse<Doc extends Record<string, any> = Record<string, any>> =
-  Doc & {
-    fileUploads: FileUploadDocument[];
-  };
+type ProductServerResponse<
+  Doc extends Record<string, unknown> = Record<string, unknown>,
+> = Doc & {
+  fileUploads: FileUploadDocument[];
+};
 
 export type {
   CaseSidePanel,
@@ -215,7 +219,6 @@ export type {
   MicrophoneInterface,
   MicrophonePolarPattern,
   MicrophoneType,
-  MobileOs,
   MotherboardFormFactor,
   MouseSensor,
   PeripheralsInterface,
