@@ -1,28 +1,14 @@
-/**
- * // page 2
-  gpuChipset: string; // NVIDIA GeForce RTX 3080,
-  gpuMemory: number; // 10 GB, 16 GB, etc.
-  gpuMemoryUnit: MemoryUnit; // GB, etc.
-  gpuCoreClock: number; // 1440 MHz, 1770 MHz, etc.
-  gpuBoostClock: number; // 1710 MHz, 2250 MHz, etc.
-  gpuTdp: number; // 320 W, 350 W, etc.
-  additionalFields: {
-    [key: string]: string;
-  };
-
- */
-
 import Joi from "joi";
 import {
   BRAND_REGEX,
-  SERIAL_ID_REGEX,
-  GRAMMAR_TEXTAREA_INPUT_REGEX,
   CURRENCY_REGEX,
-  PRODUCT_AVAILABILITY_REGEX,
-  WEIGHT_UNIT_REGEX,
   DIMENSION_UNIT_REGEX,
   GPU_CHIPSET_REGEX,
+  GRAMMAR_TEXTAREA_INPUT_REGEX,
   MEMORY_UNIT_REGEX,
+  PRODUCT_AVAILABILITY_REGEX,
+  SERIAL_ID_REGEX,
+  WEIGHT_UNIT_REGEX,
 } from "../../../regex";
 
 const createGpuJoiSchema = Joi.object({
@@ -42,7 +28,8 @@ const createGpuJoiSchema = Joi.object({
   widthUnit: Joi.string().regex(DIMENSION_UNIT_REGEX).required(),
   height: Joi.number().required(),
   heightUnit: Joi.string().regex(DIMENSION_UNIT_REGEX).required(),
-  additionalComments: Joi.string().regex(GRAMMAR_TEXTAREA_INPUT_REGEX).required(),
+  additionalComments: Joi.string().regex(GRAMMAR_TEXTAREA_INPUT_REGEX)
+    .required(),
 
   gpuChipset: Joi.string().regex(GPU_CHIPSET_REGEX).required(),
   gpuMemory: Joi.number().required(),

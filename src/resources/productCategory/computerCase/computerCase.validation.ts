@@ -1,25 +1,15 @@
-/**
- * // page 2
-  caseType: CaseType; // Mid Tower, Full Tower, etc.
-  caseColor: string; // Black, White, etc.
-  caseSidePanel: CaseSidePanel; // windowed or not
-  additionalFields: {
-    [key: string]: string;
-  };
- */
-
 import Joi from "joi";
 import {
   BRAND_REGEX,
-  SERIAL_ID_REGEX,
-  GRAMMAR_TEXTAREA_INPUT_REGEX,
-  CURRENCY_REGEX,
-  PRODUCT_AVAILABILITY_REGEX,
-  WEIGHT_UNIT_REGEX,
-  DIMENSION_UNIT_REGEX,
+  CASE_SIDE_PANEL_REGEX,
   CASE_TYPE_REGEX,
   COLOR_VARIANT_REGEX,
-  CASE_SIDE_PANEL_REGEX,
+  CURRENCY_REGEX,
+  DIMENSION_UNIT_REGEX,
+  GRAMMAR_TEXTAREA_INPUT_REGEX,
+  PRODUCT_AVAILABILITY_REGEX,
+  SERIAL_ID_REGEX,
+  WEIGHT_UNIT_REGEX,
 } from "../../../regex";
 
 const createComputerCaseJoiSchema = Joi.object({
@@ -39,7 +29,8 @@ const createComputerCaseJoiSchema = Joi.object({
   widthUnit: Joi.string().regex(DIMENSION_UNIT_REGEX).required(),
   height: Joi.number().required(),
   heightUnit: Joi.string().regex(DIMENSION_UNIT_REGEX).required(),
-  additionalComments: Joi.string().regex(GRAMMAR_TEXTAREA_INPUT_REGEX).required(),
+  additionalComments: Joi.string().regex(GRAMMAR_TEXTAREA_INPUT_REGEX)
+    .required(),
 
   caseType: Joi.string().regex(CASE_TYPE_REGEX).required(),
   caseColor: Joi.string().regex(COLOR_VARIANT_REGEX).required(),

@@ -1,38 +1,63 @@
-import { Router, NextFunction } from "express";
-import {
-  createNewGpuBulkController,
-  createNewGpuController,
-  deleteAGpuController,
-  deleteAllGpusController,
-  getGpuByIdController,
-  getQueriedGpusController,
-  updateGpuByIdController,
-  updateGpusBulkController,
-} from "./gpu.controller";
+import { Router } from "express";
 import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
 import { createGpuJoiSchema, updateGpuJoiSchema } from "./gpu.validation";
+import {
+  createNewResourceHandler,
+  deleteAllResourcesHandler,
+  deleteResourceByIdHandler,
+  getQueriedResourcesByUserHandler,
+  getQueriedResourcesHandler,
+  getResourceByIdHandler,
+  updateResourceByIdHandler,
+} from "../../../handlers";
+import { GpuModel } from "./gpu.model";
 
 const gpuRouter = Router();
 
 gpuRouter
   .route("/")
-  .get(getQueriedGpusController)
+  // @desc   Get all gpus
+  // @route  GET api/v1/product-category/gpu
+  // @access Private/Admin/Manager
+  .get(getQueriedResourcesHandler(GpuModel))
+  // @desc   Create a new gpu
+  // @route  POST api/v1/product-category/gpu
+  // @access Private/Admin/Manager
   .post(
-    validateSchemaMiddleware(createGpuJoiSchema, "gpuSchema"),
-    createNewGpuController
+    validateSchemaMiddleware(createGpuJoiSchema, "schema"),
+    createNewResourceHandler(GpuModel),
   );
 
-// separate route for safety reasons (as it deletes all documents in the collection)
-gpuRouter.route("/delete-all").delete(deleteAllGpusController);
+// @desc   Delete all gpus
+// @route  DELETE api/v1/product-category/gpu/delete-all
+// @access Private/Admin/Manager
+gpuRouter.route("/delete-all").delete(
+  deleteAllResourcesHandler(GpuModel),
+);
 
-// DEV ROUTE
-gpuRouter.route("/dev").post(createNewGpuBulkController).patch(updateGpusBulkController);
+// @desc   Get all gpus by user
+// @route  GET api/v1/product-category/gpu/user
+// @access Private/Admin/Manager
+gpuRouter.route("/user").get(
+  getQueriedResourcesByUserHandler(GpuModel),
+);
 
-// single document routes
 gpuRouter
-  .route("/:gpuId")
-  .get(getGpuByIdController)
-  .delete(deleteAGpuController)
-  .patch(validateSchemaMiddleware(updateGpuJoiSchema), updateGpuByIdController);
+  .route("/:resourceId")
+  // @desc   Get a gpu by its ID
+  // @route  GET api/v1/product-category/gpu/:resourceId
+  // @access Private/Admin/Manager
+  .get(getResourceByIdHandler(GpuModel))
+  // @desc   Delete a gpu by its ID
+  // @route  DELETE api/v1/product-category/gpu/:resourceId
+  // @access Private/Admin/Manager
+  .delete(deleteResourceByIdHandler(GpuModel))
+  // @desc   Update a gpu by its ID
+  // @route  PATCH api/v1/product-category/gpu/:resourceId
+  // @access Private/Admin/Manager
+  .patch(
+    validateSchemaMiddleware(updateGpuJoiSchema),
+    updateResourceByIdHandler(GpuModel),
+  );
 
 export { gpuRouter };
