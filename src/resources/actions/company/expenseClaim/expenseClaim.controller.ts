@@ -2,31 +2,11 @@ import expressAsyncController from "express-async-handler";
 import type { DeleteResult } from "mongodb";
 
 import type { NextFunction, Response } from "express";
-import type { AssociatedResourceKind, FileUploadDocument } from "../../../fileUpload";
 import type {
-  CreateNewExpenseClaimRequest,
-  DeleteAllExpenseClaimsRequest,
-  DeleteExpenseClaimRequest,
-  GetQueriedExpenseClaimsRequest,
-  GetExpenseClaimByIdRequest,
-  GetQueriedExpenseClaimsByUserRequest,
-  UpdateExpenseClaimByIdRequest,
-  CreateNewExpenseClaimsBulkRequest,
-  ExpenseClaimServerResponseDocument,
-  UpdateExpenseClaimsBulkRequest,
-} from "./expenseClaim.types";
+  AssociatedResourceKind,
+  FileUploadDocument,
+} from "../../../fileUpload";
 
-import {
-  createNewExpenseClaimService,
-  deleteAllExpenseClaimsService,
-  getQueriedExpenseClaimsService,
-  getExpenseClaimByIdService,
-  getQueriedExpenseClaimsByUserService,
-  getQueriedTotalExpenseClaimsService,
-  updateExpenseClaimByIdService,
-  deleteExpenseClaimByIdService,
-  returnAllExpenseClaimsUploadedFileIdsService,
-} from "./expenseClaim.service";
 import {
   deleteFileUploadByIdService,
   getFileUploadByIdService,
@@ -37,11 +17,7 @@ import {
   ExpenseClaimSchema,
   ExpenseClaimServerResponse,
 } from "./expenseClaim.model";
-import {
-  GetQueriedResourceRequestServerResponse,
-  QueryObjectParsedWithDefaults,
-  ResourceRequestServerResponse,
-} from "../../../../types";
+import { QueryObjectParsedWithDefaults } from "../../../../types";
 import { FilterQuery, QueryOptions, Types } from "mongoose";
 import { getUserByIdService } from "../../../user";
 import { removeUndefinedAndNullValues } from "../../../../utils";
@@ -54,7 +30,7 @@ const createNewExpenseClaimController = expressAsyncController(
   async (
     request: CreateNewExpenseClaimRequest,
     response: Response<ResourceRequestServerResponse<ExpenseClaimDocument>>,
-    next: NextFunction
+    next: NextFunction,
   ) => {
     const {
       userInfo: { userId, username },
@@ -67,10 +43,14 @@ const createNewExpenseClaimController = expressAsyncController(
       username,
     };
 
-    const newExpenseClaim = await createNewExpenseClaimService(newExpenseClaimSchema);
+    const newExpenseClaim = await createNewExpenseClaimService(
+      newExpenseClaimSchema,
+    );
     if (!newExpenseClaim) {
       return next(
-        new createHttpError.InternalServerError("Expense claim could not be created")
+        new createHttpError.InternalServerError(
+          "Expense claim could not be created",
+        ),
       );
     }
 
@@ -90,24 +70,30 @@ const createNewExpenseClaimController = expressAsyncController(
           associatedResource: "expense claim" as AssociatedResourceKind,
         };
 
-        const updatedFileUpload = (await insertAssociatedResourceDocumentIdService(
-          fileUploadToUpdateObject
-        )) as FileUploadDocument;
+        const updatedFileUpload =
+          (await insertAssociatedResourceDocumentIdService(
+            fileUploadToUpdateObject,
+          )) as FileUploadDocument;
 
         if (!updatedFileUpload) {
           return next(
-            new createHttpError.InternalServerError("File upload could not be updated")
+            new createHttpError.InternalServerError(
+              "File upload could not be updated",
+            ),
           );
         }
 
         return updatedFileUpload;
-      })
+      }),
     );
 
     response
       .status(201)
-      .json({ message: "New expense claim created", resourceData: [newExpenseClaim] });
-  }
+      .json({
+        message: "New expense claim created",
+        resourceData: [newExpenseClaim],
+      });
+  },
 );
 
 // @desc   Get all expense claims
@@ -117,14 +103,16 @@ const getQueriedExpenseClaimsController = expressAsyncController(
   async (
     request: GetQueriedExpenseClaimsRequest,
     response: Response<
-      GetQueriedResourceRequestServerResponse<ExpenseClaimServerResponseDocument>
+      GetQueriedResourceRequestServerResponse<
+        ExpenseClaimServerResponseDocument
+      >
     >,
-    next: NextFunction
+    next: NextFunction,
   ) => {
     let { newQueryFlag, totalDocuments } = request.body;
 
-    const { filter, projection, options } =
-      request.query as QueryObjectParsedWithDefaults;
+    const { filter, projection, options } = request
+      .query as QueryObjectParsedWithDefaults;
 
     // only perform a countDocuments scan if a new query is being made
     if (newQueryFlag) {
@@ -155,11 +143,13 @@ const getQueriedExpenseClaimsController = expressAsyncController(
           async (uploadedFileId) => {
             const fileUpload = await getFileUploadByIdService(uploadedFileId);
             if (!fileUpload) {
-              return next(new createHttpError.NotFound("File upload not found"));
+              return next(
+                new createHttpError.NotFound("File upload not found"),
+              );
             }
 
             return fileUpload;
-          }
+          },
         );
 
         // Wait for all the promises to resolve before continuing to the next iteration
@@ -168,7 +158,7 @@ const getQueriedExpenseClaimsController = expressAsyncController(
         return fileUploads.filter((fileUpload) =>
           removeUndefinedAndNullValues(fileUpload)
         );
-      })
+      }),
     );
 
     const expenseClaimServerResponseArray = expenseClaims
@@ -185,9 +175,10 @@ const getQueriedExpenseClaimsController = expressAsyncController(
       message: "Successfully retrieved expense claims",
       pages: Math.ceil(totalDocuments / Number(options?.limit)),
       totalDocuments,
-      resourceData: expenseClaimServerResponseArray as ExpenseClaimServerResponse[],
+      resourceData:
+        expenseClaimServerResponseArray as ExpenseClaimServerResponse[],
     });
-  }
+  },
 );
 
 // @desc   Get expense claims by user
@@ -197,17 +188,19 @@ const getQueriedExpenseClaimsByUserController = expressAsyncController(
   async (
     request: GetQueriedExpenseClaimsByUserRequest,
     response: Response<
-      GetQueriedResourceRequestServerResponse<ExpenseClaimServerResponseDocument>
+      GetQueriedResourceRequestServerResponse<
+        ExpenseClaimServerResponseDocument
+      >
     >,
-    next: NextFunction
+    next: NextFunction,
   ) => {
     const {
       userInfo: { userId },
     } = request.body;
     let { newQueryFlag, totalDocuments } = request.body;
 
-    const { filter, projection, options } =
-      request.query as QueryObjectParsedWithDefaults;
+    const { filter, projection, options } = request
+      .query as QueryObjectParsedWithDefaults;
 
     const filterWithUserId = { ...filter, userId };
 
@@ -239,11 +232,13 @@ const getQueriedExpenseClaimsByUserController = expressAsyncController(
           async (uploadedFileId) => {
             const fileUpload = await getFileUploadByIdService(uploadedFileId);
             if (!fileUpload) {
-              return next(new createHttpError.NotFound("File upload not found"));
+              return next(
+                new createHttpError.NotFound("File upload not found"),
+              );
             }
 
             return fileUpload as FileUploadDocument;
-          }
+          },
         );
 
         // Wait for all the promises to resolve before continuing to the next iteration
@@ -252,7 +247,7 @@ const getQueriedExpenseClaimsByUserController = expressAsyncController(
         return fileUploads.filter((fileUpload) =>
           removeUndefinedAndNullValues(fileUpload)
         );
-      })
+      }),
     );
 
     const expenseClaimServerResponseArray = expenseClaims
@@ -271,7 +266,7 @@ const getQueriedExpenseClaimsByUserController = expressAsyncController(
       totalDocuments,
       resourceData: expenseClaimServerResponseArray,
     });
-  }
+  },
 );
 
 // @desc   Get expense claim by id
@@ -280,8 +275,10 @@ const getQueriedExpenseClaimsByUserController = expressAsyncController(
 const getExpenseClaimByIdController = expressAsyncController(
   async (
     request: GetExpenseClaimByIdRequest,
-    response: Response<ResourceRequestServerResponse<ExpenseClaimServerResponseDocument>>,
-    next: NextFunction
+    response: Response<
+      ResourceRequestServerResponse<ExpenseClaimServerResponseDocument>
+    >,
+    next: NextFunction,
   ) => {
     const expenseClaimId = request.params.expenseClaimId;
 
@@ -298,7 +295,7 @@ const getExpenseClaimByIdController = expressAsyncController(
         }
 
         return fileUpload as FileUploadDocument;
-      })
+      }),
     );
 
     // create expenseClaimServerResponse
@@ -313,7 +310,7 @@ const getExpenseClaimByIdController = expressAsyncController(
       message: "Successfully retrieved expense claim",
       resourceData: [expenseClaimServerResponse],
     });
-  }
+  },
 );
 
 // @desc   Update an expense claim by id
@@ -323,7 +320,7 @@ const updateExpenseClaimByIdController = expressAsyncController(
   async (
     request: UpdateExpenseClaimByIdRequest,
     response: Response<ResourceRequestServerResponse<ExpenseClaimDocument>>,
-    next: NextFunction
+    next: NextFunction,
   ) => {
     const { expenseClaimId } = request.params;
     const {
@@ -342,14 +339,16 @@ const updateExpenseClaimByIdController = expressAsyncController(
       updateOperator,
     });
     if (!updatedExpenseClaim) {
-      return next(new createHttpError.InternalServerError("Expense claim update failed"));
+      return next(
+        new createHttpError.InternalServerError("Expense claim update failed"),
+      );
     }
 
     response.status(200).json({
       message: "Expense claim updated successfully",
       resourceData: [updatedExpenseClaim],
     });
-  }
+  },
 );
 
 // @desc   Delete all expense claims
@@ -359,7 +358,7 @@ const deleteAllExpenseClaimsController = expressAsyncController(
   async (
     _request: DeleteAllExpenseClaimsRequest,
     response: Response<ResourceRequestServerResponse<ExpenseClaimDocument>>,
-    next: NextFunction
+    next: NextFunction,
   ) => {
     const fileUploadsIds = await returnAllExpenseClaimsUploadedFileIdsService();
     if (!fileUploadsIds?.length) {
@@ -369,22 +368,23 @@ const deleteAllExpenseClaimsController = expressAsyncController(
     const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
       fileUploadsIds.map(async (fileUploadId: Types.ObjectId | string) =>
         deleteFileUploadByIdService(fileUploadId)
-      )
+      ),
     );
     if (!deleteFileUploadsResult.every((result) => result.deletedCount !== 0)) {
       return next(
         new createHttpError.InternalServerError(
-          "Some file uploads could not be deleted. Please try again."
-        )
+          "Some file uploads could not be deleted. Please try again.",
+        ),
       );
     }
 
-    const deleteExpenseClaimsResult: DeleteResult = await deleteAllExpenseClaimsService();
+    const deleteExpenseClaimsResult: DeleteResult =
+      await deleteAllExpenseClaimsService();
     if (!deleteExpenseClaimsResult.deletedCount) {
       return next(
         new createHttpError.InternalServerError(
-          "All expense claims could not be deleted. Please try again."
-        )
+          "All expense claims could not be deleted. Please try again.",
+        ),
       );
     }
 
@@ -392,7 +392,7 @@ const deleteAllExpenseClaimsController = expressAsyncController(
       message: "All expense claims deleted",
       resourceData: [],
     });
-  }
+  },
 );
 
 // @desc   Delete expense claim by id
@@ -402,7 +402,7 @@ const deleteExpenseClaimController = expressAsyncController(
   async (
     request: DeleteExpenseClaimRequest,
     response: Response<ResourceRequestServerResponse<ExpenseClaimDocument>>,
-    next: NextFunction
+    next: NextFunction,
   ) => {
     const expenseClaimId = request.params.expenseClaimId;
 
@@ -419,30 +419,34 @@ const deleteExpenseClaimController = expressAsyncController(
     const deleteFileUploadsResult: DeleteResult[] = await Promise.all(
       uploadedFilesIds.map(async (uploadedFileId) =>
         deleteFileUploadByIdService(uploadedFileId)
-      )
+      ),
     );
 
     if (deleteFileUploadsResult.some((result) => result.deletedCount === 0)) {
       return next(
         new createHttpError.InternalServerError(
-          "Some file uploads associated with this expense claim could not be deleted. Expense Claim not deleted. Please try again."
-        )
+          "Some file uploads associated with this expense claim could not be deleted. Expense Claim not deleted. Please try again.",
+        ),
       );
     }
 
-    const deleteExpenseClaimResult: DeleteResult = await deleteExpenseClaimByIdService(
-      expenseClaimId
-    );
+    const deleteExpenseClaimResult: DeleteResult =
+      await deleteExpenseClaimByIdService(
+        expenseClaimId,
+      );
     if (!deleteExpenseClaimResult.deletedCount) {
       return next(
         new createHttpError.InternalServerError(
-          "Expense claim could not be deleted. Please try again."
-        )
+          "Expense claim could not be deleted. Please try again.",
+        ),
       );
     }
 
-    response.status(200).json({ message: "Expense claim deleted", resourceData: [] });
-  }
+    response.status(200).json({
+      message: "Expense claim deleted",
+      resourceData: [],
+    });
+  },
 );
 
 // DEV ROUTE
@@ -452,21 +456,22 @@ const deleteExpenseClaimController = expressAsyncController(
 const createNewExpenseClaimsBulkController = expressAsyncController(
   async (
     request: CreateNewExpenseClaimsBulkRequest,
-    response: Response<ResourceRequestServerResponse<ExpenseClaimDocument>>
+    response: Response<ResourceRequestServerResponse<ExpenseClaimDocument>>,
   ) => {
     const { expenseClaimSchemas } = request.body;
 
     const expenseClaimDocuments = await Promise.all(
       expenseClaimSchemas.map(async (expenseClaimSchema) => {
         const expenseClaimDocument = await createNewExpenseClaimService(
-          expenseClaimSchema
+          expenseClaimSchema,
         );
         return expenseClaimDocument;
-      })
+      }),
     );
 
     const filteredExpenseClaimDocuments = expenseClaimDocuments.filter(
-      (expenseClaimDocument) => removeUndefinedAndNullValues(expenseClaimDocument)
+      (expenseClaimDocument) =>
+        removeUndefinedAndNullValues(expenseClaimDocument),
     );
 
     if (filteredExpenseClaimDocuments.length === 0) {
@@ -478,20 +483,19 @@ const createNewExpenseClaimsBulkController = expressAsyncController(
       return;
     }
 
-    const uncreatedDocumentsAmount =
-      expenseClaimSchemas.length - filteredExpenseClaimDocuments.length;
+    const uncreatedDocumentsAmount = expenseClaimSchemas.length -
+      filteredExpenseClaimDocuments.length;
 
     response.status(201).json({
-      message: `Successfully created ${
-        filteredExpenseClaimDocuments.length
-      } Expense Claims.${
-        uncreatedDocumentsAmount
-          ? ` ${uncreatedDocumentsAmount} documents were not created.`
-          : ""
-      }}`,
+      message:
+        `Successfully created ${filteredExpenseClaimDocuments.length} Expense Claims.${
+          uncreatedDocumentsAmount
+            ? ` ${uncreatedDocumentsAmount} documents were not created.`
+            : ""
+        }}`,
       resourceData: filteredExpenseClaimDocuments,
     });
-  }
+  },
 );
 
 // DEV ROUTE
@@ -501,7 +505,7 @@ const createNewExpenseClaimsBulkController = expressAsyncController(
 const updateExpenseClaimsBulkController = expressAsyncController(
   async (
     request: UpdateExpenseClaimsBulkRequest,
-    response: Response<ResourceRequestServerResponse<ExpenseClaimDocument>>
+    response: Response<ResourceRequestServerResponse<ExpenseClaimDocument>>,
   ) => {
     const { expenseClaimFields } = request.body;
 
@@ -519,11 +523,11 @@ const updateExpenseClaimsBulkController = expressAsyncController(
         });
 
         return updatedExpenseClaim;
-      })
+      }),
     );
 
     const successfullyCreatedExpenseClaims = updatedExpenseClaims.filter(
-      removeUndefinedAndNullValues
+      removeUndefinedAndNullValues,
     );
 
     if (successfullyCreatedExpenseClaims.length === 0) {
@@ -536,19 +540,18 @@ const updateExpenseClaimsBulkController = expressAsyncController(
     }
 
     response.status(201).json({
-      message: `Successfully created ${
-        successfullyCreatedExpenseClaims.length
-      } Expense Claims. ${
-        expenseClaimFields.length - successfullyCreatedExpenseClaims.length
-      } Expense Claims failed to be created.`,
+      message:
+        `Successfully created ${successfullyCreatedExpenseClaims.length} Expense Claims. ${
+          expenseClaimFields.length - successfullyCreatedExpenseClaims.length
+        } Expense Claims failed to be created.`,
       resourceData: successfullyCreatedExpenseClaims,
     });
-  }
+  },
 );
 
 export {
-  createNewExpenseClaimsBulkController,
   createNewExpenseClaimController,
+  createNewExpenseClaimsBulkController,
   deleteAllExpenseClaimsController,
   deleteExpenseClaimController,
   getExpenseClaimByIdController,

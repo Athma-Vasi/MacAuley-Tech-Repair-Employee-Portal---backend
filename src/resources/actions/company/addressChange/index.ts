@@ -7,7 +7,7 @@
  */
 import { AddressChangeModel } from "./addressChange.model";
 import { addressChangeRouter } from "./addressChange.routes";
-import { createNewAddressChangeController } from "./addressChange.controller";
+import { createNewAddressChangeController } from "./addressChange.handler";
 
 import type {
   AddressChangeDocument,

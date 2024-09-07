@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createNewAddressChangeController } from "./addressChange.controller";
+import { createNewAddressChangeController } from "./addressChange.handler";
 import { validateSchemaMiddleware } from "../../../../middlewares/validateSchema";
 import {
   createAddressChangeJoiSchema,
