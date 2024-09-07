@@ -7,15 +7,7 @@
  */
 import { AddressChangeModel } from "./addressChange.model";
 import { addressChangeRouter } from "./addressChange.routes";
-import {
-  createNewAddressChangeController,
-  deleteAllAddressChangesController,
-  deleteAnAddressChangeController,
-  getAddressChangeByIdController,
-  getAddressChangesByUserController,
-  getQueriedAddressChangesController,
-  updateAddressChangeByIdController,
-} from "./addressChange.controller";
+import { createNewAddressChangeController } from "./addressChange.controller";
 
 import type {
   AddressChangeDocument,
@@ -29,12 +21,6 @@ export {
   AddressChangeModel,
   addressChangeRouter,
   createNewAddressChangeController,
-  deleteAllAddressChangesController,
-  deleteAnAddressChangeController,
-  getAddressChangeByIdController,
-  getAddressChangesByUserController,
-  getQueriedAddressChangesController,
-  updateAddressChangeByIdController,
 };
 
 export type { AddressChangeDocument, AddressChangeSchema };

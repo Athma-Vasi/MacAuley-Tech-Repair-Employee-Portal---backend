@@ -1,14 +1,18 @@
 import {
     GetQueriedResourceRequest,
+    GetResourceByIdRequest,
     HttpResult,
     HttpServerResponse,
     UpdateResourceByIdRequest,
 } from "../types";
 import { FlattenMaps, Model, Require_id } from "mongoose";
 import {
+    deleteAllResourcesService,
+    deleteResourceByIdService,
     getQueriedResourcesByUserService,
     getQueriedResourcesService,
     getQueriedTotalResourcesService,
+    getResourceByIdService,
     updateResourceByIdService,
 } from "../services";
 import { createNewErrorLogService } from "../resources/errorLog";
@@ -234,8 +238,139 @@ function updateResourceByIdHandler<
     };
 }
 
+function getResourceByIdHandler<
+    Doc extends Record<string, unknown> = Record<string, unknown>,
+>(
+    model: Model<Doc>,
+) {
+    return async (
+        request: GetResourceByIdRequest,
+        response: HttpServerResponse<Doc>,
+    ) => {
+        try {
+            const { resourceId } = request.params;
+
+            const getResourceResult = await getResourceByIdService(
+                resourceId,
+                model,
+            );
+
+            if (getResourceResult.err) {
+                await createNewErrorLogService(
+                    createErrorLogSchema(
+                        getResourceResult.val,
+                        request.body,
+                    ),
+                );
+
+                response.status(200).json(
+                    createHttpResultError({ status: 404 }),
+                );
+                return;
+            }
+
+            response
+                .status(200)
+                .json(
+                    getResourceResult.safeUnwrap() as HttpResult<
+                        Require_id<FlattenMaps<Doc>>
+                    >,
+                );
+        } catch (error: unknown) {
+            await createNewErrorLogService(
+                createErrorLogSchema(
+                    createHttpResultError({ data: [error] }),
+                    request.body,
+                ),
+            );
+
+            response.status(200).json(createHttpResultError({}));
+        }
+    };
+}
+
+function deleteResourceByIdHandler<
+    Doc extends Record<string, unknown> = Record<string, unknown>,
+>(
+    model: Model<Doc>,
+) {
+    return async (
+        request: GetResourceByIdRequest,
+        response: HttpServerResponse,
+    ) => {
+        try {
+            const { resourceId } = request.params;
+
+            const deletedResult = await deleteResourceByIdService(
+                resourceId,
+                model,
+            );
+
+            if (deletedResult.err) {
+                await createNewErrorLogService(
+                    createErrorLogSchema(deletedResult.val, request.body),
+                );
+
+                response.status(200).json(
+                    createHttpResultError({ status: 404 }),
+                );
+                return;
+            }
+
+            response.status(200).json(createHttpResultSuccess({}));
+        } catch (error: unknown) {
+            await createNewErrorLogService(
+                createErrorLogSchema(
+                    createHttpResultError({ data: [error] }),
+                    request.body,
+                ),
+            );
+
+            response.status(200).json(createHttpResultError({}));
+        }
+    };
+}
+
+function deleteAllResourcesHandler<
+    Doc extends Record<string, unknown> = Record<string, unknown>,
+>(
+    model: Model<Doc>,
+) {
+    return async (
+        request: GetQueriedResourceRequest,
+        response: HttpServerResponse,
+    ) => {
+        try {
+            const deletedResult = await deleteAllResourcesService(model);
+
+            if (deletedResult.err) {
+                await createNewErrorLogService(
+                    createErrorLogSchema(deletedResult.val, request.body),
+                );
+
+                response.status(200).json(createHttpResultError({}));
+                return;
+            }
+
+            response.status(200).json(createHttpResultSuccess({}));
+        } catch (error: unknown) {
+            await createNewErrorLogService(
+                createErrorLogSchema(
+                    createHttpResultError({ data: [error] }),
+                    request.body,
+                ),
+            );
+
+            response.status(200).json(createHttpResultError({}));
+        }
+    };
+}
+
 export {
+    deleteAllResourcesHandler,
+    deleteResourceByIdHandler,
     getQueriedResourcesByUserHandler,
     getQueriedResourcesHandler,
+    getResourceByIdHandler,
     updateResourceByIdHandler,
 };

@@ -1,45 +1,69 @@
 import { Router } from "express";
-import {
-  createNewAddressChangeController,
-  deleteAllAddressChangesController,
-  deleteAnAddressChangeController,
-  getAddressChangeByIdController,
-  getAddressChangesByUserController,
-  getQueriedAddressChangesController,
-  updateAddressChangeByIdController,
-} from "./addressChange.controller";
+import { createNewAddressChangeController } from "./addressChange.controller";
 import { validateSchemaMiddleware } from "../../../../middlewares/validateSchema";
 import {
   createAddressChangeJoiSchema,
   updateAddressChangeJoiSchema,
 } from "./addressChange.validation";
+import {
+  deleteAllResourcesHandler,
+  deleteResourceByIdHandler,
+  getQueriedResourcesByUserHandler,
+  getQueriedResourcesHandler,
+  getResourceByIdHandler,
+  updateResourceByIdHandler,
+} from "../../../../handlers";
+import { AddressChangeModel } from "./addressChange.model";
 
 const addressChangeRouter = Router();
 
 addressChangeRouter
   .route("/")
-  .get(getQueriedAddressChangesController)
+  // @desc   Get all address changes
+  // @route  GET api/v1/actions/company/address-change
+  // @access Private/Admin/Manager
+  .get(getQueriedResourcesHandler(AddressChangeModel))
+  // @desc   Create a new address change request
+  // @route  POST api/v1/actions/company/address-change
+  // @access Private
   .post(
     validateSchemaMiddleware(
       createAddressChangeJoiSchema,
-      "addressChangeSchema",
+      "schema",
     ),
     createNewAddressChangeController,
   );
 
+// @desc    Delete all address change requests
+// @route   DELETE api/v1/actions/company/address-change/delete-all
+// @access  Private
 addressChangeRouter.route("/delete-all").delete(
-  deleteAllAddressChangesController,
+  deleteAllResourcesHandler(AddressChangeModel),
 );
 
-addressChangeRouter.route("/user").get(getAddressChangesByUserController);
+// @desc   Get all address change requests by user
+// @route  GET api/v1/actions/company/address-change/user
+// @access Private
+addressChangeRouter.route("/user").get(
+  getQueriedResourcesByUserHandler(AddressChangeModel),
+);
 
 addressChangeRouter
   .route("/:resourceId")
-  .get(getAddressChangeByIdController)
-  .delete(deleteAnAddressChangeController)
+  // @desc   Get an address change request
+  // @route  GET api/v1/actions/company/address-change/:resourceId
+  // @access Private
+  .get(getResourceByIdHandler(AddressChangeModel))
+  // @desc   Delete an address change request by its id
+  // @route  DELETE api/v1/actions/company/address-change/:resourceId
+  // @access Private
+  .delete(deleteResourceByIdHandler(AddressChangeModel))
+  // @desc   Update address change status
+  // @route  PATCH api/v1/actions/company/address-change/:resourceId
+  // @access Private/Admin/Manager
   .patch(
     validateSchemaMiddleware(updateAddressChangeJoiSchema),
-    updateAddressChangeByIdController,
+    updateResourceByIdHandler(AddressChangeModel),
   );
 
 export { addressChangeRouter };

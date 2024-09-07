@@ -1,6 +1,12 @@
-import { Schema, Types, model } from "mongoose";
+import { model, Schema, Types } from "mongoose";
 
-import type { Country, PhoneNumber, PostalCode, Province, StatesUS } from "../../../user";
+import type {
+  Country,
+  PhoneNumber,
+  PostalCode,
+  Province,
+  StatesUS,
+} from "../../../user";
 import { RequestStatus } from "../../../../types";
 
 type AddressChangeSchema = {
@@ -75,12 +81,11 @@ const addressChangeSchema = new Schema<AddressChangeSchema>(
     },
     requestStatus: {
       type: String,
-      required: false,
-      default: "pending",
+      required: [true, "Request status is required"],
       index: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 addressChangeSchema.index({
@@ -93,8 +98,8 @@ addressChangeSchema.index({
 
 const AddressChangeModel = model<AddressChangeDocument>(
   "AddressChange",
-  addressChangeSchema
+  addressChangeSchema,
 );
 
 export { AddressChangeModel };
-export type { AddressChangeSchema, AddressChangeDocument };
+export type { AddressChangeDocument, AddressChangeSchema };

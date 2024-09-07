@@ -156,7 +156,7 @@ async function updateResourceByIdService<
 
         if (resource === null || resource === undefined) {
             return new Ok(
-                createHttpResultSuccess({
+                createHttpResultError({
                     message: "Unable to update resource",
                 }),
             );
