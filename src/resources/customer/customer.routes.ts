@@ -1,75 +1,66 @@
 import { Router } from "express";
-
-import { assignQueryDefaults, verifyJWTMiddleware, verifyRoles } from "../../middlewares";
-import {
-  updateCustomerFieldsBulkController,
-  createNewCustomerController,
-  deleteCustomerController,
-  getQueriedCustomersController,
-  getCustomerByIdController,
-  updateCustomerByIdController,
-  updateCustomerPasswordController,
-  createNewCustomersBulkController,
-  getAllCustomersBulkController,
-  getCustomerDocWithPaymentInfoController,
-  deleteAllCustomersController,
-} from "./customer.controller";
 import { validateSchemaMiddleware } from "../../middlewares/validateSchema";
-import { createCustomerJoiSchema, updateCustomerJoiSchema } from "./customer.validation";
+import {
+  createCustomerJoiSchema,
+  updateCustomerJoiSchema,
+} from "./customer.validation";
+import {
+  createNewResourceHandler,
+  deleteAllResourcesHandler,
+  deleteResourceByIdHandler,
+  getQueriedResourcesByUserHandler,
+  getQueriedResourcesHandler,
+  getResourceByIdHandler,
+  updateResourceByIdHandler,
+} from "../../handlers";
+import { CustomerModel } from "./customer.model";
 
 const customerRouter = Router();
 
 customerRouter
   .route("/")
-  .get(
-    verifyJWTMiddleware,
-    verifyRoles,
-    assignQueryDefaults,
-    getQueriedCustomersController
-  )
+  // @desc   Get all customers
+  // @route  GET api/v1/customer
+  // @access Private/Admin/Manager
+  .get(getQueriedResourcesHandler(CustomerModel))
+  // @desc   Create a new customer
+  // @route  POST api/v1/customer
+  // @access Private/Admin/Manager
   .post(
-    validateSchemaMiddleware(createCustomerJoiSchema, "customerSchema"),
-    createNewCustomerController
+    validateSchemaMiddleware(createCustomerJoiSchema, "schema"),
+    createNewResourceHandler(CustomerModel),
   );
 
-customerRouter
-  .route("/payment-info")
-  .get(
-    verifyJWTMiddleware,
-    verifyRoles,
-    assignQueryDefaults,
-    getCustomerDocWithPaymentInfoController
-  );
+// @desc   Delete all customers
+// @route  DELETE api/v1/customer/delete-all
+// @access Private/Admin/Manager
+customerRouter.route("/delete-all").delete(
+  deleteAllResourcesHandler(CustomerModel),
+);
+
+// @desc   Get all customers by user
+// @route  GET api/v1/customer/user
+// @access Private/Admin/Manager
+customerRouter.route("/user").get(
+  getQueriedResourcesByUserHandler(CustomerModel),
+);
 
 customerRouter
-  .route("/update-password")
-  .patch(verifyJWTMiddleware, verifyRoles, updateCustomerPasswordController);
-
-customerRouter
-  .route("/delete-all")
-  .delete(verifyJWTMiddleware, verifyRoles, deleteAllCustomersController);
-
-// DEV ROUTES
-customerRouter
-  .route("/dev")
-  .post(verifyJWTMiddleware, verifyRoles, createNewCustomersBulkController)
-  .get(
-    verifyJWTMiddleware,
-    verifyRoles,
-    assignQueryDefaults,
-    getAllCustomersBulkController
-  )
-  .patch(verifyJWTMiddleware, verifyRoles, updateCustomerFieldsBulkController);
-
-customerRouter
-  .route("/:customerId")
-  .get(verifyJWTMiddleware, verifyRoles, assignQueryDefaults, getCustomerByIdController)
+  .route("/:resourceId")
+  // @desc   Get a customer by their ID
+  // @route  GET api/v1/customer/:resourceId
+  // @access Private/Admin/Manager
+  .get(getResourceByIdHandler(CustomerModel))
+  // @desc   Delete a customer by their ID
+  // @route  DELETE api/v1/customer/:resourceId
+  // @access Private/Admin/Manager
+  .delete(deleteResourceByIdHandler(CustomerModel))
+  // @desc   Update a customer by their ID
+  // @route  PATCH api/v1/customer/:resourceId
+  // @access Private/Admin/Manager
   .patch(
-    verifyJWTMiddleware,
-    verifyRoles,
     validateSchemaMiddleware(updateCustomerJoiSchema),
-    updateCustomerByIdController
-  )
-  .delete(verifyJWTMiddleware, verifyRoles, deleteCustomerController);
+    updateResourceByIdHandler(CustomerModel),
+  );
 
 export { customerRouter };
