@@ -6,7 +6,7 @@ import {
 } from "./comment.validation";
 import {
   createNewResourceHandler,
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -31,11 +31,11 @@ commentRouter
     createNewResourceHandler(CommentModel),
   );
 
-// @desc   Delete all comments
-// @route  DELETE api/v1/comment/delete-all
+// @desc   Delete many comments
+// @route  DELETE api/v1/comment/delete-many
 // @access Private/Admin/Manager
-commentRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(CommentModel),
+commentRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(CommentModel),
 );
 
 // @desc   Get all comments by user

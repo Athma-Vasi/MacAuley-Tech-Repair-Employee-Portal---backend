@@ -6,7 +6,7 @@ import {
 } from "./endorsement.validation";
 import {
   createNewResourceHandler,
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -31,11 +31,11 @@ endorsementRouter
     createNewResourceHandler(EndorsementModel),
   );
 
-// @desc   Delete all endorsements
-// @route  DELETE api/v1/general/endorsement/delete-all
+// @desc   Delete many endorsements
+// @route  DELETE api/v1/general/endorsement/delete-many
 // @access Private/Admin/Manager
-endorsementRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(EndorsementModel),
+endorsementRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(EndorsementModel),
 );
 
 // @desc   Get all endorsements by user

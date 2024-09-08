@@ -6,7 +6,7 @@ import {
 } from "./accessory.validation";
 import {
   createNewResourceHandler,
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -31,11 +31,11 @@ accessoryRouter
     createNewResourceHandler(AccessoryModel),
   );
 
-// @desc   Delete all accessories
-// @route  DELETE api/v1/product-category/accessory/delete-all
+// @desc   Delete many accessories
+// @route  DELETE api/v1/product-category/accessory/delete-many
 // @access Private/Admin/Manager
-accessoryRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(AccessoryModel),
+accessoryRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(AccessoryModel),
 );
 
 // @desc   Get all accessories by user

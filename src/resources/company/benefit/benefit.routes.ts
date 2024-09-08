@@ -6,7 +6,7 @@ import {
 } from "./benefit.validation";
 import {
   createNewResourceHandler,
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -31,11 +31,11 @@ benefitRouter
     createNewResourceHandler(BenefitModel),
   );
 
-// @desc   Delete all benefits
-// @route  DELETE api/v1/company/benefits/delete-all
+// @desc   Delete many benefits
+// @route  DELETE api/v1/company/benefits/delete-many
 // @access Private/Admin/Manager
-benefitRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(BenefitModel),
+benefitRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(BenefitModel),
 );
 
 // @desc   Get all benefits by user

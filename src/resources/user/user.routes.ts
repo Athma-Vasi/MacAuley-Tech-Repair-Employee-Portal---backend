@@ -2,7 +2,7 @@ import { Router } from "express";
 import { validateSchemaMiddleware } from "../../middlewares/validateSchema";
 import { createUserJoiSchema, updateUserJoiSchema } from "./user.validation";
 import {
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -28,11 +28,11 @@ userRouter
     createNewUserHandler(UserModel),
   );
 
-// @desc   Delete all users
-// @route  DELETE api/v1/product-category/user/delete-all
+// @desc   Delete many users
+// @route  DELETE api/v1/product-category/user/delete-many
 // @access Private/Admin/Manager
-userRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(UserModel),
+userRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(UserModel),
 );
 
 // @desc   Get all users by user

@@ -3,7 +3,7 @@ import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
 import { createEventJoiSchema, updateEventJoiSchema } from "./event.validation";
 import {
   createNewResourceHandler,
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -28,11 +28,11 @@ eventRouter
     createNewResourceHandler(EventModel),
   );
 
-// @desc   Delete all events
-// @route  DELETE api/v1/outreach/event/delete-all
+// @desc   Delete many events
+// @route  DELETE api/v1/outreach/event/delete-many
 // @access Private/Admin/Manager
-eventRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(EventModel),
+eventRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(EventModel),
 );
 
 // @desc   Get all events by user

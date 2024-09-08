@@ -3,7 +3,7 @@ import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
 import { createRamJoiSchema, updateRamJoiSchema } from "./ram.validation";
 import {
   createNewResourceHandler,
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -28,11 +28,11 @@ ramRouter
     createNewResourceHandler(RamModel),
   );
 
-// @desc   Delete all rams
-// @route  DELETE api/v1/product-category/ram/delete-all
+// @desc   Delete many rams
+// @route  DELETE api/v1/product-category/ram/delete-many
 // @access Private/Admin/Manager
-ramRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(RamModel),
+ramRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(RamModel),
 );
 
 // @desc   Get all rams by user

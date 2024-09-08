@@ -6,7 +6,7 @@ import {
 } from "./storage.validation";
 import {
   createNewResourceHandler,
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -31,11 +31,11 @@ storageRouter
     createNewResourceHandler(StorageModel),
   );
 
-// @desc   Delete all storages
-// @route  DELETE api/v1/product-category/storage/delete-all
+// @desc   Delete many storages
+// @route  DELETE api/v1/product-category/storage/delete-many
 // @access Private/Admin/Manager
-storageRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(StorageModel),
+storageRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(StorageModel),
 );
 
 // @desc   Get all storages by user

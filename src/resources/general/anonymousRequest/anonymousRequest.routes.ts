@@ -6,7 +6,7 @@ import {
 } from "./anonymousRequest.validation";
 import {
   createNewResourceHandler,
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -31,11 +31,11 @@ anonymousRequestRouter
     createNewResourceHandler(AnonymousRequestModel),
   );
 
-// @desc   Delete all anonymousRequests
-// @route  DELETE api/v1/general/anonymous-request/delete-all
+// @desc   Delete many anonymousRequests
+// @route  DELETE api/v1/general/anonymous-request/delete-many
 // @access Private/Admin/Manager
-anonymousRequestRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(AnonymousRequestModel),
+anonymousRequestRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(AnonymousRequestModel),
 );
 
 // @desc   Get all anonymousRequests by user

@@ -6,7 +6,7 @@ import {
   updateAddressChangeJoiSchema,
 } from "./addressChange.validation";
 import {
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -34,11 +34,11 @@ addressChangeRouter
     createNewAddressChangeController,
   );
 
-// @desc    Delete all address change requests
-// @route   DELETE api/v1/company/address-change/delete-all
+// @desc    Delete many address change requests
+// @route   DELETE api/v1/company/address-change/delete-many
 // @access  Private
-addressChangeRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(AddressChangeModel),
+addressChangeRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(AddressChangeModel),
 );
 
 // @desc   Get all address change requests by user

@@ -9,7 +9,7 @@ import type {
 import type { FlattenMaps, Model, Require_id } from "mongoose";
 import {
     createNewResourceService,
-    deleteAllResourcesService,
+    deleteManyResourcesService,
     deleteResourceByIdService,
     getQueriedResourcesByUserService,
     getQueriedResourcesService,
@@ -383,7 +383,7 @@ function deleteResourceByIdHandler<
     };
 }
 
-function deleteAllResourcesHandler<
+function deleteManyResourcesHandler<
     Doc extends Record<string, unknown> = Record<string, unknown>,
 >(
     model: Model<Doc>,
@@ -393,7 +393,7 @@ function deleteAllResourcesHandler<
         response: HttpServerResponse,
     ) => {
         try {
-            const deletedResult = await deleteAllResourcesService(model);
+            const deletedResult = await deleteManyResourcesService({ model });
 
             if (deletedResult.err) {
                 await createNewErrorLogService(
@@ -420,7 +420,7 @@ function deleteAllResourcesHandler<
 
 export {
     createNewResourceHandler,
-    deleteAllResourcesHandler,
+    deleteManyResourcesHandler,
     deleteResourceByIdHandler,
     getQueriedResourcesByUserHandler,
     getQueriedResourcesHandler,

@@ -3,7 +3,7 @@ import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
 import { createPsuJoiSchema, updatePsuJoiSchema } from "./psu.validation";
 import {
   createNewResourceHandler,
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -28,11 +28,11 @@ psuRouter
     createNewResourceHandler(PsuModel),
   );
 
-// @desc   Delete all psus
-// @route  DELETE api/v1/product-category/psu/delete-all
+// @desc   Delete many psus
+// @route  DELETE api/v1/product-category/psu/delete-many
 // @access Private/Admin/Manager
-psuRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(PsuModel),
+psuRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(PsuModel),
 );
 
 // @desc   Get all psus by user

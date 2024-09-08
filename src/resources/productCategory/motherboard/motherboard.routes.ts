@@ -6,7 +6,7 @@ import {
 } from "./motherboard.validation";
 import {
   createNewResourceHandler,
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -31,11 +31,11 @@ motherboardRouter
     createNewResourceHandler(MotherboardModel),
   );
 
-// @desc   Delete all motherboards
-// @route  DELETE api/v1/product-category/motherboard/delete-all
+// @desc   Delete many motherboards
+// @route  DELETE api/v1/product-category/motherboard/delete-many
 // @access Private/Admin/Manager
-motherboardRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(MotherboardModel),
+motherboardRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(MotherboardModel),
 );
 
 // @desc   Get all motherboards by user

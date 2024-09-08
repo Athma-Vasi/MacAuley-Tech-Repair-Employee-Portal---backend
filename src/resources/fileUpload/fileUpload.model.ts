@@ -1,18 +1,13 @@
-import { Schema, Types, model } from "mongoose";
-import type { ActionsCompany } from "../actions/company";
-import type { ActionsGeneral } from "../actions/general";
-import type { ActionsOutreach } from "../actions/outreach";
+import { model, Schema, Types } from "mongoose";
 import { ProductCategory } from "../productCategory";
 
 type FileExtension = "jpeg" | "png" | "gif" | "pdf" | "jpg";
 
 type AssociatedResourceKind =
-  | ActionsCompany
-  | ActionsGeneral
-  | ActionsOutreach
+  | "Expense Claim"
   | ProductCategory
   | "user"
-  | "repairNote";
+  | "Repair Ticket";
 
 type FileUploadSchema = {
   userId: Types.ObjectId;
@@ -77,7 +72,7 @@ const fileUploadSchema = new Schema<FileUploadSchema>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // text index for searching
@@ -87,12 +82,15 @@ fileUploadSchema.index({
   fileEncoding: "text",
 });
 
-const FileUploadModel = model<FileUploadDocument>("FileUpload", fileUploadSchema);
+const FileUploadModel = model<FileUploadDocument>(
+  "FileUpload",
+  fileUploadSchema,
+);
 
 export { FileUploadModel };
 export type {
-  FileUploadSchema,
-  FileUploadDocument,
-  FileExtension,
   AssociatedResourceKind,
+  FileExtension,
+  FileUploadDocument,
+  FileUploadSchema,
 };

@@ -6,7 +6,7 @@ import {
 } from "./customer.validation";
 import {
   createNewResourceHandler,
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -31,11 +31,11 @@ customerRouter
     createNewResourceHandler(CustomerModel),
   );
 
-// @desc   Delete all customers
-// @route  DELETE api/v1/customer/delete-all
+// @desc   Delete many customers
+// @route  DELETE api/v1/customer/delete-many
 // @access Private/Admin/Manager
-customerRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(CustomerModel),
+customerRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(CustomerModel),
 );
 
 // @desc   Get all customers by user

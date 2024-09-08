@@ -6,7 +6,7 @@ import {
 } from "./survey.validation";
 import {
   createNewResourceHandler,
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -31,11 +31,11 @@ surveyRouter
     createNewResourceHandler(SurveyModel),
   );
 
-// @desc   Delete all surveys
-// @route  DELETE api/v1/outreach/survey/delete-all
+// @desc   Delete many surveys
+// @route  DELETE api/v1/outreach/survey/delete-many
 // @access Private/Admin/Manager
-surveyRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(SurveyModel),
+surveyRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(SurveyModel),
 );
 
 // @desc   Get all surveys by user

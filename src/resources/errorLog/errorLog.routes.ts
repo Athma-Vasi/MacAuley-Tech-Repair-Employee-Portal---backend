@@ -1,7 +1,7 @@
 import { Router } from "express";
 import {
   createNewResourceHandler,
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -23,11 +23,11 @@ errorLogRouter
   // @access Private
   .post(createNewResourceHandler(ErrorLogModel));
 
-// @desc    Delete all error logs
-// @route   DELETE api/v1/error-log/delete-all
+// @desc    Delete many error logs
+// @route   DELETE api/v1/error-log/delete-many
 // @access  Private
-errorLogRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(ErrorLogModel),
+errorLogRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(ErrorLogModel),
 );
 
 // @desc   Get all error logs by user

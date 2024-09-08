@@ -6,7 +6,7 @@ import {
 } from "./announcement.validation";
 import {
   createNewResourceHandler,
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -31,11 +31,11 @@ announcementRouter
     createNewResourceHandler(AnnouncementModel),
   );
 
-// @desc   Delete all announcements
-// @route  DELETE api/v1/outreach/announcement/delete-all
+// @desc   Delete many announcements
+// @route  DELETE api/v1/outreach/announcement/delete-many
 // @access Private/Admin/Manager
-announcementRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(AnnouncementModel),
+announcementRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(AnnouncementModel),
 );
 
 // @desc   Get all announcements by user

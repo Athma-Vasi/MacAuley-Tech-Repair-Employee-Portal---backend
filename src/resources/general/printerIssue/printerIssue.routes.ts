@@ -6,7 +6,7 @@ import {
 } from "./printerIssue.validation";
 import {
   createNewResourceHandler,
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -31,11 +31,11 @@ printerIssueRouter
     createNewResourceHandler(PrinterIssueModel),
   );
 
-// @desc   Delete all printerIssues
-// @route  DELETE api/v1/general/printer-issue/delete-all
+// @desc   Delete many printerIssues
+// @route  DELETE api/v1/general/printer-issue/delete-many
 // @access Private/Admin/Manager
-printerIssueRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(PrinterIssueModel),
+printerIssueRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(PrinterIssueModel),
 );
 
 // @desc   Get all printerIssues by user

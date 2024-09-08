@@ -1,8 +1,10 @@
-import type { Model } from "mongoose";
+import type { FilterQuery, Model, QueryOptions } from "mongoose";
 import { Err, ErrImpl, Ok, OkImpl } from "ts-results";
 import { createHttpResultError, createHttpResultSuccess } from "../utils";
 import type {
-    DatabaseResponse,
+    ArrayOperators,
+    DatabaseResponseResult,
+    FieldOperators,
     HttpResult,
     QueryObjectParsedWithDefaults,
 } from "../types";
@@ -107,7 +109,7 @@ async function getQueriedResourcesService<
     projection = null,
 }: QueryObjectParsedWithDefaults & {
     model: Model<Doc>;
-}): DatabaseResponse<Doc> {
+}): DatabaseResponseResult<Doc> {
     try {
         const resources = await model.find(filter, projection, options)
             .lean()
@@ -158,7 +160,7 @@ async function getQueriedResourcesByUserService<
     projection = null,
 }: QueryObjectParsedWithDefaults & {
     model: Model<Doc>;
-}): DatabaseResponse<Doc> {
+}): DatabaseResponseResult<Doc> {
     try {
         const resources = await model.find(filter, projection, options)
             .lean()
@@ -185,7 +187,7 @@ async function updateResourceByIdService<
     resourceId: string;
     fields: Record<string, unknown>;
     model: Model<Doc>;
-    updateOperator: string;
+    updateOperator: FieldOperators | ArrayOperators;
 }) {
     try {
         const updateString = `{ "${updateOperator}":  ${
@@ -222,7 +224,7 @@ async function updateResourceByIdService<
 
 async function deleteResourceByIdService<
     Doc extends Record<string, unknown> = Record<string, unknown>,
->(resourceId: string, model: Model<Doc>): DatabaseResponse {
+>(resourceId: string, model: Model<Doc>): DatabaseResponseResult {
     try {
         const { acknowledged, deletedCount } = await model.deleteOne({
             _id: resourceId,
@@ -247,13 +249,20 @@ async function deleteResourceByIdService<
     }
 }
 
-async function deleteAllResourcesService<
+async function deleteManyResourcesService<
     Doc extends Record<string, unknown> = Record<string, unknown>,
->(model: Model<Doc>): DatabaseResponse {
+>(
+    { filter, model, options }: {
+        filter?: FilterQuery<Doc>;
+        options?: QueryOptions<Doc>;
+        model: Model<Doc>;
+    },
+): DatabaseResponseResult {
     try {
-        const totalResources = await model.countDocuments({});
+        const totalResources = await model.countDocuments(filter, options);
         const { acknowledged, deletedCount } = await model.deleteMany(
-            {},
+            filter,
+            options,
         )
             .lean()
             .exec();
@@ -262,14 +271,14 @@ async function deleteAllResourcesService<
             ? new Ok(createHttpResultSuccess({}))
             : new Ok(
                 createHttpResultError({
-                    message: "Unable to delete all resources",
+                    message: "Unable to delete some resources",
                 }),
             );
     } catch (error: unknown) {
         return new Err(
             createHttpResultError({
                 data: [error],
-                message: "Error deleting all resources",
+                message: "Error deleting resources",
             }),
         );
     }
@@ -278,7 +287,7 @@ async function deleteAllResourcesService<
 export {
     createAndNotReturnResourceService,
     createNewResourceService,
-    deleteAllResourcesService,
+    deleteManyResourcesService,
     deleteResourceByIdService,
     getQueriedResourcesByUserService,
     getQueriedResourcesService,

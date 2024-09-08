@@ -3,7 +3,7 @@ import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
 import { createCpuJoiSchema, updateCpuJoiSchema } from "./cpu.validation";
 import {
   createNewResourceHandler,
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -28,11 +28,11 @@ cpuRouter
     createNewResourceHandler(CpuModel),
   );
 
-// @desc   Delete all cpus
-// @route  DELETE api/v1/product-category/cpu/delete-all
+// @desc   Delete many cpus
+// @route  DELETE api/v1/product-category/cpu/delete-many
 // @access Private/Admin/Manager
-cpuRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(CpuModel),
+cpuRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(CpuModel),
 );
 
 // @desc   Get all cpus by user

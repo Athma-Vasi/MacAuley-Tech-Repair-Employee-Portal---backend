@@ -6,7 +6,7 @@ import {
 } from "./leaveRequest.validation";
 import {
   createNewResourceHandler,
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -31,11 +31,11 @@ leaveRequestRouter
     createNewResourceHandler(LeaveRequestModel),
   );
 
-// @desc   Delete all leave requests
-// @route  DELETE api/v1/company/leave-request/delete-all
+// @desc   Delete many leave requests
+// @route  DELETE api/v1/company/leave-request/delete-many
 // @access Private/Admin/Manager
-leaveRequestRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(LeaveRequestModel),
+leaveRequestRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(LeaveRequestModel),
 );
 
 // @desc   Get all leave requests by user

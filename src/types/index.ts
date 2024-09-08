@@ -116,7 +116,7 @@ type HttpResult<Data = unknown> = {
  * - where generic type parameter Document = ${resource}Schema & {_id, createdAt, updatedAt, __v}
  * - used in service functions that call ${Model}.find() functions
  */
-type DatabaseResponse<
+type DatabaseResponseResult<
   Doc extends Record<string, unknown> = Record<string, unknown>,
 > = Promise<
   | OkImpl<HttpResult<Require_id<FlattenMaps<Doc>>>>
@@ -237,7 +237,7 @@ type UpdateDocumentByIdServiceInput<
 export type {
   ArrayOperators,
   CreateNewResourceRequest,
-  DatabaseResponse,
+  DatabaseResponseResult,
   DeleteAllResourcesRequest,
   DeleteResourceRequest,
   DocumentUpdateOperation,

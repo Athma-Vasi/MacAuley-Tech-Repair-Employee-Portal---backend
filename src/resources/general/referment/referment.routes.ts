@@ -6,7 +6,7 @@ import {
 } from "./referment.validation";
 import {
   createNewResourceHandler,
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -31,11 +31,11 @@ refermentRouter
     createNewResourceHandler(RefermentModel),
   );
 
-// @desc   Delete all referments
-// @route  DELETE api/v1/general/referment/delete-all
+// @desc   Delete many referments
+// @route  DELETE api/v1/general/referment/delete-many
 // @access Private/Admin/Manager
-refermentRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(RefermentModel),
+refermentRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(RefermentModel),
 );
 
 // @desc   Get all referments by user

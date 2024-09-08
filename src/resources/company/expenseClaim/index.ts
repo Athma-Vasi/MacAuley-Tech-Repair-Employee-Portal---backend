@@ -8,16 +8,12 @@
 import { ExpenseClaimModel } from "./expenseClaim.model";
 import { expenseClaimRouter } from "./expenseClaim.routes";
 import {
-  createNewExpenseClaimController,
-  createNewExpenseClaimsBulkController,
-  deleteAllExpenseClaimsController,
-  deleteExpenseClaimController,
-  getExpenseClaimByIdController,
-  getQueriedExpenseClaimsByUserController,
-  getQueriedExpenseClaimsController,
-  updateExpenseClaimByIdController,
-  updateExpenseClaimsBulkController,
-} from "./expenseClaim.controller";
+  createNewExpenseClaimHandler,
+  deleteExpenseClaimByIdHandler,
+  getExpenseClaimByIdHandler,
+  getQueriedExpenseClaimsByUserHandler,
+  getQueriedExpenseClaimsHandler,
+} from "./expenseClaim.handler";
 
 import type {
   Currency,
@@ -30,17 +26,13 @@ import type {
  * Exports
  */
 export {
-  createNewExpenseClaimController,
-  createNewExpenseClaimsBulkController,
-  deleteAllExpenseClaimsController,
-  deleteExpenseClaimController,
+  createNewExpenseClaimHandler,
+  deleteExpenseClaimByIdHandler,
   ExpenseClaimModel,
   expenseClaimRouter,
-  getExpenseClaimByIdController,
-  getQueriedExpenseClaimsByUserController,
-  getQueriedExpenseClaimsController,
-  updateExpenseClaimByIdController,
-  updateExpenseClaimsBulkController,
+  getExpenseClaimByIdHandler,
+  getQueriedExpenseClaimsByUserHandler,
+  getQueriedExpenseClaimsHandler,
 };
 
 export type {

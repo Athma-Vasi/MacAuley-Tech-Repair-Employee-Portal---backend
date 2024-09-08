@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import { ProductCategory } from "../resources/productCategory";
 import { getAccessoryByIdService } from "../resources/productCategory/accessory";
-import { DatabaseResponseNullable } from "../types";
+import { DatabaseResponseResultNullable } from "../types";
 import { getCpuByIdService } from "../resources/productCategory/cpu";
 import { getComputerCaseByIdService } from "../resources/productCategory/computerCase";
 import { getDesktopComputerByIdService } from "../resources/productCategory/desktopComputer";
@@ -21,7 +21,7 @@ import { getStorageByIdService } from "../resources/productCategory/storage";
 import { getTabletByIdService } from "../resources/productCategory/tablet";
 import { getWebcamByIdService } from "../resources/productCategory/webcam";
 
-const ALLOWED_FILE_EXTENSIONS = [".jpg", ".jpeg", ".png",'.webp'];
+const ALLOWED_FILE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp"];
 
 /**
  * @description Map of product category names to their respective service functions.
@@ -29,7 +29,9 @@ const ALLOWED_FILE_EXTENSIONS = [".jpg", ".jpeg", ".png",'.webp'];
  */
 const PRODUCT_CATEGORY_SERVICE_MAP: Record<
   ProductCategory,
-  (id: string | Types.ObjectId) => DatabaseResponseNullable<Record<string, any>>
+  (
+    id: string | Types.ObjectId,
+  ) => DatabaseResponseResultNullable<Record<string, any>>
 > = {
   Accessory: getAccessoryByIdService,
   "Central Processing Unit (CPU)": getCpuByIdService,

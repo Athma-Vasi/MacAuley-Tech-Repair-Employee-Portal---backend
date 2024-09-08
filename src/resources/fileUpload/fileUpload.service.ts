@@ -9,15 +9,15 @@ import type {
 
 import { FileUploadModel } from "./fileUpload.model";
 import {
-  DatabaseResponse,
-  DatabaseResponseNullable,
+  DatabaseResponseResult,
+  DatabaseResponseResultNullable,
   QueriedResourceGetRequestServiceInput,
   QueriedTotalResourceGetRequestServiceInput,
 } from "../../types";
 import createHttpError from "http-errors";
 
 async function createNewFileUploadService(
-  newFileUploadObject: FileUploadSchema
+  newFileUploadObject: FileUploadSchema,
 ): Promise<FileUploadDocument> {
   try {
     const newFileUpload = await FileUploadModel.create(newFileUploadObject);
@@ -31,25 +31,36 @@ async function getQueriedFileUploadsService({
   filter = {},
   projection = null,
   options = {},
-}: QueriedResourceGetRequestServiceInput<FileUploadDocument>): DatabaseResponse<FileUploadDocument> {
+}: QueriedResourceGetRequestServiceInput<
+  FileUploadDocument
+>): DatabaseResponseResult<
+  FileUploadDocument
+> {
   try {
     const fileUploads = await FileUploadModel.find(filter, projection, options)
       .lean()
       .exec();
     return fileUploads;
   } catch (error: any) {
-    throw new createHttpError.InternalServerError("getQueriedFileUploadsService");
+    throw new createHttpError.InternalServerError(
+      "getQueriedFileUploadsService",
+    );
   }
 }
 
 async function getQueriedTotalFileUploadsService({
   filter = {},
-}: QueriedTotalResourceGetRequestServiceInput<FileUploadDocument>): Promise<number> {
+}: QueriedTotalResourceGetRequestServiceInput<FileUploadDocument>): Promise<
+  number
+> {
   try {
-    const totalFileUploads = await FileUploadModel.countDocuments(filter).lean().exec();
+    const totalFileUploads = await FileUploadModel.countDocuments(filter).lean()
+      .exec();
     return totalFileUploads;
   } catch (error: any) {
-    throw new createHttpError.InternalServerError("getQueriedTotalFileUploadsService");
+    throw new createHttpError.InternalServerError(
+      "getQueriedTotalFileUploadsService",
+    );
   }
 }
 
@@ -57,70 +68,58 @@ async function getQueriedFileUploadsByUserService({
   filter = {},
   projection = null,
   options = {},
-}: QueriedResourceGetRequestServiceInput<FileUploadDocument>): DatabaseResponse<FileUploadDocument> {
+}: QueriedResourceGetRequestServiceInput<
+  FileUploadDocument
+>): DatabaseResponseResult<
+  FileUploadDocument
+> {
   try {
     const fileUploads = await FileUploadModel.find(filter, projection, options)
       .lean()
       .exec();
     return fileUploads;
   } catch (error: any) {
-    throw new createHttpError.InternalServerError("getQueriedFileUploadsByUserService");
+    throw new createHttpError.InternalServerError(
+      "getQueriedFileUploadsByUserService",
+    );
   }
 }
 
 async function getFileUploadByIdService(
-  fileUploadId: Types.ObjectId | string
-): DatabaseResponseNullable<FileUploadDocument> {
+  fileUploadId: Types.ObjectId | string,
+): DatabaseResponseResultNullable<FileUploadDocument> {
   try {
-    const fileUpload = await FileUploadModel.findById(fileUploadId).lean().exec();
+    const fileUpload = await FileUploadModel.findById(fileUploadId).lean()
+      .exec();
     return fileUpload;
   } catch (error: any) {
     throw new createHttpError.InternalServerError("getFileUploadByIdService");
   }
 }
 
-type InsertAssociatedResourceDocumentIdServiceInput = {
-  userId: Types.ObjectId;
-  username: string;
-  uploadedFile: Buffer;
-  fileName: string;
-  fileExtension: FileExtension;
-  fileSize: number;
-  fileMimeType: string;
-  fileEncoding: string;
-
-  _id: Types.ObjectId;
-  createdAt: Date;
-  updatedAt: Date;
-  associatedDocumentId: Types.ObjectId;
-  associatedResource: AssociatedResourceKind;
-  __v: number;
-};
-
 async function insertAssociatedResourceDocumentIdService(
-  input: InsertAssociatedResourceDocumentIdServiceInput
-): DatabaseResponseNullable<FileUploadDocument> {
+  input: FileUploadDocument,
+): DatabaseResponseResultNullable<FileUploadDocument> {
   try {
     const updatedFileUpload = await FileUploadModel.findOneAndReplace(
       { _id: input._id },
       input,
       {
         new: true,
-      }
+      },
     )
-
       .lean()
       .exec();
     return updatedFileUpload;
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new createHttpError.InternalServerError(
-      "insertAssociatedResourceDocumentIdService"
+      "insertAssociatedResourceDocumentIdService",
     );
   }
 }
 
 async function deleteFileUploadByIdService(
-  fileUploadId: string | Types.ObjectId
+  fileUploadId: string | Types.ObjectId,
 ): Promise<DeleteResult> {
   try {
     const deleteResult = await FileUploadModel.deleteOne({
@@ -137,17 +136,19 @@ async function deleteAllFileUploadsService(): Promise<DeleteResult> {
     const deleteResult = await FileUploadModel.deleteMany({}).lean().exec();
     return deleteResult;
   } catch (error: any) {
-    throw new createHttpError.InternalServerError("deleteAllFileUploadsService");
+    throw new createHttpError.InternalServerError(
+      "deleteAllFileUploadsService",
+    );
   }
 }
 
 export {
   createNewFileUploadService,
-  getFileUploadByIdService,
-  insertAssociatedResourceDocumentIdService,
-  deleteFileUploadByIdService,
   deleteAllFileUploadsService,
+  deleteFileUploadByIdService,
+  getFileUploadByIdService,
+  getQueriedFileUploadsByUserService,
   getQueriedFileUploadsService,
   getQueriedTotalFileUploadsService,
-  getQueriedFileUploadsByUserService,
+  insertAssociatedResourceDocumentIdService,
 };

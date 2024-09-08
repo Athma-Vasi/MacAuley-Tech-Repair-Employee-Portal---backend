@@ -2,13 +2,13 @@ import { Router } from "express";
 import expressFileUpload from "express-fileupload";
 
 import {
-  verifyJWTMiddleware,
-  filesPayloadExistsMiddleware,
-  fileSizeLimiterMiddleware,
+  assignQueryDefaults,
   fileExtensionLimiterMiddleware,
   fileInfoExtracterMiddleware,
+  fileSizeLimiterMiddleware,
+  filesPayloadExistsMiddleware,
+  verifyJWTMiddleware,
   verifyRoles,
-  assignQueryDefaults,
 } from "../../middlewares";
 import { ALLOWED_FILE_EXTENSIONS } from "../../constants";
 import {
@@ -38,10 +38,10 @@ fileUploadRouter
     fileExtensionLimiterMiddleware(ALLOWED_FILE_EXTENSIONS),
     fileInfoExtracterMiddleware,
     validateSchemaMiddleware(createFileUploadJoiSchema, "fileUploadSchema"),
-    createNewFileUploadController
+    createNewFileUploadController,
   );
 
-fileUploadRouter.route("/delete-all").delete(deleteAllFileUploadsController);
+fileUploadRouter.route("/delete-many").delete(deleteAllFileUploadsController);
 
 fileUploadRouter.route("/user").get(getQueriedFileUploadsByUserController);
 

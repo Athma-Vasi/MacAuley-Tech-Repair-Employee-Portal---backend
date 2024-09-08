@@ -6,7 +6,7 @@ import {
 } from "./keyboard.validation";
 import {
   createNewResourceHandler,
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -31,11 +31,11 @@ keyboardRouter
     createNewResourceHandler(KeyboardModel),
   );
 
-// @desc   Delete all keyboards
-// @route  DELETE api/v1/product-category/keyboard/delete-all
+// @desc   Delete many keyboards
+// @route  DELETE api/v1/product-category/keyboard/delete-many
 // @access Private/Admin/Manager
-keyboardRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(KeyboardModel),
+keyboardRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(KeyboardModel),
 );
 
 // @desc   Get all keyboards by user

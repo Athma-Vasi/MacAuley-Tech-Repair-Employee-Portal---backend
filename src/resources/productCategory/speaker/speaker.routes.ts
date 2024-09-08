@@ -6,7 +6,7 @@ import {
 } from "./speaker.validation";
 import {
   createNewResourceHandler,
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -31,11 +31,11 @@ speakerRouter
     createNewResourceHandler(SpeakerModel),
   );
 
-// @desc   Delete all speakers
-// @route  DELETE api/v1/product-category/speaker/delete-all
+// @desc   Delete many speakers
+// @route  DELETE api/v1/product-category/speaker/delete-many
 // @access Private/Admin/Manager
-speakerRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(SpeakerModel),
+speakerRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(SpeakerModel),
 );
 
 // @desc   Get all speakers by user

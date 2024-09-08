@@ -6,7 +6,7 @@ import {
 } from "./computerCase.validation";
 import {
   createNewResourceHandler,
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -31,11 +31,11 @@ computerCaseRouter
     createNewResourceHandler(ComputerCaseModel),
   );
 
-// @desc   Delete all computerCases
-// @route  DELETE api/v1/product-category/computer-case/delete-all
+// @desc   Delete many computerCases
+// @route  DELETE api/v1/product-category/computer-case/delete-many
 // @access Private/Admin/Manager
-computerCaseRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(ComputerCaseModel),
+computerCaseRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(ComputerCaseModel),
 );
 
 // @desc   Get all computerCases by user

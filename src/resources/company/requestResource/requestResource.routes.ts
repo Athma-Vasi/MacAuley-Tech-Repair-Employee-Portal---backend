@@ -6,7 +6,7 @@ import {
 } from "./requestResource.validation";
 import {
   createNewResourceHandler,
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -31,11 +31,11 @@ requestResourceRouter
     createNewResourceHandler(RequestResourceModel),
   );
 
-// @desc   Delete all requestResources
-// @route  DELETE api/v1/company/request-resource/delete-all
+// @desc   Delete many requestResources
+// @route  DELETE api/v1/company/request-resource/delete-many
 // @access Private/Admin/Manager
-requestResourceRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(RequestResourceModel),
+requestResourceRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(RequestResourceModel),
 );
 
 // @desc   Get all requestResources by user

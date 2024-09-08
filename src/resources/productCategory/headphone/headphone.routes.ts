@@ -6,7 +6,7 @@ import {
 } from "./headphone.validation";
 import {
   createNewResourceHandler,
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -31,11 +31,11 @@ headphoneRouter
     createNewResourceHandler(HeadphoneModel),
   );
 
-// @desc   Delete all headphones
-// @route  DELETE api/v1/product-category/headphone/delete-all
+// @desc   Delete many headphones
+// @route  DELETE api/v1/product-category/headphone/delete-many
 // @access Private/Admin/Manager
-headphoneRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(HeadphoneModel),
+headphoneRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(HeadphoneModel),
 );
 
 // @desc   Get all headphones by user

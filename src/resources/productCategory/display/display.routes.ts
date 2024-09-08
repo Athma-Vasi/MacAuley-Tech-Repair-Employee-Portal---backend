@@ -6,7 +6,7 @@ import {
 } from "./display.validation";
 import {
   createNewResourceHandler,
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -31,11 +31,11 @@ displayRouter
     createNewResourceHandler(DisplayModel),
   );
 
-// @desc   Delete all displays
-// @route  DELETE api/v1/product-category/display/delete-all
+// @desc   Delete many displays
+// @route  DELETE api/v1/product-category/display/delete-many
 // @access Private/Admin/Manager
-displayRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(DisplayModel),
+displayRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(DisplayModel),
 );
 
 // @desc   Get all displays by user

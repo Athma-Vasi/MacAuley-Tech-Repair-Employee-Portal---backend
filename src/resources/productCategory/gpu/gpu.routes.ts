@@ -3,7 +3,7 @@ import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
 import { createGpuJoiSchema, updateGpuJoiSchema } from "./gpu.validation";
 import {
   createNewResourceHandler,
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -28,11 +28,11 @@ gpuRouter
     createNewResourceHandler(GpuModel),
   );
 
-// @desc   Delete all gpus
-// @route  DELETE api/v1/product-category/gpu/delete-all
+// @desc   Delete many gpus
+// @route  DELETE api/v1/product-category/gpu/delete-many
 // @access Private/Admin/Manager
-gpuRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(GpuModel),
+gpuRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(GpuModel),
 );
 
 // @desc   Get all gpus by user

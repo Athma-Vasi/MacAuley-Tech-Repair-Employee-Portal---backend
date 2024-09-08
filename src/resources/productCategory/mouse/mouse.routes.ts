@@ -3,7 +3,7 @@ import { validateSchemaMiddleware } from "../../../middlewares/validateSchema";
 import { createMouseJoiSchema, updateMouseJoiSchema } from "./mouse.validation";
 import {
   createNewResourceHandler,
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -28,11 +28,11 @@ mouseRouter
     createNewResourceHandler(MouseModel),
   );
 
-// @desc   Delete all mouses
-// @route  DELETE api/v1/product-category/mouse/delete-all
+// @desc   Delete many mouses
+// @route  DELETE api/v1/product-category/mouse/delete-many
 // @access Private/Admin/Manager
-mouseRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(MouseModel),
+mouseRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(MouseModel),
 );
 
 // @desc   Get all mouses by user

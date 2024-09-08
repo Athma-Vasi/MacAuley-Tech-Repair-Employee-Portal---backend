@@ -6,7 +6,7 @@ import {
 } from "./repairTicket.validation";
 import {
   createNewResourceHandler,
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -31,11 +31,11 @@ repairTicketRouter
     createNewResourceHandler(RepairTicketModel),
   );
 
-// @desc   Delete all repairTickets
-// @route  DELETE api/v1/repair-ticket/delete-all
+// @desc   Delete many repairTickets
+// @route  DELETE api/v1/repair-ticket/delete-many
 // @access Private/Admin/Manager
-repairTicketRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(RepairTicketModel),
+repairTicketRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(RepairTicketModel),
 );
 
 // @desc   Get all repairTickets by user

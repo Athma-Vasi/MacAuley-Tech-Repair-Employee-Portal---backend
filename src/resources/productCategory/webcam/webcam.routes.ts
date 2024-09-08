@@ -6,7 +6,7 @@ import {
 } from "./webcam.validation";
 import {
   createNewResourceHandler,
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -31,11 +31,11 @@ webcamRouter
     createNewResourceHandler(WebcamModel),
   );
 
-// @desc   Delete all webcams
-// @route  DELETE api/v1/product-category/webcam/delete-all
+// @desc   Delete many webcams
+// @route  DELETE api/v1/product-category/webcam/delete-many
 // @access Private/Admin/Manager
-webcamRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(WebcamModel),
+webcamRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(WebcamModel),
 );
 
 // @desc   Get all webcams by user

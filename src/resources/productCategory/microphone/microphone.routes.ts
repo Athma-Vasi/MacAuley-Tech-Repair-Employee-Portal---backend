@@ -6,7 +6,7 @@ import {
 } from "./microphone.validation";
 import {
   createNewResourceHandler,
-  deleteAllResourcesHandler,
+  deleteManyResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
   getQueriedResourcesHandler,
@@ -31,11 +31,11 @@ microphoneRouter
     createNewResourceHandler(MicrophoneModel),
   );
 
-// @desc   Delete all microphones
-// @route  DELETE api/v1/product-category/microphone/delete-all
+// @desc   Delete many microphones
+// @route  DELETE api/v1/product-category/microphone/delete-many
 // @access Private/Admin/Manager
-microphoneRouter.route("/delete-all").delete(
-  deleteAllResourcesHandler(MicrophoneModel),
+microphoneRouter.route("/delete-many").delete(
+  deleteManyResourcesHandler(MicrophoneModel),
 );
 
 // @desc   Get all microphones by user
