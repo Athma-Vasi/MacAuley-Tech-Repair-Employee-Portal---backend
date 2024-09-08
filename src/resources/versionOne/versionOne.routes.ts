@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { actionsRouter } from "../actions";
 import { commentRouter } from "../comment";
 import { fileUploadRouter } from "../fileUpload";
 import { userRouter } from "../user";
@@ -8,10 +7,15 @@ import { customerRouter } from "../customer";
 import { productCategoryRouter } from "../productCategory";
 import { usernameEmailSetRouter } from "../usernameEmailSet";
 import { errorLogRouter } from "../errorLog";
+import { companyRouter } from "../company/company.routes";
+import { generalRouter } from "../general/general.routes";
+import { outreachRouter } from "../outreach/outreach.routes";
 
 const versionOneRouter = Router();
 // route: /api/v1
-versionOneRouter.use("/actions", actionsRouter);
+versionOneRouter.use("/company", companyRouter);
+versionOneRouter.use("/general", generalRouter);
+versionOneRouter.use("/outreach", outreachRouter);
 versionOneRouter.use("/comment", commentRouter);
 versionOneRouter.use("/customer", customerRouter);
 versionOneRouter.use("/error-log", errorLogRouter);

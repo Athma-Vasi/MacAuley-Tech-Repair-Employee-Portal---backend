@@ -1,0 +1,105 @@
+import { model, Schema, Types } from "mongoose";
+import { RequestStatus } from "../../../types";
+
+type ReasonForLeave =
+  | "Vacation"
+  | "Medical"
+  | "Parental"
+  | "Bereavement"
+  | "Jury Duty"
+  | "Military"
+  | "Education"
+  | "Religious"
+  | "Other";
+
+type LeaveRequestSchema = {
+  userId: Types.ObjectId;
+  username: string;
+  startDate: NativeDate;
+  endDate: NativeDate;
+  reasonForLeave: ReasonForLeave;
+  delegatedToEmployee: string;
+  delegatedResponsibilities: string;
+  additionalComments: string;
+  requestStatus: RequestStatus;
+  acknowledgement: boolean;
+};
+
+type LeaveRequestDocument = LeaveRequestSchema & {
+  _id: Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+  __v: number;
+};
+
+const leaveRequestSchema = new Schema<LeaveRequestSchema>(
+  {
+    userId: {
+      type: Schema.Types.ObjectId,
+      required: [true, "User ID is required"],
+      ref: "User",
+      index: true,
+    },
+    username: {
+      type: String,
+      required: [true, "Username is required"],
+      index: true,
+    },
+    startDate: {
+      type: Date,
+      required: [true, "Start date is required"],
+      index: true,
+    },
+    endDate: {
+      type: Date,
+      required: [true, "End date is required"],
+      index: true,
+    },
+    reasonForLeave: {
+      type: String,
+      required: [true, "Reason for leave is required"],
+      index: true,
+    },
+    delegatedToEmployee: {
+      type: String,
+      required: false,
+      default: "",
+    },
+    delegatedResponsibilities: {
+      type: String,
+      required: false,
+      default: "",
+    },
+    additionalComments: {
+      type: String,
+      required: false,
+      default: "",
+    },
+    acknowledgement: {
+      type: Boolean,
+      required: [true, "Acknowledgement is required"],
+      default: false,
+    },
+    requestStatus: {
+      type: String,
+      required: false,
+      default: "pending",
+      index: true,
+    },
+  },
+  { timestamps: true },
+);
+
+leaveRequestSchema.index({
+  delegatedToEmployee: "text",
+  delegatedResponsibilities: "text",
+  additionalComments: "text",
+});
+
+const LeaveRequestModel = model<LeaveRequestDocument>(
+  "LeaveRequest",
+  leaveRequestSchema,
+);
+
+export { LeaveRequestModel };
+export type { LeaveRequestDocument, LeaveRequestSchema, ReasonForLeave };
