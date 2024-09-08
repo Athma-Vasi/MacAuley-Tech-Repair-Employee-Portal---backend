@@ -2,7 +2,7 @@ import { Router } from "express";
 import expressFileUpload from "express-fileupload";
 
 import {
-  assignQueryDefaults,
+  createMongoDbQueryObject,
   fileExtensionLimiterMiddleware,
   fileInfoExtracterMiddleware,
   fileSizeLimiterMiddleware,
@@ -11,44 +11,65 @@ import {
   verifyRoles,
 } from "../../middlewares";
 import { ALLOWED_FILE_EXTENSIONS } from "../../constants";
-import {
-  createNewFileUploadController,
-  deleteAFileUploadController,
-  deleteAllFileUploadsController,
-  getAllFileUploadsController,
-  getFileUploadByIdController,
-  getQueriedFileUploadsByUserController,
-  insertAssociatedResourceDocumentIdController,
-} from "./fileUpload.controller";
 import { validateSchemaMiddleware } from "../../middlewares/validateSchema";
 import { createFileUploadJoiSchema } from "./fileUpload.validation";
+import {
+  createNewResourceHandler,
+  deleteResourceByIdHandler,
+  getQueriedResourcesByUserHandler,
+  getQueriedResourcesHandler,
+  getResourceByIdHandler,
+  updateResourceByIdHandler,
+} from "../../handlers";
+import { FileUploadModel } from "./fileUpload.model";
 
 const fileUploadRouter = Router();
 
-fileUploadRouter.use(verifyJWTMiddleware, verifyRoles, assignQueryDefaults);
-fileUploadRouter.use(verifyRoles);
+fileUploadRouter.use(
+  verifyJWTMiddleware,
+  verifyRoles,
+  createMongoDbQueryObject,
+);
 
 fileUploadRouter
   .route("/")
-  .get(getAllFileUploadsController)
+  // @desc   Get all file uploads
+  // @route  GET /file-upload
+  // @access Private/Admin/Manager
+  .get(getQueriedResourcesHandler(FileUploadModel))
+  // @desc   Create a new file upload
+  // @route  POST /file-upload
+  // @access Private
   .post(
     expressFileUpload({ createParentPath: true }),
     filesPayloadExistsMiddleware,
     fileSizeLimiterMiddleware,
     fileExtensionLimiterMiddleware(ALLOWED_FILE_EXTENSIONS),
     fileInfoExtracterMiddleware,
-    validateSchemaMiddleware(createFileUploadJoiSchema, "fileUploadSchema"),
-    createNewFileUploadController,
+    validateSchemaMiddleware(createFileUploadJoiSchema, "schema"),
+    createNewResourceHandler(FileUploadModel),
   );
 
-fileUploadRouter.route("/delete-many").delete(deleteAllFileUploadsController);
-
-fileUploadRouter.route("/user").get(getQueriedFileUploadsByUserController);
+// @desc   Get all file uploads by user
+// @route  GET /file-upload/user
+// @access Private
+fileUploadRouter.route("/user").get(
+  getQueriedResourcesByUserHandler(FileUploadModel),
+);
 
 fileUploadRouter
-  .route("/:fileUploadId")
-  .get(getFileUploadByIdController)
-  .delete(deleteAFileUploadController)
-  .put(insertAssociatedResourceDocumentIdController);
+  .route("/:resourceId")
+  // @desc   Get a file upload by its id
+  // @route  GET /file-upload/:resourceId
+  // @access Private
+  .get(getResourceByIdHandler(FileUploadModel))
+  // @desc   Delete a file upload by its id
+  // @route  DELETE /file-upload/:resourceId
+  // @access Private
+  .delete(deleteResourceByIdHandler(FileUploadModel))
+  // @desc   Patch a file upload by its id
+  // @route  PATCH /file-upload/:resourceId
+  // @access Private
+  .patch(updateResourceByIdHandler(FileUploadModel));
 
 export { fileUploadRouter };

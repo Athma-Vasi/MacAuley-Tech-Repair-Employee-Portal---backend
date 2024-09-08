@@ -8,76 +8,23 @@
 
 import { FileUploadModel } from "./fileUpload.model";
 import { fileUploadRouter } from "./fileUpload.routes";
-import {
-  createNewFileUploadController,
-  deleteAFileUploadController,
-  deleteAllFileUploadsController,
-  getAllFileUploadsController,
-  getFileUploadByIdController,
-  getQueriedFileUploadsByUserController,
-  insertAssociatedResourceDocumentIdController,
-} from "./fileUpload.controller";
-import {
-  createNewFileUploadService,
-  deleteAllFileUploadsService,
-  deleteFileUploadByIdService,
-  getQueriedFileUploadsService,
-  getFileUploadByIdService,
-  getQueriedFileUploadsByUserService,
-  insertAssociatedResourceDocumentIdService,
-} from "./fileUpload.service";
 
 import type {
-  FileUploadDocument,
-  FileUploadSchema,
   AssociatedResourceKind,
   FileExtension,
+  FileUploadDocument,
+  FileUploadSchema,
 } from "./fileUpload.model";
-import type {
-  CreateNewFileUploadRequest,
-  DeleteAFileUploadRequest,
-  DeleteAllFileUploadsRequest,
-  FileUploadServerResponse,
-  GetAllFileUploadsRequest,
-  GetFileUploadByIdRequest,
-  GetFileUploadsByUserRequest,
-  InsertAssociatedDocumentIdRequest,
-} from "./fileUpload.types";
 
 /**
  * Exports
  */
 
-export {
-  FileUploadModel,
-  fileUploadRouter,
-  createNewFileUploadController,
-  deleteAFileUploadController,
-  deleteAllFileUploadsController,
-  getAllFileUploadsController,
-  getFileUploadByIdController,
-  getQueriedFileUploadsByUserController,
-  insertAssociatedResourceDocumentIdController,
-  createNewFileUploadService,
-  deleteAllFileUploadsService,
-  deleteFileUploadByIdService,
-  getQueriedFileUploadsService,
-  getFileUploadByIdService,
-  getQueriedFileUploadsByUserService,
-  insertAssociatedResourceDocumentIdService,
-};
+export { FileUploadModel, fileUploadRouter };
 
 export type {
-  FileUploadDocument,
-  FileUploadSchema,
   AssociatedResourceKind,
   FileExtension,
-  CreateNewFileUploadRequest,
-  DeleteAFileUploadRequest,
-  DeleteAllFileUploadsRequest,
-  FileUploadServerResponse,
-  GetAllFileUploadsRequest,
-  GetFileUploadByIdRequest,
-  GetFileUploadsByUserRequest,
-  InsertAssociatedDocumentIdRequest,
+  FileUploadDocument,
+  FileUploadSchema,
 };
