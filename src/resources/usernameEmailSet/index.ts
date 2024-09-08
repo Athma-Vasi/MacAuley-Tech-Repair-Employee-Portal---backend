@@ -14,36 +14,18 @@ import {
 } from "./usernameEmailSet.controller";
 
 import {
-  checkEmailExistsService,
-  checkUsernameExistsService,
-  createUsernameEmailSetService,
   updateUsernameEmailSetWithEmailService,
   updateUsernameEmailSetWithUsernameService,
 } from "./usernameEmailSet.service";
-
-import type {
-  GetUsernameEmailExistsRequest,
-  UsernameEmailSetResponse,
-  PostUsernameEmailSetRequest,
-} from "./usernameEmailSet.types";
 
 /**
  * Exports
  */
 export {
-  UsernameEmailSetModel,
-  usernameEmailSetRouter,
   checkUsernameEmailExistsController,
   postUsernameEmailSetController,
-  checkEmailExistsService,
-  checkUsernameExistsService,
-  createUsernameEmailSetService,
   updateUsernameEmailSetWithEmailService,
   updateUsernameEmailSetWithUsernameService,
-};
-
-export type {
-  GetUsernameEmailExistsRequest,
-  UsernameEmailSetResponse,
-  PostUsernameEmailSetRequest,
+  UsernameEmailSetModel,
+  usernameEmailSetRouter,
 };

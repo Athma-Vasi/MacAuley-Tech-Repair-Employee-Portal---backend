@@ -1,18 +1,26 @@
-import expressAsyncController from "express-async-handler";
+import type { Request, Response } from "express";
 
-import type { NextFunction, Response } from "express";
+import { Model } from "mongoose";
+import { HttpResult } from "../../types";
+import {
+  createAndNotReturnResourceService,
+  getResourceByFieldService,
+} from "../../services";
+import { createNewErrorLogService } from "../errorLog";
+import {
+  createErrorLogSchema,
+  createHttpResultError,
+  createHttpResultSuccess,
+} from "../../utils";
 
-import {
-  checkEmailExistsService,
-  checkUsernameExistsService,
-  createUsernameEmailSetService,
-} from "./usernameEmailSet.service";
-import {
-  GetUsernameEmailExistsRequest,
-  PostUsernameEmailSetRequest,
-  UsernameEmailSetResponse,
-} from "./usernameEmailSet.types";
-import createHttpError from "http-errors";
+type PostUsernameEmailSetRequest = Request & {
+  body: {
+    schema: {
+      username: string[];
+      email: string[];
+    };
+  };
+};
 
 // @desc   create usernameEmailSet document
 // @route  POST /api/v1/username-email-set
@@ -20,64 +28,113 @@ import createHttpError from "http-errors";
 /**
  * @description only runs once to create the document (only one document exists in collection)
  */
-const postUsernameEmailSetController = expressAsyncController(
-  async (
+function postUsernameEmailSetHandler<
+  Doc extends Record<string, unknown> = Record<string, unknown>,
+>(model: Model<Doc>) {
+  return async (
     request: PostUsernameEmailSetRequest,
-    response: Response<UsernameEmailSetResponse>,
-    next: NextFunction
+    response: Response<HttpResult>,
   ) => {
-    const { username, email } = request.body;
+    try {
+      const { schema } = request.body;
 
-    const usernameEmailSet = await createUsernameEmailSetService({
-      username,
-      email,
-    });
-
-    if (!usernameEmailSet) {
-      return next(
-        new createHttpError.InternalServerError("UsernameEmailSet not created")
+      const resourceCreationResult = await createAndNotReturnResourceService(
+        schema,
+        model,
       );
-    }
 
-    response.status(201).json({
-      status: "success",
-      message: "UsernameEmailSet created successfully",
-    });
-  }
-);
+      if (resourceCreationResult.err) {
+        await createNewErrorLogService(
+          createErrorLogSchema(
+            resourceCreationResult.val,
+            request.body,
+          ),
+        );
+
+        response.status(200).json(
+          createHttpResultError({ status: 400 }),
+        );
+        return;
+      }
+
+      response.status(200).json(
+        createHttpResultSuccess({
+          data: [resourceCreationResult.safeUnwrap()],
+        }),
+      );
+    } catch (error: unknown) {
+      await createNewErrorLogService(
+        createErrorLogSchema(
+          createHttpResultError({ data: [error] }),
+          request.body,
+        ),
+      );
+
+      response.status(200).json(createHttpResultError({}));
+    }
+  };
+}
+
+type CheckUsernameOrEmailExistsRequest = Request & {
+  body: {
+    fields: { email?: string; username?: string };
+  };
+};
 
 // @desc   check if username or email exists
 // @route  POST /api/v1/username-email-set/check
 // @access Public
-const checkUsernameEmailExistsController = expressAsyncController(
-  async (
-    request: GetUsernameEmailExistsRequest,
-    response: Response<UsernameEmailSetResponse>,
-    next: NextFunction
+function checkUsernameOrEmailExistsHandler<
+  Doc extends Record<string, unknown> = Record<string, unknown>,
+>(model: Model<Doc>) {
+  return async (
+    request: CheckUsernameOrEmailExistsRequest,
+    response: Response<HttpResult<boolean>>,
   ) => {
-    const { email, username } = request.body.fields;
+    try {
+      const { email, username } = request.body.fields;
 
-    const filter = email
-      ? { email: { $in: [email] } }
-      : { username: { $in: [username] } };
+      const filter = email
+        ? { email: { $in: [email] } }
+        : { username: { $in: [username] } };
 
-    const isUsernameOrEmailExists = email
-      ? await checkEmailExistsService(filter as { email: { $in: string[] } })
-      : await checkUsernameExistsService(filter as { username: { $in: string[] } });
-
-    if (isUsernameOrEmailExists) {
-      response.status(200).json({
-        status: "error",
-        message: `${email ? "Email" : "Username"} already exists.`,
+      const isUsernameOrEmailExistsResult = await getResourceByFieldService({
+        filter,
+        model,
       });
-      return;
+
+      if (isUsernameOrEmailExistsResult.err) {
+        await createNewErrorLogService(
+          createErrorLogSchema(
+            isUsernameOrEmailExistsResult.val,
+            request.body,
+          ),
+        );
+
+        response.status(200).json(
+          createHttpResultError({ status: 400 }),
+        );
+        return;
+      }
+
+      response.status(200).json(
+        createHttpResultSuccess({
+          data: [
+            isUsernameOrEmailExistsResult.safeUnwrap().status === 200,
+          ],
+        }),
+      );
+    } catch (error: unknown) {
+      await createNewErrorLogService(
+        createErrorLogSchema(
+          createHttpResultError({ data: [error] }),
+          request.body,
+        ),
+      );
+
+      response.status(200).json(createHttpResultError({}));
     }
+  };
+}
 
-    response.status(200).json({
-      status: "success",
-      message: `${email ? "Email" : "Username"} does not exist.`,
-    });
-  }
-);
-
-export { checkUsernameEmailExistsController, postUsernameEmailSetController };
+export { checkUsernameOrEmailExistsHandler, postUsernameEmailSetHandler };

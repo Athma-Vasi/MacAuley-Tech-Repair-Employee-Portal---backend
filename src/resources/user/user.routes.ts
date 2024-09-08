@@ -2,7 +2,6 @@ import { Router } from "express";
 import { validateSchemaMiddleware } from "../../middlewares/validateSchema";
 import { createUserJoiSchema, updateUserJoiSchema } from "./user.validation";
 import {
-  createNewResourceHandler,
   deleteAllResourcesHandler,
   deleteResourceByIdHandler,
   getQueriedResourcesByUserHandler,
@@ -11,6 +10,7 @@ import {
   updateResourceByIdHandler,
 } from "../../handlers";
 import { UserModel } from "./user.model";
+import { createNewUserHandler } from "./user.controller";
 
 const userRouter = Router();
 
@@ -25,7 +25,7 @@ userRouter
   // @access Private/Admin/Manager
   .post(
     validateSchemaMiddleware(createUserJoiSchema, "schema"),
-    createNewResourceHandler(UserModel),
+    createNewUserHandler(UserModel),
   );
 
 // @desc   Delete all users
@@ -44,15 +44,15 @@ userRouter.route("/user").get(
 
 userRouter
   .route("/:resourceId")
-  // @desc   Get a user by its ID
+  // @desc   Get an user by their ID
   // @route  GET api/v1/product-category/user/:resourceId
   // @access Private/Admin/Manager
   .get(getResourceByIdHandler(UserModel))
-  // @desc   Delete a user by its ID
+  // @desc   Delete an user by their ID
   // @route  DELETE api/v1/product-category/user/:resourceId
   // @access Private/Admin/Manager
   .delete(deleteResourceByIdHandler(UserModel))
-  // @desc   Update a user by its ID
+  // @desc   Update an user by their ID
   // @route  PATCH api/v1/product-category/user/:resourceId
   // @access Private/Admin/Manager
   .patch(

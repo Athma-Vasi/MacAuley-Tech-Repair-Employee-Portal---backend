@@ -1,23 +1,26 @@
 import { Router } from "express";
-import { verifyJWTMiddleware, verifyRoles } from "../../middlewares";
 import {
-  checkUsernameEmailExistsController,
-  postUsernameEmailSetController,
+  checkUsernameOrEmailExistsHandler,
+  postUsernameEmailSetHandler,
 } from "./usernameEmailSet.controller";
 import { validateSchemaMiddleware } from "../../middlewares/validateSchema";
 import { createUsernameEmailSetJoiSchema } from "./usernameEmailSet.validation";
+import { UsernameEmailSetModel } from "./usernameEmailSet.model";
 
 const usernameEmailSetRouter = Router();
 
 usernameEmailSetRouter
   .route("/")
   .post(
-    verifyJWTMiddleware,
-    verifyRoles,
-    validateSchemaMiddleware(createUsernameEmailSetJoiSchema, "usernameEmailSetSchema"),
-    postUsernameEmailSetController
+    validateSchemaMiddleware(
+      createUsernameEmailSetJoiSchema,
+      "schema",
+    ),
+    postUsernameEmailSetHandler(UsernameEmailSetModel),
   );
 
-usernameEmailSetRouter.route("/check").post(checkUsernameEmailExistsController);
+usernameEmailSetRouter.route("/check").post(
+  checkUsernameOrEmailExistsHandler(UsernameEmailSetModel),
+);
 
 export { usernameEmailSetRouter };

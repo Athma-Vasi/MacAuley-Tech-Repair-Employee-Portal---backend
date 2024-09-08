@@ -73,6 +73,12 @@ type GetResourceByIdRequest = RequestAfterQueryParsing & {
   };
 };
 
+type GetResourceByFieldRequest = RequestAfterQueryParsing & {
+  body: {
+    fields: Record<string, unknown>;
+  };
+};
+
 type UpdateResourceByIdRequest<
   Resource extends Record<string, unknown> = Record<string, unknown>,
 > = RequestAfterQueryParsing & {
@@ -240,6 +246,7 @@ export type {
   FileUploadObject,
   GetQueriedResourceByUserRequest,
   GetQueriedResourceRequest,
+  GetResourceByFieldRequest,
   GetResourceByIdRequest,
   HttpResult,
   HttpServerResponse,

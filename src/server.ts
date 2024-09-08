@@ -11,7 +11,6 @@ import { connectDB } from "./config/connectDB";
 import { corsOptions } from "./config/cors";
 import { errorHandler, logEvents, loggerMiddleware } from "./middlewares";
 
-import { rootRouter } from "./resources/root";
 import { authRouter } from "./resources/auth";
 import { apiRouter } from "./resources/api";
 import { credentials } from "./middlewares/credentials";
@@ -34,9 +33,8 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(compression());
 
-app.use("/", express.static(path.join(__dirname, "public")));
+app.use("/", apiRouter);
 
-app.use("/", rootRouter);
 app.use("/auth", authRouter);
 app.use("/api", apiRouter);
 
@@ -47,11 +45,7 @@ app.use((_: Request, __: Response, next: NextFunction) => {
 // error handling
 app.use(errorHandler);
 
-/**
- *
- *
- *
- */
+/** */
 
 mongoose.connection.once("open", () => {
   console.log("Connected to MongoDB");

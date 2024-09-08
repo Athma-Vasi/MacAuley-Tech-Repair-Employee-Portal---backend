@@ -37,16 +37,13 @@ async function getResourceByIdService<
 async function getResourceByFieldService<
     Doc extends Record<string, unknown> = Record<string, unknown>,
 >({
-    field,
-    value,
+    filter,
     model,
 }: {
-    field: string;
-    value: unknown;
+    filter: Record<string, unknown>;
     model: Model<Doc>;
 }) {
     try {
-        const filter = { [field]: { $eq: value } };
         const resource = await model.findOne({ filter })
             .lean()
             .exec();
@@ -70,10 +67,27 @@ async function getResourceByFieldService<
 async function createNewResourceService<
     Schema extends Record<string, unknown> = Record<string, unknown>,
     Doc extends Record<string, unknown> = Record<string, unknown>,
->(resourceSchema: Schema, model: Model<Doc>) {
+>(schema: Schema, model: Model<Doc>) {
     try {
-        const resource = await model.create(resourceSchema);
+        const resource = await model.create(schema);
         return new Ok(createHttpResultSuccess({ data: [resource] }));
+    } catch (error: unknown) {
+        return new Err(
+            createHttpResultError({
+                data: [error],
+                message: "Error creating new resource",
+            }),
+        );
+    }
+}
+
+async function createAndNotReturnResourceService<
+    Schema extends Record<string, unknown> = Record<string, unknown>,
+    Doc extends Record<string, unknown> = Record<string, unknown>,
+>(schema: Schema, model: Model<Doc>) {
+    try {
+        await model.create(schema);
+        return new Ok(createHttpResultSuccess({ data: [true] }));
     } catch (error: unknown) {
         return new Err(
             createHttpResultError({
@@ -262,6 +276,7 @@ async function deleteAllResourcesService<
 }
 
 export {
+    createAndNotReturnResourceService,
     createNewResourceService,
     deleteAllResourcesService,
     deleteResourceByIdService,
