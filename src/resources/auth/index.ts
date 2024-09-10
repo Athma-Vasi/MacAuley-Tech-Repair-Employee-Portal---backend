@@ -6,26 +6,22 @@
  * Imports
  */
 import { authRouter } from "./auth.routes";
-import {
-  loginUserController,
-  logoutUserController,
-  refreshTokenController,
-} from "./auth.controller";
+import { loginUserHandler, logoutUserHandler } from "./auth.handler";
 
 import type {
   LoginUserRequest,
   LogoutUserRequest,
   RefreshTokenRequest,
-  RequestAfterJWTVerification,
+  TokenDecoded,
 } from "./auth.types";
 
 /**
  * Exports
  */
-export { authRouter, loginUserController, logoutUserController, refreshTokenController };
+export { authRouter, loginUserHandler, logoutUserHandler };
 export type {
   LoginUserRequest,
   LogoutUserRequest,
   RefreshTokenRequest,
-  RequestAfterJWTVerification,
+  TokenDecoded,
 };

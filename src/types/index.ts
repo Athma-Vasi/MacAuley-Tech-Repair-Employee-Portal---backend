@@ -9,7 +9,7 @@ import { FileExtension } from "../resources/fileUpload";
 import type { ParsedQs } from "qs";
 import { UserRoles } from "../resources/user";
 import { Request, Response } from "express";
-import { ErrImpl, OkImpl } from "ts-results";
+import { ErrImpl, OkImpl, Result } from "ts-results";
 
 /**
  * type signature of query object created by express
@@ -36,6 +36,7 @@ type QueryObjectParsedWithDefaults<
  */
 type RequestAfterJWTVerification = Request & {
   body: {
+    accessToken: string;
     userInfo: {
       userId: string;
       username: string;
@@ -103,6 +104,7 @@ type GetQueriedResourceByUserRequest = GetQueriedResourceRequest & {
 };
 
 type HttpResult<Data = unknown> = {
+  accessToken: string;
   data: Array<Data>;
   kind: "error" | "success";
   message: string;
@@ -112,19 +114,39 @@ type HttpResult<Data = unknown> = {
   triggerLogout: boolean;
 };
 
+type DBRecord = Record<string, unknown> & {
+  _id: Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+  __v: number;
+};
+
 /**
- * - where generic type parameter Document = ${resource}Schema & {_id, createdAt, updatedAt, __v}
- * - used in service functions that call ${Model}.find() functions
+ * -
  */
-type DatabaseResponseResult<
-  Doc extends Record<string, unknown> = Record<string, unknown>,
-> = Promise<
-  | OkImpl<HttpResult<Require_id<FlattenMaps<Doc>>>>
-  | ErrImpl<HttpResult<unknown>>
+type ServiceOutput<Data = unknown> = {
+  data?: Data;
+  kind: "error" | "notFound" | "success";
+};
+
+type ServiceResult<Data = unknown> = Promise<
+  Result<ServiceOutput<Require_id<FlattenMaps<Data>>>, ServiceOutput>
 >;
 
+// /**
+//  * - where generic type parameter Doc = ${resource}Schema & {_id, createdAt, updatedAt, __v}
+//  * - used in service functions that call ${Model}.find() functions
+//  */
+// type DatabaseResponseResult<
+//   Doc extends DBRecord = DBRecord,
+//   Error = unknown,
+// > = Promise<
+//   | OkImpl<HttpResult<Doc>>
+//   | ErrImpl<HttpResult<Error>>
+// >;
+
 type HttpServerResponse<Data = unknown> = Response<
-  Awaited<HttpResult<Require_id<FlattenMaps<Data>>>>
+  Awaited<HttpResult<Data>>
 >;
 
 /**
@@ -237,7 +259,7 @@ type UpdateDocumentByIdServiceInput<
 export type {
   ArrayOperators,
   CreateNewResourceRequest,
-  DatabaseResponseResult,
+  DBRecord,
   DeleteAllResourcesRequest,
   DeleteResourceRequest,
   DocumentUpdateOperation,
@@ -256,6 +278,8 @@ export type {
   QueryObjectParsedWithDefaults,
   RequestAfterQueryParsing,
   RequestStatus,
+  ServiceOutput,
+  ServiceResult,
   UpdateDocumentByIdServiceInput,
   UpdateResourceByIdRequest,
 };

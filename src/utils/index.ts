@@ -1,9 +1,12 @@
-import { stat } from "fs";
+import { Err, Ok, Result } from "ts-results";
 import { RequestAfterJWTVerification } from "../resources/auth";
+import { TokenDecoded } from "../resources/auth/auth.types";
 import { ErrorLogSchema } from "../resources/errorLog";
-import { HttpResult } from "../types";
+import { HttpResult, ServiceOutput } from "../types";
+import jwt from "jsonwebtoken";
 
 function createHttpResultError<Data = unknown>({
+  accessToken,
   data = [],
   kind = "error",
   message,
@@ -12,6 +15,7 @@ function createHttpResultError<Data = unknown>({
   totalDocuments = 0,
   triggerLogout = false,
 }: {
+  accessToken: string;
   data?: Array<Data>;
   kind?: "error" | "success";
   message?: string;
@@ -58,6 +62,7 @@ function createHttpResultError<Data = unknown>({
   };
 
   return {
+    accessToken,
     data,
     kind,
     message: message ?? statusDescriptionTable[status] ?? "Unknown error",
@@ -71,6 +76,7 @@ function createHttpResultError<Data = unknown>({
 function createHttpResultSuccess<
   Data = unknown,
 >({
+  accessToken,
   data = [],
   kind = "success",
   message = "Successful operation",
@@ -79,6 +85,7 @@ function createHttpResultSuccess<
   totalDocuments = 0,
   triggerLogout = false,
 }: {
+  accessToken: string;
   data?: Array<Data>;
   kind?: "error" | "success";
   message?: string;
@@ -88,6 +95,7 @@ function createHttpResultSuccess<
   triggerLogout?: boolean;
 }): HttpResult<Data> {
   return {
+    accessToken,
     data,
     kind,
     message,
@@ -99,7 +107,7 @@ function createHttpResultSuccess<
 }
 
 function createErrorLogSchema(
-  httpResult: HttpResult<unknown>,
+  error: unknown,
   requestBody: RequestAfterJWTVerification["body"],
 ): ErrorLogSchema {
   const {
@@ -107,19 +115,13 @@ function createErrorLogSchema(
     sessionId,
   } = requestBody;
 
-  const unknownError = "Unknown error";
+  const unknownError = ".·°՞(¯□¯)՞°·. An unknown error occurred";
 
-  const message = httpResult.data?.[0] instanceof Error
-    ? httpResult.data?.[0].message
-    : httpResult.message ?? unknownError;
+  const message = error instanceof Error ? error.message : unknownError;
 
-  const name = httpResult.data?.[0] instanceof Error
-    ? httpResult.data?.[0].name
-    : unknownError;
+  const name = error instanceof Error ? error.name : unknownError;
 
-  let stack = httpResult.data?.[0] instanceof Error
-    ? httpResult.data?.[0].stack
-    : unknownError;
+  let stack = error instanceof Error ? error.stack : unknownError;
   stack = stack ?? unknownError;
 
   return {
@@ -129,11 +131,27 @@ function createErrorLogSchema(
     stack,
     requestBody: JSON.stringify(requestBody),
     sessionId: sessionId.toString(),
-    status: httpResult.status,
     timestamp: new Date(),
     userId: userId.toString(),
     username,
   };
+}
+
+async function verifyJWTSafe(
+  { seed, token }: {
+    seed: string;
+    token: string;
+  },
+): Promise<Result<ServiceOutput<TokenDecoded>, ServiceOutput>> {
+  try {
+    const decoded = jwt.verify(token, seed) as TokenDecoded;
+
+    return new Ok({ data: decoded, kind: "success" });
+  } catch (error: unknown) {
+    return error instanceof Error && error?.name === "TokenExpiredError"
+      ? new Ok({ kind: "error" })
+      : new Err({ data: error, kind: "error" });
+  }
 }
 
 function returnEmptyFieldsTuple(input: Record<string, unknown>) {
@@ -187,4 +205,5 @@ export {
   filterFieldsFromObject,
   removeUndefinedAndNullValues,
   returnEmptyFieldsTuple,
+  verifyJWTSafe,
 };

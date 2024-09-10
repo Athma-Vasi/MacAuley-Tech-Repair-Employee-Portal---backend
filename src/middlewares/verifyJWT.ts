@@ -1,68 +1,165 @@
-import { NextFunction, Response, Request } from "express";
-import jwt, { VerifyErrors } from "jsonwebtoken";
+import { CookieOptions, NextFunction, Request, Response } from "express";
 
 import { config } from "../config";
-import { AccessTokenDecoded } from "../resources/auth/auth.types";
-import createHttpError from "http-errors";
+import { TokenDecoded } from "../resources/auth/auth.types";
 
-function verifyJWTMiddleware(
-  // technically this request object is only modified after this middleware function runs
+import { createTokenService } from "../resources/auth/auth.service";
+import {
+  ACCESS_TOKEN_EXPIRES_IN,
+  REFRESH_TOKEN_EXPIRES_IN,
+} from "../constants";
+import { verifyJWTSafe } from "../utils";
+
+async function verifyJWTMiddleware(
   request: Request,
   response: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
-  const { ACCESS_TOKEN_SECRET } = config;
+  const { ACCESS_TOKEN_SEED, REFRESH_TOKEN_SEED } = config;
+  const cookieOptions: CookieOptions = {
+    httpOnly: true,
+    secure: true,
+    sameSite: "strict",
+  };
+  const propertyDescriptor: PropertyDescriptor = {
+    value: "",
+    writable: false,
+    enumerable: true,
+    configurable: true,
+  };
 
   const accessToken = request.headers.authorization?.split(" ")[1];
   if (!accessToken) {
-    response.clearCookie("refreshToken", {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-    });
-
-    return next(new createHttpError.Unauthorized("No token provided"));
+    response.clearCookie("refreshToken", cookieOptions);
+    return next(new Error("Access token not found"));
   }
 
-  jwt.verify(
-    accessToken,
-    ACCESS_TOKEN_SECRET,
-    async (error: VerifyErrors | null, decoded) => {
-      if (error) {
-        response.clearCookie("refreshToken", {
-          httpOnly: true,
-          secure: true,
-          sameSite: "none",
-        });
+  const { refreshToken } = request.cookies;
+  if (!refreshToken) {
+    response.clearCookie("refreshToken", cookieOptions);
+    return next(new Error("Refresh token not found"));
+  }
 
-        return next(new createHttpError.Forbidden("Access token invalid"));
-      }
+  // check if refresh token is valid
+  const decodedRefreshTokenResult = await verifyJWTSafe({
+    seed: REFRESH_TOKEN_SEED,
+    token: refreshToken,
+  });
 
-      const { userInfo, sessionId } = decoded as AccessTokenDecoded;
+  // check if access token is valid
+  const decodedAccessTokenResult = await verifyJWTSafe({
+    seed: ACCESS_TOKEN_SEED,
+    token: accessToken,
+  });
 
-      console.log("original request.body: ", request.body);
+  // if refresh token is invalid (except for expired)
+  if (decodedRefreshTokenResult.err) {
+    response.clearCookie("refreshToken", cookieOptions);
+    return next(new Error("Refresh token invalid"));
+  }
 
-      const updatedRequestBody = {
-        userInfo,
-        sessionId,
-      };
+  const refreshTokenDecoded = decodedRefreshTokenResult.safeUnwrap()
+    .data as TokenDecoded;
 
-      Object.defineProperty(request, "body", {
-        value: { ...request.body, ...updatedRequestBody },
-        writable: true,
-        enumerable: true,
-        configurable: true,
-      });
+  // if access token is invalid (except for expired)
+  if (decodedAccessTokenResult.err) {
+    response.clearCookie("refreshToken", cookieOptions);
+    return next(new Error("Access token invalid"));
+  }
 
-      console.log("\n");
-      console.group("verifyJWTMiddleware");
-      console.log("decoded: ", decoded);
-      console.log("modified request.body: ", request.body);
-      console.groupEnd();
+  // if refresh token is valid and expired
+  // create tokens and set cookie and continue to next middleware
+  if (decodedRefreshTokenResult.safeUnwrap().kind === "error") {
+    const refreshTokenResult = await createTokenService({
+      decoded: refreshTokenDecoded,
+      expiresIn: REFRESH_TOKEN_EXPIRES_IN,
+      request,
+      seed: REFRESH_TOKEN_SEED,
+    });
 
-      return next();
+    if (refreshTokenResult.err) {
+      response.clearCookie("refreshToken", cookieOptions);
+      return next(new Error("Error refreshing tokens"));
     }
-  );
+
+    const newRefreshToken = refreshTokenResult.safeUnwrap().data;
+
+    if (!newRefreshToken) {
+      response.clearCookie("refreshToken", cookieOptions);
+      return next(new Error("Error refreshing tokens"));
+    }
+
+    response.cookie("refreshToken", newRefreshToken, {
+      ...cookieOptions,
+      maxAge: 1000 * 60 * 60 * 12, // cookie expires in 12 hours
+    });
+
+    const accessTokenResult = await createTokenService({
+      decoded: refreshTokenDecoded,
+      expiresIn: ACCESS_TOKEN_EXPIRES_IN,
+      request,
+      seed: ACCESS_TOKEN_SEED,
+    });
+
+    if (accessTokenResult.err) {
+      response.clearCookie("refreshToken", cookieOptions);
+      return next(new Error("Error refreshing tokens"));
+    }
+
+    const newAccessToken = accessTokenResult.safeUnwrap().data;
+
+    if (!newAccessToken) {
+      response.clearCookie("refreshToken", cookieOptions);
+      return next(new Error("Error refreshing tokens"));
+    }
+
+    Object.defineProperty(request.body, "accessToken", {
+      value: newAccessToken,
+      ...propertyDescriptor,
+    });
+
+    return next();
+  }
+
+  // as refresh token is now valid and not expired,
+  // check if access token is expired
+  if (decodedAccessTokenResult.safeUnwrap().kind === "error") {
+    const accessTokenResult = await createTokenService({
+      decoded: refreshTokenDecoded,
+      expiresIn: ACCESS_TOKEN_EXPIRES_IN,
+      request,
+      seed: ACCESS_TOKEN_SEED,
+    });
+
+    if (accessTokenResult.err) {
+      response.clearCookie("refreshToken", cookieOptions);
+      return next(new Error("Error refreshing tokens"));
+    }
+
+    const newAccessToken = accessTokenResult.safeUnwrap().data;
+
+    if (!newAccessToken) {
+      response.clearCookie("refreshToken", cookieOptions);
+      return next(new Error("Error refreshing tokens"));
+    }
+
+    Object.defineProperty(request.body, "accessToken", {
+      value: newAccessToken,
+      ...propertyDescriptor,
+    });
+  }
+
+  Object.defineProperty(request.body, "userInfo", {
+    value: decodedAccessTokenResult.safeUnwrap().data?.userInfo,
+    ...propertyDescriptor,
+  });
+
+  Object.defineProperty(request.body, "sessionId", {
+    value: decodedAccessTokenResult.safeUnwrap().data?.sessionId,
+    ...propertyDescriptor,
+  });
+
+  return next();
 }
 
 export { verifyJWTMiddleware };

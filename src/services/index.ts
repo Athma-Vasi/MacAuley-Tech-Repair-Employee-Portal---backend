@@ -1,158 +1,152 @@
 import type { FilterQuery, Model, QueryOptions } from "mongoose";
-import { Err, ErrImpl, Ok, OkImpl } from "ts-results";
+import { Err, ErrImpl, Ok, OkImpl, Result } from "ts-results";
 import { createHttpResultError, createHttpResultSuccess } from "../utils";
 import type {
     ArrayOperators,
-    DatabaseResponseResult,
+    DBRecord,
     FieldOperators,
     HttpResult,
     QueryObjectParsedWithDefaults,
+    ServiceOutput,
+    ServiceResult,
 } from "../types";
 
 async function getResourceByIdService<
-    Doc extends Record<string, unknown> = Record<string, unknown>,
+    Doc extends DBRecord = DBRecord,
 >(
     resourceId: string,
     model: Model<Doc>,
-) {
+): ServiceResult<Doc> {
     try {
         const resource = await model.findById(resourceId)
             .lean()
             .exec();
+
         if (resource === null || resource === undefined) {
-            return new Ok(
-                createHttpResultError({ message: "Resource not found" }),
-            );
+            return new Ok({ kind: "notFound" });
         }
 
-        return new Ok(createHttpResultSuccess({ data: [resource] }));
+        return new Ok({
+            data: resource,
+            kind: "success",
+        }) as unknown as ServiceResult<Doc>;
     } catch (error: unknown) {
-        return new Err(
-            createHttpResultError({
-                data: [error],
-                message: "Error getting resource by id",
-            }),
-        );
+        return new Err({ data: error, kind: "error" });
     }
 }
 
 async function getResourceByFieldService<
-    Doc extends Record<string, unknown> = Record<string, unknown>,
+    Doc extends DBRecord = DBRecord,
 >({
     filter,
     model,
+    projection,
+    options,
 }: {
-    filter: Record<string, unknown>;
+    filter: FilterQuery<Doc>;
     model: Model<Doc>;
-}) {
+    projection?: Record<string, unknown>;
+    options?: QueryOptions<Doc>;
+}): ServiceResult<Doc> {
     try {
-        const resource = await model.findOne({ filter })
+        const resource = await model.findOne(filter, projection, options)
             .lean()
-            .exec();
-        if (resource === null || resource === undefined) {
-            return new Ok(
-                createHttpResultError({ status: 404 }),
-            );
-        }
+            .exec() as Doc;
 
-        return new Ok(createHttpResultSuccess({ data: [resource] }));
+        return new Ok({
+            data: resource,
+            kind: "success",
+        }) as unknown as ServiceResult<Doc>;
     } catch (error: unknown) {
-        return new Err(
-            createHttpResultError({
-                data: [error],
-                message: "Error getting resource by field",
-            }),
-        );
+        return new Err({ data: error, kind: "error" });
     }
 }
 
 async function createNewResourceService<
     Schema extends Record<string, unknown> = Record<string, unknown>,
-    Doc extends Record<string, unknown> = Record<string, unknown>,
->(schema: Schema, model: Model<Doc>) {
+    Doc extends DBRecord = DBRecord,
+>(
+    schema: Schema,
+    model: Model<Doc>,
+): ServiceResult<Doc> {
     try {
         const resource = await model.create(schema);
-        return new Ok(createHttpResultSuccess({ data: [resource] }));
+        return new Ok({
+            data: resource,
+            kind: "success",
+        }) as unknown as ServiceResult<Doc>;
     } catch (error: unknown) {
-        return new Err(
-            createHttpResultError({
-                data: [error],
-                message: "Error creating new resource",
-            }),
-        );
+        return new Err({ data: error, kind: "error" });
     }
 }
 
 async function createAndNotReturnResourceService<
     Schema extends Record<string, unknown> = Record<string, unknown>,
-    Doc extends Record<string, unknown> = Record<string, unknown>,
->(schema: Schema, model: Model<Doc>) {
+    Doc extends DBRecord = DBRecord,
+>(
+    schema: Schema,
+    model: Model<Doc>,
+): Promise<Result<ServiceOutput<boolean>, ServiceOutput<unknown>>> {
     try {
         await model.create(schema);
-        return new Ok(createHttpResultSuccess({ data: [true] }));
+        return new Ok({ data: true, kind: "success" });
     } catch (error: unknown) {
-        return new Err(
-            createHttpResultError({
-                data: [error],
-                message: "Error creating new resource",
-            }),
-        );
+        return new Err({ data: error, kind: "error" });
     }
 }
 
 async function getQueriedResourcesService<
-    Doc extends Record<string, unknown> = Record<string, unknown>,
+    Doc extends DBRecord = DBRecord,
 >({
     filter = {},
     model,
-    options = {},
-    projection = null,
+    options,
+    projection,
 }: QueryObjectParsedWithDefaults & {
     model: Model<Doc>;
-}): DatabaseResponseResult<Doc> {
+}): ServiceResult<Doc[]> {
     try {
         const resources = await model.find(filter, projection, options)
             .lean()
             .exec();
-        return new Ok(createHttpResultSuccess({ data: resources }));
+
+        if (resources.length === 0) {
+            return new Ok({ kind: "notFound" });
+        }
+
+        return new Ok({
+            data: resources,
+            kind: "success",
+        }) as unknown as ServiceResult<Doc[]>;
     } catch (error: unknown) {
-        return new Err(
-            createHttpResultError({
-                data: [error],
-                message: "Error getting queried resources",
-            }),
-        );
+        return new Err({ data: error, kind: "error" });
     }
 }
 
 async function getQueriedTotalResourcesService<
-    Doc extends Record<string, unknown> = Record<string, unknown>,
+    Doc extends DBRecord = DBRecord,
 >(
-    filter: Record<string, unknown>,
-    model: Model<Doc>,
-): Promise<
-    | OkImpl<HttpResult<number>>
-    | ErrImpl<HttpResult<unknown>>
-> {
+    { filter, model, options }: {
+        filter: FilterQuery<Doc> | undefined;
+        model: Model<Doc>;
+        options?: QueryOptions<Doc> | undefined;
+    },
+): Promise<Result<ServiceOutput<number>, ServiceOutput<unknown>>> {
     try {
-        const totalQueriedResources = await model.countDocuments(filter)
+        const totalQueriedResources = await model.countDocuments(
+            filter,
+            options,
+        )
             .lean()
             .exec();
-        return new Ok(
-            createHttpResultSuccess({ data: [totalQueriedResources] }),
-        );
+        return new Ok({ data: totalQueriedResources, kind: "success" });
     } catch (error: unknown) {
-        return new Err(
-            createHttpResultError({
-                data: [error],
-                message: "Error getting total resources",
-            }),
-        );
+        return new Err({ data: error, kind: "error" });
     }
 }
 
 async function getQueriedResourcesByUserService<
-    Doc extends Record<string, unknown> = Record<string, unknown>,
+    Doc extends DBRecord = DBRecord,
 >({
     filter = {},
     model,
@@ -160,24 +154,27 @@ async function getQueriedResourcesByUserService<
     projection = null,
 }: QueryObjectParsedWithDefaults & {
     model: Model<Doc>;
-}): DatabaseResponseResult<Doc> {
+}): ServiceResult<Doc[]> {
     try {
         const resources = await model.find(filter, projection, options)
             .lean()
             .exec();
-        return new Ok(createHttpResultSuccess({ data: resources }));
+
+        if (resources.length === 0) {
+            return new Ok({ kind: "notFound" });
+        }
+
+        return new Ok({
+            data: resources,
+            kind: "success",
+        }) as unknown as ServiceResult<Doc[]>;
     } catch (error: unknown) {
-        return new Err(
-            createHttpResultError({
-                data: [error],
-                message: "Error getting resources by user",
-            }),
-        );
+        return new Err({ data: error, kind: "error" });
     }
 }
 
 async function updateResourceByIdService<
-    Doc extends Record<string, unknown> = Record<string, unknown>,
+    Doc extends DBRecord = DBRecord,
 >({
     resourceId,
     fields,
@@ -188,7 +185,7 @@ async function updateResourceByIdService<
     fields: Record<string, unknown>;
     model: Model<Doc>;
     updateOperator: FieldOperators | ArrayOperators;
-}) {
+}): ServiceResult<Doc> {
     try {
         const updateString = `{ "${updateOperator}":  ${
             JSON.stringify(fields)
@@ -204,27 +201,24 @@ async function updateResourceByIdService<
             .exec();
 
         if (resource === null || resource === undefined) {
-            return new Ok(
-                createHttpResultError({
-                    message: "Unable to update resource",
-                }),
-            );
+            return new Ok({ kind: "notFound" });
         }
 
-        return new Ok(createHttpResultSuccess({ data: [resource] }));
+        return new Ok({
+            data: resource,
+            kind: "success",
+        }) as unknown as ServiceResult<Doc>;
     } catch (error: unknown) {
-        return new Err(
-            createHttpResultError({
-                data: [error],
-                message: "Error updating resource by id",
-            }),
-        );
+        return new Err({ data: error, kind: "error" });
     }
 }
 
 async function deleteResourceByIdService<
-    Doc extends Record<string, unknown> = Record<string, unknown>,
->(resourceId: string, model: Model<Doc>): DatabaseResponseResult {
+    Doc extends DBRecord = DBRecord,
+>(
+    resourceId: string,
+    model: Model<Doc>,
+): Promise<Result<ServiceOutput<boolean>, ServiceOutput<unknown>>> {
     try {
         const { acknowledged, deletedCount } = await model.deleteOne({
             _id: resourceId,
@@ -233,31 +227,22 @@ async function deleteResourceByIdService<
             .exec();
 
         return acknowledged && deletedCount === 1
-            ? new Ok(createHttpResultSuccess({}))
-            : new Ok(
-                createHttpResultError({
-                    message: "Unable to delete resource",
-                }),
-            );
+            ? new Ok({ data: true, kind: "success" })
+            : new Ok({ data: false, kind: "error" });
     } catch (error: unknown) {
-        return new Err(
-            createHttpResultError({
-                data: [error],
-                message: "Error deleting resource by id",
-            }),
-        );
+        return new Err({ data: error, kind: "error" });
     }
 }
 
 async function deleteManyResourcesService<
-    Doc extends Record<string, unknown> = Record<string, unknown>,
+    Doc extends DBRecord = DBRecord,
 >(
     { filter, model, options }: {
         filter?: FilterQuery<Doc>;
         options?: QueryOptions<Doc>;
         model: Model<Doc>;
     },
-): DatabaseResponseResult {
+): Promise<Result<ServiceOutput<boolean>, ServiceOutput<unknown>>> {
     try {
         const totalResources = await model.countDocuments(filter, options);
         const { acknowledged, deletedCount } = await model.deleteMany(
@@ -268,19 +253,10 @@ async function deleteManyResourcesService<
             .exec();
 
         return acknowledged && deletedCount === totalResources
-            ? new Ok(createHttpResultSuccess({}))
-            : new Ok(
-                createHttpResultError({
-                    message: "Unable to delete some resources",
-                }),
-            );
+            ? new Ok({ data: true, kind: "success" })
+            : new Ok({ data: false, kind: "error" });
     } catch (error: unknown) {
-        return new Err(
-            createHttpResultError({
-                data: [error],
-                message: "Error deleting resources",
-            }),
-        );
+        return new Err({ data: error, kind: "error" });
     }
 }
 

@@ -7,7 +7,6 @@ type ErrorLogSchema = {
   requestBody: string;
   sessionId: string;
   stack: string;
-  status: number;
   timestamp: Date;
   userId: string;
   username: string;
@@ -64,11 +63,6 @@ const errorLogSchema = new Schema<ErrorLogSchema>(
       type: String,
       required: false,
       default: "Request body was not provided",
-    },
-    status: {
-      type: Number,
-      required: false,
-      default: 500,
     },
     timestamp: {
       type: Date,
