@@ -1,8 +1,11 @@
 import { Err, Ok, Result } from "ts-results";
-import { RequestAfterJWTVerification } from "../resources/auth";
 import { TokenDecoded } from "../resources/auth/auth.types";
 import { ErrorLogSchema } from "../resources/errorLog";
-import { HttpResult, ServiceOutput } from "../types";
+import {
+  HttpResult,
+  RequestAfterJWTVerification,
+  ServiceOutput,
+} from "../types";
 import jwt from "jsonwebtoken";
 
 function createHttpResultError<Data = unknown>({

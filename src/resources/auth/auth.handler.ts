@@ -11,7 +11,6 @@ import { TokenDecoded } from "./auth.types";
 import { AuthModel, AuthSchema } from "./auth.model";
 import { Model } from "mongoose";
 import { DBRecord, HttpResult } from "../../types";
-import { createNewErrorLogService } from "../errorLog";
 import {
   createErrorLogSchema,
   createHttpResultError,
@@ -29,6 +28,7 @@ import {
   ACCESS_TOKEN_EXPIRES_IN,
   REFRESH_TOKEN_EXPIRES_IN,
 } from "../../constants";
+import { ErrorLogModel } from "../errorLog";
 
 /**
  * @description implements 'Refresh Token Rotation' as defined in the OAuth 2.0 RFC
@@ -61,8 +61,9 @@ function loginUserHandler<
       });
 
       if (getUserResult.err) {
-        await createNewErrorLogService(
+        await createNewResourceService(
           createErrorLogSchema(getUserResult.val, request.body),
+          ErrorLogModel,
         );
 
         response.status(200).json(createHttpResultError({ accessToken: "" }));
@@ -104,8 +105,9 @@ function loginUserHandler<
       );
 
       if (createAuthSessionResult.err) {
-        await createNewErrorLogService(
+        await createNewResourceService(
           createErrorLogSchema(createAuthSessionResult.val, request.body),
+          ErrorLogModel,
         );
 
         response.status(200).json(createHttpResultError({ accessToken: "" }));
@@ -173,11 +175,12 @@ function loginUserHandler<
         }),
       );
     } catch (error: unknown) {
-      await createNewErrorLogService(
+      await createNewResourceService(
         createErrorLogSchema(
           error,
           request.body,
         ),
+        ErrorLogModel,
       );
 
       response.status(200).json(createHttpResultError({ accessToken: "" }));
@@ -267,8 +270,9 @@ function logoutUserHandler<
       );
 
       if (getAuthSessionResult.err) {
-        await createNewErrorLogService(
+        await createNewResourceService(
           createErrorLogSchema(getAuthSessionResult.val, request.body),
+          ErrorLogModel,
         );
 
         response.clearCookie("refreshToken", cookieOptions);
@@ -317,8 +321,9 @@ function logoutUserHandler<
       });
 
       if (updateSessionResult.err) {
-        await createNewErrorLogService(
+        await createNewResourceService(
           createErrorLogSchema(updateSessionResult.val, request.body),
+          ErrorLogModel,
         );
 
         response.clearCookie("refreshToken", cookieOptions);
@@ -334,11 +339,12 @@ function logoutUserHandler<
         createHttpResultSuccess({ accessToken: "", triggerLogout: true }),
       );
     } catch (error: unknown) {
-      await createNewErrorLogService(
+      await createNewResourceService(
         createErrorLogSchema(
           error,
           request.body,
         ),
+        ErrorLogModel,
       );
 
       response.status(200).json(

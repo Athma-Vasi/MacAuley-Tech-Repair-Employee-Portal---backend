@@ -7,15 +7,11 @@ import { customerRouter } from "../customer";
 import { productCategoryRouter } from "../productCategory";
 import { usernameEmailSetRouter } from "../usernameEmailSet";
 import { errorLogRouter } from "../errorLog";
-import { companyRouter } from "../company/company.routes";
-import { generalRouter } from "../general/general.routes";
-import { outreachRouter } from "../outreach/outreach.routes";
+import { actionsRouter } from "../actions/actions.routes";
 
 const versionOneRouter = Router();
 // route: /api/v1
-versionOneRouter.use("/company", companyRouter);
-versionOneRouter.use("/general", generalRouter);
-versionOneRouter.use("/outreach", outreachRouter);
+versionOneRouter.use("/actions", actionsRouter);
 versionOneRouter.use("/comment", commentRouter);
 versionOneRouter.use("/customer", customerRouter);
 versionOneRouter.use("/error-log", errorLogRouter);

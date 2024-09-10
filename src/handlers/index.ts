@@ -18,13 +18,13 @@ import {
     getResourceByIdService,
     updateResourceByIdService,
 } from "../services";
-import { createNewErrorLogService } from "../resources/errorLog";
 import {
     createErrorLogSchema,
     createHttpResultError,
     createHttpResultSuccess,
 } from "../utils";
 import type { Response } from "express";
+import { ErrorLogModel } from "../resources/errorLog";
 
 function createNewResourceHandler<Doc extends DBRecord = DBRecord>(
     model: Model<Doc>,
@@ -42,11 +42,12 @@ function createNewResourceHandler<Doc extends DBRecord = DBRecord>(
             );
 
             if (createResourceResult.err) {
-                await createNewErrorLogService(
+                await createNewResourceService(
                     createErrorLogSchema(
                         createResourceResult.val,
                         request.body,
                     ),
+                    ErrorLogModel,
                 );
 
                 response.status(200).json(
@@ -61,11 +62,12 @@ function createNewResourceHandler<Doc extends DBRecord = DBRecord>(
                     createHttpResultSuccess({ accessToken }),
                 );
         } catch (error: unknown) {
-            await createNewErrorLogService(
+            await createNewResourceService(
                 createErrorLogSchema(
                     error,
                     request.body,
                 ),
+                ErrorLogModel,
             );
 
             response.status(200).json(createHttpResultError({
@@ -99,11 +101,12 @@ function getQueriedResourcesHandler<Doc extends DBRecord = DBRecord>(
                 });
 
                 if (totalResult.err) {
-                    await createNewErrorLogService(
+                    await createNewResourceService(
                         createErrorLogSchema(
                             totalResult.val,
                             request.body,
                         ),
+                        ErrorLogModel,
                     );
 
                     response
@@ -125,11 +128,12 @@ function getQueriedResourcesHandler<Doc extends DBRecord = DBRecord>(
             });
 
             if (getResourcesResult.err) {
-                await createNewErrorLogService(
+                await createNewResourceService(
                     createErrorLogSchema(
                         getResourcesResult.val,
                         request.body,
                     ),
+                    ErrorLogModel,
                 );
 
                 response
@@ -149,11 +153,12 @@ function getQueriedResourcesHandler<Doc extends DBRecord = DBRecord>(
                 }),
             );
         } catch (error: unknown) {
-            await createNewErrorLogService(
+            await createNewResourceService(
                 createErrorLogSchema(
                     error,
                     request.body,
                 ),
+                ErrorLogModel,
             );
 
             response.status(200).json(
@@ -191,11 +196,12 @@ function getQueriedResourcesByUserHandler<Doc extends DBRecord = DBRecord>(
                 });
 
                 if (totalResult.err) {
-                    await createNewErrorLogService(
+                    await createNewResourceService(
                         createErrorLogSchema(
                             totalResult.val,
                             request.body,
                         ),
+                        ErrorLogModel,
                     );
 
                     response.status(200).json(
@@ -215,11 +221,12 @@ function getQueriedResourcesByUserHandler<Doc extends DBRecord = DBRecord>(
             });
 
             if (getResourcesResult.err) {
-                await createNewErrorLogService(
+                await createNewResourceService(
                     createErrorLogSchema(
                         getResourcesResult.val,
                         request.body,
                     ),
+                    ErrorLogModel,
                 );
 
                 response.status(200).json(
@@ -239,11 +246,12 @@ function getQueriedResourcesByUserHandler<Doc extends DBRecord = DBRecord>(
                 }),
             );
         } catch (error: unknown) {
-            await createNewErrorLogService(
+            await createNewResourceService(
                 createErrorLogSchema(
                     error,
                     request.body,
                 ),
+                ErrorLogModel,
             );
 
             response.status(200).json(createHttpResultError({
@@ -275,11 +283,12 @@ function updateResourceByIdHandler<Doc extends DBRecord = DBRecord>(
             });
 
             if (updateResourceResult.err) {
-                await createNewErrorLogService(
+                await createNewResourceService(
                     createErrorLogSchema(
                         updateResourceResult.val,
                         request.body,
                     ),
+                    ErrorLogModel,
                 );
 
                 response.status(200).json(
@@ -297,11 +306,12 @@ function updateResourceByIdHandler<Doc extends DBRecord = DBRecord>(
                     }),
                 );
         } catch (error: unknown) {
-            await createNewErrorLogService(
+            await createNewResourceService(
                 createErrorLogSchema(
                     error,
                     request.body,
                 ),
+                ErrorLogModel,
             );
 
             response.status(200).json(createHttpResultError({
@@ -328,11 +338,12 @@ function getResourceByIdHandler<Doc extends DBRecord = DBRecord>(
             );
 
             if (getResourceResult.err) {
-                await createNewErrorLogService(
+                await createNewResourceService(
                     createErrorLogSchema(
                         getResourceResult.val,
                         request.body,
                     ),
+                    ErrorLogModel,
                 );
 
                 response.status(200).json(
@@ -350,11 +361,12 @@ function getResourceByIdHandler<Doc extends DBRecord = DBRecord>(
                     }),
                 );
         } catch (error: unknown) {
-            await createNewErrorLogService(
+            await createNewResourceService(
                 createErrorLogSchema(
                     error,
                     request.body,
                 ),
+                ErrorLogModel,
             );
 
             response.status(200).json(createHttpResultError({
@@ -381,11 +393,12 @@ function deleteResourceByIdHandler<Doc extends DBRecord = DBRecord>(
             );
 
             if (deletedResult.err) {
-                await createNewErrorLogService(
+                await createNewResourceService(
                     createErrorLogSchema(
                         deletedResult.val,
                         request.body,
                     ),
+                    ErrorLogModel,
                 );
 
                 response.status(200).json(
@@ -396,11 +409,12 @@ function deleteResourceByIdHandler<Doc extends DBRecord = DBRecord>(
 
             response.status(200).json(createHttpResultSuccess({ accessToken }));
         } catch (error: unknown) {
-            await createNewErrorLogService(
+            await createNewResourceService(
                 createErrorLogSchema(
                     error,
                     request.body,
                 ),
+                ErrorLogModel,
             );
 
             response.status(200).json(createHttpResultError({
@@ -422,11 +436,12 @@ function deleteManyResourcesHandler<Doc extends DBRecord = DBRecord>(
             const deletedResult = await deleteManyResourcesService({ model });
 
             if (deletedResult.err) {
-                await createNewErrorLogService(
+                await createNewResourceService(
                     createErrorLogSchema(
                         deletedResult.val,
                         request.body,
                     ),
+                    ErrorLogModel,
                 );
 
                 response.status(200).json(
@@ -437,11 +452,12 @@ function deleteManyResourcesHandler<Doc extends DBRecord = DBRecord>(
 
             response.status(200).json(createHttpResultSuccess({ accessToken }));
         } catch (error: unknown) {
-            await createNewErrorLogService(
+            await createNewResourceService(
                 createErrorLogSchema(
                     error,
                     request.body,
                 ),
+                ErrorLogModel,
             );
 
             response.status(200).json(createHttpResultError({

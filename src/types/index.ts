@@ -276,6 +276,7 @@ export type {
   QueriedTotalResourceGetRequestServiceInput,
   QueryObjectParsed,
   QueryObjectParsedWithDefaults,
+  RequestAfterJWTVerification,
   RequestAfterQueryParsing,
   RequestStatus,
   ServiceOutput,

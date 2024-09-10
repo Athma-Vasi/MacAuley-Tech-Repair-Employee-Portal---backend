@@ -1,10 +1,10 @@
 import {
+  createNewResourceService,
   deleteManyResourcesService,
   getResourceByIdService,
   updateResourceByIdService,
 } from "../../services";
 import { createErrorLogSchema } from "../../utils";
-import { createNewErrorLogService } from "../errorLog";
 import { AuthDocument, AuthModel } from "./auth.model";
 import { TokenDecoded } from "./auth.types";
 import { Request } from "express";
@@ -12,6 +12,7 @@ import { Err, Ok, Result } from "ts-results";
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 import { ServiceOutput } from "../../types";
+import { ErrorLogModel } from "../errorLog";
 
 async function createTokenService(
   {
@@ -39,11 +40,12 @@ async function createTokenService(
     );
 
     if (getSessionResult.err) {
-      await createNewErrorLogService(
+      await createNewResourceService(
         createErrorLogSchema(
           getSessionResult.val,
           request.body,
         ),
+        ErrorLogModel,
       );
 
       return new Err({ kind: "error" });
@@ -70,11 +72,12 @@ async function createTokenService(
       });
 
       if (deleteManyResult.err) {
-        await createNewErrorLogService(
+        await createNewResourceService(
           createErrorLogSchema(
             deleteManyResult.val,
             request.body,
           ),
+          ErrorLogModel,
         );
       }
 
@@ -91,11 +94,12 @@ async function createTokenService(
     });
 
     if (updateSessionResult.err) {
-      await createNewErrorLogService(
+      await createNewResourceService(
         createErrorLogSchema(
           updateSessionResult.val,
           request.body,
         ),
+        ErrorLogModel,
       );
 
       return new Err({ kind: "error" });
@@ -120,11 +124,12 @@ async function createTokenService(
 
     return new Ok({ data: refreshToken, kind: "success" });
   } catch (error: unknown) {
-    await createNewErrorLogService(
+    await createNewResourceService(
       createErrorLogSchema(
         error,
         request.body,
       ),
+      ErrorLogModel,
     );
 
     return new Err({ kind: "error" });
