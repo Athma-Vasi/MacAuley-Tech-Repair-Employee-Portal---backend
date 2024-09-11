@@ -1,11 +1,19 @@
 import type { Request } from "express";
 import type { Types } from "mongoose";
-import { UserRoles } from "../user";
+import { UserRoles, UserSchema } from "../user";
 
 type LoginUserRequest = Request & {
   body: {
-    username: string;
-    password: string;
+    schema: {
+      username: string;
+      password: string;
+    };
+  };
+};
+
+type RegisterUserRequest = Request & {
+  body: {
+    schema: UserSchema;
   };
 };
 
@@ -43,5 +51,6 @@ export type {
   LoginUserRequest,
   LogoutUserRequest,
   RefreshTokenRequest,
+  RegisterUserRequest,
   TokenDecoded,
 };

@@ -6,6 +6,8 @@ const ACCESS_TOKEN_EXPIRES_IN = "60s"; // 60 seconds
 
 const TRIGGER_LOGOUT_KEY = "triggerLogout";
 
+const HASH_SALT_ROUNDS = 10;
+
 // /**
 //  * @description Map of product category names to their respective service functions.
 //  * - used in `src/resources/productCategory/productCategory.controller.ts`
@@ -40,6 +42,7 @@ const TRIGGER_LOGOUT_KEY = "triggerLogout";
 export {
   ACCESS_TOKEN_EXPIRES_IN,
   ALLOWED_FILE_EXTENSIONS,
+  HASH_SALT_ROUNDS,
   REFRESH_TOKEN_EXPIRES_IN,
   TRIGGER_LOGOUT_KEY,
 };

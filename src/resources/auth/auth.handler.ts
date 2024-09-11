@@ -1,4 +1,3 @@
-import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 import type { CookieOptions, Response } from "express";
@@ -6,29 +5,32 @@ import type { LoginUserRequest, LogoutUserRequest } from ".";
 
 import { config } from "../../config";
 
-import { v4 as uuidv4 } from "uuid";
-import { TokenDecoded } from "./auth.types";
-import { AuthModel, AuthSchema } from "./auth.model";
 import { Model } from "mongoose";
-import { DBRecord, HttpResult } from "../../types";
+import { v4 as uuidv4 } from "uuid";
 import {
-  createErrorLogSchema,
-  createHttpResultError,
-  createHttpResultSuccess,
-  verifyJWTSafe,
-} from "../../utils";
+  ACCESS_TOKEN_EXPIRES_IN,
+  HASH_SALT_ROUNDS,
+  REFRESH_TOKEN_EXPIRES_IN,
+} from "../../constants";
 import {
   createNewResourceService,
   getResourceByFieldService,
   getResourceByIdService,
   updateResourceByIdService,
 } from "../../services";
-import { UserDocument } from "../user";
+import { DBRecord, HttpResult } from "../../types";
 import {
-  ACCESS_TOKEN_EXPIRES_IN,
-  REFRESH_TOKEN_EXPIRES_IN,
-} from "../../constants";
+  compareHashedStringWithPlainStringSafe,
+  createErrorLogSchema,
+  createHttpResultError,
+  createHttpResultSuccess,
+  hashStringSafe,
+  verifyJWTSafe,
+} from "../../utils";
 import { ErrorLogModel } from "../errorLog";
+import { UserDocument } from "../user";
+import { AuthModel, AuthSchema } from "./auth.model";
+import { RegisterUserRequest, TokenDecoded } from "./auth.types";
 
 /**
  * @description implements 'Refresh Token Rotation' as defined in the OAuth 2.0 RFC
@@ -37,9 +39,9 @@ import { ErrorLogModel } from "../errorLog";
  * @see https://auth0.com/blog/refresh-tokens-what-are-they-and-when-to-use-them/#:~:text=Refresh%20Token%20Automatic%20Reuse%20Detection
  */
 
-// @desc Login user
-// @route POST /auth/login
-// // @access Public
+// @desc   Login user
+// @route  POST /auth/login
+// @access Public
 function loginUserHandler<
   Doc extends DBRecord = DBRecord,
 >(
@@ -70,19 +72,6 @@ function loginUserHandler<
         return;
       }
 
-      const hashedPassword = getUserResult.safeUnwrap().data?.password ?? "";
-
-      const isPasswordCorrect = bcrypt.compare(
-        password,
-        hashedPassword as string,
-      );
-
-      if (!isPasswordCorrect) {
-        response.status(200).json(createHttpResultError({ accessToken: "" }));
-        return;
-      }
-
-      const { ACCESS_TOKEN_SEED, REFRESH_TOKEN_SEED } = config;
       const userDocument = getUserResult.safeUnwrap().data as
         | UserDocument
         | undefined;
@@ -91,6 +80,24 @@ function loginUserHandler<
         response.status(200).json(createHttpResultError({ accessToken: "" }));
         return;
       }
+
+      const isPasswordCorrectResult =
+        await compareHashedStringWithPlainStringSafe({
+          hashedString: userDocument.password,
+          plainString: password,
+        });
+
+      if (isPasswordCorrectResult.err) {
+        await createNewResourceService(
+          createErrorLogSchema(isPasswordCorrectResult.val, request.body),
+          ErrorLogModel,
+        );
+
+        response.status(200).json(createHttpResultError({ accessToken: "" }));
+        return;
+      }
+
+      const { ACCESS_TOKEN_SEED, REFRESH_TOKEN_SEED } = config;
 
       const authSessionSchema: AuthSchema = {
         expireAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // user will be required to log in their session again after 7 days
@@ -188,8 +195,122 @@ function loginUserHandler<
   };
 }
 
-// @desc Logout user
-// @route POST /auth/logout
+// @desc   Register user
+// @route  POST /auth/register
+// @access Public
+function registerUserHandler<
+  Doc extends DBRecord = DBRecord,
+>(
+  model: Model<Doc>,
+) {
+  return async (
+    request: RegisterUserRequest,
+    response: Response,
+  ) => {
+    try {
+      const { schema } = request.body;
+      const { username, password } = schema;
+
+      const getUserResult = await getResourceByFieldService({
+        filter: { username },
+        model,
+      });
+
+      if (getUserResult.err) {
+        await createNewResourceService(
+          createErrorLogSchema(getUserResult.val, request.body),
+          ErrorLogModel,
+        );
+
+        response.status(200).json(
+          createHttpResultError({
+            accessToken: "",
+            message: "Unable to register. Please try again.",
+          }),
+        );
+        return;
+      }
+
+      const unwrappedResult = getUserResult.safeUnwrap();
+
+      if (unwrappedResult.kind === "success") {
+        response.status(200).json(
+          createHttpResultError({
+            accessToken: "",
+            message: "Username already exists",
+          }),
+        );
+        return;
+      }
+
+      const hashPasswordResult = await hashStringSafe({
+        saltRounds: HASH_SALT_ROUNDS,
+        stringToHash: password,
+      });
+
+      if (hashPasswordResult.err) {
+        await createNewResourceService(
+          createErrorLogSchema(hashPasswordResult.val, request.body),
+          ErrorLogModel,
+        );
+
+        response.status(200).json(
+          createHttpResultError({
+            accessToken: "",
+            message: "Unable to register. Please try again.",
+          }),
+        );
+        return;
+      }
+
+      const hashedPassword = hashPasswordResult.safeUnwrap().data;
+      const userSchema = {
+        ...schema,
+        password: hashedPassword,
+      };
+
+      const createUserResult = await createNewResourceService(
+        userSchema,
+        model,
+      );
+
+      if (createUserResult.err) {
+        await createNewResourceService(
+          createErrorLogSchema(createUserResult.val, request.body),
+          ErrorLogModel,
+        );
+
+        response.status(200).json(
+          createHttpResultError({
+            accessToken: "",
+            message: "Unable to register. Please try again.",
+          }),
+        );
+        return;
+      }
+
+      response.status(200).json(
+        createHttpResultSuccess({
+          accessToken: "",
+          message: "User registered successfully",
+        }),
+      );
+    } catch (error: unknown) {
+      await createNewResourceService(
+        createErrorLogSchema(
+          error,
+          request.body,
+        ),
+        ErrorLogModel,
+      );
+
+      response.status(200).json(createHttpResultError({ accessToken: "" }));
+    }
+  };
+}
+
+// @desc   Logout user
+// @route  POST /auth/logout
 // @access Private
 function logoutUserHandler<
   Doc extends DBRecord = DBRecord,
@@ -264,6 +385,7 @@ function logoutUserHandler<
       const sessionId = refreshTokenDecoded.sessionId;
 
       // check if tokens are in deny list
+
       const getAuthSessionResult = await getResourceByIdService(
         sessionId.toString(),
         model,
@@ -354,7 +476,7 @@ function logoutUserHandler<
   };
 }
 
-export { loginUserHandler, logoutUserHandler };
+export { loginUserHandler, logoutUserHandler, registerUserHandler };
 
 // const refreshTokenController = expressAsyncController(
 //   async (

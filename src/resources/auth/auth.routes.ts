@@ -1,10 +1,14 @@
 import { Router } from "express";
 
-import { loginLimiter, verifyJWTMiddleware } from "../../middlewares";
+import { verifyJWTMiddleware } from "../../middlewares";
 import { validateSchemaMiddleware } from "../../middlewares/validateSchema";
-import { createAuthSessionJoiSchema } from "./auth.validation";
-import { loginUserHandler, logoutUserHandler } from "./auth.handler";
+import {
+  loginUserHandler,
+  logoutUserHandler,
+  registerUserHandler,
+} from "./auth.handler";
 import { AuthModel } from "./auth.model";
+import { createAuthSessionJoiSchema } from "./auth.validation";
 
 const authRouter = Router();
 
@@ -17,6 +21,14 @@ const authRouter = Router();
 authRouter.route("/login").post(
   validateSchemaMiddleware(createAuthSessionJoiSchema, "schema"),
   loginUserHandler(AuthModel),
+);
+
+// @desc   Register user
+// @route  POST /auth/register
+// @access Public
+authRouter.route("/register").post(
+  validateSchemaMiddleware(createAuthSessionJoiSchema, "schema"),
+  registerUserHandler(AuthModel),
 );
 
 // @desc   Logout user

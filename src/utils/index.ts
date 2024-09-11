@@ -1,3 +1,5 @@
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import { Err, Ok, Result } from "ts-results";
 import { TokenDecoded } from "../resources/auth/auth.types";
 import { ErrorLogSchema } from "../resources/errorLog";
@@ -6,7 +8,6 @@ import {
   RequestAfterJWTVerification,
   ServiceOutput,
 } from "../types";
-import jwt from "jsonwebtoken";
 
 function createHttpResultError<Data = unknown>({
   accessToken,
@@ -133,11 +134,38 @@ function createErrorLogSchema(
     name,
     stack,
     requestBody: JSON.stringify(requestBody),
-    sessionId: sessionId.toString(),
+    sessionId: sessionId?.toString() ?? "",
     timestamp: new Date(),
-    userId: userId.toString(),
-    username,
+    userId: userId?.toString() ?? "",
+    username: username ?? "",
   };
+}
+
+async function compareHashedStringWithPlainStringSafe({
+  hashedString,
+  plainString,
+}: {
+  hashedString: string;
+  plainString: string;
+}): Promise<Result<ServiceOutput<boolean>, ServiceOutput>> {
+  try {
+    const isMatch = await bcrypt.compare(plainString, hashedString);
+    return new Ok({ data: isMatch, kind: "success" });
+  } catch (error: unknown) {
+    return new Err({ data: error, kind: "error" });
+  }
+}
+
+async function hashStringSafe({ saltRounds, stringToHash }: {
+  saltRounds: number;
+  stringToHash: string;
+}): Promise<Result<ServiceOutput<string>, ServiceOutput>> {
+  try {
+    const hashedString = await bcrypt.hash(stringToHash, saltRounds);
+    return new Ok({ data: hashedString, kind: "success" });
+  } catch (error: unknown) {
+    return new Err({ data: error, kind: "error" });
+  }
 }
 
 async function verifyJWTSafe(
@@ -202,10 +230,12 @@ function filterFieldsFromObject<
 }
 
 export {
+  compareHashedStringWithPlainStringSafe,
   createErrorLogSchema,
   createHttpResultError,
   createHttpResultSuccess,
   filterFieldsFromObject,
+  hashStringSafe,
   removeUndefinedAndNullValues,
   returnEmptyFieldsTuple,
   verifyJWTSafe,
