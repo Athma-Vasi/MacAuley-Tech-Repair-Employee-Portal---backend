@@ -6,16 +6,8 @@ const createAuthSessionJoiSchema = Joi.object({
     password: Joi.string().regex(PASSWORD_REGEX).required(),
 });
 
-const refreshAuthSessionJoiSchema = Joi.object({
-    sessionId: Joi.string().required(),
-});
-
 const logoutAuthSessionJoiSchema = Joi.object({
     sessionId: Joi.string().required(),
 });
 
-export {
-    createAuthSessionJoiSchema,
-    logoutAuthSessionJoiSchema,
-    refreshAuthSessionJoiSchema,
-};
+export { createAuthSessionJoiSchema, logoutAuthSessionJoiSchema };

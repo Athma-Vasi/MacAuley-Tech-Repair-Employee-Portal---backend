@@ -1,11 +1,9 @@
 import type { FilterQuery, Model, QueryOptions } from "mongoose";
-import { Err, ErrImpl, Ok, OkImpl, Result } from "ts-results";
-import { createHttpResultError, createHttpResultSuccess } from "../utils";
+import { Err, Ok, Result } from "ts-results";
 import type {
     ArrayOperators,
     DBRecord,
     FieldOperators,
-    HttpResult,
     QueryObjectParsedWithDefaults,
     ServiceOutput,
     ServiceResult,
@@ -52,6 +50,13 @@ async function getResourceByFieldService<
         const resourceBox = await model.find(filter, projection, options)
             .lean()
             .exec();
+
+        console.group("getResourceByFieldService");
+        console.log("filter: ", filter);
+        console.log("projection: ", projection);
+        console.log("options: ", options);
+        console.log("resourceBox: ", resourceBox);
+        console.groupEnd();
 
         if (resourceBox.length === 0 || resourceBox.length > 1) {
             return new Ok({ kind: "notFound" });

@@ -28,7 +28,7 @@ import {
   verifyJWTSafe,
 } from "../../utils";
 import { ErrorLogModel } from "../errorLog";
-import { UserDocument } from "../user";
+import { UserDocument, UserModel } from "../user";
 import { AuthModel, AuthSchema } from "./auth.model";
 import { RegisterUserRequest, TokenDecoded } from "./auth.types";
 
@@ -54,12 +54,17 @@ function loginUserHandler<
     >,
   ) => {
     try {
+      console.group("loginUserHandler");
+      console.log("request.body", request.body);
+      console.log("request.cookies", request.cookies);
+      console.groupEnd();
+
       const { schema } = request.body;
       const { username, password } = schema;
 
       const getUserResult = await getResourceByFieldService({
         filter: { username },
-        model,
+        model: UserModel,
       });
 
       if (getUserResult.err) {
@@ -68,7 +73,12 @@ function loginUserHandler<
           ErrorLogModel,
         );
 
-        response.status(200).json(createHttpResultError({ accessToken: "" }));
+        response.status(200).json(
+          createHttpResultError({
+            accessToken: "",
+            message: "Unable to get user. Please try again!",
+          }),
+        );
         return;
       }
 
@@ -77,7 +87,9 @@ function loginUserHandler<
         | undefined;
 
       if (userDocument === undefined || userDocument === null) {
-        response.status(200).json(createHttpResultError({ accessToken: "" }));
+        response.status(200).json(
+          createHttpResultError({ accessToken: "", message: "User not found" }),
+        );
         return;
       }
 
@@ -93,7 +105,12 @@ function loginUserHandler<
           ErrorLogModel,
         );
 
-        response.status(200).json(createHttpResultError({ accessToken: "" }));
+        response.status(200).json(
+          createHttpResultError({
+            accessToken: "",
+            message: "Password incorrect",
+          }),
+        );
         return;
       }
 
@@ -108,7 +125,7 @@ function loginUserHandler<
 
       const createAuthSessionResult = await createNewResourceService(
         authSessionSchema,
-        AuthModel,
+        model,
       );
 
       if (createAuthSessionResult.err) {
@@ -117,7 +134,12 @@ function loginUserHandler<
           ErrorLogModel,
         );
 
-        response.status(200).json(createHttpResultError({ accessToken: "" }));
+        response.status(200).json(
+          createHttpResultError({
+            accessToken: "",
+            message: "Unable to create session. Please try again!",
+          }),
+        );
         return;
       }
 

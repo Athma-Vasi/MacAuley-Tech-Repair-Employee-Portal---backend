@@ -76,7 +76,7 @@ type PostalCode = CanadianPostalCode | USPostalCode;
 type PhoneNumber =
   `+(${string})(${string}${string}${string}) ${string}${string}${string}-${string}${string}${string}${string}`;
 type Country = "Canada" | "United States";
-type StoreLocation = "Calgary" | "Edmonton" | "Vancouver";
+type StoreLocation = "Calgary" | "Edmonton" | "Vancouver" | "Corporate";
 
 type Department =
   | "Executive Management"
@@ -226,7 +226,7 @@ type UserSchema = {
 
   jobPosition: JobPosition;
   department: Department;
-  storeLocation: StoreLocation | null;
+  storeLocation: StoreLocation;
 
   emergencyContact: { fullName: string; contactNumber: PhoneNumber };
   startDate: Date;
@@ -242,32 +242,6 @@ type UserDocument = UserSchema & {
   createdAt: Date;
   updatedAt: Date;
   __v: number;
-};
-
-//  subset of UserDocument used only for Directory page
-type DirectoryUserDocument = {
-  username: string;
-  email: string;
-  firstName: string;
-  middleName: string;
-  lastName: string;
-  preferredName: string;
-  preferredPronouns: PreferredPronouns;
-  profilePictureUrl: string;
-
-  contactNumber: PhoneNumber;
-  address: {
-    city: string;
-    province?: Province;
-    state?: StatesUS;
-    country: Country;
-  };
-
-  jobPosition: JobPosition;
-  department: Department;
-  storeLocation?: StoreLocation;
-  startDate: string;
-  active: boolean;
 };
 
 const userSchema = new Schema<UserSchema>(
@@ -440,7 +414,6 @@ export type {
   Address,
   Country,
   Department,
-  DirectoryUserDocument,
   JobPosition,
   PhoneNumber,
   PostalCode,
