@@ -1,14 +1,13 @@
-import { Schema, Types, model } from "mongoose";
+import { model, Schema, Types } from "mongoose";
 
 import type {
   DimensionUnit,
   DisplayPanelType,
   ProductAvailability,
-  ProductReview,
   StarRatingsCount,
   WeightUnit,
 } from "../productCategory.types";
-import type { Currency } from "../../actions/company/expenseClaim";
+import { Currency } from "../../../types";
 
 type DisplaySchema = {
   // page 1
@@ -202,7 +201,7 @@ const displaySchema = new Schema<DisplaySchema>(
       index: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // text indexes for searching all user entered text input fields
@@ -219,4 +218,4 @@ displaySchema.index({
 const DisplayModel = model<DisplayDocument>("Display", displaySchema);
 
 export { DisplayModel };
-export type { DisplayDocument, DisplaySchema, DisplayPanelType };
+export type { DisplayDocument, DisplayPanelType, DisplaySchema };

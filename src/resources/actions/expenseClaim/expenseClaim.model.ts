@@ -1,5 +1,5 @@
 import { model, Schema, Types } from "mongoose";
-import { RequestStatus } from "../../../types";
+import { Currency, RequestStatus } from "../../../types";
 import { FileUploadDocument } from "../../fileUpload";
 
 type ExpenseClaimKind =
@@ -13,8 +13,6 @@ type ExpenseClaimKind =
   | "Rent and Leasing"
   | "Legal and Professional Fees"
   | "Miscellaneous";
-
-type Currency = "USD" | "EUR" | "GBP" | "CAD" | "AUD" | "JPY" | "CNY";
 
 type ExpenseClaimSchema = {
   userId: Types.ObjectId;
@@ -116,7 +114,6 @@ const ExpenseClaimModel = model<ExpenseClaimDocument>(
 
 export { ExpenseClaimModel };
 export type {
-  Currency,
   ExpenseClaimDocument,
   ExpenseClaimKind,
   ExpenseClaimSchema,

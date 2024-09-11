@@ -1,4 +1,4 @@
-import { Schema, Types, model } from "mongoose";
+import { model, Schema, Types } from "mongoose";
 
 import type {
   DimensionUnit,
@@ -8,7 +8,7 @@ import type {
   StarRatingsCount,
   WeightUnit,
 } from "../productCategory.types";
-import type { Currency } from "../../actions/company/expenseClaim";
+import { Currency } from "../../../types";
 
 type RamSchema = {
   // page 1
@@ -209,7 +209,7 @@ const ramSchema = new Schema<RamSchema>(
       index: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // text indexes for searching all user entered text input fields

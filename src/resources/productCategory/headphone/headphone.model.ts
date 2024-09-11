@@ -1,4 +1,4 @@
-import { Schema, Types, model } from "mongoose";
+import { model, Schema, Types } from "mongoose";
 
 import type {
   DimensionUnit,
@@ -9,7 +9,7 @@ import type {
   StarRatingsCount,
   WeightUnit,
 } from "../productCategory.types";
-import type { Currency } from "../../actions/company/expenseClaim";
+import { Currency } from "../../../types";
 
 type HeadphoneSchema = {
   // page 1
@@ -199,7 +199,7 @@ const headphoneSchema = new Schema<HeadphoneDocument>(
       index: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // text indexes for searching all user entered text input fields
@@ -217,4 +217,9 @@ headphoneSchema.index({
 const HeadphoneModel = model<HeadphoneDocument>("Headphone", headphoneSchema);
 
 export { HeadphoneModel };
-export type { HeadphoneSchema, HeadphoneDocument, HeadphoneType, HeadphoneInterface };
+export type {
+  HeadphoneDocument,
+  HeadphoneInterface,
+  HeadphoneSchema,
+  HeadphoneType,
+};

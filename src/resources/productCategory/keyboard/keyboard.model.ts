@@ -1,17 +1,17 @@
-import { Schema, Types, model } from "mongoose";
+import { model, Schema, Types } from "mongoose";
 
 import type {
   DimensionUnit,
-  ProductAvailability,
-  ProductReview,
-  WeightUnit,
-  PeripheralsInterface,
+  KeyboardBacklight,
   KeyboardLayout,
   KeyboardSwitch,
-  KeyboardBacklight,
+  PeripheralsInterface,
+  ProductAvailability,
+  ProductReview,
   StarRatingsCount,
+  WeightUnit,
 } from "../productCategory.types";
-import type { Currency } from "../../actions/company/expenseClaim";
+import { Currency } from "../../../types";
 
 type KeyboardSchema = {
   // page 1
@@ -193,7 +193,7 @@ const keyboardSchema = new Schema<KeyboardSchema>(
       index: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // text indexes for searching all user entered text input fields
@@ -208,10 +208,10 @@ const KeyboardModel = model<KeyboardDocument>("Keyboard", keyboardSchema);
 
 export { KeyboardModel };
 export type {
+  KeyboardBacklight,
   KeyboardDocument,
+  KeyboardLayout,
   KeyboardSchema,
   KeyboardSwitch,
-  KeyboardLayout,
-  KeyboardBacklight,
   PeripheralsInterface,
 };

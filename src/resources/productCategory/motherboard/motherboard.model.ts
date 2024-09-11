@@ -1,4 +1,4 @@
-import { Schema, Types, model } from "mongoose";
+import { model, Schema, Types } from "mongoose";
 
 import type {
   DimensionUnit,
@@ -10,7 +10,7 @@ import type {
   StarRatingsCount,
   WeightUnit,
 } from "../productCategory.types";
-import type { Currency } from "../../actions/company/expenseClaim";
+import { Currency } from "../../../types";
 
 type MotherboardSchema = {
   // page 1
@@ -231,7 +231,7 @@ const motherboardSchema = new Schema<MotherboardSchema>(
       index: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // text indexes for searching all user entered text input fields
@@ -246,7 +246,10 @@ motherboardSchema.index({
   motherboardChipset: "text",
 });
 
-const MotherboardModel = model<MotherboardDocument>("Motherboard", motherboardSchema);
+const MotherboardModel = model<MotherboardDocument>(
+  "Motherboard",
+  motherboardSchema,
+);
 
-export type { MotherboardDocument, MotherboardSchema, MotherboardFormFactor };
+export type { MotherboardDocument, MotherboardFormFactor, MotherboardSchema };
 export { MotherboardModel };

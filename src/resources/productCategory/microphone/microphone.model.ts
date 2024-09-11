@@ -1,4 +1,4 @@
-import { Schema, Types, model } from "mongoose";
+import { model, Schema, Types } from "mongoose";
 
 import type {
   DimensionUnit,
@@ -10,7 +10,7 @@ import type {
   StarRatingsCount,
   WeightUnit,
 } from "../productCategory.types";
-import type { Currency } from "../../actions/company/expenseClaim";
+import { Currency } from "../../../types";
 
 type MicrophoneSchema = {
   // page 1
@@ -196,8 +196,7 @@ const microphoneSchema = new Schema<MicrophoneSchema>(
       index: true,
     },
   },
-
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // text indexes for searching all user entered text input fields
@@ -212,7 +211,10 @@ microphoneSchema.index({
   microphoneColor: "text",
 });
 
-const MicrophoneModel = model<MicrophoneDocument>("Microphone", microphoneSchema);
+const MicrophoneModel = model<MicrophoneDocument>(
+  "Microphone",
+  microphoneSchema,
+);
 
 export { MicrophoneModel };
 export type { MicrophoneDocument, MicrophoneSchema };

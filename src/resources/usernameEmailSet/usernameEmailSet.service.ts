@@ -1,8 +1,11 @@
 import { UsernameEmailSetModel } from "./usernameEmailSet.model";
 import { createHttpResultError, createHttpResultSuccess } from "../../utils";
 import { Err, Ok } from "ts-results";
+import { ServiceResult } from "../../types";
 
-async function updateUsernameEmailSetWithUsernameService(username: string) {
+async function updateUsernameEmailSetWithUsernameService(
+  username: string,
+): ServiceResult {
   try {
     const usernameEmailSet = await UsernameEmailSetModel.findOneAndUpdate(
       {},
@@ -13,21 +16,18 @@ async function updateUsernameEmailSetWithUsernameService(username: string) {
       .exec();
 
     if (usernameEmailSet === null || usernameEmailSet === undefined) {
-      return new Ok(createHttpResultError({ status: 404 }));
+      return new Ok({ kind: "notFound" });
     }
 
-    return new Ok(createHttpResultSuccess({ data: [usernameEmailSet] }));
+    return new Ok({ data: usernameEmailSet, kind: "success" });
   } catch (error: unknown) {
-    return new Err(
-      createHttpResultError({
-        data: [error],
-        message: "Error updating usernameEmailSet with username",
-      }),
-    );
+    return new Err({ data: error, kind: "error" });
   }
 }
 
-async function updateUsernameEmailSetWithEmailService(email: string) {
+async function updateUsernameEmailSetWithEmailService(
+  email: string,
+): ServiceResult {
   try {
     const usernameEmailSet = await UsernameEmailSetModel.findOneAndUpdate(
       {},
@@ -38,17 +38,12 @@ async function updateUsernameEmailSetWithEmailService(email: string) {
       .exec();
 
     if (usernameEmailSet === null || usernameEmailSet === undefined) {
-      return new Ok(createHttpResultError({ status: 404 }));
+      return new Ok({ kind: "notFound" });
     }
 
-    return new Ok(createHttpResultSuccess({ data: [usernameEmailSet] }));
+    return new Ok({ data: usernameEmailSet, kind: "success" });
   } catch (error: unknown) {
-    return new Err(
-      createHttpResultError({
-        data: [error],
-        message: "Error updating usernameEmailSet with email",
-      }),
-    );
+    return new Err({ data: error, kind: "error" });
   }
 }
 

@@ -1,4 +1,4 @@
-import { Schema, Types, model } from "mongoose";
+import { model, Schema, Types } from "mongoose";
 
 import type {
   CaseSidePanel,
@@ -9,7 +9,7 @@ import type {
   StarRatingsCount,
   WeightUnit,
 } from "../productCategory.types";
-import type { Currency } from "../../actions/company/expenseClaim";
+import { Currency } from "../../../types";
 
 type ComputerCaseSchema = {
   // page 1
@@ -184,7 +184,7 @@ const computerCaseSchema = new Schema<ComputerCaseSchema>(
       index: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // text indexes for searching all user entered text input fields
@@ -198,7 +198,15 @@ computerCaseSchema.index({
   caseColor: "text",
 });
 
-const ComputerCaseModel = model<ComputerCaseDocument>("ComputerCase", computerCaseSchema);
+const ComputerCaseModel = model<ComputerCaseDocument>(
+  "ComputerCase",
+  computerCaseSchema,
+);
 
-export type { ComputerCaseDocument, ComputerCaseSchema, CaseType, CaseSidePanel };
+export type {
+  CaseSidePanel,
+  CaseType,
+  ComputerCaseDocument,
+  ComputerCaseSchema,
+};
 export { ComputerCaseModel };

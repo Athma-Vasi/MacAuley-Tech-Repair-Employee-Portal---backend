@@ -1,14 +1,14 @@
-import { Schema, Types, model } from "mongoose";
+import { model, Schema, Types } from "mongoose";
 
 import type {
   DimensionUnit,
-  ProductAvailability,
-  WeightUnit,
-  PeripheralsInterface,
   MouseSensor,
+  PeripheralsInterface,
+  ProductAvailability,
   StarRatingsCount,
+  WeightUnit,
 } from "../productCategory.types";
-import type { Currency } from "../../actions/company/expenseClaim";
+import { Currency } from "../../../types";
 
 type MouseSchema = {
   // page 1
@@ -192,7 +192,7 @@ const mouseSchema = new Schema<MouseSchema>(
       index: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // text indexes for searching all user entered text input fields

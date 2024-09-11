@@ -1,11 +1,11 @@
-import type { RequestAfterJWTVerification } from "../resources/auth";
-import type { Response, NextFunction } from "express";
+import type { NextFunction, Response } from "express";
 import createHttpError from "http-errors";
+import { RequestAfterJWTVerification } from "../types";
 
 function verifyRoles(
   request: RequestAfterJWTVerification,
   _response: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   {
     const { url, method } = request;
@@ -35,7 +35,9 @@ function verifyRoles(
         return next();
       }
 
-      return next(new createHttpError.Forbidden("User does not have permission"));
+      return next(
+        new createHttpError.Forbidden("User does not have permission"),
+      );
     }
     if (method === "PUT" || method === "PATCH") {
       // all roles can access /user route: which can also be used to modify resources that belong to them (employees route to modify their own resources)
@@ -48,7 +50,9 @@ function verifyRoles(
         return next();
       }
 
-      return next(new createHttpError.Forbidden("User does not have permission"));
+      return next(
+        new createHttpError.Forbidden("User does not have permission"),
+      );
     }
     if (method === "DELETE") {
       // only managers are allowed to delete a resource
@@ -56,7 +60,9 @@ function verifyRoles(
         return next();
       }
 
-      return next(new createHttpError.Forbidden("User does not have permission"));
+      return next(
+        new createHttpError.Forbidden("User does not have permission"),
+      );
     }
 
     // if none of the above conditions are met, request is not allowed

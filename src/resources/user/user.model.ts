@@ -219,7 +219,7 @@ type UserSchema = {
   preferredName: string;
   preferredPronouns: PreferredPronouns;
   profilePictureUrl: string;
-  dateOfBirth: string;
+  dateOfBirth: Date;
 
   contactNumber: PhoneNumber;
   address: Address;
@@ -229,7 +229,7 @@ type UserSchema = {
   storeLocation: StoreLocation | null;
 
   emergencyContact: { fullName: string; contactNumber: PhoneNumber };
-  startDate: string;
+  startDate: Date;
   roles: UserRoles;
   active: boolean;
 
@@ -239,8 +239,8 @@ type UserSchema = {
 
 type UserDocument = UserSchema & {
   _id: Types.ObjectId;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   __v: number;
 };
 

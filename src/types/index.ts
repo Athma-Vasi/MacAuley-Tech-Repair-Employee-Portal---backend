@@ -256,9 +256,14 @@ type UpdateDocumentByIdServiceInput<
   updateOperator: FieldOperators | ArrayOperators;
 };
 
+type Urgency = "low" | "medium" | "high";
+
+type Currency = "USD" | "EUR" | "GBP" | "CAD" | "AUD" | "JPY" | "CNY";
+
 export type {
   ArrayOperators,
   CreateNewResourceRequest,
+  Currency,
   DBRecord,
   DeleteAllResourcesRequest,
   DeleteResourceRequest,
@@ -283,4 +288,5 @@ export type {
   ServiceResult,
   UpdateDocumentByIdServiceInput,
   UpdateResourceByIdRequest,
+  Urgency,
 };

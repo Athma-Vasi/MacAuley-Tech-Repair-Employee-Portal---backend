@@ -1,15 +1,38 @@
 import { NextFunction, Request, Response } from "express";
-import { ErrorLogSchema } from "../resources/errorLog/errorLog.model";
-import { createNewErrorLogService } from "../resources/errorLog/errorLog.service";
+import { ErrorLogModel } from "../resources/errorLog/errorLog.model";
+import { createErrorLogSchema, createHttpResultError } from "../utils";
+import { createNewResourceService } from "../services";
 
-function errorHandler(
-  error: any,
+async function errorHandler(
+  error: unknown,
   request: Request,
   response: Response,
-  _next: NextFunction
+  _next: NextFunction,
 ) {
-  const { message, status, stack } = error;
-  const { body } = request;
+  if (error instanceof Error) {
+    const errorLogSchema = createErrorLogSchema(
+      error,
+      request.body,
+    );
+
+    await createNewResourceService(
+      errorLogSchema,
+      ErrorLogModel,
+    );
+  }
+
+  response.status(200).json(
+    createHttpResultError({
+      accessToken: "",
+      message: "An unknown error occurred",
+    }),
+  );
+}
+
+export { errorHandler };
+
+/**
+ * onst { body } = request;
   const {
     userInfo: { userId, username },
     sessionId,
@@ -44,9 +67,7 @@ function errorHandler(
       });
       return;
     });
-}
-
-export { errorHandler };
+ */
 
 // import { NextFunction, Request, Response } from 'express';
 

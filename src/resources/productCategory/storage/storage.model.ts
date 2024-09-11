@@ -1,4 +1,4 @@
-import { Schema, Types, model } from "mongoose";
+import { model, Schema, Types } from "mongoose";
 
 import type {
   DimensionUnit,
@@ -11,7 +11,7 @@ import type {
   StorageType,
   WeightUnit,
 } from "../productCategory.types";
-import type { Currency } from "../../actions/company/expenseClaim";
+import { Currency } from "../../../types";
 
 type StorageSchema = {
   // page 1
@@ -208,7 +208,7 @@ const storageSchema = new Schema<StorageSchema>(
       index: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // text indexes for searching all user entered text input fields
@@ -223,9 +223,9 @@ const StorageModel = model<StorageDocument>("Storage", storageSchema);
 
 export type {
   StorageDocument,
-  StorageSchema,
-  StorageType,
   StorageFormFactor,
   StorageInterface,
+  StorageSchema,
+  StorageType,
 };
 export { StorageModel };

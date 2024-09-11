@@ -16,7 +16,6 @@ import {
 } from "./expenseClaim.handler";
 
 import type {
-  Currency,
   ExpenseClaimDocument,
   ExpenseClaimSchema,
   ExpenseClaimServerResponse,
@@ -36,7 +35,6 @@ export {
 };
 
 export type {
-  Currency,
   ExpenseClaimDocument,
   ExpenseClaimSchema,
   ExpenseClaimServerResponse,

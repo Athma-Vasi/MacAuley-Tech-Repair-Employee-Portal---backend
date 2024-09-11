@@ -1,17 +1,18 @@
 import type { Request, Response } from "express";
 
 import { Model } from "mongoose";
-import { HttpResult } from "../../types";
+import { DBRecord, HttpResult } from "../../types";
 import {
   createAndNotReturnResourceService,
+  createNewResourceService,
   getResourceByFieldService,
 } from "../../services";
-import { createNewErrorLogService } from "../errorLog";
 import {
   createErrorLogSchema,
   createHttpResultError,
   createHttpResultSuccess,
 } from "../../utils";
+import { ErrorLogModel } from "../errorLog";
 
 type PostUsernameEmailSetRequest = Request & {
   body: {
@@ -29,7 +30,7 @@ type PostUsernameEmailSetRequest = Request & {
  * @description only runs once to create the document (only one document exists in collection)
  */
 function postUsernameEmailSetHandler<
-  Doc extends Record<string, unknown> = Record<string, unknown>,
+  Doc extends DBRecord = DBRecord,
 >(model: Model<Doc>) {
   return async (
     request: PostUsernameEmailSetRequest,
@@ -44,33 +45,36 @@ function postUsernameEmailSetHandler<
       );
 
       if (resourceCreationResult.err) {
-        await createNewErrorLogService(
+        await createNewResourceService(
           createErrorLogSchema(
             resourceCreationResult.val,
             request.body,
           ),
+          ErrorLogModel,
         );
 
         response.status(200).json(
-          createHttpResultError({ status: 400 }),
+          createHttpResultError({ accessToken: "" }),
         );
         return;
       }
 
       response.status(200).json(
         createHttpResultSuccess({
+          accessToken: "",
           data: [resourceCreationResult.safeUnwrap()],
         }),
       );
     } catch (error: unknown) {
-      await createNewErrorLogService(
+      await createNewResourceService(
         createErrorLogSchema(
-          createHttpResultError({ data: [error] }),
+          error,
           request.body,
         ),
+        ErrorLogModel,
       );
 
-      response.status(200).json(createHttpResultError({}));
+      response.status(200).json(createHttpResultError({ accessToken: "" }));
     }
   };
 }
@@ -85,7 +89,7 @@ type CheckUsernameOrEmailExistsRequest = Request & {
 // @route  POST /api/v1/username-email-set/check
 // @access Public
 function checkUsernameOrEmailExistsHandler<
-  Doc extends Record<string, unknown> = Record<string, unknown>,
+  Doc extends DBRecord = DBRecord,
 >(model: Model<Doc>) {
   return async (
     request: CheckUsernameOrEmailExistsRequest,
@@ -104,35 +108,33 @@ function checkUsernameOrEmailExistsHandler<
       });
 
       if (isUsernameOrEmailExistsResult.err) {
-        await createNewErrorLogService(
+        await createNewResourceService(
           createErrorLogSchema(
             isUsernameOrEmailExistsResult.val,
             request.body,
           ),
+          ErrorLogModel,
         );
 
         response.status(200).json(
-          createHttpResultError({ status: 400 }),
+          createHttpResultError({ accessToken: "" }),
         );
         return;
       }
 
       response.status(200).json(
-        createHttpResultSuccess({
-          data: [
-            isUsernameOrEmailExistsResult.safeUnwrap().status === 200,
-          ],
-        }),
+        createHttpResultSuccess({ accessToken: "" }),
       );
     } catch (error: unknown) {
-      await createNewErrorLogService(
+      await createNewResourceService(
         createErrorLogSchema(
-          createHttpResultError({ data: [error] }),
+          error,
           request.body,
         ),
+        ErrorLogModel,
       );
 
-      response.status(200).json(createHttpResultError({}));
+      response.status(200).json(createHttpResultError({ accessToken: "" }));
     }
   };
 }

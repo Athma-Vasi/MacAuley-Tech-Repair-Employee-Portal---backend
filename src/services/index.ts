@@ -49,12 +49,16 @@ async function getResourceByFieldService<
     options?: QueryOptions<Doc>;
 }): ServiceResult<Doc> {
     try {
-        const resource = await model.findOne(filter, projection, options)
+        const resourceBox = await model.find(filter, projection, options)
             .lean()
-            .exec() as Doc;
+            .exec();
+
+        if (resourceBox.length === 0 || resourceBox.length > 1) {
+            return new Ok({ kind: "notFound" });
+        }
 
         return new Ok({
-            data: resource,
+            data: resourceBox[0],
             kind: "success",
         }) as unknown as ServiceResult<Doc>;
     } catch (error: unknown) {
@@ -81,8 +85,8 @@ async function createNewResourceService<
 }
 
 async function createAndNotReturnResourceService<
-    Schema extends Record<string, unknown> = Record<string, unknown>,
     Doc extends DBRecord = DBRecord,
+    Schema extends Record<string, unknown> = Record<string, unknown>,
 >(
     schema: Schema,
     model: Model<Doc>,

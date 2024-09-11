@@ -4,6 +4,8 @@ const REFRESH_TOKEN_EXPIRES_IN = "12h"; // 12 hours
 
 const ACCESS_TOKEN_EXPIRES_IN = "60s"; // 60 seconds
 
+const TRIGGER_LOGOUT_KEY = "triggerLogout";
+
 // /**
 //  * @description Map of product category names to their respective service functions.
 //  * - used in `src/resources/productCategory/productCategory.controller.ts`
@@ -39,4 +41,5 @@ export {
   ACCESS_TOKEN_EXPIRES_IN,
   ALLOWED_FILE_EXTENSIONS,
   REFRESH_TOKEN_EXPIRES_IN,
+  TRIGGER_LOGOUT_KEY,
 };

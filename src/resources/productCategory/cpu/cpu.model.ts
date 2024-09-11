@@ -1,12 +1,12 @@
-import { Schema, Types, model } from "mongoose";
+import { model, Schema, Types } from "mongoose";
 import type {
   DimensionUnit,
-  ProductAvailability,
   MemoryUnit,
-  WeightUnit,
+  ProductAvailability,
   StarRatingsCount,
+  WeightUnit,
 } from "../productCategory.types";
-import type { Currency } from "../../actions/company/expenseClaim";
+import { Currency } from "../../../types";
 
 type CpuSchema = {
   // page 1
@@ -217,7 +217,7 @@ const cpuSchema = new Schema<CpuSchema>(
       index: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // text indexes for searching all user entered text input fields

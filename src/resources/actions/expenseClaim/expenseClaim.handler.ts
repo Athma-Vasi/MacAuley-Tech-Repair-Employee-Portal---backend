@@ -5,6 +5,7 @@ import { FileUploadModel } from "../../fileUpload";
 import { ExpenseClaimDocument } from "./expenseClaim.model";
 import {
   CreateNewResourceRequest,
+  DBRecord,
   GetQueriedResourceByUserRequest,
   GetQueriedResourceRequest,
   GetResourceByIdRequest,
@@ -25,14 +26,14 @@ import {
   getResourceByIdService,
   updateResourceByIdService,
 } from "../../../services";
-import { createNewErrorLogService } from "../../errorLog";
 import { Err } from "ts-results";
+import { ErrorLogModel } from "../../errorLog";
 
 // @desc   Create a new expense claim after associated file uploads have been uploaded
 // @route  POST api/v1/company/expense-claim
 // @access Private
 function createNewExpenseClaimHandler<
-  Doc extends Record<string, unknown> = Record<string, unknown>,
+  Doc extends DBRecord = DBRecord,
 >(
   model: Model<Doc>,
 ) {
@@ -41,7 +42,7 @@ function createNewExpenseClaimHandler<
     response: Response<HttpResult>,
   ) => {
     try {
-      const { schema } = request.body;
+      const { accessToken, schema } = request.body;
 
       const createResourceResult = await createNewResourceService(
         schema,
@@ -49,19 +50,27 @@ function createNewExpenseClaimHandler<
       );
 
       if (createResourceResult.err) {
-        await createNewErrorLogService(
+        await createNewResourceService(
           createErrorLogSchema(
             createResourceResult.val,
             request.body,
           ),
+          ErrorLogModel,
         );
 
-        response.status(200).json(createHttpResultError({ status: 400 }));
+        response.status(200).json(createHttpResultError({ accessToken }));
         return;
       }
 
       const newExpenseClaim = createResourceResult.safeUnwrap()
-        .data[0] as unknown as ExpenseClaimDocument;
+        .data as ExpenseClaimDocument | undefined;
+
+      if (newExpenseClaim === undefined) {
+        response
+          .status(200)
+          .json(createHttpResultError({ accessToken }));
+        return;
+      }
 
       // for each fileUploadId, grab the corresponding fileUpload document
       // and insert expenseClaim document id into fileUpload document
@@ -74,18 +83,23 @@ function createNewExpenseClaimHandler<
           );
 
           if (fileUploadResult.err) {
-            await createNewErrorLogService(
+            await createNewResourceService(
               createErrorLogSchema(
                 fileUploadResult.val,
                 request.body,
               ),
+              ErrorLogModel,
             );
 
-            return new Err(createHttpResultError({}));
+            return new Err(createHttpResultError({ accessToken }));
           }
 
           const fileUpload = fileUploadResult.safeUnwrap()
-            .data[0] as FileUploadDocument;
+            .data as FileUploadDocument | undefined;
+
+          if (fileUpload === undefined) {
+            return new Err(createHttpResultError({ accessToken }));
+          }
 
           // insert expenseClaim document id into fileUpload document to
           // query for all fileUploads associated with an expenseClaim
@@ -101,14 +115,15 @@ function createNewExpenseClaimHandler<
           });
 
           if (updatedFileUploadResult.err) {
-            await createNewErrorLogService(
+            await createNewResourceService(
               createErrorLogSchema(
                 updatedFileUploadResult.val,
                 request.body,
               ),
+              ErrorLogModel,
             );
 
-            return new Err(createHttpResultError({}));
+            return new Err(createHttpResultError({ accessToken }));
           }
 
           return updatedFileUploadResult;
@@ -116,22 +131,25 @@ function createNewExpenseClaimHandler<
       );
 
       if (insertIdToDocumentResults.some((result) => result.err)) {
-        response.status(200).json(createHttpResultError({ status: 400 }));
+        response.status(200).json(createHttpResultError({ accessToken }));
         return;
       }
 
       response
-        .status(201)
-        .json(createResourceResult.safeUnwrap());
+        .status(200)
+        .json(createHttpResultSuccess({ accessToken }));
     } catch (error: unknown) {
-      await createNewErrorLogService(
+      await createNewResourceService(
         createErrorLogSchema(
-          createHttpResultError({ data: [error] }),
+          error,
           request.body,
         ),
+        ErrorLogModel,
       );
 
-      response.status(200).json(createHttpResultError({}));
+      response.status(200).json(createHttpResultError({
+        accessToken: request.body.accessToken ?? "",
+      }));
     }
   };
 }
@@ -140,7 +158,7 @@ function createNewExpenseClaimHandler<
 // @route  GET api/v1/company/expense-claim
 // @access Private/Admin/Manager
 function getQueriedExpenseClaimsHandler<
-  Doc extends Record<string, unknown> = Record<string, unknown>,
+  Doc extends DBRecord = DBRecord,
 >(
   model: Model<Doc>,
 ) {
@@ -149,33 +167,34 @@ function getQueriedExpenseClaimsHandler<
     response: Response<HttpResult>,
   ) => {
     try {
-      let { newQueryFlag, totalDocuments } = request.body;
+      let { accessToken, newQueryFlag, totalDocuments } = request.body;
 
       const {
-        filter = {},
-        projection = null,
-        options = {},
+        filter,
+        projection,
+        options,
       } = request.query;
 
       // only perform a countDocuments scan if a new query is being made
       if (newQueryFlag) {
-        const totalResult = await getQueriedTotalResourcesService(
+        const totalResult = await getQueriedTotalResourcesService({
           filter,
           model,
-        );
+        });
 
         if (totalResult.err) {
-          await createNewErrorLogService(
+          await createNewResourceService(
             createErrorLogSchema(totalResult.val, request.body),
+            ErrorLogModel,
           );
 
           response
             .status(200)
-            .json(createHttpResultError({ status: 400 }));
+            .json(createHttpResultError({ accessToken }));
           return;
         }
 
-        totalDocuments = totalResult.safeUnwrap().data?.[0] ?? 0;
+        totalDocuments = totalResult.safeUnwrap().data ?? 0;
       }
 
       const getResourcesResult = await getQueriedResourcesService({
@@ -186,18 +205,27 @@ function getQueriedExpenseClaimsHandler<
       });
 
       if (getResourcesResult.err) {
-        await createNewErrorLogService(
+        await createNewResourceService(
           createErrorLogSchema(getResourcesResult.val, request.body),
+          ErrorLogModel,
         );
 
         response
           .status(200)
-          .json(createHttpResultError({ status: 400 }));
+          .json(createHttpResultError({ accessToken }));
         return;
       }
 
-      const resources = getResourcesResult.safeUnwrap()
-        .data as unknown as Require_id<FlattenMaps<ExpenseClaimDocument>>[];
+      const serviceResult = getResourcesResult.safeUnwrap();
+
+      if (serviceResult.kind === "notFound") {
+        response
+          .status(200)
+          .json(createHttpResultSuccess({ accessToken }));
+        return;
+      }
+
+      const resources = serviceResult.data as ExpenseClaimDocument[];
 
       const fileUploadsResultsArrays = await Promise.all(
         resources.map(async (resource) => {
@@ -209,11 +237,12 @@ function getQueriedExpenseClaimsHandler<
               );
 
               if (fileUploadResult.err) {
-                await createNewErrorLogService(
+                await createNewResourceService(
                   createErrorLogSchema(fileUploadResult.val, request.body),
+                  ErrorLogModel,
                 );
 
-                return new Err(createHttpResultError({}));
+                return new Err(createHttpResultError({ accessToken }));
               }
 
               return fileUploadResult;
@@ -231,7 +260,7 @@ function getQueriedExpenseClaimsHandler<
       ) {
         response
           .status(200)
-          .json(createHttpResultError({ status: 400 }));
+          .json(createHttpResultError({ accessToken }));
         return;
       }
 
@@ -240,9 +269,7 @@ function getQueriedExpenseClaimsHandler<
           const fileUploadsResults = fileUploadsResultsArrays[index];
           const fileUploads = fileUploadsResults
             .map((fileUploadResult) =>
-              fileUploadResult.err
-                ? void 0
-                : fileUploadResult.safeUnwrap().data[0]
+              fileUploadResult.err ? void 0 : fileUploadResult.safeUnwrap().data
             )
             .filter((fileUpload) => removeUndefinedAndNullValues(fileUpload));
 
@@ -257,20 +284,24 @@ function getQueriedExpenseClaimsHandler<
         .status(200)
         .json(
           createHttpResultSuccess({
+            accessToken,
             data: resourceServerResponseArray,
-            pages: Math.ceil(totalDocuments / Number(options.limit)),
+            pages: Math.ceil(totalDocuments / Number(options?.limit ?? 10)),
             totalDocuments,
           }),
         );
     } catch (error: unknown) {
-      await createNewErrorLogService(
+      await createNewResourceService(
         createErrorLogSchema(
-          createHttpResultError({ data: [error] }),
+          error,
           request.body,
         ),
+        ErrorLogModel,
       );
 
-      response.status(200).json(createHttpResultError({}));
+      response.status(200).json(
+        createHttpResultError({ accessToken: request.body.accessToken ?? "" }),
+      );
     }
   };
 }
@@ -279,7 +310,7 @@ function getQueriedExpenseClaimsHandler<
 // @route  GET api/v1/company/expense-claim/user
 // @access Private
 function getQueriedExpenseClaimsByUserHandler<
-  Doc extends Record<string, unknown> = Record<string, unknown>,
+  Doc extends DBRecord = DBRecord,
 >(
   model: Model<Doc>,
 ) {
@@ -291,7 +322,7 @@ function getQueriedExpenseClaimsByUserHandler<
       const {
         userInfo: { userId },
       } = request.body;
-      let { newQueryFlag, totalDocuments } = request.body;
+      let { accessToken, newQueryFlag, totalDocuments } = request.body;
 
       const { filter, projection, options } = request.query;
 
@@ -299,23 +330,24 @@ function getQueriedExpenseClaimsByUserHandler<
 
       // only perform a countDocuments scan if a new query is being made
       if (newQueryFlag) {
-        const totalResult = await getQueriedTotalResourcesService(
-          filterWithUserId,
+        const totalResult = await getQueriedTotalResourcesService({
+          filter: filterWithUserId,
           model,
-        );
+        });
 
         if (totalResult.err) {
-          await createNewErrorLogService(
+          await createNewResourceService(
             createErrorLogSchema(totalResult.val, request.body),
+            ErrorLogModel,
           );
 
           response
             .status(200)
-            .json(createHttpResultError({ status: 400 }));
+            .json(createHttpResultError({ accessToken }));
           return;
         }
 
-        totalDocuments = totalResult.safeUnwrap().data?.[0] ?? 0;
+        totalDocuments = totalResult.safeUnwrap().data ?? 0;
       }
 
       const getResourcesResult = await getQueriedResourcesService({
@@ -326,18 +358,27 @@ function getQueriedExpenseClaimsByUserHandler<
       });
 
       if (getResourcesResult.err) {
-        await createNewErrorLogService(
+        await createNewResourceService(
           createErrorLogSchema(getResourcesResult.val, request.body),
+          ErrorLogModel,
         );
 
         response
           .status(200)
-          .json(createHttpResultError({ status: 400 }));
+          .json(createHttpResultError({ accessToken }));
         return;
       }
 
-      const resources = getResourcesResult.safeUnwrap()
-        .data as unknown as Require_id<FlattenMaps<ExpenseClaimDocument>>[];
+      const serviceResult = getResourcesResult.safeUnwrap();
+
+      if (serviceResult.kind === "notFound") {
+        response
+          .status(200)
+          .json(createHttpResultSuccess({ accessToken }));
+        return;
+      }
+
+      const resources = serviceResult.data as ExpenseClaimDocument[];
 
       const fileUploadsResultsArrays = await Promise.all(
         resources.map(async (resource) => {
@@ -349,11 +390,12 @@ function getQueriedExpenseClaimsByUserHandler<
               );
 
               if (fileUploadResult.err) {
-                await createNewErrorLogService(
+                await createNewResourceService(
                   createErrorLogSchema(fileUploadResult.val, request.body),
+                  ErrorLogModel,
                 );
 
-                return new Err(createHttpResultError({}));
+                return new Err(createHttpResultError({ accessToken }));
               }
 
               return fileUploadResult;
@@ -371,7 +413,7 @@ function getQueriedExpenseClaimsByUserHandler<
       ) {
         response
           .status(200)
-          .json(createHttpResultError({ status: 400 }));
+          .json(createHttpResultError({ accessToken }));
         return;
       }
 
@@ -380,9 +422,7 @@ function getQueriedExpenseClaimsByUserHandler<
           const fileUploadsResults = fileUploadsResultsArrays[index];
           const fileUploads = fileUploadsResults
             .map((fileUploadResult) =>
-              fileUploadResult.err
-                ? void 0
-                : fileUploadResult.safeUnwrap().data[0]
+              fileUploadResult.err ? void 0 : fileUploadResult.safeUnwrap().data
             )
             .filter((fileUpload) => removeUndefinedAndNullValues(fileUpload));
 
@@ -397,20 +437,24 @@ function getQueriedExpenseClaimsByUserHandler<
         .status(200)
         .json(
           createHttpResultSuccess({
+            accessToken,
             data: resourceServerResponseArray,
             pages: Math.ceil(totalDocuments / Number(options?.limit ?? 10)),
             totalDocuments,
           }),
         );
     } catch (error: unknown) {
-      await createNewErrorLogService(
+      await createNewResourceService(
         createErrorLogSchema(
-          createHttpResultError({ data: [error] }),
+          error,
           request.body,
         ),
+        ErrorLogModel,
       );
 
-      response.status(200).json(createHttpResultError({}));
+      response.status(200).json(createHttpResultError({
+        accessToken: request.body.accessToken ?? "",
+      }));
     }
   };
 }
@@ -419,7 +463,7 @@ function getQueriedExpenseClaimsByUserHandler<
 // @route  GET api/v1/company/expense-claim/:resourceId
 // @access Private/Admin/Manager
 function getExpenseClaimByIdHandler<
-  Doc extends Record<string, unknown> = Record<string, unknown>,
+  Doc extends DBRecord = DBRecord,
 >(
   model: Model<Doc>,
 ) {
@@ -428,6 +472,7 @@ function getExpenseClaimByIdHandler<
     response: Response<HttpResult>,
   ) => {
     try {
+      const { accessToken } = request.body;
       const { resourceId } = request.params;
 
       const getResourceResult = await getResourceByIdService(
@@ -436,18 +481,27 @@ function getExpenseClaimByIdHandler<
       );
 
       if (getResourceResult.err) {
-        await createNewErrorLogService(
+        await createNewResourceService(
           createErrorLogSchema(getResourceResult.val, request.body),
+          ErrorLogModel,
         );
 
         response
           .status(200)
-          .json(createHttpResultError({ status: 400 }));
+          .json(createHttpResultError({ accessToken }));
         return;
       }
 
-      const resource = getResourceResult.safeUnwrap()
-        .data[0] as unknown as ExpenseClaimDocument;
+      const serviceResult = getResourceResult.safeUnwrap();
+
+      if (serviceResult.kind === "notFound") {
+        response
+          .status(200)
+          .json(createHttpResultSuccess({ accessToken }));
+        return;
+      }
+
+      const resource = serviceResult.data as ExpenseClaimDocument;
 
       const fileUploadsResults = await Promise.all(
         resource.uploadedFilesIds.map(async (uploadedFileId) => {
@@ -457,11 +511,12 @@ function getExpenseClaimByIdHandler<
           );
 
           if (fileUploadResult.err) {
-            await createNewErrorLogService(
+            await createNewResourceService(
               createErrorLogSchema(fileUploadResult.val, request.body),
+              ErrorLogModel,
             );
 
-            return new Err(createHttpResultError({}));
+            return new Err(createHttpResultError({ accessToken }));
           }
 
           return fileUploadResult;
@@ -471,13 +526,13 @@ function getExpenseClaimByIdHandler<
       if (fileUploadsResults.some((result) => result.err)) {
         response
           .status(200)
-          .json(createHttpResultError({ status: 400 }));
+          .json(createHttpResultError({ accessToken }));
         return;
       }
 
       const fileUploads = fileUploadsResults
         .map((fileUploadResult) =>
-          fileUploadResult.err ? void 0 : fileUploadResult.safeUnwrap().data[0]
+          fileUploadResult.err ? void 0 : fileUploadResult.safeUnwrap().data
         )
         .filter((fileUpload) => removeUndefinedAndNullValues(fileUpload));
 
@@ -490,18 +545,22 @@ function getExpenseClaimByIdHandler<
         .status(200)
         .json(
           createHttpResultSuccess({
+            accessToken,
             data: [resourceServerResponse],
           }),
         );
     } catch (error: unknown) {
-      await createNewErrorLogService(
+      await createNewResourceService(
         createErrorLogSchema(
-          createHttpResultError({ data: [error] }),
+          error,
           request.body,
         ),
+        ErrorLogModel,
       );
 
-      response.status(200).json(createHttpResultError({}));
+      response.status(200).json(createHttpResultError({
+        accessToken: request.body.accessToken ?? "",
+      }));
     }
   };
 }
@@ -510,7 +569,7 @@ function getExpenseClaimByIdHandler<
 // @route  DELETE api/v1/company/expense-claim/:resourceId
 // @access Private/Admin/Manager
 function deleteExpenseClaimByIdHandler<
-  Doc extends Record<string, unknown> = Record<string, unknown>,
+  Doc extends DBRecord = DBRecord,
 >(
   model: Model<Doc>,
 ) {
@@ -519,6 +578,7 @@ function deleteExpenseClaimByIdHandler<
     response: Response<HttpResult>,
   ) => {
     try {
+      const { accessToken } = request.body;
       const { resourceId } = request.params;
 
       const getResourceResult = await getResourceByIdService(
@@ -527,18 +587,27 @@ function deleteExpenseClaimByIdHandler<
       );
 
       if (getResourceResult.err) {
-        await createNewErrorLogService(
+        await createNewResourceService(
           createErrorLogSchema(getResourceResult.val, request.body),
+          ErrorLogModel,
         );
 
         response
           .status(200)
-          .json(createHttpResultError({ status: 400 }));
+          .json(createHttpResultError({ accessToken }));
         return;
       }
 
-      const resource = getResourceResult.safeUnwrap()
-        .data[0] as unknown as ExpenseClaimDocument;
+      const serviceResult = getResourceResult.safeUnwrap();
+
+      if (serviceResult.kind === "notFound") {
+        response
+          .status(200)
+          .json(createHttpResultSuccess({ accessToken }));
+        return;
+      }
+
+      const resource = serviceResult.data as ExpenseClaimDocument;
 
       const uploadedFilesIds = [...resource.uploadedFilesIds];
 
@@ -554,7 +623,7 @@ function deleteExpenseClaimByIdHandler<
       if (deleteFileUploadsResults.some((result) => result.err)) {
         response
           .status(200)
-          .json(createHttpResultError({ status: 400 }));
+          .json(createHttpResultError({ accessToken }));
         return;
       }
 
@@ -564,28 +633,32 @@ function deleteExpenseClaimByIdHandler<
       );
 
       if (deleteResourceResult.err) {
-        await createNewErrorLogService(
+        await createNewResourceService(
           createErrorLogSchema(deleteResourceResult.val, request.body),
+          ErrorLogModel,
         );
 
         response
           .status(200)
-          .json(createHttpResultError({ status: 400 }));
+          .json(createHttpResultError({ accessToken }));
         return;
       }
 
       response
         .status(200)
-        .json(createHttpResultSuccess({}));
+        .json(createHttpResultSuccess({ accessToken }));
     } catch (error: unknown) {
-      await createNewErrorLogService(
+      await createNewResourceService(
         createErrorLogSchema(
-          createHttpResultError({ data: [error] }),
+          error,
           request.body,
         ),
+        ErrorLogModel,
       );
 
-      response.status(200).json(createHttpResultError({}));
+      response.status(200).json(createHttpResultError({
+        accessToken: request.body.accessToken ?? "",
+      }));
     }
   };
 }

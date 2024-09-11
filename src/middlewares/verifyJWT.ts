@@ -7,6 +7,7 @@ import { createTokenService } from "../resources/auth/auth.service";
 import {
   ACCESS_TOKEN_EXPIRES_IN,
   REFRESH_TOKEN_EXPIRES_IN,
+  TRIGGER_LOGOUT_KEY,
 } from "../constants";
 import { verifyJWTSafe } from "../utils";
 
@@ -31,13 +32,17 @@ async function verifyJWTMiddleware(
   const accessToken = request.headers.authorization?.split(" ")[1];
   if (!accessToken) {
     response.clearCookie("refreshToken", cookieOptions);
-    return next(new Error("Access token not found"));
+    return next(
+      new Error(TRIGGER_LOGOUT_KEY, { cause: "Access token not found" }),
+    );
   }
 
   const { refreshToken } = request.cookies;
   if (!refreshToken) {
     response.clearCookie("refreshToken", cookieOptions);
-    return next(new Error("Refresh token not found"));
+    return next(
+      new Error(TRIGGER_LOGOUT_KEY, { cause: "Refresh token not found" }),
+    );
   }
 
   // check if refresh token is valid
@@ -55,7 +60,9 @@ async function verifyJWTMiddleware(
   // if refresh token is invalid (except for expired)
   if (decodedRefreshTokenResult.err) {
     response.clearCookie("refreshToken", cookieOptions);
-    return next(new Error("Refresh token invalid"));
+    return next(
+      new Error(TRIGGER_LOGOUT_KEY, { cause: "Refresh token invalid" }),
+    );
   }
 
   const refreshTokenDecoded = decodedRefreshTokenResult.safeUnwrap()
@@ -64,7 +71,9 @@ async function verifyJWTMiddleware(
   // if access token is invalid (except for expired)
   if (decodedAccessTokenResult.err) {
     response.clearCookie("refreshToken", cookieOptions);
-    return next(new Error("Access token invalid"));
+    return next(
+      new Error(TRIGGER_LOGOUT_KEY, { cause: "Access token invalid" }),
+    );
   }
 
   // if refresh token is valid and expired
@@ -79,14 +88,22 @@ async function verifyJWTMiddleware(
 
     if (refreshTokenResult.err) {
       response.clearCookie("refreshToken", cookieOptions);
-      return next(new Error("Error refreshing tokens"));
+      return next(
+        new Error(TRIGGER_LOGOUT_KEY, {
+          cause: "Error refreshing refresh token",
+        }),
+      );
     }
 
     const newRefreshToken = refreshTokenResult.safeUnwrap().data;
 
     if (!newRefreshToken) {
       response.clearCookie("refreshToken", cookieOptions);
-      return next(new Error("Error refreshing tokens"));
+      return next(
+        new Error(TRIGGER_LOGOUT_KEY, {
+          cause: "Error refreshing refresh token",
+        }),
+      );
     }
 
     response.cookie("refreshToken", newRefreshToken, {
@@ -103,14 +120,18 @@ async function verifyJWTMiddleware(
 
     if (accessTokenResult.err) {
       response.clearCookie("refreshToken", cookieOptions);
-      return next(new Error("Error refreshing tokens"));
+      return next(
+        new Error(TRIGGER_LOGOUT_KEY, { cause: "Error refreshing tokens" }),
+      );
     }
 
     const newAccessToken = accessTokenResult.safeUnwrap().data;
 
     if (!newAccessToken) {
       response.clearCookie("refreshToken", cookieOptions);
-      return next(new Error("Error refreshing tokens"));
+      return next(
+        new Error(TRIGGER_LOGOUT_KEY, { cause: "Error refreshing tokens" }),
+      );
     }
 
     Object.defineProperty(request.body, "accessToken", {
@@ -133,14 +154,18 @@ async function verifyJWTMiddleware(
 
     if (accessTokenResult.err) {
       response.clearCookie("refreshToken", cookieOptions);
-      return next(new Error("Error refreshing tokens"));
+      return next(
+        new Error(TRIGGER_LOGOUT_KEY, { cause: "Error refreshing tokens" }),
+      );
     }
 
     const newAccessToken = accessTokenResult.safeUnwrap().data;
 
     if (!newAccessToken) {
       response.clearCookie("refreshToken", cookieOptions);
-      return next(new Error("Error refreshing tokens"));
+      return next(
+        new Error(TRIGGER_LOGOUT_KEY, { cause: "Error refreshing tokens" }),
+      );
     }
 
     Object.defineProperty(request.body, "accessToken", {

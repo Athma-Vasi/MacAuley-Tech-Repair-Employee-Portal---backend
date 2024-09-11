@@ -1,4 +1,4 @@
-import { Schema, Types, model } from "mongoose";
+import { model, Schema, Types } from "mongoose";
 import type {
   DimensionUnit,
   PeripheralsInterface,
@@ -6,7 +6,7 @@ import type {
   StarRatingsCount,
   WeightUnit,
 } from "../productCategory.types";
-import { Currency } from "../../actions/company/expenseClaim";
+import { Currency } from "../../../types";
 
 type AccessorySchema = {
   // page 1
@@ -180,7 +180,7 @@ const accessorySchema = new Schema<AccessorySchema>(
       index: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // text indexes for searching all user entered text input fields

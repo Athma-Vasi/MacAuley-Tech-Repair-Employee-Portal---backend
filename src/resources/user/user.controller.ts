@@ -3,19 +3,28 @@ import type { Response } from "express";
 import { UserDocument, UserModel } from "./user.model";
 
 import { Model } from "mongoose";
-import { CreateNewResourceRequest, HttpResult } from "../../types";
+import { CreateNewResourceRequest, DBRecord, HttpResult } from "../../types";
 import {
   createNewResourceService,
   getResourceByFieldService,
 } from "../../services";
-import { createNewErrorLogService } from "../errorLog";
-import { createErrorLogSchema, createHttpResultError } from "../../utils";
+
+import {
+  createErrorLogSchema,
+  createHttpResultError,
+  createHttpResultSuccess,
+} from "../../utils";
+import { ErrorLogModel } from "../errorLog";
+import {
+  updateUsernameEmailSetWithEmailService,
+  updateUsernameEmailSetWithUsernameService,
+} from "../usernameEmailSet";
 
 // @desc   Create new user
 // @route  POST /api/v1/user
-// @access Private
+// @access Public
 function createNewUserHandler<
-  Doc extends Record<string, unknown> = Record<string, unknown>,
+  Doc extends DBRecord = DBRecord,
 >(model: Model<Doc>) {
   return async (
     request: CreateNewResourceRequest<Doc>,
@@ -25,51 +34,54 @@ function createNewUserHandler<
       const { schema } = request.body;
 
       const usernameExistsResult = await getResourceByFieldService({
-        field: "username",
-        value: schema.username,
+        filter: { username: schema.username },
         model,
       });
 
       if (usernameExistsResult.err) {
-        await createNewErrorLogService(
+        await createNewResourceService(
           createErrorLogSchema(
             usernameExistsResult.val,
             request.body,
           ),
+          ErrorLogModel,
         );
 
-        response.status(200).json(createHttpResultError({}));
+        response.status(200).json(createHttpResultError({ accessToken: "" }));
         return;
       }
 
-      if (usernameExistsResult.val.status === 200) {
+      if (usernameExistsResult.val.kind === "success") {
         response.status(200).json(
-          createHttpResultError({ message: "Username already exists" }),
+          createHttpResultError({ accessToken: "" }),
         );
         return;
       }
 
       const emailExistsResult = await getResourceByFieldService({
-        field: "email",
-        value: schema.email,
+        filter: { email: schema.email },
         model,
       });
 
       if (emailExistsResult.err) {
-        await createNewErrorLogService(
+        await createNewResourceService(
           createErrorLogSchema(
             emailExistsResult.val,
             request.body,
           ),
+          ErrorLogModel,
         );
 
-        response.status(200).json(createHttpResultError({}));
+        response.status(200).json(createHttpResultError({ accessToken: "" }));
         return;
       }
 
-      if (emailExistsResult.val.status === 200) {
+      if (emailExistsResult.val.kind === "success") {
         response.status(200).json(
-          createHttpResultError({ message: "Email already exists" }),
+          createHttpResultError({
+            accessToken: "",
+            message: "Email already exists",
+          }),
         );
         return;
       }
@@ -80,37 +92,51 @@ function createNewUserHandler<
       );
 
       if (userCreationResult.err) {
-        await createNewErrorLogService(
+        await createNewResourceService(
           createErrorLogSchema(
             userCreationResult.val,
             request.body,
           ),
+          ErrorLogModel,
         );
 
-        response.status(200).json(createHttpResultError({}));
+        response.status(200).json(createHttpResultError({ accessToken: "" }));
         return;
       }
 
-      response.status(201).json(userCreationResult.safeUnwrap());
+      const { username, email } = schema;
 
-      //     const updatedUsernameEmailSet = await Promise.all([
-      //       updateUsernameEmailSetWithUsernameService(username),
-      //       updateUsernameEmailSetWithEmailService(email),
-      //     ]);
-      //     if (updatedUsernameEmailSet.some((value) => !value)) {
-      //       return next(
-      //         new createHttpError.InternalServerError("User creation failed"),
-      //       );
-      //     }
+      const updateUsernameEmailSetResult = await Promise.all([
+        updateUsernameEmailSetWithUsernameService(username),
+        updateUsernameEmailSetWithEmailService(email),
+      ]);
+
+      if (updateUsernameEmailSetResult.some((value) => value.err)) {
+        await createNewResourceService(
+          createErrorLogSchema(
+            updateUsernameEmailSetResult,
+            request.body,
+          ),
+          ErrorLogModel,
+        );
+
+        response.status(200).json(createHttpResultError({ accessToken: "" }));
+        return;
+      }
+
+      response.status(200).json(
+        createHttpResultSuccess({ accessToken: "" }),
+      );
     } catch (error: unknown) {
-      await createNewErrorLogService(
+      await createNewResourceService(
         createErrorLogSchema(
-          createHttpResultError({ data: [error] }),
+          error,
           request.body,
         ),
+        ErrorLogModel,
       );
 
-      response.status(200).json(createHttpResultError({}));
+      response.status(200).json(createHttpResultError({ accessToken: "" }));
     }
   };
 }

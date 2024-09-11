@@ -1,6 +1,5 @@
-import { Schema, Types, model } from "mongoose";
-import { Urgency } from "../actions/general/printerIssue";
-import { Currency } from "../actions/company/expenseClaim";
+import { model, Schema, Types } from "mongoose";
+import { Currency, Urgency } from "../../types";
 
 type RepairCategory =
   | "Computer Component"
@@ -217,7 +216,7 @@ const repairTicketSchema = new Schema<RepairTicketSchema>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // text index for searching
@@ -238,15 +237,18 @@ repairTicketSchema.index({
   testingResults: "text",
 });
 
-const RepairTicketModel = model<RepairTicketDocument>("RepairTicket", repairTicketSchema);
+const RepairTicketModel = model<RepairTicketDocument>(
+  "RepairTicket",
+  repairTicketSchema,
+);
 
 export { RepairTicketModel };
 export type {
-  RepairTicketSchema,
-  RepairTicketDocument,
-  RequiredRepairs,
   PartsNeeded,
   RepairStatus,
-  RepairTicketInitialSchema,
+  RepairTicketDocument,
   RepairTicketFinalSchema,
+  RepairTicketInitialSchema,
+  RepairTicketSchema,
+  RequiredRepairs,
 };

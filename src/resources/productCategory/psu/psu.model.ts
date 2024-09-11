@@ -1,4 +1,4 @@
-import { Schema, Types, model } from "mongoose";
+import { model, Schema, Types } from "mongoose";
 
 import type {
   DimensionUnit,
@@ -9,7 +9,7 @@ import type {
   StarRatingsCount,
   WeightUnit,
 } from "../productCategory.types";
-import type { Currency } from "../../actions/company/expenseClaim";
+import { Currency } from "../../../types";
 
 type PsuSchema = {
   // page 1
@@ -190,7 +190,7 @@ const psuSchema = new Schema<PsuSchema>(
       index: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // text indexes for searching all user entered text input fields
@@ -203,5 +203,11 @@ psuSchema.index({
 
 const PsuModel = model<PsuDocument>("Psu", psuSchema);
 
-export type { PsuDocument, PsuSchema, PsuEfficiency, PsuFormFactor, PsuModularity };
+export type {
+  PsuDocument,
+  PsuEfficiency,
+  PsuFormFactor,
+  PsuModularity,
+  PsuSchema,
+};
 export { PsuModel };
