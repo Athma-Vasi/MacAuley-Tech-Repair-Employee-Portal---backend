@@ -1,14 +1,14 @@
 import { CookieOptions, NextFunction, Request, Response } from "express";
 
 import { config } from "../config";
-import { TokenDecoded } from "../resources/auth/auth.types";
+import { DecodedToken } from "../resources/auth/auth.types";
 
-import { createTokenService } from "../resources/auth/auth.service";
 import {
   ACCESS_TOKEN_EXPIRES_IN,
   REFRESH_TOKEN_EXPIRES_IN,
   TRIGGER_LOGOUT_KEY,
 } from "../constants";
+import { createTokenService } from "../resources/auth/auth.service";
 import { verifyJWTSafe } from "../utils";
 
 async function verifyJWTMiddleware(
@@ -65,8 +65,8 @@ async function verifyJWTMiddleware(
     );
   }
 
-  const refreshTokenDecoded = decodedRefreshTokenResult.safeUnwrap()
-    .data as TokenDecoded;
+  const refreshDecodedToken = decodedRefreshTokenResult.safeUnwrap()
+    .data as DecodedToken;
 
   // if access token is invalid (except for expired)
   if (decodedAccessTokenResult.err) {
@@ -80,7 +80,7 @@ async function verifyJWTMiddleware(
   // create tokens and set cookie and continue to next middleware
   if (decodedRefreshTokenResult.safeUnwrap().kind === "error") {
     const refreshTokenResult = await createTokenService({
-      decoded: refreshTokenDecoded,
+      decoded: refreshDecodedToken,
       expiresIn: REFRESH_TOKEN_EXPIRES_IN,
       request,
       seed: REFRESH_TOKEN_SEED,
@@ -112,7 +112,7 @@ async function verifyJWTMiddleware(
     });
 
     const accessTokenResult = await createTokenService({
-      decoded: refreshTokenDecoded,
+      decoded: refreshDecodedToken,
       expiresIn: ACCESS_TOKEN_EXPIRES_IN,
       request,
       seed: ACCESS_TOKEN_SEED,
@@ -146,7 +146,7 @@ async function verifyJWTMiddleware(
   // check if access token is expired
   if (decodedAccessTokenResult.safeUnwrap().kind === "error") {
     const accessTokenResult = await createTokenService({
-      decoded: refreshTokenDecoded,
+      decoded: refreshDecodedToken,
       expiresIn: ACCESS_TOKEN_EXPIRES_IN,
       request,
       seed: ACCESS_TOKEN_SEED,

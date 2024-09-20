@@ -5,14 +5,14 @@
 /**
  * Imports
  */
-import { authRouter } from "./auth.routes";
 import { loginUserHandler, logoutUserHandler } from "./auth.handler";
+import { authRouter } from "./auth.routes";
 
 import type {
+  DecodedToken,
   LoginUserRequest,
   LogoutUserRequest,
   RefreshTokenRequest,
-  TokenDecoded,
 } from "./auth.types";
 
 /**
@@ -20,8 +20,8 @@ import type {
  */
 export { authRouter, loginUserHandler, logoutUserHandler };
 export type {
+  DecodedToken,
   LoginUserRequest,
   LogoutUserRequest,
   RefreshTokenRequest,
-  TokenDecoded,
 };

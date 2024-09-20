@@ -30,7 +30,7 @@ import {
 import { ErrorLogModel } from "../errorLog";
 import { UserDocument, UserModel } from "../user";
 import { AuthModel, AuthSchema } from "./auth.model";
-import { RegisterUserRequest, TokenDecoded } from "./auth.types";
+import { DecodedToken, RegisterUserRequest } from "./auth.types";
 
 /**
  * @description implements 'Refresh Token Rotation' as defined in the OAuth 2.0 RFC
@@ -392,10 +392,10 @@ function logoutUserHandler<
         return;
       }
 
-      const refreshTokenDecoded = verifyRefreshTokenResult.safeUnwrap()
-        .data as TokenDecoded | undefined;
+      const refreshDecodedToken = verifyRefreshTokenResult.safeUnwrap()
+        .data as DecodedToken | undefined;
 
-      if (refreshTokenDecoded === undefined) {
+      if (refreshDecodedToken === undefined) {
         response.clearCookie("refreshToken", cookieOptions);
         response.status(200).json(
           createHttpResultError({ accessToken: "", triggerLogout: true }),
@@ -404,7 +404,7 @@ function logoutUserHandler<
         return;
       }
 
-      const sessionId = refreshTokenDecoded.sessionId;
+      const sessionId = refreshDecodedToken.sessionId;
 
       // check if tokens are in deny list
 
@@ -442,7 +442,7 @@ function logoutUserHandler<
 
       // both tokens share the same jti
       const isEitherTokenInDenyList = existingSession.tokensDenyList.includes(
-        refreshTokenDecoded.jti,
+        refreshDecodedToken.jti,
       );
 
       if (isEitherTokenInDenyList) {
@@ -457,7 +457,7 @@ function logoutUserHandler<
       // add token jti to deny list
       const updateSessionResult = await updateResourceByIdService({
         fields: {
-          tokensDenyList: [refreshTokenDecoded.jti],
+          tokensDenyList: [refreshDecodedToken.jti],
         },
         model: AuthModel,
         resourceId: sessionId.toString(),
@@ -542,7 +542,7 @@ export { loginUserHandler, logoutUserHandler, registerUserHandler };
 //           userInfo: { userId, roles, username },
 //           sessionId,
 //           jti,
-//         } = decoded as TokenDecoded;
+//         } = decoded as DecodedToken;
 
 //         console.log("refresh token decoded", decoded);
 

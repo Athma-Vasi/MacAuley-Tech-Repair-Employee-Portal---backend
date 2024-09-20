@@ -1,18 +1,18 @@
+import { Request } from "express";
+import jwt from "jsonwebtoken";
+import { Err, Ok, Result } from "ts-results";
+import { v4 as uuidv4 } from "uuid";
 import {
   createNewResourceService,
   deleteManyResourcesService,
   getResourceByIdService,
   updateResourceByIdService,
 } from "../../services";
-import { createErrorLogSchema } from "../../utils";
-import { AuthDocument, AuthModel } from "./auth.model";
-import { TokenDecoded } from "./auth.types";
-import { Request } from "express";
-import { Err, Ok, Result } from "ts-results";
-import jwt from "jsonwebtoken";
-import { v4 as uuidv4 } from "uuid";
 import { ServiceOutput } from "../../types";
+import { createErrorLogSchema } from "../../utils";
 import { ErrorLogModel } from "../errorLog";
+import { AuthDocument, AuthModel } from "./auth.model";
+import { DecodedToken } from "./auth.types";
 
 async function createTokenService(
   {
@@ -21,7 +21,7 @@ async function createTokenService(
     request,
     seed,
   }: {
-    decoded: TokenDecoded;
+    decoded: DecodedToken;
     expiresIn: string;
     request: Request;
     seed: string;

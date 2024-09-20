@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { ErrorLogModel } from "../resources/errorLog/errorLog.model";
-import { createErrorLogSchema, createHttpResultError } from "../utils";
 import { createNewResourceService } from "../services";
+import { createErrorLogSchema, createHttpResultError } from "../utils";
 
 async function errorHandler(
   error: unknown,
@@ -10,6 +10,10 @@ async function errorHandler(
   _next: NextFunction,
 ) {
   if (error instanceof Error) {
+    console.group("errorHandler catch all");
+    console.error(error);
+    console.groupEnd();
+
     const errorLogSchema = createErrorLogSchema(
       error,
       request.body,

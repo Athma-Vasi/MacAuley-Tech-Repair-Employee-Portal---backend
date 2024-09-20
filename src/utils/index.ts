@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { Err, Ok, Result } from "ts-results";
-import { TokenDecoded } from "../resources/auth/auth.types";
+import { DecodedToken } from "../resources/auth/auth.types";
 import { ErrorLogSchema } from "../resources/errorLog";
 import {
   HttpResult,
@@ -173,9 +173,9 @@ async function verifyJWTSafe(
     seed: string;
     token: string;
   },
-): Promise<Result<ServiceOutput<TokenDecoded>, ServiceOutput>> {
+): Promise<Result<ServiceOutput<DecodedToken>, ServiceOutput>> {
   try {
-    const decoded = jwt.verify(token, seed) as TokenDecoded;
+    const decoded = jwt.verify(token, seed) as DecodedToken;
 
     return new Ok({ data: decoded, kind: "success" });
   } catch (error: unknown) {

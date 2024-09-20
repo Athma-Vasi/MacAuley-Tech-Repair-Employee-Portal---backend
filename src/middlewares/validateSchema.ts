@@ -9,13 +9,16 @@ function validateSchemaMiddleware(
     abortEarly: false,
     allowUnknown: true,
     stripUnknown: true,
-  }
+  },
 ) {
   return (request: Request, response: Response, next: NextFunction) => {
     const reqBodyField = request.body[fieldName];
-    const fields = fieldName === "documentUpdate" ? reqBodyField.fields : reqBodyField;
+    const fields = fieldName === "documentUpdate"
+      ? reqBodyField.fields
+      : reqBodyField;
 
     console.group("validateSchemaMiddleware");
+    console.log("reqBodyField: ", reqBodyField);
     console.log("fields: ", fields);
     console.log("fieldName: ", fieldName);
     console.groupEnd();
@@ -25,8 +28,8 @@ function validateSchemaMiddleware(
     if (error) {
       return next(
         new createHttpError.BadRequest(
-          `Validation error: ${error.details.map((x) => x.message).join(", ")}`
-        )
+          `Validation error: ${error.details.map((x) => x.message).join(", ")}`,
+        ),
       );
     }
 

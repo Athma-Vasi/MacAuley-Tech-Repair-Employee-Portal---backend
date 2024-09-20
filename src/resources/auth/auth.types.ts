@@ -35,7 +35,7 @@ type LogoutUserRequest = Request & {
   };
 };
 
-type TokenDecoded = {
+type DecodedToken = {
   userInfo: {
     userId: Types.ObjectId;
     username: string;
@@ -48,9 +48,9 @@ type TokenDecoded = {
 };
 
 export type {
+  DecodedToken,
   LoginUserRequest,
   LogoutUserRequest,
   RefreshTokenRequest,
   RegisterUserRequest,
-  TokenDecoded,
 };
