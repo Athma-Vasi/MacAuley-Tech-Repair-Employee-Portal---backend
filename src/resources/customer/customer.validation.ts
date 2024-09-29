@@ -1,47 +1,3 @@
-/**
- * type PaymentInformation = {
-	cardholderName: string;
-	cardNumber: string;
-	expirationDate: string;
-	cvv: string;
-	billingAddress: Address;
-};
-
-type CustomerSchema = {
-	username: string;
-	password: string;
-	email: string;
-
-	firstName: string;
-	middleName: string;
-	lastName: string;
-	preferredName: string;
-	preferredPronouns: PreferredPronouns;
-	profilePictureUrl: string;
-	dateOfBirth: NativeDate;
-
-	contactNumber: PhoneNumber;
-	address: Address;
-	paymentInformation: PaymentInformation;
-	productReviewsIds: (Types.ObjectId | string)[];
-	purchaseHistoryIds: (Types.ObjectId | string)[];
-	rmaHistoryIds: (Types.ObjectId | string)[];
-
-	isActive: boolean;
-	completedSurveys: (Types.ObjectId | string)[];
-	isPrefersReducedMotion: boolean;
-};
-
-type Address = {
-    addressLine: string;
-    city: string;
-    province?: Province | undefined;
-    state?: StatesUS | undefined;
-    postalCode: PostalCode;
-    country: Country;
-}
- */
-
 import Joi from "joi";
 import {
   ADDRESS_LINE_REGEX,
@@ -118,8 +74,8 @@ const updateCustomerJoiSchema = Joi.object({
 });
 
 export {
-  createCustomerJoiSchema,
-  updateCustomerJoiSchema,
   ADDRESS_SCHEMA,
+  createCustomerJoiSchema,
   PAYMENT_INFORMATION_SCHEMA,
+  updateCustomerJoiSchema,
 };

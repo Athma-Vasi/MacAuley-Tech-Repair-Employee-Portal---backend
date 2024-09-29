@@ -119,6 +119,13 @@ async function getQueriedResourcesService<
             .lean()
             .exec();
 
+        console.group("getQueriedResourcesService");
+        console.log("filter: ", filter);
+        console.log("projection: ", projection);
+        console.log("options: ", options);
+        console.log("resources: ", resources);
+        console.groupEnd();
+
         if (resources.length === 0) {
             return new Ok({ kind: "notFound" });
         }

@@ -1,8 +1,8 @@
-import { allowedOrigins } from './allowedOrigins';
+import { allowedOrigins } from "./allowedOrigins";
 
 type CustomOrigin = (
   requestOrigin: string | undefined,
-  callback: (err: Error | null, origin?: StaticOrigin) => void
+  callback: (err: Error | null, origin?: StaticOrigin) => void,
 ) => void;
 type StaticOrigin = string | boolean | RegExp | (string | boolean | RegExp)[];
 
@@ -32,13 +32,14 @@ type CorsOptions = {
 const corsOptions: CorsOptions = {
   origin: (
     requestOrigin: string | undefined,
-    callback: (err: Error | null, origin?: StaticOrigin) => void
+    callback: (err: Error | null, origin?: StaticOrigin) => void,
   ): void => {
-    // TODO: remove the undefined in production. it is only used for testing as request.headers.origin is undefined in development
-    if (allowedOrigins.indexOf(requestOrigin ?? 'undefined') !== -1) {
+    // TODO: remove the undefined
+    if (allowedOrigins.indexOf(requestOrigin ?? "undefined") !== -1) {
       callback(null, true);
     } else {
-      const message = `The CORS policy for this site does not allow access from the specified Origin: ${requestOrigin}`;
+      const message =
+        `The CORS policy for this site does not allow access from the specified Origin: ${requestOrigin}`;
       callback(new Error(message), false);
     }
   },

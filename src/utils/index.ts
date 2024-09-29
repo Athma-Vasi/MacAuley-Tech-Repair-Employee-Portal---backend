@@ -114,10 +114,11 @@ function createErrorLogSchema(
   error: unknown,
   requestBody: RequestAfterJWTVerification["body"],
 ): ErrorLogSchema {
-  const {
-    userInfo: { userId, username },
-    sessionId,
-  } = requestBody;
+  const userInfo = requestBody.userInfo ?? {};
+
+  const sessionId = requestBody.sessionId;
+  const userId = userInfo?.userId ?? "";
+  const username = userInfo?.username ?? "";
 
   const unknownError = ".·°՞(¯□¯)՞°·. An unknown error occurred";
 

@@ -31,6 +31,8 @@ async function errorHandler(
       message: "An unknown error occurred",
     }),
   );
+
+  return;
 }
 
 export { errorHandler };

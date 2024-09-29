@@ -1,13 +1,6 @@
-import type {
-    CreateNewResourceRequest,
-    DBRecord,
-    GetQueriedResourceRequest,
-    GetResourceByIdRequest,
-    HttpResult,
-    HttpServerResponse,
-    UpdateResourceByIdRequest,
-} from "../types";
+import type { Response } from "express";
 import type { Model } from "mongoose";
+import { ErrorLogModel } from "../resources/errorLog";
 import {
     createNewResourceService,
     deleteManyResourcesService,
@@ -18,13 +11,20 @@ import {
     getResourceByIdService,
     updateResourceByIdService,
 } from "../services";
+import type {
+    CreateNewResourceRequest,
+    DBRecord,
+    GetQueriedResourceRequest,
+    GetResourceByIdRequest,
+    HttpResult,
+    HttpServerResponse,
+    UpdateResourceByIdRequest,
+} from "../types";
 import {
     createErrorLogSchema,
     createHttpResultError,
     createHttpResultSuccess,
 } from "../utils";
-import type { Response } from "express";
-import { ErrorLogModel } from "../resources/errorLog";
 
 function createNewResourceHandler<Doc extends DBRecord = DBRecord>(
     model: Model<Doc>,
@@ -127,6 +127,14 @@ function getQueriedResourcesHandler<Doc extends DBRecord = DBRecord>(
                 projection,
             });
 
+            console.group("getQueriedResourcesHandler");
+            console.log("request.body", request.body);
+            console.log("filter", filter?.$and?.[0]?.username);
+            console.log("projection", projection);
+            console.log("options", options);
+            console.log("getResourcesResult", getResourcesResult);
+            console.groupEnd();
+
             if (getResourcesResult.err) {
                 await createNewResourceService(
                     createErrorLogSchema(
@@ -142,10 +150,26 @@ function getQueriedResourcesHandler<Doc extends DBRecord = DBRecord>(
                 return;
             }
 
+            const unwrappedResult = getResourcesResult.safeUnwrap();
+            if (unwrappedResult === undefined) {
+                response
+                    .status(200)
+                    .json(createHttpResultError({ accessToken, status: 404 }));
+                return;
+            }
+
+            const { kind, data } = unwrappedResult;
+            if (kind === "notFound" || data === undefined) {
+                response
+                    .status(200)
+                    .json(createHttpResultError({ accessToken, status: 404 }));
+                return;
+            }
+
             response.status(200).json(
                 createHttpResultSuccess({
                     accessToken,
-                    data: getResourcesResult.safeUnwrap().data,
+                    data,
                     pages: Math.ceil(
                         totalDocuments / Number(options?.limit ?? 10),
                     ),
@@ -232,6 +256,22 @@ function getQueriedResourcesByUserHandler<Doc extends DBRecord = DBRecord>(
                 response.status(200).json(
                     createHttpResultError({ accessToken, status: 400 }),
                 );
+                return;
+            }
+
+            const unwrappedResult = getResourcesResult.safeUnwrap();
+            if (unwrappedResult === undefined) {
+                response
+                    .status(200)
+                    .json(createHttpResultError({ accessToken, status: 404 }));
+                return;
+            }
+
+            const { kind, data } = unwrappedResult;
+            if (kind === "notFound" || data === undefined) {
+                response
+                    .status(200)
+                    .json(createHttpResultError({ accessToken, status: 404 }));
                 return;
             }
 

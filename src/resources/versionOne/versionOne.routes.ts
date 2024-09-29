@@ -1,15 +1,26 @@
 import { Router } from "express";
-import { commentRouter } from "../comment";
-import { fileUploadRouter } from "../fileUpload";
-import { userRouter } from "../user";
-import { repairTicketRouter } from "../repairTicket";
-import { customerRouter } from "../customer";
-import { productCategoryRouter } from "../productCategory";
-import { usernameEmailSetRouter } from "../usernameEmailSet";
-import { errorLogRouter } from "../errorLog";
+import {
+    createMongoDbQueryObject,
+    verifyJWTMiddleware,
+    verifyRoles,
+} from "../../middlewares";
 import { actionsRouter } from "../actions/actions.routes";
+import { commentRouter } from "../comment";
+import { customerRouter } from "../customer";
+import { errorLogRouter } from "../errorLog";
+import { fileUploadRouter } from "../fileUpload";
+import { productCategoryRouter } from "../productCategory";
+import { repairTicketRouter } from "../repairTicket";
+import { userRouter } from "../user";
+import { usernameEmailSetRouter } from "../usernameEmailSet";
 
 const versionOneRouter = Router();
+versionOneRouter.use(
+    // verifyJWTMiddleware,
+    // verifyRoles,
+    createMongoDbQueryObject,
+);
+
 // route: /api/v1
 versionOneRouter.use("/actions", actionsRouter);
 versionOneRouter.use("/comment", commentRouter);

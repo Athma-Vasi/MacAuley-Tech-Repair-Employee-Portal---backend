@@ -20,7 +20,7 @@ async function verifyJWTMiddleware(
   const cookieOptions: CookieOptions = {
     httpOnly: true,
     secure: true,
-    sameSite: "strict",
+    sameSite: "none",
   };
   const propertyDescriptor: PropertyDescriptor = {
     value: "",

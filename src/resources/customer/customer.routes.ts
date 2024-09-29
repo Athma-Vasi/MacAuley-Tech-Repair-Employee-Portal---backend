@@ -1,9 +1,4 @@
 import { Router } from "express";
-import { validateSchemaMiddleware } from "../../middlewares/validateSchema";
-import {
-  createCustomerJoiSchema,
-  updateCustomerJoiSchema,
-} from "./customer.validation";
 import {
   createNewResourceHandler,
   deleteManyResourcesHandler,
@@ -13,9 +8,16 @@ import {
   getResourceByIdHandler,
   updateResourceByIdHandler,
 } from "../../handlers";
+import { addUserProjection } from "../../middlewares/addUserProjection";
+import { validateSchemaMiddleware } from "../../middlewares/validateSchema";
 import { CustomerModel } from "./customer.model";
+import {
+  createCustomerJoiSchema,
+  updateCustomerJoiSchema,
+} from "./customer.validation";
 
 const customerRouter = Router();
+customerRouter.use(addUserProjection);
 
 customerRouter
   .route("/")

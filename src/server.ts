@@ -4,17 +4,16 @@ import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import helmet from "helmet";
 import mongoose from "mongoose";
-import path from "path";
 
 import { config } from "./config";
 import { connectDB } from "./config/connectDB";
 import { corsOptions } from "./config/cors";
 import { errorHandler, logEvents, loggerMiddleware } from "./middlewares";
 
-import { authRouter } from "./resources/auth";
-import { apiRouter } from "./resources/api";
-import { credentials } from "./middlewares/credentials";
 import createHttpError from "http-errors";
+import { credentials } from "./middlewares/credentials";
+import { apiRouter } from "./resources/api";
+import { authRouter } from "./resources/auth";
 
 const app = express();
 
@@ -33,7 +32,7 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(compression());
 
-app.use("/", apiRouter);
+// app.use("/", apiRouter);
 
 app.use("/auth", authRouter);
 app.use("/api", apiRouter);
