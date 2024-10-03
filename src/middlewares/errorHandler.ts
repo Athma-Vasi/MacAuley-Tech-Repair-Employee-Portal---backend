@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import { TRIGGER_LOGOUT_KEY } from "../constants";
 import { ErrorLogModel } from "../resources/errorLog/errorLog.model";
 import { createNewResourceService } from "../services";
 import { createErrorLogSchema, createHttpResultError } from "../utils";
@@ -29,6 +30,8 @@ async function errorHandler(
     createHttpResultError({
       accessToken: "",
       message: "An unknown error occurred",
+      triggerLogout: error instanceof Error &&
+        error.message === TRIGGER_LOGOUT_KEY,
     }),
   );
 

@@ -1,12 +1,12 @@
 import type { Request, Response } from "express";
 
 import { Model } from "mongoose";
-import { DBRecord, HttpResult } from "../../types";
 import {
   createAndNotReturnResourceService,
   createNewResourceService,
   getResourceByFieldService,
 } from "../../services";
+import { DBRecord, HttpResult } from "../../types";
 import {
   createErrorLogSchema,
   createHttpResultError,
@@ -54,7 +54,7 @@ function postUsernameEmailSetHandler<
         );
 
         response.status(200).json(
-          createHttpResultError({ accessToken: "" }),
+          createHttpResultError({}),
         );
         return;
       }
@@ -63,6 +63,7 @@ function postUsernameEmailSetHandler<
         createHttpResultSuccess({
           accessToken: "",
           data: [resourceCreationResult.safeUnwrap()],
+          refreshToken: "",
         }),
       );
     } catch (error: unknown) {
@@ -74,7 +75,7 @@ function postUsernameEmailSetHandler<
         ErrorLogModel,
       );
 
-      response.status(200).json(createHttpResultError({ accessToken: "" }));
+      response.status(200).json(createHttpResultError({}));
     }
   };
 }
@@ -117,13 +118,13 @@ function checkUsernameOrEmailExistsHandler<
         );
 
         response.status(200).json(
-          createHttpResultError({ accessToken: "" }),
+          createHttpResultError({}),
         );
         return;
       }
 
       response.status(200).json(
-        createHttpResultSuccess({ accessToken: "" }),
+        createHttpResultSuccess({ accessToken: "", refreshToken: "" }),
       );
     } catch (error: unknown) {
       await createNewResourceService(
@@ -134,7 +135,7 @@ function checkUsernameOrEmailExistsHandler<
         ErrorLogModel,
       );
 
-      response.status(200).json(createHttpResultError({ accessToken: "" }));
+      response.status(200).json(createHttpResultError({}));
     }
   };
 }

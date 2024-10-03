@@ -1,7 +1,11 @@
 import jwt from "jsonwebtoken";
 
-import type { CookieOptions, Response } from "express";
-import type { LoginUserRequest, LogoutUserRequest } from ".";
+import type { Response } from "express";
+import type {
+  LoginUserRequest,
+  LogoutUserRequest,
+  RefreshTokenRequest,
+} from ".";
 
 import { config } from "../../config";
 
@@ -30,6 +34,7 @@ import {
 import { ErrorLogModel } from "../errorLog";
 import { UserDocument, UserModel } from "../user";
 import { AuthModel, AuthSchema } from "./auth.model";
+import { createTokenService } from "./auth.service";
 import { DecodedToken, RegisterUserRequest } from "./auth.types";
 
 /**
@@ -75,7 +80,6 @@ function loginUserHandler<
 
         response.status(200).json(
           createHttpResultError({
-            accessToken: "",
             message: "Unable to get user. Please try again!",
           }),
         );
@@ -88,7 +92,7 @@ function loginUserHandler<
 
       if (userDocument === undefined || userDocument === null) {
         response.status(200).json(
-          createHttpResultError({ accessToken: "", message: "User not found" }),
+          createHttpResultError({ status: 404, message: "User not found" }),
         );
         return;
       }
@@ -106,10 +110,7 @@ function loginUserHandler<
         );
 
         response.status(200).json(
-          createHttpResultError({
-            accessToken: "",
-            message: "Password incorrect",
-          }),
+          createHttpResultError({ status: 401, message: "Password incorrect" }),
         );
         return;
       }
@@ -136,7 +137,6 @@ function loginUserHandler<
 
         response.status(200).json(
           createHttpResultError({
-            accessToken: "",
             message: "Unable to create session. Please try again!",
           }),
         );
@@ -165,13 +165,6 @@ function loginUserHandler<
         },
       );
 
-      response.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        maxAge: 1000 * 60 * 60 * 12, // cookie expires in 12 hours
-      });
-
       const accessToken = jwt.sign(
         {
           userInfo: {
@@ -185,9 +178,9 @@ function loginUserHandler<
         { expiresIn: ACCESS_TOKEN_EXPIRES_IN, jwtid: tokenJwtId },
       );
 
-      const userDocWithoutPassword = Object.entries(userDocument).reduce(
+      const userDocPartial = Object.entries(userDocument).reduce(
         (userDocAcc, [key, value]) => {
-          if (key === "password") {
+          if (key === "password" || key === "paymentInformation") {
             return userDocAcc;
           }
           userDocAcc[key] = value;
@@ -200,7 +193,8 @@ function loginUserHandler<
       response.status(200).json(
         createHttpResultSuccess({
           accessToken,
-          data: [userDocWithoutPassword],
+          data: [userDocPartial],
+          refreshToken,
         }),
       );
     } catch (error: unknown) {
@@ -212,7 +206,113 @@ function loginUserHandler<
         ErrorLogModel,
       );
 
-      response.status(200).json(createHttpResultError({ accessToken: "" }));
+      response.status(200).json(createHttpResultError({}));
+    }
+  };
+}
+
+// @desc   Refresh token
+// @route  POST /auth/refresh
+// @access Private
+function refreshTokensHandler<
+  Doc extends DBRecord = DBRecord,
+>(
+  model: Model<Doc>,
+) {
+  return async (
+    request: RefreshTokenRequest,
+    response: Response,
+  ) => {
+    try {
+      const { decodedToken } = request.body;
+      const { ACCESS_TOKEN_SEED, REFRESH_TOKEN_SEED } = config;
+
+      const refreshTokenResult = await createTokenService({
+        decoded: decodedToken,
+        expiresIn: REFRESH_TOKEN_EXPIRES_IN,
+        request,
+        seed: REFRESH_TOKEN_SEED,
+      });
+
+      if (refreshTokenResult.err) {
+        response.status(200).json(
+          createHttpResultError({
+            message: "Error refreshing refresh token",
+            triggerLogout: true,
+          }),
+        );
+
+        return;
+      }
+
+      const newRefreshToken = refreshTokenResult.safeUnwrap().data as
+        | string
+        | undefined;
+
+      if (newRefreshToken === undefined) {
+        response.status(200).json(
+          createHttpResultError({
+            message: "Error refreshing refresh token",
+            triggerLogout: true,
+          }),
+        );
+
+        return;
+      }
+
+      const accessTokenResult = await createTokenService({
+        decoded: decodedToken,
+        expiresIn: ACCESS_TOKEN_EXPIRES_IN,
+        request,
+        seed: ACCESS_TOKEN_SEED,
+      });
+
+      if (accessTokenResult.err) {
+        response.status(200).json(
+          createHttpResultError({
+            message: "Error refreshing access token",
+            triggerLogout: true,
+          }),
+        );
+
+        return;
+      }
+
+      const newAccessToken = accessTokenResult.safeUnwrap().data as
+        | string
+        | undefined;
+
+      if (newAccessToken === undefined) {
+        response.status(200).json(
+          createHttpResultError({
+            message: "Error refreshing tokens",
+            triggerLogout: true,
+          }),
+        );
+
+        return;
+      }
+
+      response.status(200).json(
+        createHttpResultSuccess({
+          accessToken: newAccessToken,
+          refreshToken: newRefreshToken,
+        }),
+      );
+    } catch (error: unknown) {
+      await createNewResourceService(
+        createErrorLogSchema(
+          error,
+          request.body,
+        ),
+        ErrorLogModel,
+      );
+
+      response.status(200).json(
+        createHttpResultError({
+          triggerLogout: true,
+        }),
+      );
     }
   };
 }
@@ -246,7 +346,6 @@ function registerUserHandler<
 
         response.status(200).json(
           createHttpResultError({
-            accessToken: "",
             message: "Unable to register. Please try again.",
           }),
         );
@@ -257,10 +356,7 @@ function registerUserHandler<
 
       if (unwrappedResult.kind === "success") {
         response.status(200).json(
-          createHttpResultError({
-            accessToken: "",
-            message: "Username already exists",
-          }),
+          createHttpResultError({ message: "Username already exists" }),
         );
         return;
       }
@@ -278,7 +374,6 @@ function registerUserHandler<
 
         response.status(200).json(
           createHttpResultError({
-            accessToken: "",
             message: "Unable to register. Please try again.",
           }),
         );
@@ -304,7 +399,6 @@ function registerUserHandler<
 
         response.status(200).json(
           createHttpResultError({
-            accessToken: "",
             message: "Unable to register. Please try again.",
           }),
         );
@@ -315,6 +409,7 @@ function registerUserHandler<
         createHttpResultSuccess({
           accessToken: "",
           message: "User registered successfully",
+          refreshToken: "",
         }),
       );
     } catch (error: unknown) {
@@ -326,7 +421,7 @@ function registerUserHandler<
         ErrorLogModel,
       );
 
-      response.status(200).json(createHttpResultError({ accessToken: "" }));
+      response.status(200).json(createHttpResultError({}));
     }
   };
 }
@@ -344,19 +439,11 @@ function logoutUserHandler<
     response: Response,
   ) => {
     try {
-      const { accessToken } = request.body;
-      const { refreshToken } = request.cookies;
-
-      const cookieOptions: CookieOptions = {
-        httpOnly: true,
-        secure: true,
-        sameSite: "strict",
-      };
+      const { accessToken, refreshToken } = request.body;
 
       if (!accessToken || !refreshToken) {
-        response.clearCookie("refreshToken", cookieOptions);
         response.status(200).json(
-          createHttpResultError({ accessToken: "", triggerLogout: true }),
+          createHttpResultError({ triggerLogout: true }),
         );
 
         return;
@@ -370,9 +457,8 @@ function logoutUserHandler<
       });
 
       if (verifyAccessTokenResult.err) {
-        response.clearCookie("refreshToken", cookieOptions);
         response.status(200).json(
-          createHttpResultError({ accessToken: "", triggerLogout: true }),
+          createHttpResultError({ triggerLogout: true }),
         );
 
         return;
@@ -384,9 +470,8 @@ function logoutUserHandler<
       });
 
       if (verifyRefreshTokenResult.err) {
-        response.clearCookie("refreshToken", cookieOptions);
         response.status(200).json(
-          createHttpResultError({ accessToken: "", triggerLogout: true }),
+          createHttpResultError({ triggerLogout: true }),
         );
 
         return;
@@ -396,9 +481,8 @@ function logoutUserHandler<
         .data as DecodedToken | undefined;
 
       if (refreshDecodedToken === undefined) {
-        response.clearCookie("refreshToken", cookieOptions);
         response.status(200).json(
-          createHttpResultError({ accessToken: "", triggerLogout: true }),
+          createHttpResultError({ triggerLogout: true }),
         );
 
         return;
@@ -419,9 +503,8 @@ function logoutUserHandler<
           ErrorLogModel,
         );
 
-        response.clearCookie("refreshToken", cookieOptions);
         response.status(200).json(
-          createHttpResultError({ accessToken: "", triggerLogout: true }),
+          createHttpResultError({ triggerLogout: true }),
         );
 
         return;
@@ -432,9 +515,8 @@ function logoutUserHandler<
         | undefined;
 
       if (existingSession === undefined) {
-        response.clearCookie("refreshToken", cookieOptions);
         response.status(200).json(
-          createHttpResultError({ accessToken: "", triggerLogout: true }),
+          createHttpResultError({ triggerLogout: true }),
         );
 
         return;
@@ -446,9 +528,8 @@ function logoutUserHandler<
       );
 
       if (isEitherTokenInDenyList) {
-        response.clearCookie("refreshToken", cookieOptions);
         response.status(200).json(
-          createHttpResultError({ accessToken: "", triggerLogout: true }),
+          createHttpResultError({ triggerLogout: true }),
         );
 
         return;
@@ -470,17 +551,19 @@ function logoutUserHandler<
           ErrorLogModel,
         );
 
-        response.clearCookie("refreshToken", cookieOptions);
         response.status(200).json(
-          createHttpResultError({ accessToken: "", triggerLogout: true }),
+          createHttpResultError({ triggerLogout: true }),
         );
 
         return;
       }
 
-      response.clearCookie("refreshToken", cookieOptions);
       response.status(200).json(
-        createHttpResultSuccess({ accessToken: "", triggerLogout: true }),
+        createHttpResultSuccess({
+          accessToken: "",
+          refreshToken: "",
+          triggerLogout: true,
+        }),
       );
     } catch (error: unknown) {
       await createNewResourceService(
@@ -492,13 +575,18 @@ function logoutUserHandler<
       );
 
       response.status(200).json(
-        createHttpResultError({ accessToken: "", triggerLogout: true }),
+        createHttpResultError({ triggerLogout: true }),
       );
     }
   };
 }
 
-export { loginUserHandler, logoutUserHandler, registerUserHandler };
+export {
+  loginUserHandler,
+  logoutUserHandler,
+  refreshTokensHandler,
+  registerUserHandler,
+};
 
 // const refreshTokenController = expressAsyncController(
 //   async (

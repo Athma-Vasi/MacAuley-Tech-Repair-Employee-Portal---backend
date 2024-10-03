@@ -5,6 +5,7 @@ import { validateSchemaMiddleware } from "../../middlewares/validateSchema";
 import {
   loginUserHandler,
   logoutUserHandler,
+  refreshTokensHandler,
   registerUserHandler,
 } from "./auth.handler";
 import { AuthModel } from "./auth.model";
@@ -21,6 +22,14 @@ const authRouter = Router();
 authRouter.route("/login").post(
   validateSchemaMiddleware(createAuthSessionJoiSchema, "schema"),
   loginUserHandler(AuthModel),
+);
+
+// @desc   Refresh token
+// @route  POST /auth/refresh
+// @access Private
+authRouter.route("/refresh").post(
+  verifyJWTMiddleware,
+  refreshTokensHandler(AuthModel),
 );
 
 // @desc   Register user

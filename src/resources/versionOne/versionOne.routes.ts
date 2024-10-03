@@ -2,7 +2,6 @@ import { Router } from "express";
 import {
     createMongoDbQueryObject,
     verifyJWTMiddleware,
-    verifyRoles,
 } from "../../middlewares";
 import { actionsRouter } from "../actions/actions.routes";
 import { commentRouter } from "../comment";
@@ -16,7 +15,7 @@ import { usernameEmailSetRouter } from "../usernameEmailSet";
 
 const versionOneRouter = Router();
 versionOneRouter.use(
-    // verifyJWTMiddleware,
+    verifyJWTMiddleware,
     // verifyRoles,
     createMongoDbQueryObject,
 );

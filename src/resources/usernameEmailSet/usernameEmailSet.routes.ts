@@ -1,11 +1,12 @@
 import { Router } from "express";
+
+import { validateSchemaMiddleware } from "../../middlewares/validateSchema";
 import {
   checkUsernameOrEmailExistsHandler,
   postUsernameEmailSetHandler,
-} from "./usernameEmailSet.controller";
-import { validateSchemaMiddleware } from "../../middlewares/validateSchema";
-import { createUsernameEmailSetJoiSchema } from "./usernameEmailSet.validation";
+} from "./usernameEmailSet.handler";
 import { UsernameEmailSetModel } from "./usernameEmailSet.model";
+import { createUsernameEmailSetJoiSchema } from "./usernameEmailSet.validation";
 
 const usernameEmailSetRouter = Router();
 

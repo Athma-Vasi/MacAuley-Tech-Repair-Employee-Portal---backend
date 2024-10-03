@@ -37,12 +37,13 @@ type QueryObjectParsedWithDefaults<
 type RequestAfterJWTVerification = Request & {
   body: {
     accessToken: string;
+    refreshToken: string;
+    sessionId: string;
     userInfo: {
       userId: string;
       username: string;
       roles: UserRoles;
     };
-    sessionId: string;
   };
 };
 
@@ -106,9 +107,11 @@ type GetQueriedResourceByUserRequest = GetQueriedResourceRequest & {
 type HttpResult<Data = unknown> = {
   accessToken: string;
   data: Array<Data>;
+  isTokenExpired: boolean;
   kind: "error" | "success";
   message: string;
   pages: number;
+  refreshToken: string;
   status: number;
   totalDocuments: number;
   triggerLogout: boolean;

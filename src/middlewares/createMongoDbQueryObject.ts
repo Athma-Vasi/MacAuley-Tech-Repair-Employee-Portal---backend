@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { ParsedQs } from "qs";
+import { PROPERTY_DESCRIPTOR } from "../constants";
 
 /**
      * example: here is a sample query object before transformation:
@@ -69,15 +70,10 @@ function createMongoDbQueryObject(
   const EXCLUDED_SET = new Set([
     "page",
     "fields",
+    "limitPerPage",
     "newQueryFlag",
     "totalDocuments",
   ]);
-
-  const PROPERTY_DESCRIPTOR: PropertyDescriptor = {
-    writable: true,
-    enumerable: true,
-    configurable: true,
-  };
 
   const modifiedQuery = Object.entries(query).reduce((acc, tuple) => {
     // key may be either a logical operator, or "text" or "projection" or "sort"
@@ -86,12 +82,7 @@ function createMongoDbQueryObject(
       string | ParsedQs | string[] | ParsedQs[] | undefined,
     ];
 
-    console.log("key: ", key);
-    console.log("value: ", JSON.stringify(value, null, 2));
-
-    if (value === undefined || EXCLUDED_SET.has(key)) {
-      console.log("value is undefined or excluded");
-
+    if (value === undefined) {
       return acc;
     }
 
@@ -104,8 +95,17 @@ function createMongoDbQueryObject(
   }, Object.create(null));
 
   console.log("modifiedQuery: ", JSON.stringify(modifiedQuery, null, 2));
+  console.groupEnd();
 
-  const { filter, options, projection, totalDocuments, newQueryFlag } = Object
+  const {
+    filter,
+    limit,
+    newQueryFlag,
+    options,
+    page,
+    projection,
+    totalDocuments,
+  } = Object
     .entries(modifiedQuery).reduce(
       (acc, tuple) => {
         const { filter, options, projection } = acc;
@@ -118,7 +118,7 @@ function createMongoDbQueryObject(
           return acc;
         }
 
-        if (key === "totalDocuments" || key === "newQueryFlag") {
+        if (EXCLUDED_SET.has(key)) {
           Object.defineProperty(acc, key, {
             value,
             ...PROPERTY_DESCRIPTOR,
@@ -138,10 +138,6 @@ function createMongoDbQueryObject(
         }
 
         if (key === "projection") {
-          console.group("inside projection");
-          console.log("projection: ", value);
-          console.groupEnd();
-
           if (!Array.isArray(value)) {
             projection.push(`-${value}`);
             return acc;
@@ -168,10 +164,6 @@ function createMongoDbQueryObject(
           return acc;
         }
 
-        console.log("after projection");
-        console.log("key: ", key);
-        console.log("value: ", JSON.stringify(value, null, 2));
-
         const inKeyValueChangedToArrayQuery = Object.entries(value).reduce(
           (innerAcc, [docField, queryObj]) => {
             if (queryObj === undefined) {
@@ -191,16 +183,12 @@ function createMongoDbQueryObject(
 
                 // if value is string, convert to regex
                 if (typeof searchTerm === "string") {
-                  console.log("searchTerm: ", searchTerm);
-
                   Object.defineProperty(innerInnerAcc, operator, {
                     value: searchTerm === "true" || searchTerm === "false"
                       ? searchTerm
                       : new RegExp(searchTerm, "i"),
                     ...PROPERTY_DESCRIPTOR,
                   });
-
-                  console.log("innerInnerAcc: ", innerInnerAcc);
                 } else if (Array.isArray(searchTerm)) {
                   Object.defineProperty(innerInnerAcc, operator, {
                     value: searchTerm.flatMap((val) => {
@@ -227,12 +215,6 @@ function createMongoDbQueryObject(
               Object.create(null),
             );
 
-            console.log(
-              "modifiedQueryObj: ",
-              // JSON.stringify(modifiedQueryObj, null, 2),
-              modifiedQueryObj,
-            );
-
             Object.defineProperty(innerAcc, docField, {
               value: modifiedQueryObj,
               ...PROPERTY_DESCRIPTOR,
@@ -246,12 +228,6 @@ function createMongoDbQueryObject(
         // ex: { field: { $eq: searchTerm } }
         const logicalOperatorValue = filter[key] ??
           [inKeyValueChangedToArrayQuery];
-        console.log(`\n`);
-        console.log(
-          "logicalOperatorValue: ",
-          JSON.stringify(logicalOperatorValue, null, 2),
-        );
-        console.log(`\n`);
 
         Object.defineProperty(filter, key, {
           value: logicalOperatorValue,
@@ -262,16 +238,14 @@ function createMongoDbQueryObject(
       },
       {
         filter: Object.create(null),
+        limit: 10,
+        newQueryFlag: false,
         options: Object.create(null),
+        page: 1,
         projection: [] as string[],
         totalDocuments: 0,
-        newQueryFlag: false,
       },
     );
-
-  console.log("options: ", JSON.stringify(options, null, 2));
-  console.log("filter: ", JSON.stringify(filter, null, 2));
-  console.groupEnd();
 
   // set default createdAt sort field if it does not exist: { createdAt: -1, _id: -1 }
   // as all schemas have timestamps enabled, createdAt field is guaranteed to exist
@@ -294,16 +268,12 @@ function createMongoDbQueryObject(
   }
 
   // set pagination default values for limit and skip
-  const page = Number(query.page) || 1;
-  let limit = Number(query.limit) || 10;
-  limit = limit < 1 ? 10 : limit > 25 ? 25 : limit;
   Object.defineProperty(options, "limit", {
     value: limit,
     ...PROPERTY_DESCRIPTOR,
   });
 
-  let skip = query.skip ? Number(query.skip) : (page - 1) * limit; // offset
-  skip = skip < 1 ? 0 : skip;
+  const skip = (page - 1) * limit; // offset
   Object.defineProperty(options, "skip", {
     value: skip,
     ...PROPERTY_DESCRIPTOR,
@@ -318,15 +288,15 @@ function createMongoDbQueryObject(
     ...PROPERTY_DESCRIPTOR,
   });
 
-  console.group("createMongoDbQueryObject: AFTER");
-  console.log("REQUEST BODY", JSON.stringify(request.body, null, 2));
-  console.log("query.newQueryFlag: ", newQueryFlag);
-  console.log("query.totalDocuments: ", totalDocuments);
-  console.log("options: ", JSON.stringify(options, null, 2));
-  console.log("projection: ", JSON.stringify(projection, null, 2));
-  console.log("filter: ", JSON.stringify(filter, null, 2));
-  console.log("stringified filter: ", JSON.stringify(filter, null, 2));
-  console.groupEnd();
+  // console.group("createMongoDbQueryObject: AFTER");
+  // console.log("REQUEST BODY", JSON.stringify(request.body, null, 2));
+  // console.log("query.newQueryFlag: ", newQueryFlag);
+  // console.log("query.totalDocuments: ", totalDocuments);
+  // console.log("options: ", JSON.stringify(options, null, 2));
+  // console.log("projection: ", JSON.stringify(projection, null, 2));
+  // console.log("filter: ", JSON.stringify(filter, null, 2));
+  // console.log("stringified filter: ", JSON.stringify(filter, null, 2));
+  // console.groupEnd();
 
   next();
   return;

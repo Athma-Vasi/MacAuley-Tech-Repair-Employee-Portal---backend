@@ -3,11 +3,11 @@ import type { Response } from "express";
 import { UserDocument, UserModel } from "./user.model";
 
 import { Model } from "mongoose";
-import { CreateNewResourceRequest, DBRecord, HttpResult } from "../../types";
 import {
   createNewResourceService,
   getResourceByFieldService,
 } from "../../services";
+import { CreateNewResourceRequest, DBRecord, HttpResult } from "../../types";
 
 import {
   createErrorLogSchema,
@@ -47,13 +47,16 @@ function createNewUserHandler<
           ErrorLogModel,
         );
 
-        response.status(200).json(createHttpResultError({ accessToken: "" }));
+        response.status(200).json(createHttpResultError({ status: 500 }));
         return;
       }
 
       if (usernameExistsResult.val.kind === "success") {
         response.status(200).json(
-          createHttpResultError({ accessToken: "" }),
+          createHttpResultError({
+            status: 400,
+            message: "Username already exists",
+          }),
         );
         return;
       }
@@ -72,14 +75,14 @@ function createNewUserHandler<
           ErrorLogModel,
         );
 
-        response.status(200).json(createHttpResultError({ accessToken: "" }));
+        response.status(200).json(createHttpResultError({}));
         return;
       }
 
       if (emailExistsResult.val.kind === "success") {
         response.status(200).json(
           createHttpResultError({
-            accessToken: "",
+            status: 400,
             message: "Email already exists",
           }),
         );
@@ -100,7 +103,7 @@ function createNewUserHandler<
           ErrorLogModel,
         );
 
-        response.status(200).json(createHttpResultError({ accessToken: "" }));
+        response.status(200).json(createHttpResultError({ status: 500 }));
         return;
       }
 
@@ -120,12 +123,12 @@ function createNewUserHandler<
           ErrorLogModel,
         );
 
-        response.status(200).json(createHttpResultError({ accessToken: "" }));
+        response.status(200).json(createHttpResultError({}));
         return;
       }
 
       response.status(200).json(
-        createHttpResultSuccess({ accessToken: "" }),
+        createHttpResultSuccess({ accessToken: "", refreshToken: "" }),
       );
     } catch (error: unknown) {
       await createNewResourceService(
@@ -136,7 +139,7 @@ function createNewUserHandler<
         ErrorLogModel,
       );
 
-      response.status(200).json(createHttpResultError({ accessToken: "" }));
+      response.status(200).json(createHttpResultError({}));
     }
   };
 }

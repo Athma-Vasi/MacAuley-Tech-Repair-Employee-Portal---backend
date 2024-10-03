@@ -34,7 +34,7 @@ function createNewResourceHandler<Doc extends DBRecord = DBRecord>(
         response: Response<HttpResult>,
     ) => {
         try {
-            const { accessToken, schema } = request.body;
+            const { accessToken, refreshToken, schema } = request.body;
 
             const createResourceResult = await createNewResourceService(
                 schema,
@@ -51,7 +51,7 @@ function createNewResourceHandler<Doc extends DBRecord = DBRecord>(
                 );
 
                 response.status(200).json(
-                    createHttpResultError({ accessToken, status: 400 }),
+                    createHttpResultError({ status: 400 }),
                 );
                 return;
             }
@@ -59,7 +59,7 @@ function createNewResourceHandler<Doc extends DBRecord = DBRecord>(
             response
                 .status(201)
                 .json(
-                    createHttpResultSuccess({ accessToken }),
+                    createHttpResultSuccess({ accessToken, refreshToken }),
                 );
         } catch (error: unknown) {
             await createNewResourceService(
@@ -70,9 +70,7 @@ function createNewResourceHandler<Doc extends DBRecord = DBRecord>(
                 ErrorLogModel,
             );
 
-            response.status(200).json(createHttpResultError({
-                accessToken: request.body.accessToken ?? "",
-            }));
+            response.status(200).json(createHttpResultError({}));
         }
     };
 }
@@ -85,7 +83,8 @@ function getQueriedResourcesHandler<Doc extends DBRecord = DBRecord>(
         response: HttpServerResponse,
     ) => {
         try {
-            let { newQueryFlag, totalDocuments, accessToken } = request.body;
+            let { accessToken, newQueryFlag, refreshToken, totalDocuments } =
+                request.body;
 
             const {
                 filter,
@@ -112,7 +111,7 @@ function getQueriedResourcesHandler<Doc extends DBRecord = DBRecord>(
                     response
                         .status(200)
                         .json(
-                            createHttpResultError({ accessToken, status: 400 }),
+                            createHttpResultError({ status: 400 }),
                         );
                     return;
                 }
@@ -127,14 +126,6 @@ function getQueriedResourcesHandler<Doc extends DBRecord = DBRecord>(
                 projection,
             });
 
-            console.group("getQueriedResourcesHandler");
-            console.log("request.body", request.body);
-            console.log("filter", filter?.$and?.[0]?.username);
-            console.log("projection", projection);
-            console.log("options", options);
-            console.log("getResourcesResult", getResourcesResult);
-            console.groupEnd();
-
             if (getResourcesResult.err) {
                 await createNewResourceService(
                     createErrorLogSchema(
@@ -146,7 +137,7 @@ function getQueriedResourcesHandler<Doc extends DBRecord = DBRecord>(
 
                 response
                     .status(200)
-                    .json(createHttpResultError({ accessToken, status: 400 }));
+                    .json(createHttpResultError({ status: 400 }));
                 return;
             }
 
@@ -154,7 +145,7 @@ function getQueriedResourcesHandler<Doc extends DBRecord = DBRecord>(
             if (unwrappedResult === undefined) {
                 response
                     .status(200)
-                    .json(createHttpResultError({ accessToken, status: 404 }));
+                    .json(createHttpResultError({ status: 404 }));
                 return;
             }
 
@@ -162,7 +153,7 @@ function getQueriedResourcesHandler<Doc extends DBRecord = DBRecord>(
             if (kind === "notFound" || data === undefined) {
                 response
                     .status(200)
-                    .json(createHttpResultError({ accessToken, status: 404 }));
+                    .json(createHttpResultError({ status: 404 }));
                 return;
             }
 
@@ -173,6 +164,7 @@ function getQueriedResourcesHandler<Doc extends DBRecord = DBRecord>(
                     pages: Math.ceil(
                         totalDocuments / Number(options?.limit ?? 10),
                     ),
+                    refreshToken,
                     totalDocuments,
                 }),
             );
@@ -186,9 +178,7 @@ function getQueriedResourcesHandler<Doc extends DBRecord = DBRecord>(
             );
 
             response.status(200).json(
-                createHttpResultError({
-                    accessToken: request.body.accessToken ?? "",
-                }),
+                createHttpResultError({}),
             );
         }
     };
@@ -205,6 +195,7 @@ function getQueriedResourcesByUserHandler<Doc extends DBRecord = DBRecord>(
             const {
                 accessToken,
                 newQueryFlag,
+                refreshToken,
                 userInfo: { userId },
             } = request.body;
             let { totalDocuments } = request.body;
@@ -229,7 +220,7 @@ function getQueriedResourcesByUserHandler<Doc extends DBRecord = DBRecord>(
                     );
 
                     response.status(200).json(
-                        createHttpResultError({ accessToken, status: 400 }),
+                        createHttpResultError({ status: 400 }),
                     );
                     return;
                 }
@@ -254,7 +245,7 @@ function getQueriedResourcesByUserHandler<Doc extends DBRecord = DBRecord>(
                 );
 
                 response.status(200).json(
-                    createHttpResultError({ accessToken, status: 400 }),
+                    createHttpResultError({ status: 400 }),
                 );
                 return;
             }
@@ -263,7 +254,7 @@ function getQueriedResourcesByUserHandler<Doc extends DBRecord = DBRecord>(
             if (unwrappedResult === undefined) {
                 response
                     .status(200)
-                    .json(createHttpResultError({ accessToken, status: 404 }));
+                    .json(createHttpResultError({ status: 404 }));
                 return;
             }
 
@@ -271,7 +262,7 @@ function getQueriedResourcesByUserHandler<Doc extends DBRecord = DBRecord>(
             if (kind === "notFound" || data === undefined) {
                 response
                     .status(200)
-                    .json(createHttpResultError({ accessToken, status: 404 }));
+                    .json(createHttpResultError({ status: 404 }));
                 return;
             }
 
@@ -282,6 +273,7 @@ function getQueriedResourcesByUserHandler<Doc extends DBRecord = DBRecord>(
                     pages: Math.ceil(
                         totalDocuments / Number(options?.limit ?? 10),
                     ),
+                    refreshToken,
                     totalDocuments,
                 }),
             );
@@ -294,9 +286,7 @@ function getQueriedResourcesByUserHandler<Doc extends DBRecord = DBRecord>(
                 ErrorLogModel,
             );
 
-            response.status(200).json(createHttpResultError({
-                accessToken: request.body.accessToken ?? "",
-            }));
+            response.status(200).json(createHttpResultError({}));
         }
     };
 }
@@ -313,6 +303,7 @@ function updateResourceByIdHandler<Doc extends DBRecord = DBRecord>(
             const {
                 accessToken,
                 documentUpdate: { fields, updateOperator },
+                refreshToken,
             } = request.body;
 
             const updateResourceResult = await updateResourceByIdService({
@@ -332,7 +323,7 @@ function updateResourceByIdHandler<Doc extends DBRecord = DBRecord>(
                 );
 
                 response.status(200).json(
-                    createHttpResultError({ accessToken, status: 400 }),
+                    createHttpResultError({ status: 400 }),
                 );
                 return;
             }
@@ -343,6 +334,7 @@ function updateResourceByIdHandler<Doc extends DBRecord = DBRecord>(
                     createHttpResultSuccess({
                         accessToken,
                         data: [updateResourceResult.safeUnwrap()],
+                        refreshToken,
                     }),
                 );
         } catch (error: unknown) {
@@ -354,9 +346,7 @@ function updateResourceByIdHandler<Doc extends DBRecord = DBRecord>(
                 ErrorLogModel,
             );
 
-            response.status(200).json(createHttpResultError({
-                accessToken: request.body.accessToken ?? "",
-            }));
+            response.status(200).json(createHttpResultError({}));
         }
     };
 }
@@ -369,7 +359,7 @@ function getResourceByIdHandler<Doc extends DBRecord = DBRecord>(
         response: HttpServerResponse,
     ) => {
         try {
-            const { accessToken } = request.body;
+            const { accessToken, refreshToken } = request.body;
             const { resourceId } = request.params;
 
             const getResourceResult = await getResourceByIdService(
@@ -387,7 +377,7 @@ function getResourceByIdHandler<Doc extends DBRecord = DBRecord>(
                 );
 
                 response.status(200).json(
-                    createHttpResultError({ accessToken, status: 404 }),
+                    createHttpResultError({ status: 404 }),
                 );
                 return;
             }
@@ -398,6 +388,7 @@ function getResourceByIdHandler<Doc extends DBRecord = DBRecord>(
                     createHttpResultSuccess({
                         accessToken,
                         data: [getResourceResult.safeUnwrap()],
+                        refreshToken,
                     }),
                 );
         } catch (error: unknown) {
@@ -409,9 +400,7 @@ function getResourceByIdHandler<Doc extends DBRecord = DBRecord>(
                 ErrorLogModel,
             );
 
-            response.status(200).json(createHttpResultError({
-                accessToken: request.body.accessToken ?? "",
-            }));
+            response.status(200).json(createHttpResultError({}));
         }
     };
 }
@@ -424,7 +413,7 @@ function deleteResourceByIdHandler<Doc extends DBRecord = DBRecord>(
         response: HttpServerResponse,
     ) => {
         try {
-            const { accessToken } = request.body;
+            const { accessToken, refreshToken } = request.body;
             const { resourceId } = request.params;
 
             const deletedResult = await deleteResourceByIdService(
@@ -442,12 +431,14 @@ function deleteResourceByIdHandler<Doc extends DBRecord = DBRecord>(
                 );
 
                 response.status(200).json(
-                    createHttpResultError({ accessToken, status: 404 }),
+                    createHttpResultError({ status: 404 }),
                 );
                 return;
             }
 
-            response.status(200).json(createHttpResultSuccess({ accessToken }));
+            response.status(200).json(
+                createHttpResultSuccess({ accessToken, refreshToken }),
+            );
         } catch (error: unknown) {
             await createNewResourceService(
                 createErrorLogSchema(
@@ -457,9 +448,7 @@ function deleteResourceByIdHandler<Doc extends DBRecord = DBRecord>(
                 ErrorLogModel,
             );
 
-            response.status(200).json(createHttpResultError({
-                accessToken: request.body.accessToken ?? "",
-            }));
+            response.status(200).json(createHttpResultError({}));
         }
     };
 }
@@ -472,7 +461,7 @@ function deleteManyResourcesHandler<Doc extends DBRecord = DBRecord>(
         response: HttpServerResponse,
     ) => {
         try {
-            const { accessToken } = request.body;
+            const { accessToken, refreshToken } = request.body;
             const deletedResult = await deleteManyResourcesService({ model });
 
             if (deletedResult.err) {
@@ -490,7 +479,9 @@ function deleteManyResourcesHandler<Doc extends DBRecord = DBRecord>(
                 return;
             }
 
-            response.status(200).json(createHttpResultSuccess({ accessToken }));
+            response.status(200).json(
+                createHttpResultSuccess({ accessToken, refreshToken }),
+            );
         } catch (error: unknown) {
             await createNewResourceService(
                 createErrorLogSchema(
@@ -500,9 +491,7 @@ function deleteManyResourcesHandler<Doc extends DBRecord = DBRecord>(
                 ErrorLogModel,
             );
 
-            response.status(200).json(createHttpResultError({
-                accessToken: request.body.accessToken ?? "",
-            }));
+            response.status(200).json(createHttpResultError({}));
         }
     };
 }

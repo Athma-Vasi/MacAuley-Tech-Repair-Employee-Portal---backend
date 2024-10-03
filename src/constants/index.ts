@@ -8,6 +8,12 @@ const TRIGGER_LOGOUT_KEY = "triggerLogout";
 
 const HASH_SALT_ROUNDS = 10;
 
+const PROPERTY_DESCRIPTOR: PropertyDescriptor = {
+  writable: true,
+  enumerable: true,
+  configurable: true,
+};
+
 // /**
 //  * @description Map of product category names to their respective service functions.
 //  * - used in `src/resources/productCategory/productCategory.controller.ts`
@@ -43,6 +49,7 @@ export {
   ACCESS_TOKEN_EXPIRES_IN,
   ALLOWED_FILE_EXTENSIONS,
   HASH_SALT_ROUNDS,
+  PROPERTY_DESCRIPTOR,
   REFRESH_TOKEN_EXPIRES_IN,
   TRIGGER_LOGOUT_KEY,
 };

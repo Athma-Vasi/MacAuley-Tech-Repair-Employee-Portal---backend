@@ -51,13 +51,6 @@ async function getResourceByFieldService<
             .lean()
             .exec();
 
-        console.group("getResourceByFieldService");
-        console.log("filter: ", filter);
-        console.log("projection: ", projection);
-        console.log("options: ", options);
-        console.log("resourceBox: ", resourceBox);
-        console.groupEnd();
-
         if (resourceBox.length === 0 || resourceBox.length > 1) {
             return new Ok({ kind: "notFound" });
         }
@@ -118,13 +111,6 @@ async function getQueriedResourcesService<
         const resources = await model.find(filter, projection, options)
             .lean()
             .exec();
-
-        console.group("getQueriedResourcesService");
-        console.log("filter: ", filter);
-        console.log("projection: ", projection);
-        console.log("options: ", options);
-        console.log("resources: ", resources);
-        console.groupEnd();
 
         if (resources.length === 0) {
             return new Ok({ kind: "notFound" });

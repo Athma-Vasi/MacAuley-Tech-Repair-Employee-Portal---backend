@@ -1,6 +1,5 @@
 import { Router } from "express";
-import { validateSchemaMiddleware } from "../../middlewares/validateSchema";
-import { createUserJoiSchema, updateUserJoiSchema } from "./user.validation";
+
 import {
   deleteManyResourcesHandler,
   deleteResourceByIdHandler,
@@ -9,10 +8,14 @@ import {
   getResourceByIdHandler,
   updateResourceByIdHandler,
 } from "../../handlers";
+import { addUserProjection } from "../../middlewares/addUserProjection";
+import { validateSchemaMiddleware } from "../../middlewares/validateSchema";
+import { createNewUserHandler } from "./user.handler";
 import { UserModel } from "./user.model";
-import { createNewUserHandler } from "./user.controller";
+import { createUserJoiSchema, updateUserJoiSchema } from "./user.validation";
 
 const userRouter = Router();
+userRouter.use(addUserProjection);
 
 userRouter
   .route("/")

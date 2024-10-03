@@ -18,18 +18,12 @@ type RegisterUserRequest = Request & {
 };
 
 type RefreshTokenRequest = Request & {
-  cookies: {
-    refreshToken: string;
-  };
   body: {
-    sessionId: Types.ObjectId;
+    decodedToken: DecodedToken;
   };
 };
 
 type LogoutUserRequest = Request & {
-  cookies: {
-    refreshToken: string;
-  };
   body: {
     sessionId: Types.ObjectId;
   };

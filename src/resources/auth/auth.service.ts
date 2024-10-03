@@ -39,6 +39,10 @@ async function createTokenService(
       AuthModel,
     );
 
+    console.group("createTokenService");
+    console.log("decoded:", JSON.stringify(decoded, null, 2));
+    console.log("getSessionResult:", getSessionResult);
+
     if (getSessionResult.err) {
       await createNewResourceService(
         createErrorLogSchema(
@@ -59,10 +63,14 @@ async function createTokenService(
       return new Err({ kind: "error" });
     }
 
+    console.log("existingSession:", existingSession);
+
     const isTokenInDenyList = existingSession.tokensDenyList
       .includes(
         jti,
       );
+
+    console.log("isTokenInDenyList:", isTokenInDenyList);
 
     if (isTokenInDenyList) {
       // invalidate all sessions
@@ -70,6 +78,9 @@ async function createTokenService(
         filter: { userId },
         model: AuthModel,
       });
+
+      console.log("token is in deny list, deleting all sessions");
+      console.log("deleteManyResult:", deleteManyResult);
 
       if (deleteManyResult.err) {
         await createNewResourceService(
@@ -92,6 +103,8 @@ async function createTokenService(
       model: AuthModel,
       updateOperator: "$push",
     });
+
+    console.log("updateSessionResult:", updateSessionResult);
 
     if (updateSessionResult.err) {
       await createNewResourceService(
@@ -121,6 +134,8 @@ async function createTokenService(
         jwtid: newTokenJti,
       },
     );
+
+    console.groupEnd();
 
     return new Ok({ data: refreshToken, kind: "success" });
   } catch (error: unknown) {

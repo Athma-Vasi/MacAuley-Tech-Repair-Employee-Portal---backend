@@ -10,20 +10,24 @@ import {
 } from "../types";
 
 function createHttpResultError<Data = unknown>({
-  accessToken,
+  accessToken = "",
   data = [],
+  isTokenExpired = false,
   kind = "error",
   message,
   pages = 0,
+  refreshToken = "",
   status = 500,
   totalDocuments = 0,
   triggerLogout = false,
 }: {
-  accessToken: string;
+  accessToken?: string;
   data?: Array<Data>;
+  isTokenExpired?: boolean;
   kind?: "error" | "success";
   message?: string;
   pages?: number;
+  refreshToken?: string;
   status?: number;
   totalDocuments?: number;
   triggerLogout?: boolean;
@@ -68,9 +72,11 @@ function createHttpResultError<Data = unknown>({
   return {
     accessToken,
     data,
+    isTokenExpired,
     kind,
     message: message ?? statusDescriptionTable[status] ?? "Unknown error",
     pages,
+    refreshToken,
     status,
     totalDocuments,
     triggerLogout,
@@ -82,18 +88,22 @@ function createHttpResultSuccess<
 >({
   accessToken,
   data = [],
+  isTokenExpired = false,
   kind = "success",
   message = "Successful operation",
   pages = 0,
+  refreshToken = "",
   status = 200,
   totalDocuments = 0,
   triggerLogout = false,
 }: {
   accessToken: string;
   data?: Array<Data>;
+  isTokenExpired?: boolean;
   kind?: "error" | "success";
   message?: string;
   pages?: number;
+  refreshToken?: string;
   status?: number;
   totalDocuments?: number;
   triggerLogout?: boolean;
@@ -101,9 +111,11 @@ function createHttpResultSuccess<
   return {
     accessToken,
     data,
+    isTokenExpired,
     kind,
     message,
     pages,
+    refreshToken,
     status,
     totalDocuments,
     triggerLogout,

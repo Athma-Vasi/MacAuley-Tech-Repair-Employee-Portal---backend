@@ -1,23 +1,8 @@
 import type { Response } from "express";
 import type { FileUploadDocument } from "../../fileUpload";
 
-import { FileUploadModel } from "../../fileUpload";
-import { ExpenseClaimDocument } from "./expenseClaim.model";
-import {
-  CreateNewResourceRequest,
-  DBRecord,
-  GetQueriedResourceByUserRequest,
-  GetQueriedResourceRequest,
-  GetResourceByIdRequest,
-  HttpResult,
-} from "../../../types";
-import { FlattenMaps, Model, Require_id } from "mongoose";
-import {
-  createErrorLogSchema,
-  createHttpResultError,
-  createHttpResultSuccess,
-  removeUndefinedAndNullValues,
-} from "../../../utils";
+import { Model } from "mongoose";
+import { Err } from "ts-results";
 import {
   createNewResourceService,
   deleteResourceByIdService,
@@ -26,8 +11,23 @@ import {
   getResourceByIdService,
   updateResourceByIdService,
 } from "../../../services";
-import { Err } from "ts-results";
+import {
+  CreateNewResourceRequest,
+  DBRecord,
+  GetQueriedResourceByUserRequest,
+  GetQueriedResourceRequest,
+  GetResourceByIdRequest,
+  HttpResult,
+} from "../../../types";
+import {
+  createErrorLogSchema,
+  createHttpResultError,
+  createHttpResultSuccess,
+  removeUndefinedAndNullValues,
+} from "../../../utils";
 import { ErrorLogModel } from "../../errorLog";
+import { FileUploadModel } from "../../fileUpload";
+import { ExpenseClaimDocument } from "./expenseClaim.model";
 
 // @desc   Create a new expense claim after associated file uploads have been uploaded
 // @route  POST api/v1/company/expense-claim
@@ -42,7 +42,7 @@ function createNewExpenseClaimHandler<
     response: Response<HttpResult>,
   ) => {
     try {
-      const { accessToken, schema } = request.body;
+      const { accessToken, refreshToken, schema } = request.body;
 
       const createResourceResult = await createNewResourceService(
         schema,
@@ -58,7 +58,7 @@ function createNewExpenseClaimHandler<
           ErrorLogModel,
         );
 
-        response.status(200).json(createHttpResultError({ accessToken }));
+        response.status(200).json(createHttpResultError({}));
         return;
       }
 
@@ -68,7 +68,7 @@ function createNewExpenseClaimHandler<
       if (newExpenseClaim === undefined) {
         response
           .status(200)
-          .json(createHttpResultError({ accessToken }));
+          .json(createHttpResultError({}));
         return;
       }
 
@@ -91,14 +91,14 @@ function createNewExpenseClaimHandler<
               ErrorLogModel,
             );
 
-            return new Err(createHttpResultError({ accessToken }));
+            return new Err(createHttpResultError({}));
           }
 
           const fileUpload = fileUploadResult.safeUnwrap()
             .data as FileUploadDocument | undefined;
 
           if (fileUpload === undefined) {
-            return new Err(createHttpResultError({ accessToken }));
+            return new Err(createHttpResultError({}));
           }
 
           // insert expenseClaim document id into fileUpload document to
@@ -123,7 +123,7 @@ function createNewExpenseClaimHandler<
               ErrorLogModel,
             );
 
-            return new Err(createHttpResultError({ accessToken }));
+            return new Err(createHttpResultError({}));
           }
 
           return updatedFileUploadResult;
@@ -131,13 +131,13 @@ function createNewExpenseClaimHandler<
       );
 
       if (insertIdToDocumentResults.some((result) => result.err)) {
-        response.status(200).json(createHttpResultError({ accessToken }));
+        response.status(200).json(createHttpResultError({}));
         return;
       }
 
       response
         .status(200)
-        .json(createHttpResultSuccess({ accessToken }));
+        .json(createHttpResultSuccess({ accessToken, refreshToken }));
     } catch (error: unknown) {
       await createNewResourceService(
         createErrorLogSchema(
@@ -147,9 +147,7 @@ function createNewExpenseClaimHandler<
         ErrorLogModel,
       );
 
-      response.status(200).json(createHttpResultError({
-        accessToken: request.body.accessToken ?? "",
-      }));
+      response.status(200).json(createHttpResultError({}));
     }
   };
 }
@@ -167,7 +165,8 @@ function getQueriedExpenseClaimsHandler<
     response: Response<HttpResult>,
   ) => {
     try {
-      let { accessToken, newQueryFlag, totalDocuments } = request.body;
+      let { accessToken, newQueryFlag, refreshToken, totalDocuments } =
+        request.body;
 
       const {
         filter,
@@ -190,7 +189,7 @@ function getQueriedExpenseClaimsHandler<
 
           response
             .status(200)
-            .json(createHttpResultError({ accessToken }));
+            .json(createHttpResultError({}));
           return;
         }
 
@@ -212,7 +211,7 @@ function getQueriedExpenseClaimsHandler<
 
         response
           .status(200)
-          .json(createHttpResultError({ accessToken }));
+          .json(createHttpResultError({}));
         return;
       }
 
@@ -221,7 +220,7 @@ function getQueriedExpenseClaimsHandler<
       if (serviceResult.kind === "notFound") {
         response
           .status(200)
-          .json(createHttpResultSuccess({ accessToken }));
+          .json(createHttpResultSuccess({ accessToken, refreshToken }));
         return;
       }
 
@@ -242,7 +241,7 @@ function getQueriedExpenseClaimsHandler<
                   ErrorLogModel,
                 );
 
-                return new Err(createHttpResultError({ accessToken }));
+                return new Err(createHttpResultError({}));
               }
 
               return fileUploadResult;
@@ -260,7 +259,7 @@ function getQueriedExpenseClaimsHandler<
       ) {
         response
           .status(200)
-          .json(createHttpResultError({ accessToken }));
+          .json(createHttpResultError({}));
         return;
       }
 
@@ -287,6 +286,7 @@ function getQueriedExpenseClaimsHandler<
             accessToken,
             data: resourceServerResponseArray,
             pages: Math.ceil(totalDocuments / Number(options?.limit ?? 10)),
+            refreshToken,
             totalDocuments,
           }),
         );
@@ -300,7 +300,7 @@ function getQueriedExpenseClaimsHandler<
       );
 
       response.status(200).json(
-        createHttpResultError({ accessToken: request.body.accessToken ?? "" }),
+        createHttpResultError({}),
       );
     }
   };
@@ -319,10 +319,9 @@ function getQueriedExpenseClaimsByUserHandler<
     response: Response<HttpResult>,
   ) => {
     try {
-      const {
-        userInfo: { userId },
-      } = request.body;
-      let { accessToken, newQueryFlag, totalDocuments } = request.body;
+      const { accessToken, newQueryFlag, refreshToken, userInfo: { userId } } =
+        request.body;
+      let { totalDocuments } = request.body;
 
       const { filter, projection, options } = request.query;
 
@@ -343,7 +342,7 @@ function getQueriedExpenseClaimsByUserHandler<
 
           response
             .status(200)
-            .json(createHttpResultError({ accessToken }));
+            .json(createHttpResultError({}));
           return;
         }
 
@@ -365,7 +364,7 @@ function getQueriedExpenseClaimsByUserHandler<
 
         response
           .status(200)
-          .json(createHttpResultError({ accessToken }));
+          .json(createHttpResultError({}));
         return;
       }
 
@@ -374,7 +373,7 @@ function getQueriedExpenseClaimsByUserHandler<
       if (serviceResult.kind === "notFound") {
         response
           .status(200)
-          .json(createHttpResultSuccess({ accessToken }));
+          .json(createHttpResultSuccess({ accessToken, refreshToken }));
         return;
       }
 
@@ -395,7 +394,7 @@ function getQueriedExpenseClaimsByUserHandler<
                   ErrorLogModel,
                 );
 
-                return new Err(createHttpResultError({ accessToken }));
+                return new Err(createHttpResultError({}));
               }
 
               return fileUploadResult;
@@ -413,7 +412,7 @@ function getQueriedExpenseClaimsByUserHandler<
       ) {
         response
           .status(200)
-          .json(createHttpResultError({ accessToken }));
+          .json(createHttpResultError({}));
         return;
       }
 
@@ -440,6 +439,7 @@ function getQueriedExpenseClaimsByUserHandler<
             accessToken,
             data: resourceServerResponseArray,
             pages: Math.ceil(totalDocuments / Number(options?.limit ?? 10)),
+            refreshToken,
             totalDocuments,
           }),
         );
@@ -452,9 +452,7 @@ function getQueriedExpenseClaimsByUserHandler<
         ErrorLogModel,
       );
 
-      response.status(200).json(createHttpResultError({
-        accessToken: request.body.accessToken ?? "",
-      }));
+      response.status(200).json(createHttpResultError({}));
     }
   };
 }
@@ -472,7 +470,7 @@ function getExpenseClaimByIdHandler<
     response: Response<HttpResult>,
   ) => {
     try {
-      const { accessToken } = request.body;
+      const { accessToken, refreshToken } = request.body;
       const { resourceId } = request.params;
 
       const getResourceResult = await getResourceByIdService(
@@ -488,7 +486,7 @@ function getExpenseClaimByIdHandler<
 
         response
           .status(200)
-          .json(createHttpResultError({ accessToken }));
+          .json(createHttpResultError({}));
         return;
       }
 
@@ -497,7 +495,7 @@ function getExpenseClaimByIdHandler<
       if (serviceResult.kind === "notFound") {
         response
           .status(200)
-          .json(createHttpResultSuccess({ accessToken }));
+          .json(createHttpResultSuccess({ accessToken, refreshToken }));
         return;
       }
 
@@ -516,7 +514,7 @@ function getExpenseClaimByIdHandler<
               ErrorLogModel,
             );
 
-            return new Err(createHttpResultError({ accessToken }));
+            return new Err(createHttpResultError({}));
           }
 
           return fileUploadResult;
@@ -526,7 +524,7 @@ function getExpenseClaimByIdHandler<
       if (fileUploadsResults.some((result) => result.err)) {
         response
           .status(200)
-          .json(createHttpResultError({ accessToken }));
+          .json(createHttpResultError({}));
         return;
       }
 
@@ -547,6 +545,7 @@ function getExpenseClaimByIdHandler<
           createHttpResultSuccess({
             accessToken,
             data: [resourceServerResponse],
+            refreshToken,
           }),
         );
     } catch (error: unknown) {
@@ -558,9 +557,7 @@ function getExpenseClaimByIdHandler<
         ErrorLogModel,
       );
 
-      response.status(200).json(createHttpResultError({
-        accessToken: request.body.accessToken ?? "",
-      }));
+      response.status(200).json(createHttpResultError({}));
     }
   };
 }
@@ -578,7 +575,7 @@ function deleteExpenseClaimByIdHandler<
     response: Response<HttpResult>,
   ) => {
     try {
-      const { accessToken } = request.body;
+      const { accessToken, refreshToken } = request.body;
       const { resourceId } = request.params;
 
       const getResourceResult = await getResourceByIdService(
@@ -594,7 +591,7 @@ function deleteExpenseClaimByIdHandler<
 
         response
           .status(200)
-          .json(createHttpResultError({ accessToken }));
+          .json(createHttpResultError({}));
         return;
       }
 
@@ -603,7 +600,7 @@ function deleteExpenseClaimByIdHandler<
       if (serviceResult.kind === "notFound") {
         response
           .status(200)
-          .json(createHttpResultSuccess({ accessToken }));
+          .json(createHttpResultSuccess({ accessToken, refreshToken }));
         return;
       }
 
@@ -623,7 +620,7 @@ function deleteExpenseClaimByIdHandler<
       if (deleteFileUploadsResults.some((result) => result.err)) {
         response
           .status(200)
-          .json(createHttpResultError({ accessToken }));
+          .json(createHttpResultError({}));
         return;
       }
 
@@ -640,13 +637,13 @@ function deleteExpenseClaimByIdHandler<
 
         response
           .status(200)
-          .json(createHttpResultError({ accessToken }));
+          .json(createHttpResultError({}));
         return;
       }
 
       response
         .status(200)
-        .json(createHttpResultSuccess({ accessToken }));
+        .json(createHttpResultSuccess({ accessToken, refreshToken }));
     } catch (error: unknown) {
       await createNewResourceService(
         createErrorLogSchema(
@@ -656,9 +653,7 @@ function deleteExpenseClaimByIdHandler<
         ErrorLogModel,
       );
 
-      response.status(200).json(createHttpResultError({
-        accessToken: request.body.accessToken ?? "",
-      }));
+      response.status(200).json(createHttpResultError({}));
     }
   };
 }
