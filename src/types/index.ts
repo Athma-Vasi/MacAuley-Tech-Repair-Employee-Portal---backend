@@ -11,6 +11,17 @@ import { UserRoles } from "../resources/user";
 import { Request, Response } from "express";
 import { ErrImpl, OkImpl, Result } from "ts-results";
 
+type DecodedToken = {
+  userInfo: {
+    userId: Types.ObjectId;
+    username: string;
+    roles: UserRoles;
+  };
+  sessionId: Types.ObjectId;
+  iat: number;
+  exp: number;
+};
+
 /**
  * type signature of query object created by express
  */
@@ -37,7 +48,6 @@ type QueryObjectParsedWithDefaults<
 type RequestAfterJWTVerification = Request & {
   body: {
     accessToken: string;
-    refreshToken: string;
     sessionId: string;
     userInfo: {
       userId: string;
@@ -104,14 +114,21 @@ type GetQueriedResourceByUserRequest = GetQueriedResourceRequest & {
   };
 };
 
+type LoginUserRequest = Request & {
+  body: {
+    schema: {
+      username: string;
+      password: string;
+    };
+  };
+};
+
 type HttpResult<Data = unknown> = {
   accessToken: string;
   data: Array<Data>;
-  isTokenExpired: boolean;
   kind: "error" | "success";
   message: string;
   pages: number;
-  refreshToken: string;
   status: number;
   totalDocuments: number;
   triggerLogout: boolean;
@@ -268,6 +285,7 @@ export type {
   CreateNewResourceRequest,
   Currency,
   DBRecord,
+  DecodedToken,
   DeleteAllResourcesRequest,
   DeleteResourceRequest,
   DocumentUpdateOperation,
@@ -280,6 +298,7 @@ export type {
   GetResourceByIdRequest,
   HttpResult,
   HttpServerResponse,
+  LoginUserRequest,
   QueriedResourceGetRequestServiceInput,
   QueriedTotalResourceGetRequestServiceInput,
   QueryObjectParsed,

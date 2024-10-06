@@ -1,9 +1,9 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { Err, Ok, Result } from "ts-results";
-import { DecodedToken } from "../resources/auth/auth.types";
 import { ErrorLogSchema } from "../resources/errorLog";
 import {
+  DecodedToken,
   HttpResult,
   RequestAfterJWTVerification,
   ServiceOutput,
@@ -12,22 +12,18 @@ import {
 function createHttpResultError<Data = unknown>({
   accessToken = "",
   data = [],
-  isTokenExpired = false,
   kind = "error",
   message,
   pages = 0,
-  refreshToken = "",
   status = 500,
   totalDocuments = 0,
   triggerLogout = false,
 }: {
   accessToken?: string;
   data?: Array<Data>;
-  isTokenExpired?: boolean;
   kind?: "error" | "success";
   message?: string;
   pages?: number;
-  refreshToken?: string;
   status?: number;
   totalDocuments?: number;
   triggerLogout?: boolean;
@@ -72,11 +68,9 @@ function createHttpResultError<Data = unknown>({
   return {
     accessToken,
     data,
-    isTokenExpired,
     kind,
     message: message ?? statusDescriptionTable[status] ?? "Unknown error",
     pages,
-    refreshToken,
     status,
     totalDocuments,
     triggerLogout,
@@ -88,22 +82,18 @@ function createHttpResultSuccess<
 >({
   accessToken,
   data = [],
-  isTokenExpired = false,
   kind = "success",
   message = "Successful operation",
   pages = 0,
-  refreshToken = "",
   status = 200,
   totalDocuments = 0,
   triggerLogout = false,
 }: {
   accessToken: string;
   data?: Array<Data>;
-  isTokenExpired?: boolean;
   kind?: "error" | "success";
   message?: string;
   pages?: number;
-  refreshToken?: string;
   status?: number;
   totalDocuments?: number;
   triggerLogout?: boolean;
@@ -111,11 +101,9 @@ function createHttpResultSuccess<
   return {
     accessToken,
     data,
-    isTokenExpired,
     kind,
     message,
     pages,
-    refreshToken,
     status,
     totalDocuments,
     triggerLogout,
@@ -176,6 +164,22 @@ async function hashStringSafe({ saltRounds, stringToHash }: {
   try {
     const hashedString = await bcrypt.hash(stringToHash, saltRounds);
     return new Ok({ data: hashedString, kind: "success" });
+  } catch (error: unknown) {
+    return new Err({ data: error, kind: "error" });
+  }
+}
+
+async function decodeJWTSafe(
+  token: string,
+): Promise<Result<ServiceOutput<DecodedToken>, ServiceOutput>> {
+  try {
+    const decoded = jwt.decode(token, { json: true }) as DecodedToken | null;
+
+    if (decoded === null) {
+      return new Ok({ kind: "error" });
+    }
+
+    return new Ok({ data: decoded, kind: "success" });
   } catch (error: unknown) {
     return new Err({ data: error, kind: "error" });
   }
@@ -247,6 +251,7 @@ export {
   createErrorLogSchema,
   createHttpResultError,
   createHttpResultSuccess,
+  decodeJWTSafe,
   filterFieldsFromObject,
   hashStringSafe,
   removeUndefinedAndNullValues,

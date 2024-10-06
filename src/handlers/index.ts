@@ -34,7 +34,7 @@ function createNewResourceHandler<Doc extends DBRecord = DBRecord>(
         response: Response<HttpResult>,
     ) => {
         try {
-            const { accessToken, refreshToken, schema } = request.body;
+            const { accessToken, schema } = request.body;
 
             const createResourceResult = await createNewResourceService(
                 schema,
@@ -59,7 +59,7 @@ function createNewResourceHandler<Doc extends DBRecord = DBRecord>(
             response
                 .status(201)
                 .json(
-                    createHttpResultSuccess({ accessToken, refreshToken }),
+                    createHttpResultSuccess({ accessToken }),
                 );
         } catch (error: unknown) {
             await createNewResourceService(
@@ -83,8 +83,7 @@ function getQueriedResourcesHandler<Doc extends DBRecord = DBRecord>(
         response: HttpServerResponse,
     ) => {
         try {
-            let { accessToken, newQueryFlag, refreshToken, totalDocuments } =
-                request.body;
+            let { accessToken, newQueryFlag, totalDocuments } = request.body;
 
             const {
                 filter,
@@ -157,6 +156,10 @@ function getQueriedResourcesHandler<Doc extends DBRecord = DBRecord>(
                 return;
             }
 
+            console.group("getQueriedResourcesHandler");
+            console.log("accessToken:", accessToken);
+            console.groupEnd();
+
             response.status(200).json(
                 createHttpResultSuccess({
                     accessToken,
@@ -164,7 +167,7 @@ function getQueriedResourcesHandler<Doc extends DBRecord = DBRecord>(
                     pages: Math.ceil(
                         totalDocuments / Number(options?.limit ?? 10),
                     ),
-                    refreshToken,
+
                     totalDocuments,
                 }),
             );
@@ -195,7 +198,7 @@ function getQueriedResourcesByUserHandler<Doc extends DBRecord = DBRecord>(
             const {
                 accessToken,
                 newQueryFlag,
-                refreshToken,
+
                 userInfo: { userId },
             } = request.body;
             let { totalDocuments } = request.body;
@@ -273,7 +276,7 @@ function getQueriedResourcesByUserHandler<Doc extends DBRecord = DBRecord>(
                     pages: Math.ceil(
                         totalDocuments / Number(options?.limit ?? 10),
                     ),
-                    refreshToken,
+
                     totalDocuments,
                 }),
             );
@@ -303,7 +306,6 @@ function updateResourceByIdHandler<Doc extends DBRecord = DBRecord>(
             const {
                 accessToken,
                 documentUpdate: { fields, updateOperator },
-                refreshToken,
             } = request.body;
 
             const updateResourceResult = await updateResourceByIdService({
@@ -334,7 +336,6 @@ function updateResourceByIdHandler<Doc extends DBRecord = DBRecord>(
                     createHttpResultSuccess({
                         accessToken,
                         data: [updateResourceResult.safeUnwrap()],
-                        refreshToken,
                     }),
                 );
         } catch (error: unknown) {
@@ -359,7 +360,7 @@ function getResourceByIdHandler<Doc extends DBRecord = DBRecord>(
         response: HttpServerResponse,
     ) => {
         try {
-            const { accessToken, refreshToken } = request.body;
+            const { accessToken } = request.body;
             const { resourceId } = request.params;
 
             const getResourceResult = await getResourceByIdService(
@@ -388,7 +389,6 @@ function getResourceByIdHandler<Doc extends DBRecord = DBRecord>(
                     createHttpResultSuccess({
                         accessToken,
                         data: [getResourceResult.safeUnwrap()],
-                        refreshToken,
                     }),
                 );
         } catch (error: unknown) {
@@ -413,7 +413,7 @@ function deleteResourceByIdHandler<Doc extends DBRecord = DBRecord>(
         response: HttpServerResponse,
     ) => {
         try {
-            const { accessToken, refreshToken } = request.body;
+            const { accessToken } = request.body;
             const { resourceId } = request.params;
 
             const deletedResult = await deleteResourceByIdService(
@@ -437,7 +437,7 @@ function deleteResourceByIdHandler<Doc extends DBRecord = DBRecord>(
             }
 
             response.status(200).json(
-                createHttpResultSuccess({ accessToken, refreshToken }),
+                createHttpResultSuccess({ accessToken }),
             );
         } catch (error: unknown) {
             await createNewResourceService(
@@ -461,7 +461,7 @@ function deleteManyResourcesHandler<Doc extends DBRecord = DBRecord>(
         response: HttpServerResponse,
     ) => {
         try {
-            const { accessToken, refreshToken } = request.body;
+            const { accessToken } = request.body;
             const deletedResult = await deleteManyResourcesService({ model });
 
             if (deletedResult.err) {
@@ -480,7 +480,7 @@ function deleteManyResourcesHandler<Doc extends DBRecord = DBRecord>(
             }
 
             response.status(200).json(
-                createHttpResultSuccess({ accessToken, refreshToken }),
+                createHttpResultSuccess({ accessToken }),
             );
         } catch (error: unknown) {
             await createNewResourceService(

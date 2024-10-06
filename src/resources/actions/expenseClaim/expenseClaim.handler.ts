@@ -42,7 +42,7 @@ function createNewExpenseClaimHandler<
     response: Response<HttpResult>,
   ) => {
     try {
-      const { accessToken, refreshToken, schema } = request.body;
+      const { accessToken, schema } = request.body;
 
       const createResourceResult = await createNewResourceService(
         schema,
@@ -137,7 +137,7 @@ function createNewExpenseClaimHandler<
 
       response
         .status(200)
-        .json(createHttpResultSuccess({ accessToken, refreshToken }));
+        .json(createHttpResultSuccess({ accessToken }));
     } catch (error: unknown) {
       await createNewResourceService(
         createErrorLogSchema(
@@ -165,8 +165,7 @@ function getQueriedExpenseClaimsHandler<
     response: Response<HttpResult>,
   ) => {
     try {
-      let { accessToken, newQueryFlag, refreshToken, totalDocuments } =
-        request.body;
+      let { accessToken, newQueryFlag, totalDocuments } = request.body;
 
       const {
         filter,
@@ -220,7 +219,7 @@ function getQueriedExpenseClaimsHandler<
       if (serviceResult.kind === "notFound") {
         response
           .status(200)
-          .json(createHttpResultSuccess({ accessToken, refreshToken }));
+          .json(createHttpResultSuccess({ accessToken }));
         return;
       }
 
@@ -286,7 +285,7 @@ function getQueriedExpenseClaimsHandler<
             accessToken,
             data: resourceServerResponseArray,
             pages: Math.ceil(totalDocuments / Number(options?.limit ?? 10)),
-            refreshToken,
+
             totalDocuments,
           }),
         );
@@ -319,8 +318,7 @@ function getQueriedExpenseClaimsByUserHandler<
     response: Response<HttpResult>,
   ) => {
     try {
-      const { accessToken, newQueryFlag, refreshToken, userInfo: { userId } } =
-        request.body;
+      const { accessToken, newQueryFlag, userInfo: { userId } } = request.body;
       let { totalDocuments } = request.body;
 
       const { filter, projection, options } = request.query;
@@ -373,7 +371,7 @@ function getQueriedExpenseClaimsByUserHandler<
       if (serviceResult.kind === "notFound") {
         response
           .status(200)
-          .json(createHttpResultSuccess({ accessToken, refreshToken }));
+          .json(createHttpResultSuccess({ accessToken }));
         return;
       }
 
@@ -439,7 +437,7 @@ function getQueriedExpenseClaimsByUserHandler<
             accessToken,
             data: resourceServerResponseArray,
             pages: Math.ceil(totalDocuments / Number(options?.limit ?? 10)),
-            refreshToken,
+
             totalDocuments,
           }),
         );
@@ -470,7 +468,7 @@ function getExpenseClaimByIdHandler<
     response: Response<HttpResult>,
   ) => {
     try {
-      const { accessToken, refreshToken } = request.body;
+      const { accessToken } = request.body;
       const { resourceId } = request.params;
 
       const getResourceResult = await getResourceByIdService(
@@ -495,7 +493,7 @@ function getExpenseClaimByIdHandler<
       if (serviceResult.kind === "notFound") {
         response
           .status(200)
-          .json(createHttpResultSuccess({ accessToken, refreshToken }));
+          .json(createHttpResultSuccess({ accessToken }));
         return;
       }
 
@@ -545,7 +543,6 @@ function getExpenseClaimByIdHandler<
           createHttpResultSuccess({
             accessToken,
             data: [resourceServerResponse],
-            refreshToken,
           }),
         );
     } catch (error: unknown) {
@@ -575,7 +572,7 @@ function deleteExpenseClaimByIdHandler<
     response: Response<HttpResult>,
   ) => {
     try {
-      const { accessToken, refreshToken } = request.body;
+      const { accessToken } = request.body;
       const { resourceId } = request.params;
 
       const getResourceResult = await getResourceByIdService(
@@ -600,7 +597,7 @@ function deleteExpenseClaimByIdHandler<
       if (serviceResult.kind === "notFound") {
         response
           .status(200)
-          .json(createHttpResultSuccess({ accessToken, refreshToken }));
+          .json(createHttpResultSuccess({ accessToken }));
         return;
       }
 
@@ -643,7 +640,7 @@ function deleteExpenseClaimByIdHandler<
 
       response
         .status(200)
-        .json(createHttpResultSuccess({ accessToken, refreshToken }));
+        .json(createHttpResultSuccess({ accessToken }));
     } catch (error: unknown) {
       await createNewResourceService(
         createErrorLogSchema(

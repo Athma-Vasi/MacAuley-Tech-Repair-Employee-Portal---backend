@@ -8,20 +8,7 @@
 import { loginUserHandler, logoutUserHandler } from "./auth.handler";
 import { authRouter } from "./auth.routes";
 
-import type {
-  DecodedToken,
-  LoginUserRequest,
-  LogoutUserRequest,
-  RefreshTokenRequest,
-} from "./auth.types";
-
 /**
  * Exports
  */
 export { authRouter, loginUserHandler, logoutUserHandler };
-export type {
-  DecodedToken,
-  LoginUserRequest,
-  LogoutUserRequest,
-  RefreshTokenRequest,
-};

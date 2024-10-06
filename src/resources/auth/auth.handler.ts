@@ -1,28 +1,25 @@
 import jwt from "jsonwebtoken";
 
 import type { Response } from "express";
-import type {
-  LoginUserRequest,
-  LogoutUserRequest,
-  RefreshTokenRequest,
-} from ".";
 
 import { config } from "../../config";
 
 import { Model } from "mongoose";
-import { v4 as uuidv4 } from "uuid";
-import {
-  ACCESS_TOKEN_EXPIRES_IN,
-  HASH_SALT_ROUNDS,
-  REFRESH_TOKEN_EXPIRES_IN,
-} from "../../constants";
+import { ACCESS_TOKEN_EXPIRES_IN, HASH_SALT_ROUNDS } from "../../constants";
 import {
   createNewResourceService,
   getResourceByFieldService,
   getResourceByIdService,
   updateResourceByIdService,
 } from "../../services";
-import { DBRecord, HttpResult } from "../../types";
+import {
+  CreateNewResourceRequest,
+  DBRecord,
+  DecodedToken,
+  HttpResult,
+  LoginUserRequest,
+  RequestAfterJWTVerification,
+} from "../../types";
 import {
   compareHashedStringWithPlainStringSafe,
   createErrorLogSchema,
@@ -32,10 +29,8 @@ import {
   verifyJWTSafe,
 } from "../../utils";
 import { ErrorLogModel } from "../errorLog";
-import { UserDocument, UserModel } from "../user";
-import { AuthModel, AuthSchema } from "./auth.model";
-import { createTokenService } from "./auth.service";
-import { DecodedToken, RegisterUserRequest } from "./auth.types";
+import { UserDocument, UserModel, UserSchema } from "../user";
+import { AuthSchema } from "./auth.model";
 
 /**
  * @description implements 'Refresh Token Rotation' as defined in the OAuth 2.0 RFC
@@ -61,7 +56,6 @@ function loginUserHandler<
     try {
       console.group("loginUserHandler");
       console.log("request.body", request.body);
-      console.log("request.cookies", request.cookies);
       console.groupEnd();
 
       const { schema } = request.body;
@@ -115,13 +109,16 @@ function loginUserHandler<
         return;
       }
 
-      const { ACCESS_TOKEN_SEED, REFRESH_TOKEN_SEED } = config;
+      const { ACCESS_TOKEN_SEED } = config;
 
       const authSessionSchema: AuthSchema = {
-        expireAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // user will be required to log in their session again after 7 days
+        addressIP: request.ip ?? "",
+        // user will be required to log in their session again after 1 day
+        expireAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 1),
+        isValid: true,
+        userAgent: request.get("User-Agent") ?? "",
         userId: userDocument._id,
         username: userDocument.username,
-        tokensDenyList: [],
       };
 
       const createAuthSessionResult = await createNewResourceService(
@@ -145,25 +142,14 @@ function loginUserHandler<
 
       const sessionId = createAuthSessionResult.safeUnwrap().data?._id;
 
-      // uuid for refresh token jti that will be stored in refreshTokensDenyList field in Auth session document
-      // when the /refresh endpoint is called
-      const tokenJwtId = uuidv4();
-
-      const refreshToken = jwt.sign(
-        {
-          userInfo: {
-            userId: userDocument._id,
-            username: userDocument.username,
-            roles: userDocument.roles,
-          },
-          sessionId,
-        },
-        REFRESH_TOKEN_SEED,
-        {
-          expiresIn: REFRESH_TOKEN_EXPIRES_IN,
-          jwtid: tokenJwtId,
-        },
-      );
+      if (!sessionId) {
+        response.status(200).json(
+          createHttpResultError({
+            message: "Unable to create session. Please try again!",
+          }),
+        );
+        return;
+      }
 
       const accessToken = jwt.sign(
         {
@@ -175,7 +161,7 @@ function loginUserHandler<
           sessionId,
         },
         ACCESS_TOKEN_SEED,
-        { expiresIn: ACCESS_TOKEN_EXPIRES_IN, jwtid: tokenJwtId },
+        { expiresIn: ACCESS_TOKEN_EXPIRES_IN },
       );
 
       const userDocPartial = Object.entries(userDocument).reduce(
@@ -194,7 +180,6 @@ function loginUserHandler<
         createHttpResultSuccess({
           accessToken,
           data: [userDocPartial],
-          refreshToken,
         }),
       );
     } catch (error: unknown) {
@@ -211,112 +196,6 @@ function loginUserHandler<
   };
 }
 
-// @desc   Refresh token
-// @route  POST /auth/refresh
-// @access Private
-function refreshTokensHandler<
-  Doc extends DBRecord = DBRecord,
->(
-  model: Model<Doc>,
-) {
-  return async (
-    request: RefreshTokenRequest,
-    response: Response,
-  ) => {
-    try {
-      const { decodedToken } = request.body;
-      const { ACCESS_TOKEN_SEED, REFRESH_TOKEN_SEED } = config;
-
-      const refreshTokenResult = await createTokenService({
-        decoded: decodedToken,
-        expiresIn: REFRESH_TOKEN_EXPIRES_IN,
-        request,
-        seed: REFRESH_TOKEN_SEED,
-      });
-
-      if (refreshTokenResult.err) {
-        response.status(200).json(
-          createHttpResultError({
-            message: "Error refreshing refresh token",
-            triggerLogout: true,
-          }),
-        );
-
-        return;
-      }
-
-      const newRefreshToken = refreshTokenResult.safeUnwrap().data as
-        | string
-        | undefined;
-
-      if (newRefreshToken === undefined) {
-        response.status(200).json(
-          createHttpResultError({
-            message: "Error refreshing refresh token",
-            triggerLogout: true,
-          }),
-        );
-
-        return;
-      }
-
-      const accessTokenResult = await createTokenService({
-        decoded: decodedToken,
-        expiresIn: ACCESS_TOKEN_EXPIRES_IN,
-        request,
-        seed: ACCESS_TOKEN_SEED,
-      });
-
-      if (accessTokenResult.err) {
-        response.status(200).json(
-          createHttpResultError({
-            message: "Error refreshing access token",
-            triggerLogout: true,
-          }),
-        );
-
-        return;
-      }
-
-      const newAccessToken = accessTokenResult.safeUnwrap().data as
-        | string
-        | undefined;
-
-      if (newAccessToken === undefined) {
-        response.status(200).json(
-          createHttpResultError({
-            message: "Error refreshing tokens",
-            triggerLogout: true,
-          }),
-        );
-
-        return;
-      }
-
-      response.status(200).json(
-        createHttpResultSuccess({
-          accessToken: newAccessToken,
-          refreshToken: newRefreshToken,
-        }),
-      );
-    } catch (error: unknown) {
-      await createNewResourceService(
-        createErrorLogSchema(
-          error,
-          request.body,
-        ),
-        ErrorLogModel,
-      );
-
-      response.status(200).json(
-        createHttpResultError({
-          triggerLogout: true,
-        }),
-      );
-    }
-  };
-}
-
 // @desc   Register user
 // @route  POST /auth/register
 // @access Public
@@ -326,7 +205,7 @@ function registerUserHandler<
   model: Model<Doc>,
 ) {
   return async (
-    request: RegisterUserRequest,
+    request: CreateNewResourceRequest<UserSchema>,
     response: Response,
   ) => {
     try {
@@ -409,7 +288,6 @@ function registerUserHandler<
         createHttpResultSuccess({
           accessToken: "",
           message: "User registered successfully",
-          refreshToken: "",
         }),
       );
     } catch (error: unknown) {
@@ -435,13 +313,13 @@ function logoutUserHandler<
   model: Model<Doc>,
 ) {
   return async (
-    request: LogoutUserRequest,
+    request: RequestAfterJWTVerification,
     response: Response,
   ) => {
     try {
-      const { accessToken, refreshToken } = request.body;
+      const { accessToken } = request.body;
 
-      if (!accessToken || !refreshToken) {
+      if (!accessToken) {
         response.status(200).json(
           createHttpResultError({ triggerLogout: true }),
         );
@@ -449,7 +327,7 @@ function logoutUserHandler<
         return;
       }
 
-      const { ACCESS_TOKEN_SEED, REFRESH_TOKEN_SEED } = config;
+      const { ACCESS_TOKEN_SEED } = config;
 
       const verifyAccessTokenResult = await verifyJWTSafe({
         seed: ACCESS_TOKEN_SEED,
@@ -464,12 +342,11 @@ function logoutUserHandler<
         return;
       }
 
-      const verifyRefreshTokenResult = await verifyJWTSafe({
-        seed: REFRESH_TOKEN_SEED,
-        token: refreshToken,
-      });
+      const accessTokenDecoded = verifyAccessTokenResult.safeUnwrap().data as
+        | DecodedToken
+        | undefined;
 
-      if (verifyRefreshTokenResult.err) {
+      if (accessTokenDecoded === undefined) {
         response.status(200).json(
           createHttpResultError({ triggerLogout: true }),
         );
@@ -477,20 +354,7 @@ function logoutUserHandler<
         return;
       }
 
-      const refreshDecodedToken = verifyRefreshTokenResult.safeUnwrap()
-        .data as DecodedToken | undefined;
-
-      if (refreshDecodedToken === undefined) {
-        response.status(200).json(
-          createHttpResultError({ triggerLogout: true }),
-        );
-
-        return;
-      }
-
-      const sessionId = refreshDecodedToken.sessionId;
-
-      // check if tokens are in deny list
+      const sessionId = accessTokenDecoded.sessionId;
 
       const getAuthSessionResult = await getResourceByIdService(
         sessionId.toString(),
@@ -522,12 +386,9 @@ function logoutUserHandler<
         return;
       }
 
-      // both tokens share the same jti
-      const isEitherTokenInDenyList = existingSession.tokensDenyList.includes(
-        refreshDecodedToken.jti,
-      );
+      // check if token has already been invalidated
 
-      if (isEitherTokenInDenyList) {
+      if (!existingSession.isValid) {
         response.status(200).json(
           createHttpResultError({ triggerLogout: true }),
         );
@@ -535,14 +396,12 @@ function logoutUserHandler<
         return;
       }
 
-      // add token jti to deny list
+      // invalidate session
       const updateSessionResult = await updateResourceByIdService({
-        fields: {
-          tokensDenyList: [refreshDecodedToken.jti],
-        },
-        model: AuthModel,
+        fields: { isValid: false },
+        model,
         resourceId: sessionId.toString(),
-        updateOperator: "$push",
+        updateOperator: "$set",
       });
 
       if (updateSessionResult.err) {
@@ -561,7 +420,6 @@ function logoutUserHandler<
       response.status(200).json(
         createHttpResultSuccess({
           accessToken: "",
-          refreshToken: "",
           triggerLogout: true,
         }),
       );
@@ -581,146 +439,4 @@ function logoutUserHandler<
   };
 }
 
-export {
-  loginUserHandler,
-  logoutUserHandler,
-  refreshTokensHandler,
-  registerUserHandler,
-};
-
-// const refreshTokenController = expressAsyncController(
-//   async (
-//     request: RefreshTokenRequest,
-//     response: Response,
-//     next: NextFunction,
-//   ) => {
-//     const { refreshToken } = request.cookies;
-//     const { sessionId: sessionIdFromReqBody } = request.body;
-
-//     if (!refreshToken) {
-//       await deleteAuthSessionService(sessionIdFromReqBody);
-
-//       response.clearCookie("refreshToken", {
-//         httpOnly: true,
-//         secure: true,
-//         sameSite: "none",
-//       });
-
-//       return next(new createHttpError.Unauthorized("Unauthorized"));
-//     }
-
-//     const { ACCESS_TOKEN_SEED, REFRESH_TOKEN_SEED } = config;
-//     jwt.verify(
-//       refreshToken,
-//       REFRESH_TOKEN_SEED,
-//       async (error: VerifyErrors | null, decoded) => {
-//         if (error) {
-//           await deleteAuthSessionService(sessionIdFromReqBody);
-
-//           response.clearCookie("refreshToken", {
-//             httpOnly: true,
-//             secure: true,
-//             sameSite: "none",
-//           });
-
-//           return next(new createHttpError.Unauthorized("Unauthorized"));
-//         }
-
-//         const {
-//           userInfo: { userId, roles, username },
-//           sessionId,
-//           jti,
-//         } = decoded as DecodedToken;
-
-//         console.log("refresh token decoded", decoded);
-
-//         if (!sessionId || !jti) {
-//           await deleteAuthSessionService(sessionIdFromReqBody);
-
-//           response.clearCookie("refreshToken", {
-//             httpOnly: true,
-//             secure: true,
-//             sameSite: "none",
-//           });
-
-//           return next(new createHttpError.Unauthorized("Unauthorized"));
-//         }
-
-//         const existingSession = await findSessionByIdService(sessionId);
-//         if (!existingSession) {
-//           response.clearCookie("refreshToken", {
-//             httpOnly: true,
-//             secure: true,
-//             sameSite: "none",
-//           });
-
-//           return next(new createHttpError.Unauthorized("Unauthorized"));
-//         }
-
-//         const isRefreshTokenInDenyList = existingSession.refreshTokensDenyList
-//           .includes(jti);
-//         if (isRefreshTokenInDenyList) {
-//           // assumed to be a 'replay / person-in-middle attack' - invalidate all sessions
-//           await invalidateAllAuthSessionsService(userId);
-
-//           response.clearCookie("refreshToken", {
-//             httpOnly: true,
-//             secure: true,
-//             sameSite: "none",
-//           });
-
-//           return next(new createHttpError.Unauthorized("Unauthorized"));
-//         }
-
-//         // if refresh token has not been used and session exists,
-//         // add old refresh token jti to deny list
-//         await updateSessionRefreshTokenDenyListService({
-//           sessionId,
-//           refreshTokenJwtId: jti,
-//         });
-
-//         const newRefreshTokenJti = uuidv4();
-
-//         const newRefreshToken = jwt.sign(
-//           {
-//             userInfo: {
-//               userId,
-//               username,
-//               roles,
-//             },
-//             sessionId,
-//           },
-//           REFRESH_TOKEN_SEED,
-//           {
-//             expiresIn: "1800s", // 30 minutes
-//             jwtid: newRefreshTokenJti,
-//           },
-//         );
-
-//         // create secure cookie with refresh token
-//         response.cookie("refreshToken", newRefreshToken, {
-//           httpOnly: true,
-//           secure: true,
-//           sameSite: "none",
-//           maxAge: 1000 * 60 * 30, // cookie expires in 30 minutes
-//         });
-
-//         const newAccessToken = jwt.sign(
-//           {
-//             userInfo: {
-//               userId,
-//               username,
-//               roles,
-//             },
-//             sessionId,
-//           },
-//           ACCESS_TOKEN_SEED,
-//           { expiresIn: "60s" },
-//         );
-
-//         response.status(200).json({ accessToken: newAccessToken });
-//         return;
-//       },
-//     );
-//   },
-// );
+export { loginUserHandler, logoutUserHandler, registerUserHandler };

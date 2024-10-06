@@ -128,7 +128,7 @@ function createNewUserHandler<
       }
 
       response.status(200).json(
-        createHttpResultSuccess({ accessToken: "", refreshToken: "" }),
+        createHttpResultSuccess({ accessToken: "" }),
       );
     } catch (error: unknown) {
       await createNewResourceService(
