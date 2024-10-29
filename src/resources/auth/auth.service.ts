@@ -38,11 +38,6 @@ async function createTokenService(
       AuthModel,
     );
 
-    console.log(`\n`);
-    console.group("createTokenService");
-    console.log("decodedOldToken:", JSON.stringify(decodedOldToken, null, 2));
-    console.log("getSessionResult:", getSessionResult);
-
     if (getSessionResult.err) {
       await createNewResourceService(
         createErrorLogSchema(
@@ -63,17 +58,12 @@ async function createTokenService(
       return new Err({ kind: "error", message: "Session not found" });
     }
 
-    console.log("existingSession:", existingSession);
-
     if (!existingSession.isValid) {
       // invalidate all sessions for this user
       const deleteManyResult = await deleteManyResourcesService({
         filter: { userId },
         model: AuthModel,
       });
-
-      console.log("invalidating all sessions");
-      console.log("deleteManyResult:", deleteManyResult);
 
       if (deleteManyResult.err) {
         await createNewResourceService(
@@ -97,8 +87,6 @@ async function createTokenService(
         updateOperator: "$set",
       });
 
-      console.log("updateSessionResult:", updateSessionResult);
-
       if (updateSessionResult.err) {
         await createNewResourceService(
           createErrorLogSchema(
@@ -112,6 +100,7 @@ async function createTokenService(
       }
     }
 
+    // create new session and use its ID to sign new token
     const authSessionSchema: AuthSchema = {
       addressIP: request.ip ?? "",
       // user will be required to log in their session again after 1 day
@@ -147,8 +136,6 @@ async function createTokenService(
       seed,
       { expiresIn },
     );
-
-    console.groupEnd();
 
     return new Ok({ data: newAccessToken, kind: "success" });
   } catch (error: unknown) {

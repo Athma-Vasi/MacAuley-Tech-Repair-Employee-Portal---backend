@@ -31,6 +31,7 @@ authRouter.route("/register").post(
   registerUserHandler(AuthModel),
 );
 
+// @see https://stackoverflow.com/questions/3521290/logging-out-get-or-post
 // @desc   Logout user
 // @route  POST /auth/logout
 // @access Private

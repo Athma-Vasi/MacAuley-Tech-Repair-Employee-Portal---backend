@@ -1,3 +1,4 @@
+import { Request, Response } from "express";
 import type {
   FilterQuery,
   FlattenMaps,
@@ -5,11 +6,10 @@ import type {
   Require_id,
 } from "mongoose";
 import { Types } from "mongoose";
-import { FileExtension } from "../resources/fileUpload";
 import type { ParsedQs } from "qs";
+import { Result } from "ts-results";
+import { FileExtension } from "../resources/fileUpload";
 import { UserRoles } from "../resources/user";
-import { Request, Response } from "express";
-import { ErrImpl, OkImpl, Result } from "ts-results";
 
 type DecodedToken = {
   userInfo: {
@@ -225,11 +225,10 @@ type RequestStatus = "pending" | "approved" | "rejected";
  * - Shared with frontend to ensure that the request body contains correct data shape.
  */
 type DocumentUpdateOperation<
-  Document extends Record<Key, unknown>,
-  Key extends keyof Document = keyof Document,
+  Document extends Record<string, unknown> = Record<string, unknown>,
 > =
-  | DocumentFieldUpdateOperation<Document, Key>
-  | DocumentArrayUpdateOperation<Document, Key>;
+  | DocumentFieldUpdateOperation<Document>
+  | DocumentArrayUpdateOperation<Document>;
 
 type FieldOperators =
   | "$currentDate"
@@ -243,37 +242,21 @@ type FieldOperators =
   | "$unset";
 
 type DocumentFieldUpdateOperation<
-  Document extends Record<Key, unknown>,
-  Key extends keyof Document = keyof Document,
+  Document extends Record<string, unknown> = Record<string, unknown>,
 > = {
   updateKind: "field";
   updateOperator: FieldOperators;
-  fields: Record<Key, unknown>;
+  fields: Partial<Document>;
 };
 
 type ArrayOperators = "$addToSet" | "$pop" | "$pull" | "$push" | "$pullAll";
 
 type DocumentArrayUpdateOperation<
-  Document extends Record<Key, Value>,
-  Key extends keyof Document = keyof Document,
-  Value extends Document[Key] = Document[Key],
+  Document extends Record<string, unknown> = Record<string, unknown>,
 > = {
   updateKind: "array";
   updateOperator: ArrayOperators;
-  fields: Record<Key, Value>;
-};
-
-/**
- * - Used in the update${resource}ByIdService function for all resources.
- * - Shared with frontend to ensure that the request body contains correct data shape.
- */
-type UpdateDocumentByIdServiceInput<
-  Document extends Record<Key, unknown>,
-  Key extends keyof Document = keyof Document,
-> = {
-  _id: Types.ObjectId | string;
-  fields: Record<Key, unknown>;
-  updateOperator: FieldOperators | ArrayOperators;
+  fields: Partial<Document>;
 };
 
 type Urgency = "low" | "medium" | "high";
@@ -308,7 +291,6 @@ export type {
   RequestStatus,
   ServiceOutput,
   ServiceResult,
-  UpdateDocumentByIdServiceInput,
   UpdateResourceByIdRequest,
   Urgency,
 };

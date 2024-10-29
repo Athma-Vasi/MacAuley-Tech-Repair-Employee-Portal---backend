@@ -59,7 +59,10 @@ function createNewResourceHandler<Doc extends DBRecord = DBRecord>(
             response
                 .status(201)
                 .json(
-                    createHttpResultSuccess({ accessToken }),
+                    createHttpResultSuccess({
+                        accessToken,
+                        data: [createResourceResult.safeUnwrap().data],
+                    }),
                 );
         } catch (error: unknown) {
             await createNewResourceService(
@@ -90,6 +93,13 @@ function getQueriedResourcesHandler<Doc extends DBRecord = DBRecord>(
                 projection,
                 options,
             } = request.query;
+
+            console.group("getQueriedResourcesHandler");
+            console.log("filter", JSON.stringify(filter, null, 2));
+            console.log("options", options);
+            console.log("projection", projection);
+            console.log("totalDocuments", totalDocuments);
+            console.groupEnd();
 
             // only perform a countDocuments scan if a new query is being made
             if (newQueryFlag) {
@@ -155,10 +165,6 @@ function getQueriedResourcesHandler<Doc extends DBRecord = DBRecord>(
                     .json(createHttpResultError({ status: 404 }));
                 return;
             }
-
-            console.group("getQueriedResourcesHandler");
-            console.log("accessToken:", accessToken);
-            console.groupEnd();
 
             response.status(200).json(
                 createHttpResultSuccess({
@@ -335,7 +341,7 @@ function updateResourceByIdHandler<Doc extends DBRecord = DBRecord>(
                 .json(
                     createHttpResultSuccess({
                         accessToken,
-                        data: [updateResourceResult.safeUnwrap()],
+                        data: [updateResourceResult.safeUnwrap().data],
                     }),
                 );
         } catch (error: unknown) {

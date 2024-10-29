@@ -6,10 +6,10 @@
  * Imports
  */
 
-import { CommentModel } from "./comment.model";
-import { commentRouter } from "./comment.routes";
+import { CommentModel } from "./model";
+import { commentRouter } from "./routes";
 
-import type { CommentDocument, CommentSchema } from "./comment.model";
+import type { CommentDocument, CommentSchema } from "./model";
 
 /**
  * Exports

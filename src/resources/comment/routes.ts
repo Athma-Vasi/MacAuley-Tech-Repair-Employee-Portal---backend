@@ -1,9 +1,4 @@
 import { Router } from "express";
-import { validateSchemaMiddleware } from "../../middlewares/validateSchema";
-import {
-  createCommentJoiSchema,
-  updateCommentJoiSchema,
-} from "./comment.validation";
 import {
   createNewResourceHandler,
   deleteManyResourcesHandler,
@@ -13,7 +8,9 @@ import {
   getResourceByIdHandler,
   updateResourceByIdHandler,
 } from "../../handlers";
-import { CommentModel } from "./comment.model";
+import { validateSchemaMiddleware } from "../../middlewares/validateSchema";
+import { CommentModel } from "./model";
+import { createCommentJoiSchema, updateCommentJoiSchema } from "./validations";
 
 const commentRouter = Router();
 
@@ -60,6 +57,7 @@ commentRouter
   // @access Private/Admin/Manager
   .patch(
     validateSchemaMiddleware(updateCommentJoiSchema),
+    // updateCommentHandler(CommentModel),
     updateResourceByIdHandler(CommentModel),
   );
 

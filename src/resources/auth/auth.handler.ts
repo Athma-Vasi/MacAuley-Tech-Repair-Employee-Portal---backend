@@ -25,6 +25,7 @@ import {
   createErrorLogSchema,
   createHttpResultError,
   createHttpResultSuccess,
+  decodeJWTSafe,
   hashStringSafe,
   verifyJWTSafe,
 } from "../../utils";
@@ -342,7 +343,17 @@ function logoutUserHandler<
         return;
       }
 
-      const accessTokenDecoded = verifyAccessTokenResult.safeUnwrap().data as
+      const accessTokenDecodedResult = await decodeJWTSafe(accessToken);
+
+      if (accessTokenDecodedResult.err) {
+        response.status(200).json(
+          createHttpResultError({ triggerLogout: true }),
+        );
+
+        return;
+      }
+
+      const accessTokenDecoded = accessTokenDecodedResult.safeUnwrap().data as
         | DecodedToken
         | undefined;
 

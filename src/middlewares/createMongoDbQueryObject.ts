@@ -3,6 +3,7 @@ import { ParsedQs } from "qs";
 import { PROPERTY_DESCRIPTOR } from "../constants";
 
 /**
+ * TODO: fix to latest revision of createMongoDbQueryObject
      * example: here is a sample query object before transformation:
      * queryObject:  {
           createdAt: { eq: '2023-11-11' },
@@ -127,7 +128,7 @@ function createMongoDbQueryObject(
           return acc;
         }
 
-        // will be part of the options object passed in the mongoose find method
+        // will be part of the options object passed to the mongoose find method
         if (FIND_QUERY_OPTIONS_KEYWORDS.has(key)) {
           Object.defineProperty(options, key, {
             value,
@@ -154,7 +155,7 @@ function createMongoDbQueryObject(
 
         // part of filter object passed in same method
 
-        // general text search of entire collection (with fields that have a 'text' index)
+        // general text search of entire collection (of fields that have a 'text' index)
         if (key === "$text") {
           Object.defineProperty(filter, "$text", {
             value,
